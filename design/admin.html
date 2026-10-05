@@ -369,14 +369,166 @@ td.r,th.r{text-align:right}
 .perm input{width:18px;height:18px;accent-color:var(--brand)}
 @media (max-width:1100px){.uk-role{grid-template-columns:minmax(0,1fr)}.uk-aside{position:static}}
 @media (max-width:700px){.uk-scope{grid-template-columns:1fr}}
+
+/* Sign-in screen */
+[hidden]{display:none!important}
+.auth{position:fixed;inset:0;z-index:300;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(360px,1fr);background:var(--surface);animation:authIn .35s ease}
+.auth.leave{opacity:0;transform:scale(1.015);transition:opacity .45s,transform .45s}
+@keyframes authIn{from{opacity:0}}
+.auth-art{position:relative;overflow:hidden;color:#fff;padding:44px;display:flex;flex-direction:column;justify-content:space-between;gap:24px;background:var(--auth-bg)}
+.auth-art::after{content:"";position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(rgba(255,255,255,.14) 1px,transparent 1px);background-size:22px 22px;-webkit-mask-image:linear-gradient(180deg,transparent,#000 45%,transparent);mask-image:linear-gradient(180deg,transparent,#000 45%,transparent)}
+.auth-art>*{position:relative;z-index:1}
+.auth-brand{display:flex;gap:12px;align-items:center}
+.auth-logo{width:54px;height:54px;border-radius:16px;background:#fff;display:grid;place-items:center;overflow:hidden;color:var(--brand);font:700 17px var(--f-display);box-shadow:0 10px 30px -10px rgba(0,0,0,.5);flex:none}
+.auth-logo img{width:100%;height:100%;object-fit:contain;padding:5px}
+.auth-logo.q{background:linear-gradient(135deg,#2F6FED,#12A594)}
+.auth-logo.q svg{width:70%;height:70%}
+.auth-brand b{display:block;font:700 18px var(--f-display)}.auth-brand small{opacity:.8;font-size:12.5px}
+.auth-quote{max-width:560px}.auth-quote h2{font:700 clamp(28px,3.4vw,46px)/1.06 var(--f-display);margin:0 0 14px;letter-spacing:-.025em}.auth-quote p{opacity:.85;font-size:16px;margin:0}
+.auth-stats{display:flex;gap:12px;flex-wrap:wrap}.auth-stats div{background:rgba(255,255,255,.1);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.18);border-radius:16px;padding:12px 16px;min-width:112px}.auth-stats b{display:block;font:700 22px var(--f-display)}.auth-stats span{font-size:12px;opacity:.85}
+.auth-panel{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;gap:22px;overflow-y:auto;background:var(--surface)}
+.auth-card{width:min(400px,100%);display:flex;flex-direction:column;gap:14px;animation:authIn .3s ease}
+.auth-card h1{font-size:30px;margin:0;letter-spacing:-.02em}.auth-card p{margin:0}
+.auth-form{display:flex;flex-direction:column;gap:14px}
+.lbl-row{display:flex;justify-content:space-between;align-items:center}
+.btn.big{height:46px;font-size:14.5px;width:100%;justify-content:center}
+.btn.sso{height:46px;width:100%;justify-content:center;gap:10px}
+.auth-or{display:flex;align-items:center;gap:12px;color:var(--ink-3);font-size:12px}.auth-or::before,.auth-or::after{content:"";flex:1;height:1px;background:var(--line)}
+.pw{position:relative}.pw .input{padding-right:58px}.pw .linkbtn{position:absolute;right:12px;top:50%;transform:translateY(-50%)}
+.linkbtn{background:none;border:0;color:var(--brand);font-weight:600;font-size:12.5px;padding:0;cursor:pointer;align-self:flex-start}
+.otp{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}
+.otp input{height:56px;text-align:center;font:700 22px var(--f-display);border:1.5px solid var(--line-strong);border-radius:12px;background:var(--surface-2);color:var(--ink);width:100%;min-width:0}
+.otp input:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 4px var(--brand-soft)}
+.otp.shake{animation:shake .35s}@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.auth-foot{font-size:12px;color:var(--ink-3);text-align:center}
+.small{font-size:13px}
+.auth-ok{width:60px;height:60px;border-radius:18px;background:var(--brand-soft);color:var(--brand);display:grid;place-items:center}
+.auth-spin{width:44px;height:44px;border-radius:50%;border:4px solid var(--brand-soft);border-top-color:var(--brand);animation:authSpin .8s linear infinite}@keyframes authSpin{to{transform:rotate(360deg)}}
+.rail-foot .so{margin-left:auto;width:32px;height:32px;background:transparent;border:1px solid rgba(255,255,255,.14);color:var(--rail-ink,#C5CFE3);border-radius:9px}
+.rail-foot .so:hover{background:rgba(255,255,255,.08);color:#fff}
+@media (max-width:860px){.auth{grid-template-columns:1fr;overflow-y:auto;grid-template-rows:auto 1fr}.auth-art{padding:24px}.auth-quote h2{font-size:26px}.auth-stats{display:none}.auth-panel{justify-content:flex-start;padding-top:28px}}
+@media (prefers-reduced-motion:reduce){.auth,.auth-card{animation:none}}
+
+/* School brand in the rail */
+.rail .logo{overflow:hidden;font:700 13px var(--f-display);color:#fff}
+.rail .logo.has-img img{width:100%;height:100%;object-fit:contain;padding:3px}
+.brand div{min-width:0}
+.brand b{display:block;font-size:14.5px;line-height:1.25;white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+:root{--auth-bg:radial-gradient(80% 60% at 0% 0%,color-mix(in srgb,var(--brand) 85%,#fff),transparent 60%),radial-gradient(70% 70% at 100% 100%,color-mix(in srgb,var(--brand) 45%,#12A594),transparent 60%),linear-gradient(160deg,color-mix(in srgb,var(--brand) 75%,#000),#0B1222)}
+
+/* Applicant panel */
+.drawer.wide{width:min(760px,100%)}
+.ad-head{padding:20px 22px 0;background:linear-gradient(180deg,var(--brand-soft),transparent);border-bottom:1px solid var(--line)}
+.ad-top{display:flex;gap:16px;align-items:flex-start}
+.ad-top .av.lg{width:64px;height:64px;font-size:22px;box-shadow:0 0 0 4px var(--surface)}
+.ad-top h2{font:700 24px/1.15 var(--f-display);margin:2px 0 6px}
+.ad-meta{display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:13px;color:var(--ink-2)}
+.ad-actions{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0 18px}
+.ad-steps{list-style:none;margin:0;padding:0 0 16px;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));position:relative}
+.ad-steps li{position:relative;text-align:center}
+.ad-steps li::before{content:"";position:absolute;top:14px;left:-50%;width:100%;height:3px;background:var(--line);z-index:0}
+.ad-steps li:first-child::before{display:none}
+.ad-steps li.done::before,.ad-steps li.cur::before{background:var(--brand)}
+.ad-steps button{background:none;border:0;display:flex;flex-direction:column;align-items:center;gap:4px;width:100%;position:relative;z-index:1;padding:0;color:var(--ink-3)}
+.ad-steps i{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-weight:800;font-size:12px;background:var(--surface);border:2px solid var(--line-strong);color:var(--ink-3)}
+.ad-steps li.done i{background:var(--brand);border-color:var(--brand);color:#fff}
+.ad-steps li.cur i{border-color:var(--brand);color:var(--brand);box-shadow:0 0 0 5px var(--brand-soft);animation:adPulse 2s infinite}
+@keyframes adPulse{50%{box-shadow:0 0 0 8px transparent}}
+.ad-steps span{font-size:11.5px;font-weight:700;line-height:1.2}
+.ad-steps li.cur span,.ad-steps li.done span{color:var(--ink)}
+.ad-steps small{font-size:10.5px;min-height:13px}
+.ad-steps button:hover i{border-color:var(--brand)}
+.ad-tabs{padding:0 14px}
+.ad-tabs em{font-style:normal;font-size:11px;background:var(--surface-2);border:1px solid var(--line);border-radius:20px;padding:0 6px;margin-left:4px}
+.ad-body{background:var(--canvas);gap:16px}
+.ad-next{display:flex;gap:14px;align-items:center;padding:16px;border-radius:14px;background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow)}
+.ad-next b{display:block;font-size:15px}
+.ad-next p{margin:2px 0 0;color:var(--ink-3);font-size:13px}
+.ad-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.ad-stats>div{display:flex;gap:12px;align-items:center;padding:14px;background:var(--surface);border:1px solid var(--line);border-radius:14px}
+.ad-stats b{display:block;font-size:13.5px}.ad-stats small{color:var(--ink-3);font-size:12px}
+.ring{--p:0;width:52px;height:52px;border-radius:50%;flex:none;display:grid;place-items:center;background:conic-gradient(var(--brand) calc(var(--p)*1%),var(--line) 0)}
+.ring b{width:40px;height:40px;border-radius:50%;background:var(--surface);display:grid;place-items:center;font-size:12px!important}
+.ad-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.ad-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;min-width:0}
+.ad-card h3{margin:0 0 12px;font-size:13.5px}
+.ad-card .kv{grid-template-columns:120px 1fr;font-size:13px}
+.ad-g{display:flex;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.ad-g:last-child{border-bottom:0}
+.ad-note{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.ad-note p{margin:4px 0 0;font-size:13px;color:var(--ink-2)}
+.ad-compose{display:flex;flex-direction:column;gap:8px;margin-top:12px;align-items:flex-end}
+.ad-progress{display:flex;flex-direction:column;gap:8px;font-size:13.5px}
+.ad-doc{display:flex;gap:12px;align-items:center;padding:14px 16px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.ad-doc:last-child{border-bottom:0}
+.ad-doc label.btn{cursor:pointer}
+.ad-empty{display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;padding:40px 20px;background:var(--surface);border:1px dashed var(--line-strong);border-radius:14px;color:var(--brand)}
+.ad-empty b{color:var(--ink);font-size:16px}.ad-empty p{margin:0;max-width:40ch}
+.ad-scores{display:flex;flex-direction:column;gap:14px}
+.ad-score{font-size:13.5px;display:flex;flex-direction:column;gap:6px}
+.ad-track{position:relative;height:10px;border-radius:6px;background:var(--line)}
+.ad-track i{display:block;height:100%;border-radius:6px;background:var(--brand)}
+.ad-track em{position:absolute;top:-4px;width:2px;height:18px;background:var(--ink);border-radius:2px}
+.big-seg{display:flex;width:100%}.big-seg button{flex:1;padding:10px;font-size:13px}
+.ad-tl{display:flex;flex-direction:column}
+.ad-ev{display:flex;gap:12px;align-items:flex-start;padding:10px 0;position:relative}
+.ad-ev:not(:last-child)::after{content:"";position:absolute;left:15px;top:44px;bottom:-6px;width:2px;background:var(--line)}
+.ad-ev p{margin:2px 0 0;font-size:12.5px;color:var(--ink-3)}
+.ad-ev time{font-size:12px;color:var(--ink-3);white-space:nowrap}
+@media (max-width:700px){.ad-grid,.ad-stats{grid-template-columns:1fr}.ad-steps span{font-size:10px}.ad-steps small{display:none}}
+
+/* Timetable */
+.tt2-bar{display:flex;align-items:center;gap:12px;padding:12px 16px;flex-wrap:wrap}
+.tt2-hint{display:flex;gap:10px;align-items:center;padding:12px 16px;border-radius:12px;background:var(--brand-soft);color:var(--brand);font-weight:600;font-size:13px}
+.tt2-wrap{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:20px;align-items:start}
+.tt2-side{display:flex;flex-direction:column;gap:20px;min-width:0}
+.tt2{display:grid;grid-template-columns:70px repeat(5,minmax(136px,1fr));gap:8px;min-width:780px;padding:16px}
+.tt2 .dh{padding:10px 12px;border-radius:12px;display:flex;flex-direction:column;gap:1px;position:relative;background:var(--surface-2);border:1px solid var(--line)}
+.tt2 .dh b{font:700 15px var(--f-display)}.tt2 .dh span{font-size:12px;color:var(--ink-3)}
+.tt2 .dh.today{background:var(--brand);border-color:var(--brand);color:#fff;box-shadow:0 10px 24px -12px var(--brand)}
+.tt2 .dh.today span{color:rgba(255,255,255,.85)}
+.tt2 .dh em{position:absolute;right:10px;top:10px;font-style:normal;font-size:9.5px;font-weight:800;letter-spacing:.08em;background:rgba(255,255,255,.22);padding:2px 7px;border-radius:20px;text-transform:uppercase}
+.tt2 .pt{display:flex;flex-direction:column;align-items:flex-end;justify-content:center;font-size:11px;color:var(--ink-3);padding-right:4px;line-height:1.35}
+.tt2 .pt b{font-size:12.5px;color:var(--ink)}
+.ls{position:relative;border-radius:12px;padding:10px 12px;min-height:78px;background:color-mix(in srgb,var(--c) 10%,var(--surface));border:1px solid color-mix(in srgb,var(--c) 24%,transparent);cursor:pointer;display:flex;flex-direction:column;justify-content:space-between;gap:6px;transition:transform .15s,box-shadow .15s}
+.ls:hover{transform:translateY(-2px);box-shadow:0 10px 22px -12px color-mix(in srgb,var(--c) 70%,transparent)}
+.ls:focus-visible{outline:2px solid var(--c);outline-offset:2px}
+.ls-top{display:flex;align-items:center;gap:8px;min-width:0}
+.ls-ic{width:24px;height:24px;border-radius:7px;background:var(--c);color:#fff;display:grid;place-items:center;flex:none}
+.ls-ic.big{width:48px;height:48px;border-radius:14px;background:rgba(255,255,255,.2)}
+.ls b{font-size:13px;line-height:1.2;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.ls-meta{display:flex;justify-content:space-between;align-items:center;gap:6px;font-size:11.5px;color:var(--ink-2);min-width:0}
+.ls-meta>span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ls-meta .room{font-weight:700;color:color-mix(in srgb,var(--c) 70%,var(--ink));background:color-mix(in srgb,var(--c) 15%,transparent);padding:1px 7px;border-radius:20px;white-space:nowrap;flex:none}
+.ls.past{opacity:.55}
+.ls.now{box-shadow:0 0 0 2px var(--c),0 12px 26px -12px var(--c)}
+.ls.now::after{content:"";position:absolute;left:-6px;right:-6px;top:var(--pct);height:2px;background:var(--bad);z-index:2}
+.ls.now::before{content:"";position:absolute;left:-9px;top:calc(var(--pct) - 4px);width:10px;height:10px;border-radius:50%;background:var(--bad);z-index:2;box-shadow:0 0 0 4px color-mix(in srgb,var(--bad) 25%,transparent)}
+.badge-now{position:absolute;right:8px;top:8px;font-size:9px;font-weight:800;letter-spacing:.08em;color:#fff;background:var(--bad);border-radius:20px;padding:1px 6px}
+.ls .cover{font-weight:700;color:var(--warn)}
+.tt2.edit .ls{cursor:grab;outline:1.5px dashed color-mix(in srgb,var(--c) 55%,transparent);outline-offset:-5px}
+.ls.drop{transform:scale(1.05)!important;box-shadow:0 0 0 2px var(--brand)}
+.bk{grid-column:2/-1;display:flex;align-items:center;gap:8px;justify-content:center;border-radius:12px;padding:9px;font-size:12.5px;color:var(--ink-2);background:repeating-linear-gradient(135deg,var(--surface-2) 0 10px,transparent 10px 20px);border:1px dashed var(--line-strong)}
+.bk span{color:var(--ink-3)}
+.agenda .ag{display:flex;gap:10px;align-items:center;padding:10px 18px;border-bottom:1px solid var(--line);font-size:13px}
+.agenda .ag:last-child{border-bottom:0}
+.agenda .ag.done{opacity:.55}.agenda .ag.cur{background:var(--brand-soft)}
+.agenda .ag>i{width:8px;height:8px;border-radius:50%;flex:none}
+.load .lr{display:grid;grid-template-columns:10px 1fr auto;gap:6px 10px;align-items:center;padding:9px 18px;font-size:13px}
+.load .lr .bar{grid-column:2/-1;height:4px}
+.ls-hero{padding:22px;color:#fff;background:radial-gradient(80% 140% at 0% 0%,color-mix(in srgb,var(--c) 90%,#fff),transparent 60%),linear-gradient(135deg,var(--c),color-mix(in srgb,var(--c) 55%,#000))}
+.ls-hero h2{font:700 26px var(--f-display);margin:2px 0 4px;color:#fff}
+.ls-hero .iconbtn{background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.3);color:#fff}
+@media (max-width:1600px){.tt2-wrap{grid-template-columns:minmax(0,1fr)}.tt2-side{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));align-items:start}}
 </style>
 </head>
 <body>
+<div class="auth" id="auth" hidden></div>
 <div class="app" id="app">
   <aside class="rail" id="rail" aria-label="Modules">
     <div class="brand"><div class="logo"><svg viewBox="0 0 64 64" width="72%" height="72%" aria-hidden="true"><g fill="none" stroke-width="9"><path d="M20.82 15.42A20 20 0 0 1 43.18 15.42" stroke="#FFFFFF"/><path d="M48.58 20.82A20 20 0 0 1 48.58 43.18" stroke="#C9D8FF"/><path d="M15.42 43.18A20 20 0 0 1 15.42 20.82" stroke="#E3EBFF"/><path d="M43.18 48.58A20 20 0 0 1 20.82 48.58" stroke="#FFFFFF"/><path d="M39.35 39.35L54.91 54.91" stroke="#FFFFFF" stroke-linecap="round"/></g><circle cx="32" cy="32" r="4.5" fill="#FFC56B"/></svg></div><div><b>Quad</b><small>Colombo International School</small></div></div>
     <nav class="nav" id="nav"></nav>
-    <div class="rail-foot"><div class="av sm" style="background:#12A594">PM</div><div style="font-size:12px;min-width:0"><b style="color:#fff;display:block">Prishan Maduka</b><span style="color:var(--rail-ink-2)">Super admin</span></div></div>
+    <div class="rail-foot"><div class="av sm" style="background:#12A594">PM</div><div style="font-size:12px;min-width:0"><b style="color:#fff;display:block">Prishan Maduka</b><span style="color:var(--rail-ink-2)">Super admin</span></div><button class="iconbtn so" data-act="signOut" aria-label="Sign out" title="Sign out"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
   </aside>
   <div class="main">
     <header class="top">
@@ -764,19 +916,6 @@ V.lms = () => {
   ${tabs('lms', [['courses','Courses'],['assignments','Assignments'],['gradebook','Gradebook']])}${body}`;
 };
 
-V.timetable = () => {
-  const days = ['Monday','Tuesday','Wednesday','Thursday','Friday'], times = ['08:00','08:40','09:20','10:00','10:40','11:20','12:00'];
-  const subj = {Maths:['#2F6FED','Mr. Mendis'],Physics:['#0E7490','Mr. Herath'],English:['#8B5CF6','Ms. Silva'],ICT:['#12A594','Mrs. Bandara'],History:['#B45309','Mr. Ratnayake'],Art:['#BE185D','Ms. De Alwis'],PE:['#4D7C0F','Coach Perera'],Sinhala:['#C2410C','Mrs. Herath']};
-  const keys = Object.keys(subj); seed = 21;
-  let cells = `<div></div>${days.map(d => `<div class="h">${d}</div>`).join('')}`;
-  times.forEach((t, ti) => {
-    if (ti === 3) { cells += `<div class="t">10:00</div><div class="brk">Interval · 20 min</div>`; return; }
-    cells += `<div class="t">${t}</div>` + days.map(() => { const k = pick(keys), [c, tch] = subj[k]; return `<div class="s" style="border-color:${c};background:color-mix(in srgb, ${c} 12%, var(--surface))" data-tip="<b>${k}</b><br>${tch} · Room ${100 + Math.floor(rnd()*30)}"><b>${k}</b><span class="muted">${tch}</span></div>`; }).join('');
-  });
-  return `${pageHead('Learning management system', 'Timetable', 'Grade 10 – Emerald · Week A', `<select class="input inline" aria-label="Class"><option>Grade 10 – Emerald</option><option>Grade 10 – Ruby</option></select><button class="btn">${ic('down',16)}Export</button>`)}
-  <div class="card"><div class="card-b tbl-wrap"><div class="tt">${cells}</div></div></div>`;
-};
-
 V.fees = () => {
   const t = curTab('fees', 'invoices');
   const f = S.filter.inv || 'All';
@@ -853,7 +992,7 @@ V.users = () => {
   if (t === 'people') {
     const rf = S.filter.urole || 'all', q = (S.q || '').toLowerCase();
     const rows = staff.filter(u => (rf === 'all' || u.role === rf) && (!q || (u.name + u.email).toLowerCase().includes(q)));
-    return `${pageHead('Settings', 'Users & roles', 'Staff accounts for Colombo International School. Parents and students are managed from student records.', `<button class="btn primary" data-act="inviteStaff">${ic('plus',16)}Invite staff</button>`)}
+    return `${pageHead('Settings', 'Users & roles', `Staff accounts for ${SCHOOL.name}. Parents and students are managed from student records.`, `<button class="btn primary" data-act="inviteStaff">${ic('plus',16)}Invite staff</button>`)}
     ${tabs('usr', [['people','People'],['roles','Roles & permissions']])}
     <div class="card"><div class="toolbar"><div class="searchbox">${ic('search',16)}<input class="input" id="usrSearch" placeholder="Search name or email" value="${esc(S.q||'')}"></div>
     <div class="chips">${[['all','Everyone'], ...STAFF_ROLES.map(r => [r[0], r[1]])].map(([k, l]) => `<button class="chip ${rf===k?'on':''}" data-act="filter" data-key="urole" data-val="${k}">${l}<span class="n">${k==='all'?staff.length:staff.filter(u=>u.role===k).length}</span></button>`).join('')}</div></div>
@@ -1116,7 +1255,7 @@ document.addEventListener('change', e => {
 window.addEventListener('beforeunload', e => { if (UK.dirty) { e.preventDefault(); e.returnValue = ''; } });
 
 function schoolCtx() { return {
-  key:'school', name:'Colombo International School', adminName:'Prishan Maduka', mods:PMODS, acts:PACTS,
+  key:'school', name:SCHOOL.name, adminName:'Prishan Maduka', mods:PMODS, acts:PACTS,
   users:() => staff, perms:() => rolePerms,
   roles:() => STAFF_ROLES.map(([k, l, sy]) => ({id:k, n:l, system:!!sy, d:(ROLE_META[k] || {}).d || {admin:'Full access to the school', principal:'Everything except system settings', finance:'Fees, invoices and accounts', admissions:'Enquiries, applications and CRM', teacher:'Classes, attendance and gradebook', counsellor:'Wellbeing and conduct', frontdesk:'Visitors, pickups and messages'}[k] || 'Custom role', ...(ROLE_META[k] || {})})),
   addRole:r => { STAFF_ROLES.push([r.id, r.n, false]); ROLE_META[r.id] = {d:r.d, color:r.color, scope:r.scope, sensitive:r.sensitive}; },
@@ -1128,6 +1267,230 @@ function schoolCtx() { return {
   goRoles:id => { S.tab.usr = 'roles'; if (id) S.roleSel = id; if (location.hash === '#users') route(); else location.hash = 'users'; },
   rerender:() => route(), toast, audit:() => {}, canImpersonate:false, isMe:u => u.id === 's0'
 }; }
+
+/* ---------- Sign-in screens (shared by the platform console and the school portal) ---------- */
+const AUTH = {step:'signin', email:'', cfg:null, sso:''};
+const G_ICON = '<svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>';
+const MS_ICON = '<svg width="16" height="16" viewBox="0 0 21 21" aria-hidden="true"><path fill="#F25022" d="M1 1h9v9H1z"/><path fill="#7FBA00" d="M11 1h9v9h-9z"/><path fill="#00A4EF" d="M1 11h9v9H1z"/><path fill="#FFB900" d="M11 11h9v9h-9z"/></svg>';
+function authSignedIn(key) { try { return sessionStorage.getItem('quad-auth-' + key) === '1'; } catch (e) { return true; } }
+function authOpen(cfg) { AUTH.cfg = cfg; AUTH.step = 'signin'; const a = document.getElementById('auth'); a.hidden = false; a.classList.remove('leave'); authRender(); }
+function authRender() {
+  const c = AUTH.cfg, a = document.getElementById('auth'), st = AUTH.step; let f = '';
+  if (st === 'signin') f = `<h1>${c.title}</h1><p class="muted">${c.sub}</p>
+    ${c.sso.map(s => `<button class="btn sso" data-auth="sso" data-v="${s}">${s.startsWith('Google') ? G_ICON : MS_ICON}Continue with ${s}</button>`).join('')}
+    <div class="auth-or"><span>or sign in with email</span></div>
+    <form class="auth-form" id="authForm" novalidate><div class="field"><label for="au_e">${c.emailLabel || 'Email'}</label><input class="input" id="au_e" type="email" autocomplete="username" value="${esc(AUTH.email || c.email)}"></div>
+    <div class="field"><div class="lbl-row"><label for="au_p">Password</label><button type="button" class="linkbtn" data-auth="forgot">Forgot password?</button></div><div class="pw"><input class="input" id="au_p" type="password" autocomplete="current-password" placeholder="Enter your password"><button type="button" class="linkbtn" data-auth="show">Show</button></div></div>
+    <label class="checkrow"><input type="checkbox" checked> Keep me signed in on this device</label><div class="err-msg" id="auErr" role="alert"></div>
+    <button class="btn primary big">Continue</button></form>${c.below || ''}`;
+  else if (st === 'otp') f = `<button class="linkbtn" data-auth="back">← Back</button><h1>Two-step sign-in</h1><p class="muted">Enter the 6-digit code from your authenticator app for <b>${esc(AUTH.email)}</b>.</p>
+    <div class="otp" id="otp">${Array.from({length:6}, (_, i) => `<input inputmode="numeric" autocomplete="one-time-code" maxlength="1" aria-label="Digit ${i + 1}">`).join('')}</div><div class="err-msg" id="auErr" role="alert"></div>
+    <label class="checkrow"><input type="checkbox" checked> Trust this device for 30 days</label><button class="btn primary big" data-auth="verify" id="auVerify">Verify and sign in</button>
+    <p class="muted small">No phone with you? <button class="linkbtn" data-auth="toast" data-v="Enter one of your 10 recovery codes instead">Use a recovery code</button></p>`;
+  else if (st === 'forgot') f = `<button class="linkbtn" data-auth="back">← Back</button><h1>Reset your password</h1><p class="muted">We’ll email you a link to choose a new one.</p>
+    <form class="auth-form" id="authForgot" novalidate><div class="field"><label for="au_fe">Email</label><input class="input" id="au_fe" type="email" value="${esc(AUTH.email || c.email)}"></div><div class="err-msg" id="auErr" role="alert"></div><button class="btn primary big">Send reset link</button></form>`;
+  else if (st === 'sent') f = `<div class="auth-ok">${ic('mail', 26)}</div><h1>Check your inbox</h1><p class="muted">If <b>${esc(AUTH.email)}</b> has an account, a reset link is on its way. It expires in 30 minutes.</p><button class="btn big" data-auth="back">Back to sign in</button>`;
+  else if (st === 'sso') f = `<div class="auth-spin" aria-hidden="true"></div><h1>Signing you in…</h1><p class="muted">Waiting for ${esc(AUTH.sso)} to confirm your account.</p>`;
+  a.innerHTML = `<div class="auth-art">${c.art()}</div><div class="auth-panel"><div class="auth-card">${f}</div><div class="auth-foot">${c.foot}</div></div>`;
+  const ae = () => document.getElementById('auErr');
+  const form = document.getElementById('authForm');
+  if (form) { form.onsubmit = e => { e.preventDefault(); const em = document.getElementById('au_e').value.trim(), pw = document.getElementById('au_p').value;
+      if (!/^\S+@\S+\.\S+$/.test(em)) { ae().textContent = 'Enter your email address, like name@school.edu.'; document.getElementById('au_e').focus(); return; }
+      if (!pw) { ae().textContent = 'Enter your password.'; document.getElementById('au_p').focus(); return; }
+      AUTH.email = em; AUTH.step = 'otp'; authRender(); };
+    setTimeout(() => document.getElementById('au_p')?.focus(), 60); }
+  const ff = document.getElementById('authForgot');
+  if (ff) ff.onsubmit = e => { e.preventDefault(); const em = document.getElementById('au_fe').value.trim(); if (!/^\S+@\S+\.\S+$/.test(em)) { ae().textContent = 'Enter the email you sign in with.'; return; } AUTH.email = em; AUTH.step = 'sent'; authRender(); };
+  const otp = document.getElementById('otp');
+  if (otp) { const ins = [...otp.querySelectorAll('input')]; setTimeout(() => ins[0].focus(), 60);
+    ins.forEach((inp, i) => {
+      inp.oninput = () => { inp.value = inp.value.replace(/\D/g, '').slice(-1); if (inp.value && i < 5) ins[i + 1].focus(); if (ins.every(x => x.value)) authVerify(); };
+      inp.onkeydown = e => { if (e.key === 'Backspace' && !inp.value && i > 0) ins[i - 1].focus(); };
+      inp.onpaste = e => { const d = ((e.clipboardData && e.clipboardData.getData('text')) || '').replace(/\D/g, '').slice(0, 6); if (!d) return; e.preventDefault(); d.split('').forEach((ch, k) => { if (ins[k]) ins[k].value = ch; }); ins[Math.min(d.length, 5)].focus(); if (d.length === 6) authVerify(); };
+    }); }
+}
+function authVerify() {
+  const ins = [...document.querySelectorAll('#otp input')];
+  if (ins.some(x => !x.value)) { document.getElementById('auErr').textContent = 'Enter all 6 digits.'; const o = document.getElementById('otp'); o.classList.remove('shake'); void o.offsetWidth; o.classList.add('shake'); return; }
+  const b = document.getElementById('auVerify'); if (b.disabled) return; b.disabled = true; b.textContent = 'Verifying…'; setTimeout(authDone, 700);
+}
+function authDone() { const c = AUTH.cfg; try { sessionStorage.setItem('quad-auth-' + c.key, '1'); } catch (e) {} const a = document.getElementById('auth'); a.classList.add('leave'); setTimeout(() => { a.hidden = true; a.classList.remove('leave'); a.innerHTML = ''; }, 450); if (c.done) c.done(); }
+function authSignOut(cfg) { try { sessionStorage.removeItem('quad-auth-' + cfg.key); } catch (e) {} AUTH.email = ''; authOpen(cfg); }
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-auth]'); if (!el) return; e.preventDefault(); const k = el.dataset.auth;
+  if (k === 'sso') { AUTH.sso = el.dataset.v; AUTH.step = 'sso'; authRender(); setTimeout(authDone, 1300); }
+  if (k === 'forgot') { const em = document.getElementById('au_e'); if (em) AUTH.email = em.value.trim(); AUTH.step = 'forgot'; authRender(); }
+  if (k === 'back') { AUTH.step = 'signin'; authRender(); }
+  if (k === 'show') { const p = document.getElementById('au_p'); p.type = p.type === 'password' ? 'text' : 'password'; el.textContent = p.type === 'password' ? 'Show' : 'Hide'; }
+  if (k === 'verify') authVerify();
+  if (k === 'toast') toast(el.dataset.v);
+});
+
+/* ---------- School branding (set in the platform console, kept in this browser) ---------- */
+const SCHOOL_DEFAULT = {name:'Colombo International School', short:'CIS', sub:'colombo-intl', color:'#2F6FED', logo:null};
+let SCHOOL = SCHOOL_DEFAULT;
+function loadSchool() { try { const s = JSON.parse(localStorage.getItem('quad-school') || 'null'); SCHOOL = s && s.name ? {...SCHOOL_DEFAULT, ...s} : SCHOOL_DEFAULT; } catch (e) { SCHOOL = SCHOOL_DEFAULT; } if (!SCHOOL.short) SCHOOL.short = SCHOOL.name.replace(/[^A-Za-z ]/g, '').split(' ').filter(Boolean).map(w => w[0]).slice(0, 3).join('').toUpperCase(); }
+const schoolMark = () => SCHOOL.logo ? `<img src="${SCHOOL.logo}" alt="${esc(SCHOOL.name)} logo">` : `<span>${esc(SCHOOL.short)}</span>`;
+function applySchool() {
+  loadSchool(); const c = SCHOOL.color, r = document.documentElement.style;
+  r.setProperty('--brand', c); r.setProperty('--brand-ink', '#fff'); r.setProperty('--brand-strong', `color-mix(in srgb, ${c} 80%, #000)`); r.setProperty('--brand-soft', `color-mix(in srgb, ${c} 13%, var(--surface))`);
+  r.setProperty('--rail-active', c); r.setProperty('--rail', `color-mix(in srgb, ${c} 16%, #0B1222)`); r.setProperty('--rail-2', `color-mix(in srgb, ${c} 26%, #131C31)`);
+  const lg = document.querySelector('.rail .logo'); lg.innerHTML = schoolMark(); lg.classList.toggle('has-img', !!SCHOOL.logo); lg.style.background = SCHOOL.logo ? '#fff' : c;
+  document.querySelector('.brand b').textContent = SCHOOL.name; document.querySelector('.brand small').textContent = 'Staff portal · powered by Quad';
+  document.title = SCHOOL.name + ' · Staff portal';
+}
+const schoolAuth = () => ({
+  key:'school', title:'Welcome back', sub:`Sign in to the ${esc(SCHOOL.name)} staff portal.`, email:`prishan.maduka@${SCHOOL.sub}.edu`, emailLabel:'Work email', sso:['Google Workspace','Microsoft 365'],
+  below:`<p class="muted small">Are you a parent? Use the <a href="parent.html">${esc(SCHOOL.short)} Parent app</a> on your phone.</p>`,
+  foot:`Protected by two-step sign-in · Powered by <b>Quad</b>`,
+  art:() => `<div class="auth-brand"><div class="auth-logo">${schoolMark()}</div><div><b>${esc(SCHOOL.name)}</b><small>Staff portal</small></div></div>
+    <div class="auth-quote"><h2>Good morning. Your school day starts here.</h2><p>Admissions, students, learning, fees and finance in one place.</p></div>
+    <div class="auth-stats"><div><b>1,248</b><span>students</span></div><div><b>94.6%</b><span>attendance today</span></div><div><b>Week 6</b><span>Term 1, 2026/27</span></div></div>`,
+  done:() => toast(`Signed in to ${SCHOOL.name}`)
+});
+
+/* ---------- Applicant panel (admissions pipeline) ---------- */
+const APP_DOCS = [['Birth certificate','file'],['Previous school report','book'],['Passport photo','student'],['Immunisation record','heart'],['Parent NIC or passport','file']];
+const PREV_SCHOOLS = ['Little Steps Montessori','Lyceum International','Asian International School','British School in Colombo','Elizabeth Moir School','Gateway College'];
+function appExtra(a) {
+  if (a.x) return a;
+  const r = ukSeed(a.id), p2 = pick(FIRST) + ' ' + a.name.split(' ')[1];
+  a.x = {
+    dob:`${2026 - a.grade - 5}-0${1 + Math.floor(r() * 8)}-1${Math.floor(r() * 9)}`, gender: r() > .5 ? 'Female' : 'Male', prev: PREV_SCHOOLS[Math.floor(r() * PREV_SCHOOLS.length)],
+    nat: r() > .8 ? 'British' : 'Sri Lankan', sib: r() > .6 ? `Sister in Grade ${Math.min(12, a.grade + 2)}` : 'None', lang: r() > .5 ? 'English, Sinhala' : 'English',
+    guardians:[[a.parent, 'Mother', '+94 77 ' + (2000000 + Math.floor(r() * 7000000)), a.parent.split(' ')[0].toLowerCase() + '@gmail.com', true],[p2, 'Father', '+94 71 ' + (2000000 + Math.floor(r() * 7000000)), p2.split(' ')[0].toLowerCase() + '.' + p2.split(' ')[1].toLowerCase() + '@outlook.com', false]],
+    scores:{English: 58 + Math.floor(r() * 40), Mathematics: 55 + Math.floor(r() * 43), Reasoning: 60 + Math.floor(r() * 38)}, rec:'',
+    docs: APP_DOCS.map((_, i) => i < a.docs ? 'verified' : i === a.docs ? 'pending' : 'missing'),
+    notes:[{by:'Dilini R.', t:'Family is moving back from Dubai in December. They prefer a January start and asked about the school bus from Rajagiriya.', at:'2 days ago'}],
+    fees:{app:true, assess: a.stage !== 'enquiry'}
+  };
+  return a;
+}
+function appNext(a) {
+  return {
+    enquiry:['mail','Send the application form','The family has asked about places. Send them the online form and fee details.','Send form'],
+    application:['file','Check the documents',`${a.x.docs.filter(d => d === 'verified').length} of 5 documents verified. Book an assessment when the rest arrive.`,'Book assessment'],
+    assessment:['cal','Assessment on Thu 9 Oct, 09:00','Exam hall B · English, Mathematics and reasoning papers · about 90 minutes.','Reschedule'],
+    interview:['crm','Interview on Mon 13 Oct, 10:30','Principal’s office with Mrs. Wickramasinghe. Both parents invited.','Reschedule'],
+    offer:['send','Waiting for the family to accept','Offer sent on 1 Oct. It expires on 15 Oct. The admission fee is due on acceptance.','Send reminder'],
+    enrolled:['check','Enrolled for January 2027',`Student record created. Class placement: Grade ${a.grade} – ${HOUSES[a.grade % 4]}.`,'Open record']
+  }[a.stage];
+}
+function appDrawer(id) {
+  const a = appExtra(apps.find(x => x.id === id)), si = STAGES.findIndex(s => s.k === a.stage), tab = S.appTab || 'overview', x = a.x;
+  const verified = x.docs.filter(d => d === 'verified').length, avg = Math.round((x.scores.English + x.scores.Mathematics + x.scores.Reasoning) / 3);
+  const prioTone = {high:['t-red','High priority'], med:['t-amber','Medium priority'], low:['t-blue','Low priority']}[a.prio];
+  const [nIc, nT, nD, nB] = appNext(a);
+  const dates = ['12 Sep','18 Sep','24 Sep','30 Sep','1 Oct','—'];
+  let body = '';
+  if (tab === 'overview') body = `
+    <div class="ad-next"><div class="dot-ic t-blue">${ic(nIc,18)}</div><div style="flex:1;min-width:0"><div class="eyebrow">Next step</div><b>${nT}</b><p>${nD}</p></div><button class="btn sm" data-act="toast" data-msg="${nB} · done">${nB}</button></div>
+    <div class="ad-stats">
+      <div><span class="ring" style="--p:${verified / 5 * 100}"><b>${verified}/5</b></span><div><b>Documents</b><small>${verified === 5 ? 'All verified' : (5 - verified) + ' still needed'}</small></div></div>
+      <div><span class="ring" style="--p:${a.stage === 'enquiry' || a.stage === 'application' ? 0 : avg}"><b>${a.stage === 'enquiry' || a.stage === 'application' ? '–' : avg}</b></span><div><b>Assessment</b><small>${a.stage === 'enquiry' || a.stage === 'application' ? 'Not taken yet' : 'Average of 3 papers'}</small></div></div>
+      <div><span class="ring" style="--p:${x.fees.assess ? 100 : 50}"><b>${x.fees.assess ? 2 : 1}/2</b></span><div><b>Fees paid</b><small>Application ${x.fees.assess ? 'and assessment' : 'only'}</small></div></div>
+    </div>
+    <div class="ad-grid">
+      <section class="ad-card"><h3>Student</h3><dl class="kv"><dt>Date of birth</dt><dd class="num">${x.dob}</dd><dt>Gender</dt><dd>${x.gender}</dd><dt>Nationality</dt><dd>${x.nat}</dd><dt>Current school</dt><dd>${x.prev}</dd><dt>Languages</dt><dd>${x.lang}</dd><dt>Siblings here</dt><dd>${x.sib}</dd></dl></section>
+      <section class="ad-card"><h3>Parents and guardians</h3>${x.guardians.map(([n, rel, ph, em, prim]) => `<div class="ad-g">${avatar(n,'sm')}<div style="flex:1;min-width:0"><b>${n}</b> <span class="muted" style="font-size:12px">${rel}</span>${prim ? ' <span class="pill t-blue plain" style="font-size:10.5px">Main contact</span>' : ''}<div class="muted" style="font-size:12px">${ph} · ${em}</div></div><button class="iconbtn" style="width:32px;height:32px" data-act="toast" data-msg="Calling ${esc(n)}…" aria-label="Call ${esc(n)}">${ic('phone',14)}</button></div>`).join('')}</section>
+    </div>
+    <section class="ad-card"><h3>Notes</h3>${x.notes.map(n => `<div class="ad-note">${avatar(n.by,'sm')}<div><b>${n.by}</b> <span class="muted" style="font-size:12px">${n.at}</span><p>${esc(n.t)}</p></div></div>`).join('')}
+      <form class="ad-compose" data-form="appNote" data-id="${a.id}"><textarea class="input" id="appNoteIn" rows="2" placeholder="Add a note for the admissions team…"></textarea><button class="btn sm primary">Add note</button></form></section>`;
+  else if (tab === 'docs') body = `
+    <div class="ad-progress"><div><b>${verified} of 5 verified</b><span class="muted"> · ${x.docs.filter(d => d === 'pending').length} waiting for review</span></div><div class="bar" style="height:8px"><i style="width:${verified / 5 * 100}%;background:var(--good)"></i></div></div>
+    <div class="ad-card" style="padding:0">${APP_DOCS.map(([n, i], k) => { const st = x.docs[k]; return `<div class="ad-doc ${st}"><div class="dot-ic ${st === 'verified' ? 't-green' : st === 'pending' ? 't-amber' : 't-red'}">${ic(st === 'verified' ? 'check' : i,16)}</div><div style="flex:1;min-width:0"><b>${n}</b><div class="muted" style="font-size:12px">${st === 'verified' ? 'Verified by Dilini R. · 2 Oct' : st === 'pending' ? 'Uploaded by parent · needs review' : 'Not received yet'}</div></div>
+      ${st === 'verified' ? `<button class="btn sm ghost" data-act="toast" data-msg="Opening ${n}">View</button>` : st === 'pending' ? `<button class="btn sm" data-act="toast" data-msg="Opening ${n}">View</button><button class="btn sm primary" data-act="appDoc" data-id="${a.id}" data-k="${k}" data-v="verified">Verify</button>` : `<button class="btn sm" data-act="appDoc" data-id="${a.id}" data-k="${k}" data-v="request">Ask parent</button><label class="btn sm">Upload<input type="file" hidden data-appupload="${a.id}" data-k="${k}"></label>`}</div>`; }).join('')}</div>
+    ${x.docs.includes('missing') ? `<button class="btn" data-act="appDoc" data-id="${a.id}" data-k="all" data-v="request">${ic('send',16)}Ask the family for all missing documents</button>` : ''}`;
+  else if (tab === 'assess') { const taken = si >= 2;
+    body = !taken ? `<div class="ad-empty">${ic('cal',28)}<b>No assessment yet</b><p class="muted">Book one when the documents are in. The family gets a confirmation in the parent app.</p><button class="btn primary" data-act="appStage" data-id="${a.id}" data-v="assessment">Book assessment</button></div>` : `
+    <section class="ad-card"><h3>Entrance assessment · 9 Oct</h3><div class="ad-scores">${Object.entries(x.scores).map(([k, v]) => `<div class="ad-score"><div class="lbl-row"><span>${k}</span><b class="num">${v}<span class="muted" style="font-weight:500">/100</span></b></div><div class="ad-track"><i style="width:${v}%"></i><em style="left:65%" title="Grade ${a.grade} entry benchmark: 65"></em></div></div>`).join('')}</div>
+      <p class="muted small" style="margin:10px 0 0">The marker on each bar is the Grade ${a.grade} entry benchmark (65).</p></section>
+    <section class="ad-card"><h3>Recommendation</h3><div class="seg big-seg" role="radiogroup">${[['offer','Offer a place','P'],['wait','Waitlist','L'],['decline','Decline','A']].map(([k, l, c]) => `<button class="${x.rec === k ? 'on ' + c : ''}" data-act="appRec" data-id="${a.id}" data-v="${k}">${l}</button>`).join('')}</div>
+      <textarea class="input" rows="3" style="margin-top:12px" placeholder="Interviewer notes (only staff can see these)">${avg >= 75 ? 'Confident and articulate. Strong in mathematics; reading is above grade level.' : ''}</textarea></section>`; }
+  else if (tab === 'activity') body = `<section class="ad-card"><div class="ad-tl">${[
+      ...(si >= 4 ? [['send','t-green','Offer letter sent','Admissions office · by email and the parent app','1 Oct']] : []),
+      ...(si >= 3 ? [['crm','t-violet','Interview booked','Mon 13 Oct, 10:30 with Mrs. Wickramasinghe','30 Sep']] : []),
+      ...(si >= 2 ? [['cal','t-blue','Assessment booked','Thu 9 Oct, 09:00 · Exam hall B','24 Sep']] : []),
+      ['fee','t-green','Application fee paid','Rs 5,000 by card in the parent app','18 Sep'],
+      ...x.notes.map(n => ['msg','t-amber', 'Note added by ' + n.by, esc(n.t), n.at]),
+      ['admit','t-blue', `Enquiry received`, `${a.source} · ${a.parent}`,'12 Sep']
+    ].map(([i, t, ti, d, at]) => `<div class="ad-ev"><div class="dot-ic ${t}">${ic(i,15)}</div><div style="flex:1;min-width:0"><b>${ti}</b><p>${d}</p></div><time>${at}</time></div>`).join('')}</div></section>`;
+  else body = `<section class="ad-card" style="padding:0">${[['Application fee', 5000, true, 'Paid 18 Sep · card'],['Assessment fee', 3500, x.fees.assess, x.fees.assess ? 'Paid 24 Sep · bank transfer' : 'Due when the assessment is booked'],['Admission fee', 150000, si >= 5, si >= 5 ? 'Paid on acceptance' : 'Due when the family accepts the offer'],['Refundable deposit', 100000, si >= 5, si >= 5 ? 'Held until the student leaves' : 'Due with the admission fee']]
+      .map(([n, amt, paid, d]) => `<div class="ad-doc"><div class="dot-ic ${paid ? 't-green' : 't-violet'}">${ic(paid ? 'check' : 'fee',16)}</div><div style="flex:1"><b>${n}</b><div class="muted" style="font-size:12px">${d}</div></div><b class="num">${money(amt)}</b>${paid ? '<span class="pill t-green">Paid</span>' : '<span class="pill t-violet">Not due</span>'}</div>`).join('')}</section>
+    ${si >= 3 && si < 5 ? `<button class="btn primary" data-act="appOffer" data-id="${a.id}">${ic('send',16)}${si === 4 ? 'Resend offer letter' : 'Send offer letter'}</button>` : ''}`;
+  openDrawer(`<div class="ad-head">
+      <div class="ad-top">${avatar(a.name,'lg')}<div style="flex:1;min-width:0"><div class="eyebrow">${a.id} · ${a.source}</div><h2>${a.name}</h2><div class="ad-meta"><span>Grade ${a.grade} · January 2027</span><span class="pill ${prioTone[0]}">${prioTone[1]}</span><span class="pill t-violet plain">${a.days} day${a.days === 1 ? '' : 's'} in ${STAGES[si].n.toLowerCase()}</span></div></div>
+        <button class="iconbtn" data-act="closeAll" aria-label="Close">${ic('x',16)}</button></div>
+      <div class="ad-actions"><button class="btn sm" data-act="toast" data-msg="Email sent to ${esc(a.parent)}">${ic('mail',14)}Email</button><button class="btn sm" data-act="toast" data-msg="Calling ${esc(a.parent)}…">${ic('phone',14)}Call</button><button class="btn sm" data-act="toast" data-msg="Message sent in the parent app">${ic('msg',14)}Message</button><button class="btn sm" data-act="toast" data-msg="Calendar invite created">${ic('cal',14)}Schedule</button></div>
+      <ol class="ad-steps">${STAGES.map((s, i) => `<li class="${i < si ? 'done' : i === si ? 'cur' : ''}"><button data-act="appStage" data-id="${a.id}" data-v="${s.k}" aria-label="Move to ${s.n}"><i>${i < si ? ic('check',12) : i + 1}</i><span>${s.n}</span><small>${i <= si ? dates[i] : ''}</small></button></li>`).join('')}</ol>
+    </div>
+    <div class="tabs ad-tabs" role="tablist">${[['overview','Overview'],['docs',`Documents <em>${verified}/5</em>`],['assess','Assessment'],['activity','Activity'],['fees','Fees']].map(([k, l]) => `<button role="tab" class="${tab === k ? 'on' : ''}" data-act="appTab" data-id="${a.id}" data-v="${k}">${l}</button>`).join('')}</div>
+    <div class="drawer-b ad-body">${body}</div>
+    <div class="drawer-f"><button class="btn ghost danger" data-act="appDecline" data-id="${a.id}">Decline</button><button class="btn" data-act="toast" data-msg="${esc(a.name)} added to the waitlist">Waitlist</button><span style="flex:1"></span>${si < 5 ? `<button class="btn primary" data-act="advance" data-id="${a.id}">Move to ${STAGES[si + 1].n} ${ic('arrow',14)}</button>` : `<button class="btn primary" data-act="go" data-to="students">${ic('student',16)}Open student record</button>`}</div>`, 'wide');
+  document.querySelectorAll('[data-appupload]').forEach(inp => inp.onchange = () => { if (!inp.files[0]) return; x.docs[+inp.dataset.k] = 'pending'; appDrawer(a.id); toast(`${inp.files[0].name} uploaded. Verify it to complete the checklist.`); });
+}
+
+/* ---------- Timetable ---------- */
+const TT_SUBJ = {
+  'Mathematics':['#2F6FED','Mr. Mendis','fin','Room 12'], 'English':['#8B5CF6','Ms. Silva','book','Room 4'], 'Physics':['#0E7490','Mr. Herath','settings','Lab 2'], 'ICT':['#12A594','Mrs. Bandara','grid','ICT lab'],
+  'History':['#B45309','Mr. Ratnayake','file','Room 9'], 'Art & Design':['#BE185D','Ms. De Alwis','star','Studio'], 'Physical Ed.':['#4D7C0F','Coach Perera','heart','Sports hall'], 'Sinhala':['#C2410C','Mrs. Herath','msg','Room 6']
+};
+const TT_LOAD = {'Mathematics':7,'English':6,'Physics':5,'ICT':5,'History':5,'Art & Design':4,'Physical Ed.':4,'Sinhala':4};
+const TT_P = [['P1','08:00','08:40'],['P2','08:40','09:20'],['P3','09:20','10:00'],['brk','10:00','10:20','Interval','Yard duty: Mr. Herath'],['P4','10:20','11:00'],['P5','11:00','11:40'],['P6','11:40','12:20'],['brk','12:20','13:00','Lunch','Canteen duty: Ms. Silva'],['P7','13:00','13:40'],['P8','13:40','14:20']];
+const TT_DAYS = [['Mon','5 Oct'],['Tue','6 Oct'],['Wed','7 Oct'],['Thu','8 Oct'],['Fri','9 Oct']];
+const TT_CLASSES = ['Grade 10 – Emerald','Grade 10 – Ruby','Grade 9 – Sapphire','Grade 7 – Emerald'];
+function ttGrid(cls, wk) {
+  S.tt = S.tt || {}; const key = cls + wk; if (S.tt[key]) return S.tt[key];
+  const r = ukSeed(key), bag = []; Object.entries(TT_LOAD).forEach(([k, n]) => { for (let i = 0; i < n; i++) bag.push(k); });
+  for (let i = bag.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [bag[i], bag[j]] = [bag[j], bag[i]]; }
+  return S.tt[key] = Array.from({length:5}, (_, d) => bag.slice(d * 8, d * 8 + 8));
+}
+V.timetable = () => {
+  const cls = S.ttClass || TT_CLASSES[0], wk = S.ttWeek || 'A', g = ttGrid(cls, wk), edit = !!S.ttEdit, subs = S.ttSub || {};
+  const NOW = 9 * 60 + 41, mins = t => +t.slice(0, 2) * 60 + +t.slice(3); let pi = -1;
+  let cells = `<div class="tt2-c"></div>${TT_DAYS.map(([d, dt], i) => `<div class="dh ${i === 0 ? 'today' : ''}"><b>${d}</b><span>${dt}</span>${i === 0 ? '<em>Today</em>' : ''}</div>`).join('')}`;
+  TT_P.forEach(([p, s, e, label, duty]) => {
+    if (p === 'brk') { cells += `<div class="pt"><b>${s}</b></div><div class="bk">${ic(label === 'Lunch' ? 'heart' : 'star',14)}<b>${label}</b> ${s}–${e} <span>· ${duty}</span></div>`; return; }
+    pi++; const idx = pi;
+    cells += `<div class="pt"><b>${p}</b><span>${s}</span><span>${e}</span></div>` + TT_DAYS.map((_, d) => {
+      const k = g[d][idx], [c, tch, icn, room] = TT_SUBJ[k], st = mins(s), en = mins(e);
+      const state = d === 0 ? (NOW >= en ? 'past' : NOW >= st ? 'now' : 'today') : '', pct = state === 'now' ? ((NOW - st) / (en - st) * 100).toFixed(1) : 0, sub = subs[`${cls}${wk}-${d}-${idx}`];
+      return `<div class="ls ${state}" style="--c:${c};--pct:${pct}%" data-act="ttLesson" data-d="${d}" data-p="${idx}" ${edit ? 'draggable="true"' : ''} tabindex="0" aria-label="${k}, ${TT_DAYS[d][0]} ${p}">
+        ${state === 'now' ? '<span class="badge-now">NOW</span>' : ''}<div class="ls-top"><span class="ls-ic">${ic(icn,13)}</span><b>${k}</b></div>
+        <div class="ls-meta"><span>${sub ? `<span class="cover">Cover: ${sub}</span>` : tch}</span><span class="room">${room}</span></div></div>`;
+    }).join('');
+  });
+  const today = TT_P.filter(p => p[0] !== 'brk');
+  const agenda = today.map(([p, s, e], i) => { const k = g[0][i], st = mins(s), en = mins(e), state = NOW >= en ? 'done' : NOW >= st ? 'cur' : ''; return `<div class="ag ${state}"><i style="background:${TT_SUBJ[k][0]}"></i><span class="num" style="width:44px">${s}</span><span style="flex:1"><b>${k}</b><br><small class="muted">${TT_SUBJ[k][1]} · ${TT_SUBJ[k][3]}</small></span>${state === 'cur' ? '<span class="pill t-red plain">Now</span>' : state === 'done' ? ic('check',14) : ''}</div>`; }).join('');
+  const counts = {}; g.flat().forEach(k => counts[k] = (counts[k] || 0) + 1);
+  return `${pageHead('Learning management system', 'Timetable', `${cls} · Week ${wk} · 40 lessons · Term 1, 2026/27`, `<button class="btn ${edit ? 'primary' : ''}" data-act="ttEdit">${ic(edit ? 'check' : 'grid',16)}${edit ? 'Done rearranging' : 'Rearrange'}</button><button class="btn" data-act="toast" data-msg="Timetable shared with ${cls} parents in the app">${ic('send',16)}Share with parents</button>`)}
+  <div class="tt2-bar card"><div class="chips">${TT_CLASSES.map(c => `<button class="chip ${c === cls ? 'on' : ''}" data-act="ttClass" data-v="${c}">${c}</button>`).join('')}</div><span style="flex:1"></span><div class="seg" role="radiogroup" aria-label="Week">${['A','B'].map(w => `<button class="${w === wk ? 'on P' : ''}" data-act="ttWeek" data-v="${w}">Week ${w}</button>`).join('')}</div></div>
+  ${edit ? `<div class="tt2-hint">${ic('grid',16)}Drag a lesson onto another to swap them. Teachers and parents are told when you finish.</div>` : ''}
+  <div class="tt2-wrap"><div class="card tbl-wrap"><div class="tt2 ${edit ? 'edit' : ''}">${cells}</div></div>
+    <aside class="tt2-side"><section class="card agenda"><div class="card-h"><h2>Today · Monday</h2><span class="muted num" style="font-size:12px">09:41</span></div>${agenda}</section>
+      <section class="card load"><div class="card-h"><h2>Lessons per week</h2></div>${Object.entries(TT_LOAD).map(([k, n]) => `<div class="lr"><i style="width:10px;height:10px;border-radius:3px;background:${TT_SUBJ[k][0]}"></i><span>${k}</span><b class="num">${counts[k] || 0}</b><div class="bar"><i style="width:${(counts[k] || 0) / 7 * 100}%;background:var(--ink-3)"></i></div></div>`).join('')}</section></aside></div>`;
+};
+function ttLessonDrawer(d, p) {
+  const cls = S.ttClass || TT_CLASSES[0], wk = S.ttWeek || 'A', g = ttGrid(cls, wk), k = g[d][p], [c, tch, icn, room] = TT_SUBJ[k], per = TT_P.filter(x => x[0] !== 'brk')[p], subKey = `${cls}${wk}-${d}-${p}`, sub = (S.ttSub || {})[subKey];
+  const free = Object.values(TT_SUBJ).map(v => v[1]).filter(n => n !== tch).slice(0, 4);
+  openDrawer(`<div class="ls-hero" style="--c:${c}"><div class="ad-top"><span class="ls-ic big">${ic(icn,22)}</span><div style="flex:1"><div class="eyebrow" style="color:rgba(255,255,255,.8)">${cls} · Week ${wk}</div><h2>${k}</h2><div style="opacity:.9">${TT_DAYS[d][0]} ${TT_DAYS[d][1]} · ${per[0]} · ${per[1]}–${per[2]}</div></div><button class="iconbtn" data-act="closeAll" aria-label="Close">${ic('x',16)}</button></div></div>
+    <div class="drawer-b"><dl class="kv"><dt>Teacher</dt><dd>${tch}${sub ? ` <span class="pill t-amber plain">Covered by ${sub}</span>` : ''}</dd><dt>Room</dt><dd>${room}</dd><dt>This week</dt><dd>${g.flat().filter(x => x === k).length} ${k} lessons</dd><dt>Learners</dt><dd>32 students</dd></dl>
+    <section class="ad-card"><h3>Find cover</h3><p class="muted small" style="margin:0 0 8px">Teachers with a free period at this time.</p>${free.map(n => `<div class="ad-g">${avatar(n,'sm')}<div style="flex:1"><b>${n}</b><div class="muted" style="font-size:12px">Free · ${Math.floor(Math.random() * 3) + 2} periods taught today</div></div><button class="btn sm" data-act="ttCover" data-k="${subKey}" data-v="${n}">Assign</button></div>`).join('')}</section></div>
+    <div class="drawer-f"><button class="btn" data-act="toast" data-msg="Message sent to ${tch}">${ic('msg',16)}Message ${tch.split(' ').slice(-1)[0]}</button><button class="btn primary" data-act="ttEditFrom">${ic('grid',16)}Rearrange the week</button></div>`, 'wide');
+}
+function ttBindDrag() {
+  if (!S.ttEdit) return; let from = null;
+  document.querySelectorAll('.tt2 .ls').forEach(el => {
+    el.addEventListener('dragstart', e => { from = [+el.dataset.d, +el.dataset.p]; e.dataTransfer.effectAllowed = 'move'; el.style.opacity = .4; });
+    el.addEventListener('dragend', () => el.style.opacity = '');
+    el.addEventListener('dragover', e => { e.preventDefault(); el.classList.add('drop'); });
+    el.addEventListener('dragleave', () => el.classList.remove('drop'));
+    el.addEventListener('drop', e => { e.preventDefault(); el.classList.remove('drop'); if (!from) return; const to = [+el.dataset.d, +el.dataset.p]; if (from[0] === to[0] && from[1] === to[1]) return;
+      const g = ttGrid(S.ttClass || TT_CLASSES[0], S.ttWeek || 'A'), a = g[from[0]][from[1]], b = g[to[0]][to[1]]; g[from[0]][from[1]] = b; g[to[0]][to[1]] = a; route();
+      toast(`Swapped ${a} (${TT_DAYS[from[0]][0]} P${from[1] + 1}) with ${b} (${TT_DAYS[to[0]][0]} P${to[1] + 1})`); });
+  });
+}
+
 /* ---------- Router ---------- */
 function route() {
   const h = (location.hash || '#dashboard').slice(1);
@@ -1142,6 +1505,7 @@ function route() {
   renderNav(); afterRender(); closeAll(); document.getElementById('app').classList.remove('mobile-open');
 }
 function afterRender() {
+  if (S.route === 'timetable') ttBindDrag();
   bindSearch('appSearch'); bindSearch('stuSearch'); bindSearch('usrSearch');
   if (S.route === 'lms' && curTab('lms','courses') === 'gradebook') recalcGB();
   if (S.route.startsWith('admissions')) bindKanban();
@@ -1181,24 +1545,12 @@ function moveApp(id, stage) {
 
 /* ---------- Overlays ---------- */
 const scrim = document.getElementById('scrim'), drawer = document.getElementById('drawer'), modal = document.getElementById('modal');
-function openDrawer(html) { drawer.innerHTML = html; drawer.classList.add('on'); scrim.classList.add('on'); drawer.setAttribute('aria-hidden','false'); }
+function openDrawer(html, cls = '') { drawer.className = 'drawer ' + cls; drawer.innerHTML = html; drawer.classList.add('on'); scrim.classList.add('on'); drawer.setAttribute('aria-hidden','false'); }
 function openModal(html) { modal.innerHTML = html; modal.classList.add('on'); scrim.classList.add('on'); setTimeout(() => modal.querySelector('input,select,textarea')?.focus(), 50); }
 function closeAll() { [drawer, modal, scrim, document.getElementById('cmdk'), document.getElementById('notif')].forEach(e => e.classList.remove('on')); drawer.setAttribute('aria-hidden','true'); }
 const head = (title, sub='') => `<div class="drawer-h"><div style="flex:1;min-width:0"><h2>${title}</h2>${sub?`<div class="muted" style="font-size:12.5px">${sub}</div>`:''}</div><button class="iconbtn" data-act="closeAll" aria-label="Close">${ic('x',16)}</button></div>`;
 function toast(msg) { const t = document.createElement('div'); t.className = 'toast'; t.innerHTML = `${ic('check',16)}${esc(msg)}`; const box = document.getElementById('toasts'); box.appendChild(t); while (box.children.length > 2) box.firstChild.remove(); setTimeout(() => t.remove(), 2800); }
 
-function appDrawer(id) {
-  const a = apps.find(x => x.id === id); const si = STAGES.findIndex(s => s.k === a.stage);
-  const docs = ['Birth certificate','Previous school report','Passport photo','Immunisation record','Parent NIC / passport'];
-  openDrawer(`${head(a.name, `${a.id} · Applying for Grade ${a.grade} · January 2027`)}<div class="drawer-b">
-    <div class="steps" style="padding:0">${STAGES.map((s, i) => `<div class="${i<=si?'on':''}">${s.n}</div>`).join('')}</div>
-    <dl class="kv"><dt>Parent</dt><dd>${a.parent}</dd><dt>Source</dt><dd>${a.source}</dd><dt>Priority</dt><dd style="text-transform:capitalize">${a.prio}</dd><dt>In stage for</dt><dd>${a.days} days</dd>
-    <dt>Move to stage</dt><dd><select class="input" id="moveStage">${STAGES.map(s => `<option value="${s.k}" ${s.k===a.stage?'selected':''}>${s.n}</option>`).join('')}</select></dd></dl>
-    <div><h3 style="margin-bottom:6px">Documents (${a.docs}/5)</h3>${docs.map((d, i) => `<label class="checkrow"><input type="checkbox" ${i<a.docs?'checked':''}> ${d}<span style="flex:1"></span>${i<a.docs?'<span class="pill t-green plain">Verified</span>':'<span class="pill t-amber plain">Missing</span>'}</label>`).join('')}</div>
-    <div><h3 style="margin-bottom:10px">Activity</h3><div class="timeline"><div><b>Assessment booked</b> for 9 Oct, 09:00<small>Dilini R. · 2 days ago</small></div><div><b>Application fee paid</b> Rs 5,000 via iParent<small>System · 5 days ago</small></div><div><b>Enquiry received</b> from ${a.source.toLowerCase()}<small>${a.days + 6} days ago</small></div></div></div>
-  </div><div class="drawer-f"><button class="btn" data-act="toast" data-msg="Email sent to ${esc(a.parent)}">${ic('mail',16)}Email parent</button><button class="btn primary" data-act="advance" data-id="${a.id}">${si<5?'Move to '+STAGES[si+1].n:'Enrolled ✓'}</button></div>`);
-  document.getElementById('moveStage').onchange = e => { closeAll(); moveApp(a.id, e.target.value); };
-}
 function wizard() {
   const st = S.wizardStep, w = S.wizard;
   const steps = ['Student','Parent / guardian','Programme'];
@@ -1214,7 +1566,7 @@ function invDrawer(no) {
   const v = invoices.find(x => x.no === no); const lines = [FEE_ITEMS[0], FEE_ITEMS[1], ...(v.amt > 310000 ? [FEE_ITEMS[2]] : [])];
   openDrawer(`${head(v.no, `${v.student.name} · ${v.student.cls}`)}<div class="drawer-b">
     <div style="display:flex;gap:10px;align-items:center">${statusPill(v.status)}<span class="muted">Due ${v.due}</span></div>
-    <div class="inv"><div style="display:flex;justify-content:space-between;margin-bottom:12px"><div><b>Colombo International School</b><div class="muted" style="font-size:12px">42 Ward Place, Colombo 07</div></div><div style="text-align:right;font-size:12px" class="muted">Bill to<br><b style="color:var(--ink)">${v.student.guardian}</b></div></div>
+    <div class="inv"><div style="display:flex;justify-content:space-between;margin-bottom:12px"><div><b>${SCHOOL.name}</b><div class="muted" style="font-size:12px">42 Ward Place, Colombo 07</div></div><div style="text-align:right;font-size:12px" class="muted">Bill to<br><b style="color:var(--ink)">${v.student.guardian}</b></div></div>
     <table><tbody>${lines.map(([n, a]) => `<tr><td>${n}</td><td class="r num">${money(a)}</td></tr>`).join('')}<tr class="tot"><td>Total</td><td class="r num">${money(v.amt)}</td></tr><tr><td class="muted">Paid</td><td class="r num muted">− ${money(v.paid)}</td></tr><tr class="tot"><td>Balance due</td><td class="r num">${money(v.amt - v.paid)}</td></tr></tbody></table></div>
     <div><h3 style="margin-bottom:10px">History</h3><div class="timeline"><div><b>Invoice viewed</b> in iParent app<small>${v.student.guardian} · 3 days ago</small></div><div><b>Sent</b> by email and push notification<small>System · 12 Sep</small></div><div><b>Created</b> in Term 1 billing run<small>Finance office · 10 Sep</small></div></div></div>
   </div><div class="drawer-f"><button class="btn" data-act="remind" data-name="${esc(v.student.guardian)}">${ic('send',16)}Send reminder</button>${v.amt > v.paid ? `<button class="btn primary" data-act="recordPayment" data-no="${v.no}">${ic('fee',16)}Record payment</button>` : ''}</div>`);
@@ -1276,8 +1628,23 @@ const ACT = {
   task: el => { S.tasks[+el.dataset.i].done = el.checked; el.closest('.task').classList.toggle('done', el.checked); document.getElementById('taskCount').textContent = S.tasks.filter(t => !t.done).length + ' open'; if (el.checked) toast('Task completed'); },
   toast: el => toast(el.dataset.msg),
   remind: el => toast(`Reminder sent to ${el.dataset.name} by push and email`),
-  openApp: el => appDrawer(el.dataset.id),
-  advance: el => { const a = apps.find(x => x.id === el.dataset.id); const i = STAGES.findIndex(s => s.k === a.stage); closeAll(); if (i < 5) moveApp(a.id, STAGES[i+1].k); },
+  openApp: el => { S.appTab = 'overview'; appDrawer(el.dataset.id); },
+  appTab: el => { S.appTab = el.dataset.v; appDrawer(el.dataset.id); },
+  appStage: el => { const a = apps.find(x => x.id === el.dataset.id); if (a.stage === el.dataset.v) return; moveApp(a.id, el.dataset.v); appDrawer(a.id); },
+  appDoc: el => { const a = apps.find(x => x.id === el.dataset.id), k = el.dataset.k, v = el.dataset.v;
+    if (v === 'request') { toast(k === 'all' ? `Asked ${a.parent} for ${a.x.docs.filter(d => d === 'missing').length} missing documents in the parent app` : `Asked ${a.parent} for the ${APP_DOCS[+k][0].toLowerCase()}`); return; }
+    a.x.docs[+k] = 'verified'; a.docs = a.x.docs.filter(d => d === 'verified').length; appDrawer(a.id); toast(`${APP_DOCS[+k][0]} verified`); },
+  appRec: el => { const a = apps.find(x => x.id === el.dataset.id); a.x.rec = el.dataset.v; appDrawer(a.id); toast({offer:'Recommended: offer a place', wait:'Recommended: waitlist', decline:'Recommended: decline'}[el.dataset.v]); },
+  appOffer: el => { const a = apps.find(x => x.id === el.dataset.id); if (a.stage !== 'offer') moveApp(a.id, 'offer'); appDrawer(a.id); toast(`Offer letter sent to ${a.parent} by email and the parent app`); },
+  appDecline: el => { const a = apps.find(x => x.id === el.dataset.id); if (!el.dataset.sure) { el.dataset.sure = 1; el.textContent = 'Click again to decline'; return; } apps.splice(apps.indexOf(a), 1); closeAll(); route(); toast(`${a.name}’s application declined. The family has been told.`); },
+  ttLesson: el => { if (S.ttEdit) return; ttLessonDrawer(+el.dataset.d, +el.dataset.p); },
+  ttEdit: () => { S.ttEdit = !S.ttEdit; route(); if (!S.ttEdit) toast('Timetable saved. Teachers and parents have been told about the changes.'); },
+  ttEditFrom: () => { closeAll(); S.ttEdit = true; route(); },
+  ttClass: el => { S.ttClass = el.dataset.v; route(); },
+  ttWeek: el => { S.ttWeek = el.dataset.v; route(); },
+  ttCover: el => { S.ttSub = S.ttSub || {}; S.ttSub[el.dataset.k] = el.dataset.v; closeAll(); route(); toast(`${el.dataset.v} will cover this lesson`); },
+  signOut: () => authSignOut(schoolAuth()),
+  advance: el => { const a = apps.find(x => x.id === el.dataset.id); const i = STAGES.findIndex(s => s.k === a.stage); if (i < 5) { moveApp(a.id, STAGES[i+1].k); appDrawer(a.id); } },
   openStudent: (el, e) => { if (e && e.target.matches('input')) return; S.tab.stu = 'overview'; location.hash = 'student-' + el.dataset.id; },
   selAll: el => document.querySelectorAll('.rowsel').forEach(c => c.checked = el.checked),
   openLead: el => { const l = leads[+el.dataset.id]; openDrawer(`${head(l.name, `Lead · interested in Grade ${l.grade}`)}<div class="drawer-b"><dl class="kv"><dt>Source</dt><dd>${l.source}</dd><dt>Owner</dt><dd>${l.owner}</dd><dt>Lead score</dt><dd>${l.score} / 100</dd><dt>Status</dt><dd>${statusPill(l.status)}</dd></dl>
@@ -1348,12 +1715,13 @@ document.addEventListener('submit', e => {
   if (f === 'reply') { const i = document.getElementById('replyInput'), v = i.value.trim(); if (!v) return; const th = threads.find(t => t.id === S.selectedThread); th.msgs.push({me:true, t:v, at:'Now'}); route(); toast('Reply sent to the parent’s iParent app'); }
   if (f === 'wizard') ACT.wNext();
   if (f === 'lead') ACT.saveLead();
+  if (f === 'appNote') { const a = apps.find(x => x.id === e.target.dataset.id), v = document.getElementById('appNoteIn').value.trim(); if (!v) { toast('Write a note first'); return; } a.x.notes.unshift({by:'Prishan Maduka', t:v, at:'Just now'}); appDrawer(a.id); toast('Note added'); }
   if (f === 'staffInvite') ACT.sendStaffInvite();
 });
 document.addEventListener('keydown', e => {
   if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); openCmdk(); }
   if (e.key === 'Escape') closeAll();
-  if (e.key === 'Enter' && e.target.matches('.kcard,.scard,.search')) e.target.click();
+  if (e.key === 'Enter' && e.target.matches('.kcard,.scard,.search,.ls')) e.target.click();
 });
 /* tooltip */
 const tip = document.getElementById('tip');
@@ -1368,8 +1736,11 @@ window.addEventListener('hashchange', () => { if (UK.user) delete UK.user._draft
 (() => { let imp = null; try { imp = JSON.parse(sessionStorage.getItem('quad-impersonate') || 'null'); } catch (e) {}
   if (!imp) return;
   document.getElementById('supportBar').innerHTML = `<div class="support" role="status">${ic('eye',16)}<span>Support view: you’re in <b>${esc(imp.name)}</b> as ${esc(imp.by)} from Quad. Everything you do here is logged in the school’s audit log.</span><button data-act="exitSupport">Exit to platform</button></div>`;
-  document.querySelector('.brand small').textContent = imp.name; })();
+ })();
+applySchool();
+window.addEventListener('storage', e => { if (e.key === 'quad-school') { applySchool(); route(); } });
 themeIcon(); route();
+(() => { let imp = null; try { imp = sessionStorage.getItem('quad-impersonate'); } catch (e) {} if (!imp && !authSignedIn('school')) authOpen(schoolAuth()); })();
 </script>
 </body>
 </html>

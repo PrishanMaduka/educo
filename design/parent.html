@@ -314,6 +314,66 @@ input[type=range]{width:100%;accent-color:var(--brand)}
 .float{position:absolute;font:700 22px var(--f-display);color:#fff;animation:floatUp 1.3s ease-out forwards;pointer-events:none;z-index:4;right:22px;top:56px}
 @keyframes floatUp{to{transform:translateY(-46px);opacity:0}}
 .panel ul{margin:0;padding-left:18px;color:var(--ink-2);font-size:13.5px;display:flex;flex-direction:column;gap:4px}
+
+/* School branding */
+.hero:not([style]){background:linear-gradient(140deg,var(--brand) 0%,color-mix(in srgb,var(--brand) 72%,#000) 60%,color-mix(in srgb,var(--brand) 50%,#12A594) 130%)}
+.lock{background:radial-gradient(90% 60% at 0% 0%,color-mix(in srgb,var(--brand) 80%,#fff),transparent 60%),linear-gradient(165deg,color-mix(in srgb,var(--brand) 70%,#000) 0%,var(--brand) 70%,color-mix(in srgb,var(--brand) 55%,#12A594) 140%)!important}
+.lock .logo.school{background:#fff;color:var(--brand);overflow:hidden;font:800 26px var(--f-display);box-shadow:0 18px 40px -14px rgba(0,0,0,.5)}
+.lock .logo.school img{width:100%;height:100%;object-fit:contain;padding:8px}
+.push .logo{background:var(--brand)!important;overflow:hidden;font-size:12px!important}
+.push .logo.img{background:#fff!important;border:1px solid var(--line)}
+.push .logo img{width:100%;height:100%;object-fit:contain;padding:3px}
+.brand-presets{display:flex;flex-direction:column;gap:8px}
+.brand-presets button{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;border:1px solid var(--line);background:var(--surface-2);font-weight:600;font-size:13px;text-align:left}
+.brand-presets button i{width:14px;height:14px;border-radius:50%;flex:none}
+.brand-presets button.on{border-color:var(--ink);background:var(--surface)}
+/* Sign-in flow */
+[hidden]{display:none!important}
+.signin{position:absolute;inset:0;z-index:62;color:#fff;overflow:hidden;background:radial-gradient(90% 60% at 0% 0%,color-mix(in srgb,var(--brand) 80%,#fff),transparent 60%),radial-gradient(80% 60% at 100% 100%,color-mix(in srgb,var(--brand) 40%,#12A594),transparent 60%),linear-gradient(170deg,color-mix(in srgb,var(--brand) 75%,#000),#0B1222);transition:opacity .45s,transform .45s}
+.signin.leave{opacity:0;transform:scale(1.04)}
+.si{position:absolute;inset:0;display:flex;flex-direction:column;animation:siIn .35s ease}
+@keyframes siIn{from{opacity:0;transform:translateY(12px)}}
+.si-top{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:70px 30px 0;gap:14px}
+.si-logo{width:108px;height:108px;border-radius:32px;background:#fff;display:grid;place-items:center;overflow:hidden;color:var(--brand);font:800 32px var(--f-display);box-shadow:0 22px 50px -16px rgba(0,0,0,.55);animation:siFloat 5s ease-in-out infinite}
+@keyframes siFloat{50%{transform:translateY(-6px)}}
+.si-logo img{width:100%;height:100%;object-fit:contain;padding:10px}
+.si-top h1{font:700 27px/1.15 var(--f-display);margin:10px 0 0;letter-spacing:-.02em}
+.si-top p{opacity:.85;margin:0;font-size:15px;max-width:28ch}
+.si-dots{display:flex;gap:6px;margin-top:6px}.si-dots i{width:6px;height:6px;border-radius:3px;background:rgba(255,255,255,.4)}.si-dots i:first-child{width:18px;background:#fff}
+.si-bottom{padding:24px 24px 46px;display:flex;flex-direction:column;gap:10px;text-align:center}
+.si-bottom small{opacity:.7;font-size:12px;margin-top:6px}
+.si-btn{height:52px;border-radius:16px;background:#fff;color:#0B1222;font-weight:700;font-size:15.5px;border:0;display:flex;align-items:center;justify-content:center;gap:8px;width:100%}
+.si-btn.ghost{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.3)}
+.si-btn.solid{background:var(--brand);color:#fff}
+.si-btn.plain{background:transparent;color:var(--ink-2)}
+.si-btn:disabled{opacity:.6}
+.si-back{position:absolute;top:60px;left:16px;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.18);color:#fff;display:grid;place-items:center;z-index:2}
+.si-sheet{position:absolute;left:0;right:0;bottom:0;top:128px;background:var(--surface);color:var(--ink);border-radius:30px 30px 0 0;padding:48px 22px 30px;display:flex;flex-direction:column;gap:14px;animation:sheetUp .45s cubic-bezier(.2,.8,.2,1)}
+@keyframes sheetUp{from{transform:translateY(45%)}}
+.si-mini{position:absolute;top:-32px;left:22px;width:64px;height:64px;border-radius:20px;background:#fff;display:grid;place-items:center;overflow:hidden;color:var(--brand);font:800 18px var(--f-display);box-shadow:0 12px 30px -10px rgba(0,0,0,.4);border:1px solid var(--line)}
+.si-mini img{width:100%;height:100%;object-fit:contain;padding:6px}
+.si-sheet h2{font:700 25px var(--f-display);margin:0;letter-spacing:-.02em}
+.si-sheet p{margin:0;color:var(--ink-3);font-size:14px}
+.si-sheet form{display:flex;flex-direction:column;gap:12px;margin-top:6px}
+.si-phone{display:grid;grid-template-columns:100px 1fr;gap:8px}
+.si-phone .input{font-size:16px}
+.si-resend{font-size:13.5px;color:var(--ink-3);text-align:center;margin:0}
+.si-hint{font-size:12px;color:var(--ink-3);background:var(--surface-2);border-radius:10px;padding:8px 10px;text-align:center;margin-top:auto}
+.si-done{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:14px;padding:40px 28px;background:var(--surface);color:var(--ink)}
+.si-check{width:96px;height:96px;border-radius:50%;background:var(--good);color:#fff;display:grid;place-items:center;animation:pop .45s cubic-bezier(.2,1.6,.4,1)}
+.si-face{width:100px;height:100px;border-radius:30px;background:var(--brand-soft);color:var(--brand);display:grid;place-items:center;position:relative;overflow:hidden}
+.si-face::after{content:"";position:absolute;left:10%;right:10%;height:2px;background:var(--brand);box-shadow:0 0 12px var(--brand);animation:scanLine 1.8s ease-in-out infinite}
+@keyframes scanLine{0%,100%{top:18%}50%{top:82%}}
+.si-done h2{font:700 25px var(--f-display);margin:0}.si-done p{margin:0;color:var(--ink-3);max-width:30ch}
+.si-kids{display:flex;gap:8px;justify-content:center}
+.linkbtn{background:none;border:0;color:var(--brand);font-weight:600;font-size:13.5px;padding:0;cursor:pointer;align-self:center}
+.err-msg{color:var(--bad);font-size:13px}
+.err-msg:empty{display:none}
+.otp{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}
+.otp input{height:56px;text-align:center;font:700 22px var(--f-display);border:1.5px solid var(--line-strong);border-radius:14px;background:var(--surface-2);color:var(--ink);width:100%;min-width:0}
+.otp input:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 4px var(--brand-soft)}
+.otp.shake{animation:shake .35s}@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+@media (max-width:520px){.si-back{top:16px}.si-sheet{top:84px}.si-top{padding-top:40px}}
 @media (max-width:520px){
   .stage{padding:0;display:block}
   .panel{display:none}
@@ -338,15 +398,17 @@ input[type=range]{width:100%;accent-color:var(--brand)}
     <div class="sheet" id="sheet" role="dialog" aria-modal="true"></div>
     <button class="push" id="push" data-act="openPush"></button>
     <div class="ptr" id="ptr" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-3-6.7L21 8M21 3v5h-5"/></svg></div>
+    <div class="signin" id="signin" hidden></div>
     <div class="sv" id="sv" role="dialog" aria-label="School stories"></div>
     <div class="lock" id="lock">
-      <div><div class="logo"><svg viewBox="0 0 64 64" width="72%" height="72%" aria-hidden="true"><g fill="none" stroke-width="9"><path d="M20.82 15.42A20 20 0 0 1 43.18 15.42" stroke="#FFFFFF"/><path d="M48.58 20.82A20 20 0 0 1 48.58 43.18" stroke="#C9D8FF"/><path d="M15.42 43.18A20 20 0 0 1 15.42 20.82" stroke="#E3EBFF"/><path d="M43.18 48.58A20 20 0 0 1 20.82 48.58" stroke="#FFFFFF"/><path d="M39.35 39.35L54.91 54.91" stroke="#FFFFFF" stroke-linecap="round"/></g><circle cx="32" cy="32" r="4.5" fill="#FFC56B"/></svg></div><h1>Quad Parent</h1><p>Colombo International School</p></div>
+      <div id="lockBrand"></div>
       <div><button class="faceid" id="faceid" data-act="unlock" aria-label="Unlock with Face ID"><svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 8V5a2 2 0 0 1 2-2h3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M8 21H5a2 2 0 0 1-2-2v-3M9 9v1M15 9v1M12 9v4h-1M9 16c1.5 1 4.5 1 6 0"/></svg></button><p>Tap to unlock with Face ID</p></div>
     </div>
   </div></div>
 
   <aside class="panel" aria-label="Prototype controls">
     <div><h1>Quad Parent</h1><p>Interactive prototype of the parent mobile app. Tap through it like a real phone. Use these controls to simulate what the school sends.</p></div>
+    <div class="group"><b>School branding</b><p style="margin:0;font-size:13px">Each school's logo and colours come from the platform console. Try another school:</p><div class="brand-presets" id="brandPresets"></div></div>
     <div class="group"><b>Simulate a push notification</b>
       <button class="pbtn" data-act="sim" data-k="absence"><span>Absence alert · Kavindu not in register</span>→</button>
       <button class="pbtn" data-act="sim" data-k="reward"><span>Reward · Amaya earned 5 house points</span>→</button>
@@ -362,7 +424,8 @@ input[type=range]{width:100%;accent-color:var(--brand)}
       <button class="pbtn" data-act="jump" data-to="attendance"><span>Attendance calendar</span>→</button>
       <button class="pbtn" data-act="jump" data-to="results"><span>Results & reports</span>→</button>
       <button class="pbtn" data-act="jump" data-to="absence"><span>Report an absence</span>→</button>
-      <button class="pbtn" data-act="lockApp"><span>Lock the app</span>↺</button>
+      <button class="pbtn" data-act="paSignOut"><span>Show the sign-in flow</span>↺</button>
+      <button class="pbtn" data-act="lockApp"><span>Lock the app (Face ID)</span>↺</button>
     </div>
     <div class="group"><b>Try these gestures</b><ul>
       <li>Swipe the blue card on Home to switch child</li>
@@ -405,6 +468,21 @@ const P = {
 const ic = (n, s=20, w=2) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${P[n]||''}</svg>`;
 const money = n => 'Rs ' + Math.round(n).toLocaleString('en-US');
 const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+/* ---------- School branding (set in the platform console, kept in this browser) ---------- */
+const SCHOOL_DEFAULT = {name:'Colombo International School', short:'CIS', sub:'colombo-intl', color:'#2F6FED', logo:null};
+let SCHOOL = SCHOOL_DEFAULT;
+function loadSchoolP() { try { const x = JSON.parse(localStorage.getItem('quad-school') || 'null'); SCHOOL = x && x.name ? {...SCHOOL_DEFAULT, ...x} : SCHOOL_DEFAULT; } catch (e) { SCHOOL = SCHOOL_DEFAULT; } if (!SCHOOL.short) SCHOOL.short = SCHOOL.name.replace(/[^A-Za-z ]/g, '').split(' ').filter(Boolean).map(w => w[0]).slice(0, 3).join('').toUpperCase(); }
+loadSchoolP();
+const schoolMarkP = () => SCHOOL.logo ? `<img src="${SCHOOL.logo}" alt="${esc(SCHOOL.name)} logo">` : `<span>${esc(SCHOOL.short)}</span>`;
+const BRAND_DEMOS = [['Colombo International School','CIS','colombo-intl','#2F6FED'],['Kandy Hill Academy','KHA','kandyhill','#12A594'],['Dubai Lakes British School','DLBS','dubailakes','#8B5CF6'],['Negombo Bay College','NBC','negombobay','#BE185D']];
+function applySchoolP() {
+  loadSchoolP(); const c = SCHOOL.color, r = document.documentElement.style;
+  r.setProperty('--brand', c); r.setProperty('--brand-ink', '#fff'); r.setProperty('--brand-soft', `color-mix(in srgb, ${c} 13%, var(--surface))`);
+  document.title = `${SCHOOL.short} Parent`;
+  document.getElementById('lockBrand').innerHTML = `<div class="logo school">${schoolMarkP()}</div><h1>${esc(SCHOOL.name)}</h1><p>${esc(SCHOOL.short)} Parent · powered by Quad</p>`;
+  document.getElementById('brandPresets').innerHTML = BRAND_DEMOS.map(([n, sh, sub, col]) => `<button class="${SCHOOL.name === n ? 'on' : ''}" data-act="brandDemo" data-v="${sub}"><i style="background:${col}"></i>${n}</button>`).join('') + (BRAND_DEMOS.some(d => d[0] === SCHOOL.name) ? '' : `<button class="on"><i style="background:${c}"></i>${esc(SCHOOL.name)} <span style="color:var(--ink-3);font-weight:500">· from the console</span></button>`);
+  if (!document.getElementById('signin').hidden) paRender();
+}
 
 /* ---------- Sample family ---------- */
 const KIDS = [
@@ -425,7 +503,7 @@ const S = {
   trips:[{t:'Pinnawala Elephant Orphanage', k:0, d:'Thu 23 Oct', cost:6500, consent:false},{t:'Science Olympiad – Kandy', k:1, d:'Sat 8 Nov', cost:12000, consent:true}],
   threads:[
     {id:1, from:'Ms. Nadeesha Jayasinghe', role:'Class teacher · Amaya', unread:1, msgs:[{me:false,t:'Good morning! Amaya did brilliantly in today’s spelling test. Please keep up the reading at home.',at:'08:10'}]},
-    {id:2, from:'Finance Office', role:'Colombo International School', unread:0, msgs:[{me:false,t:'Your payment of Rs 350,000 for Kavindu has been received. Thank you.',at:'Mon'}]},
+    {id:2, from:'Finance Office', role:SCHOOL.name, unread:0, msgs:[{me:false,t:'Your payment of Rs 350,000 for Kavindu has been received. Thank you.',at:'Mon'}]},
     {id:3, from:'Mr. Ruwan Mendis', role:'Form tutor · Kavindu', unread:0, msgs:[{me:false,t:'Reminder: the Science Olympiad consent form is due Friday.',at:'Sun'},{me:true,t:'Thank you, signed in the app just now.',at:'Sun'}]}
   ],
   subs:{absence:true, rewards:true, finance:true, news:true, sms:false}, faceid:true, notifs:3,
@@ -710,8 +788,8 @@ SCR.more = () => ({ big:'More', body: `
     <div class="row"><div class="ico t-violet">${ic('lock',19)}</div><div class="m"><b>Face ID</b><small>Unlock the app with Face ID</small></div><button class="toggle ${S.faceid?'on':''}" data-act="faceid" role="switch" aria-checked="${S.faceid}" aria-label="Face ID"></button></div>
     <div class="row"><div class="ico t-blue">${ic('moon',19)}</div><div class="m"><b>Dark mode</b><small>Follows your phone unless set here</small></div><button class="toggle ${isDark()?'on':''}" data-act="theme" role="switch" aria-checked="${isDark()}" aria-label="Dark mode"></button></div>
     ${row('globe','t-green','Language','English · සිංහල · தமிழ்')}</div>
-  <button class="btn sec" data-act="lockApp" style="color:var(--bad)">${ic('out',18)}Sign out</button>
-  <p style="text-align:center;font-size:12px;color:var(--ink-3);margin:0">Quad Parent 1.0 · Colombo International School</p>` });
+  <button class="btn sec" data-act="paSignOut" style="color:var(--bad)">${ic('out',18)}Sign out</button>
+  <p style="text-align:center;font-size:12px;color:var(--ink-3);margin:0">${esc(SCHOOL.short)} Parent 1.0 · ${esc(SCHOOL.name)} · powered by Quad</p>` });
 
 SCR.calendar = () => ({ title:'School calendar', body: `<div class="card">${[['06','Oct','Report absence deadline','Term 1 attendance review'],['08','Oct','Parent–teacher meetings','8–10 Oct · 3:30–6:00 pm'],['10','Oct','Term 1 fees due','Pay in the app'],['18','Oct','Open day','All day'],['23','Oct','Grade 4 Pinnawala trip','Consent required'],['31','Oct','Deepavali holiday','School closed'],['08','Nov','Science Olympiad','Kandy · Grade 9'],['12','Dec','Term 1 ends','Reports published 15 Dec']].map(([d,m,t,s]) => `<div class="row event"><div class="date"><b>${d}</b><small>${m}</small></div><div class="m"><b>${t}</b><small>${s}</small></div><button data-act="toast" data-msg="Added to your phone calendar" aria-label="Add to calendar" style="color:var(--brand)">${ic('plus',20)}</button></div>`).join('')}</div>` });
 SCR.news = () => ({ title:'News', body: NEWS.map((n, i) => `<button class="card news" data-act="push" data-to="article" data-i="${i}" style="text-align:left;width:100%"><div class="img" style="background:${n.bg};height:140px">${n.tag}</div><div class="tx"><b>${n.t}</b><small>${n.d}</small></div></button>`).join('') });
@@ -790,11 +868,11 @@ const PUSHES = {
 let pushGo = null, pushT;
 function showPush(t, m, go) {
   const el = document.getElementById('push'); pushGo = go;
-  el.innerHTML = `<div class="logo"><svg viewBox="0 0 64 64" width="72%" height="72%" aria-hidden="true"><g fill="none" stroke-width="9"><path d="M20.82 15.42A20 20 0 0 1 43.18 15.42" stroke="#FFFFFF"/><path d="M48.58 20.82A20 20 0 0 1 48.58 43.18" stroke="#C9D8FF"/><path d="M15.42 43.18A20 20 0 0 1 15.42 20.82" stroke="#E3EBFF"/><path d="M43.18 48.58A20 20 0 0 1 20.82 48.58" stroke="#FFFFFF"/><path d="M39.35 39.35L54.91 54.91" stroke="#FFFFFF" stroke-linecap="round"/></g><circle cx="32" cy="32" r="4.5" fill="#FFC56B"/></svg></div><div class="m"><b>${t}<small>now</small></b>${m}</div>`;
+  el.innerHTML = `<div class="logo ${SCHOOL.logo ? 'img' : ''}">${schoolMarkP()}</div><div class="m"><b>${t}<small>now</small></b>${m}</div>`;
   el.style.transform = ''; el.classList.remove('on'); void el.offsetWidth; el.classList.add('on'); clearTimeout(pushT); pushT = setTimeout(() => el.classList.remove('on'), 5500);
 }
 function simulate(k) {
-  if (!document.getElementById('lock').classList.contains('off')) unlock();
+  if (!document.getElementById('signin').hidden) paFinish(); else if (!document.getElementById('lock').classList.contains('off')) unlock();
   const p = PUSHES[k];
   if (k === 'message') { const t = S.threads[0]; t.unread++; t.msgs.push({me:false, t:p.m, at:'Now'}); }
   showPush(p.t, p.m, p.go); render();
@@ -894,7 +972,7 @@ function drawStory() {
   const st = STORIES[SV.i], sl = st.slides[SV.s]; st.seen = true;
   svEl.innerHTML = `<div class="slide" style="background:${sl.bg}"><div class="big-ic">${ic(st.icon,48,1.8)}</div><h2>${sl.t}</h2><p>${sl.p}</p></div>
   <div class="bars">${st.slides.map((_, j) => `<i><b style="width:${j < SV.s ? 100 : 0}%"></b></i>`).join('')}</div>
-  <div class="who"><div class="lg">${ic('star',16)}</div><div>Colombo International School<br><small>${st.name} · ${2 + SV.i}h ago</small></div><button class="x" data-act="closeStory" aria-label="Close stories">${ic('x',24)}</button></div>
+  <div class="who"><div class="lg">${ic('star',16)}</div><div>${esc(SCHOOL.name)}<br><small>${st.name} · ${2 + SV.i}h ago</small></div><button class="x" data-act="closeStory" aria-label="Close stories">${ic('x',24)}</button></div>
   <form class="foot" id="svForm"><input id="svIn" placeholder="Reply to the school" autocomplete="off" aria-label="Reply"><button type="button" class="heart ${st.liked?'on':''}" data-act="heart" aria-label="Like">${ic(st.liked?'heartF':'heart',26)}</button></form>`;
   const f = document.getElementById('svForm'), inp = document.getElementById('svIn');
   inp.onfocus = () => SV && (SV.paused = true); inp.onblur = () => SV && (SV.paused = false);
@@ -921,6 +999,56 @@ svEl.addEventListener('pointerup', e => { if (!SV || !svDown || e.target.closest
 drag(svEl, {axis:'y', when: e => !e.target.closest('button,input,form'), move: (dx, dy) => { svEl.classList.add('dragging'); svEl.style.transform = `translateY(${Math.max(0, dy)}px) scale(${1 - Math.max(0, dy) / 2000})`; },
   end: (dx, dy) => { svEl.classList.remove('dragging'); svDown = 0; if (SV) SV.paused = false; if (dy > 110) closeStory(); else svEl.style.transform = ''; } });
 
+
+/* ---------- Parent sign-in: welcome, phone or email, one-time code, Face ID ---------- */
+const PA = {step:'welcome', phone:'77 412 8890', email:false, left:30, timer:null};
+const FACE_SVG = '<svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 8V5a2 2 0 0 1 2-2h3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M8 21H5a2 2 0 0 1-2-2v-3M9 9v1M15 9v1M12 9v4h-1M9 16c1.5 1 4.5 1 6 0"/></svg>';
+function paSignedIn() { try { return sessionStorage.getItem('quad-auth-parent') === '1'; } catch (e) { return true; } }
+function paRender() {
+  const el = document.getElementById('signin'), st = PA.step, mark = schoolMarkP(); let h = '';
+  clearInterval(PA.timer);
+  if (st === 'welcome') h = `<div class="si-top"><div class="si-logo">${mark}</div><h1>${esc(SCHOOL.name)}</h1><p>Attendance, results, fees and messages for your children, in one app.</p><div class="si-dots"><i></i><i></i><i></i></div></div>
+    <div class="si-bottom"><button class="si-btn" data-act="paGo" data-v="phone">Sign in</button><button class="si-btn ghost" data-act="paInvite">I have an invite code</button><small>${esc(SCHOOL.short)} Parent · powered by Quad</small></div>`;
+  else if (st === 'phone') h = `<button class="si-back" data-act="paGo" data-v="welcome" aria-label="Back">${ic('back',20)}</button><div class="si-sheet"><div class="si-mini">${mark}</div>
+    <h2>${PA.email ? 'Sign in with email' : 'Sign in with your phone'}</h2><p>We’ll send you a 6-digit code. Use the ${PA.email ? 'email address' : 'mobile number'} the school has on file for you.</p>
+    <form id="paForm" novalidate>${PA.email ? `<input class="input" id="paEmail" type="email" value="dilhani.perera@example.lk" aria-label="Email address" style="font-size:16px">`
+      : `<div class="si-phone"><select class="input" aria-label="Country code"><option>LK +94</option><option>MV +960</option><option>AE +971</option><option>IN +91</option><option>SG +65</option></select><input class="input" id="paPhone" inputmode="tel" autocomplete="tel-national" value="${PA.phone}" aria-label="Mobile number"></div>`}
+      <div class="err-msg" id="paErr" role="alert"></div><button class="si-btn solid">Send code</button></form>
+    <button class="linkbtn" data-act="paMode">${PA.email ? 'Use my phone number instead' : 'Use email instead'}</button></div>`;
+  else if (st === 'otp') h = `<button class="si-back" data-act="paGo" data-v="phone" aria-label="Back">${ic('back',20)}</button><div class="si-sheet"><div class="si-mini">${mark}</div>
+    <h2>Enter the code</h2><p>We sent it to ${PA.email ? 'dilhani.perera@example.lk' : '+94 ' + PA.phone.replace(/\d(?=(?:\D*\d){4})/g, '•')}. It works for 10 minutes.</p>
+    <div class="otp" id="paOtp">${Array.from({length:6}, (_, i) => `<input inputmode="numeric" autocomplete="one-time-code" maxlength="1" aria-label="Digit ${i + 1}">`).join('')}</div>
+    <div class="err-msg" id="paErr" role="alert"></div><p class="si-resend" id="paResend"></p><div class="si-hint">Prototype: any 6 digits work.</div></div>`;
+  else if (st === 'verify') h = `<div class="si-done"><div class="si-check">${ic('check',44,3)}</div><h2>You’re signed in</h2><p>Welcome, Dilhani. We found 2 children at ${esc(SCHOOL.name)}.</p><div class="si-kids">${KIDS.map(k => av(k.name, k.color)).join('')}</div></div>`;
+  else if (st === 'face') h = `<div class="si-done"><div class="si-face">${FACE_SVG}</div><h2>Unlock with Face ID?</h2><p>Next time, just look at your phone to open the app. You can change this later in More.</p><button class="si-btn solid" data-act="paFace" data-v="1">Turn on Face ID</button><button class="si-btn plain" data-act="paFace" data-v="0">Not now</button></div>`;
+  el.innerHTML = `<div class="si">${h}</div>`;
+  const f = document.getElementById('paForm');
+  if (f) f.onsubmit = e => { e.preventDefault(); const err = document.getElementById('paErr');
+    if (PA.email) { const v = document.getElementById('paEmail').value.trim(); if (!/^\S+@\S+\.\S+$/.test(v)) { err.textContent = 'Enter your email address, like name@example.com.'; return; } }
+    else { const v = document.getElementById('paPhone').value, d = v.replace(/\D/g, ''); if (d.length !== 9) { err.textContent = 'Enter your 9-digit mobile number, without the first 0.'; return; } PA.phone = v; }
+    PA.step = 'otp'; paRender(); };
+  const otp = document.getElementById('paOtp');
+  if (otp) {
+    const ins = [...otp.querySelectorAll('input')]; setTimeout(() => ins[0].focus(), 350);
+    const check = () => { if (ins.every(x => x.value)) { ins.forEach(x => x.disabled = true); setTimeout(() => { PA.step = 'verify'; paRender(); setTimeout(() => { PA.step = 'face'; paRender(); }, 1300); }, 450); } };
+    ins.forEach((inp, i) => {
+      inp.oninput = () => { inp.value = inp.value.replace(/\D/g, '').slice(-1); if (inp.value && i < 5) ins[i + 1].focus(); check(); };
+      inp.onkeydown = e => { if (e.key === 'Backspace' && !inp.value && i > 0) ins[i - 1].focus(); };
+      inp.onpaste = e => { const d = ((e.clipboardData && e.clipboardData.getData('text')) || '').replace(/\D/g, '').slice(0, 6); if (!d) return; e.preventDefault(); d.split('').forEach((ch, k) => { if (ins[k]) ins[k].value = ch; }); check(); };
+    });
+    PA.left = 30; const tick = () => { const r = document.getElementById('paResend'); if (!r) return clearInterval(PA.timer); r.innerHTML = PA.left > 0 ? `Didn’t get it? You can resend in 0:${String(PA.left).padStart(2, '0')}` : '<button class="linkbtn" data-act="paResend">Resend the code</button>'; PA.left--; };
+    tick(); PA.timer = setInterval(tick, 1000);
+  }
+}
+function paShow() { const el = document.getElementById('signin'); el.hidden = false; el.classList.remove('leave'); document.getElementById('lock').classList.add('off'); PA.step = 'welcome'; paRender(); }
+function paFinish(face) {
+  clearInterval(PA.timer); if (face !== undefined) S.faceid = face;
+  try { sessionStorage.setItem('quad-auth-parent', '1'); } catch (e) {}
+  const el = document.getElementById('signin'); el.classList.add('leave'); setTimeout(() => { el.hidden = true; el.classList.remove('leave'); el.innerHTML = ''; }, 450);
+  render(); toast(face ? 'Face ID is on' : 'Signed in');
+}
+function paSignOut() { try { sessionStorage.removeItem('quad-auth-parent'); } catch (e) {} closeSheet(); closeStory(); S.tab = 'home'; S.stack = []; render(); paShow(); }
+
 /* ---------- Actions ---------- */
 const ACT = {
   tab: el => { S.tab = el.dataset.t; S.stack = []; render(); },
@@ -940,11 +1068,18 @@ const ACT = {
   theme: () => { const r = document.documentElement; r.dataset.theme = isDark() ? 'light' : 'dark'; try { localStorage.setItem('quad-parent-theme', r.dataset.theme); } catch (e) {} render(); },
   newMsg: () => openSheet(`<h2 style="font:700 20px var(--f-display)">New message</h2><div class="field"><label for="nm_to">To</label><select class="input" id="nm_to">${STAFF.map(s => `<option>${s[0]}</option>`).join('')}</select></div><div class="field"><label for="nm_b">Message</label><textarea class="input" id="nm_b" rows="4" placeholder="Write your message"></textarea></div><button class="btn" data-act="sendNew">${ic('send',18)}Send</button>`),
   sendNew: () => { const to = document.getElementById('nm_to').value, b = document.getElementById('nm_b').value.trim(); if (!b) { toast('Write a message before sending'); return; }
-    const id = S.threads.length + 1; S.threads.unshift({id, from: to, role:'Colombo International School', unread:0, msgs:[{me:true, t:b, at:'Now'}]}); closeSheet(); S.tab = 'inbox'; S.stack = [{to:'thread', p:{id}}]; render('r'); },
-  unlock, lockApp: () => { closeSheet(); document.getElementById('lock').classList.remove('off'); },
+    const id = S.threads.length + 1; S.threads.unshift({id, from: to, role:SCHOOL.name, unread:0, msgs:[{me:true, t:b, at:'Now'}]}); closeSheet(); S.tab = 'inbox'; S.stack = [{to:'thread', p:{id}}]; render('r'); },
+  unlock, lockApp: () => { closeSheet(); if (!document.getElementById('signin').hidden) return; document.getElementById('lock').classList.remove('off'); },
+  paGo: el => { PA.step = el.dataset.v; paRender(); },
+  paMode: () => { PA.email = !PA.email; paRender(); },
+  paInvite: () => { toast('Your invite code fills in your details. Then you sign in as usual.'); PA.step = 'phone'; paRender(); },
+  paResend: () => { toast('A new code is on its way'); PA.step = 'otp'; paRender(); },
+  paFace: el => paFinish(el.dataset.v === '1'),
+  paSignOut,
+  brandDemo: el => { const d = BRAND_DEMOS.find(x => x[2] === el.dataset.v); try { localStorage.setItem('quad-school', JSON.stringify({name:d[0], short:d[1], sub:d[2], color:d[3], logo:null})); } catch (e) {} applySchoolP(); render(); toast(`Showing the app for ${d[0]}`); },
   sim: el => simulate(el.dataset.k),
   openPush: () => { if (!pushGo || dragged) return; document.getElementById('push').classList.remove('on'); closeSheet(); closeStory(); pushGo(); render('r'); },
-  jump: el => { unlock(); closeSheet(); closeStory(); const to = el.dataset.to;
+  jump: el => { if (!document.getElementById('signin').hidden) paFinish(); else unlock(); closeSheet(); closeStory(); const to = el.dataset.to;
     if (to === 'pay') { S.tab = 'pay'; S.stack = []; render(); setTimeout(() => paySheet(), 250); }
     else if (to === 'stories') { S.tab = 'home'; S.stack = []; render(); setTimeout(() => openStory(0), 300); }
     else { S.tab = 'home'; S.stack = [{to, p:{}}]; render('r'); } },
@@ -968,7 +1103,10 @@ function unlock() { const f = document.getElementById('faceid'); f.classList.add
 document.addEventListener('click', e => { if (dragged) { e.preventDefault(); return; } const el = e.target.closest('[data-act]'); if (!el || !ACT[el.dataset.act]) return; if (el.matches('input')) return; ACT[el.dataset.act](el, e); });
 document.addEventListener('change', e => { if (e.target.matches('[data-act="hw"]')) ACT.hw(e.target); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeSheet(); closeStory(); } if (SV && document.activeElement?.id !== 'svIn') { if (e.key === 'ArrowRight') storyStep(1); if (e.key === 'ArrowLeft') storyStep(-1); } });
+applySchoolP();
+window.addEventListener('storage', e => { if (e.key === 'quad-school') { applySchoolP(); render(); } });
 render();
+if (!paSignedIn()) paShow();
 </script>
 </body>
 </html>

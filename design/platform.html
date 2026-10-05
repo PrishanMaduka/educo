@@ -7,7 +7,7 @@
 <link rel="icon" href="brand/quad-app-icon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap">
 <style>
 
 /* Layout: Classe365-style shell. Fixed navy module rail on the left, white top bar, cool-grey canvas with card grid. */
@@ -480,14 +480,14 @@ td.r,th.r{text-align:right}
   --shadow:0 1px 2px rgba(14,21,38,.04),0 12px 32px -16px rgba(14,21,38,.14); --shadow-lg:0 30px 70px -20px rgba(14,21,38,.3);
   color-scheme:light;
 }
-:root{--f-serif:"Instrument Serif","Iowan Old Style","Palatino Linotype",Georgia,serif;--grad:linear-gradient(135deg,#2EC4B0 0%,#4F86F7 100%)}
+:root{--f-head:"Sora","Plus Jakarta Sans",system-ui,sans-serif;--grad:linear-gradient(135deg,#2EC4B0 0%,#4F86F7 100%)}
 body{background:radial-gradient(900px 500px at 12% -10%,var(--glow-a),transparent 60%),radial-gradient(800px 500px at 95% 0%,var(--glow-b),transparent 60%),var(--canvas);background-attachment:fixed}
 
 /* Rail */
 .app{grid-template-columns:284px 1fr}
 .rail{margin:12px 0 12px 12px;height:calc(100vh - 24px);top:12px;border-radius:22px;background:linear-gradient(180deg,#0C1426 0%,#070C18 100%);border:1px solid rgba(255,255,255,.06);box-shadow:0 30px 60px -30px rgba(0,0,0,.6)}
 .brand{padding:20px 20px 16px}
-.brand b{font:400 24px/1 var(--f-serif);letter-spacing:.01em}
+.brand b{font:600 20px/1 var(--f-head);letter-spacing:-.02em}
 .op-badge{background:none;border:1px solid rgba(46,196,176,.5);color:#5EE0CC;font-size:9px;padding:2px 6px;letter-spacing:.14em}
 .nav-label{font-size:10px;letter-spacing:.16em;color:#5B6783}
 .nav a{border-radius:12px;padding:10px 12px;color:#B9C3D9;font-size:13.5px}
@@ -508,8 +508,8 @@ kbd{background:transparent;border-color:var(--line-strong)}
 
 /* Content & type */
 .content{padding:32px 36px 48px;gap:24px;max-width:1520px}
-h1{font:400 44px/1.05 var(--f-serif);letter-spacing:-.01em}
-.page-head h1{font-size:46px}
+h1{font:600 42px/1.08 var(--f-head);letter-spacing:-.035em}
+.page-head h1{font-size:40px}
 .crumbs,.eyebrow{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3);font-weight:700}
 h2{font:600 15px/1.3 var(--f-body);letter-spacing:0}
 .muted{color:var(--ink-3)}
@@ -559,7 +559,7 @@ tr.click:hover td{background:color-mix(in srgb,var(--brand) 6%,transparent)}
 .kpi{display:flex;flex-direction:column;align-items:stretch;gap:6px;padding:20px 22px 0;overflow:hidden;position:relative}
 .kpi .kl{display:flex;align-items:center;justify-content:space-between;color:var(--ink-3);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;font-weight:700}
 .kpi .kl svg{opacity:.6}
-.kpi .v{font:400 40px/1 var(--f-serif);letter-spacing:-.01em;margin-top:4px;font-variant-numeric:tabular-nums}
+.kpi .v{font:600 34px/1.05 var(--f-head);letter-spacing:-.03em;margin-top:4px;font-variant-numeric:tabular-nums}
 .kpi .d{font-size:12.5px;color:var(--ink-3);padding-bottom:18px}
 .kpi .spark{display:block;margin:0 -22px;width:calc(100% + 44px);height:46px}
 .kpi.has-spark .d{padding-bottom:6px}
@@ -568,13 +568,13 @@ tr.click:hover td{background:color-mix(in srgb,var(--brand) 6%,transparent)}
 .hero{display:flex;align-items:flex-end;gap:24px;flex-wrap:wrap;padding:8px 0 4px}
 .hero .grow{flex:1;min-width:280px}
 .hero h1{font-size:clamp(40px,5vw,64px);line-height:1}
-.hero h1 em{font-style:italic;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;padding-right:.08em}
+.hero h1 em{font-style:normal;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;padding-right:.08em}
 .hero p{margin:14px 0 0;color:var(--ink-2);font-size:16px;max-width:62ch}
 .hero p b{color:var(--ink);font-weight:600}
 .range{display:inline-flex;border:1px solid var(--hair);border-radius:999px;padding:3px;gap:2px}
 .range button{border:0;background:none;color:var(--ink-3);font-weight:600;font-size:12px;padding:5px 12px;border-radius:999px}
 .range button.on{background:var(--glass-2);color:var(--ink);box-shadow:inset 0 0 0 1px var(--hair)}
-.big-fig{font:400 34px/1 var(--f-serif)}
+.big-fig{font:600 34px/1 var(--f-head)}
 .chart .grid-l{stroke:var(--hair)}
 .draw{stroke-dasharray:var(--len,2000);stroke-dashoffset:var(--len,2000);animation:draw 1.4s cubic-bezier(.3,.7,.2,1) .15s forwards}
 @keyframes draw{to{stroke-dashoffset:0}}
@@ -606,7 +606,7 @@ tr.click:hover td{background:color-mix(in srgb,var(--brand) 6%,transparent)}
 .tcard .cv .pill{position:absolute;right:12px;top:12px;color:#fff;border-color:rgba(255,255,255,.35)}
 .tcard .tb{padding:0 18px 18px;display:flex;flex-direction:column;gap:12px;margin-top:-22px;position:relative}
 .tcard .tenant-logo{width:46px;height:46px;border-radius:14px;border:3px solid var(--surface-2);box-sizing:content-box}
-.tcard h3{font:400 22px/1.15 var(--f-serif);margin:0}
+.tcard h3{font:600 18px/1.25 var(--f-head);margin:0;letter-spacing:-.02em}
 .tcard .row{display:flex;justify-content:space-between;align-items:center;font-size:12.5px;color:var(--ink-3);gap:8px}
 .tcard .row b{color:var(--ink);font-variant-numeric:tabular-nums}
 .viewtog{display:inline-flex;border:1px solid var(--hair);border-radius:12px;padding:3px;gap:2px}
@@ -618,7 +618,7 @@ tr.click:hover td{background:color-mix(in srgb,var(--brand) 6%,transparent)}
 .t-cover::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(115deg,rgba(255,255,255,.05) 0 1px,transparent 1px 22px)}
 .covered .profile-head{margin-top:-46px;position:relative;align-items:flex-end}
 .covered .profile-head .tenant-logo.lg{width:84px;height:84px;border-radius:22px;font-size:28px;border:4px solid var(--surface);box-sizing:content-box}
-.covered .profile-head h1{font-size:40px}
+.covered .profile-head h1{font-size:34px}
 .covered .profile-head .info{padding-top:50px}
 
 @media (max-width:900px){
@@ -631,14 +631,97 @@ tr.click:hover td{background:color-mix(in srgb,var(--brand) 6%,transparent)}
   .covered .profile-head .info{padding-top:0}
   .att-cta{display:none}
 }
+
+/* Sign-in screen */
+[hidden]{display:none!important}
+.auth{position:fixed;inset:0;z-index:300;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(360px,1fr);background:var(--surface);animation:authIn .35s ease}
+.auth.leave{opacity:0;transform:scale(1.015);transition:opacity .45s,transform .45s}
+@keyframes authIn{from{opacity:0}}
+.auth-art{position:relative;overflow:hidden;color:#fff;padding:44px;display:flex;flex-direction:column;justify-content:space-between;gap:24px;background:var(--auth-bg)}
+.auth-art::after{content:"";position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(rgba(255,255,255,.14) 1px,transparent 1px);background-size:22px 22px;-webkit-mask-image:linear-gradient(180deg,transparent,#000 45%,transparent);mask-image:linear-gradient(180deg,transparent,#000 45%,transparent)}
+.auth-art>*{position:relative;z-index:1}
+.auth-brand{display:flex;gap:12px;align-items:center}
+.auth-logo{width:54px;height:54px;border-radius:16px;background:#fff;display:grid;place-items:center;overflow:hidden;color:var(--brand);font:700 17px var(--f-display);box-shadow:0 10px 30px -10px rgba(0,0,0,.5);flex:none}
+.auth-logo img{width:100%;height:100%;object-fit:contain;padding:5px}
+.auth-logo.q{background:linear-gradient(135deg,#2F6FED,#12A594)}
+.auth-logo.q svg{width:70%;height:70%}
+.auth-brand b{display:block;font:700 18px var(--f-display)}.auth-brand small{opacity:.8;font-size:12.5px}
+.auth-quote{max-width:560px}.auth-quote h2{font:700 clamp(28px,3.4vw,46px)/1.06 var(--f-display);margin:0 0 14px;letter-spacing:-.025em}.auth-quote p{opacity:.85;font-size:16px;margin:0}
+.auth-stats{display:flex;gap:12px;flex-wrap:wrap}.auth-stats div{background:rgba(255,255,255,.1);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.18);border-radius:16px;padding:12px 16px;min-width:112px}.auth-stats b{display:block;font:700 22px var(--f-display)}.auth-stats span{font-size:12px;opacity:.85}
+.auth-panel{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;gap:22px;overflow-y:auto;background:var(--surface)}
+.auth-card{width:min(400px,100%);display:flex;flex-direction:column;gap:14px;animation:authIn .3s ease}
+.auth-card h1{font-size:30px;margin:0;letter-spacing:-.02em}.auth-card p{margin:0}
+.auth-form{display:flex;flex-direction:column;gap:14px}
+.lbl-row{display:flex;justify-content:space-between;align-items:center}
+.btn.big{height:46px;font-size:14.5px;width:100%;justify-content:center}
+.btn.sso{height:46px;width:100%;justify-content:center;gap:10px}
+.auth-or{display:flex;align-items:center;gap:12px;color:var(--ink-3);font-size:12px}.auth-or::before,.auth-or::after{content:"";flex:1;height:1px;background:var(--line)}
+.pw{position:relative}.pw .input{padding-right:58px}.pw .linkbtn{position:absolute;right:12px;top:50%;transform:translateY(-50%)}
+.linkbtn{background:none;border:0;color:var(--brand);font-weight:600;font-size:12.5px;padding:0;cursor:pointer;align-self:flex-start}
+.otp{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}
+.otp input{height:56px;text-align:center;font:700 22px var(--f-display);border:1.5px solid var(--line-strong);border-radius:12px;background:var(--surface-2);color:var(--ink);width:100%;min-width:0}
+.otp input:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 4px var(--brand-soft)}
+.otp.shake{animation:shake .35s}@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.auth-foot{font-size:12px;color:var(--ink-3);text-align:center}
+.small{font-size:13px}
+.auth-ok{width:60px;height:60px;border-radius:18px;background:var(--brand-soft);color:var(--brand);display:grid;place-items:center}
+.auth-spin{width:44px;height:44px;border-radius:50%;border:4px solid var(--brand-soft);border-top-color:var(--brand);animation:authSpin .8s linear infinite}@keyframes authSpin{to{transform:rotate(360deg)}}
+.rail-foot .so{margin-left:auto;width:32px;height:32px;background:transparent;border:1px solid rgba(255,255,255,.14);color:var(--rail-ink,#C5CFE3);border-radius:9px}
+.rail-foot .so:hover{background:rgba(255,255,255,.08);color:#fff}
+@media (max-width:860px){.auth{grid-template-columns:1fr;overflow-y:auto;grid-template-rows:auto 1fr}.auth-art{padding:24px}.auth-quote h2{font-size:26px}.auth-stats{display:none}.auth-panel{justify-content:flex-start;padding-top:28px}}
+@media (prefers-reduced-motion:reduce){.auth,.auth-card{animation:none}}
+
+:root{--auth-bg:radial-gradient(70% 60% at 0% 0%,rgba(46,196,176,.45),transparent 60%),radial-gradient(60% 60% at 100% 100%,rgba(79,134,247,.45),transparent 60%),#060A14}
+.tenant-logo.has-img{background:#fff!important;padding:3px;overflow:hidden}
+.tenant-logo img{width:100%;height:100%;object-fit:contain;display:block}
+.modal.wide{width:min(900px,calc(100% - 32px))}
+.wb{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:24px;align-items:start}
+.wb-l{display:flex;flex-direction:column;gap:18px;min-width:0}
+.drop{display:flex;align-items:center;gap:14px;padding:14px;border:1.5px dashed var(--line-strong);border-radius:14px;cursor:pointer;background:var(--surface-2);transition:border-color .2s,background .2s}
+.drop:hover,.drop.over{border-color:var(--brand);background:var(--brand-soft)}
+.drop img{width:64px;height:64px;object-fit:contain;border-radius:12px;background:#fff;padding:4px;flex:none}
+.drop-ic{width:64px;height:64px;border-radius:12px;display:grid;place-items:center;background:var(--surface);border:1px solid var(--line);color:var(--ink-3);flex:none}
+.drop b{display:block}.drop small{color:var(--ink-3);font-size:12px}
+.bm{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.bm figure{margin:0;display:flex;flex-direction:column;gap:6px;min-width:0}
+.bm figcaption{font-size:10.5px;color:var(--ink-3);text-align:center;letter-spacing:.12em;text-transform:uppercase;font-weight:700}
+.bm-frame{height:150px;border-radius:12px;overflow:hidden;border:1px solid var(--line);background:var(--surface-2);box-shadow:var(--shadow)}
+.bm-logo{width:24px;height:24px;border-radius:7px;background:#fff;display:grid;place-items:center;overflow:hidden;color:var(--sc);font:700 8px var(--f-body);flex:none}
+.bm-logo img{width:100%;height:100%;object-fit:contain;padding:1px}
+.bm-logo.lg{width:30px;height:30px;font-size:9px}
+.bm-login{display:grid;grid-template-columns:1fr 1fr}
+.bm-art{padding:10px;color:#fff;display:flex;flex-direction:column;gap:6px;background:radial-gradient(90% 70% at 0% 0%,color-mix(in srgb,var(--sc) 85%,#fff),transparent 60%),linear-gradient(160deg,color-mix(in srgb,var(--sc) 75%,#000),#0B1222)}
+.bm-art b{font-size:8.5px;line-height:1.2}
+.bm-art i,.bm-form s{display:block;height:5px;border-radius:3px;background:rgba(255,255,255,.4)}
+.bm-art i.s{width:60%;margin-top:auto}
+.bm-form{background:var(--surface);padding:12px 10px;display:flex;flex-direction:column;gap:7px;justify-content:center}
+.bm-form b{font-size:9px}
+.bm-form s{background:var(--line);height:9px}
+.bm-form em{display:block;height:11px;border-radius:4px;background:var(--sc)}
+.bm-admin{display:grid;grid-template-columns:40px 1fr}
+.bm-rail{background:color-mix(in srgb,var(--sc) 18%,#0B1222);padding:8px 6px;display:flex;flex-direction:column;gap:6px;align-items:center}
+.bm-rail i{width:100%;height:5px;border-radius:3px;background:rgba(255,255,255,.18)}
+.bm-rail i.on{background:var(--sc)}
+.bm-main{padding:8px;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:22px 1fr;gap:6px}
+.bm-main span{background:var(--surface);border:1px solid var(--line);border-radius:5px}
+.bm-main span.w{grid-column:1/-1;background:linear-gradient(to top,var(--sc) 0 45%,transparent 45%) 18% 100%/12% 75% no-repeat,linear-gradient(to top,var(--sc) 0 75%,transparent 75%) 48% 100%/12% 75% no-repeat,linear-gradient(to top,var(--sc) 0 60%,transparent 60%) 78% 100%/12% 75% no-repeat,var(--surface)}
+.bm figure.bm-phone-wrap{grid-column:1/-1;display:flex;flex-direction:row;gap:14px;align-items:center;justify-content:center}
+.bm-phone{width:86px;height:170px;border-radius:18px;border:4px solid #0B0F1A;overflow:hidden;background:var(--surface-2);display:flex;flex-direction:column;gap:6px;padding-bottom:6px}
+.bm-hero{height:58px;padding:8px;background:linear-gradient(140deg,var(--sc),color-mix(in srgb,var(--sc) 55%,#000))}
+.bm-phone s{display:block;height:12px;margin:0 6px;border-radius:4px;background:var(--surface);border:1px solid var(--line)}
+.bm-tb{margin-top:auto;display:flex;justify-content:space-around;padding:4px 6px 0;border-top:1px solid var(--line)}
+.bm-tb i{width:9px;height:9px;border-radius:3px;background:var(--line-strong)}.bm-tb i:first-child{background:var(--sc)}
+.bm-lock{width:86px;height:170px;border-radius:18px;border:4px solid #0B0F1A;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:#fff;font-size:7.5px;font-weight:700;text-align:center;padding:6px;background:linear-gradient(160deg,color-mix(in srgb,var(--sc) 70%,#000),var(--sc) 70%,color-mix(in srgb,var(--sc) 60%,#12A594))}
+@media (max-width:760px){.wb{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
+<div class="auth" id="auth" hidden></div>
 <div class="app" id="app">
   <aside class="rail" id="rail" aria-label="Platform sections">
     <div class="brand"><div class="logo"><svg viewBox="0 0 64 64" width="72%" height="72%" aria-hidden="true"><g fill="none" stroke-width="9"><path d="M20.82 15.42A20 20 0 0 1 43.18 15.42" stroke="#FFFFFF"/><path d="M48.58 20.82A20 20 0 0 1 48.58 43.18" stroke="#C9D8FF"/><path d="M15.42 43.18A20 20 0 0 1 15.42 20.82" stroke="#E3EBFF"/><path d="M43.18 48.58A20 20 0 0 1 20.82 48.58" stroke="#FFFFFF"/><path d="M39.35 39.35L54.91 54.91" stroke="#FFFFFF" stroke-linecap="round"/></g><circle cx="32" cy="32" r="4.5" fill="#FFC56B"/></svg></div><div><b>Quad<span class="op-badge">PLATFORM</span></b><small>Super admin console</small></div></div>
     <nav class="nav" id="nav"></nav>
-    <div class="rail-foot"><div class="av sm" style="background:#12A594">PM</div><div style="font-size:12px;min-width:0"><b style="color:#fff;display:block">Prishan Maduka</b><span style="color:var(--rail-ink-2)">Platform owner</span></div></div>
+    <div class="rail-foot"><div class="av sm" style="background:#12A594">PM</div><div style="font-size:12px;min-width:0"><b style="color:#fff;display:block">Prishan Maduka</b><span style="color:var(--rail-ink-2)">Platform owner</span></div><button class="iconbtn so" data-act="signOut" aria-label="Sign out" title="Sign out"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
   </aside>
   <div class="main">
     <header class="top">
@@ -751,7 +834,7 @@ const initials = n => n.replace(/[^A-Za-z ]/g, '').split(' ').filter(Boolean).ma
 const AVC = ['#2F6FED','#12A594','#C2410C','#8B5CF6','#0E7490','#BE185D','#4D7C0F','#B45309'];
 const avColor = n => AVC[[...n].reduce((a, c) => a + c.charCodeAt(0), 0) % AVC.length];
 const avatar = (n, cls='') => `<div class="av ${cls}" style="background:${avColor(n)}">${initials(n)}</div>`;
-const tlogo = (t, cls='') => `<div class="tenant-logo ${cls}" style="background:${t.color}">${initials(t.name)}</div>`;
+const tlogo = (t, cls='') => t.logo ? `<div class="tenant-logo has-img ${cls}"><img src="${t.logo}" alt=""></div>` : `<div class="tenant-logo ${cls}" style="background:${t.color}">${t.short || initials(t.name)}</div>`;
 let seed = 11; const rnd = () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; };
 const pick = a => a[Math.floor(rnd() * a.length)];
 
@@ -880,7 +963,7 @@ function areaChart({labels, data, color = 'var(--c2)', fmt = v => v, h = 260, ti
 function donut(segs, size = 150, center = '') {
   const r = size / 2 - 12, c = 2 * Math.PI * r, tot = segs.reduce((a, s) => a + s[1], 0); let off = 0;
   const arcs = segs.map(([n, v, col]) => { const len = v / tot * c, gap = 3; const el = `<circle cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none" stroke="${col}" stroke-width="16" stroke-dasharray="${Math.max(0, len - gap)} ${c}" stroke-dashoffset="${-off}" transform="rotate(-90 ${size / 2} ${size / 2})" data-tip="<b>${n}</b><br>${v} schools · ${Math.round(v / tot * 100)}%"/>`; off += len; return el; }).join('');
-  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" role="img" aria-label="Schools by plan">${arcs}<text x="50%" y="48%" text-anchor="middle" style="font:400 34px var(--f-serif);fill:var(--ink)">${tot}</text><text x="50%" y="62%" text-anchor="middle" style="font-size:10.5px;letter-spacing:.14em;fill:var(--ink-3);font-weight:700">SCHOOLS</text></svg>`;
+  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" role="img" aria-label="Schools by plan">${arcs}<text x="50%" y="48%" text-anchor="middle" style="font:600 34px var(--f-head);fill:var(--ink)">${tot}</text><text x="50%" y="62%" text-anchor="middle" style="font-size:10.5px;letter-spacing:.14em;fill:var(--ink-3);font-weight:700">SCHOOLS</text></svg>`;
 }
 function countUps() {
   document.querySelectorAll('[data-count]').forEach(el => {
@@ -1008,20 +1091,19 @@ function tModules(t) {
     <button class="btn primary" data-act="toast" data-msg="Plan saved. The school admin has been emailed.">Save plan</button></div></section></div>`;
 }
 function tBranding(t) {
-  const c = S.brandColor[t.id] || t.color;
-  return `<div class="card"><div class="card-h"><h2>Branding</h2><span class="muted" style="font-size:12.5px">Shown in the school admin, parent app, emails and invoices</span></div><div class="card-b preview">
-    <div style="display:flex;flex-direction:column;gap:16px">
-      <div class="field"><label>Logo</label><div style="display:flex;gap:12px;align-items:center"><div class="tenant-logo lg" id="brandLogo" style="background:${c}">${initials(t.name)}</div><button class="btn" data-act="toast" data-msg="Choose a PNG or SVG, at least 512 × 512 px">Upload logo</button></div></div>
-      <div class="field"><label>Brand colour</label><div class="swatches">${['#2F6FED','#12A594','#0E7490','#8B5CF6','#BE185D','#C2410C','#B45309','#14203A'].map(x => `<button class="${x===c?'on':''}" style="background:${x}" data-act="brand" data-c="${x}" data-id="${t.id}" aria-label="Colour ${x}"></button>`).join('')}<input type="color" value="${c}" id="brandPick" data-id="${t.id}" aria-label="Custom colour" style="width:34px;height:34px;border:0;padding:0;background:none"></div></div>
-      <div class="field"><label for="appName">App name in stores</label><input class="input" id="appName" value="${esc(t.name.split(' ').slice(0, 2).join(' '))} Parent"></div>
-      <div class="field"><label for="dom">Custom domain</label><div class="addon"><input class="input" id="dom" value="${t.id === 1 ? 'portal.cis.lk' : ''}" placeholder="portal.yourschool.edu"><span>CNAME → ${t.sub}.quad.school</span></div></div>
-      <button class="btn primary" data-act="toast" data-msg="Branding published to all apps">Publish branding</button>
+  S.brandLogo = S.brandLogo || {};
+  const c = S.brandColor[t.id] || t.color, logo = t.id in S.brandLogo ? S.brandLogo[t.id] : t.logo, short = t.short || shortOf(t.name);
+  return `<div class="card"><div class="card-h"><h2>Branding</h2><span class="muted" style="font-size:12.5px">Used on the staff sign-in, staff portal, parent app, emails and invoices</span></div><div class="card-b wb">
+    <div class="wb-l">
+      <div class="field"><label>School logo</label>${logoDrop('tLogoFile', logo)}<div class="chips" style="margin-top:8px"><button type="button" class="chip" data-act="tCrest" data-id="${t.id}">Make a sample crest</button>${logo ? `<button type="button" class="chip" data-act="tRmLogo" data-id="${t.id}">Remove logo</button>` : ''}</div></div>
+      <div class="field"><label>Brand colour</label><div class="swatches">${BRAND_SWATCHES.map(x => `<button class="${x===c?'on':''}" style="background:${x}" data-act="brand" data-c="${x}" data-id="${t.id}" aria-label="Colour ${x}"></button>`).join('')}<input type="color" value="${c}" id="brandPick" data-id="${t.id}" aria-label="Custom colour" style="width:34px;height:34px;border:0;padding:0;background:none"></div></div>
+      <div class="form-grid"><div class="field"><label for="appName">App name in stores</label><input class="input" id="appName" value="${esc(short)} Parent"></div><div class="field"><label for="dom">Custom domain</label><input class="input" id="dom" value="${t.id === 1 ? 'portal.cis.lk' : ''}" placeholder="portal.yourschool.edu"></div></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn primary" data-act="publishBrand" data-id="${t.id}">Publish branding</button><button class="btn" data-act="openPortal" data-id="${t.id}">${ic('grid',16)}Open staff portal</button><button class="btn" data-act="openParent" data-id="${t.id}">${ic('phone',16)}Open parent app</button></div>
+      <p class="muted small" style="margin:0">The staff portal and parent app pick up published branding straight away, even in other open tabs.</p>
     </div>
-    <div style="display:flex;flex-direction:column;gap:12px" id="brandPrev" style="--tc:${c}">${brandPreview(t, c)}</div>
+    <div><div class="eyebrow" style="margin-bottom:10px">Live preview</div><div id="brandPrev">${brandMock(t.name, c, logo, short)}</div></div>
   </div></div>`;
 }
-const brandPreview = (t, c) => `<div class="mini-admin"><div class="r" style="background:color-mix(in srgb, ${c} 75%, #000)"><b style="font-size:11px">${esc(t.name.split(' ')[0])}</b><i class="on"></i><i></i><i></i><i></i><i></i></div><div class="m"><b></b><b></b><b></b><b class="wide" style="background:linear-gradient(to top, ${c} 0 40%, transparent 40%) 15% 100%/10% 80% no-repeat, linear-gradient(to top, ${c} 0 70%, transparent 70%) 45% 100%/10% 80% no-repeat, linear-gradient(to top, ${c} 0 55%, transparent 55%) 75% 100%/10% 80% no-repeat, var(--surface)"></b></div></div>
-  <div class="mini-phone" style="--tc:${c}"><div><div class="h" style="background:linear-gradient(140deg, ${c}, color-mix(in srgb, ${c} 60%, #12A594))"></div><s></s><s></s><s></s><div class="tb"><i></i><i></i><i></i><i></i></div></div></div>`;
 function tSecurity(t) {
   const s = tenantSec(t);
   return `<div class="grid g-1-1"><section class="card"><div class="card-h"><h2>Single sign-on</h2></div>
@@ -1063,7 +1145,7 @@ V.audit = () => { const f = S.filter.au || 'all'; const rows = AUDIT.filter(a =>
 /* ---------- Overlays ---------- */
 const scrim = document.getElementById('scrim'), drawer = document.getElementById('drawer'), modal = document.getElementById('modal');
 function openDrawer(html) { drawer.innerHTML = html; drawer.classList.add('on'); scrim.classList.add('on'); drawer.setAttribute('aria-hidden','false'); }
-function openModal(html) { modal.innerHTML = html; modal.classList.add('on'); scrim.classList.add('on'); setTimeout(() => modal.querySelector('input:not([type=checkbox]),select,textarea')?.focus(), 50); }
+function openModal(html, cls = '') { modal.className = 'modal ' + cls; modal.innerHTML = html; modal.classList.add('on'); scrim.classList.add('on'); setTimeout(() => modal.querySelector('input:not([type=checkbox]),select,textarea')?.focus(), 50); }
 function closeAll() { [drawer, modal, scrim, document.getElementById('cmdk')].forEach(e => e.classList.remove('on')); drawer.setAttribute('aria-hidden','true'); }
 const head = (title, sub='') => `<div class="drawer-h"><div style="flex:1;min-width:0"><h2>${title}</h2>${sub?`<div class="muted" style="font-size:12.5px">${sub}</div>`:''}</div><button class="iconbtn" data-act="closeAll" aria-label="Close">${ic('x',16)}</button></div>`;
 function toast(msg) { const t = document.createElement('div'); t.className = 'toast'; t.innerHTML = `${ic('check',16)}${esc(msg)}`; const box = document.getElementById('toasts'); box.appendChild(t); while (box.children.length > 2) box.firstChild.remove(); setTimeout(() => t.remove(), 3000); }
@@ -1078,7 +1160,7 @@ function inviteModal(t) {
   ta.oninput = () => { const n = ta.value.split(/[\s,;]+/).filter(Boolean).length; btn.innerHTML = `${ic('send',16)}Send ${n || ''} invite${n === 1 ? '' : 's'}`; };
 }
 function tenantWizard() {
-  const w = S.wiz, st = w.step, steps = ['School','Plan & modules','First admin','Create'];
+  const w = S.wiz, st = w.step, steps = ['School','Branding','Plan & modules','First admin','Create'];
   const f = (id, l, ph='', type='text') => `<div class="field"><label for="${id}">${l}</label><input class="input" id="${id}" type="${type}" placeholder="${ph}" value="${esc(w[id]||'')}"></div>`;
   let body = '';
   if (st === 0) body = `<div class="form-grid"><div class="field full"><label for="w_name">School name</label><input class="input" id="w_name" value="${esc(w.w_name||'')}" placeholder="e.g. Matara Lakeside College"></div>
@@ -1087,15 +1169,27 @@ function tenantWizard() {
     <div class="field"><label for="w_region">Data region</label><select class="input" id="w_region">${Object.entries(REGIONS).map(([k, v]) => `<option value="${k}" ${w.w_region===k?'selected':''}>${v}</option>`).join('')}</select></div>
     <div class="field"><label for="w_curr">Curriculum</label><select class="input" id="w_curr"><option>Cambridge (IGCSE / A level)</option><option>Edexcel</option><option>IB</option><option>Local (O/L, A/L)</option></select></div>
     <div class="field"><label for="w_students">Expected students</label><input class="input" id="w_students" type="number" value="${w.w_students||600}"></div></div>`;
-  else if (st === 1) { const plan = w.w_plan || 'Growth'; body = `<div class="plans" style="grid-template-columns:repeat(3,1fr);gap:10px">${Object.entries(PLANS).map(([n, p]) => `<button class="card plan ${n===plan?'feat':''}" data-act="wPlan" data-p="${n}" style="text-align:left;padding:14px;gap:6px"><b>${n}</b><span class="num" style="font:700 20px var(--f-display)">$${p.price.toFixed(2)}</span><small class="muted">${p.mods.length} modules · up to ${fmt(p.limit)}</small></button>`).join('')}</div>
+  else if (st === 1) { const col = w.w_color || BRAND_SWATCHES[0];
+    body = `<div class="wb"><div class="wb-l">
+      <div class="field"><label>School logo</label>${logoDrop('logoFile', w.logo)}<div class="chips" style="margin-top:8px"><button type="button" class="chip" data-act="wCrest">No logo yet? Make a sample crest</button>${w.logo ? '<button type="button" class="chip" data-act="wRmLogo">Remove logo</button>' : ''}</div></div>
+      <div class="field"><label>Brand colour${w.picked ? ' <span class="pill t-green plain" style="margin-left:6px;font-size:11px">Picked from your logo</span>' : ''}</label><div class="swatches">${BRAND_SWATCHES.map(x => `<button type="button" class="${x === col ? 'on' : ''}" style="background:${x}" data-act="wColor" data-c="${x}" aria-label="Colour ${x}"></button>`).join('')}<input type="color" id="w_color" value="${col}" aria-label="Custom colour" style="width:34px;height:34px;border:0;padding:0;background:none"></div></div>
+      <div class="field"><label for="w_short">Short name</label><input class="input" id="w_short" maxlength="5" value="${esc(w.w_short || shortOf(w.w_name))}"><small class="muted">Shown on the app icon, and anywhere the logo is too small to read</small></div>
+    </div><div><div class="eyebrow" style="margin-bottom:10px">Live preview</div><div id="wPrev">${brandMock(w.w_name, col, w.logo, w.w_short || shortOf(w.w_name))}</div></div></div>`; }
+  else if (st === 2) { const plan = w.w_plan || 'Growth'; body = `<div class="plans" style="grid-template-columns:repeat(3,1fr);gap:10px">${Object.entries(PLANS).map(([n, p]) => `<button class="card plan ${n===plan?'feat':''}" data-act="wPlan" data-p="${n}" style="text-align:left;padding:14px;gap:6px"><b>${n}</b><span class="num" style="font:700 20px var(--f-display)">$${p.price.toFixed(2)}</span><small class="muted">${p.mods.length} modules · up to ${fmt(p.limit)}</small></button>`).join('')}</div>
     <div class="mods" style="grid-template-columns:1fr 1fr">${MODULES.map(([k, n, i]) => { const on = (w.mods || new Set(PLANS[plan].mods)).has(k); return `<div class="mod ${on?'':'off'}" style="padding:10px 12px"><div class="meta"><b style="font-size:13px">${n}</b></div>${sw(on, 'wMod', `data-k="${k}" aria-label="${n}"`)}</div>`; }).join('')}</div>
     <label class="checkrow"><input type="checkbox" id="w_trial" ${w.w_trial !== false ? 'checked' : ''}> Start with a 30-day free trial</label>`; }
-  else if (st === 2) body = `<p class="muted" style="margin:0;font-size:13px">This person becomes the school admin. They can invite everyone else.</p><div class="form-grid">${f('w_aname','Full name','e.g. Shanthi Wickramasinghe')}${f('w_aemail','Email','principal@school.edu','email')}</div>
+  else if (st === 3) body = `<p class="muted" style="margin:0;font-size:13px">This person becomes the school admin. They can invite everyone else.</p><div class="form-grid">${f('w_aname','Full name','e.g. Shanthi Wickramasinghe')}${f('w_aemail','Email','principal@school.edu','email')}</div>
     <label class="checkrow"><input type="checkbox" checked> Import students and staff from a spreadsheet after setup</label><label class="checkrow"><input type="checkbox" checked> Copy default roles and permissions</label>`;
   else body = `<div class="prov" id="prov">${['Create isolated database schema','Seed roles and default permissions','Configure ' + (w.w_sub || 'school') + '.quad.school and TLS certificate','Apply branding and modules','Email invite to ' + (w.w_aemail || 'the school admin')].map(s => `<div><i></i>${s}</div>`).join('')}</div><div id="provDone"></div>`;
-  openModal(`${head('New school', 'Creates a new tenant with its own data and subdomain')}<div class="steps">${steps.map((s, i) => `<div class="${i<=st?'on':''}">${i+1}. ${s}</div>`).join('')}</div>
+  openModal(`${head('New school', 'Creates a new tenant with its own data, subdomain and branding')}<div class="steps">${steps.map((s, i) => `<div class="${i<=st?'on':''}">${i+1}. ${s}</div>`).join('')}</div>
     <form class="drawer-b" data-form="wizard" novalidate>${body}<div class="err-msg" id="wErr"></div></form>
-    <div class="drawer-f" id="wFoot">${st && st < 3 ? '<button class="btn" data-act="wBack">Back</button>' : ''}${st < 3 ? `<button class="btn primary" data-act="wNext">${st < 2 ? 'Continue' : 'Create school'}</button>` : ''}</div>`);
+    <div class="drawer-f" id="wFoot">${st && st < 4 ? '<button class="btn" data-act="wBack">Back</button>' : ''}${st < 4 ? `<button class="btn primary" data-act="wNext">${st < 3 ? 'Continue' : 'Create school'}</button>` : ''}</div>`, 'wide');
+  if (st === 1) {
+    const prev = () => { const w2 = S.wiz; document.getElementById('wPrev').innerHTML = brandMock(w2.w_name, w2.w_color || BRAND_SWATCHES[0], w2.logo, w2.w_short || shortOf(w2.w_name)); };
+    bindLogoDrop('logoFile', f => readLogo(f, (url, dom) => { saveWiz(); S.wiz.logo = url; if (dom) { S.wiz.w_color = dom; S.wiz.picked = true; } tenantWizard(); toast(dom ? 'Logo added. We picked a brand colour from it.' : 'Logo added'); }));
+    document.getElementById('w_color').oninput = e => { S.wiz.w_color = e.target.value; S.wiz.picked = false; document.querySelectorAll('.wb .swatches button').forEach(b => b.classList.remove('on')); prev(); };
+    document.getElementById('w_short').oninput = e => { S.wiz.w_short = e.target.value.toUpperCase(); prev(); };
+  }
   const sub = document.getElementById('w_sub'), name = document.getElementById('w_name');
   if (sub) {
     const check = () => { const v = sub.value.trim().toLowerCase(), a = document.getElementById('subAvail');
@@ -1105,19 +1199,20 @@ function tenantWizard() {
     name.oninput = () => { if (!sub.dataset.touched) { sub.value = name.value.toLowerCase().replace(/[^a-z0-9 ]/g, '').trim().split(/\s+/).slice(0, 2).join('-'); check(); } };
     sub.oninput = () => { sub.dataset.touched = 1; check(); }; check();
   }
-  if (st === 3) provision();
+  if (st === 4) provision();
 }
 function provision() {
   const rows = [...document.querySelectorAll('#prov div')]; let i = 0;
   const step = () => { if (i > 0) { rows[i-1].className = 'done'; rows[i-1].querySelector('i').innerHTML = ic('check',13); }
     if (i < rows.length) { rows[i].className = 'run'; i++; setTimeout(step, 650); return; }
     const w = S.wiz, id = Math.max(...tenants.map(t => t.id)) + 1, plan = w.w_plan || 'Growth';
-    const t = T(id, w.w_name, w.w_sub, w.w_country || 'Sri Lanka', plan, 0, w.w_trial === false ? 'Onboarding' : 'Trial', AVC[id % AVC.length], w.w_region || 'ap-south', '2026-10', {trialEnds:'4 Nov', health:'Setting up'});
+    const t = T(id, w.w_name, w.w_sub, w.w_country || 'Sri Lanka', plan, 0, w.w_trial === false ? 'Onboarding' : 'Trial', w.w_color || BRAND_SWATCHES[0], w.w_region || 'ap-south', '2026-10', {trialEnds:'4 Nov', health:'Setting up', logo: w.logo || null, short: (w.w_short || shortOf(w.w_name)).toUpperCase()});
     t.mods = w.mods || new Set(PLANS[plan].mods); tenants.push(t);
     usersByTenant[id] = [{id:`${id}-0`, name: w.w_aname, email: w.w_aemail, role:'admin', campus:CAMPUS[0], status:'Invited', mfa:true, last:'Invite sent just now', sso:false}];
     AUDIT.unshift(['Prishan Maduka', `created tenant ${w.w_name}`, w.w_sub, 'Just now', 'tenant']);
     document.getElementById('provDone').innerHTML = `<div class="inv" style="display:flex;gap:12px;align-items:center"><div class="dot-ic t-green">${ic('check',16)}</div><div style="flex:1"><b>${esc(w.w_name)} is ready</b><div class="muted" style="font-size:12.5px">${esc(w.w_sub)}.quad.school · invite sent to ${esc(w.w_aemail)}</div></div></div>`;
-    document.getElementById('wFoot').innerHTML = `<button class="btn" data-act="closeAll">Close</button><button class="btn primary" data-act="openTenant" data-id="${id}">Open school</button>`;
+    document.getElementById('provDone').insertAdjacentHTML('beforeend', `<div style="margin-top:14px">${brandMock(t.name, t.color, t.logo, t.short)}</div>`);
+    document.getElementById('wFoot').innerHTML = `<button class="btn" data-act="openTenant" data-id="${id}">Open in console</button><span style="flex:1"></span><button class="btn" data-act="openParent" data-id="${id}">${ic('phone',16)}Open parent app</button><button class="btn primary" data-act="openPortal" data-id="${id}">${ic('grid',16)}Open staff portal</button>`;
   };
   step();
 }
@@ -1388,6 +1483,131 @@ function tenantCtx(t) { return {
   impersonate:u => { try { sessionStorage.setItem('quad-impersonate', JSON.stringify({name:t.name, sub:t.sub, by:'Prishan Maduka', as:u.name})); } catch (e) {} AUDIT.unshift(['Prishan Maduka', `signed in as ${u.name} (support)`, t.sub, 'Just now', 'users']); location.href = 'admin.html'; }
 }; }
 
+
+/* ---------- Sign-in screens (shared by the platform console and the school portal) ---------- */
+const AUTH = {step:'signin', email:'', cfg:null, sso:''};
+const G_ICON = '<svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>';
+const MS_ICON = '<svg width="16" height="16" viewBox="0 0 21 21" aria-hidden="true"><path fill="#F25022" d="M1 1h9v9H1z"/><path fill="#7FBA00" d="M11 1h9v9h-9z"/><path fill="#00A4EF" d="M1 11h9v9H1z"/><path fill="#FFB900" d="M11 11h9v9h-9z"/></svg>';
+function authSignedIn(key) { try { return sessionStorage.getItem('quad-auth-' + key) === '1'; } catch (e) { return true; } }
+function authOpen(cfg) { AUTH.cfg = cfg; AUTH.step = 'signin'; const a = document.getElementById('auth'); a.hidden = false; a.classList.remove('leave'); authRender(); }
+function authRender() {
+  const c = AUTH.cfg, a = document.getElementById('auth'), st = AUTH.step; let f = '';
+  if (st === 'signin') f = `<h1>${c.title}</h1><p class="muted">${c.sub}</p>
+    ${c.sso.map(s => `<button class="btn sso" data-auth="sso" data-v="${s}">${s.startsWith('Google') ? G_ICON : MS_ICON}Continue with ${s}</button>`).join('')}
+    <div class="auth-or"><span>or sign in with email</span></div>
+    <form class="auth-form" id="authForm" novalidate><div class="field"><label for="au_e">${c.emailLabel || 'Email'}</label><input class="input" id="au_e" type="email" autocomplete="username" value="${esc(AUTH.email || c.email)}"></div>
+    <div class="field"><div class="lbl-row"><label for="au_p">Password</label><button type="button" class="linkbtn" data-auth="forgot">Forgot password?</button></div><div class="pw"><input class="input" id="au_p" type="password" autocomplete="current-password" placeholder="Enter your password"><button type="button" class="linkbtn" data-auth="show">Show</button></div></div>
+    <label class="checkrow"><input type="checkbox" checked> Keep me signed in on this device</label><div class="err-msg" id="auErr" role="alert"></div>
+    <button class="btn primary big">Continue</button></form>${c.below || ''}`;
+  else if (st === 'otp') f = `<button class="linkbtn" data-auth="back">← Back</button><h1>Two-step sign-in</h1><p class="muted">Enter the 6-digit code from your authenticator app for <b>${esc(AUTH.email)}</b>.</p>
+    <div class="otp" id="otp">${Array.from({length:6}, (_, i) => `<input inputmode="numeric" autocomplete="one-time-code" maxlength="1" aria-label="Digit ${i + 1}">`).join('')}</div><div class="err-msg" id="auErr" role="alert"></div>
+    <label class="checkrow"><input type="checkbox" checked> Trust this device for 30 days</label><button class="btn primary big" data-auth="verify" id="auVerify">Verify and sign in</button>
+    <p class="muted small">No phone with you? <button class="linkbtn" data-auth="toast" data-v="Enter one of your 10 recovery codes instead">Use a recovery code</button></p>`;
+  else if (st === 'forgot') f = `<button class="linkbtn" data-auth="back">← Back</button><h1>Reset your password</h1><p class="muted">We’ll email you a link to choose a new one.</p>
+    <form class="auth-form" id="authForgot" novalidate><div class="field"><label for="au_fe">Email</label><input class="input" id="au_fe" type="email" value="${esc(AUTH.email || c.email)}"></div><div class="err-msg" id="auErr" role="alert"></div><button class="btn primary big">Send reset link</button></form>`;
+  else if (st === 'sent') f = `<div class="auth-ok">${ic('mail', 26)}</div><h1>Check your inbox</h1><p class="muted">If <b>${esc(AUTH.email)}</b> has an account, a reset link is on its way. It expires in 30 minutes.</p><button class="btn big" data-auth="back">Back to sign in</button>`;
+  else if (st === 'sso') f = `<div class="auth-spin" aria-hidden="true"></div><h1>Signing you in…</h1><p class="muted">Waiting for ${esc(AUTH.sso)} to confirm your account.</p>`;
+  a.innerHTML = `<div class="auth-art">${c.art()}</div><div class="auth-panel"><div class="auth-card">${f}</div><div class="auth-foot">${c.foot}</div></div>`;
+  const ae = () => document.getElementById('auErr');
+  const form = document.getElementById('authForm');
+  if (form) { form.onsubmit = e => { e.preventDefault(); const em = document.getElementById('au_e').value.trim(), pw = document.getElementById('au_p').value;
+      if (!/^\S+@\S+\.\S+$/.test(em)) { ae().textContent = 'Enter your email address, like name@school.edu.'; document.getElementById('au_e').focus(); return; }
+      if (!pw) { ae().textContent = 'Enter your password.'; document.getElementById('au_p').focus(); return; }
+      AUTH.email = em; AUTH.step = 'otp'; authRender(); };
+    setTimeout(() => document.getElementById('au_p')?.focus(), 60); }
+  const ff = document.getElementById('authForgot');
+  if (ff) ff.onsubmit = e => { e.preventDefault(); const em = document.getElementById('au_fe').value.trim(); if (!/^\S+@\S+\.\S+$/.test(em)) { ae().textContent = 'Enter the email you sign in with.'; return; } AUTH.email = em; AUTH.step = 'sent'; authRender(); };
+  const otp = document.getElementById('otp');
+  if (otp) { const ins = [...otp.querySelectorAll('input')]; setTimeout(() => ins[0].focus(), 60);
+    ins.forEach((inp, i) => {
+      inp.oninput = () => { inp.value = inp.value.replace(/\D/g, '').slice(-1); if (inp.value && i < 5) ins[i + 1].focus(); if (ins.every(x => x.value)) authVerify(); };
+      inp.onkeydown = e => { if (e.key === 'Backspace' && !inp.value && i > 0) ins[i - 1].focus(); };
+      inp.onpaste = e => { const d = ((e.clipboardData && e.clipboardData.getData('text')) || '').replace(/\D/g, '').slice(0, 6); if (!d) return; e.preventDefault(); d.split('').forEach((ch, k) => { if (ins[k]) ins[k].value = ch; }); ins[Math.min(d.length, 5)].focus(); if (d.length === 6) authVerify(); };
+    }); }
+}
+function authVerify() {
+  const ins = [...document.querySelectorAll('#otp input')];
+  if (ins.some(x => !x.value)) { document.getElementById('auErr').textContent = 'Enter all 6 digits.'; const o = document.getElementById('otp'); o.classList.remove('shake'); void o.offsetWidth; o.classList.add('shake'); return; }
+  const b = document.getElementById('auVerify'); if (b.disabled) return; b.disabled = true; b.textContent = 'Verifying…'; setTimeout(authDone, 700);
+}
+function authDone() { const c = AUTH.cfg; try { sessionStorage.setItem('quad-auth-' + c.key, '1'); } catch (e) {} const a = document.getElementById('auth'); a.classList.add('leave'); setTimeout(() => { a.hidden = true; a.classList.remove('leave'); a.innerHTML = ''; }, 450); if (c.done) c.done(); }
+function authSignOut(cfg) { try { sessionStorage.removeItem('quad-auth-' + cfg.key); } catch (e) {} AUTH.email = ''; authOpen(cfg); }
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-auth]'); if (!el) return; e.preventDefault(); const k = el.dataset.auth;
+  if (k === 'sso') { AUTH.sso = el.dataset.v; AUTH.step = 'sso'; authRender(); setTimeout(authDone, 1300); }
+  if (k === 'forgot') { const em = document.getElementById('au_e'); if (em) AUTH.email = em.value.trim(); AUTH.step = 'forgot'; authRender(); }
+  if (k === 'back') { AUTH.step = 'signin'; authRender(); }
+  if (k === 'show') { const p = document.getElementById('au_p'); p.type = p.type === 'password' ? 'text' : 'password'; el.textContent = p.type === 'password' ? 'Show' : 'Hide'; }
+  if (k === 'verify') authVerify();
+  if (k === 'toast') toast(el.dataset.v);
+});
+
+/* ---------- School branding: logo upload, colour from logo, live mock-ups, publishing ---------- */
+const BRAND_SWATCHES = ['#2F6FED','#12A594','#0E7490','#8B5CF6','#BE185D','#C2410C','#B45309','#14203A'];
+const shortOf = n => (n || '').replace(/[^A-Za-z ]/g, '').split(' ').filter(w => w && /[A-Z]/.test(w[0])).map(w => w[0]).slice(0, 3).join('') || 'SCH';
+function readLogo(file, cb) {
+  if (!file || !/^image\//.test(file.type)) { toast('Choose a PNG, JPG or SVG image'); return; }
+  const fr = new FileReader();
+  fr.onload = () => { const img = new Image(); img.onload = () => {
+    const m = 256, k = Math.min(1, m / Math.max(img.width || m, img.height || m)), c = document.createElement('canvas');
+    c.width = Math.max(1, Math.round((img.width || m) * k)); c.height = Math.max(1, Math.round((img.height || m) * k));
+    const x = c.getContext('2d'); x.drawImage(img, 0, 0, c.width, c.height);
+    let url = fr.result; try { url = c.toDataURL('image/png'); } catch (e) {}
+    cb(url, dominantColor(x, c.width, c.height)); }; img.onerror = () => toast('That image could not be opened. Try a PNG or JPG.'); img.src = fr.result; };
+  fr.readAsDataURL(file);
+}
+function dominantColor(x, w, h) {
+  try { const d = x.getImageData(0, 0, w, h).data, b = {};
+    for (let i = 0; i < d.length; i += 16) { const r = d[i], g = d[i + 1], bl = d[i + 2], a = d[i + 3]; if (a < 128) continue;
+      const mx = Math.max(r, g, bl), mn = Math.min(r, g, bl); if (mx > 235 && mn > 225) continue; if (mx < 30 || mx - mn < 35) continue;
+      const k = (r >> 5) + ',' + (g >> 5) + ',' + (bl >> 5); const e = b[k] || (b[k] = [0, 0, 0, 0]); e[0] += r; e[1] += g; e[2] += bl; e[3]++; }
+    const top = Object.values(b).sort((p, q) => q[3] - p[3])[0]; if (!top) return null;
+    const hx = v => Math.round(v / top[3]).toString(16).padStart(2, '0'); return '#' + hx(top[0]) + hx(top[1]) + hx(top[2]);
+  } catch (e) { return null; }
+}
+function sampleCrest(name, color) {
+  const c = document.createElement('canvas'); c.width = c.height = 256; const x = c.getContext('2d');
+  x.beginPath(); x.moveTo(128, 14); x.lineTo(228, 46); x.lineTo(228, 120); x.bezierCurveTo(228, 186, 180, 224, 128, 244); x.bezierCurveTo(76, 224, 28, 186, 28, 120); x.lineTo(28, 46); x.closePath();
+  const g = x.createLinearGradient(0, 0, 256, 256); g.addColorStop(0, color); g.addColorStop(1, '#0B1222'); x.fillStyle = g; x.fill();
+  x.lineWidth = 8; x.strokeStyle = '#ffffff'; x.globalAlpha = .9; x.stroke(); x.globalAlpha = 1;
+  x.fillStyle = '#fff'; x.font = '700 30px system-ui, sans-serif'; x.textAlign = 'center'; x.fillText('★', 128, 78);
+  const sh = shortOf(name).slice(0, 3); x.font = `800 ${sh.length > 2 ? 64 : 80}px system-ui, sans-serif`; x.textBaseline = 'middle'; x.fillText(sh, 128, 140);
+  x.font = '600 16px system-ui, sans-serif'; x.globalAlpha = .85; x.fillText('EST. 2026', 128, 196);
+  return c.toDataURL('image/png');
+}
+function brandMock(name, color, logo, short) {
+  const mark = logo ? `<img src="${logo}" alt="">` : `<span>${esc(short || shortOf(name))}</span>`;
+  return `<div class="bm" style="--sc:${color}">
+    <figure><div class="bm-frame bm-login"><div class="bm-art"><div class="bm-logo">${mark}</div><b>${esc(name || 'Your school')}</b><i></i><i class="s"></i></div><div class="bm-form"><b>Welcome back</b><s></s><s></s><em></em></div></div><figcaption>Staff sign-in</figcaption></figure>
+    <figure><div class="bm-frame bm-admin"><div class="bm-rail"><div class="bm-logo">${mark}</div><i class="on"></i><i></i><i></i><i></i></div><div class="bm-main"><span></span><span></span><span></span><span class="w"></span></div></div><figcaption>Staff portal</figcaption></figure>
+    <figure class="bm-phone-wrap"><div class="bm-lock"><div class="bm-logo lg">${mark}</div>${esc(name || 'Your school')}</div><div class="bm-phone"><div class="bm-hero"><div class="bm-logo">${mark}</div></div><s></s><s></s><s></s><div class="bm-tb"><i></i><i></i><i></i><i></i></div></div></figure>
+    <figcaption style="grid-column:1/-1">Parent app · sign-in and home</figcaption></div>`;
+}
+function publishSchool(t) {
+  try { localStorage.setItem('quad-school', JSON.stringify({name:t.name, short:t.short || shortOf(t.name), sub:t.sub, color:t.color, logo:t.logo || null})); return true; }
+  catch (e) { toast('This browser blocked saving the branding, so the other apps can’t see it. Try a normal (not private) window.'); return false; }
+}
+const logoDrop = (id, logo) => `<label class="drop" id="${id}Drop">${logo ? `<img src="${logo}" alt="Logo preview">` : `<span class="drop-ic">${ic('plus',20)}</span>`}<span><b>${logo ? 'Replace logo' : 'Upload your logo'}</b><small>Drop a file here or click · PNG, JPG or SVG, square works best</small></span><input type="file" accept="image/*" id="${id}" hidden></label>`;
+function bindLogoDrop(id, onFile) {
+  const inp = document.getElementById(id), zone = document.getElementById(id + 'Drop'); if (!inp) return;
+  inp.onchange = () => inp.files[0] && onFile(inp.files[0]);
+  zone.ondragover = e => { e.preventDefault(); zone.classList.add('over'); }; zone.ondragleave = () => zone.classList.remove('over');
+  zone.ondrop = e => { e.preventDefault(); zone.classList.remove('over'); const f = e.dataTransfer.files[0]; if (f) onFile(f); };
+}
+const platformAuth = () => ({
+  key:'platform', title:'Sign in to Quad', sub:'For Quad staff. Schools sign in at their own address, like <b>colombo-intl.quad.school</b>.', email:'prishan@quad.school', emailLabel:'Quad email', sso:['Google Workspace'],
+  below:'', foot:'Every sign-in to the platform console is recorded in the audit log.',
+  art:() => `<div class="auth-brand"><div class="auth-logo q">${document.querySelector('.rail .logo').innerHTML}</div><div><b>Quad</b><small>Platform console</small></div></div>
+    <div class="auth-quote"><h2>Run every school on Quad from one place.</h2><p>Schools, plans, security and support for ${tenants.length} schools in 5 countries.</p></div>
+    <div class="auth-stats"><div><b>${tenants.length}</b><span>schools</span></div><div><b>13,892</b><span>students</span></div><div><b>99.98%</b><span>uptime</span></div></div>`,
+  done:() => toast('Welcome back, Prishan')
+});
+function goSchoolApp(t, app) {
+  if (!publishSchool(t)) return;
+  try { sessionStorage.removeItem('quad-impersonate'); sessionStorage.removeItem(app === 'parent' ? 'quad-auth-parent' : 'quad-auth-school'); } catch (e) {}
+  location.href = app === 'parent' ? 'parent.html' : 'admin.html';
+}
+
 /* ---------- Router ---------- */
 const NAV = [
   {g:'Platform', items:[['overview','Overview','home'],['tenants','Schools','tenants', tenants.length],['plans','Plans & billing','dollar'],['audit','Audit log','log']]}
@@ -1416,9 +1636,11 @@ function afterRender() {
   const sr = document.getElementById('seatRange'); if (sr) sr.oninput = () => { const t = tenants.find(x => x.id === +sr.dataset.id); t.limit = +sr.value; document.getElementById('seatLbl').textContent = fmt(t.limit); };
   const ps = document.getElementById('planSel'); if (ps) ps.onchange = () => { const t = tenants.find(x => x.id === +ps.dataset.id); t.plan = ps.value.split(' ')[0]; t.mods = new Set([...t.mods, ...PLANS[t.plan].mods]); route(); toast(`Changed to ${t.plan}. Billing updates from the next invoice.`); };
   const bp = document.getElementById('brandPick'); if (bp) bp.oninput = () => setBrand(+bp.dataset.id, bp.value);
+  if (document.getElementById('tLogoFile')) { const t = curTenant(); bindLogoDrop('tLogoFile', f => readLogo(f, (url, dom) => { S.brandLogo[t.id] = url; if (dom) S.brandColor[t.id] = dom; route(); toast(dom ? 'Logo added. We picked a brand colour from it. Publish to apply.' : 'Logo added. Publish to apply.'); })); }
   const br = document.getElementById('bulkRole'); if (br) br.onchange = () => { if (!br.value) return; const t = tenants.find(x => S.route === 'tenant-' + x.id); const n = S.sel.size; tenantUsers(t).forEach(u => { if (S.sel.has(u.id)) u.role = br.value; }); S.sel.clear(); route(); toast(`${n} users moved to ${roleName(t, br.value)}`); };
 }
-function setBrand(id, c) { const t = tenants.find(x => x.id === id); S.brandColor[id] = c; document.getElementById('brandLogo').style.background = c; document.getElementById('brandPrev').innerHTML = brandPreview(t, c); document.querySelectorAll('.swatches button').forEach(b => b.classList.toggle('on', b.dataset.c === c)); }
+function brandDraft(t) { S.brandLogo = S.brandLogo || {}; return {color: S.brandColor[t.id] || t.color, logo: t.id in S.brandLogo ? S.brandLogo[t.id] : t.logo}; }
+function setBrand(id, c) { const t = tenants.find(x => x.id === id); S.brandColor[id] = c; const d = brandDraft(t); document.getElementById('brandPrev').innerHTML = brandMock(t.name, d.color, d.logo, t.short || shortOf(t.name)); document.querySelectorAll('.swatches button').forEach(b => b.classList.toggle('on', b.dataset.c === c)); }
 const curTenant = () => tenants.find(x => S.route === 'tenant-' + x.id);
 
 /* ---------- Actions ---------- */
@@ -1438,11 +1660,11 @@ const ACT = {
   wBack: () => { saveWiz(); S.wiz.step--; tenantWizard(); },
   wNext: () => { saveWiz(); const w = S.wiz, err = document.getElementById('wErr');
     if (w.step === 0) { if (!w.w_name || !w.w_sub) { err.textContent = 'Enter the school name and a subdomain to continue.'; return; } if (!/^[a-z0-9-]{3,30}$/.test(w.w_sub) || tenants.some(t => t.sub === w.w_sub)) { err.textContent = 'Choose an available subdomain. Use 3–30 lowercase letters, numbers or hyphens.'; return; } }
-    if (w.step === 2 && (!w.w_aname || !/^\S+@\S+\.\S+$/.test(w.w_aemail || ''))) { err.textContent = 'Enter the admin’s name and a valid email address.'; return; }
+    if (w.step === 3 && (!w.w_aname || !/^\S+@\S+\.\S+$/.test(w.w_aemail || ''))) { err.textContent = 'Enter the admin’s name and a valid email address.'; return; }
     w.step++; tenantWizard(); },
   wPlan: el => { saveWiz(); S.wiz.w_plan = el.dataset.p; S.wiz.mods = new Set(PLANS[el.dataset.p].mods); tenantWizard(); },
   wMod: el => { saveWiz(); const w = S.wiz; w.mods = w.mods || new Set(PLANS[w.w_plan || 'Growth'].mods); w.mods.has(el.dataset.k) ? w.mods.delete(el.dataset.k) : w.mods.add(el.dataset.k); el.classList.toggle('on'); el.closest('.mod').classList.toggle('off'); },
-  impersonate: el => { const t = tenants.find(x => x.id === +el.dataset.id); try { sessionStorage.setItem('quad-impersonate', JSON.stringify({name:t.name, sub:t.sub, by:'Prishan Maduka'})); } catch (e) {} AUDIT.unshift(['Prishan Maduka', `opened ${t.name} as school admin (support)`, t.sub, 'Just now', 'tenant']); location.href = 'admin.html'; },
+  impersonate: el => { const t = tenants.find(x => x.id === +el.dataset.id); publishSchool(t); try { sessionStorage.setItem('quad-impersonate', JSON.stringify({name:t.name, sub:t.sub, by:'Prishan Maduka'})); } catch (e) {} AUDIT.unshift(['Prishan Maduka', `opened ${t.name} as school admin (support)`, t.sub, 'Just now', 'tenant']); location.href = 'admin.html'; },
   openUser: (el, e) => { if (e && e.target.matches('input')) return; location.hash = `tenant-${el.dataset.tid}-user-${el.dataset.uid}`; },
   invite: el => inviteModal(tenants.find(x => x.id === +el.dataset.id)),
   sendInvite: el => { const t = tenants.find(x => x.id === +el.dataset.id), raw = document.getElementById('inv_e').value.split(/[\s,;]+/).filter(Boolean), bad = raw.filter(e => !/^\S+@\S+\.\S+$/.test(e));
@@ -1468,6 +1690,15 @@ const ACT = {
   confirmDelRole: el => { const t = tenants.find(x => x.id === +el.dataset.id); tenantUsers(t).forEach(u => { if (u.role === S.roleSel) u.role = 'teacher'; }); rolesByTenant[t.id] = tenantRoles(t).filter(r => r.id !== S.roleSel); S.roleSel = 'teacher'; S.dirty = false; closeAll(); route(); toast('Role deleted'); },
   mod: el => { const t = tenants.find(x => x.id === +el.dataset.id), k = el.dataset.k; t.mods.has(k) ? t.mods.delete(k) : t.mods.add(k); route(); toast(`${MODULES.find(m => m[0] === k)[1]} ${t.mods.has(k) ? 'turned on' : 'turned off'} for ${t.name}`); },
   brand: el => setBrand(+el.dataset.id, el.dataset.c),
+  wColor: el => { saveWiz(); S.wiz.w_color = el.dataset.c; S.wiz.picked = false; tenantWizard(); },
+  wCrest: () => { saveWiz(); S.wiz.logo = sampleCrest(S.wiz.w_name || 'New School', S.wiz.w_color || BRAND_SWATCHES[0]); S.wiz.picked = false; tenantWizard(); },
+  wRmLogo: () => { saveWiz(); S.wiz.logo = null; S.wiz.picked = false; tenantWizard(); },
+  tCrest: el => { const t = tenants.find(x => x.id === +el.dataset.id); S.brandLogo = S.brandLogo || {}; S.brandLogo[t.id] = sampleCrest(t.name, brandDraft(t).color); route(); },
+  tRmLogo: el => { S.brandLogo = S.brandLogo || {}; S.brandLogo[+el.dataset.id] = null; route(); },
+  publishBrand: el => { const t = tenants.find(x => x.id === +el.dataset.id), d = brandDraft(t); t.color = d.color; t.logo = d.logo; delete S.brandColor[t.id]; delete S.brandLogo[t.id]; if (publishSchool(t)) { AUDIT.unshift(['Prishan Maduka', `published new branding for ${t.name}`, t.sub, 'Just now', 'tenant']); route(); toast('Published. The staff portal and parent app now use this branding.'); } },
+  openPortal: el => { const t = tenants.find(x => x.id === +el.dataset.id); if (S.brandColor[t.id] || (S.brandLogo && t.id in S.brandLogo)) { const d = brandDraft(t); t.color = d.color; t.logo = d.logo; } goSchoolApp(t, 'portal'); },
+  openParent: el => { const t = tenants.find(x => x.id === +el.dataset.id); if (S.brandColor[t.id] || (S.brandLogo && t.id in S.brandLogo)) { const d = brandDraft(t); t.color = d.color; t.logo = d.logo; } goSchoolApp(t, 'parent'); },
+  signOut: () => authSignOut(platformAuth()),
   sec: el => { const t = tenants.find(x => x.id === +el.dataset.id), s = tenantSec(t); s[el.dataset.k] = !s[el.dataset.k]; route(); toast('Saved'); },
   sso: el => { const t = tenants.find(x => x.id === +el.dataset.id), s = tenantSec(t), k = el.dataset.k; s.sso[k] = !s.sso[k]; route(); toast(s.sso[k] ? `${k === 'google' ? 'Google Workspace' : 'Microsoft 365'} connected. Staff can use it at next sign-in.` : 'Disconnected. Staff will sign in with a password.'); },
   suspend: el => { const t = tenants.find(x => x.id === +el.dataset.id); openModal(`${head('Suspend ' + t.name + '?')}<div class="drawer-b"><p style="margin:0">All ${fmt(tenantUsers(t).length)} staff and ${fmt(Math.round(t.students * .88))} parents will be signed out and can’t sign back in until you reactivate the school. Data is kept.</p><div class="field"><label for="cf">Type <span class="code">${t.sub}</span> to confirm</label><input class="input" id="cf" autocomplete="off"></div><div class="field"><label for="why">Reason (shown to the school admin)</label><select class="input" id="why"><option>Unpaid invoices</option><option>Requested by the school</option><option>Security review</option></select></div></div><div class="drawer-f"><button class="btn" data-act="closeAll">Cancel</button><button class="btn primary" id="cfBtn" data-act="confirmSuspend" data-id="${t.id}" disabled style="background:var(--bad);border-color:var(--bad);opacity:.5">Suspend school</button></div>`);
@@ -1479,7 +1710,7 @@ const ACT = {
   confirmDel: el => { const t = tenants.find(x => x.id === +el.dataset.id); t.status = 'Suspended'; t.health = 'Suspended'; t.name += ' (deleting 4 Nov)'; closeAll(); location.hash = 'tenants'; toast('Scheduled for deletion on 4 November. You can cancel from the school page.'); }
 };
 function confirmLeave() { toast('Save or discard your permission changes first'); return false; }
-function saveWiz() { modal.querySelectorAll('input,select').forEach(i => { if (i.id && i.type !== 'checkbox') S.wiz[i.id] = i.value.trim(); if (i.id === 'w_trial') S.wiz.w_trial = i.checked; }); if (S.wiz.w_sub) S.wiz.w_sub = S.wiz.w_sub.toLowerCase(); }
+function saveWiz() { modal.querySelectorAll('input,select').forEach(i => { if (i.id && i.type !== 'checkbox' && i.type !== 'file') S.wiz[i.id] = i.value.trim(); if (i.id === 'w_trial') S.wiz.w_trial = i.checked; }); if (S.wiz.w_sub) S.wiz.w_sub = S.wiz.w_sub.toLowerCase(); }
 
 document.addEventListener('click', e => {
   const cb = e.target.closest('.usel'); if (cb) { cb.checked ? S.sel.add(cb.dataset.uid) : S.sel.delete(cb.dataset.uid); route(); return; }
@@ -1497,6 +1728,7 @@ document.addEventListener('mousemove', e => { const t = e.target.closest('[data-
 function themeIcon() { const dark = document.documentElement.dataset.theme !== 'light'; const b = document.getElementById('themeBtn'); b.innerHTML = ic(dark ? 'sun' : 'moon'); b.setAttribute('aria-label', dark ? 'Switch to day theme' : 'Switch to night theme'); }
 window.addEventListener('hashchange', () => { if (UK.user) delete UK.user._draft; UK.dirty = false; UK.tab = 'profile'; UK.user = null; UK.ctx = null; if (S.dirty) { S.dirty = false; if (S.permBackup) { const t = tenants.find(x => permsByTenant[x.id] && S.route === 'tenant-' + x.id); if (t) permsByTenant[t.id] = S.permBackup; } S.permBackup = null; } S.q = ''; S.sel.clear(); route(); window.scrollTo(0, 0); });
 themeIcon(); route();
+if (!authSignedIn('platform')) authOpen(platformAuth());
 </script>
 </body>
 </html>
