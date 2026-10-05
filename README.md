@@ -30,7 +30,9 @@ Quad is multi-tenant: every school is a tenant with its own data, subdomain, use
 | Overview | Schools, students on Quad, MRR, uptime, MRR chart, schools needing attention, plan mix, system status, recent activity |
 | Schools | Tenant list with search, plan and status filters, seat usage, modules, region, MRR and health |
 | New school | Four-step wizard: school details with live subdomain availability check, plan and modules, first admin, then an animated provisioning run |
-| School › Users | Staff accounts with role and status filters, invite by email (validated), bulk change role / require two-step sign-in / deactivate, user drawer with role, campus, permission summary, devices, reset password and deactivate |
+| School › Users | Staff accounts with role and status filters, invite by email (validated), bulk change role / require two-step sign-in / deactivate |
+| User profile page | Full page per user: profile, work and preference details with save/discard, access (main role, extra roles, class assignments, combined permissions), sign-in and security (two-step, password reset, devices, sign-in history), activity, notification preferences, sign in as the user for support |
+| New role page | Full-page role builder: name, description, colour, start from an existing role, scope (whole school, campuses, own classes), permission matrix with row/column shortcuts and presets, sensitive access switches, people search, live summary with validation; also used to edit and delete custom roles |
 | School › Roles & permissions | Role list and a module × action matrix (view, create, edit, delete, approve), locked built-in roles, custom roles, save or discard bar |
 | School › Plan & modules | Module switches, plan change, seat slider, live monthly total |
 | School › Branding | Logo, brand colour and live preview of the admin app and parent app, app store name, custom domain |
@@ -39,7 +41,7 @@ Quad is multi-tenant: every school is a tenant with its own data, subdomain, use
 | Support access | "Open as school admin" opens the school's admin app with a support banner; actions are written to the audit log |
 | Plans & billing, Audit log | Plan catalogue, this month's invoices, platform-wide audit log with filters |
 
-The school admin app also has **Settings › Users & roles**, so each school's own admin can invite staff, change roles, deactivate accounts and edit role permissions without the super admin.
+The school admin app also has **Settings › Users & roles**, so each school's own admin can invite staff, change roles, deactivate accounts and edit role permissions without the super admin. It uses the same user profile page (also opened from the avatar in the top bar as *My profile*) and the same new role page.
 
 ### Admin web app (`design/admin.html`)
 

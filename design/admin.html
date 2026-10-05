@@ -334,6 +334,41 @@ td.r,th.r{text-align:right}
   .kv{grid-template-columns:110px 1fr}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+/* User kit: profile page and role builder */
+.uk-sw{width:42px;height:24px;border-radius:12px;background:var(--line-strong);position:relative;border:0;flex:none;transition:background .2s;cursor:pointer}
+.uk-sw::after{content:"";position:absolute;left:3px;top:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.3);transition:transform .2s}
+.uk-sw.on{background:var(--good)}.uk-sw.on::after{transform:translateX(18px)}
+.uk-sw:disabled{opacity:.5;cursor:not-allowed}
+.uk-set{display:flex;align-items:center;gap:14px;padding:13px 18px;border-bottom:1px solid var(--line)}
+.uk-set:last-child{border-bottom:0}
+.uk-set .meta{flex:1;min-width:0}.uk-set .meta b{display:block;font-weight:600}.uk-set .meta small{color:var(--ink-3);font-size:12.5px}
+.uk-bar{position:sticky;bottom:16px;z-index:15;display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--ink);color:var(--surface);border-radius:12px;box-shadow:var(--shadow-lg);animation:tin .2s;flex-wrap:wrap}
+.uk-bar span{flex:1;font-weight:600;min-width:180px}.uk-bar .btn{border-color:transparent}
+.uk-av{position:relative}
+.uk-cam{position:absolute;right:-2px;bottom:-2px;width:28px;height:28px;border-radius:50%;background:var(--brand);color:var(--brand-ink);border:3px solid var(--surface);display:grid;place-items:center;padding:0}
+.uk-role{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:20px;align-items:start}
+.uk-main{display:flex;flex-direction:column;gap:20px;min-width:0}
+.uk-aside{position:sticky;top:84px;min-width:0}
+.uk-n{width:26px;height:26px;border-radius:50%;background:var(--brand-soft);color:var(--brand);display:grid;place-items:center;font-weight:800;font-size:13px;flex:none}
+.uk-swatches{display:flex;gap:8px;flex-wrap:wrap}
+.uk-swatches button{width:30px;height:30px;border-radius:50%;border:3px solid var(--surface);box-shadow:0 0 0 1px var(--line-strong);padding:0}
+.uk-swatches button.on{box-shadow:0 0 0 2px var(--ink)}
+.uk-scope{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.uk-radio{display:flex;gap:10px;align-items:flex-start;border:1.5px solid var(--line);border-radius:10px;padding:12px;cursor:pointer;background:var(--surface)}
+.uk-radio.on{border-color:var(--brand);background:var(--brand-soft)}
+.uk-radio input{margin-top:3px;accent-color:var(--brand)}
+.uk-radio b{display:block;font-size:13.5px}.uk-radio small{color:var(--ink-3);font-size:12px;line-height:1.4;display:block;margin-top:2px}
+.uk-warn{display:flex;gap:8px;align-items:flex-start;background:var(--warn-soft);color:var(--warn);border-radius:8px;padding:10px 12px;font-size:12.5px;font-weight:600}
+.uk-warn svg{flex:none;margin-top:1px}
+.uk-res{position:absolute;left:0;right:0;top:calc(100% + 4px);background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow-lg);z-index:10;overflow:hidden}
+.uk-res:empty{display:none}
+.uk-res button{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:8px 12px;border:0;background:none}
+.uk-res button:hover{background:var(--surface-2)}
+.uk-res b{display:block;font-weight:600;font-size:13px}.uk-res small{color:var(--ink-3);font-size:12px}
+.perm td,.perm th{text-align:center}.perm td:first-child,.perm th:first-child{text-align:left}
+.perm input{width:18px;height:18px;accent-color:var(--brand)}
+@media (max-width:1100px){.uk-role{grid-template-columns:minmax(0,1fr)}.uk-aside{position:static}}
+@media (max-width:700px){.uk-scope{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -352,7 +387,7 @@ td.r,th.r{text-align:right}
       <select class="yearpick" id="yearpick" aria-label="Academic year"><option>2026/27 · Term 1</option><option>2025/26 · Term 3</option></select>
       <button class="iconbtn" data-act="theme" aria-label="Toggle theme" id="themeBtn"></button>
       <button class="iconbtn" data-act="notif" aria-label="Notifications"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></svg><i class="dot"></i></button>
-      <div class="me"><div class="av" style="background:#2F6FED">PM</div><div><b>Prishan M.</b><small>Administrator</small></div></div>
+      <div class="me" data-act="go" data-to="user-s0" title="My profile" style="cursor:pointer"><div class="av" style="background:#2F6FED">PM</div><div><b>Prishan M.</b><small>Administrator</small></div></div>
     </header>
     <div id="supportBar"></div>
     <main class="content" id="view"></main>
@@ -398,6 +433,7 @@ const P = {
   settings:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>'
 };
 P.eye = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/>';
+P.trash = '<path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>';
 P.shield = '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>';
 const ic = (n, s=18) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${P[n]||''}</svg>`;
 
@@ -481,7 +517,7 @@ const NAV = [
 ];
 function renderNav() {
   const base = S.route.split('-')[0];
-  const active = base === 'student' ? 'students' : base;
+  const active = base === 'student' ? 'students' : base === 'user' || base === 'role' ? 'users' : base;
   document.getElementById('nav').innerHTML = NAV.map(g => `<div class="nav-group"><div class="nav-label">${g.g}</div>${g.items.map(([k,l,i,c]) =>
     `<a href="#${k}" class="${active===k?'on':''}" title="${l}">${ic(i)}<span>${l}</span>${c?`<em class="count">${c}</em>`:''}</a>`).join('')}</div>`).join('');
 }
@@ -806,28 +842,30 @@ STAFF_ROLES.forEach(([k]) => { rolePerms[k] = {}; PMODS.forEach(([m]) => {
   else if (k === 'teacher' && m === 'sis') v = [1,0,0,0,0]; else if (k === 'counsellor' && ['sis','crm'].includes(m)) v = [1,1,0,0,0]; else if (k === 'frontdesk' && ['sis','attendance'].includes(m)) v = [1,0,0,0,0];
   rolePerms[k][m] = v; }); });
 seed = 41;
-const staff = ['Dilini Ratnayake','Kasun Perera','Anne Fernando','Nadeesha Jayasinghe','Ruwan Mendis','Shanthi Wickramasinghe','Chaminda Herath','Ishani De Alwis','Mohamed Rizvi','Priyanka Bandara','Roshan Silva','Lakmini Gunawardena','Asela Dissanayake','Sachini Abeysekera']
+const staff = ['Prishan Maduka','Kasun Perera','Anne Fernando','Nadeesha Jayasinghe','Ruwan Mendis','Shanthi Wickramasinghe','Chaminda Herath','Ishani De Alwis','Mohamed Rizvi','Priyanka Bandara','Roshan Silva','Lakmini Gunawardena','Asela Dissanayake','Sachini Abeysekera']
   .map((n, i) => ({n, email: n.toLowerCase().replace(/ /g, '.') + '@cis.lk', role: ['admin','finance','admissions','teacher','teacher','principal','teacher','teacher','finance','teacher','frontdesk','counsellor','teacher','teacher'][i],
     status: i === 12 ? 'Invited' : i === 13 ? 'Deactivated' : 'Active', mfa: i < 3 || i === 5 || i === 8 || rnd() > .5, last: ['Now','10 min ago','1 hour ago','Today, 08:05','Yesterday','2 days ago'][i % 6]}));
+staff.forEach((u, i) => { u.id = 's' + i; u.name = u.n; u.campus = i % 3 ? 'Main campus' : 'Primary campus'; u.sso = i % 3 === 0; });
+const ROLE_META = {};
 const roleLabel = k => (STAFF_ROLES.find(r => r[0] === k) || [k, k])[1];
 V.users = () => {
   const t = curTab('usr', 'people');
   if (t === 'people') {
     const rf = S.filter.urole || 'all', q = (S.q || '').toLowerCase();
-    const rows = staff.filter(u => (rf === 'all' || u.role === rf) && (!q || (u.n + u.email).toLowerCase().includes(q)));
+    const rows = staff.filter(u => (rf === 'all' || u.role === rf) && (!q || (u.name + u.email).toLowerCase().includes(q)));
     return `${pageHead('Settings', 'Users & roles', 'Staff accounts for Colombo International School. Parents and students are managed from student records.', `<button class="btn primary" data-act="inviteStaff">${ic('plus',16)}Invite staff</button>`)}
     ${tabs('usr', [['people','People'],['roles','Roles & permissions']])}
     <div class="card"><div class="toolbar"><div class="searchbox">${ic('search',16)}<input class="input" id="usrSearch" placeholder="Search name or email" value="${esc(S.q||'')}"></div>
     <div class="chips">${[['all','Everyone'], ...STAFF_ROLES.map(r => [r[0], r[1]])].map(([k, l]) => `<button class="chip ${rf===k?'on':''}" data-act="filter" data-key="urole" data-val="${k}">${l}<span class="n">${k==='all'?staff.length:staff.filter(u=>u.role===k).length}</span></button>`).join('')}</div></div>
     <div class="tbl-wrap"><table><thead><tr><th>Person</th><th>Role</th><th>Two-step sign-in</th><th>Last active</th><th>Status</th><th></th></tr></thead><tbody>
-    ${rows.map(u => { const i = staff.indexOf(u); return `<tr><td><div class="who">${avatar(u.n,'sm')}<div><b>${u.n}</b><small>${u.email}</small></div></div></td>
-      <td><select class="input inline" data-act-change="setRole" data-i="${i}" aria-label="Role for ${esc(u.n)}" ${u.role==='admin'&&i===0?'disabled title="You can’t change your own role"':''}>${STAFF_ROLES.map(([k, l]) => `<option value="${k}" ${k===u.role?'selected':''}>${l}</option>`).join('')}</select></td>
+    ${rows.map(u => { const i = staff.indexOf(u); return `<tr><td><a class="who" href="#user-${u.id}" style="color:inherit">${avatar(u.name,'sm')}<div><b style="color:var(--brand)">${esc(u.name)}</b><small>${u.email}</small></div></a></td>
+      <td><select class="input inline" data-act-change="setRole" data-i="${i}" aria-label="Role for ${esc(u.name)}" ${u.role==='admin'&&i===0?'disabled title="You can’t change your own role"':''}>${STAFF_ROLES.map(([k, l]) => `<option value="${k}" ${k===u.role?'selected':''}>${l}</option>`).join('')}</select></td>
       <td>${u.mfa ? '<span class="pill t-green">On</span>' : `<span class="pill t-amber">Off</span> <button class="btn sm ghost" data-act="mfaRemind" data-i="${i}">Remind</button>`}</td><td class="muted">${u.status === 'Invited' ? 'Invite sent 2 days ago' : u.last}</td><td>${statusPill(u.status)}</td>
       <td class="r">${i === 0 ? '<span class="muted" style="font-size:12px">You</span>' : `<button class="btn sm" data-act="toggleStaff" data-i="${i}">${u.status === 'Deactivated' ? 'Reactivate' : u.status === 'Invited' ? 'Resend invite' : 'Deactivate'}</button>`}</td></tr>`; }).join('')}
     </tbody></table></div><div class="tbl-foot"><span>${rows.length} of ${staff.length} staff · Your plan includes unlimited staff accounts.</span></div></div>`;
   }
   const r = S.roleSel || 'teacher', sys = STAFF_ROLES.find(x => x[0] === r)[2];
-  return `${pageHead('Settings', 'Users & roles', 'Choose what each role can see and change.', `<button class="btn" data-act="toast" data-msg="New role draft created">${ic('plus',16)}New role</button>`)}
+  return `${pageHead('Settings', 'Users & roles', 'Choose what each role can see and change.', `<a class="btn" href="#role-${r}">${ic(sys ? 'eye' : 'shield',16)}${sys ? 'View role page' : 'Edit role'}</a><a class="btn primary" href="#role-new">${ic('plus',16)}New role</a>`)}
   ${tabs('usr', [['people','People'],['roles','Roles & permissions']])}
   <div class="card"><div class="rolechips">${STAFF_ROLES.map(([k, l, s]) => `<button class="chip ${k===r?'on':''}" data-act="pickRole" data-r="${k}">${l}<span class="n">${staff.filter(u=>u.role===k).length}</span></button>`).join('')}</div>
   <div class="card-b" style="border-bottom:1px solid var(--line)"><h3>${roleLabel(r)}</h3><span class="muted" style="font-size:12.5px">${sys ? 'Built-in role. Its permissions can’t be changed, so the school can’t lock itself out.' : 'Tick what this role can do in each module. Changes apply at the next page load.'}</span></div>
@@ -836,13 +874,270 @@ V.users = () => {
   </tbody></table></div>${S.permDirty ? `<div class="savebar"><span>Unsaved changes to ${roleLabel(r)}</span><button class="btn sm" data-act="permDiscard">Discard</button><button class="btn sm primary" data-act="permSave">Save changes</button></div>` : ''}</div>`;
 };
 
+/* ---------- User kit: user profile page and role builder page (shared by the platform console and the school admin app) ---------- */
+const UK = { tab:'profile', draft:null, draftKey:null, dirty:false, ctx:null, user:null, q:'' };
+const UK_DEPTS = ['Leadership','Primary','Secondary','Finance office','Admissions office','Student services','Front office','IT'];
+const UK_CLASSES = ['Grade 4 – Emerald','Grade 5 – Ruby','Grade 7 – Emerald','Grade 8 – Sapphire','Grade 9 – Sapphire','Grade 10 – Topaz','Grade 11 – Ruby','Grade 12 – Emerald'];
+const UK_COLORS = ['#2F6FED','#12A594','#0E7490','#8B5CF6','#BE185D','#C2410C','#B45309','#4D7C0F'];
+const UK_SENSITIVE = [
+  ['export','Export data','Download student, staff or finance records as spreadsheets'],
+  ['medical','See medical and safeguarding notes','Allergies, health conditions and counsellor notes'],
+  ['salary','See salaries and payroll','Staff pay in the accounting module'],
+  ['refund','Approve refunds and write-offs','Cancel or reduce what a family owes'],
+  ['users','Manage users and roles','Invite staff, change roles and reset passwords']
+];
+const UK_NOTIFY = [['Absence alerts for my classes',[1,1,0]],['New messages from parents',[1,1,0]],['Invoices and payments',[1,0,0]],['Admissions pipeline changes',[0,1,0]],['Weekly summary',[1,0,0]],['Security alerts',[1,1,1]]];
+const ukSeed = s => { let h = 7; for (const c of String(s)) h = (h * 31 + c.charCodeAt(0)) % 2147483647; return () => (h = (h * 16807) % 2147483647) / 2147483647; };
+function ukEnsure(u, ctx) {
+  if (u._p) return u;
+  const r = ukSeed(u.email), parts = u.name.split(' ');
+  const role = u.role, teach = ['teacher','counsellor'].includes(role);
+  u._p = {
+    first: parts[0], last: parts.slice(1).join(' '), display: parts[0],
+    title: {admin:'School administrator', principal:'Principal', finance:'Finance officer', admissions:'Admissions officer', teacher:'Class teacher', counsellor:'School counsellor', frontdesk:'Front desk coordinator'}[role] || 'Staff member',
+    dept: {admin:'Leadership', principal:'Leadership', finance:'Finance office', admissions:'Admissions office', counsellor:'Student services', frontdesk:'Front office'}[role] || (r() > .5 ? 'Secondary' : 'Primary'),
+    phone: '+94 77 ' + String(1000000 + Math.floor(r() * 8999999)).replace(/(\d{3})(\d{4})/, '$1 $2'),
+    empId: 'EMP-' + String(1000 + Math.floor(r() * 8999)), start: `20${15 + Math.floor(r() * 10)}-0${1 + Math.floor(r() * 8)}-1${Math.floor(r() * 9)}`,
+    campus: u.campus || 'Main campus', lang: 'English', tz: 'Asia/Colombo', manager: '',
+    extraRoles: [], classes: teach ? UK_CLASSES.filter(() => r() > .7).slice(0, 3) : [],
+    pwChanged: `${2 + Math.floor(r() * 80)} days ago`, notify: UK_NOTIFY.map(n => n[1].slice()),
+    sessions: u.status === 'Active' ? [['Chrome on Windows','Colombo, Sri Lanka','Active now','112.134.20.8'],['Quad app on iPhone 15','Colombo, Sri Lanka','2 hours ago','112.134.21.40'],['Safari on MacBook','Kandy, Sri Lanka','3 days ago','175.157.4.12']].slice(0, 1 + Math.floor(r() * 3)) : []
+  };
+  if (!u._p.classes.length && teach) u._p.classes = [UK_CLASSES[Math.floor(r() * UK_CLASSES.length)]];
+  return u;
+}
+const ukRoleOf = (ctx, id) => ctx.roles().find(r => r.id === id) || {id, n:id, d:''};
+const ukEffective = (ctx, u) => { const P = ctx.perms(), out = {}; [u.role, ...u._p.extraRoles].forEach(rid => { const p = P[rid]; if (!p) return; ctx.mods.forEach(([m]) => { out[m] = (out[m] || [0,0,0,0,0]).map((v, j) => v || (p[m] ? p[m][j] : 0)); }); }); return out; };
+const ukField = (key, label, val, type='text', extra='') => `<div class="field"><label for="ukf_${key}">${label}</label><input class="input" id="ukf_${key}" data-ukf="${key}" type="${type}" value="${esc(val)}" ${extra}></div>`;
+const ukSelect = (key, label, val, opts) => `<div class="field"><label for="ukf_${key}">${label}</label><select class="input" id="ukf_${key}" data-ukf="${key}">${opts.map(o => { const [v, l] = Array.isArray(o) ? o : [o, o]; return `<option value="${esc(v)}" ${v===val?'selected':''}>${esc(l)}</option>`; }).join('')}</select></div>`;
+const ukSw = (on, attrs) => `<button class="uk-sw ${on?'on':''}" role="switch" aria-checked="${on}" ${attrs}></button>`;
+
+/* ----- User profile page ----- */
+function ukProfilePage(ctx, u) {
+  UK.ctx = ctx; UK.user = u; ukEnsure(u, ctx);
+  const p = u._p, role = ukRoleOf(ctx, u.role), t = UK.tab, me = ctx.isMe && ctx.isMe(u);
+  const tabsHtml = [['profile','Profile'],['access','Access & role'],['security','Sign-in & security'],['activity','Activity'],['notify','Notifications']]
+    .map(([k, l]) => `<button role="tab" class="${t===k?'on':''}" data-uk="tab" data-v="${k}">${l}</button>`).join('');
+  let body = '';
+  if (t === 'profile') body = `<div class="grid g-1-1">
+    <section class="card"><div class="card-h"><h2>Personal details</h2></div><div class="card-b form-grid">
+      ${ukField('first','First name',p.first)}${ukField('last','Last name',p.last)}${ukField('display','Preferred name',p.display)}
+      ${ukField('phone','Mobile',p.phone,'tel')}<div class="field full"><label for="ukf_email">Work email</label><input class="input" id="ukf_email" data-ukf="email" type="email" value="${esc(u.email)}"><small class="muted">Changing this sends a confirmation link to the new address.</small></div>
+    </div></section>
+    <section class="card"><div class="card-h"><h2>Work</h2></div><div class="card-b form-grid">
+      ${ukField('title','Job title',p.title)}${ukSelect('dept','Department',p.dept,UK_DEPTS)}
+      ${ukSelect('campus','Campus',p.campus,['Main campus','Primary campus'])}${ukField('empId','Staff ID',p.empId)}
+      ${ukField('start','Start date',p.start,'date')}${ukSelect('manager','Reports to',p.manager,[['','No one'], ...ctx.users().filter(x => x !== u && ['admin','principal'].includes(x.role)).map(x => [x.name, x.name])])}
+    </div></section>
+    <section class="card"><div class="card-h"><h2>Preferences</h2></div><div class="card-b form-grid">
+      ${ukSelect('lang','Language',p.lang,['English','සිංහල (Sinhala)','தமிழ் (Tamil)'])}${ukSelect('tz','Time zone',p.tz,['Asia/Colombo','Asia/Dubai','Asia/Kolkata','Asia/Singapore','Indian/Maldives'])}
+    </div></section>
+    <section class="card"><div class="card-h"><h2>Emergency contact</h2></div><div class="card-b form-grid">
+      ${ukField('ecName','Name',p.ecName || '', 'text', 'placeholder="e.g. Nimal Perera"')}${ukField('ecPhone','Phone',p.ecPhone || '','tel','placeholder="+94 7X XXX XXXX"')}
+    </div></section></div>`;
+  else if (t === 'access') { const eff = ukEffective(ctx, u), roles = ctx.roles();
+    body = `<div class="grid g-2-1"><section class="card"><div class="card-h"><h2>What ${esc(p.display)} can do</h2><span class="muted" style="font-size:12.5px">Combined from all roles below</span></div>
+      <div class="tbl-wrap"><table class="perm"><thead><tr><th>Module</th>${ctx.acts.map(a => `<th>${a}</th>`).join('')}</tr></thead><tbody>
+      ${ctx.mods.map(([m, n]) => `<tr><td><b style="font-weight:600">${n}</b></td>${ctx.acts.map((a, j) => `<td>${eff[m] && eff[m][j] ? `<span style="color:var(--good)" aria-label="Allowed">${ic('check',16)}</span>` : '<span class="muted" aria-label="Not allowed">–</span>'}</td>`).join('')}</tr>`).join('')}
+      </tbody></table></div></section>
+      <div style="display:flex;flex-direction:column;gap:20px;min-width:0">
+      <section class="card"><div class="card-h"><h2>Roles</h2></div><div class="card-b" style="display:flex;flex-direction:column;gap:14px">
+        <div class="field"><label for="ukRole">Main role</label><select class="input" id="ukRole" data-ukc="role" ${me ? 'disabled' : ''}>${roles.map(r => `<option value="${r.id}" ${r.id===u.role?'selected':''}>${esc(r.n)}</option>`).join('')}</select>${me ? '<small class="muted">You can’t change your own role. Ask another admin.</small>' : ''}</div>
+        <div class="field"><label>Also acting as</label><div class="chips">${p.extraRoles.map(id => `<span class="chip on">${esc(ukRoleOf(ctx, id).n)} <button data-uk="rmExtra" data-v="${id}" aria-label="Remove" style="background:none;border:0;color:inherit;padding:0 0 0 4px">${ic('x',12)}</button></span>`).join('')}
+          <select class="input inline" data-ukc="addExtra" aria-label="Add a role" style="height:30px"><option value="">+ Add role</option>${roles.filter(r => r.id !== u.role && !p.extraRoles.includes(r.id)).map(r => `<option value="${r.id}">${esc(r.n)}</option>`).join('')}</select></div>
+          <small class="muted">Use this for people with two jobs, like a teacher who is also Head of Year.</small></div>
+        <a class="btn sm" href="#${ctx.roleHash(u.role)}" style="align-self:flex-start">${ic('shield',14)}Open ${esc(role.n)} role</a>
+      </div></section>
+      <section class="card"><div class="card-h"><h2>Classes</h2><span class="muted" style="font-size:12.5px">Limits attendance and gradebook to these</span></div><div class="card-b">
+        <div class="chips">${p.classes.map(c => `<span class="chip">${esc(c)} <button data-uk="rmClass" data-v="${esc(c)}" aria-label="Remove ${esc(c)}" style="background:none;border:0;color:inherit;padding:0 0 0 4px">${ic('x',12)}</button></span>`).join('') || '<span class="muted" style="font-size:13px">No classes. This person sees every class their role allows.</span>'}</div>
+        <select class="input" data-ukc="addClass" aria-label="Add a class" style="margin-top:10px"><option value="">+ Add a class</option>${UK_CLASSES.filter(c => !p.classes.includes(c)).map(c => `<option>${c}</option>`).join('')}</select>
+      </div></section></div></div>`; }
+  else if (t === 'security') body = `<div class="grid g-1-1">
+    <section class="card"><div class="card-h"><h2>Sign-in</h2></div>
+      <div class="uk-set"><div class="meta"><b>Sign-in method</b><small>${u.sso ? 'Google Workspace (managed by the school)' : 'Email and password'}</small></div><span class="pill ${u.sso?'t-blue':'t-violet'} plain">${u.sso ? 'Google' : 'Password'}</span></div>
+      <div class="uk-set"><div class="meta"><b>Two-step sign-in</b><small>${u.mfa ? 'Authenticator app · set up 4 months ago' : 'Not set up. Anyone with the password can sign in.'}</small></div>${ukSw(u.mfa, 'data-uk="mfa" aria-label="Two-step sign-in"')}</div>
+      <div class="uk-set"><div class="meta"><b>Password</b><small>Last changed ${p.pwChanged}</small></div><button class="btn sm" data-uk="toast" data-v="Reset link sent to ${esc(u.email)}">Send reset link</button></div>
+      <div class="uk-set"><div class="meta"><b>Recovery codes</b><small>8 of 10 unused</small></div><button class="btn sm" data-uk="toast" data-v="New recovery codes created. The old ones no longer work.">Create new codes</button></div>
+    </section>
+    <section class="card"><div class="card-h"><h2>Signed-in devices</h2>${p.sessions.length > 1 ? '<button class="btn sm" data-uk="revokeAll">Sign out everywhere</button>' : ''}</div>
+      ${p.sessions.map(([d, w, at, ip], i) => `<div class="uk-set"><div class="dot-ic t-blue">${ic(d.includes('app') ? 'phone' : 'grid',16)}</div><div class="meta"><b>${d}</b><small>${w} · ${ip} · ${at}</small></div><button class="btn sm" data-uk="revoke" data-v="${i}">Sign out</button></div>`).join('') || '<div class="card-b muted" style="font-size:13px">Not signed in on any device.</div>'}
+    </section>
+    <section class="card" style="grid-column:1/-1"><div class="card-h"><h2>Sign-in history</h2></div><div class="tbl-wrap"><table><thead><tr><th>When</th><th>Device</th><th>Location</th><th>IP address</th><th>Result</th></tr></thead><tbody>
+      ${[['Today, 08:02','Chrome on Windows','Colombo, LK','112.134.20.8','Success'],['Yesterday, 17:41','Quad app on iPhone','Colombo, LK','112.134.21.40','Success'],['Yesterday, 07:58','Chrome on Windows','Colombo, LK','112.134.20.8','Success'],['3 Oct, 22:14','Firefox on Linux','Lagos, NG','102.89.33.1','Blocked'],['3 Oct, 07:55','Chrome on Windows','Colombo, LK','112.134.20.8','Success']]
+        .map(([w, d, l, ip, r]) => `<tr><td class="num">${w}</td><td>${d}</td><td>${l}</td><td><span class="code">${ip}</span></td><td><span class="pill ${r==='Success'?'t-green':'t-red'}">${r === 'Blocked' ? 'Blocked · wrong code' : r}</span></td></tr>`).join('')}
+    </tbody></table></div></section></div>`;
+  else if (t === 'activity') body = `<section class="card"><div class="card-h"><h2>Recent activity</h2><span class="muted" style="font-size:12.5px">From the audit log</span></div><div class="card-b"><div class="timeline">
+    ${[['Marked attendance','Grade 7 – Emerald · 31 present, 1 absent','Today, 08:14'],['Updated gradebook','Mathematics · Test 2 marks for 32 students','Yesterday, 15:40'],['Replied to a parent','Nimali Perera · transport route','Yesterday, 11:02'],['Signed in','Chrome on Windows · Colombo','Yesterday, 07:58'],['Role changed', `to ${role.n} by ${ctx.adminName}`,'12 Sep'],['Account created','Invited by ' + ctx.adminName, p.start]]
+      .map(([a, b, at]) => `<div><b>${a}</b> · ${b}<small>${at}</small></div>`).join('')}
+  </div></div></section>`;
+  else body = `<section class="card"><div class="card-h"><h2>Notifications</h2><span class="muted" style="font-size:12.5px">What ${esc(p.display)} hears about, and where</span></div><div class="tbl-wrap"><table class="perm"><thead><tr><th>Event</th><th>Email</th><th>Push</th><th>SMS</th></tr></thead><tbody>
+    ${UK_NOTIFY.map(([n], i) => `<tr><td><b style="font-weight:600">${n}</b></td>${[0,1,2].map(j => `<td>${ukSw(p.notify[i][j], `data-uk="notify" data-i="${i}" data-j="${j}" aria-label="${n} by ${['email','push','SMS'][j]}"`)}</td>`).join('')}</tr>`).join('')}
+  </tbody></table></div></section>`;
+  return `<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><a href="#${ctx.backHash}" class="btn sm ghost" data-uk="back">${ic('back',14)}${ctx.backLabel}</a><span class="muted" style="font-size:12.5px">${esc(ctx.name)} › Users › ${esc(u.name)}</span></div>
+  <div class="card"><div class="profile-head"><div class="uk-av">${avatar(u.name,'lg')}<button class="uk-cam" data-uk="toast" data-v="Choose a square photo, at least 400 × 400 px" aria-label="Change photo">${ic('plus',14)}</button></div>
+    <div class="info"><div class="eyebrow">${esc(p.empId)} · ${esc(p.dept)}</div><h1>${esc(u.name)}${me ? ' <span class="pill t-blue plain" style="vertical-align:middle">You</span>' : ''}</h1><div class="muted" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">${esc(p.title)} · <span class="pill t-violet plain">${esc(role.n)}</span><span class="pill ${u.status==='Active'?'t-green':u.status==='Invited'?'t-blue':'t-red'}">${u.status}</span></div></div>
+    <div class="facts"><div><b>${u.last && u.status === 'Active' ? esc(u.last) : '–'}</b>Last active</div><div><b>${u.mfa ? 'On' : 'Off'}</b>Two-step sign-in</div><div><b class="num">${p.classes.length}</b>Classes</div><div><b class="num">${p.sessions.length}</b>Devices</div></div>
+    <div class="chips">${ctx.canImpersonate && u.status === 'Active' ? `<button class="btn" data-uk="impersonate">${ic('eye',16)}Sign in as ${esc(p.display)}</button>` : ''}<button class="btn" data-uk="toast" data-v="Reset link sent to ${esc(u.email)}">Reset password</button>${me ? '' : `<button class="btn ${u.status==='Deactivated'?'primary':'danger'}" data-uk="status">${u.status === 'Deactivated' ? 'Reactivate' : u.status === 'Invited' ? 'Cancel invite' : 'Deactivate'}</button>`}</div></div>
+    <div class="tabs" role="tablist">${tabsHtml}</div></div>
+  ${body}
+  ${UK.dirty ? `<div class="uk-bar" role="status"><span>Unsaved changes to ${esc(p.display)}’s profile</span><button class="btn sm" data-uk="discard">Discard</button><button class="btn sm primary" data-uk="saveProfile">Save changes</button></div>` : ''}`;
+}
+
+/* ----- Role builder page ----- */
+function ukRolePage(ctx, roleId) {
+  UK.ctx = ctx;
+  const key = ctx.key + ':' + (roleId || 'new');
+  const existing = roleId ? ctx.roles().find(r => r.id === roleId) : null;
+  if (UK.draftKey !== key) {
+    const base = existing ? existing.id : 'teacher', P = ctx.perms();
+    UK.draft = { name: existing ? existing.n : '', desc: existing ? existing.d : '', color: existing && existing.color || UK_COLORS[1], from: base, scope: existing && existing.scope || 'school',
+      campuses: ['Main campus'], perms: JSON.parse(JSON.stringify(P[base] || {})), sensitive: Object.assign({}, existing && existing.sensitive || {}),
+      people: existing ? ctx.users().filter(u => u.role === existing.id).map(u => u.id) : [] };
+    ctx.mods.forEach(([m]) => { if (!UK.draft.perms[m]) UK.draft.perms[m] = [0,0,0,0,0]; });
+    UK.draftKey = key; UK.q = '';
+  }
+  const d = UK.draft, ro = existing && existing.system;
+  const presets = [['none','No access'],['read','Read-only'],['standard','View, create and edit'],['full','Full access']];
+  return `<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><a href="#${ctx.rolesHash}" class="btn sm ghost" data-uk="backRoles">${ic('back',14)}Roles & permissions</a><span class="muted" style="font-size:12.5px">${esc(ctx.name)} › Roles › ${existing ? esc(existing.n) : 'New role'}</span></div>
+  <div class="page-head"><div class="grow"><h1>${existing ? (ro ? esc(existing.n) : 'Edit ' + esc(existing.n)) : 'New role'}</h1><div class="muted" style="margin-top:4px">${ro ? 'Built-in role. You can look, but its permissions are fixed so the school can’t lock itself out.' : 'A role is a set of permissions you give to a group of staff. You can change it later.'}</div></div></div>
+  <div class="uk-role">
+    <div class="uk-main">
+      <section class="card"><div class="card-h"><span class="uk-n">1</span><h2>Name and look</h2></div><div class="card-b form-grid">
+        <div class="field full"><label for="ukr_name">Role name</label><input class="input" id="ukr_name" data-ukr="name" value="${esc(d.name)}" placeholder="e.g. Head of Year" ${ro?'disabled':''}><div class="err-msg" id="ukrNameMsg"></div></div>
+        <div class="field full"><label for="ukr_desc">What is this role for?</label><textarea class="input" id="ukr_desc" data-ukr="desc" rows="2" placeholder="e.g. Leads a year group: sees all students in the year, approves absences and contacts parents" ${ro?'disabled':''}>${esc(d.desc)}</textarea></div>
+        <div class="field"><label>Colour</label><div class="uk-swatches">${UK_COLORS.map(c => `<button style="background:${c}" class="${c===d.color?'on':''}" data-uk="color" data-v="${c}" aria-label="Colour ${c}" ${ro?'disabled':''}></button>`).join('')}</div></div>
+        ${existing ? '' : `<div class="field"><label for="ukr_from">Start from</label><select class="input" id="ukr_from" data-ukc="from">${ctx.roles().map(r => `<option value="${r.id}" ${r.id===d.from?'selected':''}>${esc(r.n)}</option>`).join('')}<option value="__none" ${d.from==='__none'?'selected':''}>Blank (no permissions)</option></select></div>`}
+      </div></section>
+      <section class="card"><div class="card-h"><span class="uk-n">2</span><h2>Where it applies</h2></div><div class="card-b uk-scope">
+        ${[['school','Whole school','Everything in every campus, within the permissions below.'],['campus','Selected campuses','Only students, staff and money in the campuses you pick.'],['classes','Their own classes','Only the classes assigned on each person’s profile. Best for teaching roles.']]
+          .map(([k, l, s]) => `<label class="uk-radio ${d.scope===k?'on':''}"><input type="radio" name="ukscope" value="${k}" data-ukc="scope" ${d.scope===k?'checked':''} ${ro?'disabled':''}><span><b>${l}</b><small>${s}</small></span></label>`).join('')}
+        ${d.scope === 'campus' ? `<div class="chips" style="grid-column:1/-1">${['Main campus','Primary campus'].map(c => `<label class="chip ${d.campuses.includes(c)?'on':''}"><input type="checkbox" hidden data-ukc="campus" value="${c}" ${d.campuses.includes(c)?'checked':''}>${c}</label>`).join('')}</div>` : ''}
+      </div></section>
+      <section class="card"><div class="card-h"><span class="uk-n">3</span><h2>Permissions</h2>${ro ? '' : `<div class="chips">${presets.map(([k, l]) => `<button class="chip" data-uk="preset" data-v="${k}">${l}</button>`).join('')}</div>`}</div>
+        <div class="tbl-wrap"><table class="perm"><thead><tr><th>Module</th>${ctx.acts.map((a, j) => `<th><label style="display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer">${a}<input type="checkbox" data-ukp="col" data-j="${j}" ${ctx.mods.every(([m]) => d.perms[m][j]) ? 'checked' : ''} ${ro?'disabled':''} aria-label="${a} in every module"></label></th>`).join('')}<th>All</th></tr></thead><tbody>
+        ${ctx.mods.map(([m, n]) => `<tr><td><b style="font-weight:600">${n}</b><div class="muted" style="font-size:11.5px">${ukLevel(d.perms[m], ctx)}</div></td>${ctx.acts.map((a, j) => `<td><input type="checkbox" data-ukp="cell" data-m="${m}" data-j="${j}" ${d.perms[m][j]?'checked':''} ${ro?'disabled':''} aria-label="${a} ${n}"></td>`).join('')}<td><input type="checkbox" data-ukp="row" data-m="${m}" ${d.perms[m].every(Boolean)?'checked':''} ${ro?'disabled':''} aria-label="Everything in ${n}"></td></tr>`).join('')}
+        </tbody></table></div>
+        <div class="tbl-foot"><span>Ticking Create, Edit, Delete or Approve also ticks View. Unticking View clears the row.</span></div></section>
+      <section class="card"><div class="card-h"><span class="uk-n">4</span><h2>Sensitive access</h2><span class="muted" style="font-size:12.5px">Off unless you turn it on</span></div>
+        ${UK_SENSITIVE.map(([k, l, s]) => `<div class="uk-set"><div class="dot-ic t-amber">${ic('alert',16)}</div><div class="meta"><b>${l}</b><small>${s}</small></div>${ukSw(!!d.sensitive[k], `data-uk="sens" data-v="${k}" aria-label="${l}" ${ro?'disabled':''}`)}</div>`).join('')}</section>
+      <section class="card"><div class="card-h"><span class="uk-n">5</span><h2>People with this role</h2><span class="muted" style="font-size:12.5px" id="ukPeopleCount">${d.people.length} selected</span></div><div class="card-b" style="display:flex;flex-direction:column;gap:12px">
+        ${ro ? '' : `<div style="position:relative"><div class="searchbox" style="max-width:none">${ic('search',16)}<input class="input" id="ukPeopleQ" placeholder="Search staff to add" autocomplete="off" value="${esc(UK.q)}"></div><div id="ukPeopleRes" class="uk-res"></div></div>`}
+        <div class="chips" id="ukPeople">${ukPeopleChips(ctx)}</div>
+        <small class="muted">Adding someone replaces their current main role. They keep any extra roles from their profile.</small></div></section>
+    </div>
+    <aside class="uk-aside" id="ukAside">${ukAside(ctx, existing)}</aside>
+  </div>`;
+}
+function ukLevel(row, ctx) { const n = row.filter(Boolean).length; return n === 0 ? 'No access' : n === ctx.acts.length ? 'Full access' : n === 1 && row[0] ? 'View only' : ctx.acts.filter((_, j) => row[j]).join(', '); }
+function ukPeopleChips(ctx) { const d = UK.draft; return d.people.map(id => { const u = ctx.users().find(x => x.id === id); return u ? `<span class="chip on" style="display:inline-flex;align-items:center;gap:6px">${avatar(u.name,'sm')}${esc(u.name)}<button data-uk="rmPerson" data-v="${esc(id)}" aria-label="Remove ${esc(u.name)}" style="background:none;border:0;color:inherit;padding:0">${ic('x',12)}</button></span>` : ''; }).join('') || '<span class="muted" style="font-size:13px">Nobody yet.</span>'; }
+function ukAside(ctx, existing) {
+  const d = UK.draft, ro = existing && existing.system, mods = ctx.mods.filter(([m]) => d.perms[m].some(Boolean)), total = ctx.mods.reduce((a, [m]) => a + d.perms[m].filter(Boolean).length, 0), sens = UK_SENSITIVE.filter(([k]) => d.sensitive[k]);
+  const err = ukNameError(ctx, existing);
+  return `<div class="card"><div class="card-b" style="display:flex;flex-direction:column;gap:14px">
+    <div class="eyebrow">Summary</div>
+    <div style="display:flex;gap:10px;align-items:center"><span style="width:14px;height:14px;border-radius:4px;background:${d.color};flex:none"></span><b style="font:700 18px var(--f-display)">${esc(d.name) || '<span class="muted">Untitled role</span>'}</b></div>
+    ${d.desc ? `<p class="muted" style="margin:0;font-size:13px">${esc(d.desc)}</p>` : ''}
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center">${[[total,'Permissions'],[mods.length,'Modules'],[d.people.length,'People']].map(([v, l]) => `<div class="inv" style="padding:10px 4px"><b class="num" style="font:700 20px var(--f-display);display:block">${v}</b><small class="muted">${l}</small></div>`).join('')}</div>
+    <div style="font-size:13px;display:flex;flex-direction:column;gap:4px">${mods.map(([m, n]) => `<div style="display:flex;justify-content:space-between;gap:8px"><span>${n}</span><span class="muted" style="text-align:right">${ukLevel(d.perms[m], ctx)}</span></div>`).join('') || '<span class="muted">No permissions yet. Pick a preset or tick boxes in step 3.</span>'}</div>
+    <div style="font-size:13px"><b>Applies to:</b> ${{school:'Whole school', campus:'Selected campuses (' + d.campuses.join(', ') + ')', classes:'Their own classes'}[d.scope]}</div>
+    ${sens.length ? `<div class="uk-warn">${ic('alert',16)}<span>Sensitive: ${sens.map(s => s[1].toLowerCase()).join(', ')}. Every use is written to the audit log.</span></div>` : ''}
+    ${ro ? `<a class="btn" href="#${ctx.rolesHash}" data-uk="backRoles">Back to roles</a>` : `<div class="err-msg" id="ukrErr">${UK.showErr && err ? err : ''}</div>
+    <button class="btn primary" data-uk="saveRole">${existing ? 'Save role' : 'Create role'}</button><a class="btn" href="#${ctx.rolesHash}" data-uk="cancelRole">Cancel</a>
+    ${existing ? `<button class="btn danger" data-uk="deleteRole">${ic('trash',14)}Delete role</button>` : ''}`}
+  </div></div>`;
+}
+function ukNameError(ctx, existing) { const n = UK.draft.name.trim(); if (!n) return 'Give the role a name.'; if (ctx.roles().some(r => r.n.toLowerCase() === n.toLowerCase() && (!existing || r.id !== existing.id))) return `There is already a role called “${n}”. Choose another name.`; return ''; }
+const ukRefreshAside = () => { const pc = document.getElementById('ukPeopleCount'); if (pc && UK.draft) pc.textContent = UK.draft.people.length + ' selected'; const a = document.getElementById('ukAside'); if (a) a.innerHTML = ukAside(UK.ctx, UK.draftKey.endsWith(':new') ? null : UK.ctx.roles().find(r => UK.draftKey.endsWith(':' + r.id))); };
+const ukExisting = () => UK.draftKey && !UK.draftKey.endsWith(':new') ? UK.ctx.roles().find(r => UK.draftKey.endsWith(':' + r.id)) : null;
+function ukPreset(k, ctx) { const v = {none:[0,0,0,0,0], read:[1,0,0,0,0], standard:[1,1,1,0,0], full:[1,1,1,1,1]}[k]; ctx.mods.forEach(([m]) => UK.draft.perms[m] = v.slice()); }
+
+/* ----- Events ----- */
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-uk]'); if (!el || !UK.ctx) return;
+  const ctx = UK.ctx, u = UK.user, a = el.dataset.uk, v = el.dataset.v;
+  if (el.tagName === 'BUTTON') e.preventDefault();
+  if (a === 'tab') { if (UK.dirty) return ctx.toast('Save or discard your changes first'); UK.tab = v; ctx.rerender(); }
+  if (a === 'toast') ctx.toast(v);
+  if (a === 'back' || a === 'backRoles' || a === 'cancelRole') { e.preventDefault(); if (a === 'back' && UK.dirty) return ctx.toast('Save or discard your changes first'); UK.tab = 'profile'; UK.draftKey = null; UK.showErr = false; a === 'back' ? ctx.goBack() : ctx.goRoles(); }
+  if (a === 'discard') { delete u._draft; UK.dirty = false; ctx.rerender(); ctx.toast('Changes discarded'); }
+  if (a === 'saveProfile') { const f = u._draft || {};
+    if ('email' in f && !/^\S+@\S+\.\S+$/.test(f.email)) return ctx.toast('Check the email address. It should look like name@school.edu.');
+    Object.entries(f).forEach(([k, val]) => { if (k === 'email') u.email = val; else u._p[k] = val; });
+    if ('first' in f || 'last' in f) u.name = (u._p.first + ' ' + u._p.last).trim();
+    delete u._draft; UK.dirty = false; ctx.audit(`updated the profile of ${u.name}`); ctx.rerender(); ctx.toast(f.email ? `Saved. A confirmation link was sent to ${f.email}.` : 'Profile saved'); }
+  if (a === 'mfa') { u.mfa = !u.mfa; ctx.rerender(); ctx.toast(u.mfa ? 'Two-step sign-in required at next sign-in' : 'Two-step sign-in turned off'); }
+  if (a === 'revoke') { u._p.sessions.splice(+v, 1); ctx.rerender(); ctx.toast('Device signed out'); }
+  if (a === 'revokeAll') { u._p.sessions = []; ctx.rerender(); ctx.toast(`${u._p.display} is signed out everywhere`); }
+  if (a === 'notify') { const p = u._p.notify[+el.dataset.i]; p[+el.dataset.j] = p[+el.dataset.j] ? 0 : 1; el.classList.toggle('on'); el.setAttribute('aria-checked', !!p[+el.dataset.j]); }
+  if (a === 'status') { u.status = u.status === 'Deactivated' ? 'Active' : 'Deactivated'; u.last = u.status === 'Active' ? 'Reactivated just now' : 'Deactivated just now'; if (u.status === 'Deactivated') u._p.sessions = []; ctx.audit(`${u.status === 'Active' ? 'reactivated' : 'deactivated'} ${u.name}`); ctx.rerender(); ctx.toast(u.status === 'Active' ? `${u.name} can sign in again` : `${u.name} is signed out and can no longer sign in`); }
+  if (a === 'impersonate') ctx.impersonate(u);
+  if (a === 'rmExtra') { u._p.extraRoles = u._p.extraRoles.filter(x => x !== v); ctx.rerender(); ctx.toast('Role removed'); }
+  if (a === 'rmClass') { u._p.classes = u._p.classes.filter(x => x !== v); ctx.rerender(); }
+  if (a === 'color') { UK.draft.color = v; document.querySelectorAll('.uk-swatches button').forEach(b => b.classList.toggle('on', b.dataset.v === v)); ukRefreshAside(); }
+  if (a === 'preset') { ukPreset(v, ctx); ctx.rerender(); }
+  if (a === 'sens') { UK.draft.sensitive[v] = !UK.draft.sensitive[v]; el.classList.toggle('on'); ukRefreshAside(); }
+  if (a === 'addPerson') { if (!UK.draft.people.includes(v)) UK.draft.people.push(v); UK.q = ''; const q = document.getElementById('ukPeopleQ'); q.value = ''; document.getElementById('ukPeopleRes').innerHTML = ''; document.getElementById('ukPeople').innerHTML = ukPeopleChips(ctx); ukRefreshAside(); q.focus(); }
+  if (a === 'rmPerson') { UK.draft.people = UK.draft.people.filter(x => x !== v); document.getElementById('ukPeople').innerHTML = ukPeopleChips(ctx); ukRefreshAside(); }
+  if (a === 'saveRole') { const ex = ukExisting(), err = ukNameError(ctx, ex); UK.showErr = true;
+    if (err) { ukRefreshAside(); document.getElementById('ukrNameMsg').textContent = err; document.getElementById('ukr_name').focus(); return; }
+    const d = UK.draft, role = ex || {id: 'r' + Date.now().toString(36)};
+    Object.assign(role, {n: d.name.trim(), d: d.desc.trim() || 'Custom role', color: d.color, scope: d.scope, sensitive: d.sensitive});
+    if (!ex) ctx.addRole(role); else if (ctx.updateRole) ctx.updateRole(role); ctx.setPerms(role.id, d.perms);
+    const moved = ctx.users().filter(u => d.people.includes(u.id) && u.role !== role.id); moved.forEach(u => u.role = role.id);
+    if (ex) ctx.users().forEach(u => { if (u.role === role.id && !d.people.includes(u.id)) u.role = 'teacher'; });
+    ctx.audit(`${ex ? 'updated' : 'created'} the role ${role.n}`); UK.draftKey = null; UK.showErr = false; ctx.goRoles(role.id);
+    ctx.toast(`${ex ? 'Saved' : 'Created'} “${role.n}”${moved.length ? ` · ${moved.length} ${moved.length === 1 ? 'person' : 'people'} moved to it` : ''}`); }
+  if (a === 'deleteRole') { const ex = ukExisting(); if (!ex) return; const n = ctx.users().filter(u => u.role === ex.id).length;
+    if (!el.dataset.sure) { el.dataset.sure = 1; el.innerHTML = n ? `Delete and move ${n} to Teacher?` : 'Click again to delete'; return; }
+    ctx.users().forEach(u => { if (u.role === ex.id) u.role = 'teacher'; }); ctx.removeRole(ex.id); ctx.audit(`deleted the role ${ex.n}`); UK.draftKey = null; ctx.goRoles('teacher'); ctx.toast(`Deleted “${ex.n}”`); }
+});
+document.addEventListener('input', e => {
+  if (!UK.ctx) return;
+  const f = e.target.dataset.ukf; if (f && UK.user) { const u = UK.user; u._draft = u._draft || {}; u._draft[f] = e.target.value; if (!UK.dirty) { UK.dirty = true; const bar = document.createElement('div'); bar.className = 'uk-bar'; bar.setAttribute('role','status'); bar.innerHTML = `<span>Unsaved changes to ${esc(u._p.display)}’s profile</span><button class="btn sm" data-uk="discard">Discard</button><button class="btn sm primary" data-uk="saveProfile">Save changes</button>`; document.getElementById('view').appendChild(bar); } return; }
+  const r = e.target.dataset.ukr; if (r) { UK.draft[r] = e.target.value; if (r === 'name') { const m = document.getElementById('ukrNameMsg'); if (m) m.textContent = UK.showErr || UK.draft.name ? ukNameError(UK.ctx, ukExisting()).replace('Give the role a name.', UK.showErr ? 'Give the role a name.' : '') : ''; } ukRefreshAside(); return; }
+  if (e.target.id === 'ukPeopleQ') { UK.q = e.target.value; const q = UK.q.toLowerCase().trim(), box = document.getElementById('ukPeopleRes');
+    box.innerHTML = q ? (UK.ctx.users().filter(u => !UK.draft.people.includes(u.id) && (u.name + u.email).toLowerCase().includes(q)).slice(0, 6).map(u => `<button data-uk="addPerson" data-v="${esc(u.id)}">${avatar(u.name,'sm')}<span><b>${esc(u.name)}</b><small>${esc(ukRoleOf(UK.ctx, u.role).n)}</small></span></button>`).join('') || '<div class="muted" style="padding:10px 12px;font-size:13px">No staff match.</div>') : ''; }
+});
+document.addEventListener('change', e => {
+  if (!UK.ctx) return;
+  const c = e.target.dataset.ukc, ctx = UK.ctx, u = UK.user;
+  if (c === 'role') { const old = ukRoleOf(ctx, u.role).n; u.role = e.target.value; u._p.extraRoles = u._p.extraRoles.filter(x => x !== u.role); ctx.audit(`changed role of ${u.name} from ${old} to ${ukRoleOf(ctx, u.role).n}`); ctx.rerender(); ctx.toast(`${u.name} is now ${ukRoleOf(ctx, u.role).n}`); }
+  if (c === 'addExtra' && e.target.value) { u._p.extraRoles.push(e.target.value); ctx.rerender(); ctx.toast(`Added ${ukRoleOf(ctx, e.target.value).n}`); }
+  if (c === 'addClass' && e.target.value) { u._p.classes.push(e.target.value); ctx.rerender(); }
+  if (c === 'from') { const v = e.target.value, P = ctx.perms(); UK.draft.from = v; UK.draft.perms = v === '__none' ? {} : JSON.parse(JSON.stringify(P[v])); ctx.mods.forEach(([m]) => { if (!UK.draft.perms[m]) UK.draft.perms[m] = [0,0,0,0,0]; }); ctx.rerender(); ctx.toast(v === '__none' ? 'Cleared all permissions' : `Copied permissions from ${ukRoleOf(ctx, v).n}`); }
+  if (c === 'scope') { UK.draft.scope = e.target.value; ctx.rerender(); }
+  if (c === 'campus') { const d = UK.draft, v = e.target.value; d.campuses = e.target.checked ? [...new Set([...d.campuses, v])] : d.campuses.filter(x => x !== v); ctx.rerender(); }
+  const p = e.target.dataset.ukp; if (p) { const d = UK.draft, on = e.target.checked;
+    if (p === 'cell') { const row = d.perms[e.target.dataset.m], j = +e.target.dataset.j; row[j] = on ? 1 : 0; if (j === 0 && !on) row.fill(0); if (j > 0 && on) row[0] = 1; }
+    if (p === 'row') d.perms[e.target.dataset.m] = on ? [1,1,1,1,1] : [0,0,0,0,0];
+    if (p === 'col') { const j = +e.target.dataset.j; ctx.mods.forEach(([m]) => { const row = d.perms[m]; row[j] = on ? 1 : 0; if (j === 0 && !on) row.fill(0); if (j > 0 && on) row[0] = 1; }); }
+    const y = window.scrollY; ctx.rerender(); window.scrollTo(0, y); }
+});
+window.addEventListener('beforeunload', e => { if (UK.dirty) { e.preventDefault(); e.returnValue = ''; } });
+
+function schoolCtx() { return {
+  key:'school', name:'Colombo International School', adminName:'Prishan Maduka', mods:PMODS, acts:PACTS,
+  users:() => staff, perms:() => rolePerms,
+  roles:() => STAFF_ROLES.map(([k, l, sy]) => ({id:k, n:l, system:!!sy, d:(ROLE_META[k] || {}).d || {admin:'Full access to the school', principal:'Everything except system settings', finance:'Fees, invoices and accounts', admissions:'Enquiries, applications and CRM', teacher:'Classes, attendance and gradebook', counsellor:'Wellbeing and conduct', frontdesk:'Visitors, pickups and messages'}[k] || 'Custom role', ...(ROLE_META[k] || {})})),
+  addRole:r => { STAFF_ROLES.push([r.id, r.n, false]); ROLE_META[r.id] = {d:r.d, color:r.color, scope:r.scope, sensitive:r.sensitive}; },
+  updateRole:r => { const e = STAFF_ROLES.find(x => x[0] === r.id); if (e) e[1] = r.n; ROLE_META[r.id] = {d:r.d, color:r.color, scope:r.scope, sensitive:r.sensitive}; },
+  removeRole:id => { const i = STAFF_ROLES.findIndex(x => x[0] === id); if (i > -1) STAFF_ROLES.splice(i, 1); delete rolePerms[id]; },
+  setPerms:(id, pm) => { rolePerms[id] = JSON.parse(JSON.stringify(pm)); },
+  roleHash:id => 'role-' + id, rolesHash:'users', backHash:'users', backLabel:'Users & roles',
+  goBack:() => { S.tab.usr = 'people'; location.hash = 'users'; },
+  goRoles:id => { S.tab.usr = 'roles'; if (id) S.roleSel = id; if (location.hash === '#users') route(); else location.hash = 'users'; },
+  rerender:() => route(), toast, audit:() => {}, canImpersonate:false, isMe:u => u.id === 's0'
+}; }
 /* ---------- Router ---------- */
 function route() {
   const h = (location.hash || '#dashboard').slice(1);
   S.route = h || 'dashboard';
   const [base, ...rest] = S.route.split('-');
   const view = document.getElementById('view');
+  UK.ctx = null;
   if (base === 'student' && rest.length) view.innerHTML = V.student(rest.join('-'));
+  else if (base === 'user') { const u = staff.find(x => x.id === rest.join('-')); view.innerHTML = u ? ukProfilePage(schoolCtx(), u) : V.users(); }
+  else if (base === 'role') view.innerHTML = ukRolePage(schoolCtx(), rest[0] === 'new' ? null : rest.join('-'));
   else view.innerHTML = (V[base] || V.dashboard)();
   renderNav(); afterRender(); closeAll(); document.getElementById('app').classList.remove('mobile-open');
 }
@@ -1024,10 +1319,10 @@ const ACT = {
   inviteStaff: () => openModal(`${head('Invite staff', 'They’ll get an email to set up their account')}<form class="drawer-b" data-form="staffInvite"><div class="field"><label for="si_e">Email addresses</label><textarea class="input" id="si_e" rows="3" placeholder="name@cis.lk, another@cis.lk"></textarea></div><div class="field"><label for="si_r">Role</label><select class="input" id="si_r">${STAFF_ROLES.map(([k, l]) => `<option value="${k}" ${k==='teacher'?'selected':''}>${l}</option>`).join('')}</select></div><div class="err-msg" id="siErr"></div></form><div class="drawer-f"><button class="btn" data-act="closeAll">Cancel</button><button class="btn primary" data-act="sendStaffInvite">${ic('send',16)}Send invites</button></div>`),
   sendStaffInvite: () => { const raw = document.getElementById('si_e').value.split(/[\s,;]+/).filter(Boolean), bad = raw.filter(e => !/^\S+@\S+\.\S+$/.test(e));
     if (!raw.length || bad.length) { document.getElementById('siErr').textContent = raw.length ? `Check ${bad.join(', ')}. It should look like name@cis.lk.` : 'Enter at least one email address.'; return; }
-    const role = document.getElementById('si_r').value; raw.forEach(e => staff.unshift({n: e.split('@')[0].split(/[._]/).map(w => w[0].toUpperCase() + w.slice(1)).join(' '), email:e, role, status:'Invited', mfa:false, last:''}));
+    const role = document.getElementById('si_r').value; raw.forEach((e, k) => { const nm = e.split('@')[0].split(/[._]/).map(w => w[0].toUpperCase() + w.slice(1)).join(' '); staff.unshift({id:'s' + Date.now().toString(36) + k, n:nm, name:nm, email:e, role, status:'Invited', mfa:false, last:'', campus:'Main campus', sso:false}); });
     closeAll(); S.tab.usr = 'people'; route(); toast(`${raw.length} invite${raw.length > 1 ? 's' : ''} sent as ${roleLabel(role)}`); },
-  toggleStaff: el => { const u = staff[+el.dataset.i]; if (u.status === 'Invited') { toast(`Invite resent to ${u.email}`); return; } u.status = u.status === 'Deactivated' ? 'Active' : 'Deactivated'; route(); toast(u.status === 'Deactivated' ? `${u.n} can no longer sign in` : `${u.n} can sign in again`); },
-  mfaRemind: el => toast(`Reminder sent to ${staff[+el.dataset.i].n} to turn on two-step sign-in`),
+  toggleStaff: el => { const u = staff[+el.dataset.i]; if (u.status === 'Invited') { toast(`Invite resent to ${u.email}`); return; } u.status = u.status === 'Deactivated' ? 'Active' : 'Deactivated'; route(); toast(u.status === 'Deactivated' ? `${u.name} can no longer sign in` : `${u.name} can sign in again`); },
+  mfaRemind: el => toast(`Reminder sent to ${staff[+el.dataset.i].name} to turn on two-step sign-in`),
   pickRole: el => { if (S.permDirty) { toast('Save or discard your changes first'); return; } S.roleSel = el.dataset.r; route(); },
   rperm: el => { if (!S.permBackup) S.permBackup = JSON.parse(JSON.stringify(rolePerms)); const p = rolePerms[S.roleSel || 'teacher'][el.dataset.m], j = +el.dataset.j; p[j] = el.checked ? 1 : 0; if (j === 0 && !el.checked) p.fill(0); if (j > 0 && el.checked) p[0] = 1; S.permDirty = true; route(); },
   permSave: () => { S.permDirty = false; S.permBackup = null; route(); toast(`Permissions for ${roleLabel(S.roleSel || 'teacher')} saved`); },
@@ -1044,7 +1339,7 @@ document.addEventListener('click', e => {
   ACT[a](el, e);
 });
 document.addEventListener('change', e => {
-  if (e.target.dataset.actChange === 'setRole') { const u = staff[+e.target.dataset.i]; u.role = e.target.value; toast(`${u.n} is now ${roleLabel(u.role)}`); return; }
+  if (e.target.dataset.actChange === 'setRole') { const u = staff[+e.target.dataset.i]; u.role = e.target.value; toast(`${u.name} is now ${roleLabel(u.role)}`); return; }
   const f = e.target.dataset.filter; if (f) { S.filter[f] = e.target.value; route(); }
 });
 document.addEventListener('input', e => { if (e.target.matches('[data-gb]')) recalcGB(); });
@@ -1069,7 +1364,7 @@ document.addEventListener('mousemove', e => {
   tip.style.left = x + 'px'; tip.style.top = y + 'px';
 });
 function themeIcon() { const r = document.documentElement; const dark = r.dataset.theme ? r.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches; document.getElementById('themeBtn').innerHTML = ic(dark ? 'sun' : 'moon'); }
-window.addEventListener('hashchange', () => { S.q = ''; route(); window.scrollTo(0, 0); });
+window.addEventListener('hashchange', () => { if (UK.user) delete UK.user._draft; UK.dirty = false; UK.tab = 'profile'; UK.user = null; UK.ctx = null; S.q = ''; route(); window.scrollTo(0, 0); });
 (() => { let imp = null; try { imp = JSON.parse(sessionStorage.getItem('quad-impersonate') || 'null'); } catch (e) {}
   if (!imp) return;
   document.getElementById('supportBar').innerHTML = `<div class="support" role="status">${ic('eye',16)}<span>Support view: you’re in <b>${esc(imp.name)}</b> as ${esc(imp.by)} from Quad. Everything you do here is logged in the school’s audit log.</span><button data-act="exitSupport">Exit to platform</button></div>`;
