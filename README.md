@@ -47,6 +47,9 @@ Based on the iSAMS iParent feature set: one login for all of a parent's children
 - **More**: calendar, news, staff directory, contact-details update, notification preferences, Face ID, dark mode, language, sign out
 - **Report an absence** form
 - **Prototype panel** to simulate absence alerts, rewards, new invoices and teacher messages as push notifications
+- **Live and interactive**: school stories (tap, hold to pause, swipe down, heart reactions), a "right now in class" card with a live countdown, a live school-bus tracker with an animated map and stop-by-stop alerts, a QR pickup pass that changes every 5 minutes, a canteen wallet with top-ups and a daily limit, and slide-to-pay with confetti
+- **Gestures**: swipe the Home card to switch child, pull to refresh, drag from the left edge to go back, swipe conversations for actions, drag sheets down to close, swipe push banners away
+- **Chat**: quick replies, "Seen" receipts and a typing indicator
 
 ## Proposed monorepo structure
 
