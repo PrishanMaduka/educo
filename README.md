@@ -9,7 +9,8 @@ Open `design/index.html` in a browser. Each prototype is a single self-contained
 | File | What it is |
 |---|---|
 | `design/index.html` | Launcher with links to both prototypes |
-| `design/admin.html` | Admin web app: dashboard and the six core modules |
+| `design/platform.html` | Platform console for the super admin: schools (tenants), plans, each school's users, roles, modules, branding and security |
+| `design/admin.html` | School admin web app: dashboard, the six core modules, and Users & roles |
 | `design/parent.html` | Parent mobile app in a phone frame, with controls to simulate push notifications |
 | `design/brand.html` | Logo guidelines: construction, colours, app icon and usage |
 | `design/brand/` | Logo files (SVG): full logo, white logo, mark, app icon |
@@ -19,6 +20,26 @@ Both prototypes have light and dark themes and work at phone width. All data in 
 ### Logo
 
 The mark is a ring cut into four arcs (school, teachers, parents, students) around a shared centre, with a tail that turns it into a Q. The lowercase wordmark is drawn with the same stroke as the mark. See `design/brand.html`.
+
+### Platform console (`design/platform.html`)
+
+Quad is multi-tenant: every school is a tenant with its own data, subdomain, users and settings. The super admin works in the platform console, which has a darker rail and a teal accent so it is never confused with a school's own admin app.
+
+| Area | Screens and interactions |
+|---|---|
+| Overview | Schools, students on Quad, MRR, uptime, MRR chart, schools needing attention, plan mix, system status, recent activity |
+| Schools | Tenant list with search, plan and status filters, seat usage, modules, region, MRR and health |
+| New school | Four-step wizard: school details with live subdomain availability check, plan and modules, first admin, then an animated provisioning run |
+| School › Users | Staff accounts with role and status filters, invite by email (validated), bulk change role / require two-step sign-in / deactivate, user drawer with role, campus, permission summary, devices, reset password and deactivate |
+| School › Roles & permissions | Role list and a module × action matrix (view, create, edit, delete, approve), locked built-in roles, custom roles, save or discard bar |
+| School › Plan & modules | Module switches, plan change, seat slider, live monthly total |
+| School › Branding | Logo, brand colour and live preview of the admin app and parent app, app store name, custom domain |
+| School › Sign-in & security | Google and Microsoft single sign-on, two-step sign-in rules, password and session policy, IP allowlist |
+| School › Danger zone | Export data, suspend or reactivate (type the subdomain to confirm), schedule deletion |
+| Support access | "Open as school admin" opens the school's admin app with a support banner; actions are written to the audit log |
+| Plans & billing, Audit log | Plan catalogue, this month's invoices, platform-wide audit log with filters |
+
+The school admin app also has **Settings › Users & roles**, so each school's own admin can invite staff, change roles, deactivate accounts and edit role permissions without the super admin.
 
 ### Admin web app (`design/admin.html`)
 
@@ -62,7 +83,8 @@ quad/
 ├── packages/
 │   ├── ui/           # Shared design tokens and components
 │   ├── db/           # Database schema and migrations (PostgreSQL)
-│   ├── auth/         # Roles: super admin, admin, finance, teacher, parent, student
+│   ├── auth/         # Platform roles (super admin, support) and per-school roles
+│   ├── tenancy/      # Tenant resolution by subdomain, per-tenant schema, plan limits
 │   └── config/       # Shared lint, TypeScript and test config
 └── design/           # Interactive HTML prototypes (this folder)
 ```

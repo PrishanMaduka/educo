@@ -84,7 +84,7 @@ h3{font-size:14px;font-family:var(--f-body);font-weight:700}
 .iconbtn{width:38px;height:38px;border-radius:9px;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;color:var(--ink-2);position:relative;flex:none}
 .iconbtn:hover{background:var(--surface-2);color:var(--ink)}
 .dot{position:absolute;top:7px;right:8px;width:8px;height:8px;border-radius:50%;background:var(--bad);border:2px solid var(--surface)}
-.search{flex:1;max-width:460px;display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--surface-2);border-radius:9px;padding:0 12px;height:38px;color:var(--ink-3);cursor:text}
+.search{flex:1;min-width:0;max-width:460px;display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--surface-2);border-radius:9px;padding:0 12px;height:38px;color:var(--ink-3);cursor:text}
 .search span{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 kbd{font:600 11px var(--f-body);border:1px solid var(--line-strong);border-bottom-width:2px;border-radius:5px;padding:0 5px;color:var(--ink-3);background:var(--surface)}
 .top .spacer{flex:1}
@@ -288,6 +288,14 @@ td.r,th.r{text-align:right}
 .inv .tot td{font-weight:700;border:0;padding-top:12px}
 
 /* Finance */
+.support{display:flex;align-items:center;gap:12px;padding:9px 24px;background:#12A594;color:#fff;font-size:13px;font-weight:600;flex-wrap:wrap}
+.support span{flex:1;min-width:200px}
+.support button{background:rgba(255,255,255,.18);color:#fff;border:1px solid rgba(255,255,255,.4);border-radius:7px;padding:5px 12px;font-weight:700}
+.perm td,.perm th{text-align:center}.perm td:first-child,.perm th:first-child{text-align:left}
+.perm input{width:18px;height:18px;accent-color:var(--brand)}
+.savebar{position:sticky;bottom:0;display:flex;align-items:center;gap:10px;padding:12px 18px;background:var(--ink);color:var(--surface);border-radius:0 0 var(--r) var(--r)}
+.savebar span{flex:1;font-weight:600}
+.rolechips{display:flex;gap:8px;flex-wrap:wrap;padding:14px 18px;border-bottom:1px solid var(--line)}
 .coa div{display:flex;align-items:center;gap:10px;padding:9px 18px;border-bottom:1px solid var(--line);font-size:13px}
 .coa .l1{font-weight:700;background:var(--surface-2)}
 .coa .l2{padding-left:38px}
@@ -346,6 +354,7 @@ td.r,th.r{text-align:right}
       <button class="iconbtn" data-act="notif" aria-label="Notifications"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></svg><i class="dot"></i></button>
       <div class="me"><div class="av" style="background:#2F6FED">PM</div><div><b>Prishan M.</b><small>Administrator</small></div></div>
     </header>
+    <div id="supportBar"></div>
     <main class="content" id="view"></main>
   </div>
 </div>
@@ -388,6 +397,8 @@ const P = {
   heart:'<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21.2l8.8-8.8a5.5 5.5 0 0 0 0-7.8z"/>',
   settings:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>'
 };
+P.eye = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/>';
+P.shield = '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>';
 const ic = (n, s=18) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${P[n]||''}</svg>`;
 
 /* ---------- Seeded sample data ---------- */
@@ -465,7 +476,8 @@ const NAV = [
   {g:'Relationships', items:[['crm','CRM & leads','crm'],['inbox','Communications','msg', 2]]},
   {g:'Student information', items:[['students','Students','student'],['attendance','Attendance','check']]},
   {g:'Learning', items:[['lms','Courses & gradebook','book'],['timetable','Timetable','cal']]},
-  {g:'Finance', items:[['fees','Fees & invoicing','fee'],['finance','Accounting','fin']]}
+  {g:'Finance', items:[['fees','Fees & invoicing','fee'],['finance','Accounting','fin']]},
+  {g:'Settings', items:[['users','Users & roles','shield']]}
 ];
 function renderNav() {
   const base = S.route.split('-')[0];
@@ -520,7 +532,7 @@ const legend = items => `<div class="legend">${items.map(([n, c]) => `<span><i s
 const statusPill = s => {
   const m = {Paid:'t-green','Partially paid':'t-amber',Overdue:'t-red',Draft:'t-violet',Sent:'t-blue',Active:'t-green','On leave':'t-amber',Withdrawn:'t-red',
     New:'t-blue',Contacted:'t-violet','Tour booked':'t-green',Nurturing:'t-amber',Cold:'t-red',Running:'t-green',Scheduled:'t-blue',Completed:'t-violet',
-    'On track':'t-green','At risk':'t-amber','Over budget':'t-red', Submitted:'t-green', Late:'t-amber', Missing:'t-red'};
+    'On track':'t-green','At risk':'t-amber','Over budget':'t-red', Submitted:'t-green', Late:'t-amber', Missing:'t-red', Invited:'t-blue', Deactivated:'t-red'};
   return `<span class="pill ${m[s]||'t-blue'}">${s}</span>`;
 };
 const tabs = (key, list) => { const cur = S.tab[key] || list[0][0]; return `<div class="tabs" role="tablist">${list.map(([k, l]) => `<button role="tab" class="${cur===k?'on':''}" data-act="tab" data-key="${key}" data-val="${k}">${l}</button>`).join('')}</div>`; };
@@ -780,6 +792,50 @@ V.finance = () => {
   ${tabs('fin', [['overview','Overview'],['journal','Journal'],['coa','Chart of accounts'],['budgets','Budgets']])}${body}`;
 };
 
+
+/* ---------- Users & roles (school admin manages their own staff) ---------- */
+const STAFF_ROLES = [['admin','School admin',true],['principal','Principal',true],['finance','Finance officer'],['admissions','Admissions officer'],['teacher','Teacher'],['counsellor','Counsellor'],['frontdesk','Front desk']];
+const PMODS = [['admissions','Admissions'],['crm','CRM & communications'],['sis','Student records'],['attendance','Attendance'],['lms','LMS & gradebook'],['fees','Fees & invoicing'],['finance','Accounting'],['settings','Settings & users']];
+const PACTS = ['View','Create','Edit','Delete','Approve'];
+const rolePerms = {};
+STAFF_ROLES.forEach(([k]) => { rolePerms[k] = {}; PMODS.forEach(([m]) => {
+  let v = [0,0,0,0,0];
+  if (k === 'admin') v = [1,1,1,1,1]; else if (k === 'principal') v = m === 'settings' ? [1,0,0,0,0] : [1,1,1,0,1];
+  else if (k === 'finance' && ['fees','finance'].includes(m)) v = [1,1,1,1,1]; else if (k === 'finance' && m === 'sis') v = [1,0,0,0,0];
+  else if (k === 'admissions' && ['admissions','crm'].includes(m)) v = [1,1,1,0,0]; else if (k === 'teacher' && ['attendance','lms'].includes(m)) v = [1,1,1,0,0];
+  else if (k === 'teacher' && m === 'sis') v = [1,0,0,0,0]; else if (k === 'counsellor' && ['sis','crm'].includes(m)) v = [1,1,0,0,0]; else if (k === 'frontdesk' && ['sis','attendance'].includes(m)) v = [1,0,0,0,0];
+  rolePerms[k][m] = v; }); });
+seed = 41;
+const staff = ['Dilini Ratnayake','Kasun Perera','Anne Fernando','Nadeesha Jayasinghe','Ruwan Mendis','Shanthi Wickramasinghe','Chaminda Herath','Ishani De Alwis','Mohamed Rizvi','Priyanka Bandara','Roshan Silva','Lakmini Gunawardena','Asela Dissanayake','Sachini Abeysekera']
+  .map((n, i) => ({n, email: n.toLowerCase().replace(/ /g, '.') + '@cis.lk', role: ['admin','finance','admissions','teacher','teacher','principal','teacher','teacher','finance','teacher','frontdesk','counsellor','teacher','teacher'][i],
+    status: i === 12 ? 'Invited' : i === 13 ? 'Deactivated' : 'Active', mfa: i < 3 || i === 5 || i === 8 || rnd() > .5, last: ['Now','10 min ago','1 hour ago','Today, 08:05','Yesterday','2 days ago'][i % 6]}));
+const roleLabel = k => (STAFF_ROLES.find(r => r[0] === k) || [k, k])[1];
+V.users = () => {
+  const t = curTab('usr', 'people');
+  if (t === 'people') {
+    const rf = S.filter.urole || 'all', q = (S.q || '').toLowerCase();
+    const rows = staff.filter(u => (rf === 'all' || u.role === rf) && (!q || (u.n + u.email).toLowerCase().includes(q)));
+    return `${pageHead('Settings', 'Users & roles', 'Staff accounts for Colombo International School. Parents and students are managed from student records.', `<button class="btn primary" data-act="inviteStaff">${ic('plus',16)}Invite staff</button>`)}
+    ${tabs('usr', [['people','People'],['roles','Roles & permissions']])}
+    <div class="card"><div class="toolbar"><div class="searchbox">${ic('search',16)}<input class="input" id="usrSearch" placeholder="Search name or email" value="${esc(S.q||'')}"></div>
+    <div class="chips">${[['all','Everyone'], ...STAFF_ROLES.map(r => [r[0], r[1]])].map(([k, l]) => `<button class="chip ${rf===k?'on':''}" data-act="filter" data-key="urole" data-val="${k}">${l}<span class="n">${k==='all'?staff.length:staff.filter(u=>u.role===k).length}</span></button>`).join('')}</div></div>
+    <div class="tbl-wrap"><table><thead><tr><th>Person</th><th>Role</th><th>Two-step sign-in</th><th>Last active</th><th>Status</th><th></th></tr></thead><tbody>
+    ${rows.map(u => { const i = staff.indexOf(u); return `<tr><td><div class="who">${avatar(u.n,'sm')}<div><b>${u.n}</b><small>${u.email}</small></div></div></td>
+      <td><select class="input inline" data-act-change="setRole" data-i="${i}" aria-label="Role for ${esc(u.n)}" ${u.role==='admin'&&i===0?'disabled title="You can’t change your own role"':''}>${STAFF_ROLES.map(([k, l]) => `<option value="${k}" ${k===u.role?'selected':''}>${l}</option>`).join('')}</select></td>
+      <td>${u.mfa ? '<span class="pill t-green">On</span>' : `<span class="pill t-amber">Off</span> <button class="btn sm ghost" data-act="mfaRemind" data-i="${i}">Remind</button>`}</td><td class="muted">${u.status === 'Invited' ? 'Invite sent 2 days ago' : u.last}</td><td>${statusPill(u.status)}</td>
+      <td class="r">${i === 0 ? '<span class="muted" style="font-size:12px">You</span>' : `<button class="btn sm" data-act="toggleStaff" data-i="${i}">${u.status === 'Deactivated' ? 'Reactivate' : u.status === 'Invited' ? 'Resend invite' : 'Deactivate'}</button>`}</td></tr>`; }).join('')}
+    </tbody></table></div><div class="tbl-foot"><span>${rows.length} of ${staff.length} staff · Your plan includes unlimited staff accounts.</span></div></div>`;
+  }
+  const r = S.roleSel || 'teacher', sys = STAFF_ROLES.find(x => x[0] === r)[2];
+  return `${pageHead('Settings', 'Users & roles', 'Choose what each role can see and change.', `<button class="btn" data-act="toast" data-msg="New role draft created">${ic('plus',16)}New role</button>`)}
+  ${tabs('usr', [['people','People'],['roles','Roles & permissions']])}
+  <div class="card"><div class="rolechips">${STAFF_ROLES.map(([k, l, s]) => `<button class="chip ${k===r?'on':''}" data-act="pickRole" data-r="${k}">${l}<span class="n">${staff.filter(u=>u.role===k).length}</span></button>`).join('')}</div>
+  <div class="card-b" style="border-bottom:1px solid var(--line)"><h3>${roleLabel(r)}</h3><span class="muted" style="font-size:12.5px">${sys ? 'Built-in role. Its permissions can’t be changed, so the school can’t lock itself out.' : 'Tick what this role can do in each module. Changes apply at the next page load.'}</span></div>
+  <div class="tbl-wrap"><table class="perm"><thead><tr><th>Module</th>${PACTS.map(a => `<th>${a}</th>`).join('')}</tr></thead><tbody>
+  ${PMODS.map(([m, n]) => `<tr><td><b style="font-weight:600">${n}</b></td>${PACTS.map((a, j) => `<td><input type="checkbox" data-act="rperm" data-m="${m}" data-j="${j}" ${rolePerms[r][m][j]?'checked':''} ${sys?'disabled':''} aria-label="${a} ${n}"></td>`).join('')}</tr>`).join('')}
+  </tbody></table></div>${S.permDirty ? `<div class="savebar"><span>Unsaved changes to ${roleLabel(r)}</span><button class="btn sm" data-act="permDiscard">Discard</button><button class="btn sm primary" data-act="permSave">Save changes</button></div>` : ''}</div>`;
+};
+
 /* ---------- Router ---------- */
 function route() {
   const h = (location.hash || '#dashboard').slice(1);
@@ -791,7 +847,7 @@ function route() {
   renderNav(); afterRender(); closeAll(); document.getElementById('app').classList.remove('mobile-open');
 }
 function afterRender() {
-  bindSearch('appSearch'); bindSearch('stuSearch');
+  bindSearch('appSearch'); bindSearch('stuSearch'); bindSearch('usrSearch');
   if (S.route === 'lms' && curTab('lms','courses') === 'gradebook') recalcGB();
   if (S.route.startsWith('admissions')) bindKanban();
   const m = document.getElementById('msgs'); if (m) m.scrollTop = m.scrollHeight;
@@ -834,7 +890,7 @@ function openDrawer(html) { drawer.innerHTML = html; drawer.classList.add('on');
 function openModal(html) { modal.innerHTML = html; modal.classList.add('on'); scrim.classList.add('on'); setTimeout(() => modal.querySelector('input,select,textarea')?.focus(), 50); }
 function closeAll() { [drawer, modal, scrim, document.getElementById('cmdk'), document.getElementById('notif')].forEach(e => e.classList.remove('on')); drawer.setAttribute('aria-hidden','true'); }
 const head = (title, sub='') => `<div class="drawer-h"><div style="flex:1;min-width:0"><h2>${title}</h2>${sub?`<div class="muted" style="font-size:12.5px">${sub}</div>`:''}</div><button class="iconbtn" data-act="closeAll" aria-label="Close">${ic('x',16)}</button></div>`;
-function toast(msg) { const t = document.createElement('div'); t.className = 'toast'; t.innerHTML = `${ic('check',16)}${esc(msg)}`; document.getElementById('toasts').appendChild(t); setTimeout(() => t.remove(), 2800); }
+function toast(msg) { const t = document.createElement('div'); t.className = 'toast'; t.innerHTML = `${ic('check',16)}${esc(msg)}`; const box = document.getElementById('toasts'); box.appendChild(t); while (box.children.length > 2) box.firstChild.remove(); setTimeout(() => t.remove(), 2800); }
 
 function appDrawer(id) {
   const a = apps.find(x => x.id === id); const si = STAGES.findIndex(s => s.k === a.stage);
@@ -965,6 +1021,18 @@ const ACT = {
   mark: el => { S.register[el.dataset.id] = el.dataset.val; const seg = el.parentElement; seg.querySelectorAll('button').forEach(b => b.className = b === el ? 'on ' + b.dataset.val : '');
     const roster = students.slice(0, 18); ['P','A','L','E'].forEach(k => document.getElementById('cnt-' + k).textContent = roster.filter(s => S.register[s.id] === k).length); },
   markAll: () => { students.slice(0, 18).forEach(s => S.register[s.id] = 'P'); route(); toast('All 18 students marked present'); },
+  inviteStaff: () => openModal(`${head('Invite staff', 'They’ll get an email to set up their account')}<form class="drawer-b" data-form="staffInvite"><div class="field"><label for="si_e">Email addresses</label><textarea class="input" id="si_e" rows="3" placeholder="name@cis.lk, another@cis.lk"></textarea></div><div class="field"><label for="si_r">Role</label><select class="input" id="si_r">${STAFF_ROLES.map(([k, l]) => `<option value="${k}" ${k==='teacher'?'selected':''}>${l}</option>`).join('')}</select></div><div class="err-msg" id="siErr"></div></form><div class="drawer-f"><button class="btn" data-act="closeAll">Cancel</button><button class="btn primary" data-act="sendStaffInvite">${ic('send',16)}Send invites</button></div>`),
+  sendStaffInvite: () => { const raw = document.getElementById('si_e').value.split(/[\s,;]+/).filter(Boolean), bad = raw.filter(e => !/^\S+@\S+\.\S+$/.test(e));
+    if (!raw.length || bad.length) { document.getElementById('siErr').textContent = raw.length ? `Check ${bad.join(', ')}. It should look like name@cis.lk.` : 'Enter at least one email address.'; return; }
+    const role = document.getElementById('si_r').value; raw.forEach(e => staff.unshift({n: e.split('@')[0].split(/[._]/).map(w => w[0].toUpperCase() + w.slice(1)).join(' '), email:e, role, status:'Invited', mfa:false, last:''}));
+    closeAll(); S.tab.usr = 'people'; route(); toast(`${raw.length} invite${raw.length > 1 ? 's' : ''} sent as ${roleLabel(role)}`); },
+  toggleStaff: el => { const u = staff[+el.dataset.i]; if (u.status === 'Invited') { toast(`Invite resent to ${u.email}`); return; } u.status = u.status === 'Deactivated' ? 'Active' : 'Deactivated'; route(); toast(u.status === 'Deactivated' ? `${u.n} can no longer sign in` : `${u.n} can sign in again`); },
+  mfaRemind: el => toast(`Reminder sent to ${staff[+el.dataset.i].n} to turn on two-step sign-in`),
+  pickRole: el => { if (S.permDirty) { toast('Save or discard your changes first'); return; } S.roleSel = el.dataset.r; route(); },
+  rperm: el => { if (!S.permBackup) S.permBackup = JSON.parse(JSON.stringify(rolePerms)); const p = rolePerms[S.roleSel || 'teacher'][el.dataset.m], j = +el.dataset.j; p[j] = el.checked ? 1 : 0; if (j === 0 && !el.checked) p.fill(0); if (j > 0 && el.checked) p[0] = 1; S.permDirty = true; route(); },
+  permSave: () => { S.permDirty = false; S.permBackup = null; route(); toast(`Permissions for ${roleLabel(S.roleSel || 'teacher')} saved`); },
+  permDiscard: () => { Object.assign(rolePerms, S.permBackup); S.permBackup = null; S.permDirty = false; route(); toast('Changes discarded'); },
+  exitSupport: () => { try { sessionStorage.removeItem('quad-impersonate'); } catch (e) {} location.href = 'platform.html#tenant-1'; },
   saveReg: () => { const a = students.slice(0, 18).filter(s => S.register[s.id] === 'A').length; toast(`Register saved · ${a} absence notice${a===1?'':'s'} queued for parents`); }
 };
 function saveWizard() { modal.querySelectorAll('input,select').forEach(i => { if (i.id) S.wizard[i.id] = i.value; }); }
@@ -976,6 +1044,7 @@ document.addEventListener('click', e => {
   ACT[a](el, e);
 });
 document.addEventListener('change', e => {
+  if (e.target.dataset.actChange === 'setRole') { const u = staff[+e.target.dataset.i]; u.role = e.target.value; toast(`${u.n} is now ${roleLabel(u.role)}`); return; }
   const f = e.target.dataset.filter; if (f) { S.filter[f] = e.target.value; route(); }
 });
 document.addEventListener('input', e => { if (e.target.matches('[data-gb]')) recalcGB(); });
@@ -984,6 +1053,7 @@ document.addEventListener('submit', e => {
   if (f === 'reply') { const i = document.getElementById('replyInput'), v = i.value.trim(); if (!v) return; const th = threads.find(t => t.id === S.selectedThread); th.msgs.push({me:true, t:v, at:'Now'}); route(); toast('Reply sent to the parent’s iParent app'); }
   if (f === 'wizard') ACT.wNext();
   if (f === 'lead') ACT.saveLead();
+  if (f === 'staffInvite') ACT.sendStaffInvite();
 });
 document.addEventListener('keydown', e => {
   if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); openCmdk(); }
@@ -1000,6 +1070,10 @@ document.addEventListener('mousemove', e => {
 });
 function themeIcon() { const r = document.documentElement; const dark = r.dataset.theme ? r.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches; document.getElementById('themeBtn').innerHTML = ic(dark ? 'sun' : 'moon'); }
 window.addEventListener('hashchange', () => { S.q = ''; route(); window.scrollTo(0, 0); });
+(() => { let imp = null; try { imp = JSON.parse(sessionStorage.getItem('quad-impersonate') || 'null'); } catch (e) {}
+  if (!imp) return;
+  document.getElementById('supportBar').innerHTML = `<div class="support" role="status">${ic('eye',16)}<span>Support view: you’re in <b>${esc(imp.name)}</b> as ${esc(imp.by)} from Quad. Everything you do here is logged in the school’s audit log.</span><button data-act="exitSupport">Exit to platform</button></div>`;
+  document.querySelector('.brand small').textContent = imp.name; })();
 themeIcon(); route();
 </script>
 </body>

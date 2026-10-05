@@ -1,0 +1,1001 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Quad Platform Console</title>
+<link rel="icon" href="brand/quad-app-icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap">
+<style>
+
+/* Layout: Classe365-style shell. Fixed navy module rail on the left, white top bar, cool-grey canvas with card grid. */
+:root{
+  --canvas:#F2F5FA; --surface:#FFFFFF; --surface-2:#F7F9FC; --line:#E3E8F0; --line-strong:#CBD3E0;
+  --ink:#16213A; --ink-2:#4A5672; --ink-3:#7C879F;
+  --brand:#2F6FED; --brand-ink:#FFFFFF; --brand-soft:#E8F0FE; --brand-strong:#1F55C7;
+  --rail:#14203A; --rail-2:#1C2B4B; --rail-ink:#C5CFE3; --rail-ink-2:#8392B3; --rail-active:#2F6FED;
+  --good:#138A5B; --good-soft:#E3F5EC; --warn:#B26A00; --warn-soft:#FFF2DC; --bad:#C83A2E; --bad-soft:#FDE8E5; --info:#5B4BC4; --info-soft:#EEEBFC;
+  --c1:#2F6FED; --c2:#12A594; --c3:#E8A33D; --c4:#8B5CF6;
+  --shadow:0 1px 2px rgba(20,32,58,.06),0 4px 16px rgba(20,32,58,.05);
+  --shadow-lg:0 12px 40px rgba(20,32,58,.18);
+  --f-display:"Bricolage Grotesque","Plus Jakarta Sans",system-ui,sans-serif;
+  --f-body:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --r:10px; --r-sm:7px;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --canvas:#0E1525; --surface:#151E31; --surface-2:#1A2439; --line:#26324B; --line-strong:#34425F;
+  --ink:#E7ECF6; --ink-2:#AEB8CE; --ink-3:#7D89A3;
+  --brand:#5B8CFF; --brand-ink:#0B1222; --brand-soft:#1C2C52; --brand-strong:#8AACFF;
+  --rail:#0A1020; --rail-2:#131C31; --rail-ink:#C5CFE3; --rail-ink-2:#7584A6; --rail-active:#5B8CFF;
+  --good:#4CC992; --good-soft:#123326; --warn:#F0B357; --warn-soft:#3A2A10; --bad:#FF7A6B; --bad-soft:#3D1A17; --info:#A99BFF; --info-soft:#262046;
+  --c1:#4F86F7; --c2:#1BA898; --c3:#B57A26; --c4:#9575F0;
+  --shadow:0 1px 2px rgba(0,0,0,.3); --shadow-lg:0 12px 40px rgba(0,0,0,.5);
+  color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --canvas:#0E1525; --surface:#151E31; --surface-2:#1A2439; --line:#26324B; --line-strong:#34425F;
+  --ink:#E7ECF6; --ink-2:#AEB8CE; --ink-3:#7D89A3;
+  --brand:#5B8CFF; --brand-ink:#0B1222; --brand-soft:#1C2C52; --brand-strong:#8AACFF;
+  --rail:#0A1020; --rail-2:#131C31; --rail-ink:#C5CFE3; --rail-ink-2:#7584A6; --rail-active:#5B8CFF;
+  --good:#4CC992; --good-soft:#123326; --warn:#F0B357; --warn-soft:#3A2A10; --bad:#FF7A6B; --bad-soft:#3D1A17; --info:#A99BFF; --info-soft:#262046;
+  --c1:#4F86F7; --c2:#1BA898; --c3:#B57A26; --c4:#9575F0;
+  --shadow:0 1px 2px rgba(0,0,0,.3); --shadow-lg:0 12px 40px rgba(0,0,0,.5);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--canvas);color:var(--ink);font:14px/1.5 var(--f-body);-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+a{color:var(--brand);text-decoration:none}
+:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+.num{font-variant-numeric:tabular-nums}
+h1,h2,h3{font-family:var(--f-display);margin:0;text-wrap:balance;letter-spacing:-.01em}
+h1{font-size:24px;line-height:1.2}
+h2{font-size:16px}
+h3{font-size:14px;font-family:var(--f-body);font-weight:700}
+.muted{color:var(--ink-3)}
+.eyebrow{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);font-weight:700}
+
+/* Shell */
+.app{display:grid;grid-template-columns:248px 1fr;min-height:100%;transition:grid-template-columns .2s}
+.app.collapsed{grid-template-columns:72px 1fr}
+.rail{background:var(--rail);color:var(--rail-ink);position:sticky;top:0;height:100vh;display:flex;flex-direction:column;overflow:hidden;z-index:30}
+.brand{display:flex;align-items:center;gap:10px;padding:18px 18px 14px;min-height:64px}
+.logo{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#2F6FED,#12A594);display:grid;place-items:center;flex:none;color:#fff;font:700 17px var(--f-display)}
+.brand b{font:700 18px var(--f-display);color:#fff;white-space:nowrap}
+.brand small{display:block;font-size:11px;color:var(--rail-ink-2);white-space:nowrap}
+.nav{flex:1;overflow-y:auto;padding:6px 10px 16px;scrollbar-width:thin}
+.nav-group{margin-top:14px}
+.nav-label{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--rail-ink-2);padding:0 10px 6px;white-space:nowrap}
+.nav a{display:flex;align-items:center;gap:12px;padding:9px 10px;border-radius:8px;color:var(--rail-ink);font-weight:500;white-space:nowrap;position:relative}
+.nav a:hover{background:var(--rail-2);color:#fff}
+.nav a.on{background:var(--rail-active);color:#fff}
+.nav a svg{flex:none;opacity:.9}
+.nav .count{margin-left:auto;font-size:11px;background:rgba(255,255,255,.12);padding:1px 7px;border-radius:20px}
+.nav a.on .count{background:rgba(255,255,255,.25)}
+.app.collapsed .nav-label,.app.collapsed .nav a span,.app.collapsed .nav .count,.app.collapsed .brand div,.app.collapsed .rail-foot div{display:none}
+.app.collapsed .nav a{justify-content:center}
+.rail-foot{border-top:1px solid var(--rail-2);padding:12px 14px;display:flex;align-items:center;gap:10px}
+.main{min-width:0;display:flex;flex-direction:column}
+.top{position:sticky;top:0;z-index:20;background:var(--surface);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px;padding:10px 24px;min-height:64px}
+.iconbtn{width:38px;height:38px;border-radius:9px;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;color:var(--ink-2);position:relative;flex:none}
+.iconbtn:hover{background:var(--surface-2);color:var(--ink)}
+.dot{position:absolute;top:7px;right:8px;width:8px;height:8px;border-radius:50%;background:var(--bad);border:2px solid var(--surface)}
+.search{flex:1;min-width:0;max-width:460px;display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--surface-2);border-radius:9px;padding:0 12px;height:38px;color:var(--ink-3);cursor:text}
+.search span{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+kbd{font:600 11px var(--f-body);border:1px solid var(--line-strong);border-bottom-width:2px;border-radius:5px;padding:0 5px;color:var(--ink-3);background:var(--surface)}
+.top .spacer{flex:1}
+.yearpick{border:1px solid var(--line);background:var(--surface);border-radius:9px;height:38px;padding:0 10px;font-weight:600;color:var(--ink-2)}
+.me{display:flex;align-items:center;gap:10px;padding-left:6px}
+.me b{display:block;font-size:13px;line-height:1.2}.me small{color:var(--ink-3);font-size:11.5px}
+.av{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:13px;flex:none;color:#fff}
+.av.sm{width:28px;height:28px;font-size:11px}.av.lg{width:72px;height:72px;font-size:24px}
+.content{padding:24px;display:flex;flex-direction:column;gap:20px;max-width:1480px;width:100%}
+.menu-btn{display:none}
+
+/* Generic */
+.page-head{display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap}
+.page-head .grow{flex:1;min-width:220px}
+.crumbs{font-size:12px;color:var(--ink-3);margin-bottom:4px}
+.btn{display:inline-flex;align-items:center;gap:7px;height:36px;padding:0 14px;border-radius:8px;border:1px solid var(--line-strong);background:var(--surface);font-weight:600;font-size:13px;color:var(--ink);white-space:nowrap}
+.btn:hover{background:var(--surface-2)}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:var(--brand-ink)}
+.btn.primary:hover{background:var(--brand-strong);border-color:var(--brand-strong)}
+.btn.ghost{border-color:transparent;background:transparent}
+.btn.sm{height:30px;padding:0 10px;font-size:12px}
+.btn.danger{color:var(--bad)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);min-width:0}
+.card-h{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--line)}
+.card-h h2{flex:1}
+.card-b{padding:16px 18px}
+.grid{display:grid;gap:20px}
+.g-kpi{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+.g-2-1{grid-template-columns:minmax(0,2fr) minmax(0,1fr)}
+.g-1-1{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.kpi{padding:16px 18px;display:flex;gap:14px;align-items:flex-start}
+.kpi .ic{width:42px;height:42px;border-radius:10px;display:grid;place-items:center;flex:none}
+.kpi .v{font:700 24px/1.1 var(--f-display);font-variant-numeric:tabular-nums;margin-top:2px}
+.kpi .l{font-size:12.5px;color:var(--ink-3);font-weight:600}
+.kpi .d{font-size:12px;margin-top:4px;color:var(--ink-3)}
+.up{color:var(--good);font-weight:700}.down{color:var(--bad);font-weight:700}
+.t-blue{background:var(--brand-soft);color:var(--brand)}.t-green{background:var(--good-soft);color:var(--good)}.t-amber{background:var(--warn-soft);color:var(--warn)}.t-violet{background:var(--info-soft);color:var(--info)}.t-red{background:var(--bad-soft);color:var(--bad)}
+.pill{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;padding:2px 9px;border-radius:20px;white-space:nowrap}
+.pill::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.pill.plain::before{display:none}
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:none}
+.tabs button{border:0;background:none;padding:10px 14px;font-weight:600;color:var(--ink-3);border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.tabs button:hover{color:var(--ink)}
+.tabs button.on{color:var(--brand);border-color:var(--brand)}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border:1px solid var(--line-strong);background:var(--surface);border-radius:20px;padding:4px 12px;font-size:12.5px;font-weight:600;color:var(--ink-2)}
+.chip.on{background:var(--ink);border-color:var(--ink);color:var(--surface)}
+.chip .n{opacity:.6;margin-left:4px}
+.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:12px 18px;border-bottom:1px solid var(--line)}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:12px;font-weight:700;color:var(--ink-2)}
+.input,select.input,textarea.input{height:36px;border:1px solid var(--line-strong);border-radius:8px;background:var(--surface);padding:0 11px;min-width:0;width:100%}
+textarea.input{height:auto;padding:9px 11px;resize:vertical}
+.input:focus{outline:2px solid var(--brand-soft);border-color:var(--brand)}
+.input.inline{width:auto}
+.input.err{border-color:var(--bad)}
+.err-msg{color:var(--bad);font-size:12px}
+.searchbox{position:relative;flex:1;min-width:180px;max-width:320px}
+.searchbox svg{position:absolute;left:10px;top:10px;color:var(--ink-3)}
+.searchbox .input{padding-left:34px}
+
+/* Table */
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;font-size:11.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-3);font-weight:700;padding:10px 14px;background:var(--surface-2);border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:middle}
+tr.click{cursor:pointer}
+tr.click:hover td{background:var(--surface-2)}
+td.r,th.r{text-align:right}
+.who{display:flex;align-items:center;gap:10px}
+.who b{display:block;font-weight:600;line-height:1.25}.who small{color:var(--ink-3);font-size:12px}
+.bar{height:6px;border-radius:6px;background:var(--line);overflow:hidden;min-width:60px}
+.bar i{display:block;height:100%;border-radius:6px;background:var(--brand)}
+.tbl-foot{display:flex;align-items:center;gap:10px;padding:10px 18px;color:var(--ink-3);font-size:12.5px}
+.tbl-foot .grow{flex:1}
+
+/* Charts */
+.chart{width:100%;height:auto;display:block;overflow:visible}
+.chart text{fill:var(--ink-3);font:11px var(--f-body)}
+.chart .grid-l{stroke:var(--line);stroke-width:1}
+.chart .hit{fill:transparent}
+.chart .hit:hover{fill:var(--ink);fill-opacity:.05}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--ink-2)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+#tip{position:fixed;pointer-events:none;z-index:100;background:var(--ink);color:var(--surface);font-size:12px;padding:7px 10px;border-radius:7px;box-shadow:var(--shadow-lg);opacity:0;transition:opacity .1s;max-width:240px;line-height:1.4}
+#tip.on{opacity:1}
+
+/* Feed, lists */
+.list{display:flex;flex-direction:column}
+.li{display:flex;gap:12px;padding:12px 18px;border-bottom:1px solid var(--line);align-items:flex-start}
+.li:last-child{border-bottom:0}
+.li .meta{flex:1;min-width:0}
+.li .meta b{font-weight:600}
+.li .meta p{margin:2px 0 0;color:var(--ink-3);font-size:12.5px}
+.li time{font-size:11.5px;color:var(--ink-3);white-space:nowrap}
+.dot-ic{width:32px;height:32px;border-radius:8px;display:grid;place-items:center;flex:none}
+.task{display:flex;align-items:center;gap:10px;padding:10px 18px;border-bottom:1px solid var(--line)}
+.task input{width:17px;height:17px;accent-color:var(--brand)}
+.task.done span{text-decoration:line-through;color:var(--ink-3)}
+.task small{margin-left:auto;color:var(--ink-3);font-size:12px}
+
+/* Kanban */
+.kanban{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(250px,1fr);gap:14px;overflow-x:auto;padding-bottom:8px}
+.col{background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r);display:flex;flex-direction:column;min-height:420px}
+.col-h{display:flex;align-items:center;gap:8px;padding:12px 14px;font-weight:700}
+.col-h i{width:8px;height:8px;border-radius:50%}
+.col-h .n{margin-left:auto;font-size:12px;color:var(--ink-3);background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:0 8px}
+.col-b{flex:1;display:flex;flex-direction:column;gap:10px;padding:0 10px 12px}
+.col.drop{outline:2px dashed var(--brand);outline-offset:-4px;background:var(--brand-soft)}
+.kcard{background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:12px;cursor:grab;box-shadow:var(--shadow)}
+.kcard:hover{border-color:var(--brand)}
+.kcard.dragging{opacity:.4}
+.kcard b{display:block}
+.kcard .row{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:12px;color:var(--ink-3)}
+.kcard .row .grow{flex:1}
+.prio{width:6px;height:6px;border-radius:50%;display:inline-block}
+
+/* Drawer + modal */
+.scrim{position:fixed;inset:0;background:rgba(10,16,32,.45);z-index:60;opacity:0;pointer-events:none;transition:opacity .2s}
+.scrim.on{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(520px,100%);background:var(--surface);z-index:70;transform:translateX(100%);transition:transform .25s cubic-bezier(.2,.8,.2,1);display:flex;flex-direction:column;box-shadow:var(--shadow-lg)}
+.drawer.on{transform:none}
+.drawer-h{display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid var(--line)}
+.drawer-h h2{flex:1}
+.drawer-b{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:18px}
+.drawer-f{padding:14px 20px;border-top:1px solid var(--line);display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
+.modal{position:fixed;left:50%;top:50%;transform:translate(-50%,-48%) scale(.98);width:min(640px,calc(100% - 32px));max-height:calc(100% - 48px);background:var(--surface);border-radius:14px;z-index:80;opacity:0;pointer-events:none;transition:.18s;display:flex;flex-direction:column;box-shadow:var(--shadow-lg)}
+.modal.on{opacity:1;pointer-events:auto;transform:translate(-50%,-50%)}
+.modal .drawer-b{gap:14px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form-grid .full{grid-column:1/-1}
+.steps{display:flex;gap:6px;padding:14px 20px 0}
+.steps div{flex:1;font-size:12px;font-weight:700;color:var(--ink-3)}
+.steps div::before{content:"";display:block;height:4px;border-radius:4px;background:var(--line);margin-bottom:6px}
+.steps div.on{color:var(--brand)}.steps div.on::before{background:var(--brand)}
+.kv{display:grid;grid-template-columns:140px 1fr;gap:8px 12px;font-size:13px}
+.kv dt{color:var(--ink-3)}.kv dd{margin:0;font-weight:600;min-width:0}
+.timeline{display:flex;flex-direction:column;gap:0;border-left:2px solid var(--line);margin-left:6px}
+.timeline div{position:relative;padding:0 0 14px 18px;font-size:13px}
+.timeline div::before{content:"";position:absolute;left:-7px;top:4px;width:12px;height:12px;border-radius:50%;background:var(--surface);border:2px solid var(--brand)}
+.timeline small{display:block;color:var(--ink-3)}
+.checkrow{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px dashed var(--line);font-size:13px}
+.checkrow:last-child{border:0}
+
+/* Command palette */
+.cmdk{position:fixed;left:50%;top:12vh;transform:translateX(-50%);width:min(600px,calc(100% - 32px));background:var(--surface);border-radius:14px;z-index:90;box-shadow:var(--shadow-lg);display:none;overflow:hidden;border:1px solid var(--line)}
+.cmdk.on{display:block}
+.cmdk input{width:100%;border:0;border-bottom:1px solid var(--line);padding:16px 18px;font-size:16px;background:transparent;outline:0}
+.cmdk ul{list-style:none;margin:0;padding:6px;max-height:50vh;overflow:auto}
+.cmdk li{display:flex;gap:10px;align-items:center;padding:9px 12px;border-radius:8px;cursor:pointer}
+.cmdk li small{margin-left:auto;color:var(--ink-3)}
+.cmdk li.on{background:var(--brand-soft);color:var(--brand)}
+
+/* Notifications panel */
+.notif{position:fixed;top:64px;right:16px;width:min(380px,calc(100% - 32px));background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow-lg);z-index:50;display:none}
+.notif.on{display:block}
+
+/* Toast */
+.toasts{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;gap:8px;z-index:120;align-items:center}
+.toast{background:var(--ink);color:var(--surface);padding:10px 16px;border-radius:10px;font-weight:600;font-size:13px;box-shadow:var(--shadow-lg);display:flex;gap:10px;align-items:center;animation:tin .25s}
+@keyframes tin{from{opacity:0;transform:translateY(10px)}}
+
+/* SIS */
+.profile-head{display:flex;gap:20px;align-items:center;padding:20px;flex-wrap:wrap}
+.profile-head .info{flex:1;min-width:220px}
+.profile-head .facts{display:flex;gap:24px;flex-wrap:wrap}
+.profile-head .facts div{font-size:12px;color:var(--ink-3)}.profile-head .facts b{display:block;font-size:15px;color:var(--ink)}
+.heat{display:grid;grid-template-columns:repeat(auto-fill,minmax(22px,1fr));gap:4px}
+.heat span{aspect-ratio:1;border-radius:4px;background:var(--line);max-width:100%}
+.heat .P{background:var(--good);opacity:.85}.heat .A{background:var(--bad)}.heat .L{background:var(--warn)}.heat .E{background:var(--info)}.heat .H{background:transparent;border:1px dashed var(--line-strong)}
+.seg{display:inline-flex;border:1px solid var(--line-strong);border-radius:8px;overflow:hidden}
+.seg button{border:0;background:var(--surface);padding:5px 11px;font-weight:700;font-size:12px;color:var(--ink-3);border-right:1px solid var(--line)}
+.seg button:last-child{border-right:0}
+.seg button.on.P{background:var(--good);color:#fff}.seg button.on.A{background:var(--bad);color:#fff}.seg button.on.L{background:var(--warn);color:#fff}.seg button.on.E{background:var(--info);color:#fff}
+.sgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;padding:16px 18px}
+.scard{border:1px solid var(--line);border-radius:10px;padding:16px;text-align:center;cursor:pointer;background:var(--surface)}
+.scard:hover{border-color:var(--brand);box-shadow:var(--shadow)}
+.scard .av{margin:0 auto 10px;width:56px;height:56px;font-size:18px}
+
+/* LMS */
+.course{overflow:hidden;cursor:pointer}
+.course .cover{height:84px;padding:14px 16px;color:#fff;display:flex;flex-direction:column;justify-content:space-between}
+.course .cover small{opacity:.85;font-weight:600;font-size:11.5px}
+.course .cover b{font:700 17px var(--f-display)}
+.course .cb{padding:14px 16px;display:flex;flex-direction:column;gap:10px;font-size:12.5px;color:var(--ink-3)}
+.tt{display:grid;grid-template-columns:70px repeat(5,minmax(120px,1fr));gap:6px;min-width:760px}
+.tt .h{font-weight:700;font-size:12px;color:var(--ink-3);padding:6px;text-align:center}
+.tt .t{font-size:11.5px;color:var(--ink-3);padding:8px 4px;text-align:right}
+.tt .s{border-radius:8px;padding:8px 10px;font-size:12px;min-height:56px;border-left:3px solid}
+.tt .s b{display:block;font-size:12.5px}
+.tt .brk{grid-column:2/-1;text-align:center;font-size:11.5px;color:var(--ink-3);background:var(--surface-2);border-radius:8px;padding:6px;letter-spacing:.08em;text-transform:uppercase}
+.gb input{width:56px;height:30px;border:1px solid transparent;border-radius:6px;text-align:center;background:transparent;font-variant-numeric:tabular-nums}
+.gb input:hover{border-color:var(--line-strong)}
+.gb input:focus{border-color:var(--brand);background:var(--surface);outline:0}
+.gb td{padding:6px 10px}
+
+/* Fees invoice preview */
+.inv{border:1px solid var(--line);border-radius:10px;padding:18px;background:var(--surface-2)}
+.inv table td{padding:8px 0;border-color:var(--line)}
+.inv .tot td{font-weight:700;border:0;padding-top:12px}
+
+/* Finance */
+.coa div{display:flex;align-items:center;gap:10px;padding:9px 18px;border-bottom:1px solid var(--line);font-size:13px}
+.coa .l1{font-weight:700;background:var(--surface-2)}
+.coa .l2{padding-left:38px}
+.coa .l3{padding-left:62px;color:var(--ink-2)}
+.coa code{font-size:12px;color:var(--ink-3);width:54px}
+.coa .amt{margin-left:auto;font-variant-numeric:tabular-nums}
+
+/* Inbox */
+.inbox{display:grid;grid-template-columns:320px 1fr;min-height:520px}
+.inbox .threads{border-right:1px solid var(--line);overflow-y:auto}
+.thread{padding:12px 16px;border-bottom:1px solid var(--line);cursor:pointer;display:flex;gap:10px}
+.thread.on{background:var(--brand-soft)}
+.thread .meta{flex:1;min-width:0}
+.thread p{margin:2px 0 0;font-size:12.5px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.conv{display:flex;flex-direction:column}
+.msgs{flex:1;padding:18px;display:flex;flex-direction:column;gap:10px;overflow-y:auto;max-height:420px}
+.msg{max-width:72%;padding:10px 14px;border-radius:12px;background:var(--surface-2);border:1px solid var(--line);font-size:13px}
+.msg.me{align-self:flex-end;background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}
+.msg small{display:block;opacity:.7;font-size:11px;margin-top:4px}
+.compose{display:flex;gap:8px;padding:12px;border-top:1px solid var(--line)}
+
+@media (max-width:1100px){.g-2-1,.g-3{grid-template-columns:1fr}}
+@media (max-width:900px){
+  .app,.app.collapsed{grid-template-columns:1fr}
+  .rail{position:fixed;left:0;top:0;bottom:0;width:264px;transform:translateX(-100%);transition:transform .25s}
+  .app.mobile-open .rail{transform:none}
+  .app.collapsed .nav-label,.app.collapsed .nav a span,.app.collapsed .nav .count,.app.collapsed .brand div,.app.collapsed .rail-foot div{display:revert}
+  .menu-btn{display:grid}
+  .collapse-btn,.me div,.yearpick,.search kbd{display:none}
+  .top{padding:10px 16px}
+  .content{padding:16px}
+  .g-1-1{grid-template-columns:1fr}
+  .inbox{grid-template-columns:1fr}
+  .inbox .threads{max-height:240px;border-right:0;border-bottom:1px solid var(--line)}
+  .form-grid{grid-template-columns:1fr}
+  .kv{grid-template-columns:110px 1fr}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* Platform console: same system as the school admin, with a darker rail and a teal accent so operators always know they're above the tenants. */
+:root{--rail:#0B1222;--rail-2:#16213A;--rail-active:#12A594;--op:#12A594;--op-soft:#E0F5F2}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--rail:#060A14;--rail-2:#111A2E;--rail-active:#1BA898;--op:#2EC4B0;--op-soft:#0F2E2B}}
+:root[data-theme="dark"]{--rail:#060A14;--rail-2:#111A2E;--rail-active:#1BA898;--op:#2EC4B0;--op-soft:#0F2E2B}
+.btn{justify-content:center}
+.op-badge{font-size:10px;font-weight:800;letter-spacing:.1em;background:var(--op);color:#fff;border-radius:5px;padding:2px 6px;margin-left:6px;vertical-align:2px}
+.tenant-logo{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;color:#fff;font:700 13px var(--f-display);flex:none}
+.tenant-logo.lg{width:64px;height:64px;border-radius:16px;font-size:22px}
+.health{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600}
+.health i{width:8px;height:8px;border-radius:50%}
+.meter{display:flex;flex-direction:column;gap:6px}
+.meter .top{display:flex;justify-content:space-between;font-size:12.5px}
+.meter .top b{font-variant-numeric:tabular-nums}
+.meter .top span{white-space:nowrap}
+.nav a span{overflow:hidden;text-overflow:ellipsis}
+.bulkbar{display:flex;align-items:center;gap:10px;padding:10px 18px;background:var(--brand-soft);border-bottom:1px solid var(--line);flex-wrap:wrap}
+.bulkbar b{color:var(--brand)}
+.perm-wrap{display:grid;grid-template-columns:240px minmax(0,1fr);min-height:420px}
+.perm-wrap>*{min-width:0}
+.role-list{border-right:1px solid var(--line);display:flex;flex-direction:column}
+.role-list button{display:flex;align-items:center;gap:10px;text-align:left;padding:12px 16px;border:0;background:none;border-bottom:1px solid var(--line);width:100%}
+.role-list button.on{background:var(--brand-soft)}
+.role-list button b{display:block;font-weight:600}
+.role-list button small{color:var(--ink-3);font-size:12px}
+.perm td,.perm th{text-align:center}
+.perm td:first-child,.perm th:first-child{text-align:left}
+.perm input{width:18px;height:18px;accent-color:var(--brand)}
+.perm input:disabled{opacity:.55}
+.savebar{position:sticky;bottom:0;display:flex;align-items:center;gap:10px;padding:12px 18px;background:var(--ink);color:var(--surface);border-radius:0 0 var(--r) var(--r);animation:tin .2s}
+.savebar span{flex:1;font-weight:600}
+.savebar .btn{border-color:transparent}
+.switch{width:42px;height:24px;border-radius:12px;background:var(--line-strong);position:relative;border:0;flex:none;transition:background .2s}
+.switch::after{content:"";position:absolute;left:3px;top:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.3);transition:transform .2s}
+.switch.on{background:var(--good)}
+.switch.on::after{transform:translateX(18px)}
+.switch:disabled{opacity:.5}
+.mods{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.mod{border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:flex;gap:12px;align-items:flex-start;background:var(--surface)}
+.mod .meta{flex:1;min-width:0}
+.mod .meta b{display:block}
+.mod .meta small{color:var(--ink-3);font-size:12.5px}
+.mod.off{background:var(--surface-2)}
+.mod.off .meta b{color:var(--ink-3)}
+.setting{display:flex;align-items:center;gap:16px;padding:14px 18px;border-bottom:1px solid var(--line)}
+.setting:last-child{border-bottom:0}
+.setting .meta{flex:1;min-width:0}
+.setting .meta b{display:block;font-weight:600}
+.setting .meta small{color:var(--ink-3);font-size:12.5px}
+.swatches{display:flex;gap:8px;flex-wrap:wrap}
+.swatches button{width:34px;height:34px;border-radius:50%;border:3px solid var(--surface);box-shadow:0 0 0 1px var(--line-strong)}
+.swatches button.on{box-shadow:0 0 0 2px var(--ink)}
+.preview{display:grid;grid-template-columns:1.3fr .8fr;gap:16px;align-items:start}
+.mini-admin{border:1px solid var(--line);border-radius:12px;overflow:hidden;display:grid;grid-template-columns:120px 1fr;height:230px;background:var(--canvas)}
+.mini-admin .r{padding:12px 10px;display:flex;flex-direction:column;gap:7px;color:#fff;font-size:11px}
+.mini-admin .r i{height:7px;border-radius:4px;background:rgba(255,255,255,.2)}
+.mini-admin .r i.on{background:#fff;opacity:.9}
+.mini-admin .m{padding:12px;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:34px 1fr;gap:8px}
+.mini-admin .m b{background:var(--surface);border:1px solid var(--line);border-radius:7px}
+.mini-admin .m b.wide{grid-column:1/-1}
+.mini-phone{width:150px;height:260px;border-radius:24px;background:#0B0F1A;padding:7px;justify-self:center}
+.mini-phone>div{height:100%;border-radius:18px;background:var(--canvas);padding:16px 9px 9px;display:flex;flex-direction:column;gap:7px;overflow:hidden}
+.mini-phone .h{height:62px;border-radius:12px}
+.mini-phone s{display:block;height:22px;border-radius:7px;background:var(--surface);border:1px solid var(--line)}
+.mini-phone .tb{margin-top:auto;display:flex;justify-content:space-around;padding-top:6px;border-top:1px solid var(--line)}
+.mini-phone .tb i{width:14px;height:14px;border-radius:4px;background:var(--line-strong)}
+.mini-phone .tb i:first-child{background:var(--tc)}
+.prov{display:flex;flex-direction:column;gap:12px}
+.prov div{display:flex;align-items:center;gap:12px;font-size:14px;color:var(--ink-3)}
+.prov div i{width:24px;height:24px;border-radius:50%;border:2px solid var(--line-strong);display:grid;place-items:center;flex:none}
+.prov div.run{color:var(--ink)}
+.prov div.run i{border-color:var(--brand);border-top-color:transparent;animation:spin .8s linear infinite}
+.prov div.done{color:var(--ink)}
+.prov div.done i{background:var(--good);border-color:var(--good);color:#fff}
+@keyframes spin{to{transform:rotate(360deg)}}
+.avail{font-size:12.5px;font-weight:600;display:flex;align-items:center;gap:6px;min-height:18px}
+.addon{display:flex;align-items:center;gap:0}
+.addon .input{border-radius:8px 0 0 8px}
+.addon span{height:36px;display:grid;place-items:center;padding:0 12px;border:1px solid var(--line-strong);border-left:0;border-radius:0 8px 8px 0;background:var(--surface-2);color:var(--ink-3);font-size:13px;white-space:nowrap}
+.plans{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+.plan{padding:20px;display:flex;flex-direction:column;gap:12px}
+.plan .price{font:700 30px var(--f-display)}
+.plan .price small{font:500 13px var(--f-body);color:var(--ink-3)}
+.plan ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:7px;font-size:13px}
+.plan li{display:flex;gap:8px;align-items:flex-start}
+.plan li svg{color:var(--good);flex:none;margin-top:2px}
+.plan.feat{border:2px solid var(--brand)}
+.status-row{display:flex;align-items:center;gap:10px;padding:11px 18px;border-bottom:1px solid var(--line);font-size:13.5px}
+.status-row:last-child{border-bottom:0}
+.status-row span{flex:1}
+.status-row small{color:var(--ink-3)}
+.code{font:12.5px ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--surface-2);border:1px solid var(--line);border-radius:6px;padding:1px 6px}
+@media (max-width:900px){.sys-pill{display:none}.search{min-width:0}.perm-wrap{grid-template-columns:minmax(0,1fr)}.role-list{border-right:0;border-bottom:1px solid var(--line);flex-direction:row;overflow-x:auto}.role-list button{border-bottom:0;border-right:1px solid var(--line);min-width:170px}.preview{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <aside class="rail" id="rail" aria-label="Platform sections">
+    <div class="brand"><div class="logo"><svg viewBox="0 0 64 64" width="72%" height="72%" aria-hidden="true"><g fill="none" stroke-width="9"><path d="M20.82 15.42A20 20 0 0 1 43.18 15.42" stroke="#FFFFFF"/><path d="M48.58 20.82A20 20 0 0 1 48.58 43.18" stroke="#C9D8FF"/><path d="M15.42 43.18A20 20 0 0 1 15.42 20.82" stroke="#E3EBFF"/><path d="M43.18 48.58A20 20 0 0 1 20.82 48.58" stroke="#FFFFFF"/><path d="M39.35 39.35L54.91 54.91" stroke="#FFFFFF" stroke-linecap="round"/></g><circle cx="32" cy="32" r="4.5" fill="#FFC56B"/></svg></div><div><b>Quad<span class="op-badge">PLATFORM</span></b><small>Super admin console</small></div></div>
+    <nav class="nav" id="nav"></nav>
+    <div class="rail-foot"><div class="av sm" style="background:#12A594">PM</div><div style="font-size:12px;min-width:0"><b style="color:#fff;display:block">Prishan Maduka</b><span style="color:var(--rail-ink-2)">Platform owner</span></div></div>
+  </aside>
+  <div class="main">
+    <header class="top">
+      <button class="iconbtn menu-btn" data-act="mobileNav" aria-label="Open menu"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+      <button class="iconbtn collapse-btn" data-act="collapse" aria-label="Collapse sidebar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/></svg></button>
+      <div class="search" data-act="cmdk" role="button" tabindex="0"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><span>Search schools, users, subdomains…</span><kbd>Ctrl K</kbd></div>
+      <div class="spacer"></div>
+      <span class="pill t-green sys-pill" style="height:30px"><span class="num">All systems normal</span></span>
+      <button class="iconbtn" data-act="theme" aria-label="Toggle theme" id="themeBtn"></button>
+      <div class="me"><div class="av" style="background:#12A594">PM</div><div><b>Prishan M.</b><small>Platform owner</small></div></div>
+    </header>
+    <main class="content" id="view"></main>
+  </div>
+</div>
+<div class="scrim" id="scrim" data-act="closeAll"></div>
+<aside class="drawer" id="drawer" aria-hidden="true"></aside>
+<div class="modal" id="modal" role="dialog" aria-modal="true"></div>
+<div class="cmdk" id="cmdk"><input id="cmdkInput" placeholder="Type a school, user or page…" autocomplete="off"><ul id="cmdkList"></ul></div>
+<div id="tip"></div>
+<div class="toasts" id="toasts"></div>
+
+<script>
+const P = {
+  home:'<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+  admit:'<path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="M10 17l5-5-5-5M15 12H3"/>',
+  crm:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/>',
+  msg:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
+  student:'<path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>',
+  check:'<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>',
+  book:'<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/><path d="M4 19.5V21h16"/>',
+  cal:'<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
+  fee:'<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4"/>',
+  fin:'<path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 6-6"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>', x:'<path d="M18 6 6 18M6 6l12 12"/>',
+  search:'<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',
+  sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+  moon:'<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>',
+  send:'<path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"/>', down:'<path d="M12 3v12M6 11l6 6 6-6M4 21h16"/>',
+  file:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/>',
+  alert:'<path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/>',
+  star:'<path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/>',
+  grid:'<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',
+  list:'<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>',
+  arrow:'<path d="M5 12h14M13 6l6 6-6 6"/>', back:'<path d="M19 12H5M11 18l-6-6 6-6"/>',
+  mail:'<rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 6-10 7L2 6"/>',
+  phone:'<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/>',
+  bus:'<rect x="4" y="3" width="16" height="15" rx="2"/><path d="M4 11h16M8 21v-3M16 21v-3"/>',
+  heart:'<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21.2l8.8-8.8a5.5 5.5 0 0 0 0-7.8z"/>',
+  settings:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>'
+};
+const ic = (n, s=18) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${P[n]||''}</svg>`;
+Object.assign(P, {
+  tenants:'<path d="M3 21h18M5 21V7l7-4 7 4v14M9 9h1M14 9h1M9 13h1M14 13h1M10 21v-4h4v4"/>',
+  users:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/>',
+  shield:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>', key:'<circle cx="7.5" cy="15.5" r="4.5"/><path d="m10.7 12.3 9.3-9.3M17 6l3 3M14 9l2 2"/>',
+  palette:'<circle cx="13.5" cy="6.5" r="1.5"/><circle cx="17.5" cy="10.5" r="1.5"/><circle cx="8.5" cy="7.5" r="1.5"/><circle cx="6.5" cy="12.5" r="1.5"/><path d="M12 2a10 10 0 0 0 0 20c1 0 2-1 2-2 0-.5-.2-1-.5-1.3-.3-.4-.5-.8-.5-1.2 0-1 .8-1.5 1.8-1.5H17a5 5 0 0 0 5-5c0-5-4.5-9-10-9z"/>',
+  layers:'<path d="m12 2 10 5-10 5L2 7z"/><path d="m2 17 10 5 10-5M2 12l10 5 10-5"/>', log:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/>',
+  eye:'<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/>', power:'<path d="M18.4 6.6a9 9 0 1 1-12.8 0M12 2v10"/>',
+  globe:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>', dollar:'<path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>',
+  pulse:'<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>', trash:'<path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>',
+  lock:'<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>', refresh:'<path d="M21 12a9 9 0 1 1-3-6.7L21 8M21 3v5h-5"/>'
+});
+/* ---------- Charts ---------- */
+function niceMax(v) { const p = Math.pow(10, Math.floor(Math.log10(v))); return Math.ceil(v / p / 2) * p * 2; }
+function barChart({labels, series, stacked=false, h=240, fmt=v=>v, max}) {
+  const W = 640, L = 52, R = 8, T = 10, B = 26, ih = h - T - B, iw = W - L - R;
+  const totals = labels.map((_, i) => stacked ? series.reduce((a, s) => a + s.data[i], 0) : Math.max(...series.map(s => s.data[i])));
+  const M = max || niceMax(Math.max(...totals)); const y = v => T + ih - v / M * ih; const bw = iw / labels.length;
+  let g = '';
+  for (let k = 0; k <= 4; k++) { const v = M * k / 4, yy = y(v); g += `<line class="grid-l" x1="${L}" x2="${W-R}" y1="${yy}" y2="${yy}"/><text x="${L-8}" y="${yy+4}" text-anchor="end">${fmt(v)}</text>`; }
+  labels.forEach((lab, i) => {
+    const x0 = L + i * bw; g += `<text x="${x0 + bw/2}" y="${h-8}" text-anchor="middle">${lab}</text>`;
+    const tip = `<b>${lab}</b><br>` + series.map(s => `${s.name}: ${fmt(s.data[i], true)}`).join('<br>');
+    if (stacked) {
+      let acc = 0; const w = Math.min(28, bw * .5), x = x0 + (bw - w) / 2;
+      series.forEach((s, si) => { const v = s.data[i]; if (!v) return; const y1 = y(acc + v), y0 = y(acc); const top = si === series.length - 1;
+        g += top ? `<path d="M${x},${y0} V${y1+4} q0,-4 4,-4 H${x+w-4} q4,0 4,4 V${y0} Z" fill="${s.color}"/>` : `<rect x="${x}" y="${y1}" width="${w}" height="${Math.max(0, y0-y1-2)}" fill="${s.color}"/>`; acc += v; });
+    } else {
+      const n = series.length, w = Math.min(16, bw * .7 / n), gap = 2, gw = n * w + (n - 1) * gap, xs = x0 + (bw - gw) / 2;
+      series.forEach((s, si) => { const v = s.data[i], x = xs + si * (w + gap), yy = y(v), y0 = y(0); const r = Math.min(4, (y0 - yy) / 2);
+        g += `<path d="M${x},${y0} V${yy+r} q0,-${r} ${r},-${r} H${x+w-r} q${r},0 ${r},${r} V${y0} Z" fill="${s.color}"/>`; });
+    }
+    g += `<rect class="hit" x="${x0}" y="${T}" width="${bw}" height="${ih}" data-tip="${tip.replace(/"/g,'&quot;')}"/>`;
+  });
+  g += `<line x1="${L}" x2="${W-R}" y1="${y(0)}" y2="${y(0)}" stroke="var(--line-strong)"/>`;
+  return `<svg class="chart" viewBox="0 0 ${W} ${h}" role="img">${g}</svg>`;
+}
+function lineChart({labels, data, h=200, min=80, max=100, color='var(--c1)', fmt=v=>v+'%', target}) {
+  const W = 640, L = 40, R = 12, T = 12, B = 26, ih = h - T - B, iw = W - L - R;
+  const x = i => L + i * iw / (labels.length - 1), y = v => T + ih - (v - min) / (max - min) * ih;
+  let g = '';
+  for (let k = 0; k <= 4; k++) { const v = min + (max - min) * k / 4; g += `<line class="grid-l" x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}"/><text x="${L-8}" y="${y(v)+4}" text-anchor="end">${v}%</text>`; }
+  if (target) g += `<line x1="${L}" x2="${W-R}" y1="${y(target)}" y2="${y(target)}" stroke="var(--ink-3)" stroke-dasharray="4 4"/><text x="${L+6}" y="${y(target)-6}">Target ${target}%</text>`;
+  const pts = data.map((v, i) => `${x(i)},${y(v)}`).join(' ');
+  g += `<polygon points="${L},${y(min)} ${pts} ${x(data.length-1)},${y(min)}" fill="${color}" fill-opacity=".10"/>`;
+  g += `<polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round"/>`;
+  const li = data.length - 1; g += `<circle cx="${x(li)}" cy="${y(data[li])}" r="5" fill="${color}" stroke="var(--surface)" stroke-width="2"/><text x="${x(li)-8}" y="${y(data[li])-10}" text-anchor="end" style="font-weight:700;fill:var(--ink)">${fmt(data[li])}</text>`;
+  labels.forEach((lab, i) => { if (i % Math.ceil(labels.length / 8) === 0 || i === li) g += `<text x="${x(i)}" y="${h-8}" text-anchor="middle">${lab}</text>`; });
+  const step = iw / (labels.length - 1);
+  data.forEach((v, i) => g += `<rect class="hit" x="${x(i)-step/2}" y="${T}" width="${step}" height="${ih}" data-tip="<b>${labels[i]}</b><br>Attendance ${fmt(v)}"/>`);
+  return `<svg class="chart" viewBox="0 0 ${W} ${h}" role="img">${g}</svg>`;
+}
+const legend = items => `<div class="legend">${items.map(([n, c]) => `<span><i style="background:${c}"></i>${n}</span>`).join('')}</div>`;
+
+
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmt = n => Math.round(n).toLocaleString('en-US');
+const usd = n => '$' + Math.round(n).toLocaleString('en-US');
+const initials = n => n.replace(/[^A-Za-z ]/g, '').split(' ').filter(Boolean).map(w => w[0]).slice(0, 2).join('').toUpperCase();
+const AVC = ['#2F6FED','#12A594','#C2410C','#8B5CF6','#0E7490','#BE185D','#4D7C0F','#B45309'];
+const avColor = n => AVC[[...n].reduce((a, c) => a + c.charCodeAt(0), 0) % AVC.length];
+const avatar = (n, cls='') => `<div class="av ${cls}" style="background:${avColor(n)}">${initials(n)}</div>`;
+const tlogo = (t, cls='') => `<div class="tenant-logo ${cls}" style="background:${t.color}">${initials(t.name)}</div>`;
+let seed = 11; const rnd = () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; };
+const pick = a => a[Math.floor(rnd() * a.length)];
+
+/* ---------- Sample platform data ---------- */
+const MODULES = [
+  ['admissions','Pre-admission & enrolment','admit'],['crm','CRM & communications','crm'],['sis','Student information','student'],
+  ['lms','Learning management','book'],['fees','Fees & invoicing','fee'],['finance','Finance & accounting','fin'],['parent','Parent app','phone'],['transport','Transport & bus tracking','bus']
+];
+const PLANS = {
+  Starter:{price:1.2, mods:['admissions','sis','fees','parent'], limit:500, color:'t-violet'},
+  Growth:{price:2.1, mods:['admissions','crm','sis','lms','fees','parent'], limit:1500, color:'t-blue'},
+  Enterprise:{price:3.4, mods:MODULES.map(m => m[0]), limit:5000, color:'t-green'}
+};
+const REGIONS = {'ap-south':'Asia South (Mumbai)', 'me-central':'Middle East (UAE)', 'ap-southeast':'Asia Pacific (Singapore)'};
+const T = (id, name, sub, country, plan, students, status, color, region, since, extra={}) => ({id, name, sub, country, plan, students, status, color, region, since,
+  limit: PLANS[plan].limit, mods: new Set(PLANS[plan].mods), health: extra.health || 'Healthy', tz: extra.tz || 'Asia/Colombo', currency: extra.currency || 'LKR', ...extra});
+const tenants = [
+  T(1,'Colombo International School','colombo-intl','Sri Lanka','Enterprise',1248,'Active','#2F6FED','ap-south','2024-01'),
+  T(2,'Kandy Hill Academy','kandyhill','Sri Lanka','Growth',812,'Active','#12A594','ap-south','2024-06'),
+  T(3,'Galle Fort Primary','gallefort','Sri Lanka','Starter',344,'Active','#B45309','ap-south','2025-02'),
+  T(4,'Malé Bright Future School','malebright','Maldives','Growth',1480,'Active','#0E7490','ap-south','2024-09',{health:'Near limit', tz:'Indian/Maldives', currency:'MVR'}),
+  T(5,'Dubai Lakes British School','dubailakes','UAE','Enterprise',2310,'Active','#8B5CF6','me-central','2023-11',{tz:'Asia/Dubai', currency:'AED'}),
+  T(6,'Negombo Bay College','negombobay','Sri Lanka','Growth',690,'Past due','#BE185D','ap-south','2025-01',{health:'Payment failed'}),
+  T(7,'Jaffna Northern Scholars','jaffnascholars','Sri Lanka','Starter',275,'Trial','#4D7C0F','ap-south','2026-09',{trialEnds:'19 Oct'}),
+  T(8,'Bangalore Green Valley School','greenvalley','India','Enterprise',3120,'Active','#C2410C','ap-south','2024-03',{tz:'Asia/Kolkata', currency:'INR'}),
+  T(9,'Singapore Harbourfront Intl','harbourfront','Singapore','Enterprise',1890,'Onboarding','#14203A','ap-southeast','2026-09',{tz:'Asia/Singapore', currency:'SGD', health:'Setting up'}),
+  T(10,'Nuwara Eliya Highlands School','highlands','Sri Lanka','Starter',198,'Suspended','#7C879F','ap-south','2024-05',{health:'Suspended'}),
+  T(11,'Abu Dhabi Pearl Academy','pearlacademy','UAE','Growth',1105,'Active','#0F766E','me-central','2025-04',{tz:'Asia/Dubai', currency:'AED'}),
+  T(12,'Kurunegala Royal Junior','royaljunior','Sri Lanka','Starter',420,'Trial','#9333EA','ap-south','2026-09',{trialEnds:'27 Oct'})
+];
+const mrr = t => t.status === 'Trial' || t.status === 'Suspended' ? 0 : t.students * PLANS[t.plan].price;
+const ROLES = [
+  {id:'admin', n:'School admin', d:'Full access to this school', system:true},
+  {id:'principal', n:'Principal', d:'Everything except system settings', system:true},
+  {id:'finance', n:'Finance officer', d:'Fees, invoices and accounts'},
+  {id:'admissions', n:'Admissions officer', d:'Enquiries, applications, CRM'},
+  {id:'teacher', n:'Teacher', d:'Classes, attendance, gradebook'},
+  {id:'counsellor', n:'Counsellor', d:'Student wellbeing and conduct'},
+  {id:'frontdesk', n:'Front desk', d:'Visitors, pickups, messages'}
+];
+const PERM_MODS = [['admissions','Admissions'],['crm','CRM & communications'],['sis','Student records'],['attendance','Attendance'],['lms','LMS & gradebook'],['fees','Fees & invoicing'],['finance','Accounting'],['transport','Transport'],['settings','Settings & users']];
+const ACTIONS = ['View','Create','Edit','Delete','Approve'];
+function defaultPerms(role) {
+  const all = () => [1,1,1,1,1], none = () => [0,0,0,0,0], ro = () => [1,0,0,0,0], rw = () => [1,1,1,0,0];
+  const m = {};
+  PERM_MODS.forEach(([k]) => m[k] = none());
+  if (role === 'admin') PERM_MODS.forEach(([k]) => m[k] = all());
+  if (role === 'principal') { PERM_MODS.forEach(([k]) => m[k] = [1,1,1,0,1]); m.settings = ro(); }
+  if (role === 'finance') { m.fees = all(); m.finance = all(); m.sis = ro(); m.transport = ro(); }
+  if (role === 'admissions') { m.admissions = [1,1,1,1,0]; m.crm = rw(); m.sis = [1,1,0,0,0]; m.fees = ro(); }
+  if (role === 'teacher') { m.attendance = rw(); m.lms = [1,1,1,1,0]; m.sis = ro(); m.crm = [1,1,0,0,0]; }
+  if (role === 'counsellor') { m.sis = [1,0,1,0,0]; m.attendance = ro(); m.crm = [1,1,0,0,0]; }
+  if (role === 'frontdesk') { m.sis = ro(); m.transport = [1,0,1,0,0]; m.crm = [1,1,0,0,0]; m.attendance = ro(); }
+  return m;
+}
+const FIRST = ['Dilini','Kasun','Anne','Nadeesha','Ruwan','Shanthi','Chaminda','Tharindu','Ishani','Mohamed','Fathima','Sanjeewa','Priyanka','Roshan','Kumari','Asela','Nirmala','Hasitha','Rehana','Mahesh','Lakmini','Dinesh','Sachini','Ayesha'];
+const LAST = ['Perera','Fernando','Silva','Jayasinghe','Mendis','Wickramasinghe','Bandara','Rajapaksa','Herath','Dissanayake','Rizvi','Senanayake','Gunawardena','Abeysekera','De Alwis','Ratnayake'];
+const CAMPUS = ['Main campus','Primary campus'];
+const usersByTenant = {};
+function tenantUsers(t) {
+  if (usersByTenant[t.id]) return usersByTenant[t.id];
+  seed = 100 + t.id * 7;
+  const n = 14 + Math.floor(rnd() * 12), roleMix = ['admin','principal','finance','finance','admissions','admissions','teacher','teacher','teacher','teacher','teacher','counsellor','frontdesk','teacher'];
+  const list = Array.from({length:n}, (_, i) => { const f = pick(FIRST), l = pick(LAST); const role = i < roleMix.length ? roleMix[i] : 'teacher';
+    const status = i > 2 && rnd() > .9 ? 'Invited' : i > 3 && rnd() > .94 ? 'Deactivated' : 'Active';
+    return {id:`${t.id}-${i}`, name:`${f} ${l}`, email:`${f.toLowerCase()}.${l.toLowerCase().replace(/ /g,'')}@${t.sub}.edu`, role, campus: i % 3 ? CAMPUS[0] : CAMPUS[1],
+      status, mfa: role === 'admin' || role === 'finance' || rnd() > .45, last: status === 'Active' ? pick(['2 min ago','14 min ago','1 hour ago','Today, 08:12','Yesterday','3 days ago']) : status === 'Invited' ? 'Invite sent 2 days ago' : 'Deactivated 12 Sep', sso: rnd() > .4}; });
+  usersByTenant[t.id] = list; return list;
+}
+const permsByTenant = {};
+const tenantPerms = t => permsByTenant[t.id] || (permsByTenant[t.id] = Object.fromEntries(ROLES.map(r => [r.id, defaultPerms(r.id)])));
+const rolesByTenant = {};
+const tenantRoles = t => rolesByTenant[t.id] || (rolesByTenant[t.id] = ROLES.map(r => ({...r})));
+const security = {};
+const tenantSec = t => security[t.id] || (security[t.id] = {mfaAdmins:true, mfaAll:false, sso:{google: t.id % 2 === 1, microsoft:false}, pwLen:12, timeout:30, ipOn:false, ips:'203.94.64.0/24', parentOtp:true});
+const AUDIT = [
+  ['Dilini Perera','changed role of Kasun Fernando to Finance officer','colombo-intl','12 min ago','users'],
+  ['System','sent 1,248 Term 2 draft invoices','colombo-intl','40 min ago','fees'],
+  ['Prishan Maduka','upgraded Malé Bright Future School to 2,000 students','malebright','1 hour ago','plan'],
+  ['Stripe','payment failed for Negombo Bay College ($1,449)','negombobay','3 hours ago','billing'],
+  ['Anne Silva','enabled Google sign-in','kandyhill','Yesterday','security'],
+  ['Prishan Maduka','suspended Nuwara Eliya Highlands School','highlands','2 days ago','tenant'],
+  ['System','created tenant Singapore Harbourfront Intl','harbourfront','4 days ago','tenant'],
+  ['Mohamed Rizvi','invited 18 teachers','dubailakes','5 days ago','users']
+];
+
+/* ---------- State ---------- */
+const S = {route:'overview', tab:{}, filter:{}, q:'', sel:new Set(), roleSel:'teacher', dirty:false, wiz:{step:0}, brandColor:{}};
+try { const t = localStorage.getItem('quad-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+
+/* ---------- Helpers ---------- */
+const statusTone = {Active:'t-green', Trial:'t-blue', Onboarding:'t-violet', 'Past due':'t-amber', Suspended:'t-red', Invited:'t-blue', Deactivated:'t-red'};
+const pill = (s, tone) => `<span class="pill ${tone || statusTone[s] || 't-blue'}">${s}</span>`;
+const healthDot = h => { const c = {Healthy:'var(--good)','Near limit':'var(--warn)','Payment failed':'var(--bad)','Setting up':'var(--info)',Suspended:'var(--ink-3)'}[h] || 'var(--good)'; return `<span class="health"><i style="background:${c}"></i>${h}</span>`; };
+const tabs = (key, list) => { const cur = S.tab[key] || list[0][0]; return `<div class="tabs" role="tablist">${list.map(([k, l]) => `<button role="tab" class="${cur===k?'on':''}" data-act="tab" data-key="${key}" data-val="${k}">${l}</button>`).join('')}</div>`; };
+const curTab = (k, d) => S.tab[k] || d;
+const pageHead = (crumb, title, sub, actions='') => `<div class="page-head"><div class="grow"><div class="crumbs">${crumb}</div><h1>${title}</h1>${sub?`<div class="muted" style="margin-top:4px">${sub}</div>`:''}</div><div class="chips">${actions}</div></div>`;
+const kpi = (icon, tone, label, value, delta) => `<div class="card kpi"><div class="ic ${tone}">${ic(icon,20)}</div><div><div class="l">${label}</div><div class="v">${value}</div><div class="d">${delta}</div></div></div>`;
+const roleName = (t, id) => (tenantRoles(t).find(r => r.id === id) || {n:id}).n;
+const sw = (on, act, extra='', dis=false) => `<button class="switch ${on?'on':''}" role="switch" aria-checked="${on}" data-act="${act}" ${extra} ${dis?'disabled':''}></button>`;
+
+/* ---------- Views ---------- */
+const V = {};
+V.overview = () => {
+  const active = tenants.filter(t => !['Suspended'].includes(t.status)), total = tenants.reduce((a, t) => a + mrr(t), 0);
+  const months = ['Nov','Dec','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct'];
+  const mrrSeries = [24.8,25.6,26.9,28.2,29.0,30.4,31.1,32.6,33.9,35.0,35.8, +(total/1000).toFixed(1)];
+  const byPlan = Object.keys(PLANS).map(p => [p, tenants.filter(t => t.plan === p && t.status !== 'Suspended').length]);
+  const attention = [
+    ['alert','t-red','Negombo Bay College','Card payment failed 3 hours ago · $1,449 due', 6],
+    ['pulse','t-amber','Malé Bright Future School','Using 1,480 of 1,500 student seats', 4],
+    ['cal','t-blue','Jaffna Northern Scholars','Trial ends 19 Oct · 275 students imported', 7],
+    ['layers','t-violet','Singapore Harbourfront Intl','Onboarding · 3 of 6 setup steps done', 9]
+  ];
+  return `${pageHead('Platform', 'Platform overview', 'All schools on Quad · Monday, 5 October 2026', `<button class="btn" data-act="go" data-to="tenants">${ic('tenants',16)}All schools</button><button class="btn primary" data-act="newTenant">${ic('plus',16)}New school</button>`)}
+  <div class="grid g-kpi">
+    ${kpi('tenants','t-blue','Schools (tenants)', tenants.length, `${active.length} live · 2 on trial`)}
+    ${kpi('student','t-green','Students on Quad', fmt(tenants.reduce((a, t) => a + t.students, 0)), '<span class="up">▲ 11%</span> this term')}
+    ${kpi('dollar','t-amber','Monthly recurring revenue', usd(total), '<span class="up">▲ 6.4%</span> vs September')}
+    ${kpi('pulse','t-violet','Uptime · 30 days', '99.98%', 'Last incident 19 Sep, 6 min')}
+  </div>
+  <div class="grid g-2-1">
+    <section class="card"><div class="card-h"><h2>MRR · last 12 months</h2><span class="muted" style="font-size:12px">US$ thousands</span></div>
+      <div class="card-b">${barChart({labels: months, series:[{name:'MRR', data: mrrSeries, color:'var(--c2)'}], fmt:v=>'$'+(+v).toFixed(v%1?1:0)+'k'})}</div></section>
+    <section class="card"><div class="card-h"><h2>Needs attention</h2><span class="pill t-red plain">${attention.length}</span></div>
+      <div class="list">${attention.map(([i, tone, n, d, id]) => `<div class="li" style="cursor:pointer" data-act="openTenant" data-id="${id}"><div class="dot-ic ${tone}">${ic(i,16)}</div><div class="meta"><b>${n}</b><p>${d}</p></div>${ic('arrow',14)}</div>`).join('')}</div></section>
+  </div>
+  <div class="grid g-3">
+    <section class="card"><div class="card-h"><h2>Schools by plan</h2></div><div class="card-b" style="display:flex;flex-direction:column;gap:12px">${byPlan.map(([p, n]) => `<div data-tip="<b>${p}</b><br>${n} schools"><div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:4px"><span>${p}</span><b class="num">${n}</b></div><div class="bar" style="height:10px"><i style="width:${n / tenants.length * 100}%;background:var(--c1)"></i></div></div>`).join('')}</div></section>
+    <section class="card"><div class="card-h"><h2>System status</h2></div><div>${[['API & web apps','Operational','var(--good)','42 ms p50'],['Database clusters','Operational','var(--good)','3 regions'],['Push notifications','Operational','var(--good)','218k sent today'],['Payment gateway','Degraded','var(--warn)','Retries on 2% of cards'],['SMS gateway','Operational','var(--good)','Dialog, Etisalat']].map(([n, s, c, d]) => `<div class="status-row"><i style="width:9px;height:9px;border-radius:50%;background:${c}"></i><span>${n}<br><small>${d}</small></span><b style="font-size:12.5px;color:${c}">${s}</b></div>`).join('')}</div></section>
+    <section class="card"><div class="card-h"><h2>Recent activity</h2><a href="#audit" class="btn sm ghost">Audit log ${ic('arrow',14)}</a></div><div class="list">${AUDIT.slice(0, 4).map(([w, a, sub, at]) => `<div class="li">${avatar(w,'sm')}<div class="meta"><b>${w}</b><p>${a} · <span class="code">${sub}</span></p></div><time>${at}</time></div>`).join('')}</div></section>
+  </div>`;
+};
+
+V.tenants = () => {
+  const f = S.filter.st || 'All', q = (S.q || '').toLowerCase(), plan = S.filter.plan || 'all';
+  const rows = tenants.filter(t => (f === 'All' || t.status === f) && (plan === 'all' || t.plan === plan) && (!q || (t.name + t.sub + t.country).toLowerCase().includes(q)));
+  return `${pageHead('Platform', 'Schools', 'Each school is a separate tenant with its own data, users, branding and subdomain.', `<button class="btn">${ic('down',16)}Export</button><button class="btn primary" data-act="newTenant">${ic('plus',16)}New school</button>`)}
+  <div class="card"><div class="toolbar"><div class="searchbox">${ic('search',16)}<input class="input" id="tSearch" placeholder="Search name, subdomain or country" value="${esc(S.q||'')}"></div>
+    <select class="input inline" data-filter="plan" aria-label="Plan"><option value="all">All plans</option>${Object.keys(PLANS).map(p => `<option ${plan===p?'selected':''}>${p}</option>`).join('')}</select>
+    <div class="chips">${['All','Active','Trial','Onboarding','Past due','Suspended'].map(s => `<button class="chip ${f===s?'on':''}" data-act="filter" data-key="st" data-val="${s}">${s}<span class="n">${s==='All'?tenants.length:tenants.filter(t=>t.status===s).length}</span></button>`).join('')}</div></div>
+  <div class="tbl-wrap"><table><thead><tr><th>School</th><th>Plan</th><th>Students</th><th>Modules</th><th>Region</th><th class="r">MRR</th><th>Health</th><th>Status</th></tr></thead><tbody>
+  ${rows.map(t => `<tr class="click" data-act="openTenant" data-id="${t.id}"><td><div class="who">${tlogo(t)}<div><b>${t.name}</b><small class="code">${t.sub}.quad.school</small></div></div></td><td>${pill(t.plan, PLANS[t.plan].color)}</td>
+    <td style="min-width:180px"><div class="meter"><div class="top"><b>${fmt(t.students)}</b><span class="muted">of ${fmt(t.limit)}</span></div><div class="bar"><i style="width:${Math.min(100, t.students / t.limit * 100)}%;background:${t.students / t.limit > .95 ? 'var(--warn)' : 'var(--c1)'}"></i></div></div></td>
+    <td class="num">${t.mods.size} / ${MODULES.length}</td><td class="muted">${t.country}</td><td class="r num">${mrr(t) ? usd(mrr(t)) : '<span class="muted">–</span>'}</td><td>${healthDot(t.health)}</td><td>${pill(t.status)}</td></tr>`).join('') || `<tr><td colspan="8" class="muted" style="text-align:center;padding:40px">No schools match. Clear the search or choose another status.</td></tr>`}
+  </tbody></table></div><div class="tbl-foot"><span>${rows.length} of ${tenants.length} schools</span></div></div>`;
+};
+
+V.tenant = id => {
+  const t = tenants.find(x => x.id === +id) || tenants[0];
+  const tab = curTab('t' + t.id, 'overview');
+  const body = {overview: tOverview, users: tUsers, roles: tRoles, modules: tModules, branding: tBranding, security: tSecurity, danger: tDanger}[tab](t);
+  return `<div><a href="#tenants" class="btn sm ghost">${ic('back',14)}All schools</a></div>
+  <div class="card"><div class="profile-head">${tlogo(t,'lg')}<div class="info"><div class="eyebrow">Tenant #${String(t.id).padStart(4,'0')} · ${REGIONS[t.region]}</div><h1>${t.name}</h1><div class="muted" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="code">${t.sub}.quad.school</span>${pill(t.status)}${pill(t.plan, PLANS[t.plan].color)}${healthDot(t.health)}</div></div>
+  <div class="chips"><button class="btn" data-act="impersonate" data-id="${t.id}" ${t.status==='Suspended'?'disabled':''}>${ic('eye',16)}Open as school admin</button><button class="btn primary" data-act="tab" data-key="t${t.id}" data-val="users">${ic('users',16)}Manage users</button></div></div>
+  ${tabs('t' + t.id, [['overview','Overview'],['users','Users'],['roles','Roles & permissions'],['modules','Plan & modules'],['branding','Branding'],['security','Sign-in & security'],['danger','Danger zone']])}</div>${body}`;
+};
+function tOverview(t) {
+  const u = tenantUsers(t);
+  return `<div class="grid g-kpi">${kpi('student','t-blue','Students', fmt(t.students), `of ${fmt(t.limit)} on ${t.plan}`)}${kpi('users','t-violet','Staff accounts', u.filter(x => x.status !== 'Deactivated').length, `${u.filter(x => x.status === 'Invited').length} invites pending`)}${kpi('phone','t-green','Parents on the app', fmt(Math.round(t.students * .88)), '88% of families')}${kpi('dollar','t-amber','Monthly bill', mrr(t) ? usd(mrr(t)) : '$0', t.status === 'Trial' ? 'Trial ends ' + t.trialEnds : `$${PLANS[t.plan].price.toFixed(2)} per student`)}</div>
+  <div class="grid g-2-1"><section class="card"><div class="card-h"><h2>Usage</h2></div><div class="card-b" style="display:flex;flex-direction:column;gap:16px">
+    ${[['Student seats', t.students, t.limit, ''],['Storage', Math.round(t.students * .031), 100, ' GB'],['SMS credits this month', Math.round(t.students * 2.4), 5000, ''],['API calls today', Math.round(t.students * 61), 250000, '']].map(([n, v, max, unit]) => `<div class="meter"><div class="top"><span>${n}</span><b>${fmt(v)}${unit} <span class="muted" style="font-weight:500">/ ${fmt(max)}${unit}</span></b></div><div class="bar" style="height:8px"><i style="width:${Math.min(100, v / max * 100)}%;background:${v / max > .95 ? 'var(--warn)' : 'var(--c1)'}"></i></div></div>`).join('')}
+  </div></section>
+  <section class="card"><div class="card-h"><h2>Details</h2></div><div class="card-b"><dl class="kv"><dt>Country</dt><dd>${t.country}</dd><dt>Time zone</dt><dd>${t.tz}</dd><dt>Currency</dt><dd>${t.currency}</dd><dt>Data region</dt><dd>${REGIONS[t.region]}</dd><dt>Customer since</dt><dd>${t.since}</dd><dt>Owner</dt><dd>${u[0].name}</dd><dt>Custom domain</dt><dd>${t.id === 1 ? 'portal.cis.lk ' + pill('Verified','t-green') : '<span class="muted">None</span>'}</dd></dl></div></section></div>
+  <section class="card"><div class="card-h"><h2>Recent activity in this school</h2></div><div class="list">${(u.length > 2 ? [[u[0].name,'invited 3 teachers to Primary campus','20 min ago'],[u[2].name,'posted 46 receipts','1 hour ago'],[u[1].name,'approved 6 offer letters','Yesterday'],['System','nightly backup completed (14.2 GB)','Today, 02:00']] : [['System','created this school and sent the admin invite','Just now'],['System','seeded 7 roles with default permissions','Just now']]).map(([w, a, at]) => `<div class="li">${avatar(w,'sm')}<div class="meta"><b>${w}</b><p>${a}</p></div><time>${at}</time></div>`).join('')}</div></section>`;
+}
+function tUsers(t) {
+  const all = tenantUsers(t), rf = S.filter['ur' + t.id] || 'all', sf = S.filter['us' + t.id] || 'all', q = (S.q || '').toLowerCase();
+  const rows = all.filter(u => (rf === 'all' || u.role === rf) && (sf === 'all' || u.status === sf) && (!q || (u.name + u.email).toLowerCase().includes(q)));
+  const sel = [...S.sel].filter(id => all.some(u => u.id === id));
+  return `<div class="grid g-kpi">${kpi('users','t-blue','Staff accounts', all.filter(u=>u.status==='Active').length, 'Active')}${kpi('mail','t-violet','Invites pending', all.filter(u=>u.status==='Invited').length, 'Expire after 7 days')}${kpi('shield','t-green','Using two-step sign-in', Math.round(all.filter(u=>u.mfa).length / all.length * 100) + '%', tenantSec(t).mfaAdmins ? 'Required for admins' : 'Optional')}${kpi('phone','t-amber','Parent accounts', fmt(Math.round(t.students * .88)), 'Managed from student records')}</div>
+  <div class="card"><div class="toolbar"><div class="searchbox">${ic('search',16)}<input class="input" id="uSearch" placeholder="Search name or email" value="${esc(S.q||'')}"></div>
+    <select class="input inline" data-filter="ur${t.id}" aria-label="Role"><option value="all">All roles</option>${tenantRoles(t).map(r => `<option value="${r.id}" ${rf===r.id?'selected':''}>${r.n} (${all.filter(u=>u.role===r.id).length})</option>`).join('')}</select>
+    <select class="input inline" data-filter="us${t.id}" aria-label="Status">${['all','Active','Invited','Deactivated'].map(x => `<option value="${x}" ${sf===x?'selected':''}>${x==='all'?'All statuses':x}</option>`).join('')}</select>
+    <span style="flex:1"></span><button class="btn">${ic('down',16)}Import CSV</button><button class="btn primary" data-act="invite" data-id="${t.id}">${ic('plus',16)}Invite users</button></div>
+  ${sel.length ? `<div class="bulkbar"><b>${sel.length} selected</b><select class="input inline" id="bulkRole" aria-label="New role"><option value="">Change role to…</option>${tenantRoles(t).map(r => `<option value="${r.id}">${r.n}</option>`).join('')}</select><button class="btn sm" data-act="bulk" data-op="resend" data-id="${t.id}">Resend invite</button><button class="btn sm" data-act="bulk" data-op="mfa" data-id="${t.id}">Require two-step sign-in</button><button class="btn sm danger" data-act="bulk" data-op="deactivate" data-id="${t.id}">Deactivate</button><span style="flex:1"></span><button class="btn sm ghost" data-act="clearSel">Clear</button></div>` : ''}
+  <div class="tbl-wrap"><table><thead><tr><th><input type="checkbox" data-act="selAllU" data-id="${t.id}" aria-label="Select all" ${sel.length && sel.length === rows.length ? 'checked' : ''}></th><th>User</th><th>Role</th><th>Campus</th><th>Sign-in</th><th>Last active</th><th>Status</th></tr></thead><tbody>
+  ${rows.map(u => `<tr class="click" data-act="openUser" data-tid="${t.id}" data-uid="${u.id}"><td><input type="checkbox" class="usel" data-uid="${u.id}" ${S.sel.has(u.id)?'checked':''} aria-label="Select ${esc(u.name)}"></td><td><div class="who">${avatar(u.name,'sm')}<div><b>${u.name}</b><small>${u.email}</small></div></div></td>
+    <td>${roleName(t, u.role)}</td><td class="muted">${u.campus}</td><td>${u.sso ? '<span class="pill t-blue plain">Google</span>' : '<span class="pill t-violet plain">Password</span>'} ${u.mfa ? `<span title="Two-step sign-in on" style="color:var(--good)">${ic('shield',14)}</span>` : ''}</td><td class="muted">${u.last}</td><td>${pill(u.status)}</td></tr>`).join('') || `<tr><td colspan="7" class="muted" style="text-align:center;padding:40px">No users match these filters.</td></tr>`}
+  </tbody></table></div><div class="tbl-foot"><span>${rows.length} of ${all.length} staff accounts. Parents and students sign in through the apps and are managed from student records.</span></div></div>`;
+}
+function tRoles(t) {
+  const roles = tenantRoles(t), perms = tenantPerms(t), r = roles.find(x => x.id === S.roleSel) || roles[0], p = perms[r.id], users = tenantUsers(t);
+  return `<div class="card"><div class="card-h"><h2>Roles & permissions</h2><button class="btn sm" data-act="newRole" data-id="${t.id}">${ic('plus',14)}New role</button></div>
+  <div class="perm-wrap"><div class="role-list">${roles.map(x => `<button class="${x.id===r.id?'on':''}" data-act="pickRole" data-r="${x.id}"><div style="flex:1;min-width:0"><b>${x.n} ${x.system ? `<span style="color:var(--ink-3)">${ic('lock',12)}</span>` : ''}</b><small>${users.filter(u => u.role === x.id).length} users · ${x.d}</small></div></button>`).join('')}</div>
+  <div style="min-width:0"><div class="card-b" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--line)"><div style="flex:1;min-width:200px"><h3>${r.n}</h3><span class="muted" style="font-size:12.5px">${r.system ? 'Built-in role. Its permissions are fixed so a school can never lock itself out.' : 'Tick what people with this role can do in each module.'}</span></div>
+    ${r.system ? '' : `<button class="btn sm" data-act="permPreset" data-v="ro">Read-only everywhere</button><button class="btn sm danger" data-act="delRole" data-id="${t.id}">${ic('trash',14)}Delete role</button>`}</div>
+  <div class="tbl-wrap"><table class="perm"><thead><tr><th>Module</th>${ACTIONS.map(a => `<th>${a}</th>`).join('')}</tr></thead><tbody>
+  ${PERM_MODS.map(([k, n]) => `<tr><td><b style="font-weight:600">${n}</b>${['admissions','crm','sis','lms','fees','finance','transport'].includes(k) && !t.mods.has(k === 'attendance' ? 'sis' : k) ? ' <span class="pill t-amber plain" style="font-size:10.5px">Not in plan</span>' : ''}</td>${ACTIONS.map((a, j) => `<td><input type="checkbox" data-act="perm" data-m="${k}" data-j="${j}" ${p[k][j] ? 'checked' : ''} ${r.system ? 'disabled' : ''} aria-label="${a} ${n}"></td>`).join('')}</tr>`).join('')}
+  </tbody></table></div>
+  ${S.dirty ? `<div class="savebar"><span>You have unsaved permission changes for ${r.n}.</span><button class="btn sm" data-act="discardPerms" data-id="${t.id}">Discard</button><button class="btn sm primary" data-act="savePerms">Save changes</button></div>` : ''}
+  </div></div></div>`;
+}
+function tModules(t) {
+  const plan = PLANS[t.plan], price = t.students * plan.price;
+  return `<div class="grid g-2-1"><section class="card"><div class="card-h"><h2>Modules</h2><span class="muted" style="font-size:12.5px">${t.mods.size} of ${MODULES.length} on</span></div><div class="card-b"><div class="mods">
+    ${MODULES.map(([k, n, i]) => { const on = t.mods.has(k), inPlan = plan.mods.includes(k); return `<div class="mod ${on?'':'off'}"><div class="dot-ic ${on?'t-blue':'t-violet'}">${ic(i,16)}</div><div class="meta"><b>${n}</b><small>${inPlan ? 'Included in ' + t.plan : 'Add-on · $0.40 per student'}</small></div>${sw(on, 'mod', `data-k="${k}" data-id="${t.id}" aria-label="${n}"`)}</div>`; }).join('')}
+  </div></div></section>
+  <section class="card"><div class="card-h"><h2>Plan</h2></div><div class="card-b" style="display:flex;flex-direction:column;gap:14px">
+    <div class="field"><label for="planSel">Plan</label><select class="input" id="planSel" data-id="${t.id}">${Object.keys(PLANS).map(p => `<option ${p===t.plan?'selected':''}>${p} · $${PLANS[p].price.toFixed(2)} per student</option>`).join('')}</select></div>
+    <div class="field"><label for="seatRange">Student seats · <span id="seatLbl" class="num">${fmt(t.limit)}</span></label><input type="range" id="seatRange" min="100" max="6000" step="50" value="${t.limit}" data-id="${t.id}" style="accent-color:var(--brand)"></div>
+    <div class="inv" style="display:flex;flex-direction:column;gap:6px"><div style="display:flex;justify-content:space-between"><span class="muted">${fmt(t.students)} students × $${plan.price.toFixed(2)}</span><b class="num">${usd(price)}</b></div><div style="display:flex;justify-content:space-between"><span class="muted">Add-on modules</span><b class="num">${usd(t.students * .4 * [...t.mods].filter(k => !plan.mods.includes(k)).length)}</b></div><div style="display:flex;justify-content:space-between;border-top:1px solid var(--line);padding-top:8px"><b>Monthly total</b><b class="num">${usd(price + t.students * .4 * [...t.mods].filter(k => !plan.mods.includes(k)).length)}</b></div></div>
+    <button class="btn primary" data-act="toast" data-msg="Plan saved. The school admin has been emailed.">Save plan</button></div></section></div>`;
+}
+function tBranding(t) {
+  const c = S.brandColor[t.id] || t.color;
+  return `<div class="card"><div class="card-h"><h2>Branding</h2><span class="muted" style="font-size:12.5px">Shown in the school admin, parent app, emails and invoices</span></div><div class="card-b preview">
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <div class="field"><label>Logo</label><div style="display:flex;gap:12px;align-items:center"><div class="tenant-logo lg" id="brandLogo" style="background:${c}">${initials(t.name)}</div><button class="btn" data-act="toast" data-msg="Choose a PNG or SVG, at least 512 × 512 px">Upload logo</button></div></div>
+      <div class="field"><label>Brand colour</label><div class="swatches">${['#2F6FED','#12A594','#0E7490','#8B5CF6','#BE185D','#C2410C','#B45309','#14203A'].map(x => `<button class="${x===c?'on':''}" style="background:${x}" data-act="brand" data-c="${x}" data-id="${t.id}" aria-label="Colour ${x}"></button>`).join('')}<input type="color" value="${c}" id="brandPick" data-id="${t.id}" aria-label="Custom colour" style="width:34px;height:34px;border:0;padding:0;background:none"></div></div>
+      <div class="field"><label for="appName">App name in stores</label><input class="input" id="appName" value="${esc(t.name.split(' ').slice(0, 2).join(' '))} Parent"></div>
+      <div class="field"><label for="dom">Custom domain</label><div class="addon"><input class="input" id="dom" value="${t.id === 1 ? 'portal.cis.lk' : ''}" placeholder="portal.yourschool.edu"><span>CNAME → ${t.sub}.quad.school</span></div></div>
+      <button class="btn primary" data-act="toast" data-msg="Branding published to all apps">Publish branding</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px" id="brandPrev" style="--tc:${c}">${brandPreview(t, c)}</div>
+  </div></div>`;
+}
+const brandPreview = (t, c) => `<div class="mini-admin"><div class="r" style="background:color-mix(in srgb, ${c} 75%, #000)"><b style="font-size:11px">${esc(t.name.split(' ')[0])}</b><i class="on"></i><i></i><i></i><i></i><i></i></div><div class="m"><b></b><b></b><b></b><b class="wide" style="background:linear-gradient(to top, ${c} 0 40%, transparent 40%) 15% 100%/10% 80% no-repeat, linear-gradient(to top, ${c} 0 70%, transparent 70%) 45% 100%/10% 80% no-repeat, linear-gradient(to top, ${c} 0 55%, transparent 55%) 75% 100%/10% 80% no-repeat, var(--surface)"></b></div></div>
+  <div class="mini-phone" style="--tc:${c}"><div><div class="h" style="background:linear-gradient(140deg, ${c}, color-mix(in srgb, ${c} 60%, #12A594))"></div><s></s><s></s><s></s><div class="tb"><i></i><i></i><i></i><i></i></div></div></div>`;
+function tSecurity(t) {
+  const s = tenantSec(t);
+  return `<div class="grid g-1-1"><section class="card"><div class="card-h"><h2>Single sign-on</h2></div>
+    ${[['google','Google Workspace','Staff sign in with their school Google account'],['microsoft','Microsoft 365','Staff sign in with their Microsoft account']].map(([k, n, d]) => `<div class="setting"><div class="dot-ic t-blue">${ic('key',16)}</div><div class="meta"><b>${n}</b><small>${d}</small></div>${s.sso[k] ? `<span class="pill t-green">Connected</span><button class="btn sm" data-act="sso" data-k="${k}" data-id="${t.id}">Disconnect</button>` : `<button class="btn sm primary" data-act="sso" data-k="${k}" data-id="${t.id}">Connect</button>`}</div>`).join('')}
+  </section>
+  <section class="card"><div class="card-h"><h2>Two-step sign-in</h2></div>
+    <div class="setting"><div class="meta"><b>Require for admins and finance</b><small>Recommended. Applies to roles that can change money or users.</small></div>${sw(s.mfaAdmins, 'sec', `data-k="mfaAdmins" data-id="${t.id}"`)}</div>
+    <div class="setting"><div class="meta"><b>Require for all staff</b><small>Teachers will be asked to set it up at next sign-in.</small></div>${sw(s.mfaAll, 'sec', `data-k="mfaAll" data-id="${t.id}"`)}</div>
+    <div class="setting"><div class="meta"><b>Parents sign in with a one-time code</b><small>Sent by SMS or email instead of a password.</small></div>${sw(s.parentOtp, 'sec', `data-k="parentOtp" data-id="${t.id}"`)}</div>
+  </section>
+  <section class="card"><div class="card-h"><h2>Passwords & sessions</h2></div><div class="card-b form-grid">
+    <div class="field"><label for="pwLen">Minimum password length</label><select class="input" id="pwLen">${[8,10,12,14,16].map(n => `<option ${n===s.pwLen?'selected':''}>${n} characters</option>`).join('')}</select></div>
+    <div class="field"><label for="tmo">Sign out after inactivity</label><select class="input" id="tmo">${[15,30,60,240].map(n => `<option ${n===s.timeout?'selected':''}>${n < 60 ? n + ' minutes' : n / 60 + (n === 60 ? ' hour' : ' hours')}</option>`).join('')}</select></div>
+    <button class="btn primary full" data-act="toast" data-msg="Sign-in settings saved">Save</button></div></section>
+  <section class="card"><div class="card-h"><h2>IP allowlist</h2>${sw(s.ipOn, 'sec', `data-k="ipOn" data-id="${t.id}"`)}</div><div class="card-b" style="display:flex;flex-direction:column;gap:10px">
+    <p class="muted" style="margin:0;font-size:13px">Only allow staff to sign in to the admin app from these networks. Parents and the mobile apps are not affected.</p>
+    <textarea class="input" rows="3" ${s.ipOn?'':'disabled'} aria-label="Allowed IP ranges">${s.ips}</textarea></div></section></div>`;
+}
+function tDanger(t) {
+  const susp = t.status === 'Suspended';
+  return `<div class="card" style="border-color:var(--bad)"><div class="card-h"><h2 style="color:var(--bad)">Danger zone</h2></div>
+    <div class="setting"><div class="dot-ic t-blue">${ic('down',16)}</div><div class="meta"><b>Export all data</b><small>A ZIP of CSV files and documents, ready in about 10 minutes. The school owner gets a download link.</small></div><button class="btn sm" data-act="toast" data-msg="Export started. You'll get an email when it's ready.">Start export</button></div>
+    <div class="setting"><div class="dot-ic t-amber">${ic('power',16)}</div><div class="meta"><b>${susp ? 'Reactivate this school' : 'Suspend this school'}</b><small>${susp ? 'Staff, parents and students can sign in again straight away.' : 'Everyone is signed out and can’t sign back in. Data is kept and billing pauses.'}</small></div><button class="btn sm ${susp?'primary':'danger'}" data-act="${susp?'reactivate':'suspend'}" data-id="${t.id}">${susp ? 'Reactivate' : 'Suspend'}</button></div>
+    <div class="setting"><div class="dot-ic t-red">${ic('trash',16)}</div><div class="meta"><b>Delete this school</b><small>Removes all data after a 30-day grace period. This can’t be undone after that.</small></div><button class="btn sm danger" data-act="delTenant" data-id="${t.id}">Delete school</button></div>
+  </div>`;
+}
+
+V.plans = () => `${pageHead('Platform', 'Plans & billing', 'Prices are per enrolled student per month, billed in US dollars.', `<button class="btn primary" data-act="toast" data-msg="New plan draft created">${ic('plus',16)}New plan</button>`)}
+  <div class="plans">${Object.entries(PLANS).map(([n, p], i) => `<div class="card plan ${i===1?'feat':''}"><div style="display:flex;justify-content:space-between;align-items:center"><h2>${n}</h2>${i===1?'<span class="pill t-blue plain">Most popular</span>':''}</div><div class="price">$${p.price.toFixed(2)} <small>per student / month</small></div><div class="muted" style="font-size:13px">Up to ${fmt(p.limit)} students · ${tenants.filter(t => t.plan === n).length} schools</div>
+    <ul>${p.mods.map(k => `<li>${ic('check',14)}${MODULES.find(m => m[0] === k)[1]}</li>`).join('')}</ul><button class="btn" data-act="toast" data-msg="Editing ${n}">Edit plan</button></div>`).join('')}</div>
+  <div class="card"><div class="card-h"><h2>Invoices this month</h2></div><div class="tbl-wrap"><table><thead><tr><th>School</th><th>Plan</th><th class="r">Students</th><th class="r">Amount</th><th>Status</th></tr></thead><tbody>
+  ${tenants.filter(t => mrr(t)).map(t => `<tr class="click" data-act="openTenant" data-id="${t.id}"><td><div class="who">${tlogo(t)}<b>${t.name}</b></div></td><td>${t.plan}</td><td class="r num">${fmt(t.students)}</td><td class="r num">${usd(mrr(t))}</td><td>${pill(t.status === 'Past due' ? 'Failed' : 'Paid', t.status === 'Past due' ? 't-red' : 't-green')}</td></tr>`).join('')}</tbody></table></div></div>`;
+
+V.audit = () => { const f = S.filter.au || 'all'; const rows = AUDIT.filter(a => f === 'all' || a[4] === f);
+  return `${pageHead('Platform', 'Audit log', 'Every change made by Quad staff, school admins and the system, across all schools.', `<button class="btn">${ic('down',16)}Export CSV</button>`)}
+  <div class="card"><div class="toolbar"><div class="chips">${['all','tenant','users','security','plan','billing','fees'].map(k => `<button class="chip ${f===k?'on':''}" data-act="filter" data-key="au" data-val="${k}">${k === 'all' ? 'All events' : k[0].toUpperCase() + k.slice(1)}</button>`).join('')}</div></div>
+  <div class="tbl-wrap"><table><thead><tr><th>When</th><th>Who</th><th>What</th><th>School</th></tr></thead><tbody>${rows.map(([w, a, sub, at]) => `<tr><td class="muted" style="white-space:nowrap">${at}</td><td><div class="who">${avatar(w,'sm')}<b>${w}</b></div></td><td>${a}</td><td><span class="code">${sub}</span></td></tr>`).join('')}</tbody></table></div></div>`; };
+
+/* ---------- Overlays ---------- */
+const scrim = document.getElementById('scrim'), drawer = document.getElementById('drawer'), modal = document.getElementById('modal');
+function openDrawer(html) { drawer.innerHTML = html; drawer.classList.add('on'); scrim.classList.add('on'); drawer.setAttribute('aria-hidden','false'); }
+function openModal(html) { modal.innerHTML = html; modal.classList.add('on'); scrim.classList.add('on'); setTimeout(() => modal.querySelector('input:not([type=checkbox]),select,textarea')?.focus(), 50); }
+function closeAll() { [drawer, modal, scrim, document.getElementById('cmdk')].forEach(e => e.classList.remove('on')); drawer.setAttribute('aria-hidden','true'); }
+const head = (title, sub='') => `<div class="drawer-h"><div style="flex:1;min-width:0"><h2>${title}</h2>${sub?`<div class="muted" style="font-size:12.5px">${sub}</div>`:''}</div><button class="iconbtn" data-act="closeAll" aria-label="Close">${ic('x',16)}</button></div>`;
+function toast(msg) { const t = document.createElement('div'); t.className = 'toast'; t.innerHTML = `${ic('check',16)}${esc(msg)}`; const box = document.getElementById('toasts'); box.appendChild(t); while (box.children.length > 2) box.firstChild.remove(); setTimeout(() => t.remove(), 3000); }
+
+function userDrawer(t, u) {
+  openDrawer(`${head(u.name, `${u.email} · ${t.name}`)}<div class="drawer-b">
+    <div style="display:flex;gap:12px;align-items:center">${avatar(u.name,'lg')}<div>${pill(u.status)} ${u.mfa ? pill('Two-step on','t-green') : pill('Two-step off','t-amber')}<div class="muted" style="font-size:12.5px;margin-top:6px">${u.last}</div></div></div>
+    <div class="form-grid"><div class="field"><label for="u_role">Role</label><select class="input" id="u_role">${tenantRoles(t).map(r => `<option value="${r.id}" ${r.id===u.role?'selected':''}>${r.n}</option>`).join('')}</select></div>
+    <div class="field"><label for="u_campus">Campus</label><select class="input" id="u_campus">${CAMPUS.map(c => `<option ${c===u.campus?'selected':''}>${c}</option>`).join('')}</select></div></div>
+    <div id="permSummary"></div>
+    <div><h3 style="margin-bottom:8px">Signed-in devices</h3>${u.status === 'Active' ? [['Chrome on Windows','Colombo, Sri Lanka · now'],['Quad app on iPhone','Colombo, Sri Lanka · 2 hours ago']].map(([d, w], i) => `<div class="checkrow"><span style="color:var(--ink-3)">${ic(i ? 'phone' : 'grid',16)}</span><div style="flex:1"><b style="font-weight:600">${d}</b><div class="muted" style="font-size:12px">${w}</div></div><button class="btn sm" data-act="toast" data-msg="Signed out of ${d}">Sign out</button></div>`).join('') : '<p class="muted" style="margin:0;font-size:13px">No active sessions.</p>'}</div>
+    <div><h3 style="margin-bottom:8px">Account</h3>
+      <div class="checkrow"><div style="flex:1">Require two-step sign-in</div>${sw(u.mfa, 'userMfa', `data-tid="${t.id}" data-uid="${u.id}"`)}</div>
+      <div class="checkrow"><div style="flex:1">Send a password reset link</div><button class="btn sm" data-act="toast" data-msg="Reset link sent to ${u.email}">Send</button></div>
+      ${u.status === 'Invited' ? `<div class="checkrow"><div style="flex:1">Invite not accepted yet</div><button class="btn sm" data-act="toast" data-msg="Invite resent to ${u.email}">Resend invite</button></div>` : ''}
+    </div>
+  </div><div class="drawer-f"><button class="btn danger" data-act="toggleUser" data-tid="${t.id}" data-uid="${u.id}">${u.status === 'Deactivated' ? 'Reactivate' : 'Deactivate'}</button><span style="flex:1"></span><button class="btn" data-act="closeAll">Cancel</button><button class="btn primary" data-act="saveUser" data-tid="${t.id}" data-uid="${u.id}">Save</button></div>`);
+  const showPerms = () => { const r = document.getElementById('u_role').value, p = tenantPerms(t)[r];
+    document.getElementById('permSummary').innerHTML = `<div class="inv" style="font-size:12.5px"><b style="display:block;margin-bottom:6px">${roleName(t, r)} can</b>${PERM_MODS.filter(([k]) => p[k][0]).map(([k, n]) => `<div style="display:flex;justify-content:space-between;padding:2px 0"><span>${n}</span><span class="muted">${ACTIONS.filter((_, j) => p[k][j]).join(', ')}</span></div>`).join('') || '<span class="muted">Nothing yet. Add permissions under Roles & permissions.</span>'}</div>`; };
+  document.getElementById('u_role').onchange = showPerms; showPerms();
+}
+function inviteModal(t) {
+  openModal(`${head('Invite users', `${t.name} · they’ll get an email to set up their account`)}<form class="drawer-b" data-form="invite" data-id="${t.id}">
+    <div class="field"><label for="inv_e">Email addresses</label><textarea class="input" id="inv_e" rows="3" placeholder="kasun@${t.sub}.edu, anne@${t.sub}.edu"></textarea><small class="muted">Separate several addresses with commas or new lines.</small></div>
+    <div class="form-grid"><div class="field"><label for="inv_r">Role</label><select class="input" id="inv_r">${tenantRoles(t).map(r => `<option value="${r.id}" ${r.id==='teacher'?'selected':''}>${r.n}</option>`).join('')}</select></div><div class="field"><label for="inv_c">Campus</label><select class="input" id="inv_c">${CAMPUS.map(c => `<option>${c}</option>`).join('')}</select></div></div>
+    <label class="checkrow"><input type="checkbox" checked> Ask them to set up two-step sign-in</label><div class="err-msg" id="invErr"></div></form>
+    <div class="drawer-f"><button class="btn" data-act="closeAll">Cancel</button><button class="btn primary" data-act="sendInvite" data-id="${t.id}">${ic('send',16)}Send invites</button></div>`);
+  const ta = document.getElementById('inv_e'), btn = modal.querySelector('[data-act=sendInvite]');
+  ta.oninput = () => { const n = ta.value.split(/[\s,;]+/).filter(Boolean).length; btn.innerHTML = `${ic('send',16)}Send ${n || ''} invite${n === 1 ? '' : 's'}`; };
+}
+function tenantWizard() {
+  const w = S.wiz, st = w.step, steps = ['School','Plan & modules','First admin','Create'];
+  const f = (id, l, ph='', type='text') => `<div class="field"><label for="${id}">${l}</label><input class="input" id="${id}" type="${type}" placeholder="${ph}" value="${esc(w[id]||'')}"></div>`;
+  let body = '';
+  if (st === 0) body = `<div class="form-grid"><div class="field full"><label for="w_name">School name</label><input class="input" id="w_name" value="${esc(w.w_name||'')}" placeholder="e.g. Matara Lakeside College"></div>
+    <div class="field full"><label for="w_sub">Subdomain</label><div class="addon"><input class="input" id="w_sub" value="${esc(w.w_sub||'')}" placeholder="lakeside" autocomplete="off"><span>.quad.school</span></div><div class="avail" id="subAvail"></div></div>
+    <div class="field"><label for="w_country">Country</label><select class="input" id="w_country">${['Sri Lanka','Maldives','India','UAE','Singapore'].map(c => `<option ${w.w_country===c?'selected':''}>${c}</option>`).join('')}</select></div>
+    <div class="field"><label for="w_region">Data region</label><select class="input" id="w_region">${Object.entries(REGIONS).map(([k, v]) => `<option value="${k}" ${w.w_region===k?'selected':''}>${v}</option>`).join('')}</select></div>
+    <div class="field"><label for="w_curr">Curriculum</label><select class="input" id="w_curr"><option>Cambridge (IGCSE / A level)</option><option>Edexcel</option><option>IB</option><option>Local (O/L, A/L)</option></select></div>
+    <div class="field"><label for="w_students">Expected students</label><input class="input" id="w_students" type="number" value="${w.w_students||600}"></div></div>`;
+  else if (st === 1) { const plan = w.w_plan || 'Growth'; body = `<div class="plans" style="grid-template-columns:repeat(3,1fr);gap:10px">${Object.entries(PLANS).map(([n, p]) => `<button class="card plan ${n===plan?'feat':''}" data-act="wPlan" data-p="${n}" style="text-align:left;padding:14px;gap:6px"><b>${n}</b><span class="num" style="font:700 20px var(--f-display)">$${p.price.toFixed(2)}</span><small class="muted">${p.mods.length} modules · up to ${fmt(p.limit)}</small></button>`).join('')}</div>
+    <div class="mods" style="grid-template-columns:1fr 1fr">${MODULES.map(([k, n, i]) => { const on = (w.mods || new Set(PLANS[plan].mods)).has(k); return `<div class="mod ${on?'':'off'}" style="padding:10px 12px"><div class="meta"><b style="font-size:13px">${n}</b></div>${sw(on, 'wMod', `data-k="${k}" aria-label="${n}"`)}</div>`; }).join('')}</div>
+    <label class="checkrow"><input type="checkbox" id="w_trial" ${w.w_trial !== false ? 'checked' : ''}> Start with a 30-day free trial</label>`; }
+  else if (st === 2) body = `<p class="muted" style="margin:0;font-size:13px">This person becomes the school admin. They can invite everyone else.</p><div class="form-grid">${f('w_aname','Full name','e.g. Shanthi Wickramasinghe')}${f('w_aemail','Email','principal@school.edu','email')}</div>
+    <label class="checkrow"><input type="checkbox" checked> Import students and staff from a spreadsheet after setup</label><label class="checkrow"><input type="checkbox" checked> Copy default roles and permissions</label>`;
+  else body = `<div class="prov" id="prov">${['Create isolated database schema','Seed roles and default permissions','Configure ' + (w.w_sub || 'school') + '.quad.school and TLS certificate','Apply branding and modules','Email invite to ' + (w.w_aemail || 'the school admin')].map(s => `<div><i></i>${s}</div>`).join('')}</div><div id="provDone"></div>`;
+  openModal(`${head('New school', 'Creates a new tenant with its own data and subdomain')}<div class="steps">${steps.map((s, i) => `<div class="${i<=st?'on':''}">${i+1}. ${s}</div>`).join('')}</div>
+    <form class="drawer-b" data-form="wizard" novalidate>${body}<div class="err-msg" id="wErr"></div></form>
+    <div class="drawer-f" id="wFoot">${st && st < 3 ? '<button class="btn" data-act="wBack">Back</button>' : ''}${st < 3 ? `<button class="btn primary" data-act="wNext">${st < 2 ? 'Continue' : 'Create school'}</button>` : ''}</div>`);
+  const sub = document.getElementById('w_sub'), name = document.getElementById('w_name');
+  if (sub) {
+    const check = () => { const v = sub.value.trim().toLowerCase(), a = document.getElementById('subAvail');
+      if (!v) { a.innerHTML = ''; return; }
+      if (!/^[a-z0-9-]{3,30}$/.test(v)) { a.innerHTML = `<span style="color:var(--bad)">Use 3–30 lowercase letters, numbers or hyphens.</span>`; return; }
+      a.innerHTML = tenants.some(t => t.sub === v) ? `<span style="color:var(--bad)">${ic('x',14)} ${v}.quad.school is taken</span>` : `<span style="color:var(--good)">${ic('check',14)} ${v}.quad.school is available</span>`; };
+    name.oninput = () => { if (!sub.dataset.touched) { sub.value = name.value.toLowerCase().replace(/[^a-z0-9 ]/g, '').trim().split(/\s+/).slice(0, 2).join('-'); check(); } };
+    sub.oninput = () => { sub.dataset.touched = 1; check(); }; check();
+  }
+  if (st === 3) provision();
+}
+function provision() {
+  const rows = [...document.querySelectorAll('#prov div')]; let i = 0;
+  const step = () => { if (i > 0) { rows[i-1].className = 'done'; rows[i-1].querySelector('i').innerHTML = ic('check',13); }
+    if (i < rows.length) { rows[i].className = 'run'; i++; setTimeout(step, 650); return; }
+    const w = S.wiz, id = Math.max(...tenants.map(t => t.id)) + 1, plan = w.w_plan || 'Growth';
+    const t = T(id, w.w_name, w.w_sub, w.w_country || 'Sri Lanka', plan, 0, w.w_trial === false ? 'Onboarding' : 'Trial', AVC[id % AVC.length], w.w_region || 'ap-south', '2026-10', {trialEnds:'4 Nov', health:'Setting up'});
+    t.mods = w.mods || new Set(PLANS[plan].mods); tenants.push(t);
+    usersByTenant[id] = [{id:`${id}-0`, name: w.w_aname, email: w.w_aemail, role:'admin', campus:CAMPUS[0], status:'Invited', mfa:true, last:'Invite sent just now', sso:false}];
+    AUDIT.unshift(['Prishan Maduka', `created tenant ${w.w_name}`, w.w_sub, 'Just now', 'tenant']);
+    document.getElementById('provDone').innerHTML = `<div class="inv" style="display:flex;gap:12px;align-items:center"><div class="dot-ic t-green">${ic('check',16)}</div><div style="flex:1"><b>${esc(w.w_name)} is ready</b><div class="muted" style="font-size:12.5px">${esc(w.w_sub)}.quad.school · invite sent to ${esc(w.w_aemail)}</div></div></div>`;
+    document.getElementById('wFoot').innerHTML = `<button class="btn" data-act="closeAll">Close</button><button class="btn primary" data-act="openTenant" data-id="${id}">Open school</button>`;
+  };
+  step();
+}
+
+/* ---------- Command palette ---------- */
+let cmdIdx = 0, cmdRes = [];
+const cmds = () => [...NAV.flatMap(g => g.items.map(([k, l]) => ({l, k:'Page', go:'#' + k}))), ...tenants.map(t => ({l:t.name, k:t.sub, go:'#tenant-' + t.id})),
+  ...tenants.slice(0, 5).flatMap(t => tenantUsers(t).slice(0, 4).map(u => ({l:u.name, k:t.sub, user:[t.id, u.id]}))), {l:'New school', k:'Action', act:'newTenant'}];
+function openCmdk() { closeAll(); document.getElementById('cmdk').classList.add('on'); scrim.classList.add('on'); const i = document.getElementById('cmdkInput'); i.value = ''; renderCmdk(''); i.focus(); }
+function renderCmdk(q) { q = q.toLowerCase(); cmdRes = cmds().filter(c => (c.l + c.k).toLowerCase().includes(q)).slice(0, 9); cmdIdx = 0; drawCmdk(); }
+function drawCmdk() { document.getElementById('cmdkList').innerHTML = cmdRes.map((c, i) => `<li class="${i===cmdIdx?'on':''}" data-i="${i}">${ic(c.user ? 'users' : c.k === 'Page' ? 'arrow' : c.k === 'Action' ? 'plus' : 'tenants', 16)}${esc(c.l)}<small>${c.k}</small></li>`).join('') || '<li class="muted">No matches.</li>'; }
+function runCmd(c) { if (!c) return; closeAll(); if (c.act) ACT[c.act]({dataset:{}}); else if (c.user) { const t = tenants.find(x => x.id === c.user[0]); S.tab['t' + t.id] = 'users'; location.hash = 'tenant-' + t.id; setTimeout(() => userDrawer(t, tenantUsers(t).find(u => u.id === c.user[1])), 40); } else location.hash = c.go; }
+document.getElementById('cmdkInput').addEventListener('input', e => renderCmdk(e.target.value));
+document.getElementById('cmdkInput').addEventListener('keydown', e => { if (e.key === 'ArrowDown') { cmdIdx = Math.min(cmdRes.length - 1, cmdIdx + 1); drawCmdk(); e.preventDefault(); } if (e.key === 'ArrowUp') { cmdIdx = Math.max(0, cmdIdx - 1); drawCmdk(); e.preventDefault(); } if (e.key === 'Enter') runCmd(cmdRes[cmdIdx]); });
+document.getElementById('cmdkList').addEventListener('click', e => { const li = e.target.closest('li[data-i]'); if (li) runCmd(cmdRes[+li.dataset.i]); });
+
+/* ---------- Router ---------- */
+const NAV = [
+  {g:'Platform', items:[['overview','Overview','home'],['tenants','Schools','tenants', tenants.length],['plans','Plans & billing','dollar'],['audit','Audit log','log']]}
+];
+function renderNav() {
+  const base = S.route.split('-')[0], active = base === 'tenant' ? 'tenants' : base;
+  const recent = tenants.slice(0, 4);
+  document.getElementById('nav').innerHTML = NAV.map(g => `<div class="nav-group"><div class="nav-label">${g.g}</div>${g.items.map(([k, l, i, c]) => `<a href="#${k}" class="${active===k?'on':''}" title="${l}">${ic(i)}<span>${l}</span>${c?`<em class="count">${tenants.length}</em>`:''}</a>`).join('')}</div>`).join('')
+    + `<div class="nav-group"><div class="nav-label">Pinned schools</div>${recent.map(t => `<a href="#tenant-${t.id}" class="${S.route==='tenant-'+t.id?'on':''}" title="${t.name}"><span class="tenant-logo" style="width:20px;height:20px;border-radius:6px;font-size:8.5px;background:${t.color}">${initials(t.name)}</span><span>${t.name}</span></a>`).join('')}</div>`
+    + `<div class="nav-group"><div class="nav-label">Apps</div><a href="admin.html" title="School admin app">${ic('grid')}<span>School admin app</span></a><a href="parent.html" title="Parent app">${ic('phone')}<span>Parent app</span></a></div>`;
+}
+function route() {
+  S.route = (location.hash || '#overview').slice(1) || 'overview';
+  const [base, ...rest] = S.route.split('-'), view = document.getElementById('view');
+  view.innerHTML = base === 'tenant' && rest.length ? V.tenant(rest[0]) : (V[base] || V.overview)();
+  renderNav(); closeAll(); document.getElementById('app').classList.remove('mobile-open'); afterRender();
+}
+function afterRender() {
+  ['tSearch','uSearch'].forEach(id => { const el = document.getElementById(id); if (el) el.oninput = () => { S.q = el.value; const pos = el.selectionStart; route(); const n = document.getElementById(id); n.focus(); n.setSelectionRange(pos, pos); }; });
+  const sr = document.getElementById('seatRange'); if (sr) sr.oninput = () => { const t = tenants.find(x => x.id === +sr.dataset.id); t.limit = +sr.value; document.getElementById('seatLbl').textContent = fmt(t.limit); };
+  const ps = document.getElementById('planSel'); if (ps) ps.onchange = () => { const t = tenants.find(x => x.id === +ps.dataset.id); t.plan = ps.value.split(' ')[0]; t.mods = new Set([...t.mods, ...PLANS[t.plan].mods]); route(); toast(`Changed to ${t.plan}. Billing updates from the next invoice.`); };
+  const bp = document.getElementById('brandPick'); if (bp) bp.oninput = () => setBrand(+bp.dataset.id, bp.value);
+  const br = document.getElementById('bulkRole'); if (br) br.onchange = () => { if (!br.value) return; const t = tenants.find(x => S.route === 'tenant-' + x.id); const n = S.sel.size; tenantUsers(t).forEach(u => { if (S.sel.has(u.id)) u.role = br.value; }); S.sel.clear(); route(); toast(`${n} users moved to ${roleName(t, br.value)}`); };
+}
+function setBrand(id, c) { const t = tenants.find(x => x.id === id); S.brandColor[id] = c; document.getElementById('brandLogo').style.background = c; document.getElementById('brandPrev').innerHTML = brandPreview(t, c); document.querySelectorAll('.swatches button').forEach(b => b.classList.toggle('on', b.dataset.c === c)); }
+const curTenant = () => tenants.find(x => S.route === 'tenant-' + x.id);
+
+/* ---------- Actions ---------- */
+const ACT = {
+  collapse: () => document.getElementById('app').classList.toggle('collapsed'),
+  mobileNav: () => document.getElementById('app').classList.toggle('mobile-open'),
+  theme: () => { const r = document.documentElement; const dark = r.dataset.theme ? r.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches; r.dataset.theme = dark ? 'light' : 'dark'; try { localStorage.setItem('quad-theme', r.dataset.theme); } catch (e) {} themeIcon(); },
+  cmdk: openCmdk, closeAll,
+  go: el => location.hash = el.dataset.to,
+  toast: el => toast(el.dataset.msg),
+  tab: el => { if (S.dirty && !confirmLeave()) return; S.tab[el.dataset.key] = el.dataset.val; S.q = ''; S.sel.clear(); route(); },
+  filter: el => { S.filter[el.dataset.key] = el.dataset.val; route(); },
+  openTenant: el => { closeAll(); location.hash = 'tenant-' + el.dataset.id; },
+  newTenant: () => { S.wiz = {step:0}; tenantWizard(); },
+  wBack: () => { saveWiz(); S.wiz.step--; tenantWizard(); },
+  wNext: () => { saveWiz(); const w = S.wiz, err = document.getElementById('wErr');
+    if (w.step === 0) { if (!w.w_name || !w.w_sub) { err.textContent = 'Enter the school name and a subdomain to continue.'; return; } if (!/^[a-z0-9-]{3,30}$/.test(w.w_sub) || tenants.some(t => t.sub === w.w_sub)) { err.textContent = 'Choose an available subdomain. Use 3–30 lowercase letters, numbers or hyphens.'; return; } }
+    if (w.step === 2 && (!w.w_aname || !/^\S+@\S+\.\S+$/.test(w.w_aemail || ''))) { err.textContent = 'Enter the admin’s name and a valid email address.'; return; }
+    w.step++; tenantWizard(); },
+  wPlan: el => { saveWiz(); S.wiz.w_plan = el.dataset.p; S.wiz.mods = new Set(PLANS[el.dataset.p].mods); tenantWizard(); },
+  wMod: el => { saveWiz(); const w = S.wiz; w.mods = w.mods || new Set(PLANS[w.w_plan || 'Growth'].mods); w.mods.has(el.dataset.k) ? w.mods.delete(el.dataset.k) : w.mods.add(el.dataset.k); el.classList.toggle('on'); el.closest('.mod').classList.toggle('off'); },
+  impersonate: el => { const t = tenants.find(x => x.id === +el.dataset.id); try { sessionStorage.setItem('quad-impersonate', JSON.stringify({name:t.name, sub:t.sub, by:'Prishan Maduka'})); } catch (e) {} AUDIT.unshift(['Prishan Maduka', `opened ${t.name} as school admin (support)`, t.sub, 'Just now', 'tenant']); location.href = 'admin.html'; },
+  openUser: (el, e) => { if (e && e.target.matches('input')) return; const t = tenants.find(x => x.id === +el.dataset.tid); userDrawer(t, tenantUsers(t).find(u => u.id === el.dataset.uid)); },
+  saveUser: el => { const t = tenants.find(x => x.id === +el.dataset.tid), u = tenantUsers(t).find(x => x.id === el.dataset.uid), r = document.getElementById('u_role').value;
+    const changed = r !== u.role; u.role = r; u.campus = document.getElementById('u_campus').value; closeAll(); route(); toast(changed ? `${u.name} is now ${roleName(t, r)}` : 'Saved'); if (changed) AUDIT.unshift(['Prishan Maduka', `changed role of ${u.name} to ${roleName(t, r)}`, t.sub, 'Just now', 'users']); },
+  toggleUser: el => { const t = tenants.find(x => x.id === +el.dataset.tid), u = tenantUsers(t).find(x => x.id === el.dataset.uid); u.status = u.status === 'Deactivated' ? 'Active' : 'Deactivated'; u.last = u.status === 'Deactivated' ? 'Deactivated just now' : 'Reactivated just now'; closeAll(); route(); toast(u.status === 'Deactivated' ? `${u.name} can no longer sign in` : `${u.name} can sign in again`); },
+  userMfa: el => { const t = tenants.find(x => x.id === +el.dataset.tid), u = tenantUsers(t).find(x => x.id === el.dataset.uid); u.mfa = !u.mfa; el.classList.toggle('on', u.mfa); },
+  invite: el => inviteModal(tenants.find(x => x.id === +el.dataset.id)),
+  sendInvite: el => { const t = tenants.find(x => x.id === +el.dataset.id), raw = document.getElementById('inv_e').value.split(/[\s,;]+/).filter(Boolean), bad = raw.filter(e => !/^\S+@\S+\.\S+$/.test(e));
+    if (!raw.length) { document.getElementById('invErr').textContent = 'Enter at least one email address.'; return; }
+    if (bad.length) { document.getElementById('invErr').textContent = `Check ${bad.join(', ')}. Each should look like name@school.edu.`; return; }
+    const role = document.getElementById('inv_r').value, campus = document.getElementById('inv_c').value, list = tenantUsers(t);
+    raw.forEach((e, i) => { const nm = e.split('@')[0].split(/[._]/).map(w => w[0].toUpperCase() + w.slice(1)).join(' '); list.unshift({id:`${t.id}-n${Date.now()}${i}`, name:nm, email:e, role, campus, status:'Invited', mfa:true, last:'Invite sent just now', sso:false}); });
+    closeAll(); route(); toast(`${raw.length} invite${raw.length > 1 ? 's' : ''} sent as ${roleName(t, role)}`); },
+  selAllU: el => { const t = tenants.find(x => x.id === +el.dataset.id); document.querySelectorAll('.usel').forEach(c => { c.checked = el.checked; el.checked ? S.sel.add(c.dataset.uid) : S.sel.delete(c.dataset.uid); }); route(); },
+  clearSel: () => { S.sel.clear(); route(); },
+  bulk: el => { const t = tenants.find(x => x.id === +el.dataset.id), op = el.dataset.op, us = tenantUsers(t).filter(u => S.sel.has(u.id)), n = us.length;
+    if (op === 'deactivate') us.forEach(u => { u.status = 'Deactivated'; u.last = 'Deactivated just now'; });
+    if (op === 'mfa') us.forEach(u => u.mfa = true);
+    S.sel.clear(); route(); toast({deactivate:`${n} users deactivated`, mfa:`Two-step sign-in required for ${n} users`, resend:`Invites resent to ${n} users`}[op]); },
+  pickRole: el => { if (S.dirty && !confirmLeave()) return; S.roleSel = el.dataset.r; route(); },
+  perm: el => { const t = curTenant(), p = tenantPerms(t)[S.roleSel][el.dataset.m]; const j = +el.dataset.j; p[j] = el.checked ? 1 : 0; if (j === 0 && !el.checked) p.fill(0); if (j > 0 && el.checked) p[0] = 1; S.dirty = true; S.snapshot = S.snapshot || null; route(); },
+  permPreset: () => { const t = curTenant(), p = tenantPerms(t)[S.roleSel]; Object.keys(p).forEach(k => p[k] = [1,0,0,0,0]); S.dirty = true; route(); },
+  savePerms: () => { const t = curTenant(); S.dirty = false; S.permBackup = null; AUDIT.unshift(['Prishan Maduka', `updated permissions for ${roleName(t, S.roleSel)}`, t.sub, 'Just now', 'users']); route(); toast(`Permissions saved. People with this role see the change at their next page load.`); },
+  discardPerms: () => { const t = curTenant(); if (S.permBackup) permsByTenant[t.id] = S.permBackup; S.permBackup = null; S.dirty = false; route(); toast('Changes discarded'); },
+  newRole: el => { const t = tenants.find(x => x.id === +el.dataset.id); openModal(`${head('New role', t.name)}<div class="drawer-b"><div class="field"><label for="nr_n">Role name</label><input class="input" id="nr_n" placeholder="e.g. Head of Year"></div><div class="field"><label for="nr_c">Start from</label><select class="input" id="nr_c">${tenantRoles(t).map(r => `<option value="${r.id}" ${r.id==='teacher'?'selected':''}>${r.n}</option>`).join('')}<option value="">No permissions</option></select></div><div class="err-msg" id="nrErr"></div></div><div class="drawer-f"><button class="btn" data-act="closeAll">Cancel</button><button class="btn primary" data-act="createRole" data-id="${t.id}">Create role</button></div>`); },
+  createRole: el => { const t = tenants.find(x => x.id === +el.dataset.id), n = document.getElementById('nr_n').value.trim(), from = document.getElementById('nr_c').value; if (!n) { document.getElementById('nrErr').textContent = 'Give the role a name.'; return; }
+    const id = 'c' + Date.now(); tenantRoles(t).push({id, n, d:'Custom role'}); tenantPerms(t)[id] = from ? JSON.parse(JSON.stringify(tenantPerms(t)[from])) : defaultPerms('none'); S.roleSel = id; closeAll(); route(); toast(`Role “${n}” created`); },
+  delRole: el => { const t = tenants.find(x => x.id === +el.dataset.id), r = tenantRoles(t).find(x => x.id === S.roleSel), n = tenantUsers(t).filter(u => u.role === r.id).length;
+    openModal(`${head('Delete ' + r.n + '?')}<div class="drawer-b"><p style="margin:0">${n ? `${n} users have this role. They will be moved to <b>Teacher</b>.` : 'Nobody has this role yet.'}</p></div><div class="drawer-f"><button class="btn" data-act="closeAll">Cancel</button><button class="btn primary" data-act="confirmDelRole" data-id="${t.id}" style="background:var(--bad);border-color:var(--bad)">Delete role</button></div>`); },
+  confirmDelRole: el => { const t = tenants.find(x => x.id === +el.dataset.id); tenantUsers(t).forEach(u => { if (u.role === S.roleSel) u.role = 'teacher'; }); rolesByTenant[t.id] = tenantRoles(t).filter(r => r.id !== S.roleSel); S.roleSel = 'teacher'; S.dirty = false; closeAll(); route(); toast('Role deleted'); },
+  mod: el => { const t = tenants.find(x => x.id === +el.dataset.id), k = el.dataset.k; t.mods.has(k) ? t.mods.delete(k) : t.mods.add(k); route(); toast(`${MODULES.find(m => m[0] === k)[1]} ${t.mods.has(k) ? 'turned on' : 'turned off'} for ${t.name}`); },
+  brand: el => setBrand(+el.dataset.id, el.dataset.c),
+  sec: el => { const t = tenants.find(x => x.id === +el.dataset.id), s = tenantSec(t); s[el.dataset.k] = !s[el.dataset.k]; route(); toast('Saved'); },
+  sso: el => { const t = tenants.find(x => x.id === +el.dataset.id), s = tenantSec(t), k = el.dataset.k; s.sso[k] = !s.sso[k]; route(); toast(s.sso[k] ? `${k === 'google' ? 'Google Workspace' : 'Microsoft 365'} connected. Staff can use it at next sign-in.` : 'Disconnected. Staff will sign in with a password.'); },
+  suspend: el => { const t = tenants.find(x => x.id === +el.dataset.id); openModal(`${head('Suspend ' + t.name + '?')}<div class="drawer-b"><p style="margin:0">All ${fmt(tenantUsers(t).length)} staff and ${fmt(Math.round(t.students * .88))} parents will be signed out and can’t sign back in until you reactivate the school. Data is kept.</p><div class="field"><label for="cf">Type <span class="code">${t.sub}</span> to confirm</label><input class="input" id="cf" autocomplete="off"></div><div class="field"><label for="why">Reason (shown to the school admin)</label><select class="input" id="why"><option>Unpaid invoices</option><option>Requested by the school</option><option>Security review</option></select></div></div><div class="drawer-f"><button class="btn" data-act="closeAll">Cancel</button><button class="btn primary" id="cfBtn" data-act="confirmSuspend" data-id="${t.id}" disabled style="background:var(--bad);border-color:var(--bad);opacity:.5">Suspend school</button></div>`);
+    const i = document.getElementById('cf'), b = document.getElementById('cfBtn'); i.oninput = () => { const ok = i.value.trim() === t.sub; b.disabled = !ok; b.style.opacity = ok ? 1 : .5; }; },
+  confirmSuspend: el => { const t = tenants.find(x => x.id === +el.dataset.id); t.prevStatus = t.status; t.status = 'Suspended'; t.health = 'Suspended'; AUDIT.unshift(['Prishan Maduka', `suspended ${t.name}`, t.sub, 'Just now', 'tenant']); closeAll(); route(); toast(`${t.name} is suspended`); },
+  reactivate: el => { const t = tenants.find(x => x.id === +el.dataset.id); t.status = t.prevStatus && t.prevStatus !== 'Suspended' ? t.prevStatus : 'Active'; t.health = 'Healthy'; closeAll(); route(); toast(`${t.name} is active again`); },
+  delTenant: el => { const t = tenants.find(x => x.id === +el.dataset.id); openModal(`${head('Delete ' + t.name + '?')}<div class="drawer-b"><p style="margin:0">The school is suspended now and its data is permanently deleted on <b>4 November 2026</b>. You can cancel until then.</p><div class="field"><label for="cf2">Type <span class="code">delete ${t.sub}</span> to confirm</label><input class="input" id="cf2" autocomplete="off"></div></div><div class="drawer-f"><button class="btn" data-act="closeAll">Cancel</button><button class="btn primary" id="cf2Btn" data-act="confirmDel" data-id="${t.id}" disabled style="background:var(--bad);border-color:var(--bad);opacity:.5">Delete school</button></div>`);
+    const i = document.getElementById('cf2'), b = document.getElementById('cf2Btn'); i.oninput = () => { const ok = i.value.trim() === 'delete ' + t.sub; b.disabled = !ok; b.style.opacity = ok ? 1 : .5; }; },
+  confirmDel: el => { const t = tenants.find(x => x.id === +el.dataset.id); t.status = 'Suspended'; t.health = 'Suspended'; t.name += ' (deleting 4 Nov)'; closeAll(); location.hash = 'tenants'; toast('Scheduled for deletion on 4 November. You can cancel from the school page.'); }
+};
+function confirmLeave() { toast('Save or discard your permission changes first'); return false; }
+function saveWiz() { modal.querySelectorAll('input,select').forEach(i => { if (i.id && i.type !== 'checkbox') S.wiz[i.id] = i.value.trim(); if (i.id === 'w_trial') S.wiz.w_trial = i.checked; }); if (S.wiz.w_sub) S.wiz.w_sub = S.wiz.w_sub.toLowerCase(); }
+
+document.addEventListener('click', e => {
+  const cb = e.target.closest('.usel'); if (cb) { cb.checked ? S.sel.add(cb.dataset.uid) : S.sel.delete(cb.dataset.uid); route(); return; }
+  const el = e.target.closest('[data-act]'); if (!el || !ACT[el.dataset.act]) return;
+  if (el.dataset.act === 'perm') { if (!S.permBackup) { S.permBackup = JSON.parse(JSON.stringify(permsByTenant[curTenant().id])); } return ACT.perm(el, e); }
+  if (el.dataset.act === 'selAllU') return ACT.selAllU(el, e);
+  if (el.tagName === 'BUTTON' || el.tagName === 'A') e.preventDefault();
+  ACT[el.dataset.act](el, e);
+});
+document.addEventListener('change', e => { const f = e.target.dataset.filter; if (f) { S.filter[f] = e.target.value; route(); } });
+document.addEventListener('submit', e => { e.preventDefault(); if (e.target.dataset.form === 'wizard') ACT.wNext(); if (e.target.dataset.form === 'invite') ACT.sendInvite({dataset:{id:e.target.dataset.id}}); });
+document.addEventListener('keydown', e => { if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); openCmdk(); } if (e.key === 'Escape') closeAll(); if (e.key === 'Enter' && e.target.matches('.search')) openCmdk(); });
+const tip = document.getElementById('tip');
+document.addEventListener('mousemove', e => { const t = e.target.closest('[data-tip]'); if (!t) { tip.classList.remove('on'); return; } tip.innerHTML = t.dataset.tip; tip.classList.add('on'); tip.style.left = Math.min(innerWidth - tip.offsetWidth - 8, e.clientX + 14) + 'px'; tip.style.top = (e.clientY + 16) + 'px'; });
+function themeIcon() { const r = document.documentElement; const dark = r.dataset.theme ? r.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches; document.getElementById('themeBtn').innerHTML = ic(dark ? 'sun' : 'moon'); }
+window.addEventListener('hashchange', () => { if (S.dirty) { S.dirty = false; if (S.permBackup) { const t = tenants.find(x => permsByTenant[x.id] && S.route === 'tenant-' + x.id); if (t) permsByTenant[t.id] = S.permBackup; } S.permBackup = null; } S.q = ''; S.sel.clear(); route(); window.scrollTo(0, 0); });
+themeIcon(); route();
+</script>
+</body>
+</html>
