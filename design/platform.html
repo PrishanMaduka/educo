@@ -988,6 +988,9 @@ body.askq-open .askq-fab,.scrim.on~.askq-fab,.auth:not([hidden])~.askq-fab{opaci
 .pd-mods .mod b{font-size:13px}
 .in-unit{position:relative}.in-unit .input{padding-left:24px}.in-unit::before{content:attr(data-u);position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--ink-3);font-weight:700;font-size:13px;pointer-events:none}
 @media (max-width:760px){.pd-grid{grid-template-columns:1fr}.pd-prev{position:static;order:-1}.pd-prev .plan ul,.pd-prev .plan .muted{display:none}.pd-prev .plan{padding:14px;gap:8px}}
+
+/* keep Ask Quad clear of sticky save bars */
+body:has(.savebar,.uk-bar,.bulkbar) .askq-fab{bottom:92px}
 </style>
 </head>
 <body>
