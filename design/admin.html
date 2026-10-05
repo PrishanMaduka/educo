@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Educo Admin</title>
+<title>Quad Admin</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap">
@@ -330,7 +330,7 @@ td.r,th.r{text-align:right}
 <body>
 <div class="app" id="app">
   <aside class="rail" id="rail" aria-label="Modules">
-    <div class="brand"><div class="logo">e</div><div><b>Educo</b><small>Colombo International School</small></div></div>
+    <div class="brand"><div class="logo">q</div><div><b>Quad</b><small>Colombo International School</small></div></div>
     <nav class="nav" id="nav"></nav>
     <div class="rail-foot"><div class="av sm" style="background:#12A594">PM</div><div style="font-size:12px;min-width:0"><b style="color:#fff;display:block">Prishan Maduka</b><span style="color:var(--rail-ink-2)">Super admin</span></div></div>
   </aside>
@@ -455,7 +455,7 @@ const S = {
     {no:'JE-2026-0408', date:'2026-09-29', memo:'Transport income recognised', dr:'1200 Fees receivable', cr:'4200 Transport income', amt:2730000}
   ]
 };
-try { const t = localStorage.getItem('educo-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+try { const t = localStorage.getItem('quad-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
 
 /* ---------- Navigation ---------- */
 const NAV = [
@@ -912,7 +912,7 @@ document.getElementById('cmdkList').addEventListener('click', e => { const li = 
 const ACT = {
   collapse: () => document.getElementById('app').classList.toggle('collapsed'),
   mobileNav: () => document.getElementById('app').classList.toggle('mobile-open'),
-  theme: () => { const r = document.documentElement; const dark = r.dataset.theme ? r.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches; r.dataset.theme = dark ? 'light' : 'dark'; try { localStorage.setItem('educo-theme', r.dataset.theme); } catch (e) {} themeIcon(); },
+  theme: () => { const r = document.documentElement; const dark = r.dataset.theme ? r.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches; r.dataset.theme = dark ? 'light' : 'dark'; try { localStorage.setItem('quad-theme', r.dataset.theme); } catch (e) {} themeIcon(); },
   cmdk: openCmdk, closeAll,
   notif: () => { const n = document.getElementById('notif'); const on = !n.classList.contains('on'); closeAll(); if (on) { n.innerHTML = `<div class="card-h"><h2>Notifications</h2><button class="btn sm ghost" data-act="closeAll">Mark all read</button></div><div class="list">${[
     ['fee','t-green','Payment received','Rs 312,000 from Ruwan Fernando via iParent','4m'],['admit','t-violet','New application','Liam Patel · Grade 6 · from website','22m'],['alert','t-red','Attendance alert','Grade 8 – Ruby register not submitted','1h'],['msg','t-blue','2 new parent messages','Communications inbox','2h']

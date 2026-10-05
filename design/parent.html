@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Educo Parent App</title>
+<title>Quad Parent App</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap">
@@ -226,13 +226,13 @@ textarea.input{height:auto;padding:12px 14px;resize:none}
     <div class="sheet" id="sheet" role="dialog" aria-modal="true"></div>
     <button class="push" id="push" data-act="openPush"></button>
     <div class="lock" id="lock">
-      <div><div class="logo">e</div><h1>Educo Parent</h1><p>Colombo International School</p></div>
+      <div><div class="logo">q</div><h1>Quad Parent</h1><p>Colombo International School</p></div>
       <div><button class="faceid" id="faceid" data-act="unlock" aria-label="Unlock with Face ID"><svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 8V5a2 2 0 0 1 2-2h3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M8 21H5a2 2 0 0 1-2-2v-3M9 9v1M15 9v1M12 9v4h-1M9 16c1.5 1 4.5 1 6 0"/></svg></button><p>Tap to unlock with Face ID</p></div>
     </div>
   </div></div>
 
   <aside class="panel" aria-label="Prototype controls">
-    <div><h1>Educo Parent</h1><p>Interactive prototype of the parent mobile app. Tap through it like a real phone. Use these controls to simulate what the school sends.</p></div>
+    <div><h1>Quad Parent</h1><p>Interactive prototype of the parent mobile app. Tap through it like a real phone. Use these controls to simulate what the school sends.</p></div>
     <div class="group"><b>Simulate a push notification</b>
       <button class="pbtn" data-act="sim" data-k="absence"><span>Absence alert · Kavindu not in register</span>→</button>
       <button class="pbtn" data-act="sim" data-k="reward"><span>Reward · Amaya earned 5 house points</span>→</button>
@@ -299,7 +299,7 @@ const S = {
   ],
   subs:{absence:true, rewards:true, finance:true, news:true, sms:false}, faceid:true, notifs:3
 };
-try { const t = localStorage.getItem('educo-parent-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+try { const t = localStorage.getItem('quad-parent-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
 const kid = () => KIDS[S.kid];
 const av = (n, c, cls='') => `<div class="av ${cls}" style="background:${c}">${n.split(' ').map(w=>w[0]).slice(0,2).join('')}</div>`;
 const kidSwitch = () => `<div class="kids" role="tablist" aria-label="Choose child">${KIDS.map((k, i) => `<button class="kid ${i===S.kid?'on':''}" data-act="kid" data-i="${i}" role="tab">${av(k.name, k.color, 'sm')}${k.first}</button>`).join('')}</div>`;
@@ -448,7 +448,7 @@ SCR.more = () => ({ big:'More', body: `
     <div class="row"><div class="ico t-blue">${ic('moon',19)}</div><div class="m"><b>Dark mode</b><small>Follows your phone unless set here</small></div><button class="toggle ${isDark()?'on':''}" data-act="theme" role="switch" aria-checked="${isDark()}" aria-label="Dark mode"></button></div>
     ${row('globe','t-green','Language','English · සිංහල · தமிழ்')}</div>
   <button class="btn sec" data-act="lockApp" style="color:var(--bad)">${ic('out',18)}Sign out</button>
-  <p style="text-align:center;font-size:12px;color:var(--ink-3);margin:0">Educo Parent 1.0 · Colombo International School</p>` });
+  <p style="text-align:center;font-size:12px;color:var(--ink-3);margin:0">Quad Parent 1.0 · Colombo International School</p>` });
 
 SCR.calendar = () => ({ title:'School calendar', body: `<div class="card">${[['06','Oct','Report absence deadline','Term 1 attendance review'],['08','Oct','Parent–teacher meetings','8–10 Oct · 3:30–6:00 pm'],['10','Oct','Term 1 fees due','Pay in the app'],['18','Oct','Open day','All day'],['23','Oct','Grade 4 Pinnawala trip','Consent required'],['31','Oct','Deepavali holiday','School closed'],['08','Nov','Science Olympiad','Kandy · Grade 9'],['12','Dec','Term 1 ends','Reports published 15 Dec']].map(([d,m,t,s]) => `<div class="row event"><div class="date"><b>${d}</b><small>${m}</small></div><div class="m"><b>${t}</b><small>${s}</small></div><button data-act="toast" data-msg="Added to your phone calendar" aria-label="Add to calendar" style="color:var(--brand)">${ic('plus',20)}</button></div>`).join('')}</div>` });
 SCR.news = () => ({ title:'News', body: NEWS.map((n, i) => `<button class="card news" data-act="push" data-to="article" data-i="${i}" style="text-align:left;width:100%"><div class="img" style="background:${n.bg};height:140px">${n.tag}</div><div class="tx"><b>${n.t}</b><small>${n.d}</small></div></button>`).join('') });
@@ -523,7 +523,7 @@ function simulate(k) {
   if (document.getElementById('lock').classList.contains('off') === false) unlock();
   const p = PUSHES[k]; pushKey = k; const el = document.getElementById('push');
   if (k === 'message') { const t = S.threads[0]; t.unread++; t.msgs.push({me:false, t:p.m, at:'Now'}); }
-  el.innerHTML = `<div class="logo">e</div><div class="m"><b>${p.t}<small>now</small></b>${p.m}</div>`;
+  el.innerHTML = `<div class="logo">q</div><div class="m"><b>${p.t}<small>now</small></b>${p.m}</div>`;
   el.classList.add('on'); clearTimeout(pushT); pushT = setTimeout(() => el.classList.remove('on'), 5000); render();
 }
 
@@ -543,7 +543,7 @@ const ACT = {
   trip: el => { const i = +el.dataset.i; if (!document.getElementById('consent' + i).checked) { toast('Tick the consent box to continue'); return; } S.trips[i].consent = true; render(); toast(`Booked · ${money(S.trips[i].cost)} paid`); },
   sub: el => { const k = el.dataset.k; S.subs[k] = !S.subs[k]; el.classList.toggle('on'); el.setAttribute('aria-checked', S.subs[k]); },
   faceid: el => { S.faceid = !S.faceid; el.classList.toggle('on'); },
-  theme: () => { const r = document.documentElement; r.dataset.theme = isDark() ? 'light' : 'dark'; try { localStorage.setItem('educo-parent-theme', r.dataset.theme); } catch (e) {} render(); },
+  theme: () => { const r = document.documentElement; r.dataset.theme = isDark() ? 'light' : 'dark'; try { localStorage.setItem('quad-parent-theme', r.dataset.theme); } catch (e) {} render(); },
   newMsg: () => openSheet(`<h2 style="font:700 20px var(--f-display)">New message</h2><div class="field"><label for="nm_to">To</label><select class="input" id="nm_to">${STAFF.map(s => `<option>${s[0]}</option>`).join('')}</select></div><div class="field"><label for="nm_b">Message</label><textarea class="input" id="nm_b" rows="4" placeholder="Write your message"></textarea></div><button class="btn" data-act="sendNew">${ic('send',18)}Send</button>`),
   sendNew: () => { const to = document.getElementById('nm_to').value, b = document.getElementById('nm_b').value.trim(); if (!b) { toast('Write a message before sending'); return; }
     const id = S.threads.length + 1; S.threads.unshift({id, from: to, role:'Colombo International School', unread:0, msgs:[{me:true, t:b, at:'Now'}]}); closeSheet(); S.tab = 'inbox'; S.stack = [{to:'thread', p:{id}}]; render('r'); },

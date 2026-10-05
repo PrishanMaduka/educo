@@ -1,4 +1,4 @@
-# Educo
+# Quad
 
 A school management platform for school administrators, teachers, parents and students. It will ship as a monorepo with a web app for staff and a mobile app for parents.
 
@@ -45,7 +45,7 @@ Based on the iSAMS iParent feature set: one login for all of a parent's children
 ## Proposed monorepo structure
 
 ```
-educo/
+quad/
 ├── apps/
 │   ├── web/          # Admin, teacher and student portal (Next.js)
 │   ├── parent/       # Parent mobile app (React Native / Expo)
