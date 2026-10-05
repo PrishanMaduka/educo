@@ -64,6 +64,8 @@ The layout follows the Classe365 admin pattern: a navy module sidebar, a white t
 
 Global features: command palette (Ctrl/⌘ K), notifications panel, collapsible sidebar, academic-year switcher, toasts and a theme toggle.
 
+**Form pattern.** Every input form in the staff portal and the platform console opens as a side drawer, following the applicant panel: a tinted header with an icon, section label, title and subtitle; the fields grouped in a card on a light background; and the actions pinned to the bottom. Confirmations for destructive actions (suspend, delete) use a red header. The user profile and role builder stay full pages because they hold several sections of settings.
+
 ### Parent mobile app (`design/parent.html`)
 
 Based on the iSAMS iParent feature set: one login for all of a parent's children, with dashboard, children, communications, information and settings.

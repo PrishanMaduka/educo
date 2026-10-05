@@ -520,6 +520,22 @@ td.r,th.r{text-align:right}
 .ls-hero h2{font:700 26px var(--f-display);margin:2px 0 4px;color:#fff}
 .ls-hero .iconbtn{background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.3);color:#fff}
 @media (max-width:1600px){.tt2-wrap{grid-template-columns:minmax(0,1fr)}.tt2-side{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));align-items:start}}
+
+/* Form drawers: every input form opens as a side panel, like the applicant panel */
+.drawer.form{width:min(600px,100%)}
+.drawer.form.wide{width:min(900px,100%)}
+.drawer.form .drawer-h{padding:22px 22px 18px;background:linear-gradient(180deg,var(--brand-soft),transparent);align-items:flex-start;gap:14px;border-bottom:1px solid var(--line)}
+.drawer.form .drawer-h h2{font:700 22px/1.2 var(--f-display);margin:2px 0;letter-spacing:-.01em}
+.drawer.form .drawer-h .eyebrow{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);font-weight:700}
+.fd-ic{width:46px;height:46px;border-radius:14px;background:var(--brand);color:#fff;display:grid;place-items:center;flex:none;box-shadow:0 10px 22px -10px var(--brand)}
+.drawer.form.danger .drawer-h{background:linear-gradient(180deg,var(--bad-soft),transparent)}
+.drawer.form.danger .fd-ic{background:var(--bad);box-shadow:0 10px 22px -10px var(--bad)}
+.drawer.form .steps{padding:14px 22px;border-bottom:1px solid var(--line);background:var(--surface);margin:0}
+.drawer.form .drawer-b{background:var(--canvas);padding:20px 22px;gap:14px}
+.fd-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:16px;box-shadow:var(--shadow);min-width:0}
+.drawer.form .drawer-f{background:var(--surface);padding:14px 22px;border-top:1px solid var(--line)}
+.drawer.form .err-msg:empty{display:none}
+@media (max-width:600px){.drawer.form .drawer-h{padding:18px 16px 14px}.drawer.form .drawer-b{padding:14px}.fd-ic{width:40px;height:40px}}
 </style>
 </head>
 <body>
@@ -1544,9 +1560,21 @@ function moveApp(id, stage) {
 }
 
 /* ---------- Overlays ---------- */
-const scrim = document.getElementById('scrim'), drawer = document.getElementById('drawer'), modal = document.getElementById('modal');
+const scrim = document.getElementById('scrim'), drawer = document.getElementById('drawer'), modal = document.getElementById('drawer');
 function openDrawer(html, cls = '') { drawer.className = 'drawer ' + cls; drawer.innerHTML = html; drawer.classList.add('on'); scrim.classList.add('on'); drawer.setAttribute('aria-hidden','false'); }
-function openModal(html) { modal.innerHTML = html; modal.classList.add('on'); scrim.classList.add('on'); setTimeout(() => modal.querySelector('input,select,textarea')?.focus(), 50); }
+const FORM_META = [['New application','admit','Admissions'],['Record payment','fee','Fees & invoicing'],['New journal entry','fin','Accounting'],['Add lead','crm','CRM & leads'],['New broadcast','send','Communications'],['Generate invoices','file','Fees & invoicing'],['Invite staff','crm','Users & roles'],['INV-','fee','Invoice'],['Interested in Grade','crm','Lead']];
+/* Form drawers: look up an icon and section label from the form's title */
+function formDrawer(html, cls = '') {
+  openDrawer(html, 'form ' + cls);
+  const hd = drawer.querySelector('.drawer-h'), h2 = hd && hd.querySelector('h2'), t = h2 ? h2.textContent.trim() : '';
+  const all = hd ? hd.textContent : '', m = FORM_META.find(([p]) => t.startsWith(p) || all.includes(p)) || ['', 'plus', '', false];
+  if (hd) { hd.insertAdjacentHTML('afterbegin', `<span class="fd-ic">${ic(m[1], 20)}</span>`); if (m[2]) h2.insertAdjacentHTML('beforebegin', `<div class="eyebrow">${m[2]}</div>`); }
+  if (m[3]) drawer.classList.add('danger');
+  const b = drawer.querySelector('.drawer-b');
+  if (b && !b.querySelector(':scope > .fd-card')) { const w = document.createElement('div'); w.className = 'fd-card'; while (b.firstChild) w.appendChild(b.firstChild); b.appendChild(w); const err = w.querySelector(':scope > .err-msg'); if (err) b.appendChild(err); }
+  setTimeout(() => { const f = drawer.querySelector('.drawer-b input:not([type=checkbox]):not([type=file]):not([type=radio]),.drawer-b select,.drawer-b textarea'); if (f) f.focus(); }, 120);
+}
+function openModal(html, cls = '') { formDrawer(html, cls); }
 function closeAll() { [drawer, modal, scrim, document.getElementById('cmdk'), document.getElementById('notif')].forEach(e => e.classList.remove('on')); drawer.setAttribute('aria-hidden','true'); }
 const head = (title, sub='') => `<div class="drawer-h"><div style="flex:1;min-width:0"><h2>${title}</h2>${sub?`<div class="muted" style="font-size:12.5px">${sub}</div>`:''}</div><button class="iconbtn" data-act="closeAll" aria-label="Close">${ic('x',16)}</button></div>`;
 function toast(msg) { const t = document.createElement('div'); t.className = 'toast'; t.innerHTML = `${ic('check',16)}${esc(msg)}`; const box = document.getElementById('toasts'); box.appendChild(t); while (box.children.length > 2) box.firstChild.remove(); setTimeout(() => t.remove(), 2800); }
@@ -1564,7 +1592,7 @@ function wizard() {
 }
 function invDrawer(no) {
   const v = invoices.find(x => x.no === no); const lines = [FEE_ITEMS[0], FEE_ITEMS[1], ...(v.amt > 310000 ? [FEE_ITEMS[2]] : [])];
-  openDrawer(`${head(v.no, `${v.student.name} · ${v.student.cls}`)}<div class="drawer-b">
+  formDrawer(`${head(v.no, `${v.student.name} · ${v.student.cls}`)}<div class="drawer-b">
     <div style="display:flex;gap:10px;align-items:center">${statusPill(v.status)}<span class="muted">Due ${v.due}</span></div>
     <div class="inv"><div style="display:flex;justify-content:space-between;margin-bottom:12px"><div><b>${SCHOOL.name}</b><div class="muted" style="font-size:12px">42 Ward Place, Colombo 07</div></div><div style="text-align:right;font-size:12px" class="muted">Bill to<br><b style="color:var(--ink)">${v.student.guardian}</b></div></div>
     <table><tbody>${lines.map(([n, a]) => `<tr><td>${n}</td><td class="r num">${money(a)}</td></tr>`).join('')}<tr class="tot"><td>Total</td><td class="r num">${money(v.amt)}</td></tr><tr><td class="muted">Paid</td><td class="r num muted">− ${money(v.paid)}</td></tr><tr class="tot"><td>Balance due</td><td class="r num">${money(v.amt - v.paid)}</td></tr></tbody></table></div>
@@ -1647,7 +1675,7 @@ const ACT = {
   advance: el => { const a = apps.find(x => x.id === el.dataset.id); const i = STAGES.findIndex(s => s.k === a.stage); if (i < 5) { moveApp(a.id, STAGES[i+1].k); appDrawer(a.id); } },
   openStudent: (el, e) => { if (e && e.target.matches('input')) return; S.tab.stu = 'overview'; location.hash = 'student-' + el.dataset.id; },
   selAll: el => document.querySelectorAll('.rowsel').forEach(c => c.checked = el.checked),
-  openLead: el => { const l = leads[+el.dataset.id]; openDrawer(`${head(l.name, `Lead · interested in Grade ${l.grade}`)}<div class="drawer-b"><dl class="kv"><dt>Source</dt><dd>${l.source}</dd><dt>Owner</dt><dd>${l.owner}</dd><dt>Lead score</dt><dd>${l.score} / 100</dd><dt>Status</dt><dd>${statusPill(l.status)}</dd></dl>
+  openLead: el => { const l = leads[+el.dataset.id]; formDrawer(`${head(l.name, `Interested in Grade ${l.grade} · ${l.source}`)}<div class="drawer-b"><dl class="kv"><dt>Source</dt><dd>${l.source}</dd><dt>Owner</dt><dd>${l.owner}</dd><dt>Lead score</dt><dd>${l.score} / 100</dd><dt>Status</dt><dd>${statusPill(l.status)}</dd></dl>
     <div class="field"><label for="leadNote">Log a call or note</label><textarea class="input" id="leadNote" rows="3" placeholder="Spoke with parent about Grade ${l.grade} curriculum…"></textarea></div>
     <div><h3 style="margin-bottom:10px">Timeline</h3><div class="timeline"><div><b>Opened email</b> “Open Day – 18 October”<small>${l.last}d ago</small></div><div><b>Lead created</b> from ${l.source}<small>${l.last + 9}d ago</small></div></div></div></div>
     <div class="drawer-f"><button class="btn" data-act="toast" data-msg="Tour booked for Tue 10:00">${ic('cal',16)}Book tour</button><button class="btn primary" data-act="convertLead" data-id="${l.id}">Convert to application</button></div>`); },

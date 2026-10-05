@@ -713,6 +713,22 @@ tr.click:hover td{background:color-mix(in srgb,var(--brand) 6%,transparent)}
 .bm-tb i{width:9px;height:9px;border-radius:3px;background:var(--line-strong)}.bm-tb i:first-child{background:var(--sc)}
 .bm-lock{width:86px;height:170px;border-radius:18px;border:4px solid #0B0F1A;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:#fff;font-size:7.5px;font-weight:700;text-align:center;padding:6px;background:linear-gradient(160deg,color-mix(in srgb,var(--sc) 70%,#000),var(--sc) 70%,color-mix(in srgb,var(--sc) 60%,#12A594))}
 @media (max-width:760px){.wb{grid-template-columns:1fr}}
+
+/* Form drawers: every input form opens as a side panel, like the applicant panel */
+.drawer.form{width:min(600px,100%)}
+.drawer.form.wide{width:min(900px,100%)}
+.drawer.form .drawer-h{padding:22px 22px 18px;background:linear-gradient(180deg,var(--brand-soft),transparent);align-items:flex-start;gap:14px;border-bottom:1px solid var(--line)}
+.drawer.form .drawer-h h2{font:700 22px/1.2 var(--f-display);margin:2px 0;letter-spacing:-.01em}
+.drawer.form .drawer-h .eyebrow{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);font-weight:700}
+.fd-ic{width:46px;height:46px;border-radius:14px;background:var(--brand);color:#fff;display:grid;place-items:center;flex:none;box-shadow:0 10px 22px -10px var(--brand)}
+.drawer.form.danger .drawer-h{background:linear-gradient(180deg,var(--bad-soft),transparent)}
+.drawer.form.danger .fd-ic{background:var(--bad);box-shadow:0 10px 22px -10px var(--bad)}
+.drawer.form .steps{padding:14px 22px;border-bottom:1px solid var(--line);background:var(--surface);margin:0}
+.drawer.form .drawer-b{background:var(--canvas);padding:20px 22px;gap:14px}
+.fd-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:16px;box-shadow:var(--shadow);min-width:0}
+.drawer.form .drawer-f{background:var(--surface);padding:14px 22px;border-top:1px solid var(--line)}
+.drawer.form .err-msg:empty{display:none}
+@media (max-width:600px){.drawer.form .drawer-h{padding:18px 16px 14px}.drawer.form .drawer-b{padding:14px}.fd-ic{width:40px;height:40px}}
 </style>
 </head>
 <body>
@@ -1143,9 +1159,21 @@ V.audit = () => { const f = S.filter.au || 'all'; const rows = AUDIT.filter(a =>
   <div class="tbl-wrap"><table><thead><tr><th>When</th><th>Who</th><th>What</th><th>School</th></tr></thead><tbody>${rows.map(([w, a, sub, at]) => `<tr><td class="muted" style="white-space:nowrap">${at}</td><td><div class="who">${avatar(w,'sm')}<b>${w}</b></div></td><td>${a}</td><td><span class="code">${sub}</span></td></tr>`).join('')}</tbody></table></div></div>`; };
 
 /* ---------- Overlays ---------- */
-const scrim = document.getElementById('scrim'), drawer = document.getElementById('drawer'), modal = document.getElementById('modal');
-function openDrawer(html) { drawer.innerHTML = html; drawer.classList.add('on'); scrim.classList.add('on'); drawer.setAttribute('aria-hidden','false'); }
-function openModal(html, cls = '') { modal.className = 'modal ' + cls; modal.innerHTML = html; modal.classList.add('on'); scrim.classList.add('on'); setTimeout(() => modal.querySelector('input:not([type=checkbox]),select,textarea')?.focus(), 50); }
+const scrim = document.getElementById('scrim'), drawer = document.getElementById('drawer'), modal = document.getElementById('drawer');
+function openDrawer(html, cls = '') { drawer.className = 'drawer ' + cls; drawer.innerHTML = html; drawer.classList.add('on'); scrim.classList.add('on'); drawer.setAttribute('aria-hidden','false'); }
+const FORM_META = [['Invite users','users','School users'],['New school','tenants','Platform'],['Suspend','power','Danger zone',true],['Delete','trash','Danger zone',true]];
+/* Form drawers: look up an icon and section label from the form's title */
+function formDrawer(html, cls = '') {
+  openDrawer(html, 'form ' + cls);
+  const hd = drawer.querySelector('.drawer-h'), h2 = hd && hd.querySelector('h2'), t = h2 ? h2.textContent.trim() : '';
+  const all = hd ? hd.textContent : '', m = FORM_META.find(([p]) => t.startsWith(p) || all.includes(p)) || ['', 'plus', '', false];
+  if (hd) { hd.insertAdjacentHTML('afterbegin', `<span class="fd-ic">${ic(m[1], 20)}</span>`); if (m[2]) h2.insertAdjacentHTML('beforebegin', `<div class="eyebrow">${m[2]}</div>`); }
+  if (m[3]) drawer.classList.add('danger');
+  const b = drawer.querySelector('.drawer-b');
+  if (b && !b.querySelector(':scope > .fd-card')) { const w = document.createElement('div'); w.className = 'fd-card'; while (b.firstChild) w.appendChild(b.firstChild); b.appendChild(w); const err = w.querySelector(':scope > .err-msg'); if (err) b.appendChild(err); }
+  setTimeout(() => { const f = drawer.querySelector('.drawer-b input:not([type=checkbox]):not([type=file]):not([type=radio]),.drawer-b select,.drawer-b textarea'); if (f) f.focus(); }, 120);
+}
+function openModal(html, cls = '') { formDrawer(html, cls); }
 function closeAll() { [drawer, modal, scrim, document.getElementById('cmdk')].forEach(e => e.classList.remove('on')); drawer.setAttribute('aria-hidden','true'); }
 const head = (title, sub='') => `<div class="drawer-h"><div style="flex:1;min-width:0"><h2>${title}</h2>${sub?`<div class="muted" style="font-size:12.5px">${sub}</div>`:''}</div><button class="iconbtn" data-act="closeAll" aria-label="Close">${ic('x',16)}</button></div>`;
 function toast(msg) { const t = document.createElement('div'); t.className = 'toast'; t.innerHTML = `${ic('check',16)}${esc(msg)}`; const box = document.getElementById('toasts'); box.appendChild(t); while (box.children.length > 2) box.firstChild.remove(); setTimeout(() => t.remove(), 3000); }
