@@ -7,41 +7,41 @@
 <link rel="icon" href="brand/quad-app-icon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT@9..144,500..700,50..100&family=Nunito:wght@400;500;600;700;800&family=Noto+Sans+Sinhala:wght@500;700&family=Noto+Sans+Tamil:wght@500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap">
 <style>
 /* Layout: Classe365-style shell. Fixed navy module rail on the left, white top bar, cool-grey canvas with card grid. */
 :root{
-  --canvas:#F6EFE3; --surface:#FFFCF6; --surface-2:#FAF4E9; --line:#EADFCB; --line-strong:#D9C8AA;
-  --ink:#2A2017; --ink-2:#5E4D3B; --ink-3:#85715A;
-  --brand:#A0412D; --brand-ink:#FFFFFF; --brand-soft:#F7E3D8; --brand-strong:#82331F;
-  --rail:#1F3A2E; --rail-2:#2B4A3C; --rail-ink:#EDE4D0; --rail-ink-2:#A8B59F; --rail-active:#A0412D;
-  --good:#2E7D57; --good-soft:#E2F1E6; --warn:#A8650A; --warn-soft:#FBEBCF; --bad:#B3352A; --bad-soft:#F9E0DB; --info:#3D57A6; --info-soft:#E5EAF7;
-  --c1:#A0412D; --c2:#2E7D57; --c3:#D89A2B; --c4:#3D57A6; --c5:#C2557A; --gold:#D89A2B; --gold-soft:#FBEBCF;
-  --shadow:0 1px 0 rgba(90,60,30,.05),0 8px 22px -10px rgba(90,60,30,.18);
-  --shadow-lg:0 22px 60px -16px rgba(60,35,15,.35);
-  --f-display:"Fraunces",Georgia,"Noto Sans Sinhala","Noto Sans Tamil",serif;
-  --f-body:"Nunito","Noto Sans Sinhala","Noto Sans Tamil",system-ui,-apple-system,"Segoe UI",sans-serif;
-  --r:18px; --r-sm:12px; --vine-o:.75;
+  --canvas:#FAF8F5; --surface:#FFFFFF; --surface-2:#F6F3EF; --line:#ECE8E3; --line-strong:#DCD6CF;
+  --ink:#1C1B2E; --ink-2:#4E4C63; --ink-3:#7D7A90;
+  --brand:#DD4A42; --brand-ink:#FFFFFF; --brand-soft:#FDE7E5; --brand-strong:#C23B34;
+  --rail:#1F2559; --rail-2:#2C3370; --rail-ink:#E6E7F5; --rail-ink-2:#A3A6CC; --rail-active:#DD4A42;
+  --good:#1F8A5B; --good-soft:#E3F4EC; --warn:#B26A00; --warn-soft:#FFF1DC; --bad:#D13A3A; --bad-soft:#FDE6E6; --info:#6D5AE6; --info-soft:#EEEAFE;
+  --c1:#E5534B; --c2:#3B4AA8; --c3:#8B7CF6; --c4:#F2A93B; --c5:#2BB0A0; --gold:#8B7CF6; --gold-soft:#EEEAFE;
+  --shadow:0 1px 2px rgba(28,27,46,.05),0 8px 24px -12px rgba(28,27,46,.18);
+  --shadow-lg:0 24px 60px -18px rgba(28,27,46,.35);
+  --f-display:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-body:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --r:16px; --r-sm:10px; --vine-o:0;
   color-scheme:light;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --canvas:#17120D; --surface:#211A13; --surface-2:#2A2119; --line:#3A2E22; --line-strong:#4D3E2E;
-  --ink:#F4EBDD; --ink-2:#D3C3AC; --ink-3:#A39079;
-  --brand:#E07A55; --brand-ink:#1A120C; --brand-soft:#3A2218; --brand-strong:#F09A78;
-  --rail:#121C16; --rail-2:#1D2B22; --rail-ink:#EDE4D0; --rail-ink-2:#93A08A; --rail-active:#E07A55;
-  --good:#6CC293; --good-soft:#15301F; --warn:#E9B45A; --warn-soft:#3A2A10; --bad:#F0806F; --bad-soft:#3D1A15; --info:#93A8E8; --info-soft:#1F2742;
-  --c1:#E07A55; --c2:#5FB386; --c3:#E5B04A; --c4:#8DA2E6; --c5:#E07FA0; --gold:#E5B04A; --gold-soft:#3A2A10;
-  --shadow:0 1px 0 rgba(0,0,0,.3),0 8px 22px -10px rgba(0,0,0,.6); --shadow-lg:0 22px 60px -16px rgba(0,0,0,.7); --vine-o:.45;
+  --canvas:#13142A; --surface:#1B1D3A; --surface-2:#22254A; --line:#2E3260; --line-strong:#3D4277;
+  --ink:#F1F1FA; --ink-2:#C4C5DD; --ink-3:#9395B5;
+  --brand:#FF7A6E; --brand-ink:#1B1D3A; --brand-soft:#3D1F2A; --brand-strong:#FF978C;
+  --rail:#0E0F22; --rail-2:#1A1C3A; --rail-ink:#E6E7F5; --rail-ink-2:#8D90B8; --rail-active:#FF7A6E;
+  --good:#4CC992; --good-soft:#123326; --warn:#F0B357; --warn-soft:#3A2A10; --bad:#FF7A7A; --bad-soft:#3D1A1E; --info:#A99BFF; --info-soft:#262046;
+  --c1:#FF7A6E; --c2:#7B8BF0; --c3:#A99BFF; --c4:#F5B95A; --c5:#3CC7B5; --gold:#A99BFF; --gold-soft:#262046;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px -12px rgba(0,0,0,.6); --shadow-lg:0 24px 60px -18px rgba(0,0,0,.7); --vine-o:0;
   color-scheme:dark;
 }}
 :root[data-theme="dark"]{
-  --canvas:#17120D; --surface:#211A13; --surface-2:#2A2119; --line:#3A2E22; --line-strong:#4D3E2E;
-  --ink:#F4EBDD; --ink-2:#D3C3AC; --ink-3:#A39079;
-  --brand:#E07A55; --brand-ink:#1A120C; --brand-soft:#3A2218; --brand-strong:#F09A78;
-  --rail:#121C16; --rail-2:#1D2B22; --rail-ink:#EDE4D0; --rail-ink-2:#93A08A; --rail-active:#E07A55;
-  --good:#6CC293; --good-soft:#15301F; --warn:#E9B45A; --warn-soft:#3A2A10; --bad:#F0806F; --bad-soft:#3D1A15; --info:#93A8E8; --info-soft:#1F2742;
-  --c1:#E07A55; --c2:#5FB386; --c3:#E5B04A; --c4:#8DA2E6; --c5:#E07FA0; --gold:#E5B04A; --gold-soft:#3A2A10;
-  --shadow:0 1px 0 rgba(0,0,0,.3),0 8px 22px -10px rgba(0,0,0,.6); --shadow-lg:0 22px 60px -16px rgba(0,0,0,.7); --vine-o:.45;
+  --canvas:#13142A; --surface:#1B1D3A; --surface-2:#22254A; --line:#2E3260; --line-strong:#3D4277;
+  --ink:#F1F1FA; --ink-2:#C4C5DD; --ink-3:#9395B5;
+  --brand:#FF7A6E; --brand-ink:#1B1D3A; --brand-soft:#3D1F2A; --brand-strong:#FF978C;
+  --rail:#0E0F22; --rail-2:#1A1C3A; --rail-ink:#E6E7F5; --rail-ink-2:#8D90B8; --rail-active:#FF7A6E;
+  --good:#4CC992; --good-soft:#123326; --warn:#F0B357; --warn-soft:#3A2A10; --bad:#FF7A7A; --bad-soft:#3D1A1E; --info:#A99BFF; --info-soft:#262046;
+  --c1:#FF7A6E; --c2:#7B8BF0; --c3:#A99BFF; --c4:#F5B95A; --c5:#3CC7B5; --gold:#A99BFF; --gold-soft:#262046;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px -12px rgba(0,0,0,.6); --shadow-lg:0 24px 60px -18px rgba(0,0,0,.7); --vine-o:0;
   color-scheme:dark;
 }
 *{box-sizing:border-box}
@@ -64,7 +64,7 @@ h3{font-size:14px;font-family:var(--f-body);font-weight:700}
 .app.collapsed{grid-template-columns:72px 1fr}
 .rail{background:var(--rail);color:var(--rail-ink);position:sticky;top:0;height:100vh;display:flex;flex-direction:column;overflow:hidden;z-index:30}
 .brand{display:flex;align-items:center;gap:10px;padding:18px 18px 14px;min-height:64px}
-.logo{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#A0412D,#2E7D57);display:grid;place-items:center;flex:none;color:#fff;font:700 17px var(--f-display)}
+.logo{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#DD4A42,#2BB0A0);display:grid;place-items:center;flex:none;color:#fff;font:700 17px var(--f-display)}
 .brand b{font:700 18px var(--f-display);color:#fff;white-space:nowrap}
 .brand small{display:block;font-size:11px;color:var(--rail-ink-2);white-space:nowrap}
 .nav{flex:1;overflow-y:auto;padding:6px 10px 16px;scrollbar-width:thin}
@@ -74,7 +74,8 @@ h3{font-size:14px;font-family:var(--f-body);font-weight:700}
 .nav a:hover{background:var(--rail-2);color:#fff}
 .nav a.on{background:var(--rail-active);color:#fff}
 .nav a svg{flex:none;opacity:.9}
-.nav .count{margin-left:auto;font-size:11px;background:rgba(255,255,255,.12);padding:1px 7px;border-radius:20px}
+.nav a span{overflow:hidden;text-overflow:ellipsis}
+.nav .count{flex:none;margin-left:auto;font-size:11px;background:rgba(255,255,255,.12);padding:1px 7px;border-radius:20px}
 .nav a.on .count{background:rgba(255,255,255,.25)}
 .app.collapsed .nav-label,.app.collapsed .nav a span,.app.collapsed .nav .count,.app.collapsed .brand div,.app.collapsed .rail-foot div{display:none}
 .app.collapsed .nav a{justify-content:center}
@@ -288,7 +289,7 @@ td.r,th.r{text-align:right}
 .inv .tot td{font-weight:700;border:0;padding-top:12px}
 
 /* Finance */
-.support{display:flex;align-items:center;gap:12px;padding:9px 24px;background:#2E7D57;color:#fff;font-size:13px;font-weight:600;flex-wrap:wrap}
+.support{display:flex;align-items:center;gap:12px;padding:9px 24px;background:#3B4AA8;color:#fff;font-size:13px;font-weight:600;flex-wrap:wrap}
 .support span{flex:1;min-width:200px}
 .support button{background:rgba(255,255,255,.18);color:#fff;border:1px solid rgba(255,255,255,.4);border-radius:7px;padding:5px 12px;font-weight:700}
 .perm td,.perm th{text-align:center}.perm td:first-child,.perm th:first-child{text-align:left}
@@ -381,7 +382,7 @@ td.r,th.r{text-align:right}
 .auth-brand{display:flex;gap:12px;align-items:center}
 .auth-logo{width:54px;height:54px;border-radius:16px;background:#fff;display:grid;place-items:center;overflow:hidden;color:var(--brand);font:700 17px var(--f-display);box-shadow:0 10px 30px -10px rgba(0,0,0,.5);flex:none}
 .auth-logo img{width:100%;height:100%;object-fit:contain;padding:5px}
-.auth-logo.q{background:linear-gradient(135deg,#A0412D,#2E7D57)}
+.auth-logo.q{background:#1F2559}
 .auth-logo.q svg{width:70%;height:70%}
 .auth-brand b{display:block;font:700 18px var(--f-display)}.auth-brand small{opacity:.8;font-size:12.5px}
 .auth-quote{max-width:560px}.auth-quote h2{font:700 clamp(28px,3.4vw,46px)/1.06 var(--f-display);margin:0 0 14px;letter-spacing:-.025em}.auth-quote p{opacity:.85;font-size:16px;margin:0}
@@ -414,7 +415,7 @@ td.r,th.r{text-align:right}
 .rail .logo.has-img img{width:100%;height:100%;object-fit:contain;padding:3px}
 .brand div{min-width:0}
 .brand b{display:block;font-size:14.5px;line-height:1.25;white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-:root{--auth-bg:radial-gradient(80% 60% at 0% 0%,color-mix(in srgb,var(--brand) 85%,#fff),transparent 60%),radial-gradient(70% 70% at 100% 100%,color-mix(in srgb,var(--brand) 45%,#2E7D57),transparent 60%),linear-gradient(160deg,color-mix(in srgb,var(--brand) 75%,#000),#16241D)}
+:root{--auth-bg:radial-gradient(80% 60% at 0% 0%,color-mix(in srgb,var(--brand) 85%,#fff),transparent 60%),radial-gradient(70% 70% at 100% 100%,color-mix(in srgb,var(--brand) 40%,#8B7CF6),transparent 60%),linear-gradient(160deg,color-mix(in srgb,var(--brand) 75%,#000),#1F2559)}
 
 /* Applicant panel */
 .drawer.wide{width:min(760px,100%)}
@@ -770,20 +771,20 @@ button.st-sec:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg)}
 
 /* ===== Warm & local layer: paper, soft serif, tea-green rail, liyawela vine, pill controls ===== */
 :root{--vine:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='14' viewBox='0 0 56 14'%3E%3Cg fill='none' stroke='%23C9973B' stroke-width='1.3' stroke-linecap='round'%3E%3Cpath d='M0 7c7 0 7-5 14-5s7 5 14 5 7 5 14 5 7-5 14-5'/%3E%3Cpath d='M14 2c-2 2-1 4 1 4M42 12c2-2 1-4-1-4'/%3E%3C/g%3E%3Cg fill='%23C9973B'%3E%3Ccircle cx='28' cy='7' r='1.6'/%3E%3Cpath d='M7 9.5c1.3 1 1.3 3.2 0 4.2-1.3-1-1.3-3.2 0-4.2zM35 .3c1.3 1 1.3 3.2 0 4.2-1.3-1-1.3-3.2 0-4.2z'/%3E%3C/g%3E%3C/svg%3E")}
-body{background-color:var(--canvas);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .35 0 0 0 0 .25 0 0 0 0 .15 0 0 0 .05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");font-size:14.5px}
-h1,h2{font-weight:600;font-variation-settings:"SOFT" 100,"opsz" 72;letter-spacing:-.005em}
+body{background:var(--canvas);font-size:14.5px}
+h1,h2{font-weight:800;letter-spacing:-.02em}
 h1{font-size:30px;line-height:1.15}
 h2{font-size:18px}
-.vine{height:14px;background:var(--vine) repeat-x left center/56px 14px;opacity:var(--vine-o)}
+.vine{display:none;height:14px;background:var(--vine) repeat-x left center/56px 14px;opacity:var(--vine-o)}
 .scribble{position:absolute;left:-2%;bottom:-.18em;width:104%;height:.32em;overflow:visible;pointer-events:none}
-.scrib{position:relative;display:inline-block;white-space:nowrap}
+.scrib{white-space:nowrap;box-shadow:inset 0 -.3em 0 var(--gold-soft);padding:0 .06em}
 .local{font:700 13px var(--f-body);color:var(--gold);letter-spacing:.02em}
 /* rail */
 .rail{background:var(--rail);background-image:radial-gradient(120% 50% at 0% 0%,rgba(255,255,255,.06),transparent 60%)}
 .rail::after{content:"";position:absolute;left:0;right:0;bottom:0;height:120px;pointer-events:none;background:linear-gradient(transparent,rgba(0,0,0,.18))}
 .rail .vine{margin:0 16px 4px;filter:saturate(1.2)}
 .logo{border-radius:12px;background:var(--brand)}
-.brand b{font-family:var(--f-display);font-weight:600;font-variation-settings:"SOFT" 100}
+.brand b{font-family:var(--f-display);font-weight:800;letter-spacing:-.01em}
 .nav-label{font-weight:800;letter-spacing:.12em;color:var(--rail-ink-2);opacity:.9}
 .nav a{border-radius:999px;padding:9px 12px;font-weight:600}
 .nav a.on{background:var(--rail-active);box-shadow:0 6px 16px -8px rgba(0,0,0,.6)}
@@ -810,13 +811,13 @@ textarea.input{border-radius:12px}
 .card-h{border-bottom:1px dashed var(--line-strong)}
 .card-h h2{font-size:18px}
 .kpi .ic{border-radius:14px}
-.kpi .v{font-family:var(--f-display);font-weight:600;font-size:28px;font-variation-settings:"SOFT" 100,"opsz" 96}
+.kpi .v{font-family:var(--f-display);font-weight:600;font-size:28px;letter-spacing:-.02em}
 .dot-ic{border-radius:12px}
 th{background:var(--surface-2);font-weight:800;letter-spacing:.06em;font-size:11px}
 tr.click:hover td{background:color-mix(in srgb,var(--gold) 7%,var(--surface))}
 .drawer{border-radius:22px 0 0 22px}
 .drawer-h{border-bottom:0;position:relative;padding-bottom:22px}
-.drawer-h::after{content:"";position:absolute;left:20px;right:20px;bottom:4px;height:14px;background:var(--vine) repeat-x left center/56px 14px;opacity:var(--vine-o)}
+.drawer-h::after{display:none;content:"";position:absolute;left:20px;right:20px;bottom:4px;height:14px;background:var(--vine) repeat-x left center/56px 14px;opacity:var(--vine-o)}
 .modal,.cmdk,.notif{border-radius:20px}
 .scrim{background:rgba(42,32,23,.45)}
 .toast{border-radius:16px;background:var(--ink);padding:11px 18px;max-width:min(520px,calc(100vw - 32px))}
@@ -882,7 +883,7 @@ body.aq-on .askq-fab{opacity:0;pointer-events:none}
 .askq{position:fixed;top:12px;right:12px;bottom:12px;width:min(420px,calc(100% - 24px));z-index:65;background:var(--surface);border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow-lg);display:flex;flex-direction:column;transform:translateX(calc(100% + 24px));transition:transform .28s cubic-bezier(.2,.8,.2,1);visibility:hidden}
 .askq.on{transform:none;visibility:visible}
 .aq-h{display:flex;align-items:center;gap:10px;padding:16px 16px 8px}
-.aq-h b{display:block;font:600 19px var(--f-display);font-variation-settings:"SOFT" 100}.aq-h small{color:var(--ink-3);font-size:12px}
+.aq-h b{display:block;font:600 19px var(--f-display);letter-spacing:-.01em}.aq-h small{color:var(--ink-3);font-size:12px}
 .aq-logo{width:38px;height:38px;border-radius:50%;background:conic-gradient(from 200deg,var(--c1),var(--gold),var(--c2),var(--c1));color:#fff;display:grid;place-items:center;flex:none}
 .askq .vine{margin:0 16px}
 .aq-msgs{flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:12px}
@@ -909,16 +910,30 @@ body.aq-on .askq-fab{opacity:0;pointer-events:none}
 
 /* keep Ask Quad clear of sticky save bars */
 body:has(.savebar,.uk-bar,.bulkbar) .askq-fab{bottom:92px}
+
+/* moments */
+.mom-art{width:56px;height:44px;border-radius:12px;display:grid;place-items:center;align-content:center;gap:1px;flex:none;color:#fff;background:linear-gradient(135deg,var(--a),var(--b))}
+.mom-art small{display:none;font-size:9.5px;font-weight:800;letter-spacing:.04em;opacity:.95}.mom-pick .mom-art small,.mom-art.big small{display:block}
+.mom-demo{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:10px 18px;border-top:1px dashed var(--line);font-size:12.5px;color:var(--ink-3)}
+.mom-art.big{width:100%;height:120px;border-radius:16px}
+.mom-pick{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.mom-pick button{border:2px solid transparent;background:none;padding:2px;border-radius:15px}
+.mom-pick button .mom-art{width:100%;height:56px}
+.mom-pick button.on{border-color:var(--brand)}
+.mom-list{display:flex;flex-direction:column}
+.mom{display:flex;gap:12px;padding:12px 18px;border-bottom:1px dashed var(--line)}.mom:last-child{border-bottom:0}
+.mom>div{flex:1;min-width:0}.mom b{display:block;font-size:13px}.mom p{margin:2px 0;font-size:13px;color:var(--ink-2)}.mom small{color:var(--ink-3);font-size:12px}
+.mom-heart{color:var(--c1);font-weight:700}
 </style>
 </head>
 <body>
 <div class="auth" id="auth" hidden></div>
 <div class="app" id="app">
   <aside class="rail" id="rail" aria-label="Modules">
-    <div class="brand"><div class="logo"><svg viewBox="0 0 64 64" width="72%" height="72%" aria-hidden="true"><g fill="none" stroke-width="9"><path d="M20.82 15.42A20 20 0 0 1 43.18 15.42" stroke="#FFFFFF"/><path d="M48.58 20.82A20 20 0 0 1 48.58 43.18" stroke="#C9D8FF"/><path d="M15.42 43.18A20 20 0 0 1 15.42 20.82" stroke="#E3EBFF"/><path d="M43.18 48.58A20 20 0 0 1 20.82 48.58" stroke="#FFFFFF"/><path d="M39.35 39.35L54.91 54.91" stroke="#FFFFFF" stroke-linecap="round"/></g><circle cx="32" cy="32" r="4.5" fill="#FFC56B"/></svg></div><div><b>Quad</b><small>Colombo International School</small></div></div>
+    <div class="brand"><div class="logo"><svg viewBox="0 0 64 64" width="72%" height="72%" aria-hidden="true"><rect x="9" y="9" width="21" height="21" rx="7" fill="#FFFFFF"/><rect x="34" y="9" width="21" height="21" rx="7" fill="#C9C4F5"/><rect x="9" y="34" width="21" height="21" rx="7" fill="#C9C4F5"/><rect x="34" y="34" width="21" height="21" rx="7" fill="#FF7A6E"/><path d="M49 49l9 9" stroke="#FF7A6E" stroke-width="7" stroke-linecap="round"/></svg></div><div><b>Quad</b><small>Colombo International School</small></div></div>
     <div class="vine" aria-hidden="true"></div>
     <nav class="nav" id="nav"></nav>
-    <div class="rail-foot"><div class="av sm" style="background:#2E7D57">PM</div><div style="font-size:12px;min-width:0"><b style="color:#fff;display:block">Prishan Maduka</b><span style="color:var(--rail-ink-2)">Super admin</span></div><button class="iconbtn so" data-act="signOut" aria-label="Sign out" title="Sign out"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
+    <div class="rail-foot"><div class="av sm" style="background:#7A68E8">PM</div><div style="font-size:12px;min-width:0"><b style="color:#fff;display:block">Prishan Maduka</b><span style="color:var(--rail-ink-2)">Super admin</span></div><button class="iconbtn so" data-act="signOut" aria-label="Sign out" title="Sign out"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
   </aside>
   <div class="main">
     <header class="top">
@@ -929,7 +944,7 @@ body:has(.savebar,.uk-bar,.bulkbar) .askq-fab{bottom:92px}
       <select class="yearpick" id="yearpick" aria-label="Academic year" data-dd-ic="cal" data-dd-top><optgroup label="2026/27"><option data-sub="5 Oct – 18 Dec · current" selected>2026/27 · Term 1</option><option data-sub="5 Jan – 27 Mar">2026/27 · Term 2</option><option data-sub="20 Apr – 10 Jul">2026/27 · Term 3</option></optgroup><optgroup label="Past years"><option data-sub="Read only">2025/26 · Term 3</option><option data-sub="Read only">2025/26 · Term 2</option></optgroup></select>
       <button class="iconbtn" data-act="theme" aria-label="Toggle theme" id="themeBtn"></button>
       <button class="iconbtn" data-act="notif" aria-label="Notifications"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></svg><i class="dot"></i></button>
-      <div class="me" data-act="go" data-to="user-s0" title="My profile" style="cursor:pointer"><div class="av" style="background:#A0412D">PM</div><div><b>Prishan M.</b><small>Administrator</small></div></div>
+      <div class="me" data-act="go" data-to="user-s0" title="My profile" style="cursor:pointer"><div class="av" style="background:#DD4A42">PM</div><div><b>Prishan M.</b><small>Administrator</small></div></div>
     </header>
     <div id="supportBar"></div>
     <main class="content" id="view"></main>
@@ -985,7 +1000,7 @@ const pick = a => a[Math.floor(rnd() * a.length)];
 const FIRST = ['Amaya','Kavindu','Sanduni','Dinuka','Nethmi','Yohan','Tharushi','Ravindu','Hiruni','Senuka','Aisha','Omar','Liam','Mia','Arjun','Priya','Hasini','Chamod','Imaya','Thisara','Zara','Ethan','Sofia','Nadeesha','Pasindu','Ishara','Kaveesha','Rehan','Malsha','Lucas'];
 const LAST = ['Perera','Fernando','Silva','Jayasinghe','Wickramasinghe','Bandara','Rajapaksa','Gunawardena','Mendis','Dissanayake','Khan','Hassan','Smith','Patel','Kumar','De Alwis','Ratnayake','Herath','Senanayake','Abeysekera'];
 const HOUSES = ['Emerald','Sapphire','Ruby','Topaz'];
-const AVC = ['#A0412D','#2E7D57','#B5572A','#7A4E8C','#3E6E7A','#B0466A','#5B7A2A','#9A6418'];
+const AVC = ['#DD4A42','#3B4AA8','#7A68E8','#178276','#C2457E','#2C3370','#5B6BD0','#B8433C'];
 const initials = n => n.split(' ').map(w => w[0]).slice(0, 2).join('');
 const avColor = n => AVC[[...n].reduce((a, c) => a + c.charCodeAt(0), 0) % AVC.length];
 const avatar = (n, cls='') => `<div class="av ${cls}" style="background:${avColor(n)}">${initials(n)}</div>`;
@@ -994,14 +1009,14 @@ const moneyM = n => 'Rs ' + (n / 1e6).toFixed(1) + 'M';
 
 /* ---------- Academic structure: curriculum, stages and year groups set by the platform when the school was created ---------- */
 const ACAD_DEFAULT = {curr: {id:'cambridge', name:'Cambridge International', short:'Cambridge', grading:'A* to U', quals:[['Year 6','Cambridge Primary Checkpoint'],['Year 9','Lower Secondary Checkpoint'],['Year 11','IGCSE'],['Year 13','International A Level']]},
-  stages: [{name:'Early Years (EYFS)', ages:'3–5', years:['Playgroup','Nursery','Reception'], color:'#D89A2B', sections:2}, {name:'Junior School', ages:'5–11', years:['Year 1','Year 2','Year 3','Year 4','Year 5','Year 6'], color:'#2E7D57', sections:2},
-    {name:'Senior School', ages:'11–16', years:['Year 7','Year 8','Year 9','Year 10','Year 11'], color:'#A0412D', sections:2}, {name:'Sixth Form', ages:'16–18', years:['Year 12','Year 13'], color:'#7A4E8C', sections:2}]};
+  stages: [{name:'Early Years (EYFS)', ages:'3–5', years:['Playgroup','Nursery','Reception'], color:'#8B7CF6', sections:2}, {name:'Junior School', ages:'5–11', years:['Year 1','Year 2','Year 3','Year 4','Year 5','Year 6'], color:'#2BB0A0', sections:2},
+    {name:'Senior School', ages:'11–16', years:['Year 7','Year 8','Year 9','Year 10','Year 11'], color:'#DD4A42', sections:2}, {name:'Sixth Form', ages:'16–18', years:['Year 12','Year 13'], color:'#8B7CF6', sections:2}]};
 function loadAcad() { try { const s = JSON.parse(localStorage.getItem('quad-school') || 'null'); if (s && s.acad && s.acad.stages && s.acad.stages.some(x => x.on !== false && x.years && x.years.length)) return s.acad; } catch (e) {} return ACAD_DEFAULT; }
 const ACAD = loadAcad();
 const STG = []; const LV = [];
 ACAD.stages.filter(x => x.on !== false && x.years && x.years.length).forEach(x => { const si = STG.length, from = LV.length + 1;
-  x.years.forEach(y => LV.push({label: y, stage: x.name, si, color: x.color || '#A0412D', sections: Math.max(1, Math.min(10, +x.sections || 2)), ages: x.ages}));
-  STG.push({name: x.name, ages: x.ages, color: x.color || '#A0412D', from, to: LV.length, sections: Math.max(1, Math.min(10, +x.sections || 2))}); });
+  x.years.forEach(y => LV.push({label: y, stage: x.name, si, color: x.color || '#DD4A42', sections: Math.max(1, Math.min(10, +x.sections || 2)), ages: x.ages}));
+  STG.push({name: x.name, ages: x.ages, color: x.color || '#DD4A42', from, to: LV.length, sections: Math.max(1, Math.min(10, +x.sections || 2))}); });
 const GRADE_BANDS = STG.map(x => [x.name, x.from, x.to, x.color]);
 const LV_BASE = Math.max(0, LV.findIndex(x => /(^|\D)1$/.test(x.label)));   // index of the first year group numbered 1
 const lvL = n => Math.max(1, Math.min(LV.length, LV_BASE + n));                // sample data written as grade n → this school's year group
@@ -1286,8 +1301,8 @@ V.attendance = () => {
 };
 
 const COURSES = [
-  ['Mathematics','Grade 10 · Mr. Mendis','#A0412D',72,4,128],['Physics','Grade 10 · Mr. Herath','#3E6E7A',64,2,96],['English Literature','Grade 10 · Ms. Silva','#7A4E8C',81,3,128],
-  ['ICT','Grade 10 · Mrs. Bandara','#2E7D57',58,1,64],['History','Grade 10 · Mr. Ratnayake','#9A6418',69,2,96],['Art & Design','Grade 10 · Ms. De Alwis','#B0466A',77,0,64]
+  ['Mathematics','Grade 10 · Mr. Mendis','#DD4A42',72,4,128],['Physics','Grade 10 · Mr. Herath','#3B4AA8',64,2,96],['English Literature','Grade 10 · Ms. Silva','#8B7CF6',81,3,128],
+  ['ICT','Grade 10 · Mrs. Bandara','#2BB0A0',58,1,64],['History','Grade 10 · Mr. Ratnayake','#F2A93B',69,2,96],['Art & Design','Grade 10 · Ms. De Alwis','#D9578C',77,0,64]
 ];
 V.lms = () => {
   const t = curTab('lms', 'courses');
@@ -1426,7 +1441,7 @@ V.users = () => {
 const UK = { tab:'profile', draft:null, draftKey:null, dirty:false, ctx:null, user:null, q:'' };
 const UK_DEPTS = ['Leadership','Primary','Secondary','Finance office','Admissions office','Student services','Front office','IT'];
 const UK_CLASSES = [...new Set([4, 5, 7, 8, 9, 10, 11, 12].map((n, i) => { const g = lvL(n), sx = ttSecs(g); return clsName(g, sx[i % sx.length]); }))];
-const UK_COLORS = ['#A0412D','#2E7D57','#3E6E7A','#7A4E8C','#B0466A','#B5572A','#9A6418','#5B7A2A'];
+const UK_COLORS = ['#DD4A42','#178276','#3B4AA8','#7A68E8','#C2457E','#E5534B','#2C3370','#5B6BD0'];
 const UK_SENSITIVE = [
   ['export','Export data','Download student, staff or finance records as spreadsheets'],
   ['medical','See medical and safeguarding notes','Allergies, health conditions and counsellor notes'],
@@ -1737,14 +1752,14 @@ document.addEventListener('click', e => {
 });
 
 /* ---------- School branding (set in the platform console, kept in this browser) ---------- */
-const SCHOOL_DEFAULT = {name:'Colombo International School', short:'CIS', sub:'colombo-intl', color:'#A0412D', logo:null};
+const SCHOOL_DEFAULT = {name:'Colombo International School', short:'CIS', sub:'colombo-intl', color:'#DD4A42', logo:null};
 let SCHOOL = SCHOOL_DEFAULT;
-function loadSchool() { try { const s = JSON.parse(localStorage.getItem('quad-school') || 'null'); SCHOOL = s && s.name ? {...SCHOOL_DEFAULT, ...s} : SCHOOL_DEFAULT; } catch (e) { SCHOOL = SCHOOL_DEFAULT; } if (/^#2f6fed$/i.test(SCHOOL.color || '')) SCHOOL = {...SCHOOL, color: SCHOOL_DEFAULT.color}; if (!SCHOOL.short) SCHOOL.short = SCHOOL.name.replace(/[^A-Za-z ]/g, '').split(' ').filter(Boolean).map(w => w[0]).slice(0, 3).join('').toUpperCase(); }
+function loadSchool() { try { const s = JSON.parse(localStorage.getItem('quad-school') || 'null'); SCHOOL = s && s.name ? {...SCHOOL_DEFAULT, ...s} : SCHOOL_DEFAULT; } catch (e) { SCHOOL = SCHOOL_DEFAULT; } if (/^#(2f6fed|a0412d)$/i.test(SCHOOL.color || '')) SCHOOL = {...SCHOOL, color: SCHOOL_DEFAULT.color}; if (!SCHOOL.short) SCHOOL.short = SCHOOL.name.replace(/[^A-Za-z ]/g, '').split(' ').filter(Boolean).map(w => w[0]).slice(0, 3).join('').toUpperCase(); }
 const schoolMark = () => SCHOOL.logo ? `<img src="${SCHOOL.logo}" alt="${esc(SCHOOL.name)} logo">` : `<span>${esc(SCHOOL.short)}</span>`;
 function applySchool() {
   loadSchool(); const c = SCHOOL.color, r = document.documentElement.style;
   r.setProperty('--brand', c); r.setProperty('--brand-ink', '#fff'); r.setProperty('--brand-strong', `color-mix(in srgb, ${c} 80%, #000)`); r.setProperty('--brand-soft', `color-mix(in srgb, ${c} 13%, var(--surface))`);
-  r.setProperty('--rail-active', c); r.setProperty('--rail', `color-mix(in srgb, ${c} 7%, #1F3A2E)`); r.setProperty('--rail-2', `color-mix(in srgb, ${c} 12%, #2B4A3C)`);
+  r.setProperty('--rail-active', c); r.setProperty('--rail', `color-mix(in srgb, ${c} 7%, #1F2559)`); r.setProperty('--rail-2', `color-mix(in srgb, ${c} 12%, #2B4A3C)`);
   const lg = document.querySelector('.rail .logo'); lg.innerHTML = schoolMark(); lg.classList.toggle('has-img', !!SCHOOL.logo); lg.style.background = SCHOOL.logo ? '#fff' : c;
   document.querySelector('.brand b').textContent = SCHOOL.name; document.querySelector('.brand small').textContent = 'Staff portal · powered by Quad';
   document.title = SCHOOL.name + ' · Staff portal';
@@ -1843,14 +1858,14 @@ function appDrawer(id) {
 /* ---------- Timetable ---------- */
 /* Subject library: colour, icon, default teacher and room */
 const SUBJ_LIB = {
-  'Mathematics':['#A0412D','fin','Mr. Mendis','Room 12'], 'English':['#7A4E8C','book','Ms. Silva','Room 4'], 'Sinhala':['#B5572A','msg','Mrs. Herath','Room 6'], 'Tamil':['#7A4E8C','msg','Mr. Rajan','Room 7'],
-  'Science':['#0891B2','settings','Ms. Jayawardena','Lab 1'], 'Physics':['#3E6E7A','settings','Mr. Herath','Lab 2'], 'Chemistry':['#0D9488','alert','Dr. Fonseka','Lab 3'], 'Biology':['#16A34A','heart','Ms. Gunawardena','Lab 4'],
-  'Combined Maths':['#8A3A25','fin','Mr. Wijesinghe','Room 14'], 'ICT':['#2E7D57','grid','Mrs. Bandara','ICT lab'], 'History':['#9A6418','file','Mr. Ratnayake','Room 9'], 'Geography':['#6F8F2E','home','Ms. Karunaratne','Room 10'],
-  'Environmental studies':['#2E7D57','star','Mrs. Dias','Room 2'], 'Art & Design':['#B0466A','star','Ms. De Alwis','Studio'], 'Music':['#C2557A','heart','Mr. Fernando','Music room'], 'Physical Ed.':['#5B7A2A','heart','Coach Perera','Sports hall'],
-  'Religion':['#9A6418','book','Mr. Gunasekara','Room 3'], 'Global Perspectives':['#0F766E','home','','Room 8'], 'French':['#3D57A6','msg','','Room 5'], 'Spanish':['#EA580C','msg','','Room 5'], 'Computer Science':['#0D9488','grid','','ICT lab'],
-  'PSHE':['#9A6418','heart','','Room 3'], 'Language & Literature':['#7A4E8C','book','','Room 4'], 'Language Acquisition':['#3D57A6','msg','','Room 5'], 'Individuals & Societies':['#9A6418','home','','Room 9'], 'Units of inquiry':['#2E7D57','star','','Room 2'],
-  'Design':['#C2557A','settings','','Design lab'], 'Theory of Knowledge':['#6B4A86','book','','Room 15'], 'General Paper':['#7A4E8C','file','','Room 15'], 'English Language Arts':['#7A4E8C','book','','Room 4'], 'Social Studies':['#9A6418','home','','Room 9'],
-  'Literacy':['#7A4E8C','book','','Nest'], 'Numeracy':['#A0412D','fin','','Nest'], 'Understanding the world':['#2E7D57','home','','Nest'], 'Creative play':['#B0466A','star','','Studio'], 'Physical play':['#5B7A2A','heart','','Play area'], 'Business studies':['#6B4A86','fee','Mr. Peiris','Room 11'], 'Free study':['#64748B','book','Library staff','Library']
+  'Mathematics':['#DD4A42','fin','Mr. Mendis','Room 12'], 'English':['#8B7CF6','book','Ms. Silva','Room 4'], 'Sinhala':['#E5534B','msg','Mrs. Herath','Room 6'], 'Tamil':['#8B7CF6','msg','Mr. Rajan','Room 7'],
+  'Science':['#0891B2','settings','Ms. Jayawardena','Lab 1'], 'Physics':['#3B4AA8','settings','Mr. Herath','Lab 2'], 'Chemistry':['#0D9488','alert','Dr. Fonseka','Lab 3'], 'Biology':['#16A34A','heart','Ms. Gunawardena','Lab 4'],
+  'Combined Maths':['#B83A33','fin','Mr. Wijesinghe','Room 14'], 'ICT':['#2BB0A0','grid','Mrs. Bandara','ICT lab'], 'History':['#F2A93B','file','Mr. Ratnayake','Room 9'], 'Geography':['#35B8C9','home','Ms. Karunaratne','Room 10'],
+  'Environmental studies':['#2BB0A0','star','Mrs. Dias','Room 2'], 'Art & Design':['#D9578C','star','Ms. De Alwis','Studio'], 'Music':['#E06A9A','heart','Mr. Fernando','Music room'], 'Physical Ed.':['#2BB0A0','heart','Coach Perera','Sports hall'],
+  'Religion':['#F2A93B','book','Mr. Gunasekara','Room 3'], 'Global Perspectives':['#0F766E','home','','Room 8'], 'French':['#3B4AA8','msg','','Room 5'], 'Spanish':['#EA580C','msg','','Room 5'], 'Computer Science':['#0D9488','grid','','ICT lab'],
+  'PSHE':['#F2A93B','heart','','Room 3'], 'Language & Literature':['#8B7CF6','book','','Room 4'], 'Language Acquisition':['#3B4AA8','msg','','Room 5'], 'Individuals & Societies':['#F2A93B','home','','Room 9'], 'Units of inquiry':['#2BB0A0','star','','Room 2'],
+  'Design':['#E06A9A','settings','','Design lab'], 'Theory of Knowledge':['#7A68E8','book','','Room 15'], 'General Paper':['#8B7CF6','file','','Room 15'], 'English Language Arts':['#8B7CF6','book','','Room 4'], 'Social Studies':['#F2A93B','home','','Room 9'],
+  'Literacy':['#8B7CF6','book','','Nest'], 'Numeracy':['#DD4A42','fin','','Nest'], 'Understanding the world':['#2BB0A0','home','','Nest'], 'Creative play':['#D9578C','star','','Studio'], 'Physical play':['#2BB0A0','heart','','Play area'], 'Business studies':['#7A68E8','fee','Mr. Peiris','Room 11'], 'Free study':['#64748B','book','Library staff','Library']
 };
 /* Bell schedules: lessons (L) and breaks (B) with durations; times are worked out from the start time */
 const L = dur => ({t:'L', dur}), B = (label, dur, duty) => ({t:'B', label, dur, duty});
@@ -2154,7 +2169,7 @@ V.pastoral = () => {
     const houses = HOUSES.map(h => [h, PAST.beh.filter(b => b.type === 'house' && stuOf(b.sid).house === h).reduce((a, b) => a + b.pts, 0)]).sort((a, b) => b[1] - a[1]), mx = Math.max(...houses.map(h => h[1]), 1);
     body = `<div class="grid g-2-1"><div class="card"><div class="toolbar"><select class="input inline" data-filter="behT" aria-label="Type" data-dd-ic="star"><option value="all">All types</option>${BEH_TYPES.map(([k, l]) => `<option value="${k}" data-n="${PAST.beh.filter(b => b.type === k).length}" ${ft === k ? 'selected' : ''}>${l}</option>`).join('')}</select><span class="muted" style="margin-left:auto;font-size:12.5px">${rows.length} entries · last two weeks</span></div>
       <div class="tbl-wrap"><table><thead><tr><th>Student</th><th>Type</th><th>Reason</th><th class="r">Points</th><th>By</th><th>Date</th></tr></thead><tbody>${rows.map(b => { const st = stuOf(b.sid); return `<tr class="click" data-act="openBeh" data-id="${b.id}"><td><div class="who">${avatar(st.name,'sm')}<div><b>${esc(st.name)}</b><small>${esc(st.cls)}</small></div></div></td><td>${b.pts > 0 ? `<span class="pill t-green plain">${BEH_TYPES.find(x => x[0] === b.type)[1]}</span>` : `<span class="pill ${b.type === 'detention' ? 't-red' : 't-amber'} plain">${BEH_TYPES.find(x => x[0] === b.type)[1]}</span>`}</td><td>${esc(b.cat)}</td><td class="r num"><b style="color:${b.pts > 0 ? 'var(--good)' : 'var(--bad)'}">${b.pts > 0 ? '+' : ''}${b.pts}</b></td><td class="muted">${esc(b.by)}</td><td class="num muted">${dShort(b.date)}</td></tr>`; }).join('')}</tbody></table></div></div>
-      <section class="card"><div class="card-h"><h2>House points</h2><span class="muted" style="font-size:12px">This term</span></div><div style="padding:6px 18px 18px;display:flex;flex-direction:column;gap:12px">${houses.map(([h, n], i) => `<div class="house"><span class="hd" style="background:${['#2E7D57','#A0412D','#B0466A','#D89A2B'][HOUSES.indexOf(h)]}"></span><b>${h}</b>${i === 0 ? '<span class="pill t-green plain">Leading</span>' : ''}<span class="num" style="margin-left:auto;font-weight:800">${n}</span><div class="bar" style="grid-column:1/-1"><i style="width:${n / mx * 100}%;background:${['#2E7D57','#A0412D','#B0466A','#D89A2B'][HOUSES.indexOf(h)]}"></i></div></div>`).join('')}</div></section></div>`; }
+      <section class="card"><div class="card-h"><h2>House points</h2><span class="muted" style="font-size:12px">This term</span></div><div style="padding:6px 18px 18px;display:flex;flex-direction:column;gap:12px">${houses.map(([h, n], i) => `<div class="house"><span class="hd" style="background:${['#2BB0A0','#DD4A42','#D9578C','#8B7CF6'][HOUSES.indexOf(h)]}"></span><b>${h}</b>${i === 0 ? '<span class="pill t-green plain">Leading</span>' : ''}<span class="num" style="margin-left:auto;font-weight:800">${n}</span><div class="bar" style="grid-column:1/-1"><i style="width:${n / mx * 100}%;background:${['#2BB0A0','#DD4A42','#D9578C','#8B7CF6'][HOUSES.indexOf(h)]}"></i></div></div>`).join('')}</div></section></div>`; }
   else if (t === 'medical') body = `<div class="grid g-2-1"><div class="card"><div class="card-h"><h2>Medical conditions</h2><span class="muted" style="font-size:12px">${PAST.med.length} students</span></div><div class="tbl-wrap"><table><thead><tr><th>Student</th><th>Condition</th><th>Severity</th><th>Medication</th><th>Care plan review</th></tr></thead><tbody>${PAST.med.map((m, i) => { const st = stuOf(m.sid), due = m.plan < '2026-11-05'; return `<tr class="click" data-act="openMed" data-i="${i}"><td><div class="who">${avatar(st.name,'sm')}<div><b>${esc(st.name)}</b><small>${esc(st.cls)}</small></div></div></td><td>${esc(m.cond)}</td><td>${sevPill(m.sev)}</td><td class="muted" style="font-size:12.5px">${esc(m.meds)}</td><td class="num">${due ? `<span class="pill t-amber plain">Due ${dShort(m.plan)}</span>` : dShort(m.plan)}</td></tr>`; }).join('')}</tbody></table></div></div>
     <section class="card"><div class="card-h"><h2>Sick bay today</h2><button class="btn sm primary" data-act="newVisit">${ic('plus',14)}Log visit</button></div><div class="needs">${PAST.visits.map(v => { const st = stuOf(v.sid); return `<div class="need"><span>${ic('heart',16)}</span><div><b>${esc(st.name)} · ${v.t}</b><small>${esc(v.c)} · ${esc(v.tr)}</small><small>${esc(v.out)}${v.notified ? ' · parents told' : ''}</small></div></div>`; }).join('')}</div></section></div>`;
   else { body = `<div class="sg-lock"><span>${ic('shield',18)}</span><div><b>Restricted to the safeguarding team</b><small>${PAST.access.map(a => `${esc(a[0])} (${esc(a[1])})`).join(' · ')}. Every view is recorded.</small></div></div>
@@ -2505,6 +2520,7 @@ V.teach = () => {
           ${toWrite.map(x => `<div class="need"><span>${ic('file',16)}</span><div><b>${x.n} report comments · ${esc(x.c)}</b><small>${esc(x.k.join(', '))} · due ${REP.due}</small><div class="tl-acts"><button class="btn sm" data-act="openComments" data-c="${esc(x.c)}" data-k="${esc(x.k[0])}">Write comments</button></div></div></div>`).join('')}
           ${myCls && !regs['reg|' + myCls] ? `<div class="need"><span>${ic('check',16)}</span><div><b>Morning registration · ${esc(myCls)}</b><small>Parents of absent students are told at 09:00</small><div class="tl-acts"><button class="btn sm" data-act="openRegister" data-c="${esc(myCls)}" data-key="reg|${esc(myCls)}" data-l="Morning registration">Take registration</button></div></div></div>` : ''}
           <div class="need"><span>${ic('msg',16)}</span><div><b>2 messages from parents</b><small>Reply within two school days</small><div class="tl-acts"><button class="btn sm" data-act="go" data-to="inbox">Open inbox</button></div></div></div></div></section>
+        ${momCard(t)}
         ${myCls ? (() => { const ro = classRoster(myCls), R = repOf(myCls), p = repProgress(myCls); return `<section class="card"><div class="card-h"><h2>My class · ${esc(myCls)}</h2>${repPill(R.status)}</div><div style="padding:6px 18px 16px;display:flex;flex-direction:column;gap:10px">
           <div class="cur-meta"><span><b>${ro.length}</b> students</span><span><b>${regs['reg|' + myCls] ? Object.values(S.regMarks['reg|' + myCls] || {}).filter(v => v !== 'P').length : '—'}</b> absent today</span><span><b>${Math.round(p.ct * 100)}%</b> class comments</span></div>
           <div class="st-faces">${ro.slice(0, 9).map(n => avatar(n, 'xs')).join('')}<small class="muted">${ro.length}</small></div>
@@ -2983,7 +2999,7 @@ const ACT = {
     if (!name) { err.textContent = 'Type or pick a subject to add.'; inp.focus(); return; }
     const k = Object.keys(SUBJ_LIB).find(x => x.toLowerCase() === name.toLowerCase()) || name;
     if (S.subDraft.rows.some(r => r.k === k)) { err.textContent = `${k} is already on the list.`; inp.focus(); return; }
-    if (!SUBJ_LIB[k]) SUBJ_LIB[k] = [['#0EA5E9','#E11D48','#6B4A86','#059669','#D97706'][Object.keys(SUBJ_LIB).length % 5], 'book', '', ''];
+    if (!SUBJ_LIB[k]) SUBJ_LIB[k] = [['#0EA5E9','#E11D48','#7A68E8','#059669','#D97706'][Object.keys(SUBJ_LIB).length % 5], 'book', '', ''];
     S.subDraft.rows.push({k, n: 2, t: SUBJ_LIB[k][2], r: SUBJ_LIB[k][3]}); keepScroll(subjDrawer); const b = drawer.querySelector('.drawer-b'); b.scrollTop = b.scrollHeight; },
   sjCopy: () => { subjSync(); const g = +document.getElementById('sjCopy').value; S.subDraft.rows = gSubj(g).map(r => ({...r})); keepScroll(subjDrawer); toast(`Copied ${esc(yl(g))}’s subjects. Adjust them, then save.`); },
   sjAlso: el => { subjSync(); const g = +el.dataset.g, a = S.subDraft.also; a.has(g) ? a.delete(g) : a.add(g); keepScroll(subjDrawer); },
@@ -3124,12 +3140,12 @@ window.addEventListener('hashchange', () => { if (UK.user) delete UK.user._draft
 const YL = () => LV.map((_, i) => yl(i + 1));
 P.spark = '<path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M18.5 15.5l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7z"/>';
 P.trend = '<path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/>';
-const scrib = w => `<span class="scrib">${w}<svg class="scribble" viewBox="0 0 120 10" preserveAspectRatio="none" aria-hidden="true"><path d="M2 7c20-4 40-5 60-3s38 2 56-2" fill="none" stroke="var(--gold)" stroke-width="3" stroke-linecap="round"/></svg></span>`;
+const scrib = w => `<span class="scrib">${w}</span>`;
 /* Morning over the hills: sun, layered hills, tea rows, two birds. Colours follow the theme. */
 const morningArt = (cls = '') => `<svg class="morning ${cls}" viewBox="0 0 320 150" aria-hidden="true">
-  <circle cx="226" cy="74" r="34" fill="var(--gold)" opacity=".9"/><circle cx="226" cy="74" r="50" fill="var(--gold)" opacity=".15"/>
-  <path d="M0 108c40-26 78-30 118-14s70 6 104-12 70-16 98 0v68H0z" fill="var(--c2)" opacity=".35"/>
-  <path d="M0 124c50-22 96-18 140-4s84 10 118-6 48-10 62-4v40H0z" fill="var(--c2)" opacity=".7"/>
+  <circle cx="226" cy="74" r="34" fill="var(--c1)" opacity=".9"/><circle cx="226" cy="74" r="50" fill="var(--c1)" opacity=".14"/>
+  <path d="M0 108c40-26 78-30 118-14s70 6 104-12 70-16 98 0v68H0z" fill="var(--c3)" opacity=".35"/>
+  <path d="M0 124c50-22 96-18 140-4s84 10 118-6 48-10 62-4v40H0z" fill="var(--c3)" opacity=".7"/>
   <g stroke="var(--surface)" stroke-width="2" stroke-linecap="round" opacity=".45" fill="none"><path d="M18 136c30-10 60-12 92-4"/><path d="M40 144c34-9 70-10 104-2"/><path d="M168 132c30-12 64-14 100-6"/><path d="M190 142c28-8 60-9 92-3"/></g>
   <path d="M0 150v-10c60-12 120-10 180-2s104 4 140-6v18z" fill="var(--c2)"/>
   <g fill="none" stroke="var(--ink-2)" stroke-width="1.8" stroke-linecap="round"><path d="M92 40q5-5 10 0q5-5 10 0"/><path d="M122 54q4-4 8 0q4-4 8 0"/></g></svg>`;
@@ -3213,7 +3229,7 @@ V.dashboard = () => {
   pastBuild(); const houses = HOUSES.map(h => [h, PAST.beh.filter(b => b.type === 'house' && stuOf(b.sid).house === h).reduce((a, b) => a + b.pts, 0)]).sort((a, b) => b[1] - a[1]);
   const merits = PAST.beh.filter(b => b.date >= '2026-09-29' && b.pts > 0).length;
   return `
-  <section class="hello"><div class="hello-t"><div class="local" lang="si">ආයුබෝවන් · <span lang="ta">வணக்கம்</span></div><h1>Good morning, ${scrib('Prishan')}</h1>
+  <section class="hello"><div class="hello-t"><h1>Good morning, ${scrib('Prishan')}</h1>
     <p class="hello-s"><b>1,181 of 1,248 students</b> are in school today, 94.6%. ${byYear.length ? `${esc(byYear[0][0])} is the lowest at ${byYear[0][1].toFixed(0)}%. ` : ''}Term 1 fees are 78% collected and <b>${nd.length} things</b> need you before assembly.</p>
     <div class="hello-m">Monday 5 October · Week 6 of Term 1 · next holiday Vap Poya, Mon 26 Oct</div>
     <div class="chips" style="margin-top:14px"><button class="btn primary" data-act="go" data-to="attendance">${ic('check',16)}Take attendance</button><button class="btn" data-act="newApp">${ic('plus',16)}New application</button></div></div>${morningArt()}</section>
@@ -3341,6 +3357,41 @@ Object.assign(ACT, {
 FORM_META.push(['Start a support plan', 'heart', 'Early warning'], ['Update support plan', 'heart', 'Early warning'], ['How early warning works', 'alert', 'Early warning']);
 NAV[3].items.splice(1, 0, ['signals', 'Early warning', 'alert', (sigBuild(), SIG.list.filter(x => x.level === 'high').length)]);
 
+
+/* ---------- Moments: teachers share a photo or a line of praise; parents see it in the app ---------- */
+const MOM_ART = [['mural', 'Art', 'star'], ['science', 'Science', 'grid'], ['sports', 'Sport', 'star'], ['reading', 'Reading', 'book'], ['music', 'Music', 'heart'], ['garden', 'Garden', 'home'], ['maths', 'Maths', 'fin'], ['drama', 'Drama', 'crm']];
+const momArt = (k, big) => { const a = MOM_ART.find(x => x[0] === k) || MOM_ART[0], i = MOM_ART.indexOf(a), cs = ['var(--c1)', 'var(--c2)', 'var(--c3)', 'var(--c5)'];
+  return `<span class="mom-art ${big ? 'big' : ''}" style="--a:${cs[i % 4]};--b:${cs[(i + 1) % 4]}">${ic(a[2], big ? 30 : 18)}<small>${a[1]}</small></span>`; };
+function momShareDrawer() { const t = teachAs(), d = S.momDraft, load = teacherLoad(t.name), classes = [...new Set([ctOf(t.name), ...load.rows.map(r => r.cls)].filter(Boolean))];
+  if (!d.cls || !classes.includes(d.cls)) d.cls = classes[0] || allClasses()[0];
+  const demo = acadText('Grade 4 – Emerald'), roster = [...(d.cls === demo ? ['Amaya Perera'] : []), ...classRoster(d.cls)];
+  formDrawer(`${head('Share a moment', `As ${esc(t.name)} · parents see it in the ${esc(SCHOOL.short)} Parent app`)}
+    <div class="drawer-b"><div class="form-grid"><div class="field"><label for="mo_cls">Class</label><select class="input" id="mo_cls" data-act-change="momCls">${classes.map(c => `<option ${c === d.cls ? 'selected' : ''}>${esc(c)}</option>`).join('')}</select></div>
+      <div class="field"><label for="mo_kid">Who is it about?</label><select class="input" id="mo_kid"><option value="">The whole class</option>${roster.map(n => `<option value="${esc(n)}" ${n === d.kid ? 'selected' : ''}>${esc(n)}</option>`).join('')}</select></div></div>
+      <div class="field"><label>Type</label>${seg('momKind', d.kind, [['photo', 'Photo'], ['praise', 'Praise'], ['work', 'Great work']])}</div>
+      ${d.kind === 'photo' ? `<div class="field"><label>Photo</label><div class="mom-pick">${MOM_ART.map(([k, l]) => `<button type="button" class="${d.art === k ? 'on' : ''}" data-act="momArt" data-k="${k}" aria-label="${l}" aria-pressed="${d.art === k}">${momArt(k)}</button>`).join('')}</div><small class="muted">In the real app this opens the camera. Faces of other children are blurred automatically.</small></div>` : ''}
+      <div class="field"><label for="mo_t">What happened?</label><textarea class="input" id="mo_t" rows="3" maxlength="240" placeholder="For example: Amaya chose the colours for the paddy fields in our canteen mural.">${esc(d.text || '')}</textarea></div>
+      <div class="err-msg" id="moErr"></div></div>
+    <div class="drawer-f"><button class="btn" data-act="closeAll">Cancel</button><button class="btn primary" data-act="momSend">${ic('send', 16)}Share with parents</button></div>`); }
+function momSync() { const v = id => { const e = document.getElementById(id); return e ? e.value : null; }; const d = S.momDraft; if (v('mo_t') === null) return; d.cls = v('mo_cls'); d.kid = v('mo_kid'); d.text = v('mo_t'); }
+function momCard(t) { const mine = lsGet('quad-moments', []).filter(m => m.by === t.name).slice(0, 4), re = lsGet('quad-moment-reacts', {});
+  return `<section class="card"><div class="card-h"><h2>Moments</h2><button class="btn sm primary" data-act="momShare">${ic('plus', 14)}Share a moment</button></div>
+    ${mine.length ? `<div class="mom-list">${mine.map(m => { const r = re[m.id] || {}; return `<div class="mom">${m.kind === 'photo' ? momArt(m.art) : `<span class="mom-art" style="--a:var(--c3);--b:var(--c1)">${ic(m.kind === 'praise' ? 'star' : 'file', 18)}</span>`}<div><b>${esc(m.kid || 'Whole class')} · ${esc(m.cls)}</b><p>${esc(m.text)}</p><small>${esc(m.at)}${r.heart ? ' · <span class="mom-heart">♥ parent loved this</span>' : ''}${r.thanks ? ` · “${esc(r.thanks)}”` : ''}</small></div></div>`; }).join('')}</div>`
+      : `<p class="muted" style="padding:16px 18px;margin:0">Share a photo or a line of praise. Parents see it straight away in the app and can say thanks. It takes ten seconds and families love it.</p>`}
+    ${(() => { const demo = acadText('Grade 4 – Emerald'), ctn = ST.ct[demo], x = ST.teachers.find(q => q.name === ctn); return x && x.name !== t.name ? `<div class="mom-demo">${ic('phone', 14)}<span>The parent app demo follows Amaya in ${esc(demo)}.</span><button class="linkbtn" data-act="momDemo" data-id="${x.id}">View as ${esc(x.name.split(' ')[0])}</button></div>` : ''; })()}</section>`; }
+Object.assign(ACT, {
+  momDemo: el => { S.filter.teachAs = el.dataset.id; route(); scrollTo(0, 0); toast('Now viewing My teaching as Amaya’s class teacher'); },
+  momShare: () => { S.momDraft = {kind: 'photo', art: 'mural', text: '', kid: ''}; momShareDrawer(); },
+  momKind: el => { momSync(); S.momDraft.kind = el.dataset.v || el.dataset.val || el.dataset.k; keepScroll(momShareDrawer); },
+  momArt: el => { momSync(); S.momDraft.art = el.dataset.k; keepScroll(momShareDrawer); },
+  momSend: () => { momSync(); const d = S.momDraft, t = teachAs(); if (!d.text || d.text.trim().length < 5) { document.getElementById('moErr').textContent = 'Write a sentence about what happened.'; document.getElementById('mo_t').focus(); return; }
+    const load = teacherLoad(t.name), subj = (load.rows.find(r => r.cls === d.cls) || {}).k, kid = d.kid ? d.kid.split(' ')[0] : '';
+    const m = {id: 'm' + Date.now(), by: t.name, role: ctOf(t.name) === d.cls ? 'Class teacher' : (subj || 'Teacher'), cls: d.cls, kid, kind: d.kind, text: d.text.trim(), art: d.kind === 'photo' ? d.art : '', at: '09:41', date: '2026-10-05'};
+    lsSet('quad-moments', [m, ...lsGet('quad-moments', [])]); closeAll(); const y = scrollY; route(); scrollTo(0, y); petals(18); toast(`Shared with ${kid ? kid + '’s parents' : 'parents of ' + d.cls}`); }
+});
+document.addEventListener('change', e => { if (e.target.id === 'mo_cls') { momSync(); S.momDraft.kid = ''; keepScroll(momShareDrawer); } });
+window.addEventListener('storage', e => { if (['quad-moments', 'quad-moment-reacts'].includes(e.key) && S.route === 'teach') { const y = scrollY; route(); scrollTo(0, y); } });
+FORM_META.push(['Share a moment', 'heart', 'Moments']);
 applySchool();
 window.addEventListener('storage', e => { if (['quad-pe-book', 'quad-form-replies'].includes(e.key) && ['events'].includes(S.route)) { const y = window.scrollY; route(); window.scrollTo(0, y); return; } if (e.key === 'quad-school') { if (JSON.stringify(loadAcad()) !== JSON.stringify(ACAD)) { location.reload(); return; } applySchool(); route(); } });
 themeIcon(); route();

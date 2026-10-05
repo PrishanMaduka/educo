@@ -18,20 +18,20 @@ Open `design/index.html` in a browser. Each prototype is a single self-contained
 
 Both prototypes have light and dark themes and work at phone width. All data in them is sample data for a fictional school.
 
-### Look and feel: warm and local
+### Look and feel
 
-All three apps share one design language so Quad doesn't look like every other blue SaaS dashboard:
+All three apps share one design language:
 
-- **Paper and tea country.** Warm paper backgrounds with a light grain, a tea-green side bar, terracotta as the default school colour (each school can still set its own), turmeric gold accents, and a lamp-lit warm dark theme.
-- **Type.** Fraunces, a soft serif, for headings and Nunito, a rounded sans, for text, with Noto Sans Sinhala and Noto Sans Tamil.
-- **Liyawela vine.** The traditional Sri Lankan curling vine border appears under greetings, at the top of the side bar and on drawer headers. Key words in greetings get a hand-drawn gold underline.
-- **Story first.** Home screens open with a greeting (ආයුබෝවන් · வணக்கம்) and a few sentences about what is happening and what needs doing, before any charts. They also include local details such as Poya holidays, birthdays and good news, and a petal burst for good moments.
-- **Early warning** (all apps) finds students who are slipping (schools, in the console), explains why with trends, and suggests a next step and an owner. It leads to a support plan in one click.
-- **Ask Quad** (all apps). Press the floating button or `/` and ask in plain English. Answers are worked out from the app's own data, and each one has actions and a "From:" line naming its sources. It can also draft letters.
+- **Colour.** Soft off-white pages, a deep Quad Indigo side bar, coral for actions and lilac for highlights, with a matching dark theme. Each school's brand colour replaces coral in its own staff portal and parent app. The platform console uses a darker indigo side bar with lilac for the active item, so it is never mistaken for a school's portal.
+- **Type.** Figtree throughout, with heavy headings and a soft lilac highlight on key words.
+- **Story first.** Home screens open with a greeting and a few sentences about what is happening and what needs doing, before any charts. Local details stay (Poya holidays, birthdays, rupees), and good moments get a petal burst.
+- **Early warning** (all apps). It finds students who are slipping (schools, in the console), explains why with trends, and suggests a next step and an owner. One click starts a support plan.
+- **Ask Quad** (all apps). Press the floating button or `/` and ask in plain English. Answers are worked out from the app's own data and come with actions and a "From:" line that names the sources. It can also draft letters.
+- **Moments.** Teachers press **Share a moment** in My teaching to post a photo, a line of praise or great work for one child or a whole class. Parents see it in the Moments tab of the parent app and can send a heart or a thank-you, which the teacher then sees.
 
 ### Logo
 
-The mark is a ring cut into four arcs (school, teachers, parents, students) around a shared centre, with a tail that turns it into a Q. The lowercase wordmark is drawn with the same stroke as the mark. See `design/brand.html`.
+The mark is four soft rounded tiles, one each for the school (indigo), teachers and parents (lilac) and students (coral). The coral tile has a tail that turns the square into a Q. The lowercase wordmark is drawn in Quad Indigo. See `design/brand.html`.
 
 ### Platform console (`design/platform.html`)
 
@@ -110,7 +110,7 @@ Global features: command palette (Ctrl/⌘ K), notifications panel, collapsible 
 
 Based on the iSAMS iParent feature set: one login for all of a parent's children, with dashboard, children, communications, information and settings.
 
-- **Home**: greeting with Sinhala and Tamil, then the child's day as a story ("Today with Amaya": arrival, what's happening in class now, a note from the teacher with **Say thanks**); a **heads-up** card when something is slipping (what we noticed with trends, why it matters, the teacher's suggestion, **Book a 10-minute chat**, **Message the teacher** with a draft) or good news when the child is improving; things that need you; live class, bus, fees, quick actions, coming up (including Poya holidays), school news
+- **Home**: a greeting, then the child's day as a story ("Today with Amaya": arrival, what's happening in class now, a note from the teacher with **Say thanks**); a **heads-up** card when something is slipping (what we noticed with trends, why it matters, the teacher's suggestion, **Book a 10-minute chat**, **Message the teacher** with a draft) or good news when the child is improving; things that need you; live class, bus, fees, quick actions, coming up (including Poya holidays), school news
 - **How my child is doing**: attendance against target, each subject with a trend, homework, behaviour and house points, wellbeing, in plain language
 - **Ask Quad**: a bottom sheet (floating button, More, or `/`) that answers about homework, how a child is doing overall or in a subject, attendance, next exam, fees (with Pay now), the bus, lunch, holidays, parents' evening and the class teacher, and drafts absence notes or messages to the teacher
 - **Children**: per-child profile with attendance calendar, results and progress trend, timetable, homework, rewards and conduct, school reports, medical details
