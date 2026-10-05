@@ -471,6 +471,15 @@ const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':
 /* ---------- School branding (set in the platform console, kept in this browser) ---------- */
 const SCHOOL_DEFAULT = {name:'Colombo International School', short:'CIS', sub:'colombo-intl', color:'#2F6FED', logo:null};
 let SCHOOL = SCHOOL_DEFAULT;
+/* Year groups come from the curriculum the school was set up with in the Quad console */
+const PACAD = (() => { try { const x = JSON.parse(localStorage.getItem('quad-school') || 'null'); if (x && x.acad && x.acad.stages && x.acad.stages.length) return x.acad; } catch (e) {} return {stages:[{years:['Playgroup','Nursery','Reception']},{years:['Year 1','Year 2','Year 3','Year 4','Year 5','Year 6']},{years:['Year 7','Year 8','Year 9','Year 10','Year 11']},{years:['Year 12','Year 13']}]}; })();
+const PLV = PACAD.stages.filter(x => x.on !== false && x.years && x.years.length).flatMap(x => x.years);
+const PBASE = Math.max(0, PLV.findIndex(l => /(^|\D)1$/.test(l)));
+const pyl = n => PLV[Math.max(0, Math.min(PLV.length - 1, PBASE + n - 1))];
+const pnum = l => { const m = l.match(/^(Year|Grade) (\d+)$/); return m ? [m[1], m[2]] : null; };
+function acadText(h) { const has = l => PLV.includes(l);
+  return String(h).replace(/\bGrades (\d+)–(\d+)\b/g, (m, a, b) => { if (has(`Grade ${a}`)) return m; const x = pnum(pyl(+a)), y = pnum(pyl(+b)); return x && y && x[0] === y[0] ? `${x[0]}s ${x[1]}–${y[1]}` : `${pyl(+a)} to ${pyl(+b)}`; })
+    .replace(/\bGrade (\d+)(’s)?\b/g, (m, n, p) => has(`Grade ${n}`) ? m : pyl(+n) + (p || '')); }
 function loadSchoolP() { try { const x = JSON.parse(localStorage.getItem('quad-school') || 'null'); SCHOOL = x && x.name ? {...SCHOOL_DEFAULT, ...x} : SCHOOL_DEFAULT; } catch (e) { SCHOOL = SCHOOL_DEFAULT; } if (!SCHOOL.short) SCHOOL.short = SCHOOL.name.replace(/[^A-Za-z ]/g, '').split(' ').filter(Boolean).map(w => w[0]).slice(0, 3).join('').toUpperCase(); }
 loadSchoolP();
 const schoolMarkP = () => SCHOOL.logo ? `<img src="${SCHOOL.logo}" alt="${esc(SCHOOL.name)} logo">` : `<span>${esc(SCHOOL.short)}</span>`;
@@ -813,9 +822,10 @@ function current() { return S.stack.length ? S.stack[S.stack.length - 1] : {to: 
 function render(dir) {
   const c = current(); const s = SCR[c.to](c.p || {});
   const nav = document.getElementById('nav');
+  if (s.title) s.title = acadText(s.title);
   if (s.big) nav.innerHTML = `<div class="nav big"><div class="row">${S.stack.length ? `<button class="back" data-act="pop" aria-label="Back">${ic('back',20)}</button>` : ''}<h1>${s.big}</h1>${s.right || ''}</div></div>`;
   else nav.innerHTML = `<div class="nav"><button class="back" data-act="pop" aria-label="Back">${ic('back',20)}</button><div class="t">${s.title}${s.sub?`<div style="font-size:11.5px;font-weight:500;color:var(--ink-3)">${s.sub}</div>`:''}</div></div>`;
-  const body = document.getElementById('body'); body.className = 'body' + (dir ? ' in-' + dir : ''); body.innerHTML = s.body;
+  const body = document.getElementById('body'); body.className = 'body' + (dir ? ' in-' + dir : ''); body.innerHTML = acadText(s.body);
   if (s.composer) { body.style.gap = '10px'; body.scrollTop = 1e6; } else { body.style.gap = ''; body.scrollTop = 0; }
   document.getElementById('composer').innerHTML = s.composer ? `<div class="quick">${QUICK.map(q => `<button data-act="quick" data-q="${q}">${q}</button>`).join('')}</div><form class="composer" id="composerForm"><input id="msgIn" placeholder="Write a message" autocomplete="off" aria-label="Message"><button aria-label="Send">${ic('send',18)}</button></form>` : '';
   const unread = S.threads.reduce((a, t) => a + t.unread, 0), due = S.invoices.filter(i => i.amt > i.paid).length;
@@ -836,7 +846,7 @@ function pop() { S.stack.pop(); render('l'); }
 let tt; function toast(m) { document.querySelectorAll('.toast').forEach(t => t.remove()); const t = document.createElement('div'); t.className = 'toast'; t.textContent = m; if (document.getElementById('sheet').classList.contains('on') || SV) { t.style.bottom = 'auto'; t.style.top = '62px'; } document.getElementById('screen').appendChild(t); clearTimeout(tt); tt = setTimeout(() => t.remove(), 2600); }
 
 /* ---------- Payment sheet ---------- */
-function openSheet(html) { const sh = document.getElementById('sheet'); sh.innerHTML = '<div class="grab"></div>' + html; sh.classList.add('on'); document.getElementById('scrim').classList.add('on'); }
+function openSheet(html) { const sh = document.getElementById('sheet'); sh.innerHTML = '<div class="grab"></div>' + acadText(html); sh.classList.add('on'); document.getElementById('scrim').classList.add('on'); }
 function closeSheet() { document.getElementById('sheet').style.transform = ''; document.getElementById('sheet').classList.remove('on'); document.getElementById('scrim').classList.remove('on'); }
 function paySheet(no) {
   const list = no ? S.invoices.filter(i => i.no === no) : S.invoices.filter(i => i.amt > i.paid); const total = list.reduce((a, i) => a + i.amt - i.paid, 0);
@@ -970,7 +980,7 @@ function openStory(i) { closeSheet(); SV = {i, s:0, t:0, paused:false, last:perf
 function closeStory() { if (!SV) return; SV = null; svEl.classList.remove('on'); svEl.style.transform = ''; if (current().to === 'home') render(); }
 function drawStory() {
   const st = STORIES[SV.i], sl = st.slides[SV.s]; st.seen = true;
-  svEl.innerHTML = `<div class="slide" style="background:${sl.bg}"><div class="big-ic">${ic(st.icon,48,1.8)}</div><h2>${sl.t}</h2><p>${sl.p}</p></div>
+  svEl.innerHTML = `<div class="slide" style="background:${sl.bg}"><div class="big-ic">${ic(st.icon,48,1.8)}</div><h2>${acadText(sl.t)}</h2><p>${acadText(sl.p)}</p></div>
   <div class="bars">${st.slides.map((_, j) => `<i><b style="width:${j < SV.s ? 100 : 0}%"></b></i>`).join('')}</div>
   <div class="who"><div class="lg">${ic('star',16)}</div><div>${esc(SCHOOL.name)}<br><small>${st.name} · ${2 + SV.i}h ago</small></div><button class="x" data-act="closeStory" aria-label="Close stories">${ic('x',24)}</button></div>
   <form class="foot" id="svForm"><input id="svIn" placeholder="Reply to the school" autocomplete="off" aria-label="Reply"><button type="button" class="heart ${st.liked?'on':''}" data-act="heart" aria-label="Like">${ic(st.liked?'heartF':'heart',26)}</button></form>`;
@@ -1104,7 +1114,7 @@ document.addEventListener('click', e => { if (dragged) { e.preventDefault(); ret
 document.addEventListener('change', e => { if (e.target.matches('[data-act="hw"]')) ACT.hw(e.target); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeSheet(); closeStory(); } if (SV && document.activeElement?.id !== 'svIn') { if (e.key === 'ArrowRight') storyStep(1); if (e.key === 'ArrowLeft') storyStep(-1); } });
 applySchoolP();
-window.addEventListener('storage', e => { if (e.key === 'quad-school') { applySchoolP(); render(); } });
+window.addEventListener('storage', e => { if (e.key === 'quad-school') { try { const x = JSON.parse(e.newValue || 'null'); if (x && x.acad && JSON.stringify(x.acad.stages.flatMap(y => y.years)) !== JSON.stringify(PLV)) { location.reload(); return; } } catch (er) {} applySchoolP(); render(); } });
 render();
 if (!paSignedIn()) paShow();
 </script>

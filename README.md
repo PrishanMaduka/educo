@@ -51,6 +51,17 @@ The school admin app also has **Settings › Users & roles**, so each school's o
 - **Sign-in pages** for all three apps. The console and the staff portal share one design: SSO buttons (Google Workspace, Microsoft 365), email and password with show/hide, forgot-password and "check your inbox" screens, and a 6-digit two-step code with auto-advance and paste. The staff portal's sign-in uses the school's logo and colours. The parent app has its own phone flow: welcome screen, phone number or email, one-time code with resend timer, then an offer to turn on Face ID. Each app has a sign-out button that returns to its sign-in page.
 - **Branding flows from the console to the school apps.** Published branding is stored in the browser (`localStorage` key `quad-school`). The staff portal recolours its sidebar, buttons and sign-in page and shows the school logo and name; the parent app recolours its sign-in, lock screen, home card and notifications. The parent app's side panel can switch between sample schools to show this.
 
+### Curriculum drives the school apps
+
+The curriculum and stages chosen when a school is created in the console (or later on its Stages tab) are published to the staff portal and parent app with the branding. Everything that deals with year groups follows them:
+
+- **Year groups and sections**: names such as Year 7, Grade 7, MYP 2 or Reception; the stages (for example Early Years, Junior School, Senior School, Sixth Form) are the sections used for section heads, filters and fee structures; the number of classes per year group comes from the stage.
+- **Timetable**: one bell schedule per stage, shaped by the kind of stage (early years, primary, secondary, sixth form), and default subjects worded for the curriculum (for example Global Perspectives for Cambridge, Individuals & Societies for IB, Social Studies and Spanish for American, Religion and Sinhala for the Sri Lankan national curriculum).
+- **Teachers & classes**: class-teacher teaching in early years and primary, subject teachers above; section heads per stage; a curriculum card with the grading scale and exam milestones.
+- **Students, admissions, CRM, attendance, gradebook, fees, dashboard and parent app**: year group and class names, and marks converted to the curriculum's grading scale (A* to U, 9 to 1, 1 to 7, A/B/C/S/W or A to F).
+
+Saving a school's stages, or a curriculum template applied to it, updates the school apps if that school is the one open in them.
+
 ### Admin web app (`design/admin.html`)
 
 The layout follows the Classe365 admin pattern: a navy module sidebar, a white top bar and a grid of cards on a light grey background.

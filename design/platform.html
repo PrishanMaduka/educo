@@ -1708,8 +1708,13 @@ function brandMock(name, color, logo, short) {
     <figure class="bm-phone-wrap"><div class="bm-lock"><div class="bm-logo lg">${mark}</div>${esc(name || 'Your school')}</div><div class="bm-phone"><div class="bm-hero"><div class="bm-logo">${mark}</div></div><s></s><s></s><s></s><div class="bm-tb"><i></i><i></i><i></i><i></i></div></div></figure>
     <figcaption style="grid-column:1/-1">Parent app · sign-in and home</figcaption></div>`;
 }
+/* Curriculum, stages and year groups the school apps are built from */
+function schoolAcad(t) { const c = curOf(tenantCurr(t));
+  return {curr: {id: c.id, name: c.name, short: c.short, grading: c.grading, quals: c.quals}, stages: tenantStages(t).filter(x => x.on && x.years.length).map(x => ({name: x.name, ages: x.ages, years: x.years.slice(), color: x.color, sections: x.sections}))}; }
+/* If this school is the one open in the school apps, push the change there too */
+function republishIfLive(t) { try { const cur = JSON.parse(localStorage.getItem('quad-school') || 'null'); if (cur && cur.sub === t.sub) { publishSchool(t); return true; } } catch (e) {} return false; }
 function publishSchool(t) {
-  try { localStorage.setItem('quad-school', JSON.stringify({name:t.name, short:t.short || shortOf(t.name), sub:t.sub, color:t.color, logo:t.logo || null})); return true; }
+  try { localStorage.setItem('quad-school', JSON.stringify({name:t.name, short:t.short || shortOf(t.name), sub:t.sub, color:t.color, logo:t.logo || null, acad: schoolAcad(t)})); return true; }
   catch (e) { toast('This browser blocked saving the branding, so the other apps can’t see it. Try a normal (not private) window.'); return false; }
 }
 const logoDrop = (id, logo) => `<label class="drop" id="${id}Drop">${logo ? `<img src="${logo}" alt="Logo preview">` : `<span class="drop-ic">${ic('plus',20)}</span>`}<span><b>${logo ? 'Replace logo' : 'Upload your logo'}</b><small>Drop a file here or click · PNG, JPG or SVG, square works best</small></span><input type="file" accept="image/*" id="${id}" hidden></label>`;
@@ -2001,6 +2006,7 @@ const ACT = {
     const clean = {id: d.id, name: d.name.trim(), short: d.short.trim(), desc: d.desc.trim(), grading: d.grading.trim(), quals: d.quals.filter(q => q[0] && q[1]), stages: copyStages(d.stages)};
     if (i < 0) CURRICULA.push(clean); else CURRICULA[i] = clean;
     if (S.curApply) users.forEach(t => { t.stages = copyStages(clean.stages); t.stTpl = clean.id; });
+    tenants.filter(t => t.curr === clean.id).forEach(republishIfLive);
     AUDIT.unshift(['Prishan Maduka', `${d.isNew ? 'added' : 'updated'} the ${clean.name} curriculum template${S.curApply && users.length ? ` and applied it to ${users.length} schools` : ''}`, 'platform', 'Just now', 'tenant']);
     closeAll(); route(); toast(d.isNew ? `Added ${clean.name}. It now appears in the new-school wizard.` : S.curApply && users.length ? `Saved and applied to ${users.length} school${users.length > 1 ? 's' : ''}` : 'Saved. New schools get these stages; existing schools keep theirs.'); },
   stMove: el => { const st = stagesOf(el.dataset.target), i = +el.dataset.i, j = i + +el.dataset.d; if (j < 0 || j >= st.length) return; [st[i], st[j]] = [st[j], st[i]]; stagesRerender(el.dataset.target); },
@@ -2008,7 +2014,7 @@ const ACT = {
   stDel: el => { const st = stagesOf(el.dataset.target), x = st[+el.dataset.i]; st.splice(+el.dataset.i, 1); stagesRerender(el.dataset.target); toast(`Removed ${x.name}`); },
   stRmYear: el => { const x = stagesOf(el.dataset.target)[+el.dataset.i]; x.years.splice(+el.dataset.j, 1); stagesRerender(el.dataset.target); },
   stAdd: el => { const st = stagesOf(el.dataset.target); st.push({name:'New stage', ages:'', years:[], color: STAGE_COLORS[st.length % STAGE_COLORS.length], on:true, sections:2}); stagesRerender(el.dataset.target); setTimeout(() => { const n = document.querySelectorAll('.stg-name'); if (n.length) { n[n.length - 1].focus(); n[n.length - 1].select(); } }, 40); },
-  stSave: el => { const t = tenants.find(x => x.id === +el.dataset.id), e = stagesError(tenantStages(t)); if (e) { document.getElementById('stErr').textContent = e; return; } const tt = stageTotals(t.stages); AUDIT.unshift(['Prishan Maduka', `updated stages for ${t.name} (${tt.stages} stages, ${tt.years} year groups)`, t.sub, 'Just now', 'tenant']); toast(`Saved · ${tt.stages} stages, ${tt.years} year groups, ${tt.classes} classes`); },
+  stSave: el => { const t = tenants.find(x => x.id === +el.dataset.id), e = stagesError(tenantStages(t)); if (e) { document.getElementById('stErr').textContent = e; return; } const tt = stageTotals(t.stages); AUDIT.unshift(['Prishan Maduka', `updated stages for ${t.name} (${tt.stages} stages, ${tt.years} year groups)`, t.sub, 'Just now', 'tenant']); toast(`Saved · ${tt.stages} stages, ${tt.years} year groups, ${tt.classes} classes${republishIfLive(t) ? '. The staff portal and parent app now use them.' : ''}`); },
   wColor: el => { saveWiz(); S.wiz.w_color = el.dataset.c; S.wiz.picked = false; tenantWizard(); },
   wCrest: () => { saveWiz(); S.wiz.logo = sampleCrest(S.wiz.w_name || 'New School', S.wiz.w_color || BRAND_SWATCHES[0]); S.wiz.picked = false; tenantWizard(); },
   wRmLogo: () => { saveWiz(); S.wiz.logo = null; S.wiz.picked = false; tenantWizard(); },

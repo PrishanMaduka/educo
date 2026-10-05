@@ -656,6 +656,7 @@ select.input{appearance:none;-webkit-appearance:none;background-image:url("data:
 button.st-sec:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg)}
 .st-sec h3{margin:2px 0 0;font:700 19px var(--f-display)}
 .st-sec.principal{cursor:default;background:var(--surface-2)}
+.st-sec .pill{white-space:normal;max-width:100%}
 .st-sec .cur-meta{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--ink-3)}.st-sec .cur-meta b{color:var(--ink)}
 .st-person{display:flex;align-items:center;gap:12px}.st-person b{font-size:14.5px}.st-person.sm b{font-size:13px}
 .st-load{display:flex;flex-direction:column;gap:8px;padding:12px 14px;border-radius:12px;background:var(--surface-2);border:1px solid var(--line)}
@@ -750,28 +751,72 @@ const avatar = (n, cls='') => `<div class="av ${cls}" style="background:${avColo
 const money = n => 'Rs ' + Math.round(n).toLocaleString('en-US');
 const moneyM = n => 'Rs ' + (n / 1e6).toFixed(1) + 'M';
 
+/* ---------- Academic structure: curriculum, stages and year groups set by the platform when the school was created ---------- */
+const ACAD_DEFAULT = {curr: {id:'cambridge', name:'Cambridge International', short:'Cambridge', grading:'A* to U', quals:[['Year 6','Cambridge Primary Checkpoint'],['Year 9','Lower Secondary Checkpoint'],['Year 11','IGCSE'],['Year 13','International A Level']]},
+  stages: [{name:'Early Years (EYFS)', ages:'3–5', years:['Playgroup','Nursery','Reception'], color:'#E8A33D', sections:2}, {name:'Junior School', ages:'5–11', years:['Year 1','Year 2','Year 3','Year 4','Year 5','Year 6'], color:'#12A594', sections:2},
+    {name:'Senior School', ages:'11–16', years:['Year 7','Year 8','Year 9','Year 10','Year 11'], color:'#2F6FED', sections:2}, {name:'Sixth Form', ages:'16–18', years:['Year 12','Year 13'], color:'#8B5CF6', sections:2}]};
+function loadAcad() { try { const s = JSON.parse(localStorage.getItem('quad-school') || 'null'); if (s && s.acad && s.acad.stages && s.acad.stages.some(x => x.on !== false && x.years && x.years.length)) return s.acad; } catch (e) {} return ACAD_DEFAULT; }
+const ACAD = loadAcad();
+const STG = []; const LV = [];
+ACAD.stages.filter(x => x.on !== false && x.years && x.years.length).forEach(x => { const si = STG.length, from = LV.length + 1;
+  x.years.forEach(y => LV.push({label: y, stage: x.name, si, color: x.color || '#2F6FED', sections: Math.max(1, Math.min(10, +x.sections || 2)), ages: x.ages}));
+  STG.push({name: x.name, ages: x.ages, color: x.color || '#2F6FED', from, to: LV.length, sections: Math.max(1, Math.min(10, +x.sections || 2))}); });
+const GRADE_BANDS = STG.map(x => [x.name, x.from, x.to, x.color]);
+const LV_BASE = Math.max(0, LV.findIndex(x => /(^|\D)1$/.test(x.label)));   // index of the first year group numbered 1
+const lvL = n => Math.max(1, Math.min(LV.length, LV_BASE + n));                // sample data written as grade n → this school's year group
+const yl = g => (LV[g - 1] || LV[LV.length - 1]).label;
+const GL = LV.filter(x => /^Year\b/.test(x.label)).length > LV.length / 2 ? {one:'Year group', all:'All year groups', few:'year groups'} : {one:'Grade', all:'All grades', few:'grades'};
+const labNum = l => { const m = l.match(/^(Year|Grade) (\d+)$/); return m ? [m[1], m[2]] : null; };
+const ylList = arr => { const labs = [...new Set(arr)].sort((a, b) => a - b).map(yl), p = labs.map(labNum); if (labs.length > 1 && p.every(x => x && x[0] === p[0][0])) return `${p[0][0]}s ${p.map(x => x[1]).join(', ')}`; return labs.join(', '); };
+const ylRange = (f, t) => { if (f === t) return yl(f); const a = labNum(yl(f)), b = labNum(yl(t)); return a && b && a[0] === b[0] ? `${a[0]}s ${a[1]}–${b[1]}` : `${yl(f)} to ${yl(t)}`; };
+const SECTION_NAMES = ['Emerald','Ruby','Sapphire','Topaz','Amber','Jade','Pearl','Coral','Onyx','Opal'];
+const ttSecs = g => SECTION_NAMES.slice(0, (LV[g - 1] || LV[0]).sections);
+const clsName = (g, sec) => `${yl(g)} – ${sec}`;
+const allClasses = () => LV.flatMap((_, i) => ttSecs(i + 1).map(x => clsName(i + 1, x)));
+const gradeOfCls = cls => { const i = LV.findIndex(x => cls.startsWith(x.label + ' – ')); return i < 0 ? 1 : i + 1; };
+const bandOf = g => (STG[(LV[g - 1] || LV[0]).si] || STG[0]).name;
+/* What kind of year group this is, used for default subjects, bell times and class-teacher teaching */
+function kindOf(g) { const n = g - LV_BASE, x = LV[g - 1]; if (!x) return 'middle'; const st = STG[x.si];
+  if (LV[LV_BASE] && x.si === LV[LV_BASE].si && n >= 0) return 'primary';
+  if (n <= 0) return 'early';
+  if (n >= 12 || (x.si === STG.length - 1 && st.to - st.from <= 2 && n >= 11)) return 'sixth';
+  return n <= 9 ? 'middle' : 'exam'; }
+const stageKind = si => { const k = kindOf(STG[si].from); return k === 'early' || k === 'primary' ? k : LV.slice(STG[si].from - 1, STG[si].to).every((_, j) => kindOf(STG[si].from + j) === 'sixth') ? 'sixth' : 'senior'; };
+/* Mark → grade on this curriculum's scale */
+function gradeFor(v) { const sc = (ACAD.curr && ACAD.curr.grading) || '';
+  if (/A\*/.test(sc)) return v >= 90 ? 'A*' : v >= 80 ? 'A' : v >= 70 ? 'B' : v >= 60 ? 'C' : v >= 50 ? 'D' : v >= 40 ? 'E' : 'U';
+  if (/9 to 1/.test(sc)) return String(v >= 90 ? 9 : v >= 80 ? 8 : v >= 70 ? 7 : v >= 62 ? 6 : v >= 54 ? 5 : v >= 46 ? 4 : v >= 38 ? 3 : v >= 30 ? 2 : 1);
+  if (/1 to 7/.test(sc)) return String(v >= 85 ? 7 : v >= 72 ? 6 : v >= 60 ? 5 : v >= 48 ? 4 : v >= 36 ? 3 : v >= 24 ? 2 : 1);
+  if (/S, W/.test(sc)) return v >= 75 ? 'A' : v >= 65 ? 'B' : v >= 55 ? 'C' : v >= 35 ? 'S' : 'W';
+  if (/GPA|A to F/.test(sc)) return v >= 90 ? 'A' : v >= 80 ? 'B' : v >= 70 ? 'C' : v >= 60 ? 'D' : 'F';
+  return v + '%'; }
+/* Older sample text says "Grade 7": show it as this school's year group */
+function acadText(h) {
+  const has = l => LV.some(x => x.label === l);
+  return String(h).replace(/\bGrades (\d+)–(\d+)\b/g, (m, a, b) => has(`Grade ${a}`) && has(`Grade ${b}`) ? m : ylRange(lvL(+a), lvL(+b)))
+    .replace(/\bGrades (\d+), (\d+) and (\d+)\b/g, (m, a, b, c) => has(`Grade ${a}`) ? m : ylList([lvL(+a), lvL(+b), lvL(+c)]).replace(/, (?=[^,]*$)/, ' and '))
+    .replace(/\bGrade (\d+)\b/g, (m, n) => has(m) ? m : yl(lvL(+n))); }
 const students = Array.from({length: 64}, (_, i) => {
-  const name = pick(FIRST) + ' ' + pick(LAST), grade = 1 + Math.floor(rnd() * 13), house = pick(HOUSES);
+  const name = pick(FIRST) + ' ' + pick(LAST), grade = 1 + Math.floor(rnd() * LV.length), house = pick(HOUSES), sec = ttSecs(grade)[i % ttSecs(grade).length];
   const att = 82 + rnd() * 17.5;
-  return { id: 'CIS-' + (24100 + i * 7), name, grade, cls: `Grade ${grade} – ${house}`, house,
+  return { id: 'CIS-' + (24100 + i * 7), name, grade, cls: clsName(grade, sec), house,
     gender: rnd() > .5 ? 'F' : 'M', att, gpa: (2.2 + rnd() * 1.8).toFixed(2),
     status: rnd() > .93 ? 'On leave' : rnd() > .97 ? 'Withdrawn' : 'Active',
     guardian: pick(FIRST) + ' ' + name.split(' ')[1], phone: '+94 77 ' + (1000000 + Math.floor(rnd() * 8999999)),
-    balance: rnd() > .7 ? Math.round(rnd() * 180) * 1000 : 0, dob: `${2008 + (13 - grade)}-0${1 + Math.floor(rnd() * 9)}-${10 + Math.floor(rnd() * 18)}` };
+    balance: rnd() > .7 ? Math.round(rnd() * 180) * 1000 : 0, dob: `${2026 - 3 - grade}-0${1 + Math.floor(rnd() * 9)}-${10 + Math.floor(rnd() * 18)}` };
 });
 const STAGES = [
   {k:'enquiry', n:'Enquiry', c:'var(--ink-3)'}, {k:'application', n:'Application', c:'var(--c1)'},
   {k:'assessment', n:'Assessment', c:'var(--c4)'}, {k:'interview', n:'Interview', c:'var(--c3)'},
   {k:'offer', n:'Offer sent', c:'var(--c2)'}, {k:'enrolled', n:'Enrolled', c:'var(--good)'}
 ];
-const GRADE_BANDS = [['Primary', 1, 5], ['Middle school', 6, 9], ['Senior school', 10, 13]];
 const SOURCES = ['Website','Open day','Referral','Facebook','Walk-in','Agent'];
 const apps = Array.from({length: 26}, (_, i) => ({ id: 'APP-' + (3301 + i), name: pick(FIRST) + ' ' + pick(LAST),
-  grade: 1 + Math.floor(rnd() * 12), stage: STAGES[Math.min(5, Math.floor(rnd() * 6.5))].k, source: pick(SOURCES),
+  grade: 1 + Math.floor(rnd() * (LV.length - 1)), stage: STAGES[Math.min(5, Math.floor(rnd() * 6.5))].k, source: pick(SOURCES),
   prio: pick(['high','med','low']), days: 1 + Math.floor(rnd() * 20), parent: pick(FIRST) + ' ' + pick(LAST),
   docs: Math.floor(rnd() * 5) }));
 const leads = Array.from({length: 22}, (_, i) => ({ id: i, name: pick(FIRST) + ' ' + pick(LAST), source: pick(SOURCES),
-  grade: 1 + Math.floor(rnd() * 12), score: 20 + Math.floor(rnd() * 80), owner: pick(['Dilini R.','Kasun P.','Anne F.']),
+  grade: 1 + Math.floor(rnd() * (LV.length - 1)), score: 20 + Math.floor(rnd() * 80), owner: pick(['Dilini R.','Kasun P.','Anne F.']),
   last: 1 + Math.floor(rnd() * 14), status: pick(['New','Contacted','Tour booked','Nurturing','Cold']) }));
 const FEE_ITEMS = [['Tuition fee – Term 1', 285000], ['Development levy', 25000], ['Transport (Route 4)', 42000], ['Swimming programme', 12500], ['Lab & materials', 9500]];
 const invoices = students.slice(0, 40).map((s, i) => {
@@ -903,7 +948,7 @@ V.dashboard = () => {
       <div class="muted" style="font-size:12px">Conversion enquiry → enrolled: <b style="color:var(--ink)">${Math.round(funnel[5][1]/funnel[0][1]*100)}%</b></div></div></section>
   </div>
   <div class="grid g-2-1">
-    <section class="card"><div class="card-h"><h2>Daily attendance · last 4 weeks</h2><span class="muted" style="font-size:12px">School-wide, Grades 1–13</span></div>
+    <section class="card"><div class="card-h"><h2>Daily attendance · last 4 weeks</h2><span class="muted" style="font-size:12px">School-wide, ${esc(ylRange(1, LV.length))}</span></div>
       <div class="card-b">${lineChart({labels: attL, data: att, min: 90, max: 98, target: 95})}</div></section>
     <section class="card"><div class="card-h"><h2>Today</h2><span class="pill t-blue plain">5 Oct</span></div>
       <div class="list">${[
@@ -937,13 +982,13 @@ V.admissions = () => {
     ${kpi('cal','t-amber','Seats left – Jan intake','38','Grades 1, 6 and 9 nearly full')}
   </div>
   <div class="card"><div class="toolbar"><div class="searchbox">${ic('search',16)}<input class="input" id="appSearch" placeholder="Search applicants or ID" value="${esc(S.q||'')}"></div>
-  <select class="input inline" data-filter="apGrade" aria-label="Grade" data-dd-ic="student" data-dd-q><option value="all" data-n="${bySearch.filter(a => fs === 'all' || a.source === fs).length}">All grades</option>${GRADE_BANDS.map(([band, from, to]) => `<optgroup label="${band}">${Array.from({length: to - from + 1}, (_, i) => from + i).map(g => `<option value="${g}" data-n="${gN(g)}" ${fg == g ? 'selected' : ''}>Grade ${g}</option>`).join('')}</optgroup>`).join('')}</select>
+  <select class="input inline" data-filter="apGrade" aria-label="${GL.one}" data-dd-ic="student" data-dd-q><option value="all" data-n="${bySearch.filter(a => fs === 'all' || a.source === fs).length}">${GL.all}</option>${GRADE_BANDS.map(([band, from, to]) => `<optgroup label="${esc(band)}">${Array.from({length: to - from + 1}, (_, i) => from + i).map(g => `<option value="${g}" data-n="${gN(g)}" ${fg == g ? 'selected' : ''}>${esc(yl(g))}</option>`).join('')}</optgroup>`).join('')}</select>
   <select class="input inline" data-filter="apSrc" aria-label="Source" data-dd-ic="crm"><option value="all" data-n="${bySearch.filter(a => fg === 'all' || a.grade == fg).length}">All sources</option>${SOURCES.map(x => `<option value="${x}" data-n="${sN(x)}" ${fs === x ? 'selected' : ''}>${x}</option>`).join('')}</select>
   ${fg !== 'all' || fs !== 'all' || q ? `<button class="linkbtn clear" data-act="apClear">Clear filters</button><span class="muted" style="font-size:12.5px">${list.length} of ${apps.length} applicants</span>` : ''}</div>
   <div class="card-b"><div class="kanban">${STAGES.map(st => { const cs = list.filter(a => a.stage === st.k); return `
     <div class="col" data-stage="${st.k}"><div class="col-h"><i style="background:${st.c}"></i>${st.n}<span class="n">${cs.length}</span></div>
     <div class="col-b">${cs.map(a => `<div class="kcard" draggable="true" data-id="${a.id}" data-act="openApp" tabindex="0">
-      <div style="display:flex;gap:10px;align-items:center">${avatar(a.name,'sm')}<div style="min-width:0"><b>${a.name}</b><span class="muted" style="font-size:12px">${a.id} · Grade ${a.grade}</span></div></div>
+      <div style="display:flex;gap:10px;align-items:center">${avatar(a.name,'sm')}<div style="min-width:0"><b>${a.name}</b><span class="muted" style="font-size:12px">${a.id} · ${yl(a.grade)}</span></div></div>
       <div class="row"><span class="prio" style="background:${a.prio==='high'?'var(--bad)':a.prio==='med'?'var(--warn)':'var(--ink-3)'}"></span>${a.source}<span class="grow"></span>${ic('file',13)} ${a.docs}/5 · ${a.days}d</div></div>`).join('') || `<div class="muted" style="font-size:12px;text-align:center;padding:20px 0">${list.length < apps.length ? 'No matches' : 'Drop applicants here'}</div>`}</div></div>`; }).join('')}</div></div></div>`;
 };
 
@@ -955,7 +1000,7 @@ V.crm = () => {
     const rows = leads.filter(l => f === 'All' || l.source === f);
     body = `<div class="toolbar"><div class="chips">${['All', ...SOURCES].map(s => `<button class="chip ${f===s?'on':''}" data-act="filter" data-key="src" data-val="${s}">${s}<span class="n">${s==='All'?leads.length:leads.filter(l=>l.source===s).length}</span></button>`).join('')}</div></div>
     <div class="tbl-wrap"><table><thead><tr><th>Lead</th><th>Source</th><th>Interest</th><th>Lead score</th><th>Owner</th><th>Last contact</th><th>Status</th></tr></thead><tbody>
-    ${rows.map(l => `<tr class="click" data-act="openLead" data-id="${l.id}"><td><div class="who">${avatar(l.name,'sm')}<div><b>${l.name}</b><small>Parent enquiry</small></div></div></td><td>${l.source}</td><td>Grade ${l.grade}</td>
+    ${rows.map(l => `<tr class="click" data-act="openLead" data-id="${l.id}"><td><div class="who">${avatar(l.name,'sm')}<div><b>${l.name}</b><small>Parent enquiry</small></div></div></td><td>${l.source}</td><td>${yl(l.grade)}</td>
       <td><div style="display:flex;align-items:center;gap:8px"><div class="bar" style="width:80px"><i style="width:${l.score}%;background:${l.score>70?'var(--good)':l.score>40?'var(--warn)':'var(--bad)'}"></i></div><span class="num">${l.score}</span></div></td>
       <td>${l.owner}</td><td class="num">${l.last}d ago</td><td>${statusPill(l.status)}</td></tr>`).join('')}</tbody></table></div>`;
   } else if (t === 'campaigns') {
@@ -990,7 +1035,7 @@ V.students = () => {
   const grid = `<div class="sgrid">${rows.map(s => `<div class="scard" data-act="openStudent" data-id="${s.id}" tabindex="0">${avatar(s.name)}<b>${s.name}</b><div class="muted" style="font-size:12px">${s.id} · ${s.cls}</div><div style="display:flex;justify-content:center;gap:16px;margin-top:10px;font-size:12px"><span><b class="num">${s.att.toFixed(0)}%</b> att.</span><span><b class="num">${s.gpa}</b> GPA</span></div></div>`).join('')}</div>`;
   return `${pageHead('Student information system', 'Students', `${students.length} of 1,248 shown · sample records`, `<button class="btn">${ic('down',16)}Import CSV</button><button class="btn primary" data-act="newApp">${ic('plus',16)}Add student</button>`)}
   <div class="card"><div class="toolbar"><div class="searchbox">${ic('search',16)}<input class="input" id="stuSearch" placeholder="Search by name or ID" value="${esc(S.q||'')}"></div>
-  <select class="input inline" data-filter="grade" aria-label="Grade" data-dd-ic="student"><option value="all">All grades</option>${Array.from({length:13},(_, i)=>`<option value="${i+1}" ${g==i+1?'selected':''}>Grade ${i+1}</option>`).join('')}</select>
+  <select class="input inline" data-filter="grade" aria-label="${GL.one}" data-dd-ic="student"><option value="all">${GL.all}</option>${LV.map((x, i)=>`<option value="${i+1}" ${g==i+1?'selected':''}>${esc(x.label)}</option>`).join('')}</select>
   <select class="input inline" data-filter="status" aria-label="Status" data-dd-ic="check">${['all','Active','On leave','Withdrawn'].map(x=>`<option value="${x}" ${st===x?'selected':''}>${x==='all'?'All statuses':x}</option>`).join('')}</select>
   <span style="flex:1"></span><div class="seg"><button class="${S.view==='table'?'on P':''}" data-act="view" data-val="table" aria-label="Table view">${ic('list',15)}</button><button class="${S.view==='grid'?'on P':''}" data-act="view" data-val="grid" aria-label="Card view">${ic('grid',15)}</button></div></div>
   ${S.view === 'grid' ? grid : table}<div class="tbl-foot"><span>${rows.length} students</span><span class="grow"></span><button class="btn sm" disabled>Previous</button><button class="btn sm">Next</button></div></div>`;
@@ -1002,7 +1047,7 @@ V.student = (id) => {
   seed = [...s.id].reduce((a, c) => a + c.charCodeAt(0), 11);
   const days = Array.from({length: 60}, (_, i) => i % 7 >= 5 ? 'H' : rnd() * 100 > s.att ? pick(['A','L','A','E']) : 'P');
   const subjects = ['English','Mathematics','Science','Sinhala','History','ICT','Art','Physical Education'].map(n => ({n, t1: 55 + Math.floor(rnd()*43), t2: 55 + Math.floor(rnd()*43)}));
-  const grade = v => v >= 85 ? 'A*' : v >= 75 ? 'A' : v >= 65 ? 'B' : v >= 55 ? 'C' : 'D';
+  const grade = gradeFor;
   let body = '';
   if (t === 'overview') body = `<div class="grid g-1-1"><div class="card"><div class="card-h"><h2>Personal details</h2><button class="btn sm">Edit</button></div><div class="card-b"><dl class="kv">
     <dt>Date of birth</dt><dd class="num">${s.dob}</dd><dt>Gender</dt><dd>${s.gender==='F'?'Female':'Male'}</dd><dt>House</dt><dd>${s.house}</dd><dt>Nationality</dt><dd>Sri Lankan</dd><dt>Admission date</dt><dd class="num">2019-01-14</dd><dt>Previous school</dt><dd>Little Steps Montessori</dd><dt>Transport</dt><dd>Route 4 · Rajagiriya</dd></dl></div></div>
@@ -1030,13 +1075,13 @@ V.student = (id) => {
 };
 
 V.attendance = () => {
-  const cls = S.filter.cls || 'Grade 7 – Emerald';
+  const regCls = [lvL(7), lvL(7), lvL(8), lvL(10)].map((g, i) => clsName(g, ttSecs(g)[i % 2 ? Math.min(1, ttSecs(g).length - 1) : 0])).filter((x, i, a) => a.indexOf(x) === i), cls = regCls.includes(S.filter.cls) ? S.filter.cls : regCls[0];
   const roster = students.slice(0, 18);
   roster.forEach(s => { if (!S.register[s.id]) S.register[s.id] = rnd() > .93 ? 'A' : rnd() > .95 ? 'L' : 'P'; });
   const c = k => roster.filter(s => S.register[s.id] === k).length;
   return `${pageHead('Student information system', 'Attendance register', 'Monday, 5 October 2026 · Period 1 (08:00 – 08:40)', `<button class="btn" data-act="markAll">Mark all present</button><button class="btn primary" data-act="saveReg">${ic('check',16)}Save register</button>`)}
   <div class="grid g-kpi">${[['Present','P','t-green'],['Absent','A','t-red'],['Late','L','t-amber'],['Excused','E','t-violet']].map(([l,k,tone]) => `<div class="card kpi"><div class="ic ${tone}">${ic('check',18)}</div><div><div class="l">${l}</div><div class="v" id="cnt-${k}">${c(k)}</div><div class="d">of ${roster.length} students</div></div></div>`).join('')}</div>
-  <div class="card"><div class="toolbar"><select class="input inline" data-filter="cls" aria-label="Class" data-dd-ic="student">${['Grade 7 – Emerald','Grade 7 – Sapphire','Grade 8 – Ruby','Grade 10 – Topaz'].map(x=>`<option ${x===cls?'selected':''}>${x}</option>`).join('')}</select><input class="input inline" type="date" value="2026-10-05" aria-label="Date"><span class="muted" style="font-size:12.5px">Absences notify parents in iParent at 09:00.</span></div>
+  <div class="card"><div class="toolbar"><select class="input inline" data-filter="cls" aria-label="Class" data-dd-ic="student">${regCls.map(x=>`<option ${x===cls?'selected':''}>${esc(x)}</option>`).join('')}</select><input class="input inline" type="date" value="2026-10-05" aria-label="Date"><span class="muted" style="font-size:12.5px">Absences notify parents in iParent at 09:00.</span></div>
   <div class="tbl-wrap"><table><thead><tr><th>#</th><th>Student</th><th>Mark</th><th>Note</th><th class="r">Term %</th></tr></thead><tbody>
   ${roster.map((s, i) => `<tr><td class="muted num">${i+1}</td><td><div class="who">${avatar(s.name,'sm')}<div><b>${s.name}</b><small>${s.id}</small></div></div></td>
     <td><div class="seg" role="radiogroup" aria-label="Attendance for ${esc(s.name)}">${['P','A','L','E'].map(k => `<button class="${S.register[s.id]===k?'on '+k:''}" data-act="mark" data-id="${s.id}" data-val="${k}" title="${{P:'Present',A:'Absent',L:'Late',E:'Excused'}[k]}">${k}</button>`).join('')}</div></td>
@@ -1060,11 +1105,11 @@ V.lms = () => {
   else {
     const rows = students.slice(20, 32);
     seed = 99; const marks = rows.map(() => [0,0,0,0].map(() => 50 + Math.floor(rnd() * 49)));
-    body = `<div class="card gb"><div class="toolbar"><select class="input inline" aria-label="Course" data-dd-ic="book"><option>Mathematics · Grade 10</option></select><span class="muted" style="font-size:12.5px">Click a mark to edit. Weighted average updates as you type.</span></div><div class="tbl-wrap"><table><thead><tr><th>Student</th><th class="r">Test 1 (20%)</th><th class="r">Test 2 (20%)</th><th class="r">Project (25%)</th><th class="r">Mid-term (35%)</th><th class="r">Weighted</th><th>Grade</th></tr></thead><tbody>
+    body = `<div class="card gb"><div class="toolbar"><select class="input inline" aria-label="Course" data-dd-ic="book"><option>Mathematics · ${yl(lvL(10))}</option></select><span class="muted" style="font-size:12.5px">Click a mark to edit. Weighted average updates as you type.</span></div><div class="tbl-wrap"><table><thead><tr><th>Student</th><th class="r">Test 1 (20%)</th><th class="r">Test 2 (20%)</th><th class="r">Project (25%)</th><th class="r">Mid-term (35%)</th><th class="r">Weighted</th><th>Grade</th></tr></thead><tbody>
     ${rows.map((s, i) => `<tr data-row="${i}"><td><div class="who">${avatar(s.name,'sm')}<b>${s.name}</b></div></td>${marks[i].map((m, j) => `<td class="r"><input type="number" min="0" max="100" value="${m}" data-gb="${j}" aria-label="Mark ${j+1} for ${esc(s.name)}"></td>`).join('')}<td class="r num"><b class="w"></b></td><td class="g"></td></tr>`).join('')}</tbody></table></div>
     <div class="tbl-foot"><span>Class average: <b id="gbAvg" class="num"></b></span><span class="grow"></span><button class="btn sm primary" data-act="toast" data-msg="Grades published to iParent">Publish to parents</button></div></div>`;
   }
-  return `${pageHead('Learning management system', 'Courses & gradebook', 'Grade 10 · Cambridge IGCSE pathway', `<button class="btn primary" data-act="toast" data-msg="Assignment draft created">${ic('plus',16)}New assignment</button>`)}
+  return `${pageHead('Learning management system', 'Courses & gradebook', `${yl(lvL(10))} · ${esc(ACAD.curr.name)}${(ACAD.curr.quals || []).find(q => q[0] === yl(lvL(11))) ? ' · ' + esc(ACAD.curr.quals.find(q => q[0] === yl(lvL(11)))[1]) + ' pathway' : ''}`, `<button class="btn primary" data-act="toast" data-msg="Assignment draft created">${ic('plus',16)}New assignment</button>`)}
   ${tabs('lms', [['courses','Courses'],['assignments','Assignments'],['gradebook','Gradebook']])}${body}`;
 };
 
@@ -1080,7 +1125,7 @@ V.fees = () => {
     ${rows.map(v => `<tr class="click" data-act="openInv" data-no="${v.no}"><td class="num"><b>${v.no}</b></td><td><div class="who">${avatar(v.student.name,'sm')}<div><b>${v.student.name}</b><small>${v.student.cls}</small></div></div></td><td class="num">${v.due}</td><td class="r num">${money(v.amt)}</td><td class="r num">${money(v.paid)}</td><td class="r num"><b>${money(v.amt - v.paid)}</b></td><td>${statusPill(v.status)}</td></tr>`).join('')}</tbody></table></div>`;
   } else if (t === 'structures') {
     body = `<div class="tbl-wrap"><table><thead><tr><th>Fee item</th><th>Applies to</th><th>Frequency</th><th class="r">Amount</th><th>Ledger account</th></tr></thead><tbody>
-    ${[['Tuition – Primary (G1–5)','Grades 1–5','Per term',245000,'4100 Tuition income'],['Tuition – Middle (G6–9)','Grades 6–9','Per term',285000,'4100 Tuition income'],['Tuition – Upper (G10–13)','Grades 10–13','Per term',325000,'4100 Tuition income'],
+    ${[...STG.map((x, i) => [`Tuition – ${x.name}`, ylRange(x.from, x.to), 'Per term', 185000 + i * 50000, '4100 Tuition income']),
        ['Development levy','All','Per term',25000,'4300 Levies'],['Transport – Zone A/B/C','Opt-in','Per term','32,000–52,000','4200 Transport income'],['Admission fee','New students','One-off',150000,'4400 Admission fees'],['Refundable deposit','New students','One-off',100000,'2300 Deposits held']]
        .map(([n,a,fq,amt,l]) => `<tr><td><b>${n}</b></td><td>${a}</td><td>${fq}</td><td class="r num">${typeof amt==='number'?money(amt):'Rs '+amt}</td><td class="muted">${l}</td></tr>`).join('')}</tbody></table></div>
     <div class="tbl-foot"><span>Sibling discount: 10% for the 2nd child, 15% for the 3rd. Scholarships are applied as credit notes.</span></div>`;
@@ -1168,7 +1213,7 @@ V.users = () => {
 /* ---------- User kit: user profile page and role builder page (shared by the platform console and the school admin app) ---------- */
 const UK = { tab:'profile', draft:null, draftKey:null, dirty:false, ctx:null, user:null, q:'' };
 const UK_DEPTS = ['Leadership','Primary','Secondary','Finance office','Admissions office','Student services','Front office','IT'];
-const UK_CLASSES = ['Grade 4 – Emerald','Grade 5 – Ruby','Grade 7 – Emerald','Grade 8 – Sapphire','Grade 9 – Sapphire','Grade 10 – Topaz','Grade 11 – Ruby','Grade 12 – Emerald'];
+const UK_CLASSES = [...new Set([4, 5, 7, 8, 9, 10, 11, 12].map((n, i) => { const g = lvL(n), sx = ttSecs(g); return clsName(g, sx[i % sx.length]); }))];
 const UK_COLORS = ['#2F6FED','#12A594','#0E7490','#8B5CF6','#BE185D','#C2410C','#B45309','#4D7C0F'];
 const UK_SENSITIVE = [
   ['export','Export data','Download student, staff or finance records as spreadsheets'],
@@ -1509,7 +1554,7 @@ function appExtra(a) {
   const r = ukSeed(a.id), p2 = pick(FIRST) + ' ' + a.name.split(' ')[1];
   a.x = {
     dob:`${2026 - a.grade - 5}-0${1 + Math.floor(r() * 8)}-1${Math.floor(r() * 9)}`, gender: r() > .5 ? 'Female' : 'Male', prev: PREV_SCHOOLS[Math.floor(r() * PREV_SCHOOLS.length)],
-    nat: r() > .8 ? 'British' : 'Sri Lankan', sib: r() > .6 ? `Sister in Grade ${Math.min(12, a.grade + 2)}` : 'None', lang: r() > .5 ? 'English, Sinhala' : 'English',
+    nat: r() > .8 ? 'British' : 'Sri Lankan', sib: r() > .6 ? `Sister in ${yl(Math.min(LV.length, a.grade + 2))}` : 'None', lang: r() > .5 ? 'English, Sinhala' : 'English',
     guardians:[[a.parent, 'Mother', '+94 77 ' + (2000000 + Math.floor(r() * 7000000)), a.parent.split(' ')[0].toLowerCase() + '@gmail.com', true],[p2, 'Father', '+94 71 ' + (2000000 + Math.floor(r() * 7000000)), p2.split(' ')[0].toLowerCase() + '.' + p2.split(' ')[1].toLowerCase() + '@outlook.com', false]],
     scores:{English: 58 + Math.floor(r() * 40), Mathematics: 55 + Math.floor(r() * 43), Reasoning: 60 + Math.floor(r() * 38)}, rec:'',
     docs: APP_DOCS.map((_, i) => i < a.docs ? 'verified' : i === a.docs ? 'pending' : 'missing'),
@@ -1525,7 +1570,7 @@ function appNext(a) {
     assessment:['cal','Assessment on Thu 9 Oct, 09:00','Exam hall B · English, Mathematics and reasoning papers · about 90 minutes.','Reschedule'],
     interview:['crm','Interview on Mon 13 Oct, 10:30','Principal’s office with Mrs. Wickramasinghe. Both parents invited.','Reschedule'],
     offer:['send','Waiting for the family to accept','Offer sent on 1 Oct. It expires on 15 Oct. The admission fee is due on acceptance.','Send reminder'],
-    enrolled:['check','Enrolled for January 2027',`Student record created. Class placement: Grade ${a.grade} – ${HOUSES[a.grade % 4]}.`,'Open record']
+    enrolled:['check','Enrolled for January 2027',`Student record created. Class placement: ${clsName(a.grade, ttSecs(a.grade)[0])}.`,'Open record']
   }[a.stage];
 }
 function appDrawer(id) {
@@ -1555,8 +1600,8 @@ function appDrawer(id) {
     ${x.docs.includes('missing') ? `<button class="btn" data-act="appDoc" data-id="${a.id}" data-k="all" data-v="request">${ic('send',16)}Ask the family for all missing documents</button>` : ''}`;
   else if (tab === 'assess') { const taken = si >= 2;
     body = !taken ? `<div class="ad-empty">${ic('cal',28)}<b>No assessment yet</b><p class="muted">Book one when the documents are in. The family gets a confirmation in the parent app.</p><button class="btn primary" data-act="appStage" data-id="${a.id}" data-v="assessment">Book assessment</button></div>` : `
-    <section class="ad-card"><h3>Entrance assessment · 9 Oct</h3><div class="ad-scores">${Object.entries(x.scores).map(([k, v]) => `<div class="ad-score"><div class="lbl-row"><span>${k}</span><b class="num">${v}<span class="muted" style="font-weight:500">/100</span></b></div><div class="ad-track"><i style="width:${v}%"></i><em style="left:65%" title="Grade ${a.grade} entry benchmark: 65"></em></div></div>`).join('')}</div>
-      <p class="muted small" style="margin:10px 0 0">The marker on each bar is the Grade ${a.grade} entry benchmark (65).</p></section>
+    <section class="ad-card"><h3>Entrance assessment · 9 Oct</h3><div class="ad-scores">${Object.entries(x.scores).map(([k, v]) => `<div class="ad-score"><div class="lbl-row"><span>${k}</span><b class="num">${v}<span class="muted" style="font-weight:500">/100</span></b></div><div class="ad-track"><i style="width:${v}%"></i><em style="left:65%" title="${yl(a.grade)} entry benchmark: 65"></em></div></div>`).join('')}</div>
+      <p class="muted small" style="margin:10px 0 0">The marker on each bar is the ${yl(a.grade)} entry benchmark (65).</p></section>
     <section class="ad-card"><h3>Recommendation</h3><div class="seg big-seg" role="radiogroup">${[['offer','Offer a place','P'],['wait','Waitlist','L'],['decline','Decline','A']].map(([k, l, c]) => `<button class="${x.rec === k ? 'on ' + c : ''}" data-act="appRec" data-id="${a.id}" data-v="${k}">${l}</button>`).join('')}</div>
       <textarea class="input" rows="3" style="margin-top:12px" placeholder="Interviewer notes (only staff can see these)">${avg >= 75 ? 'Confident and articulate. Strong in mathematics; reading is above grade level.' : ''}</textarea></section>`; }
   else if (tab === 'activity') body = `<section class="ad-card"><div class="ad-tl">${[
@@ -1571,7 +1616,7 @@ function appDrawer(id) {
       .map(([n, amt, paid, d]) => `<div class="ad-doc"><div class="dot-ic ${paid ? 't-green' : 't-violet'}">${ic(paid ? 'check' : 'fee',16)}</div><div style="flex:1"><b>${n}</b><div class="muted" style="font-size:12px">${d}</div></div><b class="num">${money(amt)}</b>${paid ? '<span class="pill t-green">Paid</span>' : '<span class="pill t-violet">Not due</span>'}</div>`).join('')}</section>
     ${si >= 3 && si < 5 ? `<button class="btn primary" data-act="appOffer" data-id="${a.id}">${ic('send',16)}${si === 4 ? 'Resend offer letter' : 'Send offer letter'}</button>` : ''}`;
   openDrawer(`<div class="ad-head">
-      <div class="ad-top">${avatar(a.name,'lg')}<div style="flex:1;min-width:0"><div class="eyebrow">${a.id} · ${a.source}</div><h2>${a.name}</h2><div class="ad-meta"><span>Grade ${a.grade} · January 2027</span><span class="pill ${prioTone[0]}">${prioTone[1]}</span><span class="pill t-violet plain">${a.days} day${a.days === 1 ? '' : 's'} in ${STAGES[si].n.toLowerCase()}</span></div></div>
+      <div class="ad-top">${avatar(a.name,'lg')}<div style="flex:1;min-width:0"><div class="eyebrow">${a.id} · ${a.source}</div><h2>${a.name}</h2><div class="ad-meta"><span>${yl(a.grade)} · January 2027</span><span class="pill ${prioTone[0]}">${prioTone[1]}</span><span class="pill t-violet plain">${a.days} day${a.days === 1 ? '' : 's'} in ${STAGES[si].n.toLowerCase()}</span></div></div>
         <button class="iconbtn" data-act="closeAll" aria-label="Close">${ic('x',16)}</button></div>
       <div class="ad-actions"><button class="btn sm" data-act="toast" data-msg="Email sent to ${esc(a.parent)}">${ic('mail',14)}Email</button><button class="btn sm" data-act="toast" data-msg="Calling ${esc(a.parent)}…">${ic('phone',14)}Call</button><button class="btn sm" data-act="toast" data-msg="Message sent in the parent app">${ic('msg',14)}Message</button><button class="btn sm" data-act="toast" data-msg="Calendar invite created">${ic('cal',14)}Schedule</button></div>
       <ol class="ad-steps">${STAGES.map((s, i) => `<li class="${i < si ? 'done' : i === si ? 'cur' : ''}"><button data-act="appStage" data-id="${a.id}" data-v="${s.k}" aria-label="Move to ${s.n}"><i>${i < si ? ic('check',12) : i + 1}</i><span>${s.n}</span><small>${i <= si ? dates[i] : ''}</small></button></li>`).join('')}</ol>
@@ -1589,40 +1634,54 @@ const SUBJ_LIB = {
   'Science':['#0891B2','settings','Ms. Jayawardena','Lab 1'], 'Physics':['#0E7490','settings','Mr. Herath','Lab 2'], 'Chemistry':['#0D9488','alert','Dr. Fonseka','Lab 3'], 'Biology':['#16A34A','heart','Ms. Gunawardena','Lab 4'],
   'Combined Maths':['#1D4ED8','fin','Mr. Wijesinghe','Room 14'], 'ICT':['#12A594','grid','Mrs. Bandara','ICT lab'], 'History':['#B45309','file','Mr. Ratnayake','Room 9'], 'Geography':['#65A30D','home','Ms. Karunaratne','Room 10'],
   'Environmental studies':['#15803D','star','Mrs. Dias','Room 2'], 'Art & Design':['#BE185D','star','Ms. De Alwis','Studio'], 'Music':['#DB2777','heart','Mr. Fernando','Music room'], 'Physical Ed.':['#4D7C0F','heart','Coach Perera','Sports hall'],
-  'Religion':['#A16207','book','Mr. Gunasekara','Room 3'], 'Business studies':['#7C3AED','fee','Mr. Peiris','Room 11'], 'Free study':['#64748B','book','Library staff','Library']
+  'Religion':['#A16207','book','Mr. Gunasekara','Room 3'], 'Global Perspectives':['#0F766E','home','','Room 8'], 'French':['#4F46E5','msg','','Room 5'], 'Spanish':['#EA580C','msg','','Room 5'], 'Computer Science':['#0D9488','grid','','ICT lab'],
+  'PSHE':['#A16207','heart','','Room 3'], 'Language & Literature':['#8B5CF6','book','','Room 4'], 'Language Acquisition':['#4F46E5','msg','','Room 5'], 'Individuals & Societies':['#B45309','home','','Room 9'], 'Units of inquiry':['#15803D','star','','Room 2'],
+  'Design':['#DB2777','settings','','Design lab'], 'Theory of Knowledge':['#7C3AED','book','','Room 15'], 'General Paper':['#8B5CF6','file','','Room 15'], 'English Language Arts':['#8B5CF6','book','','Room 4'], 'Social Studies':['#B45309','home','','Room 9'],
+  'Literacy':['#8B5CF6','book','','Nest'], 'Numeracy':['#2F6FED','fin','','Nest'], 'Understanding the world':['#15803D','home','','Nest'], 'Creative play':['#BE185D','star','','Studio'], 'Physical play':['#4D7C0F','heart','','Play area'], 'Business studies':['#7C3AED','fee','Mr. Peiris','Room 11'], 'Free study':['#64748B','book','Library staff','Library']
 };
 /* Bell schedules: lessons (L) and breaks (B) with durations; times are worked out from the start time */
 const L = dur => ({t:'L', dur}), B = (label, dur, duty) => ({t:'B', label, dur, duty});
-const BELLS = [
-  {id:'primary', name:'Primary day', start:'07:45', rows:[L(35), L(35), B('Snack break', 20, 'Yard duty: Mrs. Dias'), L(35), L(35), B('Lunch', 30, 'Canteen duty: Ms. Silva'), L(35), L(35)]},
-  {id:'middle', name:'Middle school day', start:'07:50', rows:[L(40), L(40), L(40), B('Interval', 20, 'Yard duty: Mr. Ratnayake'), L(40), L(40), L(40), B('Lunch', 30, 'Canteen duty: Ms. Karunaratne'), L(40), L(40)]},
-  {id:'senior', name:'Senior school day', start:'08:00', rows:[L(40), L(40), L(40), B('Interval', 20, 'Yard duty: Mr. Herath'), L(40), L(40), L(40), B('Lunch', 40, 'Canteen duty: Ms. Silva'), L(40), L(40)]},
-  {id:'alevel', name:'A/L day', start:'07:30', rows:[L(40), L(40), L(40), L(40), B('Interval', 30, 'Yard duty: Dr. Fonseka'), L(40), L(40), L(40), L(40)]}
-];
-const SUBJ_DEFAULT = g => g <= 5 ? [['English',7],['Mathematics',7],['Sinhala',4],['Environmental studies',4],['Religion',2],['Art & Design',2],['Music',2],['Physical Ed.',2]]
-  : g <= 9 ? [['Mathematics',6],['English',6],['Science',6],['Sinhala',4],['History',3],['Geography',3],['ICT',3],['Religion',2],['Art & Design',3],['Physical Ed.',4]]
-  : g <= 11 ? [['Mathematics',7],['English',6],['Physics',5],['ICT',5],['History',5],['Art & Design',4],['Physical Ed.',4],['Sinhala',4]]
-  : [['Physics',9],['Chemistry',9],['Combined Maths',9],['English',4],['ICT',4],['Free study',3],['Physical Ed.',2]];
+const BELL_TPL = {
+  early: [L(30), L(30), B('Snack break', 20, 'Yard duty: Early years team'), L(30), L(30), B('Lunch', 30, 'Lunch duty: Early years team'), L(30)],
+  primary: [L(35), L(35), B('Snack break', 20, 'Yard duty: Junior team'), L(35), L(35), B('Lunch', 30, 'Canteen duty: Junior team'), L(35), L(35)],
+  senior: [L(40), L(40), L(40), B('Interval', 20, 'Yard duty: Senior team'), L(40), L(40), L(40), B('Lunch', 40, 'Canteen duty: Senior team'), L(40), L(40)],
+  sixth: [L(40), L(40), L(40), L(40), B('Interval', 30, 'Yard duty: Sixth form team'), L(40), L(40), L(40), L(40)]};
+const BELL_START = {early:'08:00', primary:'07:45', senior:'08:00', sixth:'07:30'};
+const BELLS = STG.map((x, si) => { const k = stageKind(si); return {id: 'st' + si, name: `${x.name} day`, start: BELL_START[k], rows: BELL_TPL[k].map(r => ({...r}))}; });
+/* Default subjects for each kind of year group, worded for this curriculum */
+const CUR_WORDS = {
+  local: {eng:'English', lang:'Sinhala', hum:'Religion', psci:'Environmental studies', ict:'ICT', amath:'Combined Maths', gp:'English'},
+  cambridge: {eng:'English', lang:'French', hum:'Global Perspectives', psci:'Science', ict:'Computer Science', amath:'Mathematics', gp:'General Paper'},
+  edexcel: {eng:'English', lang:'French', hum:'PSHE', psci:'Science', ict:'ICT', amath:'Mathematics', gp:'English'},
+  ib: {eng:'Language & Literature', lang:'Language Acquisition', hum:'Individuals & Societies', psci:'Units of inquiry', ict:'Design', amath:'Mathematics', gp:'Theory of Knowledge'},
+  american: {eng:'English Language Arts', lang:'Spanish', hum:'Social Studies', psci:'Science', ict:'Computer Science', amath:'Mathematics', gp:'English'}};
+const CW = CUR_WORDS[(ACAD.curr && ACAD.curr.id) || ''] || CUR_WORDS.cambridge;
+const SUBJ_DEFAULT = g => { const w = CW; return ({
+  early: [['Literacy',6],['Numeracy',5],['Understanding the world',4],['Creative play',4],['Physical play',4],['Music',2]],
+  primary: [[w.eng,7],['Mathematics',7],[w.psci,4],[w.lang,4],[w.hum,2],['Art & Design',2],['Music',2],['Physical Ed.',2]],
+  middle: [['Mathematics',6],[w.eng,6],['Science',6],[w.lang,4],['History',3],['Geography',3],[w.ict,3],[w.hum,2],['Art & Design',3],['Physical Ed.',4]],
+  exam: [['Mathematics',7],[w.eng,6],['Physics',5],[w.ict,5],['History',5],['Art & Design',4],['Physical Ed.',4],[w.lang,4]],
+  sixth: [['Physics',9],['Chemistry',9],[w.amath,9],[w.gp,4],[w.ict,4],['Free study',3],['Physical Ed.',2]]
+})[kindOf(g)].filter((x, i, a) => a.findIndex(y => y[0] === x[0]) === i); };
+/* Subjects the class teacher teaches in early years and primary classes */
+const classTeacherSubj = g => { const k = kindOf(g); if (k === 'early') return SUBJ_DEFAULT(g).map(x => x[0]).filter(x => x !== 'Music'); if (k === 'primary') return [CW.eng, 'Mathematics', CW.psci, CW.hum].concat((ACAD.curr || {}).id === 'local' ? [CW.lang] : []); return []; };
 const TTC = {subj:{}, bell:{}};
-const bellDefault = g => g <= 5 ? 'primary' : g <= 9 ? 'middle' : g <= 11 ? 'senior' : 'alevel';
+const bellDefault = g => 'st' + (LV[g - 1] || LV[0]).si;
 const gSubj = g => TTC.subj[g] || (TTC.subj[g] = SUBJ_DEFAULT(g).map(([k, n]) => ({k, n, t: SUBJ_LIB[k][2], r: SUBJ_LIB[k][3]})));
 const gBell = g => BELLS.find(x => x.id === (TTC.bell[g] || bellDefault(g))) || BELLS[0];
-const bellGrades = id => Array.from({length:13}, (_, i) => i + 1).filter(g => gBell(g).id === id);
+const bellGrades = id => Array.from({length:LV.length}, (_, i) => i + 1).filter(g => gBell(g).id === id);
 const hm = m => `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
 const toMin = t => +t.slice(0, 2) * 60 + +t.slice(3, 5);
 /* Periods as [label, start, end, breakLabel, duty]; lessons are P1, P2… and breaks are 'brk' */
 function bellPeriods(b) { let m = toMin(b.start), n = 0; return b.rows.map(r => { const s = m; m += +r.dur || 0; return r.t === 'L' ? ['P' + (++n), hm(s), hm(m)] : ['brk', hm(s), hm(m), r.label, r.duty]; }); }
 const bellLessons = b => b.rows.filter(r => r.t === 'L').length;
 const bellSummary = b => { const p = bellPeriods(b), br = b.rows.length - bellLessons(b); return `${bellLessons(b)} lessons · ${br} break${br === 1 ? '' : 's'} · ${p.length ? p[0][1] + '–' + p[p.length - 1][2] : ''}`; };
-const gradeOfCls = cls => +cls.match(/Grade (\d+)/)[1];
 function ttSubj(g, k, cls) { const r = gSubj(g).find(x => x.k === k), lib = SUBJ_LIB[k] || ['#64748B','book','',''];
   return [lib[0], (cls ? taOf(cls, k) : '') || (cls ? 'Unassigned' : r ? r.t : lib[2]), lib[1], r ? r.r : lib[3]]; }
-const ttReset = g => { Object.keys(S.tt || {}).forEach(k => { if (k.startsWith(`Grade ${g} –`)) delete S.tt[k]; }); Object.keys(S.ttSub || {}).forEach(k => { if (k.startsWith(`Grade ${g} –`)) delete S.ttSub[k]; }); };
+const ttReset = g => { Object.keys(S.tt || {}).forEach(k => { if (k.startsWith(yl(g) + ' –')) delete S.tt[k]; }); Object.keys(S.ttSub || {}).forEach(k => { if (k.startsWith(yl(g) + ' –')) delete S.ttSub[k]; }); };
 const TT_DAYS = [['Mon','5 Oct'],['Tue','6 Oct'],['Wed','7 Oct'],['Thu','8 Oct'],['Fri','9 Oct']];
-const TT_SECTIONS = ['Emerald','Ruby','Sapphire'];
-const ttSecs = g => TT_SECTIONS.slice(0, g <= 5 ? 2 : 3);
-const ttGradeOf = () => +(S.filter.ttGrade || 10);
-const ttCls = () => { const g = ttGradeOf(), list = ttSecs(g).map(x => `Grade ${g} – ${x}`); return list.includes(S.ttClass) ? S.ttClass : list[0]; };
+const ttGradeOf = () => +(S.filter.ttGrade || lvL(10));
+const ttCls = () => { const g = ttGradeOf(), list = ttSecs(g).map(x => clsName(g, x)); return list.includes(S.ttClass) ? S.ttClass : list[0]; };
 function ttGrid(cls, wk) {
   S.tt = S.tt || {}; const key = cls + wk; if (S.tt[key]) return S.tt[key];
   const g = gradeOfCls(cls), per = bellLessons(gBell(g)), slots = per * 5;
@@ -1651,14 +1710,14 @@ V.timetable = () => {
   const agenda = today.map(([p, s, e], i) => { const k = g[0][i], [c, tch, , room] = ttSubj(gr, k, cls), st = mins(s), en = mins(e), state = NOW >= en ? 'done' : NOW >= st ? 'cur' : ''; return `<div class="ag ${state}"><i style="background:${c}"></i><span class="num" style="width:44px">${s}</span><span style="flex:1"><b>${esc(k)}</b><br><small class="muted">${esc(tch)} · ${esc(room)}</small></span>${state === 'cur' ? '<span class="pill t-red plain">Now</span>' : state === 'done' ? ic('check',14) : ''}</div>`; }).join('');
   const counts = {}; g.flat().forEach(k => counts[k] = (counts[k] || 0) + 1);
   const mx = Math.max(...subj.map(x => x.n), 1), slots = per * 5;
-  const warn = planned > slots ? `<div class="tt2-hint warn">${ic('alert',16)}<span>Grade ${gr} plans ${planned} lessons a week but the ${esc(bell.name)} has ${slots} periods, so ${planned - slots} lesson${planned - slots > 1 ? 's don’t' : ' doesn’t'} fit.</span><button class="btn sm" data-act="ttSubjects">Edit subjects</button><button class="btn sm" data-act="ttBell">Edit bell times</button></div>` : '';
-  return `${pageHead('Learning management system', 'Timetable', `${cls} · Week ${wk} · ${slots} periods · Term 1, 2026/27`, `<button class="btn" data-act="ttSubjects">${ic('book',16)}Subjects</button><button class="btn" data-act="ttBell">${ic('cal',16)}Bell times</button><button class="btn ${edit ? 'primary' : ''}" data-act="ttEdit">${ic(edit ? 'check' : 'grid',16)}${edit ? 'Done rearranging' : 'Rearrange'}</button><button class="btn" data-act="toast" data-msg="Timetable shared with ${cls} parents in the app">${ic('send',16)}Share with parents</button>`)}
-  <div class="tt2-bar card"><select class="input inline" data-filter="ttGrade" aria-label="Grade" data-dd-ic="student" data-dd-q>${GRADE_BANDS.map(([band, from, to]) => `<optgroup label="${band}">${Array.from({length: to - from + 1}, (_, i) => from + i).map(x => `<option value="${x}" data-sub="${ttSecs(x).length} classes · ${gSubj(x).length} subjects · ${esc(gBell(x).name)}" ${gr === x ? 'selected' : ''}>Grade ${x}</option>`).join('')}</optgroup>`).join('')}</select><span class="sep" aria-hidden="true"></span><div class="chips" role="radiogroup" aria-label="Class">${ttSecs(gr).map(x => { const c = `Grade ${gr} – ${x}`; return `<button class="chip ${c === cls ? 'on' : ''}" role="radio" aria-checked="${c === cls}" data-act="ttClass" data-v="${c}">${x}</button>`; }).join('')}</div>
+  const warn = planned > slots ? `<div class="tt2-hint warn">${ic('alert',16)}<span>${esc(yl(gr))} plans ${planned} lessons a week but the ${esc(bell.name)} has ${slots} periods, so ${planned - slots} lesson${planned - slots > 1 ? 's don’t' : ' doesn’t'} fit.</span><button class="btn sm" data-act="ttSubjects">Edit subjects</button><button class="btn sm" data-act="ttBell">Edit bell times</button></div>` : '';
+  return `${pageHead('Learning management system', 'Timetable', `${cls} · ${esc(bandOf(gr))} · Week ${wk} · ${slots} periods · ${esc(ACAD.curr.short || ACAD.curr.name)}`, `<button class="btn" data-act="ttSubjects">${ic('book',16)}Subjects</button><button class="btn" data-act="ttBell">${ic('cal',16)}Bell times</button><button class="btn ${edit ? 'primary' : ''}" data-act="ttEdit">${ic(edit ? 'check' : 'grid',16)}${edit ? 'Done rearranging' : 'Rearrange'}</button><button class="btn" data-act="toast" data-msg="Timetable shared with ${cls} parents in the app">${ic('send',16)}Share with parents</button>`)}
+  <div class="tt2-bar card"><select class="input inline" data-filter="ttGrade" aria-label="${GL.one}" data-dd-ic="student" data-dd-q>${GRADE_BANDS.map(([band, from, to]) => `<optgroup label="${band}">${Array.from({length: to - from + 1}, (_, i) => from + i).map(x => `<option value="${x}" data-sub="${ttSecs(x).length} classes · ${gSubj(x).length} subjects · ${esc(gBell(x).name)}" ${gr === x ? 'selected' : ''}>${esc(yl(x))}</option>`).join('')}</optgroup>`).join('')}</select><span class="sep" aria-hidden="true"></span><div class="chips" role="radiogroup" aria-label="Class">${ttSecs(gr).map(x => { const c = clsName(gr, x); return `<button class="chip ${c === cls ? 'on' : ''}" role="radio" aria-checked="${c === cls}" data-act="ttClass" data-v="${c}">${x}</button>`; }).join('')}</div>
     ${(stBuild(), ST.ct[cls]) ? `<button class="tt-ct" data-act="openClass" data-c="${esc(cls)}">${avatar(ST.ct[cls],'xs')}<span><small>Class teacher</small><b>${esc(ST.ct[cls])}</b></span></button>` : `<button class="tt-ct" data-act="openClass" data-c="${esc(cls)}">${ic('plus',14)}<span>Set class teacher</span></button>`}<button class="tt-bell" data-act="ttBell" title="Edit bell times">${ic('cal',14)}<b>${esc(bell.name)}</b><span>${bellSummary(bell)}</span></button><span style="flex:1"></span><div class="seg" role="radiogroup" aria-label="Week">${['A','B'].map(w => `<button class="${w === wk ? 'on P' : ''}" data-act="ttWeek" data-v="${w}">Week ${w}</button>`).join('')}</div></div>
   ${warn}${edit ? `<div class="tt2-hint">${ic('grid',16)}Drag a lesson onto another to swap them. Teachers and parents are told when you finish.</div>` : ''}
   <div class="tt2-wrap"><div class="card tbl-wrap"><div class="tt2 ${edit ? 'edit' : ''}">${cells}</div></div>
     <aside class="tt2-side"><section class="card agenda"><div class="card-h"><h2>Today · Monday</h2><span class="muted num" style="font-size:12px">09:41</span></div>${agenda}</section>
-      <section class="card load"><div class="card-h"><h2>Grade ${gr} subjects</h2><button class="linkbtn" data-act="ttSubjects">Edit</button></div>${subj.map(({k, n}) => `<div class="lr"><i style="width:10px;height:10px;border-radius:3px;background:${ttSubj(gr, k)[0]}"></i><span>${esc(k)}</span><b class="num">${counts[k] || 0}${counts[k] !== n ? `<small class="muted"> / ${n}</small>` : ''}</b><div class="bar"><i style="width:${(counts[k] || 0) / mx * 100}%;background:${ttSubj(gr, k)[0]}"></i></div></div>`).join('')}
+      <section class="card load"><div class="card-h"><h2>${esc(yl(gr))} subjects</h2><button class="linkbtn" data-act="ttSubjects">Edit</button></div>${subj.map(({k, n}) => `<div class="lr"><i style="width:10px;height:10px;border-radius:3px;background:${ttSubj(gr, k)[0]}"></i><span>${esc(k)}</span><b class="num">${counts[k] || 0}${counts[k] !== n ? `<small class="muted"> / ${n}</small>` : ''}</b><div class="bar"><i style="width:${(counts[k] || 0) / mx * 100}%;background:${ttSubj(gr, k)[0]}"></i></div></div>`).join('')}
         ${counts['Free study'] && !subj.some(x => x.k === 'Free study') ? `<div class="lr muted"><i style="width:10px;height:10px;border-radius:3px;background:#64748B"></i><span>Free study (unplanned)</span><b class="num">${counts['Free study']}</b></div>` : ''}
         <div class="lr-foot">${planned} of ${slots} periods planned</div></section></aside></div>`;
 };
@@ -1673,12 +1732,9 @@ function ttLessonDrawer(d, p) {
 
 /* ---------- Teachers & classes: teaching assignments, class teachers, section heads ---------- */
 const MAX_LOAD = 30;
-const PRIMARY_CORE = ['English', 'Mathematics', 'Environmental studies', 'Sinhala', 'Religion'];
 const SUBJ_GROUP = {'Mathematics':['Mathematics','Combined Maths'], 'Combined Maths':['Combined Maths','Mathematics'], 'Science':['Science','Physics'], 'Physics':['Physics','Science'], 'Chemistry':['Chemistry','Science'], 'Biology':['Biology','Science'],
   'History':['History','Geography'], 'Geography':['Geography','History'], 'Business studies':['Business studies','ICT']};
 const ST = {teachers: [], ta: {}, ct: {}, heads: {}, deputies: {}, built: false};
-const allClasses = () => Array.from({length:13}, (_, i) => i + 1).flatMap(g => ttSecs(g).map(x => `Grade ${g} – ${x}`));
-const bandOf = g => GRADE_BANDS.find(([, f, t]) => g >= f && g <= t)[0];
 function stBuild() {
   if (ST.built) return; ST.built = true;
   const F = ['Dilani','Sanduni','Tharushi','Kumari','Anusha','Chathurika','Ishara','Malsha','Hiruni','Nirosha','Shalini','Fathima','Priya','Nadeesha','Gayani','Ruvini'],
@@ -1691,9 +1747,9 @@ function stBuild() {
   allClasses().forEach(cls => { const g = gradeOfCls(cls);
     gSubj(g).forEach(({k, n}) => {
       if (k === 'Free study') return;
-      if (g <= 5 && PRIMARY_CORE.includes(k)) { let t = ST.teachers.find(x => x.primary && x._cls === cls); if (!t) { t = mk(PRIMARY_CORE, true); t._cls = cls; ST.ct[cls] = t.name; } add(t, cls, k, n); return; }
+      if (classTeacherSubj(g).includes(k)) { let t = ST.teachers.find(x => x.primary && x._cls === cls); if (!t) { t = mk(classTeacherSubj(g), true); t._cls = cls; ST.ct[cls] = t.name; } add(t, cls, k, n); return; }
       const fit = ST.teachers.filter(t => !t.primary && t.subjects.includes(k) && (load[t.name] || 0) + n <= MAX_LOAD - 2)
-        .sort((a, b2) => (Object.keys(ST.ta).some(x => x.startsWith(`Grade ${g} –`) && ST.ta[x] === b2.name) - Object.keys(ST.ta).some(x => x.startsWith(`Grade ${g} –`) && ST.ta[x] === a.name)) || (load[b2.name] || 0) - (load[a.name] || 0));
+        .sort((a, b2) => (Object.keys(ST.ta).some(x => x.startsWith(yl(g) + ' –') && ST.ta[x] === b2.name) - Object.keys(ST.ta).some(x => x.startsWith(yl(g) + ' –') && ST.ta[x] === a.name)) || (load[b2.name] || 0) - (load[a.name] || 0));
       add(fit[0] || mk(SUBJ_GROUP[k] || [k]), cls, k, n);
     });
   });
@@ -1704,7 +1760,7 @@ function stBuild() {
   const taken = new Set(Object.values(ST.ct)), lead = new Set();
   const inBand = (t, f, to) => { const rows = teacherLoad(t.name).rows; return rows.length ? rows.filter(r => { const g = gradeOfCls(r.cls); return g >= f && g <= to; }).length / rows.length : 0; };
   GRADE_BANDS.forEach(([band, f, to]) => {
-    const pool = ST.teachers.filter(t => !lead.has(t.name) && inBand(t, f, to) >= .6 && (band === 'Primary' ? t.primary : !taken.has(t.name))).sort((a, b2) => teacherLoad(b2.name).total - teacherLoad(a.name).total);
+    const pool = ST.teachers.filter(t => !lead.has(t.name) && inBand(t, f, to) >= .6 && (['early', 'primary'].includes(kindOf(f)) ? t.primary : !taken.has(t.name))).sort((a, b2) => teacherLoad(b2.name).total - teacherLoad(a.name).total);
     ST.heads[band] = pool[0] ? pool[0].name : ''; ST.deputies[band] = pool[1] ? pool[1].name : ''; pool.slice(0, 2).forEach(t => lead.add(t.name));
   });
 }
@@ -1720,7 +1776,7 @@ const roleChips = name => { const c = ctOf(name), h = headOf(name), d = deputyOf
 
 V.staffing = () => {
   stBuild(); const t = curTab('stf', 'teachers'), un = unassigned();
-  const kp = `<div class="grid g-kpi">${kpi('crm','t-blue','Teachers', ST.teachers.length, `${ST.teachers.filter(x => x.primary).length} primary class teachers`)}${kpi('student','t-violet','Classes', allClasses().length, `${Object.keys(ST.ct).length} with a class teacher`)}
+  const kp = `<div class="grid g-kpi">${kpi('crm','t-blue','Teachers', ST.teachers.length, `${ST.teachers.filter(x => x.primary).length} teach their own class most subjects`)}${kpi('student','t-violet','Classes', allClasses().length, `${Object.keys(ST.ct).length} with a class teacher`)}
     ${kpi('cal','t-green','Lessons a week', allClasses().reduce((a, c) => a + gSubj(gradeOfCls(c)).reduce((x, y) => x + y.n, 0), 0), 'Across all classes')}${kpi('alert', un.length ? 't-amber' : 't-green', 'Unassigned lessons', un.reduce((a, x) => a + x.n, 0), un.length ? `${un.length} class subjects need a teacher` : 'Every lesson has a teacher')}</div>`;
   let body = '';
   if (t === 'teachers') {
@@ -1735,12 +1791,12 @@ V.staffing = () => {
       <span class="muted" style="font-size:12.5px;margin-left:auto">${rows.length} of ${ST.teachers.length}</span></div>
       <div class="tbl-wrap"><table><thead><tr><th>Teacher</th><th>Subjects</th><th>Teaches</th><th>Responsibilities</th><th style="width:150px">Periods a week</th></tr></thead><tbody>
       ${rows.map(x => { const l = teacherLoad(x.name), grades = [...new Set(l.rows.map(r => gradeOfCls(r.cls)))].sort((a, b2) => a - b2);
-        return `<tr class="click" data-act="openTeacher" data-id="${x.id}"><td><div class="who">${avatar(x.name,'sm')}<div><b>${esc(x.name)}</b><small>${x.primary ? 'Primary class teacher' : 'Subject teacher'}</small></div></div></td>
+        return `<tr class="click" data-act="openTeacher" data-id="${x.id}"><td><div class="who">${avatar(x.name,'sm')}<div><b>${esc(x.name)}</b><small>${x.primary ? 'Class teacher model' : 'Subject teacher'}</small></div></div></td>
         <td><div class="chips">${x.subjects.map(k => `<span class="subj-tag" style="--c:${(SUBJ_LIB[k] || ['#64748B'])[0]}">${esc(k)}</span>`).join('')}</div></td>
-        <td class="muted" style="font-size:12.5px">${l.rows.length ? `${new Set(l.rows.map(r => r.cls)).size} class${new Set(l.rows.map(r => r.cls)).size > 1 ? 'es' : ''} · Grade ${grades.length > 2 ? grades[0] + '–' + grades[grades.length - 1] : grades.join(', ')}` : '<span class="pill t-amber plain">No lessons</span>'}</td>
+        <td class="muted" style="font-size:12.5px">${l.rows.length ? `${new Set(l.rows.map(r => r.cls)).size} class${new Set(l.rows.map(r => r.cls)).size > 1 ? 'es' : ''} · ${esc(grades.length > 2 ? ylRange(grades[0], grades[grades.length - 1]) : ylList(grades))}` : '<span class="pill t-amber plain">No lessons</span>'}</td>
         <td><div class="chips">${roleChips(x.name) || '<span class="muted">—</span>'}</div></td><td>${loadBar(l.total, x.max)}</td></tr>`; }).join('') || `<tr><td colspan="5" class="muted" style="text-align:center;padding:30px">No teachers match.</td></tr>`}</tbody></table></div></div>`;
   } else if (t === 'classes') {
-    body = GRADE_BANDS.map(([band, f, to]) => `<section class="card st-band"><div class="card-h"><div><h2>${band}</h2><div class="muted" style="font-size:12.5px">Grades ${f}–${to}</div></div>
+    body = GRADE_BANDS.map(([band, f, to]) => `<section class="card st-band"><div class="card-h"><div><h2>${band}</h2><div class="muted" style="font-size:12.5px">${esc(ylRange(f, to))}</div></div>
       <button class="st-head" data-act="openSection" data-b="${band}">${avatar(ST.heads[band],'sm')}<span><small>Head of section</small><b>${esc(ST.heads[band])}</b></span>${ic('chev',14)}</button></div>
       <div class="st-classes">${allClasses().filter(c => { const g = gradeOfCls(c); return g >= f && g <= to; }).map(c => { const subj = gSubj(gradeOfCls(c)).filter(x => x.k !== 'Free study'), miss = subj.filter(x => !ST.ta[`${c}|${x.k}`]).length, ct = ST.ct[c];
         return `<button class="st-class" data-act="openClass" data-c="${esc(c)}"><div class="st-cn"><b>${c.replace(' – ', ' ')}</b>${miss ? `<span class="pill t-amber plain">${miss} unassigned</span>` : `<span class="pill t-green plain">${subj.length} subjects</span>`}</div>
@@ -1748,13 +1804,15 @@ V.staffing = () => {
           <div class="st-faces">${[...new Set(subj.map(x => ST.ta[`${c}|${x.k}`]).filter(Boolean))].slice(0, 6).map(n => avatar(n, 'xs')).join('')}<small class="muted">${new Set(subj.map(x => ST.ta[`${c}|${x.k}`]).filter(Boolean)).size} teachers</small></div></button>`; }).join('')}</div></section>`).join('');
   } else {
     body = `<div class="st-sections">${GRADE_BANDS.map(([band, f, to]) => { const cls = allClasses().filter(c => { const g = gradeOfCls(c); return g >= f && g <= to; }), tch = new Set(cls.flatMap(c => gSubj(gradeOfCls(c)).map(x => ST.ta[`${c}|${x.k}`]).filter(Boolean)));
-      return `<button class="card st-sec" data-act="openSection" data-b="${band}"><div class="st-sec-top"><span class="eyebrow">Grades ${f}–${to}</span><h3>${band}</h3></div>
+      return `<button class="card st-sec" data-act="openSection" data-b="${band}"><div class="st-sec-top"><span class="eyebrow">${esc(ylRange(f, to))}</span><h3>${band}</h3></div>
         <div class="st-person">${avatar(ST.heads[band])}<div><small>Head of section</small><b>${esc(ST.heads[band])}</b></div></div>
         <div class="st-person sm">${avatar(ST.deputies[band] || '?','sm')}<div><small>Deputy head</small><b>${esc(ST.deputies[band] || 'Not set')}</b></div></div>
         <div class="cur-meta"><span><b>${cls.length}</b> classes</span><span><b>${tch.size}</b> teachers</span><span><b>${cls.filter(c => ST.ct[c]).length}/${cls.length}</b> class teachers</span></div></button>`; }).join('')}
+      <div class="card st-sec principal"><div class="st-sec-top"><span class="eyebrow">Curriculum</span><h3>${esc(ACAD.curr.name)}</h3></div><div class="cur-meta"><span>Grading <b>${esc(ACAD.curr.grading || '—')}</b></span><span><b>${LV.length}</b> ${GL.few}</span><span><b>${STG.length}</b> sections</span></div>
+        ${(ACAD.curr.quals || []).length ? `<div class="chips">${ACAD.curr.quals.map(q => `<span class="pill plain">${esc(q[0])} · ${esc(q[1])}</span>`).join('')}</div>` : ''}<p class="muted" style="font-size:12.5px;margin:0">Set by Quad when the school was created. Stages and year groups are managed in the platform console.</p></div>
       <div class="card st-sec principal"><div class="st-sec-top"><span class="eyebrow">Whole school</span><h3>Leadership</h3></div><div class="st-person">${avatar('Shanthi Wickramasinghe')}<div><small>Principal</small><b>Shanthi Wickramasinghe</b></div></div><p class="muted" style="font-size:12.5px;margin:0">Section heads report to the principal. Change the principal in Users & roles.</p></div></div>`;
   }
-  return `${pageHead('Learning', 'Teachers & classes', 'Who teaches what, class teachers and section heads for 2026/27.', `<button class="btn" data-act="go" data-to="timetable">${ic('cal',16)}Timetable</button>`)}
+  return `${pageHead('Learning', 'Teachers & classes', `${esc(ACAD.curr.name)} · who teaches what, class teachers and section heads for 2026/27.`, `<button class="btn" data-act="go" data-to="timetable">${ic('cal',16)}Timetable</button>`)}
     ${kp}${tabs('stf', [['teachers', 'Teachers'], ['classes', 'Classes'], ['sections', 'Sections']])}${body}`;
 };
 
@@ -1762,15 +1820,15 @@ V.staffing = () => {
 function teacherDrawer() {
   const d = S.tDraft, t = ST.teachers.find(x => x.id === d.id), total = d.rows.reduce((a, r) => a + r.n, 0);
   const g = +(d.addG || 10), gradeSubj = gSubj(g).filter(x => x.k !== 'Free study');
-  formDrawer(`${head(`Teacher · ${esc(t.name)}`, `${esc(t.email)} · ${t.primary ? 'Primary class teacher' : 'Subject teacher'}`)}
+  formDrawer(`${head(`Teacher · ${esc(t.name)}`, `${esc(t.email)} · ${t.primary ? 'Teaches most subjects to their own class' : 'Subject teacher'}`)}
     <div class="drawer-b" id="tchForm">
       <div class="st-load ${total > d.max ? 'over' : ''}"><div><b>${total} of ${d.max} periods a week</b><span>${total > d.max ? `${total - d.max} over the limit` : `${d.max - total} free periods`}</span></div>${loadBar(total, d.max)}</div>
       <div class="field"><label>Subjects ${esc(t.name.split(' ')[0])} can teach</label><div class="chips">${Object.keys(SUBJ_LIB).filter(k => k !== 'Free study').map(k => `<button type="button" class="chip ${d.subjects.has(k) ? 'on' : ''}" data-act="tSubj" data-k="${esc(k)}" aria-pressed="${d.subjects.has(k)}">${esc(k)}</button>`).join('')}</div></div>
       <div class="field"><label>Lessons</label>
         <div class="st-rows">${d.rows.map((r, i) => `<div class="st-row" style="--c:${(SUBJ_LIB[r.k] || ['#64748B'])[0]}"><i></i><b>${esc(r.cls)}</b><span>${esc(r.k)}</span><span class="num muted">${r.n}/wk</span>${r.from ? `<small class="pill t-violet plain">from ${esc(r.from)}</small>` : '<small></small>'}<button type="button" class="iconbtn" data-act="tRowRm" data-i="${i}" aria-label="Remove ${esc(r.k)} in ${esc(r.cls)}">${ic('x',14)}</button></div>`).join('') || '<div class="muted" style="padding:10px 0">No lessons yet.</div>'}</div>
-        <div class="st-add"><select class="input" id="tAddG" aria-label="Grade">${Array.from({length:13}, (_, i) => i + 1).map(x => `<option value="${x}" ${x === g ? 'selected' : ''}>Grade ${x}</option>`).join('')}</select>
-          <select class="input" id="tAddC" aria-label="Class">${ttSecs(g).map(x => `<option>Grade ${g} – ${x}</option>`).join('')}</select>
-          <select class="input" id="tAddK" aria-label="Subject">${gradeSubj.map(x => { const cur = ST.ta[`Grade ${g} – ${ttSecs(g)[0]}|${x.k}`]; return `<option value="${esc(x.k)}" ${d.subjects.has(x.k) ? '' : ''}>${esc(x.k)} · ${x.n}/wk${d.subjects.has(x.k) ? '' : ' (not in subjects)'}</option>`; }).join('')}</select>
+        <div class="st-add"><select class="input" id="tAddG" aria-label="${GL.one}">${Array.from({length:LV.length}, (_, i) => i + 1).map(x => `<option value="${x}" ${x === g ? 'selected' : ''}>${esc(yl(x))}</option>`).join('')}</select>
+          <select class="input" id="tAddC" aria-label="Class">${ttSecs(g).map(x => `<option>${esc(clsName(g, x))}</option>`).join('')}</select>
+          <select class="input" id="tAddK" aria-label="Subject">${gradeSubj.map(x => { const cur = ST.ta[`${clsName(g, ttSecs(g)[0])}|${x.k}`]; return `<option value="${esc(x.k)}" ${d.subjects.has(x.k) ? '' : ''}>${esc(x.k)} · ${x.n}/wk${d.subjects.has(x.k) ? '' : ' (not in subjects)'}</option>`; }).join('')}</select>
           <button type="button" class="btn" data-act="tRowAdd">${ic('plus',14)}Add</button></div>
         <small class="muted">Adding a lesson takes it over from whoever teaches it now.</small></div>
       <div class="form-grid">
@@ -1814,7 +1872,7 @@ function classDrawer() {
 function sectionDrawer(b) {
   const [, f, to] = GRADE_BANDS.find(x => x[0] === b), pool = ST.teachers.filter(t => teacherLoad(t.name).rows.some(r => { const g = gradeOfCls(r.cls); return g >= f && g <= to; })), rest = ST.teachers.filter(t => !pool.includes(t));
   const sel = (id, cur) => `<select class="input" id="${id}"><option value="">Not set</option><optgroup label="Teaches in ${b}">${pool.map(t => `<option ${t.name === cur ? 'selected' : ''}>${esc(t.name)}</option>`).join('')}</optgroup><optgroup label="Other teachers">${rest.map(t => `<option ${t.name === cur ? 'selected' : ''}>${esc(t.name)}</option>`).join('')}</optgroup></select>`;
-  formDrawer(`${head(`Section · ${b}`, `Grades ${f}–${to} · ${pool.length} teachers`)}
+  formDrawer(`${head(`Section · ${b}`, `${esc(ylRange(f, to))} · ${pool.length} teachers`)}
     <div class="drawer-b"><input type="hidden" id="secB" value="${b}">
       <div class="form-grid"><div class="field"><label for="secHead">Head of section</label>${sel('secHead', ST.heads[b])}</div><div class="field"><label for="secDep">Deputy head</label>${sel('secDep', ST.deputies[b])}</div></div>
       <p class="muted small" style="margin:0">The head approves reports and leave for the section and sees every class in it. A teacher can lead one section only.</p>
@@ -1836,21 +1894,21 @@ function subjDrawer() {
   const d = S.subDraft, b = gBell(d.g), per = bellLessons(b), lib = Object.keys(SUBJ_LIB).filter(k => !d.rows.some(r => r.k === k));
   const band = GRADE_BANDS.find(([, f, t]) => d.g >= f && d.g <= t), peers = Array.from({length: band[2] - band[1] + 1}, (_, i) => band[1] + i).filter(x => x !== d.g);
   const teachers = [...new Set(Object.values(SUBJ_LIB).map(v => v[2]))];
-  formDrawer(`${head(`Subjects · Grade ${d.g}`, `${esc(b.name)} · ${per} lessons a day · ${per * 5} periods a week`)}
+  formDrawer(`${head(`Subjects · ${esc(yl(d.g))}`, `${esc(b.name)} · ${per} lessons a day · ${per * 5} periods a week`)}
     <div class="drawer-b" id="subjForm">
       ${sjMeter()}
       <div class="sj-list"><div class="sj-h"><span></span><span>Subject</span><span>Lessons a week</span><span>Teachers by class</span><span>Room</span><span></span></div>
       ${d.rows.map((r, i) => { const [c, icn] = SUBJ_LIB[r.k] || ['#64748B','book']; return `<div class="sj-row" style="--c:${c}"><span class="ls-ic">${ic(icn,13)}</span><b>${esc(r.k)}</b>
         <div class="stepper"><button type="button" data-act="sjN" data-i="${i}" data-d="-1" aria-label="Fewer ${esc(r.k)} lessons">−</button><input class="input num" type="number" min="0" max="20" data-sr="${i}|n" value="${r.n}" aria-label="${esc(r.k)} lessons a week"><button type="button" data-act="sjN" data-i="${i}" data-d="1" aria-label="More ${esc(r.k)} lessons">+</button></div>
-        <span class="sj-tch">${r.k === 'Free study' ? 'Library staff' : (stBuild(), ttSecs(d.g).map(x => { const n = ST.ta[`Grade ${d.g} – ${x}|${r.k}`]; return `<span title="${esc(x)}">${n ? esc(n) : '<em>Unassigned</em>'}</span>`; }).join(''))}</span><input class="input" data-sr="${i}|r" value="${esc(r.r)}" aria-label="${esc(r.k)} room">
+        <span class="sj-tch">${r.k === 'Free study' ? 'Library staff' : (stBuild(), ttSecs(d.g).map(x => { const n = ST.ta[`${clsName(d.g, x)}|${r.k}`]; return `<span title="${esc(x)}">${n ? esc(n) : '<em>Unassigned</em>'}</span>`; }).join(''))}</span><input class="input" data-sr="${i}|r" value="${esc(r.r)}" aria-label="${esc(r.k)} room">
         <button type="button" class="iconbtn" data-act="sjRm" data-i="${i}" aria-label="Remove ${esc(r.k)}">${ic('x',14)}</button></div>`; }).join('') || '<div class="muted" style="padding:14px">No subjects yet. Add one below.</div>'}
       <datalist id="sjTeachers">${teachers.map(t => `<option>${esc(t)}</option>`).join('')}</datalist></div>
       <div class="sj-add"><input class="input" id="sjNew" list="sjLib" placeholder="Add a subject, e.g. Geography or a new one"><datalist id="sjLib">${lib.map(k => `<option>${esc(k)}</option>`).join('')}</datalist><button type="button" class="btn" data-act="sjAdd">${ic('plus',14)}Add subject</button></div>
       <div class="form-grid">
-        <div class="field"><label for="sjCopy">Start from another grade</label><div style="display:flex;gap:8px"><select class="input" id="sjCopy">${Array.from({length:13}, (_, i) => i + 1).filter(x => x !== d.g).map(x => `<option value="${x}">Grade ${x} · ${gSubj(x).length} subjects</option>`).join('')}</select><button type="button" class="btn" data-act="sjCopy">Copy</button></div></div>
-        <div class="field"><label>Also use for</label><div class="chips">${peers.map(x => `<button type="button" class="chip ${d.also.has(x) ? 'on' : ''}" data-act="sjAlso" data-g="${x}" aria-pressed="${d.also.has(x)}">Grade ${x}</button>`).join('')}</div></div>
+        <div class="field"><label for="sjCopy">Start from another grade</label><div style="display:flex;gap:8px"><select class="input" id="sjCopy">${Array.from({length:LV.length}, (_, i) => i + 1).filter(x => x !== d.g).map(x => `<option value="${x}">${esc(yl(x))} · ${gSubj(x).length} subjects</option>`).join('')}</select><button type="button" class="btn" data-act="sjCopy">Copy</button></div></div>
+        <div class="field"><label>Also use for</label><div class="chips">${peers.map(x => `<button type="button" class="chip ${d.also.has(x) ? 'on' : ''}" data-act="sjAlso" data-g="${x}" aria-pressed="${d.also.has(x)}">${esc(yl(x))}</button>`).join('')}</div></div>
       </div>
-      <p class="muted small" style="margin:0">Teachers are set per class in <a href="#staffing" data-act="go" data-to="staffing">Teachers & classes</a>. Saving rebuilds the timetables of ${ttSecs(d.g).length} classes in Grade ${d.g}${d.also.size ? ` and ${d.also.size} other grade${d.also.size > 1 ? 's' : ''}` : ''}. Lessons you moved by hand and cover teachers are reset.</p>
+      <p class="muted small" style="margin:0">Teachers are set per class in <a href="#staffing" data-act="go" data-to="staffing">Teachers & classes</a>. Saving rebuilds the timetables of ${ttSecs(d.g).length} classes in ${esc(yl(d.g))}${d.also.size ? ` and ${d.also.size} other grade${d.also.size > 1 ? 's' : ''}` : ''}. Lessons you moved by hand and cover teachers are reset.</p>
       <div class="err-msg" id="sjErr"></div>
     </div>
     <div class="drawer-f"><button class="btn" data-act="closeAll">Cancel</button><button class="btn primary" data-act="sjSave">Save subjects</button></div>`, 'wide');
@@ -1871,7 +1929,7 @@ function bellLive() {
 const bellStrip = d => { const total = d.rows.reduce((a, r) => a + (+r.dur || 0), 0) || 1, p = bellPeriods(d);
   return d.rows.map((r, i) => `<i class="${r.t === 'L' ? 'l' : 'b'}" style="flex:${(+r.dur || 0) / total}" title="${r.t === 'L' ? p[i][0] : esc(r.label)} · ${p[i][1]}–${p[i][2]}">${r.t === 'L' ? p[i][0].slice(1) : ''}</i>`).join(''); };
 function bellWarn(d) {
-  const slots = bellLessons(d) * 5, msgs = [...d.grades].map(g => { const n = gSubj(g).reduce((a, x) => a + x.n, 0); return n > slots ? `Grade ${g} plans ${n} lessons, ${n - slots} more than ${slots} periods` : n < slots ? `Grade ${g} plans ${n} lessons, so ${slots - n} periods become free study` : ''; }).filter(Boolean);
+  const slots = bellLessons(d) * 5, msgs = [...d.grades].map(g => { const n = gSubj(g).reduce((a, x) => a + x.n, 0); return n > slots ? `${esc(yl(g))} plans ${n} lessons, ${n - slots} more than ${slots} periods` : n < slots ? `${esc(yl(g))} plans ${n} lessons, so ${slots - n} periods become free study` : ''; }).filter(Boolean);
   return msgs.length ? `<div class="tt2-hint warn">${ic('alert',16)}<span>${msgs.join('. ')}. Change their subjects after saving.</span></div>` : '';
 }
 function bellDrawer() {
@@ -1890,7 +1948,7 @@ function bellDrawer() {
         ${r.t === 'B' ? `<input class="input bl-duty" data-br="${i}|duty" value="${esc(r.duty || '')}" placeholder="Duty, e.g. Yard duty: Mr. Herath" aria-label="Duty">` : '<span class="bl-duty"></span>'}
         <div class="bl-acts"><button type="button" class="iconbtn" data-act="blMove" data-i="${i}" data-d="-1" aria-label="Move up" ${i === 0 ? 'disabled' : ''}>↑</button><button type="button" class="iconbtn" data-act="blMove" data-i="${i}" data-d="1" aria-label="Move down" ${i === d.rows.length - 1 ? 'disabled' : ''}>↓</button><button type="button" class="iconbtn" data-act="blRm" data-i="${i}" aria-label="Remove">${ic('x',14)}</button></div></div>`).join('')}</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn sm" data-act="blAdd" data-t="L">${ic('plus',14)}Add lesson</button><button type="button" class="btn sm" data-act="blAdd" data-t="B">${ic('plus',14)}Add interval</button></div>
-      <div class="field"><label>Grades on this schedule</label><div class="chips">${Array.from({length:13}, (_, i) => i + 1).map(g => { const on = d.grades.has(g), other = !on && gBell(g).id !== d.id ? gBell(g).name : ''; return `<button type="button" class="chip ${on ? 'on' : ''}" data-act="blGrade" data-g="${g}" aria-pressed="${on}" ${other ? `title="Now on ${esc(other)}"` : ''}>Grade ${g}</button>`; }).join('')}</div><small class="muted">Turning a grade on moves it from its current schedule.</small></div>
+      <div class="field"><label>Grades on this schedule</label><div class="chips">${Array.from({length:LV.length}, (_, i) => i + 1).map(g => { const on = d.grades.has(g), other = !on && gBell(g).id !== d.id ? gBell(g).name : ''; return `<button type="button" class="chip ${on ? 'on' : ''}" data-act="blGrade" data-g="${g}" aria-pressed="${on}" ${other ? `title="Now on ${esc(other)}"` : ''}>${esc(yl(g))}</button>`; }).join('')}</div><small class="muted">Turning a grade on moves it from its current schedule.</small></div>
       <div id="blWarn">${bellWarn(d)}</div>
       <div class="err-msg" id="blErr"></div>
     </div>
@@ -1922,6 +1980,7 @@ function route() {
   else if (base === 'user') { const u = staff.find(x => x.id === rest.join('-')); view.innerHTML = u ? ukProfilePage(schoolCtx(), u) : V.users(); }
   else if (base === 'role') view.innerHTML = ukRolePage(schoolCtx(), rest[0] === 'new' ? null : rest.join('-'));
   else view.innerHTML = (V[base] || V.dashboard)();
+  view.innerHTML = acadText(view.innerHTML);
   renderNav(); afterRender(); closeAll(); document.getElementById('app').classList.remove('mobile-open');
 }
 /* ---------- Filter dropdowns: enhance native selects ---------- */
@@ -2022,7 +2081,7 @@ function moveApp(id, stage) {
 
 /* ---------- Overlays ---------- */
 const scrim = document.getElementById('scrim'), drawer = document.getElementById('drawer'), modal = document.getElementById('drawer');
-function openDrawer(html, cls = '') { drawer.className = 'drawer ' + cls; drawer.innerHTML = html; drawer.classList.add('on'); scrim.classList.add('on'); drawer.setAttribute('aria-hidden','false'); }
+function openDrawer(html, cls = '') { html = acadText(html); drawer.className = 'drawer ' + cls; drawer.innerHTML = html; drawer.classList.add('on'); scrim.classList.add('on'); drawer.setAttribute('aria-hidden','false'); }
 const FORM_META = [['Teacher','crm','Teachers & classes'],['Class ·','student','Teachers & classes'],['Section','grid','Teachers & classes'],['Subjects','book','Timetable'],['Bell schedule','cal','Timetable'],['New bell schedule','cal','Timetable'],['New application','admit','Admissions'],['Record payment','fee','Fees & invoicing'],['New journal entry','fin','Accounting'],['Add lead','crm','CRM & leads'],['New broadcast','send','Communications'],['Generate invoices','file','Fees & invoicing'],['Invite staff','crm','Users & roles'],['INV-','fee','Invoice'],['Interested in Grade','crm','Lead']];
 /* Form drawers: look up an icon and section label from the form's title */
 function formDrawer(html, cls = '') {
@@ -2041,7 +2100,7 @@ function formDrawer(html, cls = '') {
 function openModal(html, cls = '') { formDrawer(html, cls); }
 function closeAll() { [drawer, modal, scrim, document.getElementById('cmdk'), document.getElementById('notif')].forEach(e => e.classList.remove('on')); drawer.setAttribute('aria-hidden','true'); }
 const head = (title, sub='') => `<div class="drawer-h"><div style="flex:1;min-width:0"><h2>${title}</h2>${sub?`<div class="muted" style="font-size:12.5px">${sub}</div>`:''}</div><button class="iconbtn" data-act="closeAll" aria-label="Close">${ic('x',16)}</button></div>`;
-function toast(msg) { const t = document.createElement('div'); t.className = 'toast'; t.innerHTML = `${ic('check',16)}${esc(msg)}`; const box = document.getElementById('toasts'); box.appendChild(t); while (box.children.length > 2) box.firstChild.remove(); setTimeout(() => t.remove(), 2800); }
+function toast(msg) { msg = acadText(msg); const t = document.createElement('div'); t.className = 'toast'; t.innerHTML = `${ic('check',16)}${esc(msg)}`; const box = document.getElementById('toasts'); box.appendChild(t); while (box.children.length > 2) box.firstChild.remove(); setTimeout(() => t.remove(), 2800); }
 
 function wizard() {
   const st = S.wizardStep, w = S.wizard;
@@ -2049,7 +2108,7 @@ function wizard() {
   const f = (id, l, type='text', full=false, extra='') => `<div class="field ${full?'full':''}"><label for="${id}">${l}</label><input class="input" id="${id}" type="${type}" value="${esc(w[id]||'')}" ${extra}></div>`;
   const body = st === 0 ? `<div class="form-grid">${f('w_first','First name')}${f('w_last','Last name')}${f('w_dob','Date of birth','date')}<div class="field"><label for="w_gender">Gender</label><select class="input" id="w_gender"><option>Female</option><option>Male</option><option>Prefer not to say</option></select></div>${f('w_prev','Previous school','text',true)}</div>`
     : st === 1 ? `<div class="form-grid">${f('w_pname','Full name','text',true)}${f('w_email','Email','email')}${f('w_phone','Mobile','tel')}<div class="field full"><label for="w_rel">Relationship</label><select class="input" id="w_rel"><option>Mother</option><option>Father</option><option>Guardian</option></select></div></div>`
-    : `<div class="form-grid"><div class="field"><label for="w_grade">Entry grade</label><select class="input" id="w_grade">${Array.from({length:13},(_, i)=>`<option value="${i+1}">Grade ${i+1}</option>`).join('')}</select></div><div class="field"><label for="w_intake">Intake</label><select class="input" id="w_intake"><option>January 2027</option><option>September 2027</option></select></div><div class="field full"><label for="w_src">How did you hear about us?</label><select class="input" id="w_src">${SOURCES.map(s=>`<option>${s}</option>`).join('')}</select></div><label class="checkrow full"><input type="checkbox" checked> Send application link to parent via email and iParent</label></div>`;
+    : `<div class="form-grid"><div class="field"><label for="w_grade">Entry ${GL.one.toLowerCase()}</label><select class="input" id="w_grade">${LV.map((x, i)=>`<option value="${i+1}">${esc(x.label)}</option>`).join('')}</select></div><div class="field"><label for="w_intake">Intake</label><select class="input" id="w_intake"><option>January 2027</option><option>September 2027</option></select></div><div class="field full"><label for="w_src">How did you hear about us?</label><select class="input" id="w_src">${SOURCES.map(s=>`<option>${s}</option>`).join('')}</select></div><label class="checkrow full"><input type="checkbox" checked> Send application link to parent via email and iParent</label></div>`;
   openModal(`${head('New application', 'Creates an applicant in the Enquiry stage')}<div class="steps">${steps.map((s, i) => `<div class="${i<=st?'on':''}">${i+1}. ${s}</div>`).join('')}</div>
   <form class="drawer-b" data-form="wizard" novalidate>${body}<div class="err-msg" id="wErr"></div></form>
   <div class="drawer-f">${st?'<button class="btn" data-act="wBack">Back</button>':''}<button class="btn primary" data-act="wNext">${st<2?'Continue':'Create application'}</button></div>`);
@@ -2170,15 +2229,15 @@ const ACT = {
     if (S.subDraft.rows.some(r => r.k === k)) { err.textContent = `${k} is already on the list.`; inp.focus(); return; }
     if (!SUBJ_LIB[k]) SUBJ_LIB[k] = [['#0EA5E9','#E11D48','#7C3AED','#059669','#D97706'][Object.keys(SUBJ_LIB).length % 5], 'book', '', ''];
     S.subDraft.rows.push({k, n: 2, t: SUBJ_LIB[k][2], r: SUBJ_LIB[k][3]}); keepScroll(subjDrawer); const b = drawer.querySelector('.drawer-b'); b.scrollTop = b.scrollHeight; },
-  sjCopy: () => { subjSync(); const g = +document.getElementById('sjCopy').value; S.subDraft.rows = gSubj(g).map(r => ({...r})); keepScroll(subjDrawer); toast(`Copied Grade ${g}’s subjects. Adjust them, then save.`); },
+  sjCopy: () => { subjSync(); const g = +document.getElementById('sjCopy').value; S.subDraft.rows = gSubj(g).map(r => ({...r})); keepScroll(subjDrawer); toast(`Copied ${esc(yl(g))}’s subjects. Adjust them, then save.`); },
   sjAlso: el => { subjSync(); const g = +el.dataset.g, a = S.subDraft.also; a.has(g) ? a.delete(g) : a.add(g); keepScroll(subjDrawer); },
   sjSave: () => { subjSync(); const d = S.subDraft, err = document.getElementById('sjErr'), slots = bellLessons(gBell(d.g)) * 5;
     const rows = d.rows.filter(r => r.n > 0), used = rows.reduce((a, r) => a + r.n, 0);
     if (!rows.length) { err.textContent = 'Add at least one subject with lessons.'; return; }
     if (used > slots) { err.textContent = `${used} lessons don’t fit in ${slots} periods. Remove ${used - slots} or add periods in Bell times.`; return; }
-    const bad = [...d.also].find(g => bellLessons(gBell(g)) * 5 < used); if (bad) { err.textContent = `Grade ${bad} has only ${bellLessons(gBell(bad)) * 5} periods a week, fewer than ${used}.`; return; }
+    const bad = [...d.also].find(g => bellLessons(gBell(g)) * 5 < used); if (bad) { err.textContent = `${esc(yl(bad))} has only ${bellLessons(gBell(bad)) * 5} periods a week, fewer than ${used}.`; return; }
     [d.g, ...d.also].forEach(g => { TTC.subj[g] = rows.map(r => ({...r, t: r.t.trim(), r: r.r.trim()})); ttReset(g); });
-    closeAll(); route(); toast(`Saved subjects for Grade ${[d.g, ...d.also].sort((x, y) => x - y).join(', ')}. Timetables rebuilt.`); },
+    closeAll(); route(); toast(`Saved subjects for ${esc(ylList([d.g, ...d.also]))}. Timetables rebuilt.`); },
   ttBell: () => { S.bellDraft = bellDraftOf(gBell(ttGradeOf())); bellDrawer(); },
   blPick: el => { S.bellDraft = bellDraftOf(BELLS.find(x => x.id === el.dataset.id)); keepScroll(bellDrawer); },
   blNew: () => { bellSync(); const d = S.bellDraft; S.bellDraft = {...d, id: 'b' + Date.now().toString(36), name: `${d.name} (copy)`, rows: d.rows.map(r => ({...r})), grades: new Set(), isNew: true}; keepScroll(bellDrawer); const n = document.getElementById('bl_name'); n.focus(); n.select(); },
@@ -2196,14 +2255,14 @@ const ACT = {
     if (d.rows.some(r => r.t === 'B' && !String(r.label).trim())) { err.textContent = 'Give every interval a name, for example Lunch.'; return; }
     if (toMin(p[p.length - 1][2]) > 18 * 60) { err.textContent = `The day ends at ${p[p.length - 1][2]}. Shorten it to finish by 18:00.`; return; }
     const orphan = bellGrades(d.id).filter(g => !d.grades.has(g) && bellDefault(g) === d.id);
-    if (orphan.length) { err.textContent = `Grade ${orphan.join(', ')} ${orphan.length > 1 ? 'need' : 'needs'} a schedule. Turn ${orphan.length > 1 ? 'them' : 'it'} on in another schedule instead.`; return; }
+    if (orphan.length) { err.textContent = `${esc(ylList(orphan))} ${orphan.length > 1 ? 'need' : 'needs'} a schedule. Turn ${orphan.length > 1 ? 'them' : 'it'} on in another schedule instead.`; return; }
     const clean = {id: d.id, name: d.name.trim(), start: d.start, rows: d.rows.map(r => r.t === 'L' ? L(+r.dur) : B(String(r.label).trim(), +r.dur, String(r.duty || '').trim()))};
     const i = BELLS.findIndex(x => x.id === d.id); if (i < 0) BELLS.push(clean); else BELLS[i] = clean;
     const affected = new Set([...bellGrades(d.id), ...d.grades]);
     bellGrades(d.id).filter(g => !d.grades.has(g)).forEach(g => delete TTC.bell[g]);
     d.grades.forEach(g => TTC.bell[g] = d.id);
     affected.forEach(ttReset);
-    closeAll(); route(); toast(`${d.isNew ? 'Added' : 'Saved'} ${clean.name}${affected.size ? ` · Grade ${[...affected].sort((x, y) => x - y).join(', ')} updated` : ''}`); },
+    closeAll(); route(); toast(`${d.isNew ? 'Added' : 'Saved'} ${clean.name}${affected.size ? ` · ${esc(ylList([...affected]))} updated` : ''}`); },
   ttLesson: el => { if (S.ttEdit) return; ttLessonDrawer(+el.dataset.d, +el.dataset.p); },
   ttEdit: () => { S.ttEdit = !S.ttEdit; route(); if (!S.ttEdit) toast('Timetable saved. Teachers and parents have been told about the changes.'); },
   ttEditFrom: () => { closeAll(); S.ttEdit = true; route(); },
@@ -2215,12 +2274,12 @@ const ACT = {
   advance: el => { const a = apps.find(x => x.id === el.dataset.id); const i = STAGES.findIndex(s => s.k === a.stage); if (i < 5) { moveApp(a.id, STAGES[i+1].k); appDrawer(a.id); } },
   openStudent: (el, e) => { if (e && e.target.matches('input')) return; S.tab.stu = 'overview'; location.hash = 'student-' + el.dataset.id; },
   selAll: el => document.querySelectorAll('.rowsel').forEach(c => c.checked = el.checked),
-  openLead: el => { const l = leads[+el.dataset.id]; formDrawer(`${head(l.name, `Interested in Grade ${l.grade} · ${l.source}`)}<div class="drawer-b"><dl class="kv"><dt>Source</dt><dd>${l.source}</dd><dt>Owner</dt><dd>${l.owner}</dd><dt>Lead score</dt><dd>${l.score} / 100</dd><dt>Status</dt><dd>${statusPill(l.status)}</dd></dl>
-    <div class="field"><label for="leadNote">Log a call or note</label><textarea class="input" id="leadNote" rows="3" placeholder="Spoke with parent about Grade ${l.grade} curriculum…"></textarea></div>
+  openLead: el => { const l = leads[+el.dataset.id]; formDrawer(`${head(l.name, `Interested in ${yl(l.grade)} · ${l.source}`)}<div class="drawer-b"><dl class="kv"><dt>Source</dt><dd>${l.source}</dd><dt>Owner</dt><dd>${l.owner}</dd><dt>Lead score</dt><dd>${l.score} / 100</dd><dt>Status</dt><dd>${statusPill(l.status)}</dd></dl>
+    <div class="field"><label for="leadNote">Log a call or note</label><textarea class="input" id="leadNote" rows="3" placeholder="Spoke with parent about ${yl(l.grade)} curriculum…"></textarea></div>
     <div><h3 style="margin-bottom:10px">Timeline</h3><div class="timeline"><div><b>Opened email</b> “Open Day – 18 October”<small>${l.last}d ago</small></div><div><b>Lead created</b> from ${l.source}<small>${l.last + 9}d ago</small></div></div></div></div>
     <div class="drawer-f"><button class="btn" data-act="toast" data-msg="Tour booked for Tue 10:00">${ic('cal',16)}Book tour</button><button class="btn primary" data-act="convertLead" data-id="${l.id}">Convert to application</button></div>`); },
   convertLead: el => { const l = leads[+el.dataset.id]; apps.push({id:'APP-' + (3400 + apps.length), name: l.name, grade: l.grade, stage:'application', source: l.source, prio:'high', days:0, parent: l.name, docs:0}); l.status = 'Tour booked'; closeAll(); toast(`${l.name} added to Applications`); },
-  newLead: () => { openModal(`${head('Add lead')}<form class="drawer-b" data-form="lead"><div class="form-grid"><div class="field"><label for="l_name">Parent name</label><input class="input" id="l_name" required></div><div class="field"><label for="l_grade">Interest grade</label><select class="input" id="l_grade">${Array.from({length:13},(_, i)=>`<option value="${i+1}">Grade ${i+1}</option>`).join('')}</select></div><div class="field full"><label for="l_src">Source</label><select class="input" id="l_src">${SOURCES.map(s=>`<option>${s}</option>`).join('')}</select></div></div><div class="err-msg" id="lErr"></div></form><div class="drawer-f"><button class="btn" data-act="closeAll">Cancel</button><button class="btn primary" data-act="saveLead">Add lead</button></div>`); },
+  newLead: () => { openModal(`${head('Add lead')}<form class="drawer-b" data-form="lead"><div class="form-grid"><div class="field"><label for="l_name">Parent name</label><input class="input" id="l_name" required></div><div class="field"><label for="l_grade">Interest grade</label><select class="input" id="l_grade">${LV.map((x, i)=>`<option value="${i+1}">${esc(x.label)}</option>`).join('')}</select></div><div class="field full"><label for="l_src">Source</label><select class="input" id="l_src">${SOURCES.map(s=>`<option>${s}</option>`).join('')}</select></div></div><div class="err-msg" id="lErr"></div></form><div class="drawer-f"><button class="btn" data-act="closeAll">Cancel</button><button class="btn primary" data-act="saveLead">Add lead</button></div>`); },
   saveLead: () => { const n = document.getElementById('l_name').value.trim(); if (!n) { document.getElementById('lErr').textContent = 'Enter the parent’s name to create the lead.'; document.getElementById('l_name').classList.add('err'); return; }
     leads.unshift({id: leads.length, name: n, source: document.getElementById('l_src').value, grade: +document.getElementById('l_grade').value, score: 50, owner:'Prishan M.', last: 0, status:'New'}); leads.forEach((l, i) => l.id = i); closeAll(); S.tab.crm = 'leads'; route(); toast('Lead added'); },
   thread: el => { S.selectedThread = +el.dataset.id; threads.find(t => t.id === S.selectedThread).unread = false; route(); },
@@ -2306,7 +2365,7 @@ window.addEventListener('hashchange', () => { if (UK.user) delete UK.user._draft
   document.getElementById('supportBar').innerHTML = `<div class="support" role="status">${ic('eye',16)}<span>Support view: you’re in <b>${esc(imp.name)}</b> as ${esc(imp.by)} from Quad. Everything you do here is logged in the school’s audit log.</span><button data-act="exitSupport">Exit to platform</button></div>`;
  })();
 applySchool();
-window.addEventListener('storage', e => { if (e.key === 'quad-school') { applySchool(); route(); } });
+window.addEventListener('storage', e => { if (e.key === 'quad-school') { if (JSON.stringify(loadAcad()) !== JSON.stringify(ACAD)) { location.reload(); return; } applySchool(); route(); } });
 themeIcon(); route();
 (() => { let imp = null; try { imp = sessionStorage.getItem('quad-impersonate'); } catch (e) {} if (!imp && !authSignedIn('school')) authOpen(schoolAuth()); })();
 </script>
