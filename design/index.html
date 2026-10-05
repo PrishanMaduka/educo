@@ -1,72 +1,65 @@
 <title>Quad Design Prototypes</title>
 <link rel="icon" href="brand/quad-app-icon.svg" type="image/svg+xml">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT@9..144,500..700,50..100&family=Nunito:wght@400;600;700;800&family=Noto+Sans+Sinhala:wght@500;700&family=Noto+Sans+Tamil:wght@500;700&display=swap">
 <style>
-/* Layout: one centred column, two large preview cards that open each prototype, module map below. */
-:root{--bg:#F2F5FA;--surface:#FFFFFF;--line:#E3E8F0;--ink:#16213A;--ink-2:#4A5672;--ink-3:#7C879F;--brand:#2F6FED;--rail:#14203A;--teal:#12A594;
-  --f-display:"Bricolage Grotesque","Plus Jakarta Sans",system-ui,sans-serif;--f-body:"Plus Jakarta Sans",system-ui,sans-serif;color-scheme:light}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#0E1525;--surface:#151E31;--line:#26324B;--ink:#E7ECF6;--ink-2:#AEB8CE;--ink-3:#7D89A3;--brand:#5B8CFF;--rail:#0A1020;--teal:#2EC4B0;color-scheme:dark}}
-:root[data-theme="dark"]{--bg:#0E1525;--surface:#151E31;--line:#26324B;--ink:#E7ECF6;--ink-2:#AEB8CE;--ink-3:#7D89A3;--brand:#5B8CFF;--rail:#0A1020;--teal:#2EC4B0;color-scheme:dark}
+/* Layout: one centred column. Warm paper launcher: greeting, what makes Quad different, three app cards, more. */
+:root{--bg:#F6EFE3;--surface:#FFFCF6;--surface-2:#FAF4E9;--line:#EADFCB;--ink:#2A2017;--ink-2:#5E4D3B;--ink-3:#85715A;--brand:#A0412D;--tea:#2E7D57;--gold:#D89A2B;--rail:#1F3A2E;--vine-o:.75;
+  --f-display:"Fraunces",Georgia,serif;--f-body:"Nunito","Noto Sans Sinhala","Noto Sans Tamil",system-ui,sans-serif;color-scheme:light}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#17120D;--surface:#211A13;--surface-2:#2A2119;--line:#3A2E22;--ink:#F4EBDD;--ink-2:#D3C3AC;--ink-3:#A39079;--brand:#E07A55;--tea:#5FB386;--gold:#E5B04A;--rail:#121C16;--vine-o:.45;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#17120D;--surface:#211A13;--surface-2:#2A2119;--line:#3A2E22;--ink:#F4EBDD;--ink-2:#D3C3AC;--ink-3:#A39079;--brand:#E07A55;--tea:#5FB386;--gold:#E5B04A;--rail:#121C16;--vine-o:.45;color-scheme:dark}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 var(--f-body);padding-inline:16px}
-.wrap{max-width:1040px;margin:0 auto;padding-block:48px 64px;display:flex;flex-direction:column;gap:32px}
-.logo{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#2F6FED,#12A594);color:#fff;display:grid;place-items:center;font:700 22px var(--f-display)}
-h1{font:700 clamp(30px,5vw,44px)/1.1 var(--f-display);letter-spacing:-.02em;margin:14px 0 8px;text-wrap:balance}
-.lede{color:var(--ink-2);max-width:62ch;margin:0}
-.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px}
-.card{background:var(--surface);border:1px solid var(--line);border-radius:18px;overflow:hidden;text-decoration:none;color:inherit;display:flex;flex-direction:column;transition:transform .15s,box-shadow .15s}
-.card:hover{transform:translateY(-3px);box-shadow:0 14px 40px rgba(20,32,58,.14)}
+body{margin:0;background:var(--bg);color:var(--ink);font:15.5px/1.6 var(--f-body);padding-inline:16px}
+.wrap{max-width:1040px;margin:0 auto;padding-block:48px 64px;display:flex;flex-direction:column;gap:30px}
+.vine{height:14px;opacity:var(--vine-o);background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='14' viewBox='0 0 56 14'%3E%3Cg fill='none' stroke='%23C9973B' stroke-width='1.3' stroke-linecap='round'%3E%3Cpath d='M0 7c7 0 7-5 14-5s7 5 14 5 7 5 14 5 7-5 14-5'/%3E%3Cpath d='M14 2c-2 2-1 4 1 4M42 12c2-2 1-4-1-4'/%3E%3C/g%3E%3Cg fill='%23C9973B'%3E%3Ccircle cx='28' cy='7' r='1.6'/%3E%3Cpath d='M7 9.5c1.3 1 1.3 3.2 0 4.2-1.3-1-1.3-3.2 0-4.2zM35 .3c1.3 1 1.3 3.2 0 4.2-1.3-1-1.3-3.2 0-4.2z'/%3E%3C/g%3E%3C/svg%3E") repeat-x left center/56px 14px}
+.logo{width:48px;height:48px;border-radius:14px;background:var(--rail);display:grid;place-items:center}
+.local{font-weight:800;color:var(--gold);font-size:14px}
+h1{font:600 clamp(32px,5.4vw,52px)/1.08 var(--f-display);font-variation-settings:"SOFT" 100;margin:12px 0 10px;text-wrap:balance}
+h1 em{font-style:normal;position:relative;white-space:nowrap}
+h1 em svg{position:absolute;left:0;bottom:-.12em;width:100%;height:.3em}
+.lede{color:var(--ink-2);max-width:64ch;margin:0;font-size:17px}
+h2{font:600 26px var(--f-display);font-variation-settings:"SOFT" 100;margin:0 0 14px}
+.why{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.why div{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:18px 20px}
+.why b{display:block;font:600 19px var(--f-display);font-variation-settings:"SOFT" 100;margin:8px 0 4px}
+.why p{margin:0;color:var(--ink-2);font-size:14px}
+.why i{display:grid;place-items:center;width:40px;height:40px;border-radius:50%;font-style:normal;font-size:18px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:22px;overflow:hidden;text-decoration:none;color:inherit;display:flex;flex-direction:column;transition:transform .15s,box-shadow .15s}
+.card:hover{transform:translateY(-3px);box-shadow:0 18px 40px -16px rgba(60,35,15,.35)}
 .card:focus-visible{outline:2px solid var(--brand);outline-offset:3px}
-.pv{height:200px;position:relative;overflow:hidden}
-.pv.admin{background:var(--bg);display:grid;grid-template-columns:56px 1fr}
-.pv.admin .r{background:#14203A;display:flex;flex-direction:column;gap:8px;padding:14px 12px}
-.pv.admin .r i{height:8px;border-radius:4px;background:rgba(255,255,255,.18)}
-.pv.admin .r i:nth-child(2){background:#2F6FED}
-.pv.admin .m{padding:16px;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:44px 1fr;gap:10px}
-.pv.admin .m b{background:var(--surface);border:1px solid var(--line);border-radius:8px}
-.pv.admin .m b.ch{grid-column:1/3;background:linear-gradient(to top,#2F6FED 0 30%,transparent 30%) 12% 100%/8% 70% no-repeat,linear-gradient(to top,#2F6FED 0 60%,transparent 60%) 32% 100%/8% 80% no-repeat,linear-gradient(to top,#E8A33D 0 50%,transparent 50%) 52% 100%/8% 60% no-repeat,linear-gradient(to top,#2F6FED 0 80%,transparent 80%) 72% 100%/8% 90% no-repeat,var(--surface)}
-.pv.parent{background:linear-gradient(140deg,#2F6FED,#12A594);display:flex;justify-content:center;align-items:flex-end}
-.pv.parent .ph{width:150px;height:180px;border-radius:26px 26px 0 0;background:#0B0F1A;padding:8px 8px 0}
-.pv.parent .ph div{height:100%;border-radius:19px 19px 0 0;background:#F3F6FB;padding:26px 10px 0;display:flex;flex-direction:column;gap:7px}
-.pv.parent .ph i{display:block;height:40px;border-radius:10px;background:linear-gradient(135deg,#2F6FED,#1F55C7)}
-.pv.parent .ph s{display:block;height:20px;border-radius:7px;background:#fff;border:1px solid #E3E8F0}
-.cb{padding:18px 20px 20px;display:flex;flex-direction:column;gap:6px}
-.cb h2{font:700 21px var(--f-display);margin:0}
-.cb p{margin:0;color:var(--ink-2);font-size:14px}
-.cb span{color:var(--brand);font-weight:700;font-size:14px;margin-top:6px}
-h3{font:700 13px var(--f-body);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin:0 0 12px}
-.mods{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
-.mod{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
-.mod b{display:block;margin-bottom:4px}
-.mod p{margin:0;font-size:13px;color:var(--ink-3)}
-.brandrow{flex-direction:row;align-items:center;gap:20px;padding:18px 20px;flex-wrap:wrap}
-.brandrow img{width:170px;max-width:100%}
-.brandrow div{flex:1;min-width:200px}
-.brandrow b{font:700 18px var(--f-display);display:block}
-.brandrow p{margin:2px 0 0;color:var(--ink-2);font-size:14px}
-.brandrow span{color:var(--brand);font-weight:700;font-size:14px}
+.pv{height:150px;position:relative;overflow:hidden;display:grid;place-items:end center}
+.pv svg{width:100%;height:100%}
+.cb{padding:16px 20px 20px;display:flex;flex-direction:column;gap:6px;flex:1}
+.cb h3{font:600 21px var(--f-display);font-variation-settings:"SOFT" 100;margin:0}
+.cb p{margin:0;color:var(--ink-2);font-size:14px;flex:1}
+.cb span{color:var(--brand);font-weight:800;font-size:14px;margin-top:6px}
+.row{flex-direction:row;align-items:center;gap:18px;padding:16px 20px;flex-wrap:wrap}
+.row .badge{width:52px;height:52px;border-radius:16px;display:grid;place-items:center;flex:none;color:#fff;font-weight:800;font-size:12px}
+.row div{flex:1;min-width:200px}.row b{font:600 18px var(--f-display);display:block}.row p{margin:2px 0 0;color:var(--ink-2);font-size:14px}.row span{color:var(--brand);font-weight:800;font-size:14px}
 .note{font-size:13px;color:var(--ink-3);margin:0}
+@media (prefers-reduced-motion:reduce){.card{transition:none}}
 </style>
 <div class="wrap">
-  <header><div class="logo"><svg viewBox="0 0 64 64" width="72%" height="72%" aria-hidden="true"><g fill="none" stroke-width="9"><path d="M20.82 15.42A20 20 0 0 1 43.18 15.42" stroke="#FFFFFF"/><path d="M48.58 20.82A20 20 0 0 1 48.58 43.18" stroke="#C9D8FF"/><path d="M15.42 43.18A20 20 0 0 1 15.42 20.82" stroke="#E3EBFF"/><path d="M43.18 48.58A20 20 0 0 1 20.82 48.58" stroke="#FFFFFF"/><path d="M39.35 39.35L54.91 54.91" stroke="#FFFFFF" stroke-linecap="round"/></g><circle cx="32" cy="32" r="4.5" fill="#FFC56B"/></svg></div><h1>Quad design prototypes</h1>
-  <p class="lede">Interactive designs for the school platform. The admin web app covers the six core modules for staff. The parent app follows the iParent model: one login for every child, alerts, results, payments and messages. Both use the same colours and type, and both have light and dark themes.</p></header>
-  <div class="cards">
-    <a class="card" href="admin.html"><div class="pv admin" aria-hidden="true"><div class="r"><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="m"><b></b><b></b><b></b><b class="ch"></b><b></b></div></div>
-      <div class="cb"><h2>Admin web app</h2><p>Dashboard, admissions pipeline, CRM, student records, attendance, LMS, fees and accounting. Press Ctrl K to search.</p><span>Open admin app →</span></div></a>
-    <a class="card" href="parent.html"><div class="pv parent" aria-hidden="true"><div class="ph"><div><i></i><s></s><s></s><s></s></div></div></div>
-      <div class="cb"><h2>Parent mobile app</h2><p>Face ID unlock, child switcher, attendance calendar, results, timetable, homework, card payments, trips, messages and push alerts.</p><span>Open parent app →</span></div></a>
-  </div>
-  <a class="card brandrow" href="circle.html"><div class="logo" style="width:56px;height:56px;border-radius:50%;background:#E8A33D;display:grid;place-items:center;color:#3a2507;font-weight:800;font-size:13px">Circle</div><div><b>New concept: Quad Circle</b><p>Every child has a circle. A live school day linking a teacher's phone, the child's circle and a parent's phone, with moments, family pulse and the school's connection view.</p></div><span>Open concept →</span></a>
-  <a class="card brandrow" href="platform.html"><div class="logo" style="width:56px;height:56px;border-radius:14px;background:#0B1222"><svg viewBox="0 0 64 64" width="72%" height="72%" aria-hidden="true"><g fill="none" stroke-width="9"><path d="M20.82 15.42A20 20 0 0 1 43.18 15.42" stroke="#FFFFFF"/><path d="M48.58 20.82A20 20 0 0 1 48.58 43.18" stroke="#C9D8FF"/><path d="M15.42 43.18A20 20 0 0 1 15.42 20.82" stroke="#E3EBFF"/><path d="M43.18 48.58A20 20 0 0 1 20.82 48.58" stroke="#FFFFFF"/><path d="M39.35 39.35L54.91 54.91" stroke="#FFFFFF" stroke-linecap="round"/></g><circle cx="32" cy="32" r="4.5" fill="#FFC56B"/></svg></div><div><b>Platform console (super admin)</b><p>Create and manage schools as tenants: plans, modules, branding, security, and each school’s users and roles.</p></div><span>Open console →</span></a>
-  <a class="card brandrow" href="brand.html"><img src="brand/quad-logo.svg" alt="Quad logo"><div><b>Brand and logo</b><p>How the mark is built, colours, the app icon and logo files.</p></div><span>Open brand guide →</span></a>
-  <section><h3>Modules in the admin prototype</h3><div class="mods">
-    <div class="mod"><b>Pre-admission & enrolment</b><p>Drag-and-drop pipeline, applicant drawer with document checklist, three-step application form.</p></div>
-    <div class="mod"><b>CRM</b><p>Scored leads, source filters, campaigns, enquiry forms and a parent inbox that replies to the app.</p></div>
-    <div class="mod"><b>Student information</b><p>Directory in table or card view, full profile with attendance heatmap, results, fees and conduct, live register.</p></div>
-    <div class="mod"><b>Learning management</b><p>Course spaces, assignment tracking, weighted gradebook that recalculates as you type, weekly timetable.</p></div>
-    <div class="mod"><b>Fees & invoicing</b><p>Invoice list by status, invoice preview, record payment, bulk billing run, fee structures and receipts.</p></div>
-    <div class="mod"><b>Finance & accounting</b><p>Income vs expenditure, journal entries with a debit/credit balance check, chart of accounts, budgets.</p></div>
+  <header><div class="logo"><svg viewBox="0 0 64 64" width="72%" height="72%" aria-hidden="true"><g fill="none" stroke-width="9"><path d="M20.82 15.42A20 20 0 0 1 43.18 15.42" stroke="#FFFFFF"/><path d="M48.58 20.82A20 20 0 0 1 48.58 43.18" stroke="#CFE3D6"/><path d="M15.42 43.18A20 20 0 0 1 15.42 20.82" stroke="#F1E6CF"/><path d="M43.18 48.58A20 20 0 0 1 20.82 48.58" stroke="#FFFFFF"/><path d="M39.35 39.35L54.91 54.91" stroke="#FFFFFF" stroke-linecap="round"/></g><circle cx="32" cy="32" r="4.5" fill="#D89A2B"/></svg></div>
+  <div class="local" style="margin-top:18px" lang="si">ආයුබෝවන් · <span lang="ta">வணக்கம்</span> · Welcome</div>
+  <h1>A school system that feels like <em>your school<svg viewBox="0 0 120 10" preserveAspectRatio="none" aria-hidden="true"><path d="M2 7c20-4 40-5 60-3s38 2 56-2" fill="none" stroke="var(--gold)" stroke-width="3" stroke-linecap="round"/></svg></em></h1>
+  <p class="lede">Quad runs the whole school, from admissions to fees to report cards, and it is built for schools like ours. Every screen opens with what is happening and what needs doing, in plain words, before any tables or charts.</p></header>
+  <div class="vine" aria-hidden="true"></div>
+  <section><h2>What makes Quad different</h2><div class="why">
+    <div><i style="background:#F9E0DB;color:#B3352A">!</i><b>Early warning</b><p>Spots students who have started slipping in attendance, behaviour, learning or homework, says why, and suggests who should act. One click starts a support plan. The console does the same for schools.</p></div>
+    <div><i style="background:#F7E3D8;color:#A0412D">✦</i><b>Ask Quad</b><p>Ask in plain English: “Who needs attention in Year 9?”, “What do I owe?”, “Draft a letter about the trip”. Answers come from the school’s own records and show their sources.</p></div>
+    <div><i style="background:#E2F1E6;color:#2E7D57">❀</i><b>Warm and local</b><p>Sinhala and Tamil greetings, the Poya calendar, rupees, local payment options, and a look drawn from tea country and the liyawela vine instead of another blue dashboard.</p></div>
   </div></section>
+  <section><h2>The apps</h2><div class="cards">
+    <a class="card" href="admin.html"><div class="pv" style="background:linear-gradient(160deg,#F7E3D8,#FBEBCF)" aria-hidden="true"><svg viewBox="0 0 300 150"><rect x="20" y="22" width="56" height="128" rx="10" fill="#1F3A2E"/><rect x="30" y="40" width="36" height="7" rx="3.5" fill="#A0412D"/><rect x="30" y="56" width="30" height="5" rx="2.5" fill="#EDE4D0" opacity=".5"/><rect x="30" y="68" width="34" height="5" rx="2.5" fill="#EDE4D0" opacity=".5"/><rect x="88" y="22" width="192" height="58" rx="12" fill="#FFFCF6"/><rect x="100" y="34" width="110" height="10" rx="5" fill="#2A2017"/><path d="M100 54c12-3 24-4 36-2" stroke="#D89A2B" stroke-width="3" fill="none" stroke-linecap="round"/><circle cx="252" cy="50" r="14" fill="#D89A2B"/><rect x="88" y="90" width="120" height="60" rx="12" fill="#FFFCF6"/><rect x="100" y="102" width="14" height="14" rx="5" fill="#F9E0DB"/><rect x="120" y="104" width="70" height="6" rx="3" fill="#5E4D3B"/><rect x="100" y="124" width="14" height="14" rx="5" fill="#FBEBCF"/><rect x="120" y="126" width="60" height="6" rx="3" fill="#5E4D3B"/><rect x="216" y="90" width="64" height="60" rx="12" fill="#FFFCF6"/><rect x="226" y="102" width="44" height="8" rx="4" fill="#2E7D57"/></svg></div>
+      <div class="cb"><h3>Staff portal</h3><p>The school today on one page, early warning with support plans, admissions, pastoral care, timetable, cover, exams, fees and accounting.</p><span>Open the staff portal →</span></div></a>
+    <a class="card" href="parent.html"><div class="pv" style="background:linear-gradient(160deg,#A0412D,#2E7D57)" aria-hidden="true"><svg viewBox="0 0 300 150"><rect x="95" y="18" width="110" height="150" rx="22" fill="#2A2017"/><rect x="102" y="26" width="96" height="140" rx="16" fill="#F6EFE3"/><rect x="112" y="40" width="50" height="8" rx="4" fill="#2A2017"/><path d="M112 54c10-2 20-3 30-1" stroke="#D89A2B" stroke-width="2.5" fill="none" stroke-linecap="round"/><rect x="112" y="64" width="76" height="40" rx="10" fill="#FFFCF6"/><circle cx="124" cy="78" r="6" fill="#C2557A"/><rect x="134" y="74" width="44" height="5" rx="2.5" fill="#5E4D3B"/><rect x="134" y="84" width="34" height="5" rx="2.5" fill="#85715A"/><rect x="112" y="112" width="76" height="22" rx="8" fill="#FBEBCF"/></svg></div>
+      <div class="cb"><h3>Parent app</h3><p>One login for every child: their day as a story, gentle heads-ups from teachers, Ask Quad, payments, bus tracking, bookings and forms.</p><span>Open the parent app →</span></div></a>
+    <a class="card" href="platform.html"><div class="pv" style="background:linear-gradient(160deg,#2B1D14,#4A3020)" aria-hidden="true"><svg viewBox="0 0 300 150"><g fill="#3A2A1E"><rect x="24" y="30" width="80" height="100" rx="14"/><rect x="112" y="30" width="80" height="100" rx="14"/><rect x="200" y="30" width="80" height="100" rx="14"/></g><rect x="24" y="30" width="80" height="26" rx="14" fill="#A0412D"/><rect x="112" y="30" width="80" height="26" rx="14" fill="#2E7D57"/><rect x="200" y="30" width="80" height="26" rx="14" fill="#9A6418"/><g fill="#D89A2B"><circle cx="40" cy="74" r="5"/><circle cx="128" cy="74" r="5"/><circle cx="216" cy="74" r="5"/></g><g fill="#EDE4D0" opacity=".5"><rect x="36" y="88" width="56" height="5" rx="2.5"/><rect x="124" y="88" width="56" height="5" rx="2.5"/><rect x="212" y="88" width="56" height="5" rx="2.5"/></g></svg></div>
+      <div class="cb"><h3>Platform console</h3><p>For the Quad team: every school as a tenant, early warning for schools at risk, plans, curricula, branding, users and roles.</p><span>Open the console →</span></div></a>
+  </div></section>
+  <a class="card row" href="circle.html"><span class="badge" style="background:#D89A2B;color:#3a2507">Circle</span><div><b>Concept: Quad Circle</b><p>Every child has a circle. A live school day linking a teacher’s phone, the child’s circle and a parent’s phone.</p></div><span>Open concept →</span></a>
+  <a class="card row" href="brand.html"><img src="brand/quad-logo.svg" alt="Quad logo" style="width:150px;max-width:100%"><div><b>Brand and logo</b><p>How the mark is built, colours, the app icon and logo files.</p></div><span>Open brand guide →</span></a>
   <p class="note">All names, figures and records are sample data for a fictional school.</p>
 </div>

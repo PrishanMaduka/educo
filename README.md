@@ -8,7 +8,7 @@ Open `design/index.html` in a browser. Each prototype is a single self-contained
 
 | File | What it is |
 |---|---|
-| `design/index.html` | Launcher with links to both prototypes |
+| `design/index.html` | Launcher: what makes Quad different, and links to every prototype |
 | `design/circle.html` | Concept: Quad Circle. Every child has a circle of family and school around them; a live school day links a teacher's phone (capture moments, family pulse, quiet hours), the child's circle and a parent's phone (day ring, moments, the people around the child, learning at home), plus the school's connection view |
 | `design/platform.html` | Platform console for the super admin: schools (tenants), plans, each school's users, roles, modules, branding and security |
 | `design/admin.html` | School admin web app: dashboard, the six core modules, and Users & roles |
@@ -17,6 +17,17 @@ Open `design/index.html` in a browser. Each prototype is a single self-contained
 | `design/brand/` | Logo files (SVG): full logo, white logo, mark, app icon |
 
 Both prototypes have light and dark themes and work at phone width. All data in them is sample data for a fictional school.
+
+### Look and feel: warm and local
+
+All three apps share one design language so Quad doesn't look like every other blue SaaS dashboard:
+
+- **Paper and tea country.** Warm paper backgrounds with a light grain, a tea-green side bar, terracotta as the default school colour (each school can still set its own), turmeric gold accents, and a lamp-lit warm dark theme.
+- **Type.** Fraunces, a soft serif, for headings and Nunito, a rounded sans, for text, with Noto Sans Sinhala and Noto Sans Tamil.
+- **Liyawela vine.** The traditional Sri Lankan curling vine border appears under greetings, at the top of the side bar and on drawer headers. Key words in greetings get a hand-drawn gold underline.
+- **Story first.** Home screens open with a greeting (ආයුබෝවන් · வணக்கம்) and a few sentences about what is happening and what needs doing, before any charts. They also include local details such as Poya holidays, birthdays and good news, and a petal burst for good moments.
+- **Early warning** (all apps) finds students who are slipping (schools, in the console), explains why with trends, and suggests a next step and an owner. It leads to a support plan in one click.
+- **Ask Quad** (all apps). Press the floating button or `/` and ask in plain English. Answers are worked out from the app's own data, and each one has actions and a "From:" line naming its sources. It can also draft letters.
 
 ### Logo
 
@@ -69,7 +80,7 @@ The layout follows the Classe365 admin pattern: a navy module sidebar, a white t
 
 | Module | Screens and interactions |
 |---|---|
-| Dashboard | KPIs, fee collection chart, admissions funnel, attendance trend, today's schedule, overdue invoices, task list |
+| Home (the school today) | Greeting and a plain-language summary; **Needs you today** (uncovered lessons, students who need a conversation, open high-level safeguarding cases, exam clashes, overdue invoices, applicants who have been waiting); **Good news** (birthdays with Send wishes, merits, best year group, students who are improving); early warning cards; then "The numbers": KPIs, fee collection chart, admissions funnel, attendance trend, today's schedule, overdue invoices, task list |
 | Pre-admission & enrolment | Kanban pipeline (Enquiry → Application → Assessment → Interview → Offer → Enrolled) with drag and drop; search plus grade and source filters with live counts, a result count and Clear filters; wide applicant panel with clickable stage tracker, quick contact actions, next step, readiness rings, student and guardian details, notes, document checklist (verify, upload, ask parent), assessment scores against the entry benchmark with a recommendation, activity timeline and fees with offer letter; three-step application form |
 | CRM | Leads with scores and source filters, lead drawer with notes and "convert to application", campaigns, enquiry forms, unified parent inbox, broadcast composer |
 | Student information system | Student directory (table or cards, search, filters), student profile (overview, attendance heatmap, academics, fees, rewards and conduct), class attendance register |
@@ -78,6 +89,8 @@ The layout follows the Classe365 admin pattern: a navy module sidebar, a white t
 | My teaching | A teacher's day (switch teacher with the picker): current or next lesson with countdown, today's lessons with Register and Marks & comments, a "Needs you" list (cover requests to accept, report comments due, morning registration, parent messages), their own class, and the week at a glance with any clashes flagged. The register drawer marks present, absent, late or excused; the comments drawer has a mark, grade and comment per student with a comment bank |
 | Reports | Report cycle (Term 1 report) per class with marks and comments progress and a four-step flow: marks and comments → section head review → approved → published to parents. Student report editor with mark, grade on the curriculum's scale, effort, comment and comment bank for each subject, a class teacher comment, previous/next student, and a live preview of the printed report with the school's branding. Publishing shows a "report is ready" card in the parent app |
 | Academic year | Current year with a term timeline and today marker, students by year group, pre-rollover checks and past years (read only). The year-end rollover is a five-step drawer: new year and term dates (validated), promotion map from each year group to the next with leavers and new intake plus exceptions (repeat the year, leaving), classes and staff (class teachers move up with their class or stay with the year group; keep subjects, assignments and section heads; rebuild timetables), fees and records (carry forward balances, draft invoices, notify parents, archive), and a typed confirmation with a progress run. Afterwards students have moved up, leavers are alumni, the year switcher shows the new year and reports start again |
+| Early warning | Students flagged from attendance trend, behaviour concerns, a subject falling well below last term, missed homework, and fees unpaid for 30+ days, with a reason, sparkline, level (Needs a conversation, Keep an eye on, Plan in place, Improving, Not a concern), suggested next step and owner. Filter by level, signal and year group. **Start a plan** drawer (step, owner, review date, what was agreed, tell parents); **Write to parents** drafts a letter in Ask Quad; **Not a concern**; **How this works** explains the rules. A banner shows on the student's profile |
+| Ask Quad | Side panel, opened from the top bar, the floating button or `/`. Answers questions about who needs attention (by year group), attendance, overdue fees (with Send reminders), cover, exam clashes, parents' evening bookings, admissions, and a student or teacher by name. Drafts letters (trip, fees, attendance, parents' evening, about a child) with Copy |
 | Pastoral care | Behaviour log (merits, house points, concerns, detentions) with filters, house points table and a log drawer that can tell parents; medical conditions with severity, medication, care-plan reviews and a sick-bay log; safeguarding restricted to the lead and deputies, with concerns, levels, statuses, a dated chronology and a "record a concern" drawer |
 | Staff cover | Today's absent staff, every lesson that needs cover, free teachers for each lesson (subject specialists first, then fewest covers this term), auto-assign, report absence, and a cover sheet that feeds the timetable and My teaching |
 | Exams | Exam series from the curriculum's qualifications (for example Checkpoint, IGCSE, A Level, O/L, A/L, MYP, Diploma) plus internal exams; a day-by-session timetable with no clashes for any year group, room capacity checks, add and edit papers, and publish to the parent app |

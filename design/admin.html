@@ -7,41 +7,41 @@
 <link rel="icon" href="brand/quad-app-icon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT@9..144,500..700,50..100&family=Nunito:wght@400;500;600;700;800&family=Noto+Sans+Sinhala:wght@500;700&family=Noto+Sans+Tamil:wght@500;700&display=swap">
 <style>
 /* Layout: Classe365-style shell. Fixed navy module rail on the left, white top bar, cool-grey canvas with card grid. */
 :root{
-  --canvas:#F2F5FA; --surface:#FFFFFF; --surface-2:#F7F9FC; --line:#E3E8F0; --line-strong:#CBD3E0;
-  --ink:#16213A; --ink-2:#4A5672; --ink-3:#7C879F;
-  --brand:#2F6FED; --brand-ink:#FFFFFF; --brand-soft:#E8F0FE; --brand-strong:#1F55C7;
-  --rail:#14203A; --rail-2:#1C2B4B; --rail-ink:#C5CFE3; --rail-ink-2:#8392B3; --rail-active:#2F6FED;
-  --good:#138A5B; --good-soft:#E3F5EC; --warn:#B26A00; --warn-soft:#FFF2DC; --bad:#C83A2E; --bad-soft:#FDE8E5; --info:#5B4BC4; --info-soft:#EEEBFC;
-  --c1:#2F6FED; --c2:#12A594; --c3:#E8A33D; --c4:#8B5CF6;
-  --shadow:0 1px 2px rgba(20,32,58,.06),0 4px 16px rgba(20,32,58,.05);
-  --shadow-lg:0 12px 40px rgba(20,32,58,.18);
-  --f-display:"Bricolage Grotesque","Plus Jakarta Sans",system-ui,sans-serif;
-  --f-body:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
-  --r:10px; --r-sm:7px;
+  --canvas:#F6EFE3; --surface:#FFFCF6; --surface-2:#FAF4E9; --line:#EADFCB; --line-strong:#D9C8AA;
+  --ink:#2A2017; --ink-2:#5E4D3B; --ink-3:#85715A;
+  --brand:#A0412D; --brand-ink:#FFFFFF; --brand-soft:#F7E3D8; --brand-strong:#82331F;
+  --rail:#1F3A2E; --rail-2:#2B4A3C; --rail-ink:#EDE4D0; --rail-ink-2:#A8B59F; --rail-active:#A0412D;
+  --good:#2E7D57; --good-soft:#E2F1E6; --warn:#A8650A; --warn-soft:#FBEBCF; --bad:#B3352A; --bad-soft:#F9E0DB; --info:#3D57A6; --info-soft:#E5EAF7;
+  --c1:#A0412D; --c2:#2E7D57; --c3:#D89A2B; --c4:#3D57A6; --c5:#C2557A; --gold:#D89A2B; --gold-soft:#FBEBCF;
+  --shadow:0 1px 0 rgba(90,60,30,.05),0 8px 22px -10px rgba(90,60,30,.18);
+  --shadow-lg:0 22px 60px -16px rgba(60,35,15,.35);
+  --f-display:"Fraunces",Georgia,"Noto Sans Sinhala","Noto Sans Tamil",serif;
+  --f-body:"Nunito","Noto Sans Sinhala","Noto Sans Tamil",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --r:18px; --r-sm:12px; --vine-o:.75;
   color-scheme:light;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --canvas:#0E1525; --surface:#151E31; --surface-2:#1A2439; --line:#26324B; --line-strong:#34425F;
-  --ink:#E7ECF6; --ink-2:#AEB8CE; --ink-3:#7D89A3;
-  --brand:#5B8CFF; --brand-ink:#0B1222; --brand-soft:#1C2C52; --brand-strong:#8AACFF;
-  --rail:#0A1020; --rail-2:#131C31; --rail-ink:#C5CFE3; --rail-ink-2:#7584A6; --rail-active:#5B8CFF;
-  --good:#4CC992; --good-soft:#123326; --warn:#F0B357; --warn-soft:#3A2A10; --bad:#FF7A6B; --bad-soft:#3D1A17; --info:#A99BFF; --info-soft:#262046;
-  --c1:#4F86F7; --c2:#1BA898; --c3:#B57A26; --c4:#9575F0;
-  --shadow:0 1px 2px rgba(0,0,0,.3); --shadow-lg:0 12px 40px rgba(0,0,0,.5);
+  --canvas:#17120D; --surface:#211A13; --surface-2:#2A2119; --line:#3A2E22; --line-strong:#4D3E2E;
+  --ink:#F4EBDD; --ink-2:#D3C3AC; --ink-3:#A39079;
+  --brand:#E07A55; --brand-ink:#1A120C; --brand-soft:#3A2218; --brand-strong:#F09A78;
+  --rail:#121C16; --rail-2:#1D2B22; --rail-ink:#EDE4D0; --rail-ink-2:#93A08A; --rail-active:#E07A55;
+  --good:#6CC293; --good-soft:#15301F; --warn:#E9B45A; --warn-soft:#3A2A10; --bad:#F0806F; --bad-soft:#3D1A15; --info:#93A8E8; --info-soft:#1F2742;
+  --c1:#E07A55; --c2:#5FB386; --c3:#E5B04A; --c4:#8DA2E6; --c5:#E07FA0; --gold:#E5B04A; --gold-soft:#3A2A10;
+  --shadow:0 1px 0 rgba(0,0,0,.3),0 8px 22px -10px rgba(0,0,0,.6); --shadow-lg:0 22px 60px -16px rgba(0,0,0,.7); --vine-o:.45;
   color-scheme:dark;
 }}
 :root[data-theme="dark"]{
-  --canvas:#0E1525; --surface:#151E31; --surface-2:#1A2439; --line:#26324B; --line-strong:#34425F;
-  --ink:#E7ECF6; --ink-2:#AEB8CE; --ink-3:#7D89A3;
-  --brand:#5B8CFF; --brand-ink:#0B1222; --brand-soft:#1C2C52; --brand-strong:#8AACFF;
-  --rail:#0A1020; --rail-2:#131C31; --rail-ink:#C5CFE3; --rail-ink-2:#7584A6; --rail-active:#5B8CFF;
-  --good:#4CC992; --good-soft:#123326; --warn:#F0B357; --warn-soft:#3A2A10; --bad:#FF7A6B; --bad-soft:#3D1A17; --info:#A99BFF; --info-soft:#262046;
-  --c1:#4F86F7; --c2:#1BA898; --c3:#B57A26; --c4:#9575F0;
-  --shadow:0 1px 2px rgba(0,0,0,.3); --shadow-lg:0 12px 40px rgba(0,0,0,.5);
+  --canvas:#17120D; --surface:#211A13; --surface-2:#2A2119; --line:#3A2E22; --line-strong:#4D3E2E;
+  --ink:#F4EBDD; --ink-2:#D3C3AC; --ink-3:#A39079;
+  --brand:#E07A55; --brand-ink:#1A120C; --brand-soft:#3A2218; --brand-strong:#F09A78;
+  --rail:#121C16; --rail-2:#1D2B22; --rail-ink:#EDE4D0; --rail-ink-2:#93A08A; --rail-active:#E07A55;
+  --good:#6CC293; --good-soft:#15301F; --warn:#E9B45A; --warn-soft:#3A2A10; --bad:#F0806F; --bad-soft:#3D1A15; --info:#93A8E8; --info-soft:#1F2742;
+  --c1:#E07A55; --c2:#5FB386; --c3:#E5B04A; --c4:#8DA2E6; --c5:#E07FA0; --gold:#E5B04A; --gold-soft:#3A2A10;
+  --shadow:0 1px 0 rgba(0,0,0,.3),0 8px 22px -10px rgba(0,0,0,.6); --shadow-lg:0 22px 60px -16px rgba(0,0,0,.7); --vine-o:.45;
   color-scheme:dark;
 }
 *{box-sizing:border-box}
@@ -64,7 +64,7 @@ h3{font-size:14px;font-family:var(--f-body);font-weight:700}
 .app.collapsed{grid-template-columns:72px 1fr}
 .rail{background:var(--rail);color:var(--rail-ink);position:sticky;top:0;height:100vh;display:flex;flex-direction:column;overflow:hidden;z-index:30}
 .brand{display:flex;align-items:center;gap:10px;padding:18px 18px 14px;min-height:64px}
-.logo{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#2F6FED,#12A594);display:grid;place-items:center;flex:none;color:#fff;font:700 17px var(--f-display)}
+.logo{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#A0412D,#2E7D57);display:grid;place-items:center;flex:none;color:#fff;font:700 17px var(--f-display)}
 .brand b{font:700 18px var(--f-display);color:#fff;white-space:nowrap}
 .brand small{display:block;font-size:11px;color:var(--rail-ink-2);white-space:nowrap}
 .nav{flex:1;overflow-y:auto;padding:6px 10px 16px;scrollbar-width:thin}
@@ -288,7 +288,7 @@ td.r,th.r{text-align:right}
 .inv .tot td{font-weight:700;border:0;padding-top:12px}
 
 /* Finance */
-.support{display:flex;align-items:center;gap:12px;padding:9px 24px;background:#12A594;color:#fff;font-size:13px;font-weight:600;flex-wrap:wrap}
+.support{display:flex;align-items:center;gap:12px;padding:9px 24px;background:#2E7D57;color:#fff;font-size:13px;font-weight:600;flex-wrap:wrap}
 .support span{flex:1;min-width:200px}
 .support button{background:rgba(255,255,255,.18);color:#fff;border:1px solid rgba(255,255,255,.4);border-radius:7px;padding:5px 12px;font-weight:700}
 .perm td,.perm th{text-align:center}.perm td:first-child,.perm th:first-child{text-align:left}
@@ -381,7 +381,7 @@ td.r,th.r{text-align:right}
 .auth-brand{display:flex;gap:12px;align-items:center}
 .auth-logo{width:54px;height:54px;border-radius:16px;background:#fff;display:grid;place-items:center;overflow:hidden;color:var(--brand);font:700 17px var(--f-display);box-shadow:0 10px 30px -10px rgba(0,0,0,.5);flex:none}
 .auth-logo img{width:100%;height:100%;object-fit:contain;padding:5px}
-.auth-logo.q{background:linear-gradient(135deg,#2F6FED,#12A594)}
+.auth-logo.q{background:linear-gradient(135deg,#A0412D,#2E7D57)}
 .auth-logo.q svg{width:70%;height:70%}
 .auth-brand b{display:block;font:700 18px var(--f-display)}.auth-brand small{opacity:.8;font-size:12.5px}
 .auth-quote{max-width:560px}.auth-quote h2{font:700 clamp(28px,3.4vw,46px)/1.06 var(--f-display);margin:0 0 14px;letter-spacing:-.025em}.auth-quote p{opacity:.85;font-size:16px;margin:0}
@@ -414,7 +414,7 @@ td.r,th.r{text-align:right}
 .rail .logo.has-img img{width:100%;height:100%;object-fit:contain;padding:3px}
 .brand div{min-width:0}
 .brand b{display:block;font-size:14.5px;line-height:1.25;white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-:root{--auth-bg:radial-gradient(80% 60% at 0% 0%,color-mix(in srgb,var(--brand) 85%,#fff),transparent 60%),radial-gradient(70% 70% at 100% 100%,color-mix(in srgb,var(--brand) 45%,#12A594),transparent 60%),linear-gradient(160deg,color-mix(in srgb,var(--brand) 75%,#000),#0B1222)}
+:root{--auth-bg:radial-gradient(80% 60% at 0% 0%,color-mix(in srgb,var(--brand) 85%,#fff),transparent 60%),radial-gradient(70% 70% at 100% 100%,color-mix(in srgb,var(--brand) 45%,#2E7D57),transparent 60%),linear-gradient(160deg,color-mix(in srgb,var(--brand) 75%,#000),#16241D)}
 
 /* Applicant panel */
 .drawer.wide{width:min(760px,100%)}
@@ -767,6 +767,145 @@ button.st-sec:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg)}
 .bl-lines{display:flex;flex-direction:column;gap:6px}.bl-line{display:grid;grid-template-columns:minmax(0,1fr) 110px 160px;gap:10px;align-items:center;padding:6px 10px;border:1px solid var(--line);border-radius:10px;font-size:13px}
 .in-unit{position:relative}.in-unit .input{padding-left:34px}.in-unit::before{content:attr(data-u);position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--ink-3);font-weight:700;font-size:12.5px;pointer-events:none}
 @media (max-width:900px){.gw-grid{grid-template-columns:1fr}.ex-day{grid-template-columns:1fr}.bl-line{grid-template-columns:1fr 1fr}.bl-line b{grid-column:1/-1}}
+
+/* ===== Warm & local layer: paper, soft serif, tea-green rail, liyawela vine, pill controls ===== */
+:root{--vine:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='14' viewBox='0 0 56 14'%3E%3Cg fill='none' stroke='%23C9973B' stroke-width='1.3' stroke-linecap='round'%3E%3Cpath d='M0 7c7 0 7-5 14-5s7 5 14 5 7 5 14 5 7-5 14-5'/%3E%3Cpath d='M14 2c-2 2-1 4 1 4M42 12c2-2 1-4-1-4'/%3E%3C/g%3E%3Cg fill='%23C9973B'%3E%3Ccircle cx='28' cy='7' r='1.6'/%3E%3Cpath d='M7 9.5c1.3 1 1.3 3.2 0 4.2-1.3-1-1.3-3.2 0-4.2zM35 .3c1.3 1 1.3 3.2 0 4.2-1.3-1-1.3-3.2 0-4.2z'/%3E%3C/g%3E%3C/svg%3E")}
+body{background-color:var(--canvas);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .35 0 0 0 0 .25 0 0 0 0 .15 0 0 0 .05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");font-size:14.5px}
+h1,h2{font-weight:600;font-variation-settings:"SOFT" 100,"opsz" 72;letter-spacing:-.005em}
+h1{font-size:30px;line-height:1.15}
+h2{font-size:18px}
+.vine{height:14px;background:var(--vine) repeat-x left center/56px 14px;opacity:var(--vine-o)}
+.scribble{position:absolute;left:-2%;bottom:-.18em;width:104%;height:.32em;overflow:visible;pointer-events:none}
+.scrib{position:relative;display:inline-block;white-space:nowrap}
+.local{font:700 13px var(--f-body);color:var(--gold);letter-spacing:.02em}
+/* rail */
+.rail{background:var(--rail);background-image:radial-gradient(120% 50% at 0% 0%,rgba(255,255,255,.06),transparent 60%)}
+.rail::after{content:"";position:absolute;left:0;right:0;bottom:0;height:120px;pointer-events:none;background:linear-gradient(transparent,rgba(0,0,0,.18))}
+.rail .vine{margin:0 16px 4px;filter:saturate(1.2)}
+.logo{border-radius:12px;background:var(--brand)}
+.brand b{font-family:var(--f-display);font-weight:600;font-variation-settings:"SOFT" 100}
+.nav-label{font-weight:800;letter-spacing:.12em;color:var(--rail-ink-2);opacity:.9}
+.nav a{border-radius:999px;padding:9px 12px;font-weight:600}
+.nav a.on{background:var(--rail-active);box-shadow:0 6px 16px -8px rgba(0,0,0,.6)}
+.nav a.on::after{content:"";position:absolute;right:12px;top:50%;width:6px;height:6px;margin-top:-3px;border-radius:50%;background:var(--gold)}
+.nav a.on .count{margin-right:14px}
+.app.collapsed .nav a.on::after{display:none}
+/* top bar */
+.top{background:color-mix(in srgb,var(--canvas) 82%,transparent);backdrop-filter:blur(10px);border-bottom:1px dashed var(--line-strong)}
+.iconbtn,.yearpick,.search{border-radius:999px}
+.search{background:var(--surface)}
+/* controls */
+.btn{border-radius:999px;height:38px;padding:0 16px;font-weight:700}
+.btn.sm{height:30px;padding:0 12px}
+.btn.primary{box-shadow:0 6px 14px -8px var(--brand)}
+.input,select.input{border-radius:12px;height:38px}
+textarea.input{border-radius:12px}
+.input:focus{outline:0;box-shadow:0 0 0 3px color-mix(in srgb,var(--brand) 22%,transparent)}
+.chip{border-radius:999px}
+.chip.on{background:var(--brand);border-color:var(--brand);color:#fff}
+.seg{border-radius:999px}
+.tabs button.on{color:var(--brand)}
+.tabs button{font-weight:700}
+.card{border-radius:var(--r)}
+.card-h{border-bottom:1px dashed var(--line-strong)}
+.card-h h2{font-size:18px}
+.kpi .ic{border-radius:14px}
+.kpi .v{font-family:var(--f-display);font-weight:600;font-size:28px;font-variation-settings:"SOFT" 100,"opsz" 96}
+.dot-ic{border-radius:12px}
+th{background:var(--surface-2);font-weight:800;letter-spacing:.06em;font-size:11px}
+tr.click:hover td{background:color-mix(in srgb,var(--gold) 7%,var(--surface))}
+.drawer{border-radius:22px 0 0 22px}
+.drawer-h{border-bottom:0;position:relative;padding-bottom:22px}
+.drawer-h::after{content:"";position:absolute;left:20px;right:20px;bottom:4px;height:14px;background:var(--vine) repeat-x left center/56px 14px;opacity:var(--vine-o)}
+.modal,.cmdk,.notif{border-radius:20px}
+.scrim{background:rgba(42,32,23,.45)}
+.toast{border-radius:16px;background:var(--ink);padding:11px 18px;max-width:min(520px,calc(100vw - 32px))}
+.kcard,.scard,.inv{border-radius:14px}
+.bar{background:color-mix(in srgb,var(--line) 80%,var(--surface))}
+.savebar{background:var(--rail)}
+.crumbs{font-weight:800;letter-spacing:.1em;text-transform:uppercase;font-size:11px;color:var(--ink-3)}
+.page-head + .vine{margin-top:-8px}
+/* petals (celebrate) */
+.petals{position:fixed;inset:0;pointer-events:none;z-index:200;overflow:hidden}
+.petals i{position:absolute;top:-20px;width:10px;height:14px;border-radius:60% 0 60% 0;animation:petal 1.9s cubic-bezier(.2,.6,.4,1) forwards}
+@keyframes petal{to{transform:translate(var(--dx),105vh) rotate(var(--r));opacity:.2}}
+@media (prefers-reduced-motion:reduce){.petals{display:none}}
+
+/* home: the school today */
+.hello{position:relative;display:flex;align-items:flex-end;gap:20px;background:linear-gradient(120deg,var(--surface) 30%,color-mix(in srgb,var(--gold) 14%,var(--surface)));border:1px solid var(--line);border-radius:28px;padding:28px 30px;overflow:hidden;box-shadow:var(--shadow)}
+.hello-t{flex:1;min-width:0;position:relative;z-index:1}
+.hello h1{font-size:clamp(30px,3.4vw,44px);margin:6px 0 10px}
+.hello-s{font-size:16.5px;line-height:1.55;color:var(--ink-2);max-width:62ch;margin:0}
+.hello-s b{color:var(--ink)}
+.hello-m{margin-top:10px;font-size:13px;color:var(--ink-3);font-weight:700}
+.morning{width:300px;flex:none;align-self:stretch;margin:-28px -30px -28px 0}
+.morning.sm{width:200px;margin:0}
+.sec-t{font-size:22px;margin-top:6px}
+.needs2{display:flex;flex-direction:column}
+.nd{display:flex;align-items:center;gap:14px;padding:14px 18px;border-bottom:1px dashed var(--line)}
+.nd:last-child{border-bottom:0}
+.nd .ic{width:38px;height:38px;border-radius:14px;display:grid;place-items:center;flex:none;background:var(--warn-soft);color:var(--warn)}
+.nd.bad .ic{background:var(--bad-soft);color:var(--bad)}.nd.info .ic{background:var(--info-soft);color:var(--info)}
+.nd div{flex:1;min-width:0}.nd b{display:block}.nd small{color:var(--ink-3);font-size:12.5px}
+.good{display:flex;flex-direction:column;padding:6px 0}
+.good>div{display:flex;gap:12px;align-items:center;padding:11px 18px}
+.good>div>div{flex:1;min-width:0}.good b{display:block}.good small{color:var(--ink-3);font-size:12.5px}
+.gn-ic{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:var(--gold-soft);flex:none;font-size:17px}
+/* early warning */
+.story{display:flex;align-items:center;gap:16px;padding:20px 24px;background:linear-gradient(110deg,var(--surface) 40%,color-mix(in srgb,var(--c2) 10%,var(--surface)));overflow:hidden}
+.story-t{flex:1;min-width:0}.story p{margin:4px 0 0;font-size:16px;line-height:1.55;color:var(--ink-2);max-width:70ch}.story p b{color:var(--ink)}
+.sig-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px;padding:18px}
+.sig-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;padding:16px 18px}
+.sig{border:1px solid var(--line);border-radius:18px;background:var(--surface);padding:16px;display:flex;flex-direction:column;gap:12px;border-top:4px solid var(--warn);min-width:0}
+.sig.high{border-top-color:var(--bad)}.sig.plan{border-top-color:var(--brand)}.sig.better{border-top-color:var(--good)}.sig.dismissed{border-top-color:var(--line-strong);opacity:.8}
+.sig-h{display:flex;gap:12px;align-items:center}.sig-h .pill{margin-top:5px}.sig-h b{display:block;font-size:15px}.sig-h b a{color:var(--ink)}.sig-h small{color:var(--ink-3);font-size:12px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sig-f{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:9px}
+.sig-f li{display:flex;gap:10px;align-items:center}.sig-f li>div{flex:1;min-width:0}.sig-f b{display:block;font-size:13.5px;font-weight:700}.sig-f small{color:var(--ink-3);font-size:12px}
+.sf-ic{width:28px;height:28px;border-radius:10px;background:var(--surface-2);color:var(--ink-2);display:grid;place-items:center;flex:none}
+.spk{width:64px;height:24px;flex:none;overflow:visible}
+.sig-next{display:flex;gap:10px;align-items:flex-start;background:color-mix(in srgb,var(--gold) 10%,var(--surface));border:1px dashed color-mix(in srgb,var(--gold) 55%,var(--line));border-radius:14px;padding:10px 12px}
+.sig-next .ic{color:var(--gold);margin-top:2px}.sig-next small{display:block;color:var(--ink-3);font-size:11.5px}.sig-next b{display:block;font-size:13.5px}
+.sig-acts{display:flex;gap:8px;flex-wrap:wrap}
+.setting{display:flex;align-items:center;gap:14px;padding:12px 0;border-top:1px dashed var(--line)}.setting .meta{flex:1;min-width:0}.setting .meta b{display:block}.setting .meta small{color:var(--ink-3);font-size:12.5px}
+.sig-banner{display:flex;align-items:center;gap:14px;padding:14px 18px;border-radius:18px;background:var(--warn-soft);border:1px solid color-mix(in srgb,var(--warn) 30%,transparent)}
+.sig-banner.high{background:var(--bad-soft);border-color:color-mix(in srgb,var(--bad) 30%,transparent)}.sig-banner.better{background:var(--good-soft);border-color:color-mix(in srgb,var(--good) 30%,transparent)}.sig-banner.plan{background:var(--brand-soft)}
+.sig-banner .ic{width:38px;height:38px;border-radius:50%;background:var(--surface);display:grid;place-items:center;flex:none}
+.sig-banner b{display:block}.sig-banner small{color:var(--ink-2);font-size:12.5px}
+.sig-why{display:flex;flex-direction:column;gap:8px;background:var(--surface-2);border-radius:14px;padding:12px 14px;font-size:13px}
+.sig-why div{display:flex;gap:9px;align-items:flex-start}.sig-why svg{flex:none;margin-top:3px;color:var(--ink-3)}
+.empty{grid-column:1/-1;text-align:center;padding:30px;display:flex;flex-direction:column;align-items:center;gap:6px}.empty p{margin:0}
+/* Ask Quad */
+.askq-fab{position:fixed;right:22px;bottom:22px;z-index:55;display:flex;align-items:center;gap:8px;height:48px;padding:0 20px 0 16px;border:0;border-radius:999px;background:var(--brand);color:#fff;font-weight:800;box-shadow:0 14px 30px -10px var(--brand),0 2px 0 rgba(0,0,0,.08);transition:transform .15s}
+.askq-fab:hover{transform:translateY(-2px)}
+body.aq-on .askq-fab{opacity:0;pointer-events:none}
+.aq-top kbd{margin-left:4px}
+.askq{position:fixed;top:12px;right:12px;bottom:12px;width:min(420px,calc(100% - 24px));z-index:65;background:var(--surface);border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow-lg);display:flex;flex-direction:column;transform:translateX(calc(100% + 24px));transition:transform .28s cubic-bezier(.2,.8,.2,1);visibility:hidden}
+.askq.on{transform:none;visibility:visible}
+.aq-h{display:flex;align-items:center;gap:10px;padding:16px 16px 8px}
+.aq-h b{display:block;font:600 19px var(--f-display);font-variation-settings:"SOFT" 100}.aq-h small{color:var(--ink-3);font-size:12px}
+.aq-logo{width:38px;height:38px;border-radius:50%;background:conic-gradient(from 200deg,var(--c1),var(--gold),var(--c2),var(--c1));color:#fff;display:grid;place-items:center;flex:none}
+.askq .vine{margin:0 16px}
+.aq-msgs{flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:12px}
+.aq-m{max-width:92%;font-size:13.5px;line-height:1.5}
+.aq-m p{margin:0 0 8px}.aq-m p:last-child{margin-bottom:0}
+.aq-m.bot{align-self:flex-start;background:var(--surface-2);border:1px solid var(--line);border-radius:18px 18px 18px 6px;padding:12px 14px}
+.aq-m.me{align-self:flex-end;background:var(--brand);color:#fff;border-radius:18px 18px 6px 18px;padding:10px 14px;font-weight:600}
+.aq-m.typing{display:flex;gap:5px;padding:14px}.aq-m.typing i{width:7px;height:7px;border-radius:50%;background:var(--ink-3);animation:aqDot 1s infinite}.aq-m.typing i:nth-child(2){animation-delay:.15s}.aq-m.typing i:nth-child(3){animation-delay:.3s}
+@keyframes aqDot{50%{opacity:.25;transform:translateY(-3px)}}
+.aq-sugg{display:flex;flex-wrap:wrap;gap:8px}
+.aq-sugg button{border:1px solid var(--line-strong);background:var(--surface);border-radius:999px;padding:7px 12px;font-size:12.5px;font-weight:700;color:var(--ink-2);text-align:left}
+.aq-sugg button:hover{border-color:var(--brand);color:var(--brand)}
+.aq-list{margin:6px 0 8px;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
+.aq-list li{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:7px 10px;font-weight:700}
+.aq-list small{display:block;font-weight:500;color:var(--ink-3);font-size:12px}
+.aq-acts{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.aq-from{margin-top:10px;font-size:11.5px;color:var(--ink-3);border-top:1px dashed var(--line-strong);padding-top:7px}
+.aq-draft{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--gold);border-radius:12px;padding:12px 14px;margin:6px 0;font-family:var(--f-body)}
+.aq-draft b{display:block;font:600 15px var(--f-display);margin-bottom:6px}.aq-draft p{margin:0 0 8px}
+.aq-f{display:flex;gap:8px;padding:12px 14px 14px;border-top:1px dashed var(--line-strong)}
+.aq-f .btn{width:42px;padding:0;justify-content:center;flex:none}
+@media (max-width:860px){.aq-top span,.aq-top kbd{display:none}.aq-top{width:38px;padding:0;justify-content:center}.morning{display:none}.hello{padding:22px}.sig-grid{grid-template-columns:1fr;padding:12px}.askq{top:auto;left:8px;right:8px;bottom:8px;width:auto;height:min(86vh,680px);transform:translateY(calc(100% + 24px))}.askq-fab{right:14px;bottom:14px;height:44px}.story .morning{display:none}}
+@media (prefers-reduced-motion:reduce){.askq,.askq-fab{transition:none}.aq-m.typing i{animation:none}}
 </style>
 </head>
 <body>
@@ -774,8 +913,9 @@ button.st-sec:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg)}
 <div class="app" id="app">
   <aside class="rail" id="rail" aria-label="Modules">
     <div class="brand"><div class="logo"><svg viewBox="0 0 64 64" width="72%" height="72%" aria-hidden="true"><g fill="none" stroke-width="9"><path d="M20.82 15.42A20 20 0 0 1 43.18 15.42" stroke="#FFFFFF"/><path d="M48.58 20.82A20 20 0 0 1 48.58 43.18" stroke="#C9D8FF"/><path d="M15.42 43.18A20 20 0 0 1 15.42 20.82" stroke="#E3EBFF"/><path d="M43.18 48.58A20 20 0 0 1 20.82 48.58" stroke="#FFFFFF"/><path d="M39.35 39.35L54.91 54.91" stroke="#FFFFFF" stroke-linecap="round"/></g><circle cx="32" cy="32" r="4.5" fill="#FFC56B"/></svg></div><div><b>Quad</b><small>Colombo International School</small></div></div>
+    <div class="vine" aria-hidden="true"></div>
     <nav class="nav" id="nav"></nav>
-    <div class="rail-foot"><div class="av sm" style="background:#12A594">PM</div><div style="font-size:12px;min-width:0"><b style="color:#fff;display:block">Prishan Maduka</b><span style="color:var(--rail-ink-2)">Super admin</span></div><button class="iconbtn so" data-act="signOut" aria-label="Sign out" title="Sign out"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
+    <div class="rail-foot"><div class="av sm" style="background:#2E7D57">PM</div><div style="font-size:12px;min-width:0"><b style="color:#fff;display:block">Prishan Maduka</b><span style="color:var(--rail-ink-2)">Super admin</span></div><button class="iconbtn so" data-act="signOut" aria-label="Sign out" title="Sign out"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
   </aside>
   <div class="main">
     <header class="top">
@@ -786,7 +926,7 @@ button.st-sec:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg)}
       <select class="yearpick" id="yearpick" aria-label="Academic year" data-dd-ic="cal" data-dd-top><optgroup label="2026/27"><option data-sub="5 Oct – 18 Dec · current" selected>2026/27 · Term 1</option><option data-sub="5 Jan – 27 Mar">2026/27 · Term 2</option><option data-sub="20 Apr – 10 Jul">2026/27 · Term 3</option></optgroup><optgroup label="Past years"><option data-sub="Read only">2025/26 · Term 3</option><option data-sub="Read only">2025/26 · Term 2</option></optgroup></select>
       <button class="iconbtn" data-act="theme" aria-label="Toggle theme" id="themeBtn"></button>
       <button class="iconbtn" data-act="notif" aria-label="Notifications"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></svg><i class="dot"></i></button>
-      <div class="me" data-act="go" data-to="user-s0" title="My profile" style="cursor:pointer"><div class="av" style="background:#2F6FED">PM</div><div><b>Prishan M.</b><small>Administrator</small></div></div>
+      <div class="me" data-act="go" data-to="user-s0" title="My profile" style="cursor:pointer"><div class="av" style="background:#A0412D">PM</div><div><b>Prishan M.</b><small>Administrator</small></div></div>
     </header>
     <div id="supportBar"></div>
     <main class="content" id="view"></main>
@@ -842,7 +982,7 @@ const pick = a => a[Math.floor(rnd() * a.length)];
 const FIRST = ['Amaya','Kavindu','Sanduni','Dinuka','Nethmi','Yohan','Tharushi','Ravindu','Hiruni','Senuka','Aisha','Omar','Liam','Mia','Arjun','Priya','Hasini','Chamod','Imaya','Thisara','Zara','Ethan','Sofia','Nadeesha','Pasindu','Ishara','Kaveesha','Rehan','Malsha','Lucas'];
 const LAST = ['Perera','Fernando','Silva','Jayasinghe','Wickramasinghe','Bandara','Rajapaksa','Gunawardena','Mendis','Dissanayake','Khan','Hassan','Smith','Patel','Kumar','De Alwis','Ratnayake','Herath','Senanayake','Abeysekera'];
 const HOUSES = ['Emerald','Sapphire','Ruby','Topaz'];
-const AVC = ['#2F6FED','#12A594','#C2410C','#8B5CF6','#0E7490','#BE185D','#4D7C0F','#B45309'];
+const AVC = ['#A0412D','#2E7D57','#B5572A','#7A4E8C','#3E6E7A','#B0466A','#5B7A2A','#9A6418'];
 const initials = n => n.split(' ').map(w => w[0]).slice(0, 2).join('');
 const avColor = n => AVC[[...n].reduce((a, c) => a + c.charCodeAt(0), 0) % AVC.length];
 const avatar = (n, cls='') => `<div class="av ${cls}" style="background:${avColor(n)}">${initials(n)}</div>`;
@@ -851,14 +991,14 @@ const moneyM = n => 'Rs ' + (n / 1e6).toFixed(1) + 'M';
 
 /* ---------- Academic structure: curriculum, stages and year groups set by the platform when the school was created ---------- */
 const ACAD_DEFAULT = {curr: {id:'cambridge', name:'Cambridge International', short:'Cambridge', grading:'A* to U', quals:[['Year 6','Cambridge Primary Checkpoint'],['Year 9','Lower Secondary Checkpoint'],['Year 11','IGCSE'],['Year 13','International A Level']]},
-  stages: [{name:'Early Years (EYFS)', ages:'3–5', years:['Playgroup','Nursery','Reception'], color:'#E8A33D', sections:2}, {name:'Junior School', ages:'5–11', years:['Year 1','Year 2','Year 3','Year 4','Year 5','Year 6'], color:'#12A594', sections:2},
-    {name:'Senior School', ages:'11–16', years:['Year 7','Year 8','Year 9','Year 10','Year 11'], color:'#2F6FED', sections:2}, {name:'Sixth Form', ages:'16–18', years:['Year 12','Year 13'], color:'#8B5CF6', sections:2}]};
+  stages: [{name:'Early Years (EYFS)', ages:'3–5', years:['Playgroup','Nursery','Reception'], color:'#D89A2B', sections:2}, {name:'Junior School', ages:'5–11', years:['Year 1','Year 2','Year 3','Year 4','Year 5','Year 6'], color:'#2E7D57', sections:2},
+    {name:'Senior School', ages:'11–16', years:['Year 7','Year 8','Year 9','Year 10','Year 11'], color:'#A0412D', sections:2}, {name:'Sixth Form', ages:'16–18', years:['Year 12','Year 13'], color:'#7A4E8C', sections:2}]};
 function loadAcad() { try { const s = JSON.parse(localStorage.getItem('quad-school') || 'null'); if (s && s.acad && s.acad.stages && s.acad.stages.some(x => x.on !== false && x.years && x.years.length)) return s.acad; } catch (e) {} return ACAD_DEFAULT; }
 const ACAD = loadAcad();
 const STG = []; const LV = [];
 ACAD.stages.filter(x => x.on !== false && x.years && x.years.length).forEach(x => { const si = STG.length, from = LV.length + 1;
-  x.years.forEach(y => LV.push({label: y, stage: x.name, si, color: x.color || '#2F6FED', sections: Math.max(1, Math.min(10, +x.sections || 2)), ages: x.ages}));
-  STG.push({name: x.name, ages: x.ages, color: x.color || '#2F6FED', from, to: LV.length, sections: Math.max(1, Math.min(10, +x.sections || 2))}); });
+  x.years.forEach(y => LV.push({label: y, stage: x.name, si, color: x.color || '#A0412D', sections: Math.max(1, Math.min(10, +x.sections || 2)), ages: x.ages}));
+  STG.push({name: x.name, ages: x.ages, color: x.color || '#A0412D', from, to: LV.length, sections: Math.max(1, Math.min(10, +x.sections || 2))}); });
 const GRADE_BANDS = STG.map(x => [x.name, x.from, x.to, x.color]);
 const LV_BASE = Math.max(0, LV.findIndex(x => /(^|\D)1$/.test(x.label)));   // index of the first year group numbered 1
 const lvL = n => Math.max(1, Math.min(LV.length, LV_BASE + n));                // sample data written as grade n → this school's year group
@@ -1023,50 +1163,6 @@ const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':
 
 /* ---------- Views ---------- */
 const V = {};
-V.dashboard = () => {
-  const months = ['Apr','May','Jun','Jul','Aug','Sep','Oct'];
-  const collected = [38.4, 6.2, 4.1, 41.2, 7.5, 5.3, 48.2], outstanding = [4.1, 1.2, .8, 6.3, 1.9, 1.1, 13.3];
-  const att = [94.1,95.2,93.8,94.6,96.0,95.1,92.4,94.8,95.6,95.9,94.2,93.7,95.0,96.2,95.4,94.6,95.8,96.1,95.2,94.6];
-  const attL = att.map((_, i) => { const d = new Date(2026, 8, 8 + Math.floor(i / 5) * 7 + i % 5); return d.toLocaleDateString('en-GB', {day:'numeric', month:'short'}); });
-  const funnel = STAGES.map(s => [s.n, apps.filter(a => STAGES.findIndex(x=>x.k===a.stage) >= STAGES.findIndex(x=>x.k===s.k)).length]);
-  const overdue = invoices.filter(i => i.status === 'Overdue').slice(0, 5);
-  return `
-  ${pageHead('Home', 'Good morning, Prishan', 'Monday, 5 October 2026 · Week 6 of Term 1', `<button class="btn" data-act="go" data-to="attendance">${ic('check',16)}Take attendance</button><button class="btn" data-act="recordPayment">${ic('fee',16)}Record payment</button><button class="btn primary" data-act="newApp">${ic('plus',16)}New application</button>`)}
-  <div class="grid g-kpi">
-    ${kpi('student','t-blue','Enrolled students','1,248','<span class="up">▲ 3.2%</span> vs last year')}
-    ${kpi('check','t-green','Attendance today','94.6%','1,181 present · 67 absent')}
-    ${kpi('fee','t-amber','Term 1 fees collected','Rs 48.2M','<span class="up">78%</span> of Rs 61.5M billed')}
-    ${kpi('admit','t-violet','Open applications', apps.filter(a=>!['enrolled'].includes(a.stage)).length, '6 interviews this week')}
-  </div>
-  <div class="grid g-2-1">
-    <section class="card"><div class="card-h"><h2>Fee collection</h2>${legend([['Collected','var(--c1)'],['Outstanding','var(--c3)']])}</div>
-      <div class="card-b">${barChart({labels: months, series: [{name:'Collected', data: collected, color:'var(--c1)'},{name:'Outstanding', data: outstanding, color:'var(--c3)'}], stacked:true, fmt:(v)=>'Rs '+(+v).toFixed(v<10&&v%1?1:0)+'M'})}</div></section>
-    <section class="card"><div class="card-h"><h2>Admissions funnel</h2><a href="#admissions" class="btn sm ghost">Open pipeline ${ic('arrow',14)}</a></div>
-      <div class="card-b" style="display:flex;flex-direction:column;gap:12px">${funnel.map(([n, v], i) => `<div data-tip="<b>${n}</b><br>${v} applicants reached this stage"><div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:4px"><span>${n}</span><b class="num">${v}</b></div><div class="bar" style="height:10px"><i style="width:${v/funnel[0][1]*100}%;background:var(--c1);opacity:${1 - i*.12}"></i></div></div>`).join('')}
-      <div class="muted" style="font-size:12px">Conversion enquiry → enrolled: <b style="color:var(--ink)">${Math.round(funnel[5][1]/funnel[0][1]*100)}%</b></div></div></section>
-  </div>
-  <div class="grid g-2-1">
-    <section class="card"><div class="card-h"><h2>Daily attendance · last 4 weeks</h2><span class="muted" style="font-size:12px">School-wide, ${esc(ylRange(1, LV.length))}</span></div>
-      <div class="card-b">${lineChart({labels: attL, data: att, min: 90, max: 98, target: 95})}</div></section>
-    <section class="card"><div class="card-h"><h2>Today</h2><span class="pill t-blue plain">5 Oct</span></div>
-      <div class="list">${[
-        ['08:30','Grade 10 Physics practical','Lab 2 · Mr. Herath','t-blue','book'],
-        ['10:00','Admission interview – Liam Patel','Principal’s office','t-violet','admit'],
-        ['11:30','Finance committee','Board room · Q2 budget review','t-amber','fin'],
-        ['14:00','Inter-house swimming heats','Aquatic centre','t-green','star'],
-        ['16:00','PTA meeting – Primary','Main hall','t-red','crm']
-      ].map(([t,a,b,tone,i]) => `<div class="li"><div class="dot-ic ${tone}">${ic(i,16)}</div><div class="meta"><b>${a}</b><p>${b}</p></div><time>${t}</time></div>`).join('')}</div></section>
-  </div>
-  <div class="grid g-2-1">
-    <section class="card"><div class="card-h"><h2>Overdue invoices</h2><a href="#fees" class="btn sm ghost">All invoices ${ic('arrow',14)}</a></div>
-      <div class="tbl-wrap"><table><thead><tr><th>Student</th><th>Invoice</th><th>Due</th><th class="r">Balance</th><th></th></tr></thead><tbody>
-      ${overdue.map(v => `<tr><td><div class="who">${avatar(v.student.name,'sm')}<div><b>${v.student.name}</b><small>${v.student.cls}</small></div></div></td><td class="num">${v.no}</td><td class="num">${v.due}</td><td class="r num"><b>${money(v.amt - v.paid)}</b></td><td class="r"><button class="btn sm" data-act="remind" data-name="${esc(v.student.guardian)}">${ic('send',14)}Remind</button></td></tr>`).join('')}
-      </tbody></table></div></section>
-    <section class="card"><div class="card-h"><h2>My tasks</h2><span class="muted" style="font-size:12px" id="taskCount">${S.tasks.filter(t=>!t.done).length} open</span></div>
-      <div>${S.tasks.map((t, i) => `<label class="task ${t.done?'done':''}"><input type="checkbox" data-act="task" data-i="${i}" ${t.done?'checked':''}><span>${t.t}</span><small>${t.due}</small></label>`).join('')}</div></section>
-  </div>`;
-};
-
 V.admissions = () => {
   const q = (S.q || '').toLowerCase(), fg = S.filter.apGrade || 'all', fs = S.filter.apSrc || 'all';
   const bySearch = apps.filter(a => !q || a.name.toLowerCase().includes(q) || a.id.toLowerCase().includes(q));
@@ -1169,7 +1265,7 @@ V.student = (id) => {
   <div class="card"><div class="profile-head">${avatar(s.name,'lg')}<div class="info"><div class="eyebrow">${s.id}</div><h1>${s.name}</h1><div class="muted">${s.cls} · House ${s.house} · ${statusPill(s.status)}</div></div>
   <div class="facts"><div><b class="num">${s.att.toFixed(1)}%</b>Attendance</div><div><b class="num">${s.gpa}</b>GPA</div><div><b class="num">${s.balance?money(s.balance):'Rs 0'}</b>Fee balance</div><div><b>42</b>House points</div></div>
   <div class="chips"><button class="btn" data-act="go" data-to="inbox">${ic('msg',16)}Message parent</button><button class="btn primary" data-act="toast" data-msg="Report card PDF generated">${ic('file',16)}Report card</button></div></div>
-  ${tabs('stu', [['overview','Overview'],['attendance','Attendance'],['academics','Academics'],['fees','Fees'],['conduct','Rewards & conduct']])}</div>${body}`;
+  ${tabs('stu', [['overview','Overview'],['attendance','Attendance'],['academics','Academics'],['fees','Fees'],['conduct','Rewards & conduct']])}</div>${sigBanner(s)}${body}`;
 };
 
 V.attendance = () => {
@@ -1187,8 +1283,8 @@ V.attendance = () => {
 };
 
 const COURSES = [
-  ['Mathematics','Grade 10 · Mr. Mendis','#2F6FED',72,4,128],['Physics','Grade 10 · Mr. Herath','#0E7490',64,2,96],['English Literature','Grade 10 · Ms. Silva','#8B5CF6',81,3,128],
-  ['ICT','Grade 10 · Mrs. Bandara','#12A594',58,1,64],['History','Grade 10 · Mr. Ratnayake','#B45309',69,2,96],['Art & Design','Grade 10 · Ms. De Alwis','#BE185D',77,0,64]
+  ['Mathematics','Grade 10 · Mr. Mendis','#A0412D',72,4,128],['Physics','Grade 10 · Mr. Herath','#3E6E7A',64,2,96],['English Literature','Grade 10 · Ms. Silva','#7A4E8C',81,3,128],
+  ['ICT','Grade 10 · Mrs. Bandara','#2E7D57',58,1,64],['History','Grade 10 · Mr. Ratnayake','#9A6418',69,2,96],['Art & Design','Grade 10 · Ms. De Alwis','#B0466A',77,0,64]
 ];
 V.lms = () => {
   const t = curTab('lms', 'courses');
@@ -1327,7 +1423,7 @@ V.users = () => {
 const UK = { tab:'profile', draft:null, draftKey:null, dirty:false, ctx:null, user:null, q:'' };
 const UK_DEPTS = ['Leadership','Primary','Secondary','Finance office','Admissions office','Student services','Front office','IT'];
 const UK_CLASSES = [...new Set([4, 5, 7, 8, 9, 10, 11, 12].map((n, i) => { const g = lvL(n), sx = ttSecs(g); return clsName(g, sx[i % sx.length]); }))];
-const UK_COLORS = ['#2F6FED','#12A594','#0E7490','#8B5CF6','#BE185D','#C2410C','#B45309','#4D7C0F'];
+const UK_COLORS = ['#A0412D','#2E7D57','#3E6E7A','#7A4E8C','#B0466A','#B5572A','#9A6418','#5B7A2A'];
 const UK_SENSITIVE = [
   ['export','Export data','Download student, staff or finance records as spreadsheets'],
   ['medical','See medical and safeguarding notes','Allergies, health conditions and counsellor notes'],
@@ -1638,14 +1734,14 @@ document.addEventListener('click', e => {
 });
 
 /* ---------- School branding (set in the platform console, kept in this browser) ---------- */
-const SCHOOL_DEFAULT = {name:'Colombo International School', short:'CIS', sub:'colombo-intl', color:'#2F6FED', logo:null};
+const SCHOOL_DEFAULT = {name:'Colombo International School', short:'CIS', sub:'colombo-intl', color:'#A0412D', logo:null};
 let SCHOOL = SCHOOL_DEFAULT;
-function loadSchool() { try { const s = JSON.parse(localStorage.getItem('quad-school') || 'null'); SCHOOL = s && s.name ? {...SCHOOL_DEFAULT, ...s} : SCHOOL_DEFAULT; } catch (e) { SCHOOL = SCHOOL_DEFAULT; } if (!SCHOOL.short) SCHOOL.short = SCHOOL.name.replace(/[^A-Za-z ]/g, '').split(' ').filter(Boolean).map(w => w[0]).slice(0, 3).join('').toUpperCase(); }
+function loadSchool() { try { const s = JSON.parse(localStorage.getItem('quad-school') || 'null'); SCHOOL = s && s.name ? {...SCHOOL_DEFAULT, ...s} : SCHOOL_DEFAULT; } catch (e) { SCHOOL = SCHOOL_DEFAULT; } if (/^#2f6fed$/i.test(SCHOOL.color || '')) SCHOOL = {...SCHOOL, color: SCHOOL_DEFAULT.color}; if (!SCHOOL.short) SCHOOL.short = SCHOOL.name.replace(/[^A-Za-z ]/g, '').split(' ').filter(Boolean).map(w => w[0]).slice(0, 3).join('').toUpperCase(); }
 const schoolMark = () => SCHOOL.logo ? `<img src="${SCHOOL.logo}" alt="${esc(SCHOOL.name)} logo">` : `<span>${esc(SCHOOL.short)}</span>`;
 function applySchool() {
   loadSchool(); const c = SCHOOL.color, r = document.documentElement.style;
   r.setProperty('--brand', c); r.setProperty('--brand-ink', '#fff'); r.setProperty('--brand-strong', `color-mix(in srgb, ${c} 80%, #000)`); r.setProperty('--brand-soft', `color-mix(in srgb, ${c} 13%, var(--surface))`);
-  r.setProperty('--rail-active', c); r.setProperty('--rail', `color-mix(in srgb, ${c} 16%, #0B1222)`); r.setProperty('--rail-2', `color-mix(in srgb, ${c} 26%, #131C31)`);
+  r.setProperty('--rail-active', c); r.setProperty('--rail', `color-mix(in srgb, ${c} 7%, #1F3A2E)`); r.setProperty('--rail-2', `color-mix(in srgb, ${c} 12%, #2B4A3C)`);
   const lg = document.querySelector('.rail .logo'); lg.innerHTML = schoolMark(); lg.classList.toggle('has-img', !!SCHOOL.logo); lg.style.background = SCHOOL.logo ? '#fff' : c;
   document.querySelector('.brand b').textContent = SCHOOL.name; document.querySelector('.brand small').textContent = 'Staff portal · powered by Quad';
   document.title = SCHOOL.name + ' · Staff portal';
@@ -1744,14 +1840,14 @@ function appDrawer(id) {
 /* ---------- Timetable ---------- */
 /* Subject library: colour, icon, default teacher and room */
 const SUBJ_LIB = {
-  'Mathematics':['#2F6FED','fin','Mr. Mendis','Room 12'], 'English':['#8B5CF6','book','Ms. Silva','Room 4'], 'Sinhala':['#C2410C','msg','Mrs. Herath','Room 6'], 'Tamil':['#9333EA','msg','Mr. Rajan','Room 7'],
-  'Science':['#0891B2','settings','Ms. Jayawardena','Lab 1'], 'Physics':['#0E7490','settings','Mr. Herath','Lab 2'], 'Chemistry':['#0D9488','alert','Dr. Fonseka','Lab 3'], 'Biology':['#16A34A','heart','Ms. Gunawardena','Lab 4'],
-  'Combined Maths':['#1D4ED8','fin','Mr. Wijesinghe','Room 14'], 'ICT':['#12A594','grid','Mrs. Bandara','ICT lab'], 'History':['#B45309','file','Mr. Ratnayake','Room 9'], 'Geography':['#65A30D','home','Ms. Karunaratne','Room 10'],
-  'Environmental studies':['#15803D','star','Mrs. Dias','Room 2'], 'Art & Design':['#BE185D','star','Ms. De Alwis','Studio'], 'Music':['#DB2777','heart','Mr. Fernando','Music room'], 'Physical Ed.':['#4D7C0F','heart','Coach Perera','Sports hall'],
-  'Religion':['#A16207','book','Mr. Gunasekara','Room 3'], 'Global Perspectives':['#0F766E','home','','Room 8'], 'French':['#4F46E5','msg','','Room 5'], 'Spanish':['#EA580C','msg','','Room 5'], 'Computer Science':['#0D9488','grid','','ICT lab'],
-  'PSHE':['#A16207','heart','','Room 3'], 'Language & Literature':['#8B5CF6','book','','Room 4'], 'Language Acquisition':['#4F46E5','msg','','Room 5'], 'Individuals & Societies':['#B45309','home','','Room 9'], 'Units of inquiry':['#15803D','star','','Room 2'],
-  'Design':['#DB2777','settings','','Design lab'], 'Theory of Knowledge':['#7C3AED','book','','Room 15'], 'General Paper':['#8B5CF6','file','','Room 15'], 'English Language Arts':['#8B5CF6','book','','Room 4'], 'Social Studies':['#B45309','home','','Room 9'],
-  'Literacy':['#8B5CF6','book','','Nest'], 'Numeracy':['#2F6FED','fin','','Nest'], 'Understanding the world':['#15803D','home','','Nest'], 'Creative play':['#BE185D','star','','Studio'], 'Physical play':['#4D7C0F','heart','','Play area'], 'Business studies':['#7C3AED','fee','Mr. Peiris','Room 11'], 'Free study':['#64748B','book','Library staff','Library']
+  'Mathematics':['#A0412D','fin','Mr. Mendis','Room 12'], 'English':['#7A4E8C','book','Ms. Silva','Room 4'], 'Sinhala':['#B5572A','msg','Mrs. Herath','Room 6'], 'Tamil':['#7A4E8C','msg','Mr. Rajan','Room 7'],
+  'Science':['#0891B2','settings','Ms. Jayawardena','Lab 1'], 'Physics':['#3E6E7A','settings','Mr. Herath','Lab 2'], 'Chemistry':['#0D9488','alert','Dr. Fonseka','Lab 3'], 'Biology':['#16A34A','heart','Ms. Gunawardena','Lab 4'],
+  'Combined Maths':['#8A3A25','fin','Mr. Wijesinghe','Room 14'], 'ICT':['#2E7D57','grid','Mrs. Bandara','ICT lab'], 'History':['#9A6418','file','Mr. Ratnayake','Room 9'], 'Geography':['#6F8F2E','home','Ms. Karunaratne','Room 10'],
+  'Environmental studies':['#2E7D57','star','Mrs. Dias','Room 2'], 'Art & Design':['#B0466A','star','Ms. De Alwis','Studio'], 'Music':['#C2557A','heart','Mr. Fernando','Music room'], 'Physical Ed.':['#5B7A2A','heart','Coach Perera','Sports hall'],
+  'Religion':['#9A6418','book','Mr. Gunasekara','Room 3'], 'Global Perspectives':['#0F766E','home','','Room 8'], 'French':['#3D57A6','msg','','Room 5'], 'Spanish':['#EA580C','msg','','Room 5'], 'Computer Science':['#0D9488','grid','','ICT lab'],
+  'PSHE':['#9A6418','heart','','Room 3'], 'Language & Literature':['#7A4E8C','book','','Room 4'], 'Language Acquisition':['#3D57A6','msg','','Room 5'], 'Individuals & Societies':['#9A6418','home','','Room 9'], 'Units of inquiry':['#2E7D57','star','','Room 2'],
+  'Design':['#C2557A','settings','','Design lab'], 'Theory of Knowledge':['#6B4A86','book','','Room 15'], 'General Paper':['#7A4E8C','file','','Room 15'], 'English Language Arts':['#7A4E8C','book','','Room 4'], 'Social Studies':['#9A6418','home','','Room 9'],
+  'Literacy':['#7A4E8C','book','','Nest'], 'Numeracy':['#A0412D','fin','','Nest'], 'Understanding the world':['#2E7D57','home','','Nest'], 'Creative play':['#B0466A','star','','Studio'], 'Physical play':['#5B7A2A','heart','','Play area'], 'Business studies':['#6B4A86','fee','Mr. Peiris','Room 11'], 'Free study':['#64748B','book','Library staff','Library']
 };
 /* Bell schedules: lessons (L) and breaks (B) with durations; times are worked out from the start time */
 const L = dur => ({t:'L', dur}), B = (label, dur, duty) => ({t:'B', label, dur, duty});
@@ -2055,7 +2151,7 @@ V.pastoral = () => {
     const houses = HOUSES.map(h => [h, PAST.beh.filter(b => b.type === 'house' && stuOf(b.sid).house === h).reduce((a, b) => a + b.pts, 0)]).sort((a, b) => b[1] - a[1]), mx = Math.max(...houses.map(h => h[1]), 1);
     body = `<div class="grid g-2-1"><div class="card"><div class="toolbar"><select class="input inline" data-filter="behT" aria-label="Type" data-dd-ic="star"><option value="all">All types</option>${BEH_TYPES.map(([k, l]) => `<option value="${k}" data-n="${PAST.beh.filter(b => b.type === k).length}" ${ft === k ? 'selected' : ''}>${l}</option>`).join('')}</select><span class="muted" style="margin-left:auto;font-size:12.5px">${rows.length} entries · last two weeks</span></div>
       <div class="tbl-wrap"><table><thead><tr><th>Student</th><th>Type</th><th>Reason</th><th class="r">Points</th><th>By</th><th>Date</th></tr></thead><tbody>${rows.map(b => { const st = stuOf(b.sid); return `<tr class="click" data-act="openBeh" data-id="${b.id}"><td><div class="who">${avatar(st.name,'sm')}<div><b>${esc(st.name)}</b><small>${esc(st.cls)}</small></div></div></td><td>${b.pts > 0 ? `<span class="pill t-green plain">${BEH_TYPES.find(x => x[0] === b.type)[1]}</span>` : `<span class="pill ${b.type === 'detention' ? 't-red' : 't-amber'} plain">${BEH_TYPES.find(x => x[0] === b.type)[1]}</span>`}</td><td>${esc(b.cat)}</td><td class="r num"><b style="color:${b.pts > 0 ? 'var(--good)' : 'var(--bad)'}">${b.pts > 0 ? '+' : ''}${b.pts}</b></td><td class="muted">${esc(b.by)}</td><td class="num muted">${dShort(b.date)}</td></tr>`; }).join('')}</tbody></table></div></div>
-      <section class="card"><div class="card-h"><h2>House points</h2><span class="muted" style="font-size:12px">This term</span></div><div style="padding:6px 18px 18px;display:flex;flex-direction:column;gap:12px">${houses.map(([h, n], i) => `<div class="house"><span class="hd" style="background:${['#12A594','#2F6FED','#BE185D','#E8A33D'][HOUSES.indexOf(h)]}"></span><b>${h}</b>${i === 0 ? '<span class="pill t-green plain">Leading</span>' : ''}<span class="num" style="margin-left:auto;font-weight:800">${n}</span><div class="bar" style="grid-column:1/-1"><i style="width:${n / mx * 100}%;background:${['#12A594','#2F6FED','#BE185D','#E8A33D'][HOUSES.indexOf(h)]}"></i></div></div>`).join('')}</div></section></div>`; }
+      <section class="card"><div class="card-h"><h2>House points</h2><span class="muted" style="font-size:12px">This term</span></div><div style="padding:6px 18px 18px;display:flex;flex-direction:column;gap:12px">${houses.map(([h, n], i) => `<div class="house"><span class="hd" style="background:${['#2E7D57','#A0412D','#B0466A','#D89A2B'][HOUSES.indexOf(h)]}"></span><b>${h}</b>${i === 0 ? '<span class="pill t-green plain">Leading</span>' : ''}<span class="num" style="margin-left:auto;font-weight:800">${n}</span><div class="bar" style="grid-column:1/-1"><i style="width:${n / mx * 100}%;background:${['#2E7D57','#A0412D','#B0466A','#D89A2B'][HOUSES.indexOf(h)]}"></i></div></div>`).join('')}</div></section></div>`; }
   else if (t === 'medical') body = `<div class="grid g-2-1"><div class="card"><div class="card-h"><h2>Medical conditions</h2><span class="muted" style="font-size:12px">${PAST.med.length} students</span></div><div class="tbl-wrap"><table><thead><tr><th>Student</th><th>Condition</th><th>Severity</th><th>Medication</th><th>Care plan review</th></tr></thead><tbody>${PAST.med.map((m, i) => { const st = stuOf(m.sid), due = m.plan < '2026-11-05'; return `<tr class="click" data-act="openMed" data-i="${i}"><td><div class="who">${avatar(st.name,'sm')}<div><b>${esc(st.name)}</b><small>${esc(st.cls)}</small></div></div></td><td>${esc(m.cond)}</td><td>${sevPill(m.sev)}</td><td class="muted" style="font-size:12.5px">${esc(m.meds)}</td><td class="num">${due ? `<span class="pill t-amber plain">Due ${dShort(m.plan)}</span>` : dShort(m.plan)}</td></tr>`; }).join('')}</tbody></table></div></div>
     <section class="card"><div class="card-h"><h2>Sick bay today</h2><button class="btn sm primary" data-act="newVisit">${ic('plus',14)}Log visit</button></div><div class="needs">${PAST.visits.map(v => { const st = stuOf(v.sid); return `<div class="need"><span>${ic('heart',16)}</span><div><b>${esc(st.name)} · ${v.t}</b><small>${esc(v.c)} · ${esc(v.tr)}</small><small>${esc(v.out)}${v.notified ? ' · parents told' : ''}</small></div></div>`; }).join('')}</div></section></div>`;
   else { body = `<div class="sg-lock"><span>${ic('shield',18)}</span><div><b>Restricted to the safeguarding team</b><small>${PAST.access.map(a => `${esc(a[0])} (${esc(a[1])})`).join(' · ')}. Every view is recorded.</small></div></div>
@@ -2884,7 +2980,7 @@ const ACT = {
     if (!name) { err.textContent = 'Type or pick a subject to add.'; inp.focus(); return; }
     const k = Object.keys(SUBJ_LIB).find(x => x.toLowerCase() === name.toLowerCase()) || name;
     if (S.subDraft.rows.some(r => r.k === k)) { err.textContent = `${k} is already on the list.`; inp.focus(); return; }
-    if (!SUBJ_LIB[k]) SUBJ_LIB[k] = [['#0EA5E9','#E11D48','#7C3AED','#059669','#D97706'][Object.keys(SUBJ_LIB).length % 5], 'book', '', ''];
+    if (!SUBJ_LIB[k]) SUBJ_LIB[k] = [['#0EA5E9','#E11D48','#6B4A86','#059669','#D97706'][Object.keys(SUBJ_LIB).length % 5], 'book', '', ''];
     S.subDraft.rows.push({k, n: 2, t: SUBJ_LIB[k][2], r: SUBJ_LIB[k][3]}); keepScroll(subjDrawer); const b = drawer.querySelector('.drawer-b'); b.scrollTop = b.scrollHeight; },
   sjCopy: () => { subjSync(); const g = +document.getElementById('sjCopy').value; S.subDraft.rows = gSubj(g).map(r => ({...r})); keepScroll(subjDrawer); toast(`Copied ${esc(yl(g))}’s subjects. Adjust them, then save.`); },
   sjAlso: el => { subjSync(); const g = +el.dataset.g, a = S.subDraft.also; a.has(g) ? a.delete(g) : a.add(g); keepScroll(subjDrawer); },
@@ -3021,6 +3117,227 @@ window.addEventListener('hashchange', () => { if (UK.user) delete UK.user._draft
   if (!imp) return;
   document.getElementById('supportBar').innerHTML = `<div class="support" role="status">${ic('eye',16)}<span>Support view: you’re in <b>${esc(imp.name)}</b> as ${esc(imp.by)} from Quad. Everything you do here is logged in the school’s audit log.</span><button data-act="exitSupport">Exit to platform</button></div>`;
  })();
+/* ========== Warm & local: morning scene, petals, early warning, Ask Quad ========== */
+const YL = () => LV.map((_, i) => yl(i + 1));
+P.spark = '<path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M18.5 15.5l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7z"/>';
+P.trend = '<path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/>';
+const scrib = w => `<span class="scrib">${w}<svg class="scribble" viewBox="0 0 120 10" preserveAspectRatio="none" aria-hidden="true"><path d="M2 7c20-4 40-5 60-3s38 2 56-2" fill="none" stroke="var(--gold)" stroke-width="3" stroke-linecap="round"/></svg></span>`;
+/* Morning over the hills: sun, layered hills, tea rows, two birds. Colours follow the theme. */
+const morningArt = (cls = '') => `<svg class="morning ${cls}" viewBox="0 0 320 150" aria-hidden="true">
+  <circle cx="226" cy="74" r="34" fill="var(--gold)" opacity=".9"/><circle cx="226" cy="74" r="50" fill="var(--gold)" opacity=".15"/>
+  <path d="M0 108c40-26 78-30 118-14s70 6 104-12 70-16 98 0v68H0z" fill="var(--c2)" opacity=".35"/>
+  <path d="M0 124c50-22 96-18 140-4s84 10 118-6 48-10 62-4v40H0z" fill="var(--c2)" opacity=".7"/>
+  <g stroke="var(--surface)" stroke-width="2" stroke-linecap="round" opacity=".45" fill="none"><path d="M18 136c30-10 60-12 92-4"/><path d="M40 144c34-9 70-10 104-2"/><path d="M168 132c30-12 64-14 100-6"/><path d="M190 142c28-8 60-9 92-3"/></g>
+  <path d="M0 150v-10c60-12 120-10 180-2s104 4 140-6v18z" fill="var(--c2)"/>
+  <g fill="none" stroke="var(--ink-2)" stroke-width="1.8" stroke-linecap="round"><path d="M92 40q5-5 10 0q5-5 10 0"/><path d="M122 54q4-4 8 0q4-4 8 0"/></g></svg>`;
+function petals(n = 28) { if (matchMedia('(prefers-reduced-motion: reduce)').matches) return; const box = document.createElement('div'); box.className = 'petals'; const cols = ['var(--gold)', 'var(--c1)', 'var(--c2)', 'var(--c5)'];
+  box.innerHTML = Array.from({length: n}, (_, i) => `<i style="left:${Math.random() * 100}%;background:${cols[i % 4]};--dx:${(Math.random() * 160 - 80).toFixed(0)}px;--r:${(Math.random() * 720 - 360).toFixed(0)}deg;animation-delay:${(Math.random() * .35).toFixed(2)}s"></i>`).join('');
+  document.body.appendChild(box); setTimeout(() => box.remove(), 2600); }
+
+/* ---------- Early warning ---------- */
+const SIG = {list: [], plans: {}, dismissed: {}};
+const SIG_F = {att: ['Attendance', 'check'], beh: ['Behaviour', 'alert'], learn: ['Learning', 'book'], hw: ['Homework', 'file'], fee: ['Family finances', 'fee']};
+function sigBuild() { if (SIG.built) return; SIG.built = true; stBuild(); pastBuild(); const r = ukSeed('early-warning');
+  students.filter(s => s.status === 'Active').forEach(s => { const f = [], g = s.grade, subs = gSubj(g), ct = ST.ct[s.cls];
+    const prev = Math.min(99.5, s.att + (r() < .55 ? 2 + r() * 8 : -r() * 3)), drop = prev - s.att, trend = Array.from({length: 6}, (_, i) => +(prev - drop * i / 5 + (r() - .5) * 1.4).toFixed(1));
+    if (s.att < 90 && drop >= 3) f.push({k: 'att', w: s.att < 86 ? 3 : 2, t: `Attendance ${s.att.toFixed(0)}% · down ${drop.toFixed(0)} points in 3 weeks`, why: `${Math.round((100 - s.att) / 100 * 30)} days missed this term, mostly Mondays`, trend});
+    const neg = PAST.beh.filter(b => b.sid === s.id && b.pts < 0).length + (r() < .12 ? 2 : 0);
+    if (neg >= 2) f.push({k: 'beh', w: neg >= 3 ? 3 : 2, t: `${neg} behaviour concerns in 2 weeks`, why: 'Was settled last term; most entries are in afternoon lessons'});
+    const subs2 = subs.filter(x => !/relig|buddh|islam|christ|hindu|catholic/i.test(x.k));
+    if (r() < .2 && subs2.length && kindOf(g) !== 'early') { const sub = subs2[Math.floor(r() * subs2.length)].k, now = 38 + Math.floor(r() * 18), was = now + 11 + Math.floor(r() * 14);
+      f.push({k: 'learn', w: now < 45 ? 3 : 2, t: `${sub} ${now}% · was ${was}% last term`, why: 'Last two assessments below target', sub}); }
+    if (r() < .14) { const n = 3 + Math.floor(r() * 4); f.push({k: 'hw', w: n >= 5 ? 2 : 1, t: `${n} homework tasks missed this month`, why: 'Was handing in on time until Week 3'}); }
+    if (s.balance >= 90000) f.push({k: 'fee', w: 1, t: `${money(s.balance)} unpaid for 30+ days`, why: 'No reply to two reminders. The family may need support'});
+    if (!f.length || f.reduce((a, x) => a + x.w, 0) < 2) return; const score = f.reduce((a, x) => a + x.w, 0), level = score >= 5 || f.length >= 3 ? 'high' : 'med';
+    const ks = f.map(x => x.k), lr = f.find(x => x.k === 'learn');
+    const step = ks.includes('beh') && score >= 5 ? ['Refer to the pastoral team', ST.heads && Object.values(ST.heads).filter(Boolean)[0] || 'Head of section'] : ks.includes('att') ? ['Class teacher to call home this week', ct] : lr ? [`Offer ${lr.sub} catch-up sessions`, taOf(s.cls, lr.sub) || ct] : ks.includes('beh') ? ['Check in with the student, then the parents', ct] : ks.includes('hw') ? ['Agree a homework plan with the parents', ct] : ['Bursar to offer a payment plan', 'Bursar’s office'];
+    SIG.list.push({sid: s.id, s, f, score, level, step: step[0], owner: step[1] || 'Class teacher', at: Math.floor(r() * 4)}); });
+  SIG.list.sort((a, b) => b.score - a.score);
+  SIG.list.filter(x => x.level === 'med').slice(-4).forEach((x, i) => { SIG.plans[x.sid] = {owner: x.owner, step: x.step, review: '2026-10-16', note: 'Agreed with parents at a meeting on 18 Sep.', since: '18 Sep', better: true, was: x.f[0].t}; x.level = 'better'; });
+}
+const sigOf = id => { sigBuild(); return SIG.list.find(x => x.sid === id); };
+const sigLevel = x => SIG.dismissed[x.sid] ? 'dismissed' : x.level === 'better' ? 'better' : SIG.plans[x.sid] ? 'plan' : x.level;
+const SIG_LV = {high: ['Needs a conversation', 't-red'], med: ['Keep an eye on', 't-amber'], plan: ['Plan in place', 't-blue'], better: ['Improving', 't-green'], dismissed: ['Not a concern', 't-violet']};
+const spark = (d, c = 'var(--bad)') => { const mn = Math.min(...d) - 1, mx = Math.max(...d) + 1, p = d.map((v, i) => `${(i / (d.length - 1) * 64).toFixed(1)},${(22 - (v - mn) / (mx - mn) * 20).toFixed(1)}`).join(' ');
+  return `<svg class="spk" viewBox="0 0 64 24" aria-hidden="true"><polyline points="${p}" fill="none" stroke="${c}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="64" cy="${p.split(' ').pop().split(',')[1]}" r="2.6" fill="${c}"/></svg>`; };
+const sigCard = (x, compact) => { const lv = sigLevel(x), pl = SIG.plans[x.sid];
+  return `<article class="sig ${lv}" ${compact ? '' : `id="sig-${x.sid}"`}><div class="sig-h">${avatar(x.s.name)}<div style="flex:1;min-width:0"><b><a href="#student-${x.sid}">${esc(x.s.name)}</a></b><small>${esc(x.s.cls)} · class teacher ${esc(ST.ct[x.s.cls] || '—')}</small><span class="pill ${SIG_LV[lv][1]} plain">${SIG_LV[lv][0]}</span></div></div>
+    <ul class="sig-f">${(lv === 'better' ? [{k: 'att', t: `Was: ${pl.was}`, why: `Plan since ${pl.since}. Up 5 points in the last two weeks`, trend: [84, 85, 86, 88, 89, 91]}] : x.f).slice(0, compact ? 2 : 9).map(f => `<li><span class="sf-ic">${ic(SIG_F[f.k][1], 15)}</span><div><b>${esc(f.t)}</b>${compact ? '' : `<small>${esc(f.why)}</small>`}</div>${f.trend ? spark(f.trend, lv === 'better' ? 'var(--good)' : 'var(--bad)') : ''}</li>`).join('')}</ul>
+    ${compact ? '' : `<div class="sig-next"><span class="ic">${ic(pl ? 'check' : 'spark', 16)}</span><div><small>${pl ? 'Plan' : 'Suggested next step'}</small><b>${esc(pl ? pl.step : x.step)}</b><small>${esc(pl ? `${pl.owner} · review ${dShort(pl.review)}` : `Owner: ${x.owner}`)}</small></div></div>
+    <div class="sig-acts">${pl ? `<button class="btn sm" data-act="sigPlan" data-id="${x.sid}">${ic('settings',14)}Update plan</button>` : `<button class="btn sm primary" data-act="sigPlan" data-id="${x.sid}">${ic('check',14)}Start a plan</button>`}<button class="btn sm" data-act="askAbout" data-q="Draft a letter to ${esc(x.s.guardian)} about ${esc(x.s.name.split(' ')[0])}">${ic('msg',14)}Write to parents</button>${lv === 'high' || lv === 'med' ? `<button class="btn sm ghost" data-act="sigDismiss" data-id="${x.sid}">Not a concern</button>` : ''}</div>`}</article>`; };
+V.signals = () => { sigBuild(); const lvF = S.filter.sigLv || 'open', fk = S.filter.sigF || 'all', fg = S.filter.sigG || 'all';
+  const cnt = l => SIG.list.filter(x => l === 'open' ? ['high', 'med'].includes(sigLevel(x)) : sigLevel(x) === l).length;
+  const rows = SIG.list.filter(x => (lvF === 'open' ? ['high', 'med'].includes(sigLevel(x)) : sigLevel(x) === lvF) && (fk === 'all' || x.f.some(f => f.k === fk)) && (fg === 'all' || x.s.grade == fg));
+  const hi = cnt('high'), md = cnt('med'), bt = cnt('better');
+  return `${pageHead('Student information', 'Early warning', '', `<button class="btn" data-act="sigHow">${ic('alert',16)}How this works</button>`)}
+  <section class="card story"><div class="story-t"><span class="local">This week</span><p><b>${hi} student${hi === 1 ? '' : 's'} need${hi === 1 ? 's' : ''} a conversation</b> and ${md} are worth keeping an eye on. Most started slipping in the last three weeks, so there is still time to help. ${bt} students you supported last month are improving.</p></div>${morningArt('sm')}</section>
+  <div class="card"><div class="toolbar"><div class="chips">${[['open', 'To look at'], ['high', 'Needs a conversation'], ['med', 'Keep an eye on'], ['plan', 'Plan in place'], ['better', 'Improving'], ['dismissed', 'Not a concern']].map(([k, l]) => `<button class="chip ${lvF === k ? 'on' : ''}" data-act="filter" data-key="sigLv" data-val="${k}">${l}<span class="n">${cnt(k)}</span></button>`).join('')}</div>
+    <select class="input inline" data-filter="sigF" aria-label="Signal" data-dd-ic="alert"><option value="all">All signals</option>${Object.entries(SIG_F).map(([k, [l]]) => `<option value="${k}" ${fk === k ? 'selected' : ''} data-n="${SIG.list.filter(x => x.f.some(f => f.k === k)).length}">${l}</option>`).join('')}</select>
+    <select class="input inline" data-filter="sigG" aria-label="${GL.one}" data-dd-ic="student"><option value="all">${GL.all}</option>${YL().map((l, i) => `<option value="${i + 1}" ${fg == i + 1 ? 'selected' : ''}>${esc(l)}</option>`).join('')}</select></div>
+  <div class="sig-grid">${rows.map(x => sigCard(x)).join('') || `<div class="empty">${morningArt('sm')}<b>Nothing here</b><p class="muted">No students match these filters. That’s good news.</p></div>`}</div></div>`; };
+function sigBanner(s) { const x = sigOf(s.id); if (!x) return ''; const lv = sigLevel(x); if (lv === 'dismissed') return '';
+  return `<div class="sig-banner ${lv}"><span class="ic">${ic(lv === 'better' ? 'trend' : 'alert', 18)}</span><div style="flex:1;min-width:0"><b>${SIG_LV[lv][0]}</b><small>${esc(lv === 'better' ? 'Plan since ' + SIG.plans[x.sid].since + ' is working' : x.f.map(f => f.t).join(' · '))}</small></div><a class="btn sm" href="#signals">Open early warning</a></div>`; }
+const SIG_STEPS = ['Class teacher to call home this week', 'Meeting with parents', 'Check in with the student, then the parents', 'Offer catch-up sessions', 'Agree a homework plan with the parents', 'Refer to the pastoral team', 'Assign a mentor', 'Bursar to offer a payment plan'];
+function sigPlanDrawer(x) { const pl = SIG.plans[x.sid] || {owner: x.owner, step: x.step, review: '2026-10-19', note: '', tell: true};
+  formDrawer(`${head(SIG.plans[x.sid] ? 'Update support plan' : 'Start a support plan', `${esc(x.s.name)} · ${esc(x.s.cls)}`)}
+    <div class="drawer-b"><div class="sig-why">${x.f.map(f => `<div>${ic(SIG_F[f.k][1], 14)}<span>${esc(f.t)}</span></div>`).join('')}</div>
+      <div class="field"><label for="sp_step">Next step</label><select class="input" id="sp_step">${[...new Set([pl.step, ...SIG_STEPS])].map(o => `<option ${o === pl.step ? 'selected' : ''}>${esc(o)}</option>`).join('')}</select></div>
+      <div class="form-grid"><div class="field"><label for="sp_owner">Owner</label><select class="input" id="sp_owner">${[...new Set([pl.owner, ...ST.teachers.map(t => t.name), 'Bursar’s office'])].map(o => `<option ${o === pl.owner ? 'selected' : ''}>${esc(o)}</option>`).join('')}</select></div>
+      <div class="field"><label for="sp_rev">Review on</label><input class="input" type="date" id="sp_rev" value="${pl.review}"></div>
+      <div class="field full"><label for="sp_note">What we agreed</label><textarea class="input" id="sp_note" rows="3" placeholder="For example: Kasun will call on Tuesday; morning check-ins for two weeks">${esc(pl.note || '')}</textarea></div></div>
+      <div class="setting"><div class="meta"><b>Let the parents know</b><small>They get a kind message in the app saying who will be in touch and when.</small></div>${ukSw(pl.tell !== false, 'id="sp_tell" data-act="spTell" aria-label="Let the parents know"')}</div></div>
+    <div class="drawer-f"><button class="btn" data-act="closeAll">Cancel</button><button class="btn primary" data-act="sigSave" data-id="${x.sid}">Save plan</button></div>`); }
+
+/* ---------- Home: the school today ---------- */
+function needsToday() { sigBuild(); coverBuild(); examsBuild(); const out = [];
+  const rows = COVER.absent.flatMap(a => absentLessons(a.name, a.part).map(l => l.key)), open = rows.filter(k => !(S.ttSub || {})[k]).length;
+  if (open) out.push(['bad', 'crm', `${open} lessons have no cover yet`, `${COVER.absent.length} staff are absent today. First lesson at 07:50.`, 'cover', 'Arrange cover']);
+  const hi = SIG.list.filter(x => sigLevel(x) === 'high').length; if (hi) out.push(['bad', 'alert', `${hi} students need a conversation`, 'Early warning found them slipping in the last three weeks.', 'signals', 'See who']);
+  const sg = PAST.sg.filter(x => x.level === 'High' && x.status !== 'Closed').length; if (sg) out.push(['warn', 'shield', `${sg} high-level safeguarding case open`, 'Restricted to the safeguarding team.', 'pastoral', 'Open']);
+  const cl = EXAMS.series.reduce((a, se) => a + examClashes(se).clash.size, 0); if (cl) out.push(['warn', 'file', `${cl} exam papers clash`, 'Fix them before you publish the timetable to parents.', 'exams', 'Fix']);
+  const od = invoices.filter(i => i.status === 'Overdue'); if (od.length) out.push(['warn', 'fee', `${od.length} invoices are overdue`, `${money(od.reduce((a, i) => a + i.amt - i.paid, 0))} outstanding. A friendly reminder usually works.`, 'fees', 'Remind']);
+  const wait = apps.filter(a => a.days > 14 && a.stage !== 'enrolled').length; if (wait) out.push(['info', 'admit', `${wait} applicants waiting over two weeks`, 'Families decide quickly. A call today keeps them warm.', 'admissions', 'Open pipeline']);
+  return out; }
+V.dashboard = () => {
+  sigBuild(); const months = ['Apr','May','Jun','Jul','Aug','Sep','Oct'];
+  const collected = [38.4, 6.2, 4.1, 41.2, 7.5, 5.3, 48.2], outstanding = [4.1, 1.2, .8, 6.3, 1.9, 1.1, 13.3];
+  const att = [94.1,95.2,93.8,94.6,96.0,95.1,92.4,94.8,95.6,95.9,94.2,93.7,95.0,96.2,95.4,94.6,95.8,96.1,95.2,94.6];
+  const attL = att.map((_, i) => { const d = new Date(2026, 8, 8 + Math.floor(i / 5) * 7 + i % 5); return d.toLocaleDateString('en-GB', {day:'numeric', month:'short'}); });
+  const funnel = STAGES.map(s => [s.n, apps.filter(a => STAGES.findIndex(x=>x.k===a.stage) >= STAGES.findIndex(x=>x.k===s.k)).length]);
+  const overdue = invoices.filter(i => i.status === 'Overdue').slice(0, 5), nd = needsToday();
+  const byYear = YL().map((l, i) => { const xs = students.filter(s => s.grade === i + 1); return [l, xs.length ? xs.reduce((a, s) => a + s.att, 0) / xs.length : 100]; }).filter((_, i) => students.some(s => s.grade === i + 1)).sort((a, b) => a[1] - b[1]);
+  const top = SIG.list.filter(x => sigLevel(x) === 'high').slice(0, 3), live = students.filter(s => s.status === 'Active'), bdays = [live[5], live[17], live[29]];
+  pastBuild(); const houses = HOUSES.map(h => [h, PAST.beh.filter(b => b.type === 'house' && stuOf(b.sid).house === h).reduce((a, b) => a + b.pts, 0)]).sort((a, b) => b[1] - a[1]);
+  const merits = PAST.beh.filter(b => b.date >= '2026-09-29' && b.pts > 0).length;
+  return `
+  <section class="hello"><div class="hello-t"><div class="local" lang="si">ආයුබෝවන් · <span lang="ta">வணக்கம்</span></div><h1>Good morning, ${scrib('Prishan')}</h1>
+    <p class="hello-s"><b>1,181 of 1,248 students</b> are in school today, 94.6%. ${byYear.length ? `${esc(byYear[0][0])} is the lowest at ${byYear[0][1].toFixed(0)}%. ` : ''}Term 1 fees are 78% collected and <b>${nd.length} things</b> need you before assembly.</p>
+    <div class="hello-m">Monday 5 October · Week 6 of Term 1 · next holiday Vap Poya, Mon 26 Oct</div>
+    <div class="chips" style="margin-top:14px"><button class="btn primary" data-act="go" data-to="attendance">${ic('check',16)}Take attendance</button><button class="btn" data-act="newApp">${ic('plus',16)}New application</button></div></div>${morningArt()}</section>
+  <div class="vine" aria-hidden="true"></div>
+  <div class="grid g-2-1">
+    <section class="card"><div class="card-h"><h2>Needs you today</h2><span class="pill t-amber plain">${nd.length}</span></div>
+      <div class="needs2">${nd.map(([tone, i, t, sub, to, btn]) => `<div class="nd ${tone}"><span class="ic">${ic(i, 18)}</span><div><b>${t}</b><small>${sub}</small></div><a class="btn sm" href="#${to}">${btn}</a></div>`).join('') || '<p class="muted" style="padding:18px">All clear. Enjoy your tea.</p>'}</div></section>
+    <section class="card"><div class="card-h"><h2>Good news</h2>${ic('star', 18)}</div><div class="good">
+      <div><span class="gn-ic">🎂</span><div><b>${bdays.length} birthdays today</b><small>${bdays.map(s => esc(s.name.split(' ')[0]) + ' (' + esc(s.cls.split(' – ')[0]) + ')').join(', ')}</small></div><button class="btn sm" data-act="bday">Send wishes</button></div>
+      <div><span class="gn-ic" style="background:var(--good-soft);color:var(--good)">${ic('star', 16)}</span><div><b>${merits} merits this week</b><small>${esc(houses[0][0])} house leads with ${houses[0][1]} points</small></div></div>
+      <div><span class="gn-ic" style="background:var(--brand-soft);color:var(--brand)">${ic('check', 16)}</span><div><b>${esc(byYear[byYear.length - 1] ? byYear[byYear.length - 1][0] : '')} had the best week</b><small>${byYear.length ? byYear[byYear.length - 1][1].toFixed(1) : ''}% attendance</small></div></div>
+      <div><span class="gn-ic" style="background:var(--info-soft);color:var(--info)">${ic('trend', 16)}</span><div><b>${SIG.list.filter(x => sigLevel(x) === 'better').length} students are improving</b><small>Their support plans are working</small></div></div></div></section>
+  </div>
+  <section class="card"><div class="card-h"><h2>Early warning</h2><span class="muted" style="font-size:12.5px">Students who started slipping in the last three weeks</span><a href="#signals" class="btn sm ghost">See all ${ic('arrow',14)}</a></div>
+    <div class="sig-row">${top.map(x => sigCard(x, true)).join('')}</div></section>
+  <h2 class="sec-t">The numbers</h2>
+  <div class="grid g-kpi">
+    ${kpi('student','t-blue','Enrolled students','1,248','<span class="up">▲ 3.2%</span> vs last year')}
+    ${kpi('check','t-green','Attendance today','94.6%','1,181 present · 67 absent')}
+    ${kpi('fee','t-amber','Term 1 fees collected','Rs 48.2M','<span class="up">78%</span> of Rs 61.5M billed')}
+    ${kpi('admit','t-violet','Open applications', apps.filter(a=>!['enrolled'].includes(a.stage)).length, '6 interviews this week')}
+  </div>
+  <div class="grid g-2-1">
+    <section class="card"><div class="card-h"><h2>Fee collection</h2>${legend([['Collected','var(--c2)'],['Outstanding','var(--c3)']])}</div>
+      <div class="card-b">${barChart({labels: months, series: [{name:'Collected', data: collected, color:'var(--c2)'},{name:'Outstanding', data: outstanding, color:'var(--c3)'}], stacked:true, fmt:(v)=>'Rs '+(+v).toFixed(v<10&&v%1?1:0)+'M'})}</div></section>
+    <section class="card"><div class="card-h"><h2>Admissions funnel</h2><a href="#admissions" class="btn sm ghost">Open pipeline ${ic('arrow',14)}</a></div>
+      <div class="card-b" style="display:flex;flex-direction:column;gap:12px">${funnel.map(([n, v], i) => `<div data-tip="<b>${n}</b><br>${v} applicants reached this stage"><div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:4px"><span>${n}</span><b class="num">${v}</b></div><div class="bar" style="height:10px"><i style="width:${v/funnel[0][1]*100}%;background:var(--c1);opacity:${1 - i*.12}"></i></div></div>`).join('')}
+      <div class="muted" style="font-size:12px">Conversion enquiry → enrolled: <b style="color:var(--ink)">${Math.round(funnel[5][1]/funnel[0][1]*100)}%</b></div></div></section>
+  </div>
+  <div class="grid g-2-1">
+    <section class="card"><div class="card-h"><h2>Daily attendance · last 4 weeks</h2><span class="muted" style="font-size:12px">School-wide, ${esc(ylRange(1, LV.length))}</span></div>
+      <div class="card-b">${lineChart({labels: attL, data: att, min: 90, max: 98, target: 95})}</div></section>
+    <section class="card"><div class="card-h"><h2>Today</h2><span class="pill t-blue plain">5 Oct</span></div>
+      <div class="list">${[
+        ['08:30','Grade 10 Physics practical','Lab 2 · Mr. Herath','t-blue','book'],
+        ['10:00','Admission interview – Liam Patel','Principal’s office','t-violet','admit'],
+        ['11:30','Finance committee','Board room · Q2 budget review','t-amber','fin'],
+        ['14:00','Inter-house swimming heats','Aquatic centre','t-green','star'],
+        ['16:00','PTA meeting – Primary','Main hall','t-red','crm']
+      ].map(([t,a,b,tone,i]) => `<div class="li"><div class="dot-ic ${tone}">${ic(i,16)}</div><div class="meta"><b>${a}</b><p>${b}</p></div><time>${t}</time></div>`).join('')}</div></section>
+  </div>
+  <div class="grid g-2-1">
+    <section class="card"><div class="card-h"><h2>Overdue invoices</h2><a href="#fees" class="btn sm ghost">All invoices ${ic('arrow',14)}</a></div>
+      <div class="tbl-wrap"><table><thead><tr><th>Student</th><th>Invoice</th><th>Due</th><th class="r">Balance</th><th></th></tr></thead><tbody>
+      ${overdue.map(v => `<tr><td><div class="who">${avatar(v.student.name,'sm')}<div><b>${v.student.name}</b><small>${v.student.cls}</small></div></div></td><td class="num">${v.no}</td><td class="num">${v.due}</td><td class="r num"><b>${money(v.amt - v.paid)}</b></td><td class="r"><button class="btn sm" data-act="remind" data-name="${esc(v.student.guardian)}">${ic('send',14)}Remind</button></td></tr>`).join('')}
+      </tbody></table></div></section>
+    <section class="card"><div class="card-h"><h2>My tasks</h2><span class="muted" style="font-size:12px" id="taskCount">${S.tasks.filter(t=>!t.done).length} open</span></div>
+      <div>${S.tasks.map((t, i) => `<label class="task ${t.done?'done':''}"><input type="checkbox" data-act="task" data-i="${i}" ${t.done?'checked':''}><span>${t.t}</span><small>${t.due}</small></label>`).join('')}</div></section>
+  </div>`;
+};
+
+/* ---------- Ask Quad: plain-English questions answered from the school's own records ---------- */
+const AQ = {msgs: [], open: false, busy: false};
+const AQ_SUGG = ['Who needs attention in Year 9?', 'How is attendance this week?', 'What fees are overdue?', 'Is all cover arranged today?', 'Draft a letter about the Pinnawala trip', 'Tell me about Amaya'];
+const aqFrom = s => `<div class="aq-from">From: ${s}</div>`;
+const aqActs = a => `<div class="aq-acts">${a.join('')}</div>`;
+const aqGo = (to, l) => `<a class="btn sm" href="#${to}">${l}</a>`;
+function aqYear(q) { const m = q.match(/\b(year|grade|form|yr)\s*(\d{1,2})\b/i); if (m) { const lab = YL().findIndex(l => new RegExp(`\\b${m[2]}\\b`).test(l) && new RegExp(m[1].slice(0, 2), 'i').test(l)); if (lab >= 0) return lab + 1; const n = YL().findIndex(l => new RegExp(`\\b${m[2]}$`).test(l)); if (n >= 0) return n + 1; }
+  const i = YL().findIndex(l => q.toLowerCase().includes(l.toLowerCase())); return i >= 0 ? i + 1 : 0; }
+function aqDraft(topic, to) { const who = to || 'Parents and guardians';
+  const t = /trip|pinnawala|excursion/i.test(topic) ? ['Year group trip to Pinnawala Elephant Orphanage', `We are delighted to invite your child on a trip to the Pinnawala Elephant Orphanage on Thursday 23 October. The bus leaves school at 07:30 and returns by 15:30. The cost is Rs 4,500, which covers transport, entry and lunch.\n\nPlease give your consent in the ${SCHOOL.short} Parent app by Monday 12 October. If cost is a concern, please speak to us in confidence.`]
+    : /fee|payment|invoice|overdue/i.test(topic) ? ['A gentle reminder about Term 1 fees', `We hope the term has started well for your family. Our records show that a Term 1 balance is still open. You can pay in the ${SCHOOL.short} Parent app by card, bank transfer or in three instalments.\n\nIf now is a difficult time, please let us know. We are always happy to agree a plan that works for you.`]
+    : /attend|absen|late/i.test(topic) ? ['Checking in about attendance', `We have noticed that your child has missed a few days recently, and we wanted to check that everything is all right. Being in school every day really helps them keep up with friends and learning.\n\nCould we have a short chat this week? Please reply in the app with a time that suits you.`]
+    : /evening|meeting|parents'? ?evening/i.test(topic) ? ['Parents’ evening is open for booking', `Parents’ evening is on Thursday 15 October from 4:00 to 7:00 pm. Please book a 10-minute slot with each of your child’s teachers in the ${SCHOOL.short} Parent app.\n\nWe look forward to seeing you.`]
+    : ['A note from school', `We would love to talk with you about how ${topic.replace(/^(about|regarding)\s+/i, '') || 'your child'} is getting on. They have so many strengths, and we want to make sure they have the support they need this term.\n\nCould we find a time for a short chat this week? Please reply in the app with a time that suits you.`];
+  return `<div class="aq-draft"><b>${esc(t[0])}</b><p>Dear ${esc(who)},</p>${t[1].split('\n\n').map(p => `<p>${esc(p)}</p>`).join('')}<p>With warm regards,<br>Prishan Maduka<br>${esc(SCHOOL.name)}</p></div>`; }
+function aqAnswer(raw) { const q = raw.toLowerCase(); sigBuild(); const yr = aqYear(raw);
+  const stu = students.find(s => q.includes(s.name.toLowerCase())) || students.find(s => q.split(/[^a-z]+/).includes(s.name.split(' ')[0].toLowerCase()) && s.name.split(' ')[0].length > 3);
+  const tea = ST.teachers.find(t => q.includes(t.name.toLowerCase()) || q.includes(t.name.split(' ').slice(-1)[0].toLowerCase()) && /teach|teacher|load|timetable|mr|ms|mrs/.test(q));
+  if (/draft|write|letter|message to|email/.test(q)) { const to = (raw.match(/to ([A-Z][a-z]+ [A-Z][a-z]+)/) || [])[1]; const topic = (raw.match(/about (.+)$/i) || [, ''])[1];
+    return `<p>Here’s a draft in the school’s voice. Edit it as you like before sending.</p>${aqDraft(topic || raw, to)}${aqActs([`<button class="btn sm primary" data-act="aqCopy">${ic('file', 14)}Copy</button>`, aqGo('inbox', 'Open Communications')])}${aqFrom('Calendar · Forms · Fees')}`; }
+  if (/attention|at risk|worr|slipping|struggl|early warning|concern/.test(q) || (/who/.test(q) && yr)) { const xs = SIG.list.filter(x => ['high', 'med'].includes(sigLevel(x)) && (!yr || x.s.grade === yr));
+    if (!xs.length) return `<p>Good news: nobody ${yr ? 'in ' + esc(yl(yr)) + ' ' : ''}is showing warning signs right now.</p>${aqFrom('Early warning')}`;
+    return `<p><b>${xs.length} student${xs.length > 1 ? 's' : ''}${yr ? ' in ' + esc(yl(yr)) : ''}</b> could do with some support. ${xs.filter(x => sigLevel(x) === 'high').length} need a conversation soon.</p><ul class="aq-list">${xs.slice(0, 5).map(x => `<li><a href="#student-${x.sid}">${esc(x.s.name)}</a> · ${esc(x.s.cls)}<small>${esc(x.f.map(f => f.t).join(' · '))}</small></li>`).join('')}</ul>${aqActs([aqGo('signals', 'Open early warning')])}${aqFrom('Attendance register · Behaviour log · Gradebook · Fees')}`; }
+  if (stu) { const x = sigOf(stu.id), inv = invoices.filter(i => i.student.id === stu.id && i.amt > i.paid);
+    return `<p><b>${esc(stu.name)}</b> is in ${esc(stu.cls)}, ${esc(stu.house)} house. Attendance is ${stu.att.toFixed(1)}% and GPA ${stu.gpa}.${x ? ` Early warning: <b>${SIG_LV[sigLevel(x)][0].toLowerCase()}</b> (${esc(x.f[0].t)}).` : ' No warning signs.'}${inv.length ? ` There is ${money(inv.reduce((a, i) => a + i.amt - i.paid, 0))} unpaid.` : ' Fees are up to date.'}</p><p class="muted">Class teacher: ${esc(ST.ct[stu.cls] || '—')} · Guardian: ${esc(stu.guardian)}</p>${aqActs([aqGo('student-' + stu.id, 'Open profile'), `<button class="btn sm" data-act="askAbout" data-q="Draft a letter to ${esc(stu.guardian)} about ${esc(stu.name.split(' ')[0])}">Write to parents</button>`])}${aqFrom('Student record · Attendance · Fees')}`; }
+  if (tea) { const ld = teacherLoad(tea.name), cls = Object.entries(ST.ct).filter(([, n]) => n === tea.name).map(([c]) => c);
+    return `<p><b>${esc(tea.name)}</b> teaches ${esc(tea.subjects.join(', '))}: ${ld.total} periods a week across ${ld.rows.length} classes.${cls.length ? ` Class teacher of ${esc(cls.join(', '))}.` : ''} ${teacherDay(tea.name, 0).length} lessons today.</p>${aqActs([aqGo('staffing', 'Teachers & classes'), aqGo('timetable', 'Timetable')])}${aqFrom('Staffing · Timetable')}`; }
+  if (/attend|absent|present/.test(q)) { const xs = students.filter(s => !yr || s.grade === yr), avg = xs.reduce((a, s) => a + s.att, 0) / Math.max(1, xs.length);
+    const by = YL().map((l, i) => { const ys = students.filter(s => s.grade === i + 1); return [l, ys.length ? ys.reduce((a, s) => a + s.att, 0) / ys.length : null]; }).filter(x => x[1] != null).sort((a, b) => a[1] - b[1]);
+    return yr ? `<p>${esc(yl(yr))} attendance is <b>${avg.toFixed(1)}%</b> this term, against 95% for the school target. ${xs.filter(s => s.att < 90).length} students are below 90%.</p>${aqActs([aqGo('attendance', 'Take attendance'), aqGo('signals', 'Early warning')])}${aqFrom('Attendance register')}`
+      : `<p>Today <b>94.6%</b> of students are in school (1,181 of 1,248), just under the 95% target. The lowest year groups this term:</p><ul class="aq-list">${by.slice(0, 3).map(([l, v]) => `<li>${esc(l)}<small>${v.toFixed(1)}%</small></li>`).join('')}</ul><p class="muted">Mondays are the weakest day, 1.6 points below the weekly average.</p>${aqActs([aqGo('attendance', 'Open attendance')])}${aqFrom('Attendance register')}`; }
+  if (/fee|overdue|owe|outstanding|invoice|paid|payment/.test(q)) { const od = invoices.filter(i => i.status === 'Overdue'), tot = od.reduce((a, i) => a + i.amt - i.paid, 0);
+    return `<p>Term 1 is <b>78% collected</b> (Rs 48.2M of Rs 61.5M). ${od.length} invoices are overdue, ${money(tot)} in total. The largest:</p><ul class="aq-list">${od.sort((a, b) => (b.amt - b.paid) - (a.amt - a.paid)).slice(0, 3).map(i => `<li>${esc(i.student.name)}<small>${money(i.amt - i.paid)} · due ${i.due}</small></li>`).join('')}</ul>${aqActs([`<button class="btn sm primary" data-act="aqRemind" data-n="${od.length}">${ic('send', 14)}Send friendly reminders</button>`, aqGo('fees', 'Open fees')])}${aqFrom('Fees & invoicing')}`; }
+  if (/cover|absent staff|sick|substitut/.test(q)) { coverBuild(); const rows = COVER.absent.flatMap(a => absentLessons(a.name, a.part).map(l => l.key)), open = rows.filter(k => !(S.ttSub || {})[k]).length;
+    return `<p>${COVER.absent.length} staff are absent today (${esc(COVER.absent.map(a => a.name + ', ' + a.why.toLowerCase()).join('; '))}). ${open ? `<b>${open} of ${rows.length} lessons</b> still need cover.` : 'Every lesson is covered.'}</p>${aqActs([aqGo('cover', open ? 'Arrange cover' : 'Open cover board')])}${aqFrom('Staff absence · Timetable')}`; }
+  if (/exam|clash|paper/.test(q)) { examsBuild(); return `<p>${EXAMS.series.length} exam series are set up.</p><ul class="aq-list">${EXAMS.series.map(se => { const c = examClashes(se); return `<li>${esc(se.name)}<small>${se.papers.length} papers · ${c.clash.size ? c.clash.size + ' clashes' : 'no clashes'}${se.published ? ' · published' : ''}</small></li>`; }).join('')}</ul>${aqActs([aqGo('exams', 'Open exams')])}${aqFrom('Exams')}`; }
+  if (/evening|booking|book/.test(q)) { evtBuild(); const b = lsGet('quad-pe-book', {}), n = Object.keys(b).filter(k => k.startsWith('pe1|')).length; return `<p>${esc(EVT.list[0].title)} is on ${dShort(EVT.list[0].date)}. <b>${n}</b> slots have been booked in the parent app so far.</p>${aqActs([aqGo('events', 'Open evenings & forms'), `<button class="btn sm" data-act="askAbout" data-q="Draft a letter about parents evening">Draft a reminder</button>`])}${aqFrom('Evenings & forms')}`; }
+  if (/admission|applica|enquir|intake/.test(q)) { const o = apps.filter(a => a.stage !== 'enrolled'); return `<p>${o.length} applications are open for the January intake, and ${apps.filter(a => a.stage === 'interview').length} are at interview. ${apps.filter(a => a.days > 14 && a.stage !== 'enrolled').length} families have waited more than two weeks.</p>${aqActs([aqGo('admissions', 'Open pipeline')])}${aqFrom('Admissions')}`; }
+  if (/birthday|good news|well|celebrat/.test(q)) return `<p>Three birthdays today, ${PAST.beh.filter(b => b.date >= '2026-09-29' && b.pts > 0).length} merits this week, and ${SIG.list.filter(x => sigLevel(x) === 'better').length} students whose support plans are working.</p>${aqActs([`<button class="btn sm" data-act="bday">Send birthday wishes</button>`])}${aqFrom('Students · Behaviour log')}`;
+  if (/how many|students|enrol/.test(q)) return `<p>${students.length > 0 ? '1,248' : 0} students are enrolled across ${YL().length} year groups, ${esc(ylRange(1, LV.length))}.</p>${aqActs([aqGo('students', 'Open students')])}${aqFrom('Student records')}`;
+  return `<p>I can answer questions about this school’s records. Try one of these:</p><ul class="aq-list"><li>Who needs attention in a year group</li><li>Attendance, fees, cover, exams or admissions</li><li>A student or teacher by name</li><li>“Draft a letter about …”</li></ul>`; }
+function aqRender() { const box = document.getElementById('aqMsgs'); if (!box) return;
+  box.innerHTML = `<div class="aq-m bot"><p><b>Hello Prishan.</b> Ask me anything about ${esc(SCHOOL.name)}: students, attendance, fees, cover, exams. I’ll show where each answer comes from.</p></div>${AQ.msgs.length ? '' : `<div class="aq-sugg">${AQ_SUGG.map(s => `<button data-act="aqAsk" data-q="${esc(acadText(s))}">${esc(acadText(s))}</button>`).join('')}</div>`}${AQ.msgs.map(m => `<div class="aq-m ${m.me ? 'me' : 'bot'}">${m.me ? esc(m.t) : m.t}</div>`).join('')}${AQ.busy ? '<div class="aq-m bot typing" aria-label="Thinking"><i></i><i></i><i></i></div>' : ''}`;
+  box.scrollTop = box.scrollHeight; }
+function aqAsk(q) { q = q.trim(); if (!q || AQ.busy) return; AQ.msgs.push({me: true, t: q}); AQ.busy = true; aqRender();
+  setTimeout(() => { AQ.busy = false; let a; try { a = acadText(aqAnswer(q)); } catch (e) { a = '<p>Sorry, I couldn’t work that out. Try asking another way.</p>'; } AQ.msgs.push({t: a}); aqRender(); }, 650); }
+function aqOpen(q) { const p = document.getElementById('askq'); p.classList.add('on'); p.setAttribute('aria-hidden', 'false'); AQ.open = true; document.body.classList.add('aq-on'); aqRender(); const i = document.getElementById('aqIn'); if (q) { aqAsk(q); } setTimeout(() => i.focus(), 60); }
+function aqClose() { const p = document.getElementById('askq'); p.classList.remove('on'); p.setAttribute('aria-hidden', 'true'); AQ.open = false; document.body.classList.remove('aq-on'); }
+document.body.insertAdjacentHTML('beforeend', `<button class="askq-fab" data-act="askOpen" aria-label="Ask Quad">${ic('spark', 18)}<span>Ask Quad</span></button>
+  <aside class="askq" id="askq" role="dialog" aria-label="Ask Quad" aria-hidden="true"><div class="aq-h"><span class="aq-logo">${ic('spark', 18)}</span><div style="flex:1;min-width:0"><b>Ask Quad</b><small>Answers from ${esc(SCHOOL.name)}’s records</small></div><button class="iconbtn" data-act="aqReset" aria-label="New conversation" title="New conversation">${ic('plus', 16)}</button><button class="iconbtn" data-act="aqClose" aria-label="Close">${ic('x', 16)}</button></div>
+  <div class="vine" aria-hidden="true"></div><div class="aq-msgs" id="aqMsgs" aria-live="polite"></div>
+  <form class="aq-f" id="aqForm"><input class="input" id="aqIn" placeholder="Ask about students, fees, cover…" autocomplete="off" aria-label="Your question"><button class="btn primary" aria-label="Send">${ic('send', 16)}</button></form></aside>`);
+document.querySelector('.top .spacer') && document.querySelector('.top .spacer').insertAdjacentHTML('afterend', `<button class="btn aq-top" data-act="askOpen">${ic('spark', 16)}<span>Ask Quad</span><kbd>/</kbd></button>`);
+document.getElementById('aqForm').addEventListener('submit', e => { e.preventDefault(); e.stopPropagation(); const i = document.getElementById('aqIn'); aqAsk(i.value); i.value = ''; });
+document.addEventListener('keydown', e => { if (e.key === '/' && !e.ctrlKey && !e.metaKey && !e.target.closest('input,textarea,select,[contenteditable]')) { e.preventDefault(); aqOpen(); }
+  if (e.key === 'Escape' && AQ.open && !drawer.classList.contains('on') && !DD.pop) { aqClose(); const f = document.querySelector('.askq-fab'); f && f.focus(); } });
+Object.assign(ACT, {
+  askOpen: () => aqOpen(), aqClose: () => aqClose(), aqAsk: el => aqAsk(el.dataset.q), aqReset: () => { AQ.msgs = []; aqRender(); document.getElementById('aqIn').focus(); },
+  askAbout: el => { if (!AQ.open) aqOpen(el.dataset.q); else aqAsk(el.dataset.q); },
+  aqCopy: el => { const d = el.closest('.aq-m').querySelector('.aq-draft'); const t = d ? d.innerText : ''; try { navigator.clipboard.writeText(t).catch(() => {}); } catch (e) {} toast('Draft copied'); },
+  aqRemind: el => { toast(`Friendly reminders sent to ${el.dataset.n} families in the parent app`); el.disabled = true; el.textContent = 'Reminders sent'; },
+  bday: el => { petals(); toast('Birthday wishes sent to three families'); if (el.tagName === 'BUTTON') { el.disabled = true; el.textContent = 'Sent'; } },
+  spTell: el => { const on = el.getAttribute('aria-checked') !== 'true'; el.setAttribute('aria-checked', on); el.classList.toggle('on', on); },
+  sigPlan: el => sigPlanDrawer(sigOf(el.dataset.id)),
+  sigSave: el => { const x = sigOf(el.dataset.id), v = id => document.getElementById(id).value, on = document.getElementById('sp_tell').getAttribute('aria-checked') === 'true';
+    if (!v('sp_rev')) { toast('Choose a review date'); return; }
+    SIG.plans[x.sid] = {owner: v('sp_owner'), step: v('sp_step'), review: v('sp_rev'), note: v('sp_note'), since: '5 Oct', tell: on}; closeAll(); const y = scrollY; route(); scrollTo(0, y); petals(18); toast(`Plan saved for ${x.s.name.split(' ')[0]}${on ? ' · parents told who will be in touch' : ''}`); },
+  sigDismiss: el => { const x = sigOf(el.dataset.id); SIG.dismissed[x.sid] = true; const y = scrollY; route(); scrollTo(0, y); toast(`${x.s.name.split(' ')[0]} marked as not a concern · you can undo this under “Not a concern”`); },
+  sigHow: () => formDrawer(`${head('How early warning works', 'Checked every morning at 06:00 from your own records')}
+    <div class="drawer-b"><p style="margin:0">Quad looks for changes, not just low numbers, so a student who is usually fine but has started slipping is found early. Nothing is sent to parents unless you start a plan and choose to tell them.</p>
+    <div class="sig-why">${[['check', 'Attendance below 90% and down 3+ points in three weeks'], ['alert', 'Two or more behaviour concerns in two weeks'], ['book', 'A subject 10+ points below last term and under 55%'], ['file', 'Three or more homework tasks missed this month'], ['fee', 'Fees unpaid for 30+ days with no reply (shown to leaders only)']].map(([i, t]) => `<div>${ic(i, 14)}<span>${t}</span></div>`).join('')}</div>
+    <p class="muted" style="margin:0">Several strong signals together, or three of any kind, mean <b>Needs a conversation</b>. One means <b>Keep an eye on</b>. Safeguarding records are never used here.</p></div><div class="drawer-f"><button class="btn primary" data-act="closeAll">Got it</button></div>`)
+});
+FORM_META.push(['Start a support plan', 'heart', 'Early warning'], ['Update support plan', 'heart', 'Early warning'], ['How early warning works', 'alert', 'Early warning']);
+NAV[3].items.splice(1, 0, ['signals', 'Early warning', 'alert', (sigBuild(), SIG.list.filter(x => x.level === 'high').length)]);
+
 applySchool();
 window.addEventListener('storage', e => { if (['quad-pe-book', 'quad-form-replies'].includes(e.key) && ['events'].includes(S.route)) { const y = window.scrollY; route(); window.scrollTo(0, y); return; } if (e.key === 'quad-school') { if (JSON.stringify(loadAcad()) !== JSON.stringify(ACAD)) { location.reload(); return; } applySchool(); route(); } });
 themeIcon(); route();
