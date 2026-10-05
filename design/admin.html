@@ -669,6 +669,77 @@ button.st-sec:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg)}
 .st-add{display:grid;grid-template-columns:110px minmax(0,1fr) minmax(0,1.2fr) auto;gap:8px;margin-top:8px}
 .sj-tch{display:flex;flex-direction:column;font-size:12px;line-height:1.35;min-width:0}.sj-tch span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sj-tch em{color:var(--warn);font-style:normal;font-weight:600}
 @media (max-width:760px){.st-row{grid-template-columns:4px minmax(0,1fr) auto 32px}.st-row>span:not(.num),.st-row>small{display:none}.st-row.cls{grid-template-columns:4px minmax(0,1fr) auto}.st-row.cls select{grid-column:2/-1}.st-add{grid-template-columns:1fr 1fr}.st-band .card-h{flex-wrap:wrap;gap:10px}.sj-row .sj-tch{grid-column:2/-1}}
+
+/* Reports */
+.pd-grid{display:grid;gap:20px;align-items:start}.pd-prev{position:sticky;top:0;display:flex;flex-direction:column;gap:12px;min-width:0}
+.rep-sum{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.rep-sum small{display:block;font-size:11px;color:var(--ink-3);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
+.rep-list{display:flex;flex-direction:column;gap:4px}
+.rep-row{display:grid;grid-template-columns:28px minmax(0,1fr) 54px 34px auto;gap:10px;align-items:center;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--surface);text-align:left;cursor:pointer;color:var(--ink);font-size:13px}
+.rep-row:hover{border-color:var(--brand)}
+.rep-g{display:inline-grid;place-items:center;min-width:30px;height:26px;padding:0 6px;border-radius:8px;background:var(--brand-soft);color:var(--brand);font-weight:800;font-size:12.5px}
+.rep-grid{grid-template-columns:minmax(0,1fr) 300px}
+.rep-subj{border:1px solid var(--line);border-left:4px solid var(--c);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:8px;background:var(--surface)}
+.rep-sh{display:grid;grid-template-columns:minmax(0,1fr) auto 70px 34px 150px;gap:8px;align-items:center}
+.rep-sh b{font-size:13.5px}.rep-sh small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chips.bank .chip{font-size:11.5px;padding:2px 9px}
+.rep-sheet{background:#fff;color:#1d2433;border-radius:12px;padding:16px;font-size:12px;box-shadow:var(--shadow-lg);display:flex;flex-direction:column;gap:10px;border:1px solid var(--line)}
+.rep-top{display:flex;gap:10px;align-items:center;border-bottom:2px solid var(--brand);padding-bottom:10px}.rep-top b{display:block;font-size:13px}.rep-top small{color:#667085}
+.rep-logo{width:34px;height:34px;border-radius:9px;background:var(--brand);color:#fff;display:grid;place-items:center;font-weight:800;font-size:11px;overflow:hidden}.rep-logo img{width:100%;height:100%;object-fit:contain;background:#fff}
+.rep-who b{display:block;font-size:14px}.rep-who span{display:block;color:#667085}
+.rep-sheet table{width:100%;border-collapse:collapse}.rep-sheet th,.rep-sheet td{padding:4px 2px;border-bottom:1px solid #eef0f4;text-align:left;font-size:11.5px}.rep-sheet th{color:#667085;font-weight:700}.rep-sheet .r{text-align:right}
+.rep-ct small{color:#667085;font-weight:700;text-transform:uppercase;font-size:10px;letter-spacing:.05em}.rep-ct p{margin:2px 0 0;line-height:1.45}
+.rep-key{font-size:10.5px;color:#667085;border-top:1px dashed #d0d5dd;padding-top:6px}
+/* Academic year */
+.yr-hero{padding:20px 22px;display:flex;flex-direction:column;gap:18px}
+.yr-h{display:flex;justify-content:space-between;align-items:center}.yr-h h2{margin:2px 0 0;font:700 28px var(--f-display)}
+.yr-line{position:relative;display:flex;gap:6px;padding-top:4px}
+.yr-term{border-radius:10px;padding:10px 12px;background:var(--brand-soft);color:var(--brand);min-width:0}.yr-term b{display:block;font-size:13px}.yr-term small{font-size:11.5px;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.yr-now{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--bad);font-style:normal}.yr-now span{position:absolute;top:-18px;left:-16px;font-size:10px;font-weight:800;color:var(--bad);text-transform:uppercase}
+.yr-bars{display:flex;align-items:flex-end;gap:6px;height:180px;padding:16px 18px 8px}
+.yr-bar{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:6px;height:100%;min-width:0}.yr-bar i{width:100%;max-width:34px;border-radius:6px 6px 2px 2px;background:var(--c);opacity:.85}.yr-bar small{font-size:10.5px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.rl-term{display:grid;grid-template-columns:70px minmax(0,1fr) auto minmax(0,1fr);gap:8px;align-items:center;margin-bottom:6px}
+.rl-promo{display:flex;flex-direction:column;gap:4px}
+.rl-p{display:grid;grid-template-columns:minmax(0,1fr) 24px minmax(0,1fr);gap:8px;align-items:center;padding:6px 10px;border-radius:10px;border-left:4px solid var(--c);background:var(--surface-2);font-size:13px}
+.rl-p small{display:block;color:var(--ink-3);font-size:11.5px}.rl-p.new{border-left-color:var(--good);background:var(--good-soft)}.rl-arrow{color:var(--ink-3);display:grid}
+.rl-ex{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.ychip{display:inline-flex;align-items:center;gap:6px;padding:4px 6px 4px 10px;border-radius:20px;background:var(--surface-2);border:1px solid var(--line);font-size:12.5px;font-weight:600}.ychip button{border:0;background:none;color:var(--ink-3);display:grid;cursor:pointer}
+.rl-opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.rl-opt{display:flex;gap:10px;align-items:flex-start;padding:12px;border:1.5px solid var(--line);border-radius:12px;cursor:pointer}.rl-opt.on{border-color:var(--brand);background:var(--brand-soft)}.rl-opt small{display:block;color:var(--ink-3);font-size:12px;margin-top:2px}.rl-opt input{margin-top:3px}
+.rl-sum{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px}.rl-sum div{border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--surface-2)}.rl-sum b{display:block;font:700 24px var(--f-display)}.rl-sum span{font-size:12px;color:var(--ink-3)}
+.rl-run{display:flex;flex-direction:column;gap:6px}
+.rl-task{display:flex;gap:10px;align-items:center;font-size:13px;color:var(--ink-3)}.rl-task.done{color:var(--good)}.rl-task.run{color:var(--ink);font-weight:600}
+.rl-task .dot{width:8px;height:8px;border-radius:50%;background:var(--line-strong);margin:0 3px}
+.rl-task .spin{width:14px;height:14px;border-radius:50%;border:2px solid var(--brand-soft);border-top-color:var(--brand);animation:rlspin .7s linear infinite}
+@keyframes rlspin{to{transform:rotate(360deg)}}
+/* Teacher view */
+.teach-hero{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;align-items:center;padding:20px 22px;background:linear-gradient(120deg,color-mix(in srgb,var(--c) 92%,#000),color-mix(in srgb,var(--c) 55%,#0b1220));color:#fff;border:0}
+.teach-hero small{display:block;font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;opacity:.8}.teach-hero b{display:block;font:700 22px var(--f-display);margin:2px 0}.teach-hero span{opacity:.88;font-size:13px}
+.teach-stats{display:flex;gap:10px}.teach-stats div{background:rgba(255,255,255,.14);border-radius:12px;padding:10px 14px;min-width:90px}.teach-stats b{font-size:20px;margin:0}.teach-stats small{text-transform:none;letter-spacing:0;font-weight:600}
+.tl-list{display:flex;flex-direction:column;padding:8px 18px 16px}
+.tl{display:grid;grid-template-columns:52px minmax(0,1fr);gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}.tl:last-child{border:0}
+.tl-t{display:flex;flex-direction:column;align-items:flex-end;font-size:12px;color:var(--ink-3);padding-top:2px}.tl-t b{color:var(--ink);font-size:13.5px}
+.tl-b{border-left:3px solid var(--c);padding-left:12px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.tl-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.tl-top .ls-ic{width:24px;height:24px;border-radius:7px;background:var(--c);color:#fff;display:grid;place-items:center}.tl-top .badge-now{position:static}
+.tl.past{opacity:.55}.tl.now .tl-b{background:color-mix(in srgb,var(--c) 8%,transparent);border-radius:0 10px 10px 0;padding:8px 12px}
+.tl-acts{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+.needs{display:flex;flex-direction:column;padding:4px 18px 14px}
+.need{display:grid;grid-template-columns:28px minmax(0,1fr);gap:10px;padding:10px 0;border-bottom:1px solid var(--line);font-size:13px}.need:last-child{border:0}.need>span{width:28px;height:28px;border-radius:8px;background:var(--brand-soft);color:var(--brand);display:grid;place-items:center}
+.need.warn>span{background:var(--warn-soft);color:var(--warn)}.need small{display:block;color:var(--ink-3);font-size:12px}
+.wk{display:grid;grid-template-columns:repeat(5,minmax(130px,1fr));gap:10px;padding:0 18px 18px;overflow-x:auto}
+.wk-d{display:flex;flex-direction:column;gap:6px;min-width:0}.wk-h{display:flex;gap:6px;align-items:baseline;padding:6px 8px;border-radius:9px;background:var(--surface-2)}.wk-h small{color:var(--ink-3);font-size:11.5px}
+.wk-d.today .wk-h{background:var(--brand);color:#fff}.wk-d.today .wk-h small{color:rgba(255,255,255,.8)}
+.wk-l{display:grid;grid-template-columns:40px minmax(0,1fr);gap:0 6px;padding:6px 8px;border-radius:9px;background:color-mix(in srgb,var(--c) 10%,var(--surface));border-left:3px solid var(--c);font-size:12px}
+.wk-l.clash{background:var(--bad-soft);border-left-color:var(--bad)}.wk-l.clash small{color:var(--bad);font-weight:700}
+.cur-meta{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--ink-3)}.cur-meta b{color:var(--ink)}
+.teach-grid{align-items:start}
+.wk-l b{grid-row:span 2;font-size:11.5px}.wk-l span{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.wk-l small{color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.reg-sum{display:flex;gap:8px;flex-wrap:wrap}
+.reg-list{display:flex;flex-direction:column;gap:4px}.reg-row{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:10px;align-items:center;padding:6px 8px;border-radius:10px;border:1px solid var(--line);background:var(--surface);font-size:13px}
+.cm-list{display:flex;flex-direction:column;gap:8px}.cm-row{display:grid;grid-template-columns:28px minmax(0,1fr);gap:10px;padding:10px;border-radius:12px;border:1px solid var(--line);background:var(--surface)}.cm-row.done{border-color:color-mix(in srgb,var(--good) 45%,transparent)}
+.cm-main{display:flex;flex-direction:column;gap:6px;min-width:0}.cm-top{display:grid;grid-template-columns:minmax(0,1fr) 80px 34px;gap:8px;align-items:center;font-size:13px}
+@media (max-width:900px){.rep-grid{grid-template-columns:1fr}.rep-grid .pd-prev{order:0;position:static}}
+@media (max-width:760px){.rep-sum{grid-template-columns:1fr}.rep-sh{grid-template-columns:minmax(0,1fr) 70px 34px}.rep-sh small{display:none}.rep-sh select{grid-column:1/-1}.rep-row{grid-template-columns:28px minmax(0,1fr) 34px auto}.rep-row .num{display:none}
+  .rl-opts{grid-template-columns:1fr}.rl-term{grid-template-columns:1fr 1fr}.rl-term b{grid-column:1/-1}.rl-term span{display:none}.teach-stats{width:100%}.teach-stats div{flex:1;min-width:0}}
 </style>
 </head>
 <body>
@@ -853,13 +924,13 @@ try { const t = localStorage.getItem('quad-theme'); if (t) document.documentElem
 
 /* ---------- Navigation ---------- */
 const NAV = [
-  {g:'Overview', items:[['dashboard','Dashboard','home']]},
+  {g:'Overview', items:[['dashboard','Dashboard','home'],['teach','My teaching','cal']]},
   {g:'Pre-admission', items:[['admissions','Admissions pipeline','admit', apps.filter(a=>a.stage!=='enrolled').length]]},
   {g:'Relationships', items:[['crm','CRM & leads','crm'],['inbox','Communications','msg', 2]]},
   {g:'Student information', items:[['students','Students','student'],['attendance','Attendance','check']]},
-  {g:'Learning', items:[['lms','Courses & gradebook','book'],['timetable','Timetable','cal'],['staffing','Teachers & classes','crm']]},
+  {g:'Learning', items:[['lms','Courses & gradebook','book'],['timetable','Timetable','cal'],['staffing','Teachers & classes','crm'],['reports','Reports','file']]},
   {g:'Finance', items:[['fees','Fees & invoicing','fee'],['finance','Accounting','fin']]},
-  {g:'Settings', items:[['users','Users & roles','shield']]}
+  {g:'Settings', items:[['year','Academic year','cal'],['users','Users & roles','shield']]}
 ];
 function renderNav() {
   const base = S.route.split('-')[0];
@@ -1682,14 +1753,37 @@ const ttReset = g => { Object.keys(S.tt || {}).forEach(k => { if (k.startsWith(y
 const TT_DAYS = [['Mon','5 Oct'],['Tue','6 Oct'],['Wed','7 Oct'],['Thu','8 Oct'],['Fri','9 Oct']];
 const ttGradeOf = () => +(S.filter.ttGrade || lvL(10));
 const ttCls = () => { const g = ttGradeOf(), list = ttSecs(g).map(x => clsName(g, x)); return list.includes(S.ttClass) ? S.ttClass : list[0]; };
+/* Timetables are built for the whole school at once so no teacher is in two classes at the same time */
+function ttBusy(wk, skip) { const busy = {};
+  Object.keys(S.tt || {}).forEach(key => { if (!key.endsWith(wk) || key === skip) return; const cls = key.slice(0, -wk.length), g = gradeOfCls(cls), per = bellPeriods(gBell(g)).filter(x => x[0] !== 'brk');
+    S.tt[key].forEach((day, d) => day.forEach((k, i) => { const t = taOf(cls, k); if (!t || k === 'Free study' || !per[i]) return; ((busy[t] = busy[t] || {})[d] = busy[t][d] || []).push([toMin(per[i][1]), toMin(per[i][2])]); })); });
+  return busy; }
+function ttBuild(cls, wk) {
+  const key = cls + wk, g = gradeOfCls(cls), per = bellPeriods(gBell(g)).filter(x => x[0] !== 'brk'), n = per.length, slots = n * 5, busy = ttBusy(wk, key);
+  const r = ukSeed(key), bag = []; gSubj(g).forEach(({k, n: c}) => { for (let i = 0; i < c; i++) bag.push(k); });
+  for (let i = bag.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [bag[i], bag[j]] = [bag[j], bag[i]]; }
+  while (bag.length < slots) bag.push('Free study'); bag.length = slots;
+  const free = (t, d, s, e) => !t || !busy[t] || !busy[t][d] || !busy[t][d].some(([a, b]) => s < b && a < e);
+  const grid = Array.from({length:5}, () => []);
+  for (let d = 0; d < 5; d++) for (let i = 0; i < n; i++) { const s = toMin(per[i][1]), e = toMin(per[i][2]), today = grid[d];
+    let j = bag.findIndex(k => k === 'Free study' || (free(taOf(cls, k), d, s, e) && today.filter(x => x === k).length < 2));
+    if (j < 0) j = bag.findIndex(k => k === 'Free study' || free(taOf(cls, k), d, s, e)); if (j < 0) j = 0;
+    const k = bag.splice(j, 1)[0]; today.push(k); const t = k !== 'Free study' && taOf(cls, k); if (t) ((busy[t] = busy[t] || {})[d] = busy[t][d] || []).push([s, e]); }
+  // Repair: swap any lesson whose teacher is busy elsewhere with a lesson in this class that fits both times
+  const other = ttBusy(wk, key), ok = (k, d, i) => k === 'Free study' || free2(taOf(cls, k), d, toMin(per[i][1]), toMin(per[i][2]));
+  function free2(t, d, s0, e0) { return !t || !other[t] || !other[t][d] || !other[t][d].some(([a, b]) => s0 < b && a < e0); }
+  for (let pass = 0; pass < 3; pass++) for (let d = 0; d < 5; d++) for (let i = 0; i < n; i++) { if (ok(grid[d][i], d, i)) continue;
+    let done = false; for (let d2 = 0; d2 < 5 && !done; d2++) for (let i2 = 0; i2 < n && !done; i2++) { const a = grid[d][i], b = grid[d2][i2];
+      if (a !== b && ok(a, d2, i2) && ok(b, d, i)) { grid[d][i] = b; grid[d2][i2] = a; done = true; } } }
+  return S.tt[key] = grid;
+}
 function ttGrid(cls, wk) {
   S.tt = S.tt || {}; const key = cls + wk; if (S.tt[key]) return S.tt[key];
-  const g = gradeOfCls(cls), per = bellLessons(gBell(g)), slots = per * 5;
-  const r = ukSeed(key), bag = []; gSubj(g).forEach(({k, n}) => { for (let i = 0; i < n; i++) bag.push(k); });
-  for (let i = bag.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [bag[i], bag[j]] = [bag[j], bag[i]]; }
-  while (bag.length < slots) bag.push('Free study');
-  return S.tt[key] = Array.from({length:5}, (_, d) => bag.slice(d * per, d * per + per));
+  allClasses().forEach(c => { if (!S.tt[c + wk]) ttBuild(c, wk); });
+  return S.tt[key] || ttBuild(cls, wk);
 }
+/* Lessons where a teacher is booked twice at the same time */
+function teacherClashes(name, d) { const l = teacherDay(name, d), out = new Set(); l.forEach((a, i) => l.slice(i + 1).forEach(b => { if (toMin(a.s) < toMin(b.e) && toMin(b.s) < toMin(a.e)) { out.add(a); out.add(b); } })); return out; }
 V.timetable = () => {
   const cls = ttCls(), gr = gradeOfCls(cls), wk = S.ttWeek || 'A', g = ttGrid(cls, wk), edit = !!S.ttEdit, subs = S.ttSub || {};
   const bell = gBell(gr), TT_P = bellPeriods(bell), per = bellLessons(bell), subj = gSubj(gr), planned = subj.reduce((a, x) => a + x.n, 0);
@@ -1881,6 +1975,232 @@ function sectionDrawer(b) {
 }
 document.addEventListener('change', e => { if (e.target.closest && e.target.closest('#tchForm')) { tSync(); if (e.target.id === 'tAddG') keepScroll(teacherDrawer); else { const w = document.getElementById('tWarn'); if (w) w.innerHTML = tWarn(); } } });
 
+/* ========== Shared: class rosters and a teacher's lessons ========== */
+const YEAR = {cur: '2026/27', next: '2027/28', terms: [['Term 1','2026-10-05','2026-12-18'],['Term 2','2027-01-05','2027-03-27'],['Term 3','2027-04-20','2027-07-10']], past: ['2025/26','2024/25'], rolled: false};
+const ROSTERS = {};
+function classRoster(cls) {
+  if (ROSTERS[cls]) return ROSTERS[cls];
+  const r = ukSeed('roster' + cls + YEAR.cur), own = students.filter(x => x.cls === cls && x.status !== 'Graduated').map(x => x.name), n = 20 + Math.floor(r() * 9), out = [...own];
+  while (out.length < n) { const nm = FIRST[Math.floor(r() * FIRST.length)] + ' ' + LAST[Math.floor(r() * LAST.length)]; if (!out.includes(nm)) out.push(nm); }
+  return ROSTERS[cls] = out;
+}
+const NOW_MIN = 9 * 60 + 41;
+function teacherDay(name, d) {
+  stBuild(); const out = [];
+  allClasses().forEach(cls => { const g = gradeOfCls(cls), grid = ttGrid(cls, 'A'), per = bellPeriods(gBell(g)).filter(x => x[0] !== 'brk');
+    per.forEach((p, i) => { const k = grid[d][i], sub = (S.ttSub || {})[`${cls}A-${d}-${i}`];
+      if ((taOf(cls, k) === name && !sub) || sub === name) out.push({cls, g, k, p: p[0], s: p[1], e: p[2], i, d, room: ttSubj(g, k, cls)[3], cover: sub === name}); }); });
+  return out.sort((a, b) => toMin(a.s) - toMin(b.s));
+}
+
+/* ========== Reports ========== */
+const REP = {cycle: 'Term 1 report', due: '11 Dec 2026', cls: {}};
+const EFFORT = ['Excellent', 'Good', 'Satisfactory', 'Needs more effort'];
+const BANK = [
+  ['Strong', '{first} has made excellent progress in {subj} this term and consistently produces work of a high standard.'],
+  ['Steady', '{first} works hard in {subj} and is making steady progress. Well done.'],
+  ['Engaged', '{first} contributes thoughtfully in class discussions and asks good questions.'],
+  ['Next step', 'Next term, {first} should focus on checking answers carefully and showing all working.'],
+  ['Homework', '{first} needs to complete homework on time to build on the work done in class.'],
+  ['Support', '{first} is encouraged to attend the lunchtime help sessions to build confidence in {subj}.']];
+const repSubj = g => gSubj(g).filter(x => x.k !== 'Free study');
+function repOf(cls) {
+  if (REP.cls[cls]) return REP.cls[cls];
+  const g = gradeOfCls(cls), r = ukSeed('rep' + cls + YEAR.cur), idx = allClasses().indexOf(cls), roster = classRoster(cls), sub = repSubj(g);
+  const fill = idx % 7 === 0 ? .55 : idx % 5 === 0 ? .8 : 1, cfill = idx % 3 === 0 ? .4 : idx % 4 === 0 ? .75 : 1;
+  const st = {}; roster.forEach((nm, si) => { const base = 55 + r() * 35, subj = {};
+    sub.forEach(({k}) => { const m = Math.max(28, Math.min(99, Math.round(base + (r() - .5) * 26))), on = r() < fill, c = on && r() < cfill;
+      subj[k] = {m: on ? m : '', e: on ? Math.min(3, Math.floor((100 - m) / 15)) : '', c: c ? BANK[m > 80 ? 0 : m > 65 ? 1 : 3][1].replace(/\{first\}/g, nm.split(' ')[0]).replace(/\{subj\}/g, k) : ''}; });
+    st[nm] = {subj, ct: cfill === 1 && r() > .2 ? `${nm.split(' ')[0]} has had a positive start to the year and is a kind and helpful member of ${cls}.` : ''}; });
+  const status = fill === 1 && cfill === 1 ? (idx % 4 === 1 ? 'published' : idx % 4 === 2 ? 'approved' : 'review') : 'draft';
+  return REP.cls[cls] = {status, st, history: []};
+}
+function repProgress(cls) { const R = repOf(cls), g = gradeOfCls(cls), sub = repSubj(g); let m = 0, c = 0, tot = 0, ct = 0;
+  Object.values(R.st).forEach(x => { sub.forEach(({k}) => { tot++; if (x.subj[k] && x.subj[k].m !== '') m++; if (x.subj[k] && x.subj[k].c) c++; }); if (x.ct) ct++; });
+  const n = Object.keys(R.st).length; return {marks: tot ? m / tot : 0, comments: tot ? c / tot : 0, ct: n ? ct / n : 0, n, missingM: tot - m, missingC: tot - c, missingCt: n - ct}; }
+const REP_STEPS = [['draft','Marks & comments'],['review','Section head review'],['approved','Approved'],['published','Published to parents']];
+const repPill = st => ({draft:'<span class="pill t-amber plain">In progress</span>', review:'<span class="pill t-violet plain">Awaiting review</span>', approved:'<span class="pill t-blue plain">Approved</span>', published:'<span class="pill t-green plain">Published</span>'})[st];
+const pbar = (v, warn) => `<div class="wl ${v < 1 && warn ? 'high' : ''}"><div class="bar"><i style="width:${Math.round(v * 100)}%"></i></div><span class="num">${Math.round(v * 100)}%</span></div>`;
+V.reports = () => {
+  stBuild(); const fs = S.filter.repStage || 'all', fst = S.filter.repStatus || 'all', all = allClasses();
+  const rows = all.filter(c => (fs === 'all' || bandOf(gradeOfCls(c)) === fs) && (fst === 'all' || repOf(c).status === fst));
+  const cnt = k => all.filter(c => repOf(c).status === k).length, prog = all.map(repProgress), avg = f => prog.reduce((a, x) => a + x[f], 0) / prog.length;
+  return `${pageHead('Learning', 'Reports', `${REP.cycle} · ${YEAR.cur} · due ${REP.due} · graded ${esc(ACAD.curr.grading || '')}`, `${cnt('approved') ? `<button class="btn primary" data-act="repPublishAll">${ic('send',16)}Publish ${cnt('approved')} approved</button>` : ''}`)}
+    <div class="grid g-kpi">${kpi('file','t-green','Published to parents', `${cnt('published')}/${all.length}`, 'classes')}${kpi('fin','t-blue','Marks entered', Math.round(avg('marks') * 100) + '%', 'across all subjects')}${kpi('msg','t-violet','Comments written', Math.round(avg('comments') * 100) + '%', `${Math.round(avg('ct') * 100)}% of class teacher comments`)}${kpi('alert','t-amber','Awaiting review', cnt('review'), 'section heads to approve')}</div>
+    <div class="card"><div class="toolbar"><select class="input inline" data-filter="repStage" aria-label="Section" data-dd-ic="grid"><option value="all">All sections</option>${STG.map(x => `<option ${fs === x.name ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select>
+      <select class="input inline" data-filter="repStatus" aria-label="Status" data-dd-ic="check"><option value="all">All statuses</option>${REP_STEPS.map(([k, l]) => `<option value="${k}" data-n="${cnt(k)}" ${fst === k ? 'selected' : ''}>${l}</option>`).join('')}</select>
+      <span class="muted" style="font-size:12.5px;margin-left:auto">${rows.length} classes</span></div>
+    <div class="tbl-wrap"><table><thead><tr><th>Class</th><th>Class teacher</th><th class="r">Students</th><th style="width:150px">Marks</th><th style="width:150px">Comments</th><th>Status</th></tr></thead><tbody>
+    ${rows.map(c => { const p = repProgress(c), R = repOf(c); return `<tr class="click" data-act="openRepClass" data-c="${esc(c)}"><td><b>${esc(c)}</b><div class="muted" style="font-size:12px">${esc(bandOf(gradeOfCls(c)))}</div></td><td>${ST.ct[c] ? `<div class="who">${avatar(ST.ct[c],'sm')}<span>${esc(ST.ct[c])}</span></div>` : '<span class="muted">—</span>'}</td><td class="r num">${p.n}</td><td>${pbar(p.marks, 1)}</td><td>${pbar(p.comments, 1)}</td><td>${repPill(R.status)}</td></tr>`; }).join('')}</tbody></table></div></div>`;
+};
+function repClassDrawer(cls) {
+  const R = repOf(cls), g = gradeOfCls(cls), sub = repSubj(g), p = repProgress(cls), si = REP_STEPS.findIndex(x => x[0] === R.status), head2 = ST.heads[bandOf(g)];
+  const avg = nm => { const ms = sub.map(({k}) => R.st[nm].subj[k].m).filter(m => m !== ''); return ms.length ? Math.round(ms.reduce((a, b) => a + b, 0) / ms.length) : null; };
+  const blockers = [p.missingM ? `${p.missingM} marks missing` : '', p.missingC ? `${p.missingC} subject comments missing` : '', p.missingCt ? `${p.missingCt} class teacher comments missing` : ''].filter(Boolean);
+  formDrawer(`${head(`Reports · ${esc(cls)}`, `${REP.cycle} · class teacher ${esc(ST.ct[cls] || 'not set')} · section head ${esc(head2 || 'not set')}`)}
+    <div class="steps">${REP_STEPS.map(([, l], i) => `<div class="${i <= si ? 'on' : ''}">${i + 1}. ${l}</div>`).join('')}</div>
+    <div class="drawer-b">
+      <div class="rep-sum"><div><small>Marks</small>${pbar(p.marks, 1)}</div><div><small>Subject comments</small>${pbar(p.comments, 1)}</div><div><small>Class teacher comments</small>${pbar(p.ct, 1)}</div></div>
+      ${R.status === 'draft' && blockers.length ? `<div class="tt2-hint warn">${ic('alert',16)}<span>${blockers.join(' · ')}. Finish these before sending for review.</span></div>` : ''}
+      ${R.history.length ? `<div class="muted small">${R.history.map(h => esc(h)).join(' · ')}</div>` : ''}
+      <div class="rep-list">${Object.keys(R.st).map(nm => { const a = avg(nm), miss = sub.filter(({k}) => R.st[nm].subj[k].m === '' || !R.st[nm].subj[k].c).length + (R.st[nm].ct ? 0 : 1);
+        return `<button class="rep-row" data-act="openRepStudent" data-c="${esc(cls)}" data-n="${esc(nm)}">${avatar(nm,'sm')}<b>${esc(nm)}</b><span class="num">${a === null ? '—' : a + '%'}</span><span class="rep-g">${a === null ? '' : gradeFor(a)}</span>${miss ? `<span class="pill t-amber plain">${miss} to do</span>` : `<span class="pill t-green plain">${ic('check',12)} Ready</span>`}</button>`; }).join('')}</div>
+    </div>
+    <div class="drawer-f">${R.status === 'draft' ? `<button class="btn primary" data-act="repAdvance" data-c="${esc(cls)}" data-to="review" ${blockers.length ? 'disabled' : ''}>Send for review</button>`
+      : R.status === 'review' ? `<button class="btn" data-act="repAdvance" data-c="${esc(cls)}" data-to="draft">Return to teachers</button><button class="btn primary" data-act="repAdvance" data-c="${esc(cls)}" data-to="approved">${ic('check',16)}Approve as section head</button>`
+      : R.status === 'approved' ? `<button class="btn" data-act="repAdvance" data-c="${esc(cls)}" data-to="draft">Reopen</button><button class="btn primary" data-act="repAdvance" data-c="${esc(cls)}" data-to="published">${ic('send',16)}Publish to parents</button>`
+      : `<button class="btn" data-act="toast" data-msg="${p.n} report PDFs are being prepared">${ic('down',16)}Download PDFs</button><button class="btn" data-act="repAdvance" data-c="${esc(cls)}" data-to="approved">Unpublish</button>`}</div>`, 'wide');
+}
+function repStudentDrawer(cls, nm) {
+  const R = repOf(cls), g = gradeOfCls(cls), sub = repSubj(g), x = R.st[nm], names = Object.keys(R.st), i = names.indexOf(nm), first = nm.split(' ')[0], locked = R.status === 'published' || R.status === 'approved';
+  S.repEdit = {cls, nm};
+  formDrawer(`${head(`Report · ${esc(nm)}`, `${esc(cls)} · ${REP.cycle} · ${i + 1} of ${names.length}`)}
+    <div class="drawer-b"><div class="pd-grid rep-grid" id="repForm"><div style="display:flex;flex-direction:column;gap:12px;min-width:0">
+      ${locked ? `<div class="tt2-hint">${ic('alert',16)}<span>This report is ${R.status}. Reopen the class to make changes.</span></div>` : ''}
+      ${sub.map(({k}) => { const v = x.subj[k], c = (SUBJ_LIB[k] || ['#64748B'])[0]; return `<section class="rep-subj" style="--c:${c}"><div class="rep-sh"><b>${esc(k)}</b><small class="muted">${esc(taOf(cls, k) || 'Unassigned')}</small>
+        <input class="input num" type="number" min="0" max="100" data-rf="${esc(k)}|m" value="${v.m}" aria-label="${esc(k)} mark" placeholder="Mark" ${locked ? 'disabled' : ''}><span class="rep-g" data-rg="${esc(k)}">${v.m === '' ? '–' : gradeFor(+v.m)}</span>
+        <select class="input" data-rf="${esc(k)}|e" aria-label="${esc(k)} effort" ${locked ? 'disabled' : ''}><option value="">Effort</option>${EFFORT.map((e, j) => `<option value="${j}" ${v.e === j || v.e === String(j) ? 'selected' : ''}>${e}</option>`).join('')}</select></div>
+        <textarea class="input" rows="2" data-rf="${esc(k)}|c" placeholder="Comment for ${esc(first)}" aria-label="${esc(k)} comment" ${locked ? 'disabled' : ''}>${esc(v.c)}</textarea>
+        ${locked ? '' : `<div class="chips bank">${BANK.map(([l], j) => `<button type="button" class="chip" data-act="repBank" data-k="${esc(k)}" data-j="${j}">+ ${l}</button>`).join('')}</div>`}</section>`; }).join('')}
+      <div class="field"><label for="repCt">Class teacher’s comment${ST.ct[cls] ? ` · ${esc(ST.ct[cls])}` : ''}</label><textarea class="input" id="repCt" rows="3" data-rf="_ct" ${locked ? 'disabled' : ''}>${esc(x.ct)}</textarea></div>
+    </div><aside class="pd-prev" id="repPrev"></aside></div></div>
+    <div class="drawer-f"><button class="btn" data-act="repNav" data-d="-1" ${i === 0 ? 'disabled' : ''}>${ic('back',14)} Previous</button><button class="btn" data-act="repNav" data-d="1" ${i === names.length - 1 ? 'disabled' : ''}>Next ${ic('arrow',14)}</button><span style="flex:1"></span><button class="btn" data-act="openRepClass" data-c="${esc(cls)}">Back to class</button>${locked ? '' : `<button class="btn primary" data-act="repSave">Save</button>`}</div>`, 'wide');
+  repPreview();
+}
+function repSync() { const e = S.repEdit; if (!e) return; const x = repOf(e.cls).st[e.nm];
+  drawer.querySelectorAll('[data-rf]').forEach(el => { const [k, f] = el.dataset.rf.split('|'); if (k === '_ct') { x.ct = el.value; return; } if (!x.subj[k]) return; x.subj[k][f] = f === 'm' ? (el.value === '' ? '' : Math.max(0, Math.min(100, Math.round(+el.value)))) : f === 'e' ? (el.value === '' ? '' : +el.value) : el.value; }); }
+function repPreview() {
+  const e = S.repEdit, box = document.getElementById('repPrev'); if (!e || !box) return; const R = repOf(e.cls), x = R.st[e.nm], g = gradeOfCls(e.cls), sub = repSubj(g);
+  const ms = sub.map(({k}) => x.subj[k].m).filter(m => m !== ''), avg = ms.length ? Math.round(ms.reduce((a, b) => a + +b, 0) / ms.length) : null, att = (88 + (e.nm.length * 7) % 12).toFixed(1);
+  box.innerHTML = `<div class="rep-sheet"><div class="rep-top"><div class="rep-logo">${schoolMark()}</div><div><b>${esc(SCHOOL.name)}</b><small>${REP.cycle} · ${YEAR.cur}</small></div></div>
+    <div class="rep-who"><b>${esc(e.nm)}</b><span>${esc(e.cls)} · ${esc(ACAD.curr.short || ACAD.curr.name)}</span><span>Attendance ${att}% · Average ${avg === null ? '—' : avg + '% · ' + gradeFor(avg)}</span></div>
+    <table><thead><tr><th>Subject</th><th class="r">Mark</th><th>Grade</th><th>Effort</th></tr></thead><tbody>${sub.map(({k}) => { const v = x.subj[k]; return `<tr><td>${esc(k)}</td><td class="r num">${v.m === '' ? '—' : v.m}</td><td><b>${v.m === '' ? '—' : gradeFor(+v.m)}</b></td><td>${v.e === '' ? '—' : EFFORT[+v.e].split(' ')[0]}</td></tr>`; }).join('')}</tbody></table>
+    ${x.ct ? `<div class="rep-ct"><small>Class teacher</small><p>${esc(x.ct)}</p></div>` : '<div class="rep-ct muted"><small>Class teacher</small><p>Not written yet</p></div>'}
+    <div class="rep-key">Grading: ${esc(ACAD.curr.grading || 'percentage')}</div></div>`;
+  sub.forEach(({k}) => { const el = drawer.querySelector(`[data-rg="${CSS.escape(k)}"]`); if (el) el.textContent = x.subj[k].m === '' ? '–' : gradeFor(+x.subj[k].m); });
+}
+document.addEventListener('input', e => { if (e.target.closest && e.target.closest('#repForm') && e.target.dataset.rf) { repSync(); repPreview(); } });
+document.addEventListener('change', e => { if (e.target.closest && e.target.closest('#repForm') && e.target.dataset.rf) { repSync(); repPreview(); } });
+
+/* ========== Academic year and year-end rollover ========== */
+const fmtD = d => new Date(d + 'T00:00').toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'});
+const yearCounts = () => LV.map((_, i) => ttSecs(i + 1).reduce((a, x) => a + classRoster(clsName(i + 1, x)).length, 0));
+V.year = () => {
+  const today = new Date('2026-10-05T00:00').getTime(), s0 = new Date(YEAR.terms[0][1]).getTime(), s1 = new Date(YEAR.terms[2][2]).getTime(), pct = Math.max(0, Math.min(100, (today - s0) / (s1 - s0) * 100));
+  const counts = yearCounts(), pub = allClasses().filter(c => repOf(c).status === 'published').length;
+  return `${pageHead('Settings', 'Academic year', `${esc(ACAD.curr.name)} · ${LV.length} ${GL.few} · ${allClasses().length} classes`, `<button class="btn primary" data-act="rollStart">${ic('arrow',16)}Start year-end rollover</button>`)}
+    <section class="card yr-hero"><div class="yr-h"><div><div class="eyebrow">Current year</div><h2>${YEAR.cur}</h2></div>${YEAR.rolled ? '<span class="pill t-green plain">Rolled over</span>' : '<span class="pill t-blue plain">In progress</span>'}</div>
+      <div class="yr-line">${YEAR.terms.map(([n, a, b]) => { const w = (new Date(b) - new Date(a)) / (s1 - s0) * 100; return `<div class="yr-term" style="flex:${w}"><b>${n}</b><small>${fmtD(a)} – ${fmtD(b)}</small></div>`; }).join('')}<i class="yr-now" style="left:${pct}%"><span>Today</span></i></div></section>
+    <div class="grid g-2-1"><section class="card"><div class="card-h"><h2>Students by ${GL.one.toLowerCase()}</h2><span class="muted" style="font-size:12px">${counts.reduce((a, b) => a + b, 0)} students</span></div>
+      <div class="yr-bars">${LV.map((x, i) => `<div class="yr-bar" style="--c:${x.color}" title="${esc(x.label)} · ${counts[i]}"><i style="height:${counts[i] / Math.max(...counts) * 100}%"></i><small>${esc(x.label.replace(/^(Year|Grade) /, ''))}</small></div>`).join('')}</div>
+      <div class="legend" style="padding:0 18px 16px">${STG.map(x => `<span><i style="background:${x.color}"></i>${esc(x.name)}</span>`).join('')}</div></section>
+      <section class="card"><div class="card-h"><h2>Before you roll over</h2></div><div style="padding:4px 18px 16px">${rollChecks().map(([ok, t]) => `<div class="checkrow">${ok ? `<span style="color:var(--good)">${ic('check',16)}</span>` : `<span style="color:var(--warn)">${ic('alert',16)}</span>`}<span>${t}</span></div>`).join('')}</div>
+      <div class="card-h" style="border-top:1px solid var(--line)"><h2>Past years</h2></div><div style="padding:4px 18px 16px">${YEAR.past.map(y => `<div class="checkrow"><span>${ic('file',16)}</span><span style="flex:1"><b>${y}</b> · read only</span><button class="linkbtn" data-act="toast" data-msg="Opening ${y} in read-only mode">Open</button></div>`).join('')}</div></section></div>`;
+};
+function rollChecks() { const all = allClasses(), pub = all.filter(c => repOf(c).status === 'published').length, unpaid = invoices.filter(v => v.status !== 'Paid').length, un = unassigned().length, enrolled = apps.filter(a => a.stage === 'enrolled').length;
+  return [[pub === all.length, `${pub} of ${all.length} classes have published ${REP.cycle.toLowerCase()}s`], [!unpaid, `${unpaid} invoices are not fully paid. Balances can be carried forward.`], [!un, un ? `${un} class subjects have no teacher` : 'Every lesson has a teacher'], [true, `${enrolled} new students enrolled for the next intake`]]; }
+const ROLL_STEPS = ['New year', 'Promotion', 'Classes & staff', 'Fees & records', 'Confirm'];
+function rollDrawer() {
+  const w = S.roll, st = w.step, counts = yearCounts();
+  let body = '';
+  if (st === 0) body = `<div class="form-grid"><div class="field"><label for="rl_name">New academic year</label><input class="input" id="rl_name" value="${esc(w.name)}"></div><div class="field"><label>Curriculum</label><input class="input" value="${esc(ACAD.curr.name)}" disabled></div></div>
+      <div class="field"><label>Terms</label>${w.terms.map((t, i) => `<div class="rl-term"><b>${t[0]}</b><input class="input" type="date" data-rt="${i}|1" value="${t[1]}" aria-label="${t[0]} starts"><span class="muted">to</span><input class="input" type="date" data-rt="${i}|2" value="${t[2]}" aria-label="${t[0]} ends"></div>`).join('')}</div>
+      <div class="field"><label>Checks</label>${rollChecks().map(([ok, t]) => `<div class="checkrow">${ok ? `<span style="color:var(--good)">${ic('check',16)}</span>` : `<span style="color:var(--warn)">${ic('alert',16)}</span>`}<span>${t}</span></div>`).join('')}<small class="muted">Warnings don’t stop the rollover.</small></div>`;
+  else if (st === 1) { const intake = apps.filter(a => a.stage === 'enrolled').length;
+    body = `<div class="rl-promo">${LV.map((x, i) => `<div class="rl-p" style="--c:${x.color}"><span class="rl-from"><b>${esc(x.label)}</b><small>${counts[i]} students</small></span><span class="rl-arrow">${ic('arrow',14)}</span><span class="rl-to">${i < LV.length - 1 ? `<b>${esc(LV[i + 1].label)}</b>` : '<b>Leaves school</b><small>Moved to alumni</small>'}</span></div>`).join('')}
+      <div class="rl-p new"><span class="rl-from"><b>New intake</b><small>${intake} enrolled applicants</small></span><span class="rl-arrow">${ic('arrow',14)}</span><span class="rl-to"><b>${esc(LV[0].label)}</b><small>and other entry year groups</small></span></div></div>
+      <div class="field"><label>Exceptions</label><div class="rl-ex">${Object.entries(w.ex).map(([id, k]) => { const x = students.find(y => y.id === id); return `<span class="ychip">${esc(x.name)} · ${k === 'repeat' ? 'repeats ' + esc(yl(x.grade)) : 'leaving'}<button type="button" data-act="rlExRm" data-id="${id}" aria-label="Remove">${ic('x',12)}</button></span>`; }).join('') || '<span class="muted small">None. Everyone moves up one year group.</span>'}</div>
+        <div class="st-add" style="grid-template-columns:minmax(0,1fr) 150px auto"><select class="input" id="rlStu">${students.filter(x => x.status !== 'Graduated' && !w.ex[x.id]).map(x => `<option value="${x.id}">${esc(x.name)} · ${esc(x.cls)}</option>`).join('')}</select><select class="input" id="rlKind"><option value="repeat">Repeats the year</option><option value="leave">Leaving</option></select><button type="button" class="btn" data-act="rlExAdd">${ic('plus',14)}Add</button></div></div>`; }
+  else if (st === 2) body = `<div class="field"><label>Class teachers</label><div class="rl-opts">${[['up','Move up with their class','Year 7 Emerald’s class teacher takes Year 8 Emerald next year'],['stay','Stay with their year group','Teachers keep the same year group with new students']].map(([k, l, d]) => `<label class="rl-opt ${w.ct === k ? 'on' : ''}"><input type="radio" name="rlct" value="${k}" ${w.ct === k ? 'checked' : ''} data-act="rlCt"><span><b>${l}</b><small>${d.replace('Year 7 Emerald', esc(clsName(lvL(7), ttSecs(lvL(7))[0]))).replace('Year 8 Emerald', esc(clsName(lvL(8), ttSecs(lvL(8))[0])))}</small></span></label>`).join('')}</div></div>
+      ${[['subj','Keep subjects and bell times for every year group'],['ta','Keep teaching assignments'],['heads','Keep section heads and deputies'],['tt','Rebuild timetables for the new year']].map(([k, l]) => `<div class="setting"><div class="meta"><b>${l}</b></div>${ukSw(w.opt[k], `data-act="rlOpt" data-k="${k}" aria-label="${l}"`)}</div>`).join('')}`;
+  else if (st === 3) { const owed = invoices.reduce((a, v) => a + (v.amt - v.paid), 0);
+    body = `${[['bal',`Carry forward unpaid balances (${money(owed)})`],['inv','Create draft Term 1 invoices for the new year'],['notify','Tell parents in the app when classes are confirmed']].map(([k, l]) => `<div class="setting"><div class="meta"><b>${l}</b></div>${ukSw(w.opt[k], `data-act="rlOpt" data-k="${k}" aria-label="${l}"`)}</div>`).join('')}
+      <div class="setting"><div class="meta"><b>Archive ${YEAR.cur} as read only</b><small>Registers, marks, reports and invoices stay available to view.</small></div>${ukSw(true, 'disabled aria-label="Archive"')}</div>`; }
+  else { const ex = Object.values(w.ex), counts2 = counts.reduce((a, b) => a + b, 0);
+    body = `<div class="rl-sum">${[[counts2 - counts[counts.length - 1] - ex.filter(k => k === 'leave').length, 'students move up a year group'], [counts[counts.length - 1], `${yl(LV.length)} students leave`], [ex.filter(k => k === 'repeat').length, 'repeat the year'], [apps.filter(a => a.stage === 'enrolled').length, 'new students join'], [allClasses().length, 'classes set up']].map(([n, l]) => `<div><b class="num">${n}</b><span>${esc(l)}</span></div>`).join('')}</div>
+      <div class="field"><label for="rl_confirm">Type <b>${esc(w.name)}</b> to start</label><input class="input" id="rl_confirm" autocomplete="off" placeholder="${esc(w.name)}"></div>
+      <div class="rl-run" id="rlRun"></div>`; }
+  formDrawer(`${head(`Year-end rollover · ${esc(YEAR.cur)} → ${esc(w.name)}`, `${esc(ACAD.curr.name)} · ${LV.length} ${GL.few}`)}<div class="steps">${ROLL_STEPS.map((x, i) => `<div class="${i <= st ? 'on' : ''}">${i + 1}. ${x}</div>`).join('')}</div>
+    <div class="drawer-b" id="rollForm">${body}<div class="err-msg" id="rlErr"></div></div>
+    <div class="drawer-f">${st ? '<button class="btn" data-act="rlBack">Back</button>' : '<button class="btn" data-act="closeAll">Cancel</button>'}<button class="btn primary" data-act="rlNext" id="rlGo">${st < 4 ? 'Continue' : 'Start rollover'}</button></div>`, 'wide');
+}
+function rollSync() { const w = S.roll; if (!w) return; const n = document.getElementById('rl_name'); if (n) w.name = n.value.trim();
+  drawer.querySelectorAll('[data-rt]').forEach(el => { const [i, j] = el.dataset.rt.split('|'); w.terms[+i][+j] = el.value; }); }
+function rollApply() {
+  const w = S.roll, last = LV.length, upCt = w.ct === 'up';
+  students.forEach(x => { if (x.status === 'Graduated') return; const k = w.ex[x.id]; if (k === 'leave') { x.status = 'Withdrawn'; return; } if (k === 'repeat') return;
+    if (x.grade >= last) { x.status = 'Graduated'; return; } x.grade++; x.cls = clsName(x.grade, ttSecs(x.grade).includes(x.cls.split(' – ')[1]) ? x.cls.split(' – ')[1] : ttSecs(x.grade)[0]); });
+  if (upCt) { const old = {...ST.ct}; ST.ct = {}; Object.entries(old).forEach(([c, t]) => { const g = gradeOfCls(c), sec = c.split(' – ')[1]; if (g < last && ttSecs(g + 1).includes(sec)) ST.ct[clsName(g + 1, sec)] = t; }); }
+  if (!w.opt.ta) ST.ta = {}; if (!w.opt.heads) { Object.keys(ST.heads).forEach(b => ST.heads[b] = ''); Object.keys(ST.deputies).forEach(b => ST.deputies[b] = ''); }
+  if (!w.opt.subj) { TTC.subj = {}; TTC.bell = {}; }
+  S.tt = {}; S.ttSub = {}; Object.keys(ROSTERS).forEach(k => delete ROSTERS[k]); Object.keys(REP.cls).forEach(k => delete REP.cls[k]);
+  YEAR.past.unshift(YEAR.cur); YEAR.cur = w.name; const [a, b] = w.name.split('/'); YEAR.next = `${+a + 1}/${String(+b + 1).padStart(2, '0')}`; YEAR.terms = w.terms.map(t => t.slice()); YEAR.rolled = true;
+  REP.cycle = 'Term 1 report'; REP.due = fmtD(YEAR.terms[0][2]);
+  REP_NEW = true; setYearPicker();
+}
+let REP_NEW = false;
+function setYearPicker() {
+  const sel = document.getElementById('yearpick'); if (!sel) return;
+  sel.innerHTML = `<optgroup label="${YEAR.cur}">${YEAR.terms.map((t, i) => `<option data-sub="${fmtD(t[1])} – ${fmtD(t[2])}${i === 0 ? ' · current' : ''}" ${i === 0 ? 'selected' : ''}>${YEAR.cur} · ${t[0]}</option>`).join('')}</optgroup><optgroup label="Past years">${YEAR.past.slice(0, 2).map(y => `<option data-sub="Read only">${y} · Term 3</option>`).join('')}</optgroup>`;
+  const btn = sel.nextElementSibling; if (btn && btn.classList.contains('dd')) btn.remove(); sel.classList.remove('dd-native'); ddEnhance();
+}
+
+/* ========== Teacher view: My teaching ========== */
+function teachAs() { stBuild(); const id = S.filter.teachAs; let t = ST.teachers.find(x => x.id === id);
+  if (!t) { const want = clsName(lvL(7), ttSecs(lvL(7))[0]); t = ST.teachers.find(x => ST.ct[want] === x.name) || ST.teachers.find(x => !x.primary) || ST.teachers[0]; }
+  return t; }
+V.teach = () => {
+  const t = teachAs(), first = t.name.split(' ')[0], today = teacherDay(t.name, 0), next = today.find(l => toMin(l.e) > NOW_MIN), cur = today.find(l => toMin(l.s) <= NOW_MIN && toMin(l.e) > NOW_MIN);
+  const myCls = ctOf(t.name), regs = S.regDone || {}, load = teacherLoad(t.name);
+  const toWrite = [...new Set(load.rows.map(r => r.cls))].map(c => { const R = repOf(c); if (R.status !== 'draft') return null; const n = Object.values(R.st).filter(x => load.rows.some(r => r.cls === c && x.subj[r.k] && !x.subj[r.k].c)).length; return n ? {c, n, k: load.rows.filter(r => r.cls === c).map(r => r.k)} : null; }).filter(Boolean);
+  const coverReq = !S.coverDone ? (() => { const c = allClasses().find(c => !load.rows.some(r => r.cls === c) && gradeOfCls(c) >= gradeOfCls(load.rows[0] ? load.rows[0].cls : c) - 1); return c ? {cls: c, p: 'P5', s: '11:00'} : null; })() : null;
+  const lessonCard = l => { const st = toMin(l.e) <= NOW_MIN ? 'past' : toMin(l.s) <= NOW_MIN ? 'now' : '', key = `${l.cls}|${l.d}|${l.i}`, [c, , icn] = ttSubj(l.g, l.k, l.cls);
+    return `<div class="tl ${st}" style="--c:${c}"><div class="tl-t"><b class="num">${l.s}</b><small class="num">${l.e}</small></div><div class="tl-b"><div class="tl-top"><span class="ls-ic">${ic(icn,13)}</span><b>${esc(l.k)}</b>${st === 'now' ? '<span class="badge-now">NOW</span>' : ''}${l.cover ? '<span class="pill t-amber plain">Cover</span>' : ''}</div>
+      <div class="muted" style="font-size:12.5px">${esc(l.cls)} · ${esc(l.room)} · ${l.p}</div>
+      <div class="tl-acts">${regs[key] ? `<span class="pill t-green plain">${ic('check',12)} Register taken</span>` : `<button class="btn sm ${st === 'now' ? 'primary' : ''}" data-act="openRegister" data-c="${esc(l.cls)}" data-key="${esc(key)}" data-l="${esc(l.k)} · ${l.p}">${ic('check',14)}Register</button>`}<button class="btn sm" data-act="openComments" data-c="${esc(l.cls)}" data-k="${esc(l.k)}">${ic('file',14)}Marks & comments</button></div></div></div>`; };
+  const week = TT_DAYS.map((d, i) => ({d, l: teacherDay(t.name, i)}));
+  return `${pageHead('Overview', `Good morning, ${esc(first)}`, `${TT_DAYS[0][0]} ${TT_DAYS[0][1]} · ${today.length} lessons today · ${load.total} periods a week`, `<select class="input inline teach-pick" data-filter="teachAs" aria-label="View as teacher" data-dd-ic="crm" data-dd-q>${ST.teachers.map(x => `<option value="${x.id}" data-sub="${esc(x.subjects.slice(0, 3).join(', '))}" ${x.id === t.id ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select>`)}
+    <div class="teach-hero card" style="--c:${next ? ttSubj(next.g, next.k, next.cls)[0] : 'var(--brand)'}">${cur ? `<div><small>Now · until ${cur.e}</small><b>${esc(cur.k)} with ${esc(cur.cls)}</b><span>${esc(cur.room)} · ${Math.max(0, toMin(cur.e) - NOW_MIN)} minutes left</span></div>` : next ? `<div><small>Next lesson · ${next.s}</small><b>${esc(next.k)} with ${esc(next.cls)}</b><span>${esc(next.room)} · in ${toMin(next.s) - NOW_MIN} minutes</span></div>` : `<div><small>Today</small><b>No more lessons today</b><span>Time to catch up on marking</span></div>`}
+      <div class="teach-stats"><div><b class="num">${today.filter(l => toMin(l.e) <= NOW_MIN).length}/${today.length}</b><small>lessons done</small></div><div><b class="num">${toWrite.reduce((a, x) => a + x.n, 0)}</b><small>reports to write</small></div><div><b class="num">${myCls ? esc(myCls.replace(/^(Year|Grade) /, '')) : '—'}</b><small>my class</small></div></div></div>
+    <div class="grid g-2-1 teach-grid"><section class="card"><div class="card-h"><h2>Today</h2><span class="muted num" style="font-size:12px">09:41</span></div><div class="tl-list">${today.map(lessonCard).join('') || '<div class="muted" style="padding:24px;text-align:center">No lessons today.</div>'}</div></section>
+      <div style="display:flex;flex-direction:column;gap:20px;min-width:0">
+        <section class="card"><div class="card-h"><h2>Needs you</h2></div><div class="needs">
+          ${coverReq ? `<div class="need warn"><span>${ic('alert',16)}</span><div><b>Cover request · ${esc(coverReq.cls)} ${coverReq.p}</b><small>${coverReq.s} today · teacher absent</small><div class="tl-acts"><button class="btn sm primary" data-act="coverAccept" data-c="${esc(coverReq.cls)}">Accept</button><button class="btn sm" data-act="coverDecline">Can’t cover</button></div></div></div>` : ''}
+          ${toWrite.map(x => `<div class="need"><span>${ic('file',16)}</span><div><b>${x.n} report comments · ${esc(x.c)}</b><small>${esc(x.k.join(', '))} · due ${REP.due}</small><div class="tl-acts"><button class="btn sm" data-act="openComments" data-c="${esc(x.c)}" data-k="${esc(x.k[0])}">Write comments</button></div></div></div>`).join('')}
+          ${myCls && !regs['reg|' + myCls] ? `<div class="need"><span>${ic('check',16)}</span><div><b>Morning registration · ${esc(myCls)}</b><small>Parents of absent students are told at 09:00</small><div class="tl-acts"><button class="btn sm" data-act="openRegister" data-c="${esc(myCls)}" data-key="reg|${esc(myCls)}" data-l="Morning registration">Take registration</button></div></div></div>` : ''}
+          <div class="need"><span>${ic('msg',16)}</span><div><b>2 messages from parents</b><small>Reply within two school days</small><div class="tl-acts"><button class="btn sm" data-act="go" data-to="inbox">Open inbox</button></div></div></div></div></section>
+        ${myCls ? (() => { const ro = classRoster(myCls), R = repOf(myCls), p = repProgress(myCls); return `<section class="card"><div class="card-h"><h2>My class · ${esc(myCls)}</h2>${repPill(R.status)}</div><div style="padding:6px 18px 16px;display:flex;flex-direction:column;gap:10px">
+          <div class="cur-meta"><span><b>${ro.length}</b> students</span><span><b>${regs['reg|' + myCls] ? Object.values(S.regMarks['reg|' + myCls] || {}).filter(v => v !== 'P').length : '—'}</b> absent today</span><span><b>${Math.round(p.ct * 100)}%</b> class comments</span></div>
+          <div class="st-faces">${ro.slice(0, 9).map(n => avatar(n, 'xs')).join('')}<small class="muted">${ro.length}</small></div>
+          <div class="tl-acts"><button class="btn sm" data-act="openRepClass" data-c="${esc(myCls)}">Class reports</button><button class="btn sm" data-act="go" data-to="timetable">Timetable</button></div></div></section>`; })() : ''}</div></div>
+    <section class="card"><div class="card-h"><h2>My week</h2><span class="muted" style="font-size:12px">${load.total} periods · ${new Set(load.rows.map(r => r.cls)).size} classes</span></div><div class="wk">${week.map(({d, l}, i) => `<div class="wk-d ${i === 0 ? 'today' : ''}"><div class="wk-h"><b>${d[0]}</b><small>${d[1]}</small></div>${(cl => l.map(x => `<div class="wk-l ${cl.has(x) ? 'clash' : ''}" style="--c:${ttSubj(x.g, x.k, x.cls)[0]}" ${cl.has(x) ? 'title="Booked in two classes at this time"' : ''}><b class="num">${x.s}</b><span>${esc(x.cls.replace(/^(Year|Grade) /, ''))}</span><small>${cl.has(x) ? 'Clash · ' : ''}${esc(x.k)}</small></div>`).join(''))(teacherClashes(t.name, i)) || '<small class="muted">Free</small>'}</div>`).join('')}</div></section>`;
+};
+function registerDrawer(cls, key, label) {
+  S.regMarks = S.regMarks || {}; const m = S.regMarks[key] || (S.regMarks[key] = {}), ro = classRoster(cls), r = ukSeed(key);
+  ro.forEach(n => { if (!m[n]) m[n] = r() > .94 ? 'A' : r() > .96 ? 'L' : 'P'; });
+  const c = k => ro.filter(n => m[n] === k).length;
+  formDrawer(`${head(`Register · ${esc(cls)}`, `${esc(label)} · ${TT_DAYS[0][0]} ${TT_DAYS[0][1]}`)}
+    <div class="drawer-b"><div class="reg-sum" id="regSum">${[['P','Present','t-green'],['A','Absent','t-red'],['L','Late','t-amber'],['E','Excused','t-violet']].map(([k, l, tn]) => `<span class="pill ${tn} plain">${l} <b>${c(k)}</b></span>`).join('')}</div>
+      <div class="reg-list">${ro.map(n => `<div class="reg-row">${avatar(n,'sm')}<b>${esc(n)}</b><div class="seg">${['P','A','L','E'].map(k => `<button type="button" class="${m[n] === k ? 'on ' + k : ''}" data-act="regMark" data-key="${esc(key)}" data-n="${esc(n)}" data-v="${k}">${k}</button>`).join('')}</div></div>`).join('')}</div></div>
+    <div class="drawer-f"><button class="btn" data-act="regAll" data-key="${esc(key)}" data-c="${esc(cls)}" data-l="${esc(label)}">Mark all present</button><span style="flex:1"></span><button class="btn" data-act="closeAll">Cancel</button><button class="btn primary" data-act="regSave" data-key="${esc(key)}" data-c="${esc(cls)}">${ic('check',16)}Save register</button></div>`);
+}
+function commentsDrawer(cls, k) {
+  const R = repOf(cls), locked = R.status !== 'draft', t = teachAs(), mine = teacherLoad(t.name).rows.filter(r => r.cls === cls).map(r => r.k), subs = mine.length ? mine : [k];
+  S.cmEdit = {cls, k};
+  formDrawer(`${head(`Marks & comments · ${esc(cls)}`, `${REP.cycle} · ${esc(k)} · due ${REP.due}`)}
+    <div class="drawer-b" id="cmForm">${subs.length > 1 ? `<div class="chips">${subs.map(x => `<button type="button" class="chip ${x === k ? 'on' : ''}" data-act="openComments" data-c="${esc(cls)}" data-k="${esc(x)}">${esc(x)}</button>`).join('')}</div>` : ''}
+      ${locked ? `<div class="tt2-hint">${ic('alert',16)}<span>Reports for ${esc(cls)} are ${R.status === 'review' ? 'with the section head' : R.status}. Ask them to return the class to make changes.</span></div>` : ''}
+      <div class="cm-list">${Object.keys(R.st).map(nm => { const v = R.st[nm].subj[k] || {m:'', c:''}; return `<div class="cm-row ${v.m !== '' && v.c ? 'done' : ''}">${avatar(nm,'sm')}<div class="cm-main"><div class="cm-top"><b>${esc(nm)}</b><input class="input num" type="number" min="0" max="100" data-cm="${esc(nm)}|m" value="${v.m}" placeholder="Mark" aria-label="Mark for ${esc(nm)}" ${locked ? 'disabled' : ''}><span class="rep-g">${v.m === '' ? '–' : gradeFor(+v.m)}</span></div>
+        <textarea class="input" rows="2" data-cm="${esc(nm)}|c" placeholder="Comment" aria-label="Comment for ${esc(nm)}" ${locked ? 'disabled' : ''}>${esc(v.c)}</textarea>
+        ${locked ? '' : `<div class="chips bank">${BANK.slice(0, 4).map(([l], j) => `<button type="button" class="chip" data-act="cmBank" data-n="${esc(nm)}" data-j="${j}">+ ${l}</button>`).join('')}</div>`}</div></div>`; }).join('')}</div></div>
+    <div class="drawer-f"><span class="muted small" id="cmCount" style="margin-right:auto"></span><button class="btn" data-act="closeAll">Close</button>${locked ? '' : '<button class="btn primary" data-act="cmSave">Save</button>'}</div>`, 'wide');
+  cmCount();
+}
+function cmSync() { const e = S.cmEdit; if (!e) return; const R = repOf(e.cls);
+  drawer.querySelectorAll('[data-cm]').forEach(el => { const [nm, f] = el.dataset.cm.split('|'), v = R.st[nm].subj[e.k]; if (!v) return; v[f] = f === 'm' ? (el.value === '' ? '' : Math.max(0, Math.min(100, Math.round(+el.value)))) : el.value; }); }
+function cmCount() { const e = S.cmEdit, R = repOf(e.cls), n = Object.values(R.st).filter(x => x.subj[e.k] && x.subj[e.k].m !== '' && x.subj[e.k].c).length, el = document.getElementById('cmCount'); if (el) el.textContent = `${n} of ${Object.keys(R.st).length} done`; }
+document.addEventListener('input', e => { if (e.target.closest && e.target.closest('#cmForm') && e.target.dataset.cm) { cmSync(); cmCount(); const row = e.target.closest('.cm-row'), [nm] = e.target.dataset.cm.split('|'), v = repOf(S.cmEdit.cls).st[nm].subj[S.cmEdit.k]; row.classList.toggle('done', v.m !== '' && !!v.c); row.querySelector('.rep-g').textContent = v.m === '' ? '–' : gradeFor(+v.m); } });
+
 /* ---------- Subjects per grade (drawer) ---------- */
 const keepScroll = fn => { const b0 = drawer.querySelector('.drawer-b'), y = b0 ? b0.scrollTop : 0; S.noFocus = true; fn(); S.noFocus = false; const b1 = drawer.querySelector('.drawer-b'); if (b1) b1.scrollTop = y; };
 function subjSync() { const d = S.subDraft; if (!d) return; drawer.querySelectorAll('[data-sr]').forEach(el => { const [i, f] = el.dataset.sr.split('|'); if (d.rows[+i]) d.rows[+i][f] = f === 'n' ? Math.max(0, parseInt(el.value, 10) || 0) : el.value; }); }
@@ -1992,7 +2312,7 @@ function ddPaint(sel, btn) { const {val, active} = ddLabel(sel), lab = sel.getAt
   btn.innerHTML = `${sel.dataset.ddIc ? `<span class="dd-ic">${ic(sel.dataset.ddIc, 15)}</span>` : ''}${active ? `<span class="dd-l">${esc(lab)}</span>` : ''}<span class="dd-v">${esc(val)}</span>${active ? `<span class="dd-x" role="button" aria-label="Clear ${esc(lab)} filter" data-ddx>${ic('x', 12)}</span>` : `<span class="dd-chev">${ic('chev', 15)}</span>`}`;
   btn.setAttribute('aria-label', `${lab}: ${val}`); }
 function ddEnhance(root = document) {
-  root.querySelectorAll('.toolbar select.input.inline:not([data-act-change]), .tt2-bar select, select#yearpick').forEach(sel => {
+  root.querySelectorAll('.toolbar select.input.inline:not([data-act-change]), .tt2-bar select, select.teach-pick, select#yearpick').forEach(sel => {
     if (sel.classList.contains('dd-native')) return;
     sel.classList.add('dd-native'); sel.tabIndex = -1; sel.setAttribute('aria-hidden', 'true');
     const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'dd' + (sel.dataset.ddTop !== undefined ? ' dd-top yearpick' : '');
@@ -2082,7 +2402,7 @@ function moveApp(id, stage) {
 /* ---------- Overlays ---------- */
 const scrim = document.getElementById('scrim'), drawer = document.getElementById('drawer'), modal = document.getElementById('drawer');
 function openDrawer(html, cls = '') { html = acadText(html); drawer.className = 'drawer ' + cls; drawer.innerHTML = html; drawer.classList.add('on'); scrim.classList.add('on'); drawer.setAttribute('aria-hidden','false'); }
-const FORM_META = [['Teacher','crm','Teachers & classes'],['Class ·','student','Teachers & classes'],['Section','grid','Teachers & classes'],['Subjects','book','Timetable'],['Bell schedule','cal','Timetable'],['New bell schedule','cal','Timetable'],['New application','admit','Admissions'],['Record payment','fee','Fees & invoicing'],['New journal entry','fin','Accounting'],['Add lead','crm','CRM & leads'],['New broadcast','send','Communications'],['Generate invoices','file','Fees & invoicing'],['Invite staff','crm','Users & roles'],['INV-','fee','Invoice'],['Interested in Grade','crm','Lead']];
+const FORM_META = [['Reports ·','file','Reports'],['Report ·','file','Reports'],['Year-end rollover','cal','Academic year'],['Register','check','My teaching'],['Marks & comments','file','My teaching'],['Teacher','crm','Teachers & classes'],['Class ·','student','Teachers & classes'],['Section','grid','Teachers & classes'],['Subjects','book','Timetable'],['Bell schedule','cal','Timetable'],['New bell schedule','cal','Timetable'],['New application','admit','Admissions'],['Record payment','fee','Fees & invoicing'],['New journal entry','fin','Accounting'],['Add lead','crm','CRM & leads'],['New broadcast','send','Communications'],['Generate invoices','file','Fees & invoicing'],['Invite staff','crm','Users & roles'],['INV-','fee','Invoice'],['Interested in Grade','crm','Lead']];
 /* Form drawers: look up an icon and section label from the form's title */
 function formDrawer(html, cls = '') {
   openDrawer(html, 'form ' + cls);
@@ -2188,6 +2508,45 @@ const ACT = {
   appRec: el => { const a = apps.find(x => x.id === el.dataset.id); a.x.rec = el.dataset.v; appDrawer(a.id); toast({offer:'Recommended: offer a place', wait:'Recommended: waitlist', decline:'Recommended: decline'}[el.dataset.v]); },
   appOffer: el => { const a = apps.find(x => x.id === el.dataset.id); if (a.stage !== 'offer') moveApp(a.id, 'offer'); appDrawer(a.id); toast(`Offer letter sent to ${a.parent} by email and the parent app`); },
   appDecline: el => { const a = apps.find(x => x.id === el.dataset.id); if (!el.dataset.sure) { el.dataset.sure = 1; el.textContent = 'Click again to decline'; return; } apps.splice(apps.indexOf(a), 1); closeAll(); route(); toast(`${a.name}’s application declined. The family has been told.`); },
+  openRepClass: el => { repSync(); repClassDrawer(el.dataset.c); },
+  openRepStudent: el => repStudentDrawer(el.dataset.c, el.dataset.n),
+  repBank: el => { repSync(); const e = S.repEdit, ta = drawer.querySelector(`[data-rf="${CSS.escape(el.dataset.k + '|c')}"]`), t = BANK[+el.dataset.j][1].replace(/\{first\}/g, e.nm.split(' ')[0]).replace(/\{subj\}/g, el.dataset.k); ta.value = (ta.value ? ta.value.trim() + ' ' : '') + t; repSync(); repPreview(); ta.focus(); },
+  repNav: el => { repSync(); const e = S.repEdit, names = Object.keys(repOf(e.cls).st), i = names.indexOf(e.nm) + +el.dataset.d; if (names[i]) { S.noFocus = true; repStudentDrawer(e.cls, names[i]); S.noFocus = false; } },
+  repSave: () => { repSync(); const e = S.repEdit; toast(`Saved ${e.nm.split(' ')[0]}’s report`); repClassDrawer(e.cls); if (S.route === 'reports' || S.route === 'teach') { const y = window.scrollY; document.getElementById('view').innerHTML = acadText((V[S.route])()); afterRender(); window.scrollTo(0, y); } },
+  repAdvance: el => { const c = el.dataset.c, R = repOf(c), to = el.dataset.to, who = to === 'approved' || (to === 'draft' && R.status === 'review') ? ST.heads[bandOf(gradeOfCls(c))] || 'Section head' : 'Prishan Maduka';
+    R.status = to; R.history.unshift(`${({draft: 'Returned to teachers', review: 'Sent for review', approved: 'Approved', published: 'Published'})[to]} by ${who}`);
+    if (to === 'published') { try { localStorage.setItem('quad-reports', JSON.stringify({cycle: REP.cycle, year: YEAR.cur, at: Date.now(), classes: allClasses().filter(x => repOf(x).status === 'published')})); } catch (e) {} }
+    const y = window.scrollY; route(); window.scrollTo(0, y); repClassDrawer(c); toast(({draft: `${c} reports returned to teachers`, review: `${c} sent to ${ST.heads[bandOf(gradeOfCls(c))] || 'the section head'} for review`, approved: `${c} reports approved`, published: `${c} reports published. Parents can read them in the app.`})[to]); },
+  repPublishAll: () => { const list = allClasses().filter(c => repOf(c).status === 'approved'); list.forEach(c => { repOf(c).status = 'published'; repOf(c).history.unshift('Published by Prishan Maduka'); });
+    try { localStorage.setItem('quad-reports', JSON.stringify({cycle: REP.cycle, year: YEAR.cur, at: Date.now(), classes: allClasses().filter(x => repOf(x).status === 'published')})); } catch (e) {}
+    route(); toast(`Published reports for ${list.length} classes. Parents have been notified.`); },
+  rollStart: () => { S.roll = {step: 0, name: YEAR.next, terms: YEAR.terms.map(([n, a, b]) => [n, a.replace(/^(\d{4})/, y => +y + 1), b.replace(/^(\d{4})/, y => +y + 1)]), ex: {}, ct: 'up', opt: {subj: true, ta: true, heads: true, tt: true, bal: true, inv: false, notify: true}}; rollDrawer(); },
+  rlBack: () => { rollSync(); S.roll.step--; rollDrawer(); },
+  rlNext: () => { rollSync(); const w = S.roll, err = document.getElementById('rlErr');
+    if (w.step === 0) { if (!/^\d{4}\/\d{2}$/.test(w.name)) { err.textContent = 'Use the format 2027/28.'; return; } const bad = w.terms.find(t => !t[1] || !t[2] || t[1] >= t[2]); if (bad) { err.textContent = `${bad[0]} must end after it starts.`; return; } if (w.terms.some((t, i) => i && t[1] <= w.terms[i - 1][2])) { err.textContent = 'Terms must not overlap.'; return; } }
+    if (w.step < 4) { w.step++; rollDrawer(); return; }
+    if (document.getElementById('rl_confirm').value.trim() !== w.name) { err.textContent = `Type ${w.name} exactly to start.`; document.getElementById('rl_confirm').focus(); return; }
+    const go = document.getElementById('rlGo'), back = drawer.querySelector('[data-act=rlBack]'); go.disabled = true; if (back) back.disabled = true; err.textContent = '';
+    const tasks = ['Archive ' + YEAR.cur + ' as read only', 'Move students up a year group', 'Graduate ' + yl(LV.length) + ' to alumni', 'Set up ' + allClasses().length + ' classes', w.ct === 'up' ? 'Move class teachers up with their classes' : 'Keep class teachers with their year groups', w.opt.tt ? 'Rebuild timetables' : 'Keep timetables', w.opt.bal ? 'Carry forward balances' : 'Close balances', w.opt.notify ? 'Notify parents' : 'Skip parent notice'];
+    const box = document.getElementById('rlRun'); let i = 0;
+    const tick = () => { box.innerHTML = tasks.map((t, j) => `<div class="rl-task ${j < i ? 'done' : j === i ? 'run' : ''}">${j < i ? ic('check',14) : j === i ? '<i class="spin"></i>' : '<i class="dot"></i>'}<span>${esc(t)}</span></div>`).join('');
+      if (i++ < tasks.length) setTimeout(tick, 260); else { rollApply(); go.disabled = false; go.textContent = 'Done'; go.dataset.act = 'rlDone'; toast(`Welcome to ${YEAR.cur}. Students have moved up a year group.`); } };
+    tick(); },
+  rlDone: () => { closeAll(); location.hash = 'year'; route(); },
+  rlExAdd: () => { rollSync(); const id = document.getElementById('rlStu').value; if (id) S.roll.ex[id] = document.getElementById('rlKind').value; rollDrawer(); },
+  rlExRm: el => { delete S.roll.ex[el.dataset.id]; rollDrawer(); },
+  rlCt: el => { S.roll.ct = el.value; drawer.querySelectorAll('.rl-opt').forEach(o => o.classList.toggle('on', o.querySelector('input').checked)); },
+  rlOpt: el => { const o = S.roll.opt, k = el.dataset.k; o[k] = !o[k]; el.classList.toggle('on', o[k]); el.setAttribute('aria-checked', o[k]); },
+  openRegister: el => registerDrawer(el.dataset.c, el.dataset.key, el.dataset.l),
+  regMark: el => { const m = S.regMarks[el.dataset.key]; m[el.dataset.n] = el.dataset.v; el.parentNode.querySelectorAll('button').forEach(b => b.className = b === el ? 'on ' + b.dataset.v : '');
+    const ro = Object.keys(m), c = k => ro.filter(n => m[n] === k).length; document.getElementById('regSum').innerHTML = [['P','Present','t-green'],['A','Absent','t-red'],['L','Late','t-amber'],['E','Excused','t-violet']].map(([k, l, tn]) => `<span class="pill ${tn} plain">${l} <b>${c(k)}</b></span>`).join(''); },
+  regAll: el => { const m = S.regMarks[el.dataset.key]; Object.keys(m).forEach(n => m[n] = 'P'); S.noFocus = true; registerDrawer(el.dataset.c, el.dataset.key, el.dataset.l); S.noFocus = false; },
+  regSave: el => { S.regDone = S.regDone || {}; S.regDone[el.dataset.key] = true; const m = S.regMarks[el.dataset.key], ab = Object.values(m).filter(v => v === 'A').length; closeAll(); route(); toast(`Register saved for ${el.dataset.c}${ab ? ` · ${ab} absent, parents notified` : ' · everyone present'}`); },
+  openComments: el => commentsDrawer(el.dataset.c, el.dataset.k),
+  cmBank: el => { const e = S.cmEdit, nm = el.dataset.n, ta = drawer.querySelector(`[data-cm="${CSS.escape(nm + '|c')}"]`); ta.value = (ta.value ? ta.value.trim() + ' ' : '') + BANK[+el.dataset.j][1].replace(/\{first\}/g, nm.split(' ')[0]).replace(/\{subj\}/g, e.k); ta.dispatchEvent(new Event('input', {bubbles: true})); },
+  cmSave: () => { cmSync(); const e = S.cmEdit; closeAll(); route(); toast(`Saved ${e.k} marks and comments for ${e.cls}`); },
+  coverAccept: el => { S.coverDone = true; S.ttSub = S.ttSub || {}; const c = el.dataset.c, t = teachAs(); S.ttSub[`${c}A-0-4`] = t.name; route(); toast(`You’re covering ${c} P5. It’s on your timetable.`); },
+  coverDecline: () => { S.coverDone = true; route(); toast('Declined. The cover coordinator has been told.'); },
   openTeacher: el => { stBuild(); const t = ST.teachers.find(x => x.id === el.dataset.id), l = teacherLoad(t.name), h = headOf(t.name), dp = deputyOf(t.name);
     S.tDraft = {id: t.id, subjects: new Set(t.subjects), rows: l.rows.map(r => ({...r})), orig: l.rows.map(r => ({...r})), ct: ctOf(t.name), head: h ? 'H|' + h : dp ? 'D|' + dp : '', max: t.max, addG: l.rows.length ? gradeOfCls(l.rows[0].cls) : 10}; teacherDrawer(); },
   tSubj: el => { tSync(); const s0 = S.tDraft.subjects, k = el.dataset.k; s0.has(k) ? s0.delete(k) : s0.add(k); keepScroll(teacherDrawer); },

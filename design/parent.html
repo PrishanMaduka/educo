@@ -383,6 +383,7 @@ input[type=range]{width:100%;accent-color:var(--brand)}
   .push{top:12px}
 }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.rep-ready{display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:0;padding:12px 14px;cursor:pointer;color:var(--ink)}.rep-ready .ic{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;flex:none}.rep-ready span:nth-child(2){flex:1}.rep-ready small{display:block;color:var(--ink-3);font-size:12px}
 </style>
 </head>
 <body>
@@ -561,6 +562,8 @@ function busLine() {
   if (S.bus.running || S.bus.t > 0) return `On the way · ${busEtaMin()} min from home`;
   return 'Afternoon bus leaves school at 14:10';
 }
+/* Reports published from the staff portal for this child's class */
+function pubReport(k) { try { const r = JSON.parse(localStorage.getItem('quad-reports') || 'null'); return r && r.classes && r.classes.includes(acadText(k.grade)) ? r : null; } catch (e) { return null; } }
 SCR.home = () => {
   const k = kid(), L = LIVE[S.kid], due = S.invoices.filter(i => i.amt > i.paid), hw = k.homework.filter(h => !h[3]).length;
   const qa = [['attendance','t-green','cal','Attendance'],['results','t-blue','chart','Results'],['timetable','t-violet','clock','Timetable'],['homework','t-amber','book','Homework'],
@@ -569,6 +572,7 @@ SCR.home = () => {
   return { big:'Good morning, Dilhani', right:`<button class="back" data-act="push" data-to="notifications" aria-label="Notifications" style="position:relative">${ic('bell',18)}${S.notifs?'<span style="position:absolute;top:6px;right:7px;width:8px;height:8px;border-radius:50%;background:var(--bad)"></span>':''}</button>`, body: `
   <div class="stories" aria-label="School stories">${STORIES.map((st, i) => `<button class="story ${st.seen?'seen':''}" data-act="story" data-i="${i}"><span class="ring-s"><span style="background:${st.slides[0].bg}">${ic(st.icon,24)}</span></span>${st.name}</button>`).join('')}</div>
   ${kidSwitch()}
+  ${pubReport(k) ? `<button class="card rep-ready" data-act="push" data-to="reports"><span class="ic t-blue">${ic('file',20)}</span><span><b>${k.first}’s ${pubReport(k).cycle} is ready</b><small>${pubReport(k).year} · tap to read</small></span>${ic('chev',18)}</button>` : ''}
   <div class="card hero ${S.heroAnim?'slide-'+S.heroAnim:''}" id="hero"><small>${k.grade} · Monday 5 Oct</small><div class="big">${k.first} arrived at school at ${k.arrived}</div>
     <div class="stats"><div><b class="num" data-count="${k.att}" data-dec="1" data-suf="%">${k.att}%</b>Attendance</div><div><b class="num" data-count="${k.points}">${k.points}</b>House points</div><div><b class="num" data-count="${hw}">${hw}</b>Homework due</div></div></div>
   <div class="dots" aria-hidden="true">${KIDS.map((_, i) => `<i class="${i===S.kid?'on':''}"></i>`).join('')}</div>
@@ -738,7 +742,7 @@ SCR.conduct = () => { const k = kid(); return { title:`${k.first} · Rewards`, b
   <div class="card">${[['star','t-green','+5 · Science fair project','Ms. Jayasinghe · 2 Oct'],['star','t-green','Merit certificate · Mathematics','Mr. Mendis · 24 Sep'],['alert','t-amber','Late to class','Form tutor · 18 Sep'],['star','t-green','+3 · Helping a classmate','Class teacher · 11 Sep']].map(a => row(...a)).join('')}</div>` }; };
 
 SCR.reports = () => { const k = kid(); return { title:`${k.first} · Reports`, body: `${kidSwitch()}
-  <div class="card">${[['Term 1 mid-term report','Published 3 Oct 2026','New'],['Term 3 end-of-year report','Published 4 Apr 2026',''],['Term 2 report','Published 12 Dec 2025',''],['Cambridge checkpoint results','Published 20 Aug 2025','']].map(([t,d,n]) => row('file','t-violet',t,d, n?pill(n,'t-blue'):'', 'data-act="toast" data-msg="Opening PDF report…"')).join('')}</div>` }; };
+  <div class="card">${(pubReport(k) ? [[`${pubReport(k).cycle} ${pubReport(k).year}`, 'Published today', 'New']] : []).concat([['Term 1 mid-term report','Published 3 Oct 2026', pubReport(k) ? '' : 'New'],['Term 3 end-of-year report','Published 4 Apr 2026',''],['Term 2 report','Published 12 Dec 2025',''],['Cambridge checkpoint results','Published 20 Aug 2025','']]).map(([t,d,n]) => row('file','t-violet',t,d, n?pill(n,'t-blue'):'', 'data-act="toast" data-msg="Opening PDF report…"')).join('')}</div>` }; };
 
 SCR.medical = () => { const k = kid(); return { title:`${k.first} · Medical`, body: `
   <div class="card">${row('heart','t-red','Allergies', S.kid?'None recorded':'Mild peanut allergy · EpiPen in sick bay')}${row('file','t-blue','Immunisations','Up to date · checked Aug 2026')}${row('user','t-violet','Emergency contact','Ruwan Perera · +94 77 412 8890')}</div>
@@ -1114,7 +1118,7 @@ document.addEventListener('click', e => { if (dragged) { e.preventDefault(); ret
 document.addEventListener('change', e => { if (e.target.matches('[data-act="hw"]')) ACT.hw(e.target); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeSheet(); closeStory(); } if (SV && document.activeElement?.id !== 'svIn') { if (e.key === 'ArrowRight') storyStep(1); if (e.key === 'ArrowLeft') storyStep(-1); } });
 applySchoolP();
-window.addEventListener('storage', e => { if (e.key === 'quad-school') { try { const x = JSON.parse(e.newValue || 'null'); if (x && x.acad && JSON.stringify(x.acad.stages.flatMap(y => y.years)) !== JSON.stringify(PLV)) { location.reload(); return; } } catch (er) {} applySchoolP(); render(); } });
+window.addEventListener('storage', e => { if (e.key === 'quad-reports') { render(); return; } if (e.key === 'quad-school') { try { const x = JSON.parse(e.newValue || 'null'); if (x && x.acad && JSON.stringify(x.acad.stages.flatMap(y => y.years)) !== JSON.stringify(PLV)) { location.reload(); return; } } catch (er) {} applySchoolP(); render(); } });
 render();
 if (!paSignedIn()) paShow();
 </script>
