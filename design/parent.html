@@ -505,7 +505,7 @@ input[type=range]{width:100%;accent-color:var(--brand)}
 .askq-fab{position:absolute;right:16px;bottom:96px;z-index:20;display:flex;align-items:center;gap:8px;height:46px;padding:0 18px 0 14px;border-radius:999px;background:var(--brand);color:var(--brand-ink);font-weight:800;font-size:14px;box-shadow:0 14px 28px -12px color-mix(in srgb,var(--brand) 80%,#000),0 0 0 3px color-mix(in srgb,var(--surface) 70%,transparent);transition:padding .25s,gap .25s,transform .2s}
 .askq-fab span{max-width:90px;overflow:hidden;white-space:nowrap;transition:max-width .25s,opacity .2s}
 .askq-fab.mini{padding:0 13px;gap:0}.askq-fab.mini span{max-width:0;opacity:0}
-.askq-fab svg{color:var(--gold)}
+.askq-fab svg{color:var(--brand-ink)}
 .askq-fab:active{transform:scale(.95)}
 .aq-scrim{position:absolute;inset:0;background:rgba(28,27,46,.42);opacity:0;pointer-events:none;transition:opacity .25s;z-index:34}
 .aq-scrim.on{opacity:1;pointer-events:auto}
@@ -789,6 +789,15 @@ button.it:active{background:var(--surface-2)}
 .mo-note .acts{justify-content:space-between;align-items:center;gap:8px}
 .mo-more{display:inline-flex;align-items:center;gap:3px;font-size:13px;font-weight:800;color:var(--brand)}
 .tabbar .ti .dot{position:absolute}
+
+/* Home greeting: a full-width morning scene behind the whole header */
+.ghead.scene{position:relative;overflow:hidden;margin:0 12px;padding:16px 16px 58px;border-radius:24px;border:1px solid var(--line)}
+.ghead.scene .gt{position:relative;z-index:1}
+.ghead.scene .back{background:color-mix(in srgb,var(--surface) 80%,transparent)}
+.mscene{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;display:block}
+.ms-sun{transform-box:fill-box;transform-origin:center;animation:msRise 1.4s cubic-bezier(.2,.8,.2,1) backwards}
+@keyframes msRise{from{transform:translateY(40px);opacity:0}}
+@media (prefers-reduced-motion:reduce){.ms-sun{animation:none}}
 </style>
 </head>
 <body>
@@ -1163,6 +1172,19 @@ function homeMoment(k) { const ms = momFor(k), m = ms[0], T = k.teacher, ki = KI
   const th = !!(reacts()[m.id] || {}).thanks;
   return `<div class="t-note mo-note">${m.art ? `<button class="mo-thumb" data-act="momGo" data-kid="${ki}" aria-label="Open ${k.first}’s moments">${momArt(m.art)}</button>` : av(m.by, avc(m.by), 'sm')}<div class="q"><span class="mo-eye">${ic('image', 13, 2.2)}Latest moment · ${esc(m.at)}</span><b>${esc(m.by)}:</b> ${esc(m.text)}<small>${esc(m.role)} · ${esc(momWho(m))}</small></div>
     <div class="acts"><button class="mo-more" data-act="momGo" data-kid="${ki}">${ms.length > 1 ? `All ${ms.length} moments` : 'Moments'}${ic('chev', 14, 2.4)}</button><button class="thx ${th ? 'done' : ''}" data-act="sayThanks" data-id="${esc(m.id)}" ${th ? 'aria-disabled="true"' : ''}>${ic(th ? 'check' : 'heart', 15, 2.2)}${th ? 'Thanks sent' : 'Say thanks'}</button></div></div>`; }
+/* Morning scene drawn across the whole greeting section: soft sky, a sun rising on the right, rolling hills along the bottom */
+const morningScene = (id = 'ms') => `<svg class="mscene" viewBox="0 0 1200 320" preserveAspectRatio="xMaxYMax slice" aria-hidden="true">
+  <defs><linearGradient id="${id}-sky" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color:var(--surface)"/><stop offset=".55" style="stop-color:color-mix(in srgb,var(--c3) 10%,var(--surface))"/><stop offset="1" style="stop-color:color-mix(in srgb,var(--c1) 16%,var(--surface))"/></linearGradient>
+  <radialGradient id="${id}-glow" cx="1010" cy="190" r="300" gradientUnits="userSpaceOnUse"><stop offset="0" style="stop-color:var(--c1);stop-opacity:.32"/><stop offset=".45" style="stop-color:var(--c1);stop-opacity:.1"/><stop offset="1" style="stop-color:var(--c1);stop-opacity:0"/></radialGradient></defs>
+  <rect width="1200" height="320" fill="url(#${id}-sky)"/><rect width="1200" height="320" fill="url(#${id}-glow)"/>
+  <circle class="ms-sun" cx="1010" cy="196" r="58" style="fill:var(--c1)" opacity=".85"/>
+  <g fill="none" style="stroke:var(--ink-3)" stroke-width="2.4" stroke-linecap="round" opacity=".7"><path d="M842 92q9-9 18 0q9-9 18 0"/><path d="M892 64q7-7 14 0q7-7 14 0"/><path d="M790 120q6-6 12 0q6-6 12 0"/></g>
+  <path d="M0 236C170 214 330 226 500 212S820 150 1000 168 1150 176 1200 170V320H0Z" style="fill:var(--c3)" opacity=".16"/>
+  <path d="M0 262C210 240 400 258 610 240S960 206 1200 222V320H0Z" style="fill:var(--c3)" opacity=".3"/>
+  <path d="M0 290C260 272 500 290 760 272S1060 252 1200 262V320H0Z" style="fill:var(--c2)" opacity=".42"/>
+  <g fill="none" style="stroke:var(--surface)" stroke-width="2" stroke-linecap="round" opacity=".35"><path d="M560 300c80-10 170-12 250-6"/><path d="M860 290c80-9 170-11 260-6"/><path d="M700 312c90-8 190-9 280-4"/></g>
+  <path d="M0 308C300 298 620 310 900 300S1120 292 1200 296V320H0Z" style="fill:var(--c2)" opacity=".6"/></svg>`;
+
 const morningArt = () => `<svg class="morning" viewBox="0 0 92 68" aria-hidden="true"><rect width="92" height="68" fill="var(--sky)"/><g class="sun"><circle cx="64" cy="30" r="20" fill="var(--c1)" opacity=".18"/><circle cx="64" cy="30" r="12" fill="var(--c1)"/></g><path d="M18 20q3-3 6 0q3-3 6 0M33 13q2.5-2.5 5 0q2.5-2.5 5 0" fill="none" stroke="var(--ink-2)" stroke-width="1.3" stroke-linecap="round"/><path d="M0 44C18 34 32 36 48 42S76 34 92 38V68H0z" fill="var(--hill-1)"/><path d="M0 53C20 45 40 47 58 53S82 49 92 51V68H0z" fill="var(--hill-2)"/><g fill="none" stroke="var(--hill-3)" stroke-width="1.6" stroke-linecap="round" opacity=".85"><path d="M6 57C22 52 40 53 56 58"/><path d="M58 56C70 53 80 53 92 55"/></g><path d="M0 61C30 57 60 59 92 59V68H0z" fill="var(--hill-3)"/></svg>`;
 const scribble = w => `<span class="hl">${w}</span>`;
 const minsBefore = t => 8 * 60 - toMinP(t);
@@ -1213,8 +1235,8 @@ SCR.home = () => {
   const qa = [['attendance','t-green','cal','Attendance'],['results','t-blue','chart','Results'],['timetable','t-violet','clock','Timetable'],['homework','t-gold','book','Homework'],
     ['bus','t-green','bus','Track bus'],['pickup','t-blue','qr','Pickup pass'],['wallet','t-gold','wallet','Canteen'],['absence','t-red','alert','Report absence'],
     ['conduct','t-lotus','star','Rewards'],['trips','t-violet','pin','Trips'],['reports','t-blue','file','Reports'],['calendar','t-green','cal','Calendar']];
-  return { head:`<div class="ghead"><div class="gt"><div class="gx"><div class="hello">Monday 5 October</div><h1>Good morning, ${scribble('Dilhani')}</h1></div>
-      <div class="gr">${morningArt()}</div><button class="back" data-act="push" data-to="notifications" aria-label="Notifications" style="position:relative">${ic('bell',18)}${S.notifs?'<span style="position:absolute;top:7px;right:8px;width:8px;height:8px;border-radius:50%;background:var(--bad);box-shadow:0 0 0 2px var(--surface)"></span>':''}</button></div></div>`, body: `
+  return { head:`<div class="ghead scene">${morningScene('ph')}<div class="gt"><div class="gx"><div class="hello">Monday 5 October</div><h1>Good morning, ${scribble('Dilhani')}</h1></div>
+      <button class="back" data-act="push" data-to="notifications" aria-label="Notifications" style="position:relative">${ic('bell',18)}${S.notifs?'<span style="position:absolute;top:7px;right:8px;width:8px;height:8px;border-radius:50%;background:var(--bad);box-shadow:0 0 0 2px var(--surface)"></span>':''}</button></div></div>`, body: `
   <div class="stories" aria-label="School stories">${STORIES.map((st, i) => `<button class="story ${st.seen?'seen':''}" data-act="story" data-i="${i}"><span class="ring-s"><span style="background:${st.slides[0].bg}">${ic(st.icon,24)}</span></span>${st.name}</button>`).join('')}</div>
   ${kidSwitch(true)}
   <div class="card hero today ${S.heroAnim?'slide-'+S.heroAnim:''}" id="hero" aria-label="Today with ${k.first}"><div class="tin">

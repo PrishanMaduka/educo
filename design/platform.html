@@ -591,9 +591,9 @@ tr.click:hover td{background:color-mix(in srgb,var(--gold) 9%,var(--surface))}
 .kpi.has-spark .d{padding-bottom:6px}
 
 /* Overview: story first */
-.hero{position:relative;overflow:hidden;display:grid;grid-template-columns:minmax(0,1fr) minmax(220px,320px);gap:6px 28px;align-items:end;padding:30px 30px 26px;background:linear-gradient(160deg,var(--surface) 0%,var(--surface-2) 100%);border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow)}
+.hero{position:relative;overflow:hidden;display:grid;grid-template-columns:minmax(0,1fr);gap:6px 28px;align-items:end;padding:32px 34px 76px;background:var(--surface);border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow)}
 .hero>.vine{position:absolute;left:0;right:0;top:10px}
-.hero .grow{min-width:0}
+.hero .grow{min-width:0;position:relative;z-index:1;max-width:min(680px,64%)}
 .hero .greet{font:800 11px/1.4 var(--f-body);letter-spacing:.12em;text-transform:uppercase;color:var(--gold-ink);margin-top:8px}
 .hero h1{font-size:clamp(34px,4.4vw,52px);line-height:1.08;margin-top:8px}
 .hero p{margin:16px 0 0;color:var(--ink-2);font-size:16px;line-height:1.65;max-width:64ch}
@@ -776,7 +776,8 @@ body.askq-open .askq-fab,.scrim.on~.askq-fab,.auth:not([hidden])~.askq-fab{opaci
   .top .spacer{display:none}
   .card-h .hide-sm{display:none}
   .askq-top{width:38px;padding:0;justify-content:center}
-  .hero{grid-template-columns:minmax(0,1fr);padding:26px 20px 20px}
+  .hero{grid-template-columns:minmax(0,1fr);padding:26px 20px 120px}
+  .hero .grow{max-width:none}
   .hero-art{max-width:260px;justify-self:end;margin-top:-6px}
   .hero h1{font-size:36px}
   .page-head h1{font-size:28px}
@@ -992,6 +993,12 @@ body.askq-open .askq-fab,.scrim.on~.askq-fab,.auth:not([hidden])~.askq-fab{opaci
 
 /* keep Ask Quad clear of sticky save bars */
 body:has(.savebar,.uk-bar,.bulkbar) .askq-fab{bottom:92px}
+
+.mscene{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;display:block}
+.ms-sun{transform-box:fill-box;transform-origin:center;animation:msRise 1.4s cubic-bezier(.2,.8,.2,1) backwards}
+@keyframes msRise{from{transform:translateY(40px);opacity:0}}
+@media (max-width:860px){.mscene{top:auto;height:130px}}
+@media (prefers-reduced-motion:reduce){.ms-sun{animation:none}}
 </style>
 </head>
 <body>
@@ -1285,7 +1292,7 @@ V.overview = () => {
     <p><b>${tenants.length} schools</b> in <b>${countries.length} countries</b> now run on Quad, looking after <b>${fmt(students)} students</b> and bringing in <b>${usd(total)}</b> a month. Most of them are doing well: ${good.length} are thriving. ${today.length ? `There ${today.length === 1 ? 'is one thing' : `are ${today.length} things`} that need you today` : 'Nothing needs you today'}${risk.length ? `, and ${risk.length === 1 ? 'one school is' : risk.length + ' schools are'} showing early signs they might leave.` : '.'}</p>
     <div class="cal-note">${ic('cal',15)}<span><b>Mon 26 Oct · Vap Poya</b> – Sri Lankan schools closed, expect a quiet day for attendance and SMS</span></div>
     <div class="chips"><button class="btn primary" data-act="newTenant">${ic('plus',16)}New school</button><button class="btn" data-act="go" data-to="tenants">${ic('tenants',16)}All schools</button><button class="btn gold" data-act="askq">${ic('spark',16)}Ask Quad</button></div></div>
-    ${morningArt()}</section>
+    ${morningScene('hero')}</section>
   <section class="card"><div class="card-h"><h2>Needs you today</h2><span class="pill t-red">${today.length}</span><span class="muted hide-sm" style="font-size:12.5px;margin-left:auto">Billing, seats, trials and early warnings in one list</span></div>
     ${today.length ? `<div class="today">${today.map(x => `<div class="li" data-act="openTenant" data-id="${x.t.id}"><span class="ic2 ${x.tone}">${ic(x.icon,18)}</span><div class="meta"><b>${esc(x.t.name)}</b><p>${x.text}</p></div><button class="btn sm ${x.act === 'retryPay' ? 'primary' : ''}" data-act="${x.act}" data-id="${x.t.id}" ${x.mail ? `data-mail="${x.mail}"` : ''}>${x.cta}</button></div>`).join('')}</div>` : `<div class="empty">${morningArt('')}<b>All clear.</b><span>Nothing needs you today. Enjoy your tea.</span></div>`}</section>
   <section style="display:flex;flex-direction:column;gap:16px"><div class="sec-h"><div class="grow"><div class="eyebrow">Early warning</div><h2>Early warning for schools</h2><p>Signals from staff use, the parent app, billing and support, explained in plain words with a next step. It’s a nudge to talk, not a verdict.</p></div>
@@ -2170,6 +2177,19 @@ function todayItems() {
   tenants.filter(t => t.checkin).forEach(t => out.push({t, tone:'t-green', icon:'cal', text:`Check-in ${t.checkin.when} · ${t.checkin.how} with ${t.checkin.who}`, act:'openTenant', cta:'Open'}));
   return out;
 }
+/* Morning scene drawn across the whole greeting section: soft sky, a sun rising on the right, rolling hills along the bottom */
+const morningScene = (id = 'ms') => `<svg class="mscene" viewBox="0 0 1200 320" preserveAspectRatio="xMaxYMax slice" aria-hidden="true">
+  <defs><linearGradient id="${id}-sky" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color:var(--surface)"/><stop offset=".55" style="stop-color:color-mix(in srgb,var(--c3) 10%,var(--surface))"/><stop offset="1" style="stop-color:color-mix(in srgb,var(--c1) 16%,var(--surface))"/></linearGradient>
+  <radialGradient id="${id}-glow" cx="1010" cy="190" r="300" gradientUnits="userSpaceOnUse"><stop offset="0" style="stop-color:var(--c1);stop-opacity:.32"/><stop offset=".45" style="stop-color:var(--c1);stop-opacity:.1"/><stop offset="1" style="stop-color:var(--c1);stop-opacity:0"/></radialGradient></defs>
+  <rect width="1200" height="320" fill="url(#${id}-sky)"/><rect width="1200" height="320" fill="url(#${id}-glow)"/>
+  <circle class="ms-sun" cx="1010" cy="196" r="58" style="fill:var(--c1)" opacity=".85"/>
+  <g fill="none" style="stroke:var(--ink-3)" stroke-width="2.4" stroke-linecap="round" opacity=".7"><path d="M842 92q9-9 18 0q9-9 18 0"/><path d="M892 64q7-7 14 0q7-7 14 0"/><path d="M790 120q6-6 12 0q6-6 12 0"/></g>
+  <path d="M0 236C170 214 330 226 500 212S820 150 1000 168 1150 176 1200 170V320H0Z" style="fill:var(--c3)" opacity=".16"/>
+  <path d="M0 262C210 240 400 258 610 240S960 206 1200 222V320H0Z" style="fill:var(--c3)" opacity=".3"/>
+  <path d="M0 290C260 272 500 290 760 272S1060 252 1200 262V320H0Z" style="fill:var(--c2)" opacity=".42"/>
+  <g fill="none" style="stroke:var(--surface)" stroke-width="2" stroke-linecap="round" opacity=".35"><path d="M560 300c80-10 170-12 250-6"/><path d="M860 290c80-9 170-11 260-6"/><path d="M700 312c90-8 190-9 280-4"/></g>
+  <path d="M0 308C300 298 620 310 900 300S1120 292 1200 296V320H0Z" style="fill:var(--c2)" opacity=".6"/></svg>`;
+
 function morningArt(cls = 'hero-art') {
   return `<svg class="${cls}" viewBox="0 0 320 170" aria-hidden="true" focusable="false">
     <circle cx="206" cy="104" r="58" style="fill:var(--gold);opacity:.14"/><circle cx="206" cy="104" r="36" style="fill:var(--gold);opacity:.95"/>
