@@ -541,6 +541,48 @@ td.r,th.r{text-align:right}
 .drawer.form .drawer-h .fd-steps{flex-basis:100%;margin-top:18px;padding-bottom:2px}
 .drawer.form > .steps{display:none}
 @media (max-width:600px){.fd-steps span{font-size:10px}.fd-steps small{display:none}}
+
+/* Select fields: custom chevron instead of the browser default */
+select.input{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238A94A6' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:34px;cursor:pointer;font-weight:500}
+/* Filter dropdown (replaces native selects in toolbars) */
+.dd-native{position:absolute!important;width:1px!important;height:1px!important;opacity:0;pointer-events:none;overflow:hidden}
+.dd{display:inline-flex;align-items:center;gap:8px;height:38px;padding:0 10px 0 12px;border:1px solid var(--line-strong);border-radius:10px;background:var(--surface);color:var(--ink);font:inherit;font-size:13.5px;white-space:nowrap;cursor:pointer;transition:border-color .15s,background .15s,box-shadow .15s;max-width:100%}
+.dd:hover{border-color:var(--ink-3)}
+.dd:focus-visible,.dd[aria-expanded=true]{outline:0;border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft)}
+.dd .dd-ic{color:var(--ink-3);display:grid}
+.dd .dd-l{color:var(--ink-3);font-weight:500}
+.dd .dd-v{font-weight:700;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.dd .dd-chev{color:var(--ink-3);display:grid;transition:transform .2s}
+.dd[aria-expanded=true] .dd-chev{transform:rotate(180deg)}
+.dd.active{background:var(--brand-soft);border-color:color-mix(in srgb,var(--brand) 45%,transparent);color:var(--brand)}
+.dd.active .dd-ic,.dd.active .dd-l,.dd.active .dd-chev{color:var(--brand)}
+.dd .dd-x{display:grid;place-items:center;width:20px;height:20px;border-radius:50%;margin:0 -4px 0 -2px;color:var(--brand)}
+.dd .dd-x:hover{background:color-mix(in srgb,var(--brand) 18%,transparent)}
+.dd.dd-top{height:38px;align-self:center;border-color:var(--line);font-size:13px}
+.dd-pop{position:fixed;z-index:200;min-width:220px;max-width:min(320px,calc(100vw - 24px));background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow-lg);padding:6px;display:flex;flex-direction:column;opacity:0;transform:translateY(-6px) scale(.98);transform-origin:top left;transition:opacity .14s,transform .14s;pointer-events:none}
+.dd-pop.on{opacity:1;transform:none;pointer-events:auto}
+.dd-pop .dd-q{display:flex;align-items:center;gap:8px;padding:0 10px;height:36px;border:1px solid var(--line);border-radius:9px;margin:2px 2px 6px;color:var(--ink-3)}
+.dd-pop .dd-q input{border:0;outline:0;background:none;flex:1;min-width:0;font:inherit;color:var(--ink)}
+.dd-list{overflow:auto;max-height:min(340px,55vh);display:flex;flex-direction:column;gap:1px;overscroll-behavior:contain}
+.dd-g{font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);padding:10px 10px 4px}
+.dd-o{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:9px;border:0;background:none;text-align:left;font:inherit;font-size:13.5px;color:var(--ink);cursor:pointer;width:100%}
+.dd-o .dd-t{flex:1;min-width:0}
+.dd-o .dd-t small{display:block;color:var(--ink-3);font-size:11.5px}
+.dd-o .dd-n{font-size:11.5px;font-weight:700;color:var(--ink-3);background:var(--surface-2);border-radius:20px;padding:1px 8px;font-variant-numeric:tabular-nums}
+.dd-o .dd-ck{width:16px;color:var(--brand);display:grid;flex:none}
+.dd-o.hl{background:var(--surface-2)}
+.dd-o[aria-selected=true]{font-weight:700;color:var(--brand)}
+.dd-o[aria-selected=true] .dd-n{background:var(--brand-soft);color:var(--brand)}
+.dd-o.zero{color:var(--ink-3)}
+.dd-o .sw{width:10px;height:10px;border-radius:3px;flex:none}
+.dd-empty{padding:16px;text-align:center;color:var(--ink-3);font-size:13px}
+.toolbar .linkbtn.clear{font-size:13px;align-self:center;margin:0;padding:0}
+@media (max-width:760px){.dd .dd-l{display:none}}
+@media (max-width:900px){.dd.yearpick{display:none}}
+/* Timetable grade filter */
+.tt2-bar{flex-wrap:wrap}
+.tt2-bar .chips{flex-wrap:wrap}
+.tt2-bar .sep{width:1px;height:24px;background:var(--line);margin:0 2px}
 </style>
 </head>
 <body>
@@ -557,7 +599,7 @@ td.r,th.r{text-align:right}
       <button class="iconbtn collapse-btn" data-act="collapse" aria-label="Collapse sidebar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/></svg></button>
       <div class="search" data-act="cmdk" role="button" tabindex="0"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><span>Search students, invoices, pages…</span><kbd>Ctrl K</kbd></div>
       <div class="spacer"></div>
-      <select class="yearpick" id="yearpick" aria-label="Academic year"><option>2026/27 · Term 1</option><option>2025/26 · Term 3</option></select>
+      <select class="yearpick" id="yearpick" aria-label="Academic year" data-dd-ic="cal" data-dd-top><optgroup label="2026/27"><option data-sub="5 Oct – 18 Dec · current" selected>2026/27 · Term 1</option><option data-sub="5 Jan – 27 Mar">2026/27 · Term 2</option><option data-sub="20 Apr – 10 Jul">2026/27 · Term 3</option></optgroup><optgroup label="Past years"><option data-sub="Read only">2025/26 · Term 3</option><option data-sub="Read only">2025/26 · Term 2</option></optgroup></select>
       <button class="iconbtn" data-act="theme" aria-label="Toggle theme" id="themeBtn"></button>
       <button class="iconbtn" data-act="notif" aria-label="Notifications"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></svg><i class="dot"></i></button>
       <div class="me" data-act="go" data-to="user-s0" title="My profile" style="cursor:pointer"><div class="av" style="background:#2F6FED">PM</div><div><b>Prishan M.</b><small>Administrator</small></div></div>
@@ -592,7 +634,7 @@ const P = {
   search:'<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',
   sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
   moon:'<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>',
-  send:'<path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"/>', down:'<path d="M12 3v12M6 11l6 6 6-6M4 21h16"/>',
+  send:'<path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"/>', chev:'<path d="m6 9 6 6 6-6"/>', down:'<path d="M12 3v12M6 11l6 6 6-6M4 21h16"/>',
   file:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/>',
   alert:'<path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/>',
   star:'<path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/>',
@@ -637,6 +679,7 @@ const STAGES = [
   {k:'assessment', n:'Assessment', c:'var(--c4)'}, {k:'interview', n:'Interview', c:'var(--c3)'},
   {k:'offer', n:'Offer sent', c:'var(--c2)'}, {k:'enrolled', n:'Enrolled', c:'var(--good)'}
 ];
+const GRADE_BANDS = [['Primary', 1, 5], ['Middle school', 6, 9], ['Senior school', 10, 13]];
 const SOURCES = ['Website','Open day','Referral','Facebook','Walk-in','Agent'];
 const apps = Array.from({length: 26}, (_, i) => ({ id: 'APP-' + (3301 + i), name: pick(FIRST) + ' ' + pick(LAST),
   grade: 1 + Math.floor(rnd() * 12), stage: STAGES[Math.min(5, Math.floor(rnd() * 6.5))].k, source: pick(SOURCES),
@@ -797,8 +840,10 @@ V.dashboard = () => {
 };
 
 V.admissions = () => {
-  const q = (S.q || '').toLowerCase();
-  const list = apps.filter(a => !q || a.name.toLowerCase().includes(q) || a.id.toLowerCase().includes(q));
+  const q = (S.q || '').toLowerCase(), fg = S.filter.apGrade || 'all', fs = S.filter.apSrc || 'all';
+  const bySearch = apps.filter(a => !q || a.name.toLowerCase().includes(q) || a.id.toLowerCase().includes(q));
+  const list = bySearch.filter(a => (fg === 'all' || a.grade == fg) && (fs === 'all' || a.source === fs));
+  const gN = g => bySearch.filter(a => a.grade == g && (fs === 'all' || a.source === fs)).length, sN = x => bySearch.filter(a => a.source === x && (fg === 'all' || a.grade == fg)).length;
   return `${pageHead('Pre-admission & enrolment', 'Admissions pipeline', 'Drag a card to move an applicant between stages. Intake: January 2027.', `<button class="btn">${ic('down',16)}Export</button><button class="btn primary" data-act="newApp">${ic('plus',16)}New application</button>`)}
   <div class="grid g-kpi">
     ${kpi('admit','t-blue','Enquiries this month','64','<span class="up">▲ 18%</span> after open-day campaign')}
@@ -807,13 +852,14 @@ V.admissions = () => {
     ${kpi('cal','t-amber','Seats left – Jan intake','38','Grades 1, 6 and 9 nearly full')}
   </div>
   <div class="card"><div class="toolbar"><div class="searchbox">${ic('search',16)}<input class="input" id="appSearch" placeholder="Search applicants or ID" value="${esc(S.q||'')}"></div>
-  <select class="input inline" aria-label="Grade"><option>All grades</option>${Array.from({length:13},(_, i)=>`<option>Grade ${i+1}</option>`).join('')}</select>
-  <select class="input inline" aria-label="Source"><option>All sources</option>${SOURCES.map(s=>`<option>${s}</option>`).join('')}</select></div>
+  <select class="input inline" data-filter="apGrade" aria-label="Grade" data-dd-ic="student" data-dd-q><option value="all" data-n="${bySearch.filter(a => fs === 'all' || a.source === fs).length}">All grades</option>${GRADE_BANDS.map(([band, from, to]) => `<optgroup label="${band}">${Array.from({length: to - from + 1}, (_, i) => from + i).map(g => `<option value="${g}" data-n="${gN(g)}" ${fg == g ? 'selected' : ''}>Grade ${g}</option>`).join('')}</optgroup>`).join('')}</select>
+  <select class="input inline" data-filter="apSrc" aria-label="Source" data-dd-ic="crm"><option value="all" data-n="${bySearch.filter(a => fg === 'all' || a.grade == fg).length}">All sources</option>${SOURCES.map(x => `<option value="${x}" data-n="${sN(x)}" ${fs === x ? 'selected' : ''}>${x}</option>`).join('')}</select>
+  ${fg !== 'all' || fs !== 'all' || q ? `<button class="linkbtn clear" data-act="apClear">Clear filters</button><span class="muted" style="font-size:12.5px">${list.length} of ${apps.length} applicants</span>` : ''}</div>
   <div class="card-b"><div class="kanban">${STAGES.map(st => { const cs = list.filter(a => a.stage === st.k); return `
     <div class="col" data-stage="${st.k}"><div class="col-h"><i style="background:${st.c}"></i>${st.n}<span class="n">${cs.length}</span></div>
     <div class="col-b">${cs.map(a => `<div class="kcard" draggable="true" data-id="${a.id}" data-act="openApp" tabindex="0">
       <div style="display:flex;gap:10px;align-items:center">${avatar(a.name,'sm')}<div style="min-width:0"><b>${a.name}</b><span class="muted" style="font-size:12px">${a.id} · Grade ${a.grade}</span></div></div>
-      <div class="row"><span class="prio" style="background:${a.prio==='high'?'var(--bad)':a.prio==='med'?'var(--warn)':'var(--ink-3)'}"></span>${a.source}<span class="grow"></span>${ic('file',13)} ${a.docs}/5 · ${a.days}d</div></div>`).join('') || '<div class="muted" style="font-size:12px;text-align:center;padding:20px 0">Drop applicants here</div>'}</div></div>`; }).join('')}</div></div></div>`;
+      <div class="row"><span class="prio" style="background:${a.prio==='high'?'var(--bad)':a.prio==='med'?'var(--warn)':'var(--ink-3)'}"></span>${a.source}<span class="grow"></span>${ic('file',13)} ${a.docs}/5 · ${a.days}d</div></div>`).join('') || `<div class="muted" style="font-size:12px;text-align:center;padding:20px 0">${list.length < apps.length ? 'No matches' : 'Drop applicants here'}</div>`}</div></div>`; }).join('')}</div></div></div>`;
 };
 
 V.crm = () => {
@@ -859,8 +905,8 @@ V.students = () => {
   const grid = `<div class="sgrid">${rows.map(s => `<div class="scard" data-act="openStudent" data-id="${s.id}" tabindex="0">${avatar(s.name)}<b>${s.name}</b><div class="muted" style="font-size:12px">${s.id} · ${s.cls}</div><div style="display:flex;justify-content:center;gap:16px;margin-top:10px;font-size:12px"><span><b class="num">${s.att.toFixed(0)}%</b> att.</span><span><b class="num">${s.gpa}</b> GPA</span></div></div>`).join('')}</div>`;
   return `${pageHead('Student information system', 'Students', `${students.length} of 1,248 shown · sample records`, `<button class="btn">${ic('down',16)}Import CSV</button><button class="btn primary" data-act="newApp">${ic('plus',16)}Add student</button>`)}
   <div class="card"><div class="toolbar"><div class="searchbox">${ic('search',16)}<input class="input" id="stuSearch" placeholder="Search by name or ID" value="${esc(S.q||'')}"></div>
-  <select class="input inline" data-filter="grade" aria-label="Grade"><option value="all">All grades</option>${Array.from({length:13},(_, i)=>`<option value="${i+1}" ${g==i+1?'selected':''}>Grade ${i+1}</option>`).join('')}</select>
-  <select class="input inline" data-filter="status" aria-label="Status">${['all','Active','On leave','Withdrawn'].map(x=>`<option value="${x}" ${st===x?'selected':''}>${x==='all'?'All statuses':x}</option>`).join('')}</select>
+  <select class="input inline" data-filter="grade" aria-label="Grade" data-dd-ic="student"><option value="all">All grades</option>${Array.from({length:13},(_, i)=>`<option value="${i+1}" ${g==i+1?'selected':''}>Grade ${i+1}</option>`).join('')}</select>
+  <select class="input inline" data-filter="status" aria-label="Status" data-dd-ic="check">${['all','Active','On leave','Withdrawn'].map(x=>`<option value="${x}" ${st===x?'selected':''}>${x==='all'?'All statuses':x}</option>`).join('')}</select>
   <span style="flex:1"></span><div class="seg"><button class="${S.view==='table'?'on P':''}" data-act="view" data-val="table" aria-label="Table view">${ic('list',15)}</button><button class="${S.view==='grid'?'on P':''}" data-act="view" data-val="grid" aria-label="Card view">${ic('grid',15)}</button></div></div>
   ${S.view === 'grid' ? grid : table}<div class="tbl-foot"><span>${rows.length} students</span><span class="grow"></span><button class="btn sm" disabled>Previous</button><button class="btn sm">Next</button></div></div>`;
 };
@@ -905,7 +951,7 @@ V.attendance = () => {
   const c = k => roster.filter(s => S.register[s.id] === k).length;
   return `${pageHead('Student information system', 'Attendance register', 'Monday, 5 October 2026 · Period 1 (08:00 – 08:40)', `<button class="btn" data-act="markAll">Mark all present</button><button class="btn primary" data-act="saveReg">${ic('check',16)}Save register</button>`)}
   <div class="grid g-kpi">${[['Present','P','t-green'],['Absent','A','t-red'],['Late','L','t-amber'],['Excused','E','t-violet']].map(([l,k,tone]) => `<div class="card kpi"><div class="ic ${tone}">${ic('check',18)}</div><div><div class="l">${l}</div><div class="v" id="cnt-${k}">${c(k)}</div><div class="d">of ${roster.length} students</div></div></div>`).join('')}</div>
-  <div class="card"><div class="toolbar"><select class="input inline" data-filter="cls" aria-label="Class">${['Grade 7 – Emerald','Grade 7 – Sapphire','Grade 8 – Ruby','Grade 10 – Topaz'].map(x=>`<option ${x===cls?'selected':''}>${x}</option>`).join('')}</select><input class="input inline" type="date" value="2026-10-05" aria-label="Date"><span class="muted" style="font-size:12.5px">Absences notify parents in iParent at 09:00.</span></div>
+  <div class="card"><div class="toolbar"><select class="input inline" data-filter="cls" aria-label="Class" data-dd-ic="student">${['Grade 7 – Emerald','Grade 7 – Sapphire','Grade 8 – Ruby','Grade 10 – Topaz'].map(x=>`<option ${x===cls?'selected':''}>${x}</option>`).join('')}</select><input class="input inline" type="date" value="2026-10-05" aria-label="Date"><span class="muted" style="font-size:12.5px">Absences notify parents in iParent at 09:00.</span></div>
   <div class="tbl-wrap"><table><thead><tr><th>#</th><th>Student</th><th>Mark</th><th>Note</th><th class="r">Term %</th></tr></thead><tbody>
   ${roster.map((s, i) => `<tr><td class="muted num">${i+1}</td><td><div class="who">${avatar(s.name,'sm')}<div><b>${s.name}</b><small>${s.id}</small></div></div></td>
     <td><div class="seg" role="radiogroup" aria-label="Attendance for ${esc(s.name)}">${['P','A','L','E'].map(k => `<button class="${S.register[s.id]===k?'on '+k:''}" data-act="mark" data-id="${s.id}" data-val="${k}" title="${{P:'Present',A:'Absent',L:'Late',E:'Excused'}[k]}">${k}</button>`).join('')}</div></td>
@@ -929,7 +975,7 @@ V.lms = () => {
   else {
     const rows = students.slice(20, 32);
     seed = 99; const marks = rows.map(() => [0,0,0,0].map(() => 50 + Math.floor(rnd() * 49)));
-    body = `<div class="card gb"><div class="toolbar"><select class="input inline" aria-label="Course"><option>Mathematics · Grade 10</option></select><span class="muted" style="font-size:12.5px">Click a mark to edit. Weighted average updates as you type.</span></div><div class="tbl-wrap"><table><thead><tr><th>Student</th><th class="r">Test 1 (20%)</th><th class="r">Test 2 (20%)</th><th class="r">Project (25%)</th><th class="r">Mid-term (35%)</th><th class="r">Weighted</th><th>Grade</th></tr></thead><tbody>
+    body = `<div class="card gb"><div class="toolbar"><select class="input inline" aria-label="Course" data-dd-ic="book"><option>Mathematics · Grade 10</option></select><span class="muted" style="font-size:12.5px">Click a mark to edit. Weighted average updates as you type.</span></div><div class="tbl-wrap"><table><thead><tr><th>Student</th><th class="r">Test 1 (20%)</th><th class="r">Test 2 (20%)</th><th class="r">Project (25%)</th><th class="r">Mid-term (35%)</th><th class="r">Weighted</th><th>Grade</th></tr></thead><tbody>
     ${rows.map((s, i) => `<tr data-row="${i}"><td><div class="who">${avatar(s.name,'sm')}<b>${s.name}</b></div></td>${marks[i].map((m, j) => `<td class="r"><input type="number" min="0" max="100" value="${m}" data-gb="${j}" aria-label="Mark ${j+1} for ${esc(s.name)}"></td>`).join('')}<td class="r num"><b class="w"></b></td><td class="g"></td></tr>`).join('')}</tbody></table></div>
     <div class="tbl-foot"><span>Class average: <b id="gbAvg" class="num"></b></span><span class="grow"></span><button class="btn sm primary" data-act="toast" data-msg="Grades published to iParent">Publish to parents</button></div></div>`;
   }
@@ -1459,7 +1505,10 @@ const TT_SUBJ = {
 const TT_LOAD = {'Mathematics':7,'English':6,'Physics':5,'ICT':5,'History':5,'Art & Design':4,'Physical Ed.':4,'Sinhala':4};
 const TT_P = [['P1','08:00','08:40'],['P2','08:40','09:20'],['P3','09:20','10:00'],['brk','10:00','10:20','Interval','Yard duty: Mr. Herath'],['P4','10:20','11:00'],['P5','11:00','11:40'],['P6','11:40','12:20'],['brk','12:20','13:00','Lunch','Canteen duty: Ms. Silva'],['P7','13:00','13:40'],['P8','13:40','14:20']];
 const TT_DAYS = [['Mon','5 Oct'],['Tue','6 Oct'],['Wed','7 Oct'],['Thu','8 Oct'],['Fri','9 Oct']];
-const TT_CLASSES = ['Grade 10 – Emerald','Grade 10 – Ruby','Grade 9 – Sapphire','Grade 7 – Emerald'];
+const TT_SECTIONS = ['Emerald','Ruby','Sapphire'];
+const ttSecs = g => TT_SECTIONS.slice(0, g <= 5 ? 2 : 3);
+const ttGradeOf = () => +(S.filter.ttGrade || 10);
+const ttCls = () => { const g = ttGradeOf(), list = ttSecs(g).map(x => `Grade ${g} – ${x}`); return list.includes(S.ttClass) ? S.ttClass : list[0]; };
 function ttGrid(cls, wk) {
   S.tt = S.tt || {}; const key = cls + wk; if (S.tt[key]) return S.tt[key];
   const r = ukSeed(key), bag = []; Object.entries(TT_LOAD).forEach(([k, n]) => { for (let i = 0; i < n; i++) bag.push(k); });
@@ -1467,7 +1516,7 @@ function ttGrid(cls, wk) {
   return S.tt[key] = Array.from({length:5}, (_, d) => bag.slice(d * 8, d * 8 + 8));
 }
 V.timetable = () => {
-  const cls = S.ttClass || TT_CLASSES[0], wk = S.ttWeek || 'A', g = ttGrid(cls, wk), edit = !!S.ttEdit, subs = S.ttSub || {};
+  const cls = ttCls(), wk = S.ttWeek || 'A', g = ttGrid(cls, wk), edit = !!S.ttEdit, subs = S.ttSub || {};
   const NOW = 9 * 60 + 41, mins = t => +t.slice(0, 2) * 60 + +t.slice(3); let pi = -1;
   let cells = `<div class="tt2-c"></div>${TT_DAYS.map(([d, dt], i) => `<div class="dh ${i === 0 ? 'today' : ''}"><b>${d}</b><span>${dt}</span>${i === 0 ? '<em>Today</em>' : ''}</div>`).join('')}`;
   TT_P.forEach(([p, s, e, label, duty]) => {
@@ -1485,14 +1534,14 @@ V.timetable = () => {
   const agenda = today.map(([p, s, e], i) => { const k = g[0][i], st = mins(s), en = mins(e), state = NOW >= en ? 'done' : NOW >= st ? 'cur' : ''; return `<div class="ag ${state}"><i style="background:${TT_SUBJ[k][0]}"></i><span class="num" style="width:44px">${s}</span><span style="flex:1"><b>${k}</b><br><small class="muted">${TT_SUBJ[k][1]} · ${TT_SUBJ[k][3]}</small></span>${state === 'cur' ? '<span class="pill t-red plain">Now</span>' : state === 'done' ? ic('check',14) : ''}</div>`; }).join('');
   const counts = {}; g.flat().forEach(k => counts[k] = (counts[k] || 0) + 1);
   return `${pageHead('Learning management system', 'Timetable', `${cls} · Week ${wk} · 40 lessons · Term 1, 2026/27`, `<button class="btn ${edit ? 'primary' : ''}" data-act="ttEdit">${ic(edit ? 'check' : 'grid',16)}${edit ? 'Done rearranging' : 'Rearrange'}</button><button class="btn" data-act="toast" data-msg="Timetable shared with ${cls} parents in the app">${ic('send',16)}Share with parents</button>`)}
-  <div class="tt2-bar card"><div class="chips">${TT_CLASSES.map(c => `<button class="chip ${c === cls ? 'on' : ''}" data-act="ttClass" data-v="${c}">${c}</button>`).join('')}</div><span style="flex:1"></span><div class="seg" role="radiogroup" aria-label="Week">${['A','B'].map(w => `<button class="${w === wk ? 'on P' : ''}" data-act="ttWeek" data-v="${w}">Week ${w}</button>`).join('')}</div></div>
+  <div class="tt2-bar card"><select class="input inline" data-filter="ttGrade" aria-label="Grade" data-dd-ic="student" data-dd-q>${GRADE_BANDS.map(([band, from, to]) => `<optgroup label="${band}">${Array.from({length: to - from + 1}, (_, i) => from + i).map(g => `<option value="${g}" data-sub="${ttSecs(g).length} classes · ${ttSecs(g).join(', ')}" ${ttGradeOf() === g ? 'selected' : ''}>Grade ${g}</option>`).join('')}</optgroup>`).join('')}</select><span class="sep" aria-hidden="true"></span><div class="chips" role="radiogroup" aria-label="Class">${ttSecs(ttGradeOf()).map(x => { const c = `Grade ${ttGradeOf()} – ${x}`; return `<button class="chip ${c === cls ? 'on' : ''}" role="radio" aria-checked="${c === cls}" data-act="ttClass" data-v="${c}">${x}</button>`; }).join('')}</div><span style="flex:1"></span><div class="seg" role="radiogroup" aria-label="Week">${['A','B'].map(w => `<button class="${w === wk ? 'on P' : ''}" data-act="ttWeek" data-v="${w}">Week ${w}</button>`).join('')}</div></div>
   ${edit ? `<div class="tt2-hint">${ic('grid',16)}Drag a lesson onto another to swap them. Teachers and parents are told when you finish.</div>` : ''}
   <div class="tt2-wrap"><div class="card tbl-wrap"><div class="tt2 ${edit ? 'edit' : ''}">${cells}</div></div>
     <aside class="tt2-side"><section class="card agenda"><div class="card-h"><h2>Today · Monday</h2><span class="muted num" style="font-size:12px">09:41</span></div>${agenda}</section>
       <section class="card load"><div class="card-h"><h2>Lessons per week</h2></div>${Object.entries(TT_LOAD).map(([k, n]) => `<div class="lr"><i style="width:10px;height:10px;border-radius:3px;background:${TT_SUBJ[k][0]}"></i><span>${k}</span><b class="num">${counts[k] || 0}</b><div class="bar"><i style="width:${(counts[k] || 0) / 7 * 100}%;background:var(--ink-3)"></i></div></div>`).join('')}</section></aside></div>`;
 };
 function ttLessonDrawer(d, p) {
-  const cls = S.ttClass || TT_CLASSES[0], wk = S.ttWeek || 'A', g = ttGrid(cls, wk), k = g[d][p], [c, tch, icn, room] = TT_SUBJ[k], per = TT_P.filter(x => x[0] !== 'brk')[p], subKey = `${cls}${wk}-${d}-${p}`, sub = (S.ttSub || {})[subKey];
+  const cls = ttCls(), wk = S.ttWeek || 'A', g = ttGrid(cls, wk), k = g[d][p], [c, tch, icn, room] = TT_SUBJ[k], per = TT_P.filter(x => x[0] !== 'brk')[p], subKey = `${cls}${wk}-${d}-${p}`, sub = (S.ttSub || {})[subKey];
   const free = Object.values(TT_SUBJ).map(v => v[1]).filter(n => n !== tch).slice(0, 4);
   openDrawer(`<div class="ls-hero" style="--c:${c}"><div class="ad-top"><span class="ls-ic big">${ic(icn,22)}</span><div style="flex:1"><div class="eyebrow" style="color:rgba(255,255,255,.8)">${cls} · Week ${wk}</div><h2>${k}</h2><div style="opacity:.9">${TT_DAYS[d][0]} ${TT_DAYS[d][1]} · ${per[0]} · ${per[1]}–${per[2]}</div></div><button class="iconbtn" data-act="closeAll" aria-label="Close">${ic('x',16)}</button></div></div>
     <div class="drawer-b"><dl class="kv"><dt>Teacher</dt><dd>${tch}${sub ? ` <span class="pill t-amber plain">Covered by ${sub}</span>` : ''}</dd><dt>Room</dt><dd>${room}</dd><dt>This week</dt><dd>${g.flat().filter(x => x === k).length} ${k} lessons</dd><dt>Learners</dt><dd>32 students</dd></dl>
@@ -1507,7 +1556,7 @@ function ttBindDrag() {
     el.addEventListener('dragover', e => { e.preventDefault(); el.classList.add('drop'); });
     el.addEventListener('dragleave', () => el.classList.remove('drop'));
     el.addEventListener('drop', e => { e.preventDefault(); el.classList.remove('drop'); if (!from) return; const to = [+el.dataset.d, +el.dataset.p]; if (from[0] === to[0] && from[1] === to[1]) return;
-      const g = ttGrid(S.ttClass || TT_CLASSES[0], S.ttWeek || 'A'), a = g[from[0]][from[1]], b = g[to[0]][to[1]]; g[from[0]][from[1]] = b; g[to[0]][to[1]] = a; route();
+      const g = ttGrid(ttCls(), S.ttWeek || 'A'), a = g[from[0]][from[1]], b = g[to[0]][to[1]]; g[from[0]][from[1]] = b; g[to[0]][to[1]] = a; route();
       toast(`Swapped ${a} (${TT_DAYS[from[0]][0]} P${from[1] + 1}) with ${b} (${TT_DAYS[to[0]][0]} P${to[1] + 1})`); });
   });
 }
@@ -1525,7 +1574,64 @@ function route() {
   else view.innerHTML = (V[base] || V.dashboard)();
   renderNav(); afterRender(); closeAll(); document.getElementById('app').classList.remove('mobile-open');
 }
+/* ---------- Filter dropdowns: enhance native selects ---------- */
+const DD = {pop: null, sel: null, btn: null, hl: 0};
+function ddLabel(sel) { const o = sel.options[sel.selectedIndex], first = sel.options[0], all = sel.dataset.ddTop === undefined && first && /^all\b/i.test(first.textContent);
+  return {val: o ? o.textContent : '', active: all && sel.selectedIndex > 0}; }
+function ddPaint(sel, btn) { const {val, active} = ddLabel(sel), lab = sel.getAttribute('aria-label') || '';
+  btn.classList.toggle('active', active);
+  btn.innerHTML = `${sel.dataset.ddIc ? `<span class="dd-ic">${ic(sel.dataset.ddIc, 15)}</span>` : ''}${active ? `<span class="dd-l">${esc(lab)}</span>` : ''}<span class="dd-v">${esc(val)}</span>${active ? `<span class="dd-x" role="button" aria-label="Clear ${esc(lab)} filter" data-ddx>${ic('x', 12)}</span>` : `<span class="dd-chev">${ic('chev', 15)}</span>`}`;
+  btn.setAttribute('aria-label', `${lab}: ${val}`); }
+function ddEnhance(root = document) {
+  root.querySelectorAll('.toolbar select.input.inline:not([data-act-change]), .tt2-bar select, select#yearpick').forEach(sel => {
+    if (sel.classList.contains('dd-native')) return;
+    sel.classList.add('dd-native'); sel.tabIndex = -1; sel.setAttribute('aria-hidden', 'true');
+    const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'dd' + (sel.dataset.ddTop !== undefined ? ' dd-top yearpick' : '');
+    btn.setAttribute('aria-haspopup', 'listbox'); btn.setAttribute('aria-expanded', 'false');
+    sel.after(btn); ddPaint(sel, btn);
+    btn.addEventListener('click', e => { if (e.target.closest('[data-ddx]')) { e.stopPropagation(); sel.selectedIndex = 0; ddPick(sel, btn); return; } DD.btn === btn ? ddClose() : ddOpen(sel, btn); });
+    btn.addEventListener('keydown', e => { if (['ArrowDown', 'ArrowUp'].includes(e.key) && DD.btn !== btn) { e.preventDefault(); ddOpen(sel, btn); } });
+  });
+}
+function ddPick(sel, btn) { ddPaint(sel, btn); ddClose(); sel.dispatchEvent(new Event('change', {bubbles: true})); if (sel.id === 'yearpick') toast(`Showing ${sel.value}`); }
+function ddItems(sel, q = '') {
+  q = q.toLowerCase().trim(); let html = '', idx = 0;
+  const opt = o => { const i = [...sel.options].indexOf(o), on = i === sel.selectedIndex, n = o.dataset.n;
+    if (q && !o.textContent.toLowerCase().includes(q)) return '';
+    return `<button type="button" class="dd-o ${n === '0' ? 'zero' : ''}" role="option" aria-selected="${on}" data-i="${i}" data-k="${idx++}"><span class="dd-ck">${on ? ic('check', 14) : ''}</span><span class="dd-t">${esc(o.textContent)}${o.dataset.sub ? `<small>${esc(o.dataset.sub)}</small>` : ''}</span>${n !== undefined ? `<span class="dd-n">${n}</span>` : ''}</button>`; };
+  [...sel.children].forEach(ch => { if (ch.tagName === 'OPTGROUP') { const inner = [...ch.children].map(opt).join(''); if (inner) html += `<div class="dd-g" role="presentation">${esc(ch.label)}</div>${inner}`; } else html += opt(ch); });
+  return html || '<div class="dd-empty">No matches</div>';
+}
+function ddOpen(sel, btn) {
+  ddClose(); const pop = document.createElement('div'); pop.className = 'dd-pop'; pop.setAttribute('role', 'listbox'); pop.setAttribute('aria-label', sel.getAttribute('aria-label') || '');
+  const search = sel.dataset.ddQ !== undefined || sel.options.length > 9;
+  pop.innerHTML = `${search ? `<label class="dd-q">${ic('search', 14)}<input placeholder="Search ${esc((sel.getAttribute('aria-label') || '').toLowerCase())}s" aria-label="Search"></label>` : ''}<div class="dd-list">${ddItems(sel)}</div>`;
+  document.body.appendChild(pop); Object.assign(DD, {pop, sel, btn, at: Date.now()}); btn.setAttribute('aria-expanded', 'true');
+  const r = btn.getBoundingClientRect(), w = Math.max(r.width, 220), left = Math.min(r.left, innerWidth - w - 12), below = innerHeight - r.bottom;
+  pop.style.minWidth = w + 'px'; pop.style.left = Math.max(12, left) + 'px';
+  if (below < 260 && r.top > below) { pop.style.bottom = (innerHeight - r.top + 6) + 'px'; pop.style.transformOrigin = 'bottom left'; } else pop.style.top = (r.bottom + 6) + 'px';
+  const list = pop.querySelector('.dd-list'), cur = list.querySelector('[aria-selected=true]');
+  DD.hl = cur ? +cur.dataset.k : 0; ddHl();
+  requestAnimationFrame(() => pop.classList.add('on'));
+  const inp = pop.querySelector('input');
+  if (inp) { setTimeout(() => inp.focus({preventScroll: true}), 30); inp.addEventListener('input', () => { list.innerHTML = ddItems(sel, inp.value); DD.hl = 0; ddHl(); }); }
+  else setTimeout(() => (list.querySelector('.dd-o.hl') || list.querySelector('.dd-o') || btn).focus({preventScroll: true}), 30);
+  pop.addEventListener('click', e => { const o = e.target.closest('.dd-o'); if (!o) return; sel.selectedIndex = +o.dataset.i; ddPick(sel, btn); btn.focus(); });
+  pop.addEventListener('mousemove', e => { const o = e.target.closest('.dd-o'); if (o && +o.dataset.k !== DD.hl) { DD.hl = +o.dataset.k; ddHl(false); } });
+  pop.addEventListener('keydown', e => { const os = [...list.querySelectorAll('.dd-o')];
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); DD.hl = (DD.hl + (e.key === 'ArrowDown' ? 1 : -1) + os.length) % os.length; ddHl(); if (!inp) os[DD.hl].focus(); }
+    else if (e.key === 'Enter') { e.preventDefault(); const o = os[DD.hl]; if (o) o.click(); }
+    else if (e.key === 'Tab') ddClose(); });
+}
+function ddHl(scroll = true) { if (!DD.pop) return; DD.pop.querySelectorAll('.dd-o').forEach(o => { const on = +o.dataset.k === DD.hl; o.classList.toggle('hl', on); if (on && scroll) { const l = o.parentNode; if (o.offsetTop < l.scrollTop) l.scrollTop = o.offsetTop - 4; else if (o.offsetTop + o.offsetHeight > l.scrollTop + l.clientHeight) l.scrollTop = o.offsetTop + o.offsetHeight - l.clientHeight + 4; } }); }
+function ddClose() { if (!DD.pop) return; const p = DD.pop; p.classList.remove('on'); setTimeout(() => p.remove(), 150); DD.btn && DD.btn.setAttribute('aria-expanded', 'false'); Object.assign(DD, {pop: null, sel: null, btn: null}); }
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && DD.pop) { e.preventDefault(); e.stopImmediatePropagation(); const b = DD.btn; ddClose(); b.focus(); } }, true);
+document.addEventListener('mousedown', e => { if (DD.pop && !DD.pop.contains(e.target) && !DD.btn.contains(e.target)) ddClose(); }, true);
+window.addEventListener('resize', ddClose);
+document.addEventListener('scroll', e => { if (DD.pop && !DD.pop.contains(e.target) && Date.now() - DD.at > 400) ddClose(); }, true);
+
 function afterRender() {
+  ddClose(); ddEnhance();
   if (S.route === 'timetable') ttBindDrag();
   bindSearch('appSearch'); bindSearch('stuSearch'); bindSearch('usrSearch');
   if (S.route === 'lms' && curTab('lms','courses') === 'gradebook') recalcGB();
@@ -1676,6 +1782,7 @@ const ACT = {
   ttLesson: el => { if (S.ttEdit) return; ttLessonDrawer(+el.dataset.d, +el.dataset.p); },
   ttEdit: () => { S.ttEdit = !S.ttEdit; route(); if (!S.ttEdit) toast('Timetable saved. Teachers and parents have been told about the changes.'); },
   ttEditFrom: () => { closeAll(); S.ttEdit = true; route(); },
+  apClear: () => { S.filter.apGrade = 'all'; S.filter.apSrc = 'all'; S.q = ''; route(); },
   ttClass: el => { S.ttClass = el.dataset.v; route(); },
   ttWeek: el => { S.ttWeek = el.dataset.v; route(); },
   ttCover: el => { S.ttSub = S.ttSub || {}; S.ttSub[el.dataset.k] = el.dataset.v; closeAll(); route(); toast(`${el.dataset.v} will cover this lesson`); },

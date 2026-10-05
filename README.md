@@ -58,14 +58,16 @@ The layout follows the Classe365 admin pattern: a navy module sidebar, a white t
 | Module | Screens and interactions |
 |---|---|
 | Dashboard | KPIs, fee collection chart, admissions funnel, attendance trend, today's schedule, overdue invoices, task list |
-| Pre-admission & enrolment | Kanban pipeline (Enquiry → Application → Assessment → Interview → Offer → Enrolled) with drag and drop; wide applicant panel with clickable stage tracker, quick contact actions, next step, readiness rings, student and guardian details, notes, document checklist (verify, upload, ask parent), assessment scores against the entry benchmark with a recommendation, activity timeline and fees with offer letter; three-step application form |
+| Pre-admission & enrolment | Kanban pipeline (Enquiry → Application → Assessment → Interview → Offer → Enrolled) with drag and drop; search plus grade and source filters with live counts, a result count and Clear filters; wide applicant panel with clickable stage tracker, quick contact actions, next step, readiness rings, student and guardian details, notes, document checklist (verify, upload, ask parent), assessment scores against the entry benchmark with a recommendation, activity timeline and fees with offer letter; three-step application form |
 | CRM | Leads with scores and source filters, lead drawer with notes and "convert to application", campaigns, enquiry forms, unified parent inbox, broadcast composer |
 | Student information system | Student directory (table or cards, search, filters), student profile (overview, attendance heatmap, academics, fees, rewards and conduct), class attendance register |
-| Learning management | Courses, assignments, gradebook with weighted averages that update as you type; timetable with class and week switches, today column, live "now" line, subject colours and icons, break bands with duty staff, today's agenda, lessons-per-week, lesson panel with cover teacher assignment, and drag-to-swap rearranging |
+| Learning management | Courses, assignments, gradebook with weighted averages that update as you type; timetable with a grade filter (grouped into primary, middle and senior school) and that grade's classes, a week switch, today column, live "now" line, subject colours and icons, break bands with duty staff, today's agenda, lessons-per-week, lesson panel with cover teacher assignment, and drag-to-swap rearranging |
 | Fees & invoicing | Invoices by status, invoice preview drawer, record payment, bulk invoice generation, fee structures, payment receipts |
 | Finance & accounting | Income vs expenditure, spend by category, bank balances, journal entries with debit/credit balance check, chart of accounts, budget vs actual |
 
-Global features: command palette (Ctrl/⌘ K), notifications panel, collapsible sidebar, academic-year switcher, toasts and a theme toggle.
+Global features: command palette (Ctrl/⌘ K), notifications panel, collapsible sidebar, academic-year and term switcher, toasts and a theme toggle.
+
+**Filter dropdowns.** Toolbar filters use a custom dropdown instead of the browser's select: icon, current value, a tinted state with a clear (×) button when a filter is on, a menu with group headings, counts per option, a check on the selected one, search for long lists, and keyboard support (arrows, Enter, Escape). Form selects in drawers keep the native control with a matching chevron.
 
 **Form pattern.** Every input form in the staff portal and the platform console opens as a side drawer, following the applicant panel: a tinted header with an icon, section label, title and subtitle; the fields grouped in a card on a light background; and the actions pinned to the bottom. Confirmations for destructive actions (suspend, delete) use a red header. The user profile and role builder stay full pages because they hold several sections of settings.
 
