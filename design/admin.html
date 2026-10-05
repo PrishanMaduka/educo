@@ -583,6 +583,55 @@ select.input{appearance:none;-webkit-appearance:none;background-image:url("data:
 .tt2-bar{flex-wrap:wrap}
 .tt2-bar .chips{flex-wrap:wrap}
 .tt2-bar .sep{width:1px;height:24px;background:var(--line);margin:0 2px}
+
+/* Timetable setup: subjects and bell schedules */
+.tt-bell{display:inline-flex;align-items:center;gap:8px;border:1px dashed var(--line-strong);background:none;border-radius:10px;padding:6px 10px;font-size:12.5px;color:var(--ink-2);cursor:pointer;min-width:0}
+.tt-bell:hover{border-color:var(--brand);color:var(--brand)}
+.tt-bell span{color:var(--ink-3)}
+.tt2 .bk{cursor:pointer}
+.tt2-hint.warn{background:var(--warn-soft);color:var(--warn);flex-wrap:wrap}.tt2-hint.warn span{flex:1;min-width:200px}
+.ls.free{background:repeating-linear-gradient(135deg,var(--surface-2) 0 8px,var(--surface) 8px 16px);border-style:dashed}
+.load .lr-foot{padding:10px 18px 14px;font-size:12px;color:var(--ink-3);border-top:1px solid var(--line)}
+.load .card-h .linkbtn{font-size:13px}
+.stepper{display:inline-flex;align-items:center;border:1px solid var(--line-strong);border-radius:9px;overflow:hidden;height:36px;background:var(--surface)}
+.stepper button{width:30px;height:100%;border:0;background:var(--surface-2);font-size:16px;font-weight:700;color:var(--ink-2);cursor:pointer}
+.stepper button:hover{background:var(--brand-soft);color:var(--brand)}
+.stepper .input{border:0;border-radius:0;height:100%;width:46px;text-align:center;padding:0 2px;-moz-appearance:textfield}
+.stepper .input::-webkit-inner-spin-button{display:none}
+.sj-meter{border-radius:12px;padding:12px 14px;background:var(--surface-2);border:1px solid var(--line);display:flex;flex-direction:column;gap:10px}
+.sj-top{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:13px}
+.sj-top span{display:inline-flex;align-items:center;gap:6px;color:var(--ink-3)}
+.sj-meter.ok .sj-top span{color:var(--good)}.sj-meter.over{background:var(--bad-soft);border-color:transparent}.sj-meter.over .sj-top span{color:var(--bad);font-weight:600}
+.sj-bar{display:flex;gap:2px;height:12px;border-radius:6px;overflow:hidden}
+.sj-bar i{min-width:3px;transition:flex .25s}.sj-bar i.gap{background:repeating-linear-gradient(135deg,var(--line) 0 4px,transparent 4px 8px)}
+.sj-list{display:flex;flex-direction:column;gap:6px}
+.sj-h,.sj-row{display:grid;grid-template-columns:26px minmax(110px,1.1fr) 108px minmax(0,1.2fr) minmax(0,.8fr) 32px;gap:8px;align-items:center}
+.sj-h{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-3);padding:0 2px}
+.sj-row{padding:6px;border-radius:12px;border:1px solid var(--line);background:var(--surface);border-left:4px solid var(--c)}
+.sj-row .ls-ic{width:26px;height:26px}
+.sj-row b{font-size:13.5px;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.sj-add{display:flex;gap:8px}.sj-add .input{flex:1}
+.bl-sum{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:13px}.bl-sum span{color:var(--ink-3)}
+.bl-strip{display:flex;gap:2px;height:26px;border-radius:8px;overflow:hidden}
+.bl-strip i{display:grid;place-items:center;font:700 10.5px var(--f-body);font-style:normal;color:#fff;min-width:4px;transition:flex .25s}
+.bl-strip i.l{background:var(--brand)}.bl-strip i.b{background:repeating-linear-gradient(135deg,var(--warn) 0 5px,color-mix(in srgb,var(--warn) 70%,#fff) 5px 10px)}
+.bl-list{display:flex;flex-direction:column;gap:6px}
+.bl-row{display:grid;grid-template-columns:34px minmax(90px,1fr) 92px auto 24px minmax(0,1.3fr) auto;gap:8px;align-items:center;padding:6px 8px;border-radius:12px;border:1px solid var(--line);background:var(--surface)}
+.bl-row.b{background:var(--warn-soft);border-color:transparent}
+.bl-ic{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;font-weight:800;font-size:12px;background:var(--brand-soft);color:var(--brand)}
+.bl-row.b .bl-ic{background:var(--surface);color:var(--warn)}
+.bl-t{font-size:12.5px;color:var(--ink-2);font-weight:600}
+.bl-acts{display:flex;gap:2px}.bl-acts .iconbtn{width:30px;height:30px;font-weight:700}
+@media (max-width:760px){
+  .sj-h{display:none}
+  .sj-row{grid-template-columns:26px minmax(0,1fr) auto 32px}
+  .sj-row>input{grid-column:2/-1}
+  .bl-row{grid-template-columns:34px minmax(0,1fr) auto}
+  .bl-row .stepper{grid-column:2}.bl-row>small{display:none}
+  .bl-row .bl-duty{grid-column:2/-1}.bl-row .bl-acts{grid-column:3;grid-row:1}
+  .bl-row .bl-t{grid-column:3;grid-row:2;text-align:right}
+  .tt-bell span{display:none}
+}
 </style>
 </head>
 <body>
@@ -1498,12 +1547,41 @@ function appDrawer(id) {
 }
 
 /* ---------- Timetable ---------- */
-const TT_SUBJ = {
-  'Mathematics':['#2F6FED','Mr. Mendis','fin','Room 12'], 'English':['#8B5CF6','Ms. Silva','book','Room 4'], 'Physics':['#0E7490','Mr. Herath','settings','Lab 2'], 'ICT':['#12A594','Mrs. Bandara','grid','ICT lab'],
-  'History':['#B45309','Mr. Ratnayake','file','Room 9'], 'Art & Design':['#BE185D','Ms. De Alwis','star','Studio'], 'Physical Ed.':['#4D7C0F','Coach Perera','heart','Sports hall'], 'Sinhala':['#C2410C','Mrs. Herath','msg','Room 6']
+/* Subject library: colour, icon, default teacher and room */
+const SUBJ_LIB = {
+  'Mathematics':['#2F6FED','fin','Mr. Mendis','Room 12'], 'English':['#8B5CF6','book','Ms. Silva','Room 4'], 'Sinhala':['#C2410C','msg','Mrs. Herath','Room 6'], 'Tamil':['#9333EA','msg','Mr. Rajan','Room 7'],
+  'Science':['#0891B2','settings','Ms. Jayawardena','Lab 1'], 'Physics':['#0E7490','settings','Mr. Herath','Lab 2'], 'Chemistry':['#0D9488','alert','Dr. Fonseka','Lab 3'], 'Biology':['#16A34A','heart','Ms. Gunawardena','Lab 4'],
+  'Combined Maths':['#1D4ED8','fin','Mr. Wijesinghe','Room 14'], 'ICT':['#12A594','grid','Mrs. Bandara','ICT lab'], 'History':['#B45309','file','Mr. Ratnayake','Room 9'], 'Geography':['#65A30D','home','Ms. Karunaratne','Room 10'],
+  'Environmental studies':['#15803D','star','Mrs. Dias','Room 2'], 'Art & Design':['#BE185D','star','Ms. De Alwis','Studio'], 'Music':['#DB2777','heart','Mr. Fernando','Music room'], 'Physical Ed.':['#4D7C0F','heart','Coach Perera','Sports hall'],
+  'Religion':['#A16207','book','Mr. Gunasekara','Room 3'], 'Business studies':['#7C3AED','fee','Mr. Peiris','Room 11'], 'Free study':['#64748B','book','Library staff','Library']
 };
-const TT_LOAD = {'Mathematics':7,'English':6,'Physics':5,'ICT':5,'History':5,'Art & Design':4,'Physical Ed.':4,'Sinhala':4};
-const TT_P = [['P1','08:00','08:40'],['P2','08:40','09:20'],['P3','09:20','10:00'],['brk','10:00','10:20','Interval','Yard duty: Mr. Herath'],['P4','10:20','11:00'],['P5','11:00','11:40'],['P6','11:40','12:20'],['brk','12:20','13:00','Lunch','Canteen duty: Ms. Silva'],['P7','13:00','13:40'],['P8','13:40','14:20']];
+/* Bell schedules: lessons (L) and breaks (B) with durations; times are worked out from the start time */
+const L = dur => ({t:'L', dur}), B = (label, dur, duty) => ({t:'B', label, dur, duty});
+const BELLS = [
+  {id:'primary', name:'Primary day', start:'07:45', rows:[L(35), L(35), B('Snack break', 20, 'Yard duty: Mrs. Dias'), L(35), L(35), B('Lunch', 30, 'Canteen duty: Ms. Silva'), L(35), L(35)]},
+  {id:'middle', name:'Middle school day', start:'07:50', rows:[L(40), L(40), L(40), B('Interval', 20, 'Yard duty: Mr. Ratnayake'), L(40), L(40), L(40), B('Lunch', 30, 'Canteen duty: Ms. Karunaratne'), L(40), L(40)]},
+  {id:'senior', name:'Senior school day', start:'08:00', rows:[L(40), L(40), L(40), B('Interval', 20, 'Yard duty: Mr. Herath'), L(40), L(40), L(40), B('Lunch', 40, 'Canteen duty: Ms. Silva'), L(40), L(40)]},
+  {id:'alevel', name:'A/L day', start:'07:30', rows:[L(40), L(40), L(40), L(40), B('Interval', 30, 'Yard duty: Dr. Fonseka'), L(40), L(40), L(40), L(40)]}
+];
+const SUBJ_DEFAULT = g => g <= 5 ? [['English',7],['Mathematics',7],['Sinhala',4],['Environmental studies',4],['Religion',2],['Art & Design',2],['Music',2],['Physical Ed.',2]]
+  : g <= 9 ? [['Mathematics',6],['English',6],['Science',6],['Sinhala',4],['History',3],['Geography',3],['ICT',3],['Religion',2],['Art & Design',3],['Physical Ed.',4]]
+  : g <= 11 ? [['Mathematics',7],['English',6],['Physics',5],['ICT',5],['History',5],['Art & Design',4],['Physical Ed.',4],['Sinhala',4]]
+  : [['Physics',9],['Chemistry',9],['Combined Maths',9],['English',4],['ICT',4],['Free study',3],['Physical Ed.',2]];
+const TTC = {subj:{}, bell:{}};
+const bellDefault = g => g <= 5 ? 'primary' : g <= 9 ? 'middle' : g <= 11 ? 'senior' : 'alevel';
+const gSubj = g => TTC.subj[g] || (TTC.subj[g] = SUBJ_DEFAULT(g).map(([k, n]) => ({k, n, t: SUBJ_LIB[k][2], r: SUBJ_LIB[k][3]})));
+const gBell = g => BELLS.find(x => x.id === (TTC.bell[g] || bellDefault(g))) || BELLS[0];
+const bellGrades = id => Array.from({length:13}, (_, i) => i + 1).filter(g => gBell(g).id === id);
+const hm = m => `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
+const toMin = t => +t.slice(0, 2) * 60 + +t.slice(3, 5);
+/* Periods as [label, start, end, breakLabel, duty]; lessons are P1, P2… and breaks are 'brk' */
+function bellPeriods(b) { let m = toMin(b.start), n = 0; return b.rows.map(r => { const s = m; m += +r.dur || 0; return r.t === 'L' ? ['P' + (++n), hm(s), hm(m)] : ['brk', hm(s), hm(m), r.label, r.duty]; }); }
+const bellLessons = b => b.rows.filter(r => r.t === 'L').length;
+const bellSummary = b => { const p = bellPeriods(b), br = b.rows.length - bellLessons(b); return `${bellLessons(b)} lessons · ${br} break${br === 1 ? '' : 's'} · ${p.length ? p[0][1] + '–' + p[p.length - 1][2] : ''}`; };
+const gradeOfCls = cls => +cls.match(/Grade (\d+)/)[1];
+function ttSubj(g, k) { const r = gSubj(g).find(x => x.k === k), lib = SUBJ_LIB[k] || ['#64748B','book','',''];
+  return [lib[0], r ? r.t : lib[2], lib[1], r ? r.r : lib[3]]; }
+const ttReset = g => { Object.keys(S.tt || {}).forEach(k => { if (k.startsWith(`Grade ${g} –`)) delete S.tt[k]; }); Object.keys(S.ttSub || {}).forEach(k => { if (k.startsWith(`Grade ${g} –`)) delete S.ttSub[k]; }); };
 const TT_DAYS = [['Mon','5 Oct'],['Tue','6 Oct'],['Wed','7 Oct'],['Thu','8 Oct'],['Fri','9 Oct']];
 const TT_SECTIONS = ['Emerald','Ruby','Sapphire'];
 const ttSecs = g => TT_SECTIONS.slice(0, g <= 5 ? 2 : 3);
@@ -1511,43 +1589,127 @@ const ttGradeOf = () => +(S.filter.ttGrade || 10);
 const ttCls = () => { const g = ttGradeOf(), list = ttSecs(g).map(x => `Grade ${g} – ${x}`); return list.includes(S.ttClass) ? S.ttClass : list[0]; };
 function ttGrid(cls, wk) {
   S.tt = S.tt || {}; const key = cls + wk; if (S.tt[key]) return S.tt[key];
-  const r = ukSeed(key), bag = []; Object.entries(TT_LOAD).forEach(([k, n]) => { for (let i = 0; i < n; i++) bag.push(k); });
+  const g = gradeOfCls(cls), per = bellLessons(gBell(g)), slots = per * 5;
+  const r = ukSeed(key), bag = []; gSubj(g).forEach(({k, n}) => { for (let i = 0; i < n; i++) bag.push(k); });
   for (let i = bag.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [bag[i], bag[j]] = [bag[j], bag[i]]; }
-  return S.tt[key] = Array.from({length:5}, (_, d) => bag.slice(d * 8, d * 8 + 8));
+  while (bag.length < slots) bag.push('Free study');
+  return S.tt[key] = Array.from({length:5}, (_, d) => bag.slice(d * per, d * per + per));
 }
 V.timetable = () => {
-  const cls = ttCls(), wk = S.ttWeek || 'A', g = ttGrid(cls, wk), edit = !!S.ttEdit, subs = S.ttSub || {};
-  const NOW = 9 * 60 + 41, mins = t => +t.slice(0, 2) * 60 + +t.slice(3); let pi = -1;
+  const cls = ttCls(), gr = gradeOfCls(cls), wk = S.ttWeek || 'A', g = ttGrid(cls, wk), edit = !!S.ttEdit, subs = S.ttSub || {};
+  const bell = gBell(gr), TT_P = bellPeriods(bell), per = bellLessons(bell), subj = gSubj(gr), planned = subj.reduce((a, x) => a + x.n, 0);
+  const NOW = 9 * 60 + 41, mins = toMin; let pi = -1;
   let cells = `<div class="tt2-c"></div>${TT_DAYS.map(([d, dt], i) => `<div class="dh ${i === 0 ? 'today' : ''}"><b>${d}</b><span>${dt}</span>${i === 0 ? '<em>Today</em>' : ''}</div>`).join('')}`;
   TT_P.forEach(([p, s, e, label, duty]) => {
-    if (p === 'brk') { cells += `<div class="pt"><b>${s}</b></div><div class="bk">${ic(label === 'Lunch' ? 'heart' : 'star',14)}<b>${label}</b> ${s}–${e} <span>· ${duty}</span></div>`; return; }
+    if (p === 'brk') { cells += `<div class="pt"><b>${s}</b></div><div class="bk" data-act="ttBell" role="button" tabindex="0">${ic(/lunch/i.test(label) ? 'heart' : 'star',14)}<b>${esc(label)}</b> ${s}–${e} <span>${duty ? '· ' + esc(duty) : ''}</span></div>`; return; }
     pi++; const idx = pi;
     cells += `<div class="pt"><b>${p}</b><span>${s}</span><span>${e}</span></div>` + TT_DAYS.map((_, d) => {
-      const k = g[d][idx], [c, tch, icn, room] = TT_SUBJ[k], st = mins(s), en = mins(e);
+      const k = g[d][idx], [c, tch, icn, room] = ttSubj(gr, k), st = mins(s), en = mins(e);
       const state = d === 0 ? (NOW >= en ? 'past' : NOW >= st ? 'now' : 'today') : '', pct = state === 'now' ? ((NOW - st) / (en - st) * 100).toFixed(1) : 0, sub = subs[`${cls}${wk}-${d}-${idx}`];
-      return `<div class="ls ${state}" style="--c:${c};--pct:${pct}%" data-act="ttLesson" data-d="${d}" data-p="${idx}" ${edit ? 'draggable="true"' : ''} tabindex="0" aria-label="${k}, ${TT_DAYS[d][0]} ${p}">
-        ${state === 'now' ? '<span class="badge-now">NOW</span>' : ''}<div class="ls-top"><span class="ls-ic">${ic(icn,13)}</span><b>${k}</b></div>
-        <div class="ls-meta"><span>${sub ? `<span class="cover">Cover: ${sub}</span>` : tch}</span><span class="room">${room}</span></div></div>`;
+      return `<div class="ls ${state} ${k === 'Free study' ? 'free' : ''}" style="--c:${c};--pct:${pct}%" data-act="ttLesson" data-d="${d}" data-p="${idx}" ${edit ? 'draggable="true"' : ''} tabindex="0" aria-label="${esc(k)}, ${TT_DAYS[d][0]} ${p}">
+        ${state === 'now' ? '<span class="badge-now">NOW</span>' : ''}<div class="ls-top"><span class="ls-ic">${ic(icn,13)}</span><b>${esc(k)}</b></div>
+        <div class="ls-meta"><span>${sub ? `<span class="cover">Cover: ${sub}</span>` : esc(tch)}</span><span class="room">${esc(room)}</span></div></div>`;
     }).join('');
   });
   const today = TT_P.filter(p => p[0] !== 'brk');
-  const agenda = today.map(([p, s, e], i) => { const k = g[0][i], st = mins(s), en = mins(e), state = NOW >= en ? 'done' : NOW >= st ? 'cur' : ''; return `<div class="ag ${state}"><i style="background:${TT_SUBJ[k][0]}"></i><span class="num" style="width:44px">${s}</span><span style="flex:1"><b>${k}</b><br><small class="muted">${TT_SUBJ[k][1]} · ${TT_SUBJ[k][3]}</small></span>${state === 'cur' ? '<span class="pill t-red plain">Now</span>' : state === 'done' ? ic('check',14) : ''}</div>`; }).join('');
+  const agenda = today.map(([p, s, e], i) => { const k = g[0][i], [c, tch, , room] = ttSubj(gr, k), st = mins(s), en = mins(e), state = NOW >= en ? 'done' : NOW >= st ? 'cur' : ''; return `<div class="ag ${state}"><i style="background:${c}"></i><span class="num" style="width:44px">${s}</span><span style="flex:1"><b>${esc(k)}</b><br><small class="muted">${esc(tch)} · ${esc(room)}</small></span>${state === 'cur' ? '<span class="pill t-red plain">Now</span>' : state === 'done' ? ic('check',14) : ''}</div>`; }).join('');
   const counts = {}; g.flat().forEach(k => counts[k] = (counts[k] || 0) + 1);
-  return `${pageHead('Learning management system', 'Timetable', `${cls} · Week ${wk} · 40 lessons · Term 1, 2026/27`, `<button class="btn ${edit ? 'primary' : ''}" data-act="ttEdit">${ic(edit ? 'check' : 'grid',16)}${edit ? 'Done rearranging' : 'Rearrange'}</button><button class="btn" data-act="toast" data-msg="Timetable shared with ${cls} parents in the app">${ic('send',16)}Share with parents</button>`)}
-  <div class="tt2-bar card"><select class="input inline" data-filter="ttGrade" aria-label="Grade" data-dd-ic="student" data-dd-q>${GRADE_BANDS.map(([band, from, to]) => `<optgroup label="${band}">${Array.from({length: to - from + 1}, (_, i) => from + i).map(g => `<option value="${g}" data-sub="${ttSecs(g).length} classes · ${ttSecs(g).join(', ')}" ${ttGradeOf() === g ? 'selected' : ''}>Grade ${g}</option>`).join('')}</optgroup>`).join('')}</select><span class="sep" aria-hidden="true"></span><div class="chips" role="radiogroup" aria-label="Class">${ttSecs(ttGradeOf()).map(x => { const c = `Grade ${ttGradeOf()} – ${x}`; return `<button class="chip ${c === cls ? 'on' : ''}" role="radio" aria-checked="${c === cls}" data-act="ttClass" data-v="${c}">${x}</button>`; }).join('')}</div><span style="flex:1"></span><div class="seg" role="radiogroup" aria-label="Week">${['A','B'].map(w => `<button class="${w === wk ? 'on P' : ''}" data-act="ttWeek" data-v="${w}">Week ${w}</button>`).join('')}</div></div>
-  ${edit ? `<div class="tt2-hint">${ic('grid',16)}Drag a lesson onto another to swap them. Teachers and parents are told when you finish.</div>` : ''}
+  const mx = Math.max(...subj.map(x => x.n), 1), slots = per * 5;
+  const warn = planned > slots ? `<div class="tt2-hint warn">${ic('alert',16)}<span>Grade ${gr} plans ${planned} lessons a week but the ${esc(bell.name)} has ${slots} periods, so ${planned - slots} lesson${planned - slots > 1 ? 's don’t' : ' doesn’t'} fit.</span><button class="btn sm" data-act="ttSubjects">Edit subjects</button><button class="btn sm" data-act="ttBell">Edit bell times</button></div>` : '';
+  return `${pageHead('Learning management system', 'Timetable', `${cls} · Week ${wk} · ${slots} periods · Term 1, 2026/27`, `<button class="btn" data-act="ttSubjects">${ic('book',16)}Subjects</button><button class="btn" data-act="ttBell">${ic('cal',16)}Bell times</button><button class="btn ${edit ? 'primary' : ''}" data-act="ttEdit">${ic(edit ? 'check' : 'grid',16)}${edit ? 'Done rearranging' : 'Rearrange'}</button><button class="btn" data-act="toast" data-msg="Timetable shared with ${cls} parents in the app">${ic('send',16)}Share with parents</button>`)}
+  <div class="tt2-bar card"><select class="input inline" data-filter="ttGrade" aria-label="Grade" data-dd-ic="student" data-dd-q>${GRADE_BANDS.map(([band, from, to]) => `<optgroup label="${band}">${Array.from({length: to - from + 1}, (_, i) => from + i).map(x => `<option value="${x}" data-sub="${ttSecs(x).length} classes · ${gSubj(x).length} subjects · ${esc(gBell(x).name)}" ${gr === x ? 'selected' : ''}>Grade ${x}</option>`).join('')}</optgroup>`).join('')}</select><span class="sep" aria-hidden="true"></span><div class="chips" role="radiogroup" aria-label="Class">${ttSecs(gr).map(x => { const c = `Grade ${gr} – ${x}`; return `<button class="chip ${c === cls ? 'on' : ''}" role="radio" aria-checked="${c === cls}" data-act="ttClass" data-v="${c}">${x}</button>`; }).join('')}</div>
+    <button class="tt-bell" data-act="ttBell" title="Edit bell times">${ic('cal',14)}<b>${esc(bell.name)}</b><span>${bellSummary(bell)}</span></button><span style="flex:1"></span><div class="seg" role="radiogroup" aria-label="Week">${['A','B'].map(w => `<button class="${w === wk ? 'on P' : ''}" data-act="ttWeek" data-v="${w}">Week ${w}</button>`).join('')}</div></div>
+  ${warn}${edit ? `<div class="tt2-hint">${ic('grid',16)}Drag a lesson onto another to swap them. Teachers and parents are told when you finish.</div>` : ''}
   <div class="tt2-wrap"><div class="card tbl-wrap"><div class="tt2 ${edit ? 'edit' : ''}">${cells}</div></div>
     <aside class="tt2-side"><section class="card agenda"><div class="card-h"><h2>Today · Monday</h2><span class="muted num" style="font-size:12px">09:41</span></div>${agenda}</section>
-      <section class="card load"><div class="card-h"><h2>Lessons per week</h2></div>${Object.entries(TT_LOAD).map(([k, n]) => `<div class="lr"><i style="width:10px;height:10px;border-radius:3px;background:${TT_SUBJ[k][0]}"></i><span>${k}</span><b class="num">${counts[k] || 0}</b><div class="bar"><i style="width:${(counts[k] || 0) / 7 * 100}%;background:var(--ink-3)"></i></div></div>`).join('')}</section></aside></div>`;
+      <section class="card load"><div class="card-h"><h2>Grade ${gr} subjects</h2><button class="linkbtn" data-act="ttSubjects">Edit</button></div>${subj.map(({k, n}) => `<div class="lr"><i style="width:10px;height:10px;border-radius:3px;background:${ttSubj(gr, k)[0]}"></i><span>${esc(k)}</span><b class="num">${counts[k] || 0}${counts[k] !== n ? `<small class="muted"> / ${n}</small>` : ''}</b><div class="bar"><i style="width:${(counts[k] || 0) / mx * 100}%;background:${ttSubj(gr, k)[0]}"></i></div></div>`).join('')}
+        ${counts['Free study'] && !subj.some(x => x.k === 'Free study') ? `<div class="lr muted"><i style="width:10px;height:10px;border-radius:3px;background:#64748B"></i><span>Free study (unplanned)</span><b class="num">${counts['Free study']}</b></div>` : ''}
+        <div class="lr-foot">${planned} of ${slots} periods planned</div></section></aside></div>`;
 };
 function ttLessonDrawer(d, p) {
-  const cls = ttCls(), wk = S.ttWeek || 'A', g = ttGrid(cls, wk), k = g[d][p], [c, tch, icn, room] = TT_SUBJ[k], per = TT_P.filter(x => x[0] !== 'brk')[p], subKey = `${cls}${wk}-${d}-${p}`, sub = (S.ttSub || {})[subKey];
-  const free = Object.values(TT_SUBJ).map(v => v[1]).filter(n => n !== tch).slice(0, 4);
-  openDrawer(`<div class="ls-hero" style="--c:${c}"><div class="ad-top"><span class="ls-ic big">${ic(icn,22)}</span><div style="flex:1"><div class="eyebrow" style="color:rgba(255,255,255,.8)">${cls} · Week ${wk}</div><h2>${k}</h2><div style="opacity:.9">${TT_DAYS[d][0]} ${TT_DAYS[d][1]} · ${per[0]} · ${per[1]}–${per[2]}</div></div><button class="iconbtn" data-act="closeAll" aria-label="Close">${ic('x',16)}</button></div></div>
-    <div class="drawer-b"><dl class="kv"><dt>Teacher</dt><dd>${tch}${sub ? ` <span class="pill t-amber plain">Covered by ${sub}</span>` : ''}</dd><dt>Room</dt><dd>${room}</dd><dt>This week</dt><dd>${g.flat().filter(x => x === k).length} ${k} lessons</dd><dt>Learners</dt><dd>32 students</dd></dl>
+  const cls = ttCls(), gr = gradeOfCls(cls), wk = S.ttWeek || 'A', g = ttGrid(cls, wk), k = g[d][p], [c, tch, icn, room] = ttSubj(gr, k), per = bellPeriods(gBell(gr)).filter(x => x[0] !== 'brk')[p], subKey = `${cls}${wk}-${d}-${p}`, sub = (S.ttSub || {})[subKey];
+  const free = [...new Set(Object.values(SUBJ_LIB).map(v => v[2]))].filter(n => n !== tch && n !== 'Library staff').slice(0, 4);
+  openDrawer(`<div class="ls-hero" style="--c:${c}"><div class="ad-top"><span class="ls-ic big">${ic(icn,22)}</span><div style="flex:1"><div class="eyebrow" style="color:rgba(255,255,255,.8)">${cls} · Week ${wk}</div><h2>${esc(k)}</h2><div style="opacity:.9">${TT_DAYS[d][0]} ${TT_DAYS[d][1]} · ${per[0]} · ${per[1]}–${per[2]}</div></div><button class="iconbtn" data-act="closeAll" aria-label="Close">${ic('x',16)}</button></div></div>
+    <div class="drawer-b"><dl class="kv"><dt>Teacher</dt><dd>${esc(tch)}${sub ? ` <span class="pill t-amber plain">Covered by ${sub}</span>` : ''}</dd><dt>Room</dt><dd>${esc(room)}</dd><dt>This week</dt><dd>${g.flat().filter(x => x === k).length} ${esc(k)} lessons</dd><dt>Learners</dt><dd>32 students</dd></dl>
     <section class="ad-card"><h3>Find cover</h3><p class="muted small" style="margin:0 0 8px">Teachers with a free period at this time.</p>${free.map(n => `<div class="ad-g">${avatar(n,'sm')}<div style="flex:1"><b>${n}</b><div class="muted" style="font-size:12px">Free · ${Math.floor(Math.random() * 3) + 2} periods taught today</div></div><button class="btn sm" data-act="ttCover" data-k="${subKey}" data-v="${n}">Assign</button></div>`).join('')}</section></div>
-    <div class="drawer-f"><button class="btn" data-act="toast" data-msg="Message sent to ${tch}">${ic('msg',16)}Message ${tch.split(' ').slice(-1)[0]}</button><button class="btn primary" data-act="ttEditFrom">${ic('grid',16)}Rearrange the week</button></div>`, 'wide');
+    <div class="drawer-f"><button class="btn" data-act="toast" data-msg="Message sent to ${esc(tch)}">${ic('msg',16)}Message ${esc(tch.split(' ').slice(-1)[0])}</button><button class="btn primary" data-act="ttEditFrom">${ic('grid',16)}Rearrange the week</button></div>`, 'wide');
 }
+
+/* ---------- Subjects per grade (drawer) ---------- */
+const keepScroll = fn => { const b0 = drawer.querySelector('.drawer-b'), y = b0 ? b0.scrollTop : 0; S.noFocus = true; fn(); S.noFocus = false; const b1 = drawer.querySelector('.drawer-b'); if (b1) b1.scrollTop = y; };
+function subjSync() { const d = S.subDraft; if (!d) return; drawer.querySelectorAll('[data-sr]').forEach(el => { const [i, f] = el.dataset.sr.split('|'); if (d.rows[+i]) d.rows[+i][f] = f === 'n' ? Math.max(0, parseInt(el.value, 10) || 0) : el.value; }); }
+function sjMeter() {
+  const d = S.subDraft, slots = bellLessons(gBell(d.g)) * 5, used = d.rows.reduce((a, r) => a + (+r.n || 0), 0), diff = slots - used;
+  const st = diff < 0 ? 'over' : diff > 0 ? 'under' : 'ok';
+  return `<div class="sj-meter ${st}" id="sjMeter"><div class="sj-top"><b>${used} of ${slots} periods a week</b><span>${st === 'ok' ? `${ic('check',14)}Every period is planned` : st === 'under' ? `${diff} period${diff > 1 ? 's' : ''} left · shown as free study` : `${-diff} too many · remove lessons or add periods in Bell times`}</span></div>
+    <div class="sj-bar">${d.rows.filter(r => r.n > 0).map(r => `<i style="flex:${r.n};background:${(SUBJ_LIB[r.k] || ['#64748B'])[0]}" title="${esc(r.k)} · ${r.n}"></i>`).join('')}${diff > 0 ? `<i class="gap" style="flex:${diff}"></i>` : ''}</div></div>`;
+}
+function subjDrawer() {
+  const d = S.subDraft, b = gBell(d.g), per = bellLessons(b), lib = Object.keys(SUBJ_LIB).filter(k => !d.rows.some(r => r.k === k));
+  const band = GRADE_BANDS.find(([, f, t]) => d.g >= f && d.g <= t), peers = Array.from({length: band[2] - band[1] + 1}, (_, i) => band[1] + i).filter(x => x !== d.g);
+  const teachers = [...new Set(Object.values(SUBJ_LIB).map(v => v[2]))];
+  formDrawer(`${head(`Subjects · Grade ${d.g}`, `${esc(b.name)} · ${per} lessons a day · ${per * 5} periods a week`)}
+    <div class="drawer-b" id="subjForm">
+      ${sjMeter()}
+      <div class="sj-list"><div class="sj-h"><span></span><span>Subject</span><span>Lessons a week</span><span>Teacher</span><span>Room</span><span></span></div>
+      ${d.rows.map((r, i) => { const [c, icn] = SUBJ_LIB[r.k] || ['#64748B','book']; return `<div class="sj-row" style="--c:${c}"><span class="ls-ic">${ic(icn,13)}</span><b>${esc(r.k)}</b>
+        <div class="stepper"><button type="button" data-act="sjN" data-i="${i}" data-d="-1" aria-label="Fewer ${esc(r.k)} lessons">−</button><input class="input num" type="number" min="0" max="20" data-sr="${i}|n" value="${r.n}" aria-label="${esc(r.k)} lessons a week"><button type="button" data-act="sjN" data-i="${i}" data-d="1" aria-label="More ${esc(r.k)} lessons">+</button></div>
+        <input class="input" data-sr="${i}|t" value="${esc(r.t)}" list="sjTeachers" aria-label="${esc(r.k)} teacher"><input class="input" data-sr="${i}|r" value="${esc(r.r)}" aria-label="${esc(r.k)} room">
+        <button type="button" class="iconbtn" data-act="sjRm" data-i="${i}" aria-label="Remove ${esc(r.k)}">${ic('x',14)}</button></div>`; }).join('') || '<div class="muted" style="padding:14px">No subjects yet. Add one below.</div>'}
+      <datalist id="sjTeachers">${teachers.map(t => `<option>${esc(t)}</option>`).join('')}</datalist></div>
+      <div class="sj-add"><input class="input" id="sjNew" list="sjLib" placeholder="Add a subject, e.g. Geography or a new one"><datalist id="sjLib">${lib.map(k => `<option>${esc(k)}</option>`).join('')}</datalist><button type="button" class="btn" data-act="sjAdd">${ic('plus',14)}Add subject</button></div>
+      <div class="form-grid">
+        <div class="field"><label for="sjCopy">Start from another grade</label><div style="display:flex;gap:8px"><select class="input" id="sjCopy">${Array.from({length:13}, (_, i) => i + 1).filter(x => x !== d.g).map(x => `<option value="${x}">Grade ${x} · ${gSubj(x).length} subjects</option>`).join('')}</select><button type="button" class="btn" data-act="sjCopy">Copy</button></div></div>
+        <div class="field"><label>Also use for</label><div class="chips">${peers.map(x => `<button type="button" class="chip ${d.also.has(x) ? 'on' : ''}" data-act="sjAlso" data-g="${x}" aria-pressed="${d.also.has(x)}">Grade ${x}</button>`).join('')}</div></div>
+      </div>
+      <p class="muted small" style="margin:0">Saving rebuilds the timetables of ${ttSecs(d.g).length} classes in Grade ${d.g}${d.also.size ? ` and ${d.also.size} other grade${d.also.size > 1 ? 's' : ''}` : ''}. Lessons you moved by hand and cover teachers are reset.</p>
+      <div class="err-msg" id="sjErr"></div>
+    </div>
+    <div class="drawer-f"><button class="btn" data-act="closeAll">Cancel</button><button class="btn primary" data-act="sjSave">Save subjects</button></div>`, 'wide');
+}
+document.addEventListener('input', e => { if (e.target.closest && e.target.closest('#subjForm') && e.target.dataset.sr) { subjSync(); const m = document.getElementById('sjMeter'); if (m) m.outerHTML = sjMeter(); } });
+
+/* ---------- Bell schedules (drawer) ---------- */
+function bellSync() { const d = S.bellDraft; if (!d) return; const v = id => { const e = document.getElementById(id); return e ? e.value : null; };
+  if (v('bl_name') !== null) { d.name = v('bl_name'); d.start = v('bl_start') || d.start; }
+  drawer.querySelectorAll('[data-br]').forEach(el => { const [i, f] = el.dataset.br.split('|'); if (d.rows[+i]) d.rows[+i][f] = f === 'dur' ? Math.max(0, parseInt(el.value, 10) || 0) : el.value; }); }
+function bellLive() {
+  const d = S.bellDraft, p = bellPeriods(d), total = d.rows.reduce((a, r) => a + (+r.dur || 0), 0);
+  p.forEach((x, i) => { const t = drawer.querySelector(`[data-bt="${i}"]`); if (t) t.textContent = `${x[1]}–${x[2]}`; });
+  const strip = document.getElementById('blStrip'); if (strip) strip.innerHTML = bellStrip(d);
+  const sum = document.getElementById('blSum'); if (sum) sum.innerHTML = `<b>${bellSummary(d)}</b><span>${Math.floor(total / 60)} h ${total % 60} min</span>`;
+  const w = document.getElementById('blWarn'); if (w) w.innerHTML = bellWarn(d);
+}
+const bellStrip = d => { const total = d.rows.reduce((a, r) => a + (+r.dur || 0), 0) || 1, p = bellPeriods(d);
+  return d.rows.map((r, i) => `<i class="${r.t === 'L' ? 'l' : 'b'}" style="flex:${(+r.dur || 0) / total}" title="${r.t === 'L' ? p[i][0] : esc(r.label)} · ${p[i][1]}–${p[i][2]}">${r.t === 'L' ? p[i][0].slice(1) : ''}</i>`).join(''); };
+function bellWarn(d) {
+  const slots = bellLessons(d) * 5, msgs = [...d.grades].map(g => { const n = gSubj(g).reduce((a, x) => a + x.n, 0); return n > slots ? `Grade ${g} plans ${n} lessons, ${n - slots} more than ${slots} periods` : n < slots ? `Grade ${g} plans ${n} lessons, so ${slots - n} periods become free study` : ''; }).filter(Boolean);
+  return msgs.length ? `<div class="tt2-hint warn">${ic('alert',16)}<span>${msgs.join('. ')}. Change their subjects after saving.</span></div>` : '';
+}
+function bellDrawer() {
+  const d = S.bellDraft, p = bellPeriods(d), total = d.rows.reduce((a, r) => a + (+r.dur || 0), 0);
+  formDrawer(`${head(d.isNew ? 'New bell schedule' : `Bell schedule · ${esc(d.name)}`, 'Lessons, intervals and their times for one school day')}
+    <div class="drawer-b" id="bellForm">
+      <div class="field"><label>Schedules</label><div class="chips">${BELLS.map(x => `<button type="button" class="chip ${x.id === d.id ? 'on' : ''}" data-act="blPick" data-id="${x.id}">${esc(x.name)}<span class="n">${bellGrades(x.id).length ? 'Gr ' + bellGrades(x.id).join(', ') : 'unused'}</span></button>`).join('')}${d.isNew ? `<button type="button" class="chip on">${esc(d.name || 'New schedule')}</button>` : ''}<button type="button" class="chip" data-act="blNew">${ic('plus',12)} New from this</button></div></div>
+      <div class="form-grid"><div class="field"><label for="bl_name">Name</label><input class="input" id="bl_name" value="${esc(d.name)}" placeholder="e.g. Primary half day"></div><div class="field"><label for="bl_start">First bell</label><input class="input" id="bl_start" type="time" value="${d.start}" step="300"></div></div>
+      <div class="bl-sum" id="blSum"><b>${bellSummary(d)}</b><span>${Math.floor(total / 60)} h ${total % 60} min</span></div>
+      <div class="bl-strip" id="blStrip" aria-hidden="true">${bellStrip(d)}</div>
+      <div class="bl-list">${d.rows.map((r, i) => `<div class="bl-row ${r.t === 'L' ? 'l' : 'b'}">
+        <span class="bl-ic">${r.t === 'L' ? p[i][0] : ic(/lunch/i.test(r.label) ? 'heart' : 'star', 14)}</span>
+        ${r.t === 'L' ? `<b>Lesson</b>` : `<input class="input" data-br="${i}|label" value="${esc(r.label)}" placeholder="Interval" aria-label="Break name">`}
+        <span class="bl-t num" data-bt="${i}">${p[i][1]}–${p[i][2]}</span>
+        <div class="stepper"><button type="button" data-act="blDur" data-i="${i}" data-d="-5" aria-label="5 minutes shorter">−</button><input class="input num" type="number" min="5" max="180" step="5" data-br="${i}|dur" value="${r.dur}" aria-label="Minutes"><button type="button" data-act="blDur" data-i="${i}" data-d="5" aria-label="5 minutes longer">+</button></div><small class="muted">min</small>
+        ${r.t === 'B' ? `<input class="input bl-duty" data-br="${i}|duty" value="${esc(r.duty || '')}" placeholder="Duty, e.g. Yard duty: Mr. Herath" aria-label="Duty">` : '<span class="bl-duty"></span>'}
+        <div class="bl-acts"><button type="button" class="iconbtn" data-act="blMove" data-i="${i}" data-d="-1" aria-label="Move up" ${i === 0 ? 'disabled' : ''}>↑</button><button type="button" class="iconbtn" data-act="blMove" data-i="${i}" data-d="1" aria-label="Move down" ${i === d.rows.length - 1 ? 'disabled' : ''}>↓</button><button type="button" class="iconbtn" data-act="blRm" data-i="${i}" aria-label="Remove">${ic('x',14)}</button></div></div>`).join('')}</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn sm" data-act="blAdd" data-t="L">${ic('plus',14)}Add lesson</button><button type="button" class="btn sm" data-act="blAdd" data-t="B">${ic('plus',14)}Add interval</button></div>
+      <div class="field"><label>Grades on this schedule</label><div class="chips">${Array.from({length:13}, (_, i) => i + 1).map(g => { const on = d.grades.has(g), other = !on && gBell(g).id !== d.id ? gBell(g).name : ''; return `<button type="button" class="chip ${on ? 'on' : ''}" data-act="blGrade" data-g="${g}" aria-pressed="${on}" ${other ? `title="Now on ${esc(other)}"` : ''}>Grade ${g}</button>`; }).join('')}</div><small class="muted">Turning a grade on moves it from its current schedule.</small></div>
+      <div id="blWarn">${bellWarn(d)}</div>
+      <div class="err-msg" id="blErr"></div>
+    </div>
+    <div class="drawer-f">${!d.isNew && BELLS.length > 1 ? `<button class="btn ghost danger" style="margin-right:auto" data-act="blDel" ${bellGrades(d.id).length ? `disabled title="Move its grades to another schedule first"` : ''}>Delete</button>` : ''}<button class="btn" data-act="closeAll">Cancel</button><button class="btn primary" data-act="blSave">${d.isNew ? 'Add schedule' : 'Save bell times'}</button></div>`, 'wide');
+}
+document.addEventListener('input', e => { if (e.target.closest && e.target.closest('#bellForm')) { bellSync(); bellLive(); } });
+const bellDraftOf = x => ({id: x.id, name: x.name, start: x.start, rows: x.rows.map(r => ({...r})), grades: new Set(bellGrades(x.id)), isNew: false});
 function ttBindDrag() {
   if (!S.ttEdit) return; let from = null;
   document.querySelectorAll('.tt2 .ls').forEach(el => {
@@ -1673,7 +1835,7 @@ function moveApp(id, stage) {
 /* ---------- Overlays ---------- */
 const scrim = document.getElementById('scrim'), drawer = document.getElementById('drawer'), modal = document.getElementById('drawer');
 function openDrawer(html, cls = '') { drawer.className = 'drawer ' + cls; drawer.innerHTML = html; drawer.classList.add('on'); scrim.classList.add('on'); drawer.setAttribute('aria-hidden','false'); }
-const FORM_META = [['New application','admit','Admissions'],['Record payment','fee','Fees & invoicing'],['New journal entry','fin','Accounting'],['Add lead','crm','CRM & leads'],['New broadcast','send','Communications'],['Generate invoices','file','Fees & invoicing'],['Invite staff','crm','Users & roles'],['INV-','fee','Invoice'],['Interested in Grade','crm','Lead']];
+const FORM_META = [['Subjects','book','Timetable'],['Bell schedule','cal','Timetable'],['New bell schedule','cal','Timetable'],['New application','admit','Admissions'],['Record payment','fee','Fees & invoicing'],['New journal entry','fin','Accounting'],['Add lead','crm','CRM & leads'],['New broadcast','send','Communications'],['Generate invoices','file','Fees & invoicing'],['Invite staff','crm','Users & roles'],['INV-','fee','Invoice'],['Interested in Grade','crm','Lead']];
 /* Form drawers: look up an icon and section label from the form's title */
 function formDrawer(html, cls = '') {
   openDrawer(html, 'form ' + cls);
@@ -1686,7 +1848,7 @@ function formDrawer(html, cls = '') {
     hd.insertAdjacentHTML('beforeend', `<ol class="ad-steps fd-steps" style="--n:${items.length}" aria-label="Steps">${items.map((el, i) => `<li class="${i < cur ? 'done' : i === cur ? 'cur' : ''}" ${i === cur ? 'aria-current="step"' : ''}><div class="st"><i>${i < cur ? ic('check', 12) : i + 1}</i><span>${el.textContent.replace(/^\d+\.\s*/, '')}</span><small>${i < cur ? 'Done' : i === cur ? 'Now' : ''}</small></div></li>`).join('')}</ol>`); }
   const b = drawer.querySelector('.drawer-b');
   if (b && !b.querySelector(':scope > .fd-card')) { const w = document.createElement('div'); w.className = 'fd-card'; while (b.firstChild) w.appendChild(b.firstChild); b.appendChild(w); const err = w.querySelector(':scope > .err-msg'); if (err) b.appendChild(err); }
-  setTimeout(() => { const f = drawer.querySelector('.drawer-b input:not([type=checkbox]):not([type=file]):not([type=radio]),.drawer-b select,.drawer-b textarea'); if (f) f.focus(); }, 120);
+  if (!S.noFocus) setTimeout(() => { const f = drawer.querySelector('.drawer-b input:not([type=checkbox]):not([type=file]):not([type=radio]),.drawer-b select,.drawer-b textarea'); if (f) f.focus(); }, 120);
 }
 function openModal(html, cls = '') { formDrawer(html, cls); }
 function closeAll() { [drawer, modal, scrim, document.getElementById('cmdk'), document.getElementById('notif')].forEach(e => e.classList.remove('on')); drawer.setAttribute('aria-hidden','true'); }
@@ -1779,6 +1941,49 @@ const ACT = {
   appRec: el => { const a = apps.find(x => x.id === el.dataset.id); a.x.rec = el.dataset.v; appDrawer(a.id); toast({offer:'Recommended: offer a place', wait:'Recommended: waitlist', decline:'Recommended: decline'}[el.dataset.v]); },
   appOffer: el => { const a = apps.find(x => x.id === el.dataset.id); if (a.stage !== 'offer') moveApp(a.id, 'offer'); appDrawer(a.id); toast(`Offer letter sent to ${a.parent} by email and the parent app`); },
   appDecline: el => { const a = apps.find(x => x.id === el.dataset.id); if (!el.dataset.sure) { el.dataset.sure = 1; el.textContent = 'Click again to decline'; return; } apps.splice(apps.indexOf(a), 1); closeAll(); route(); toast(`${a.name}’s application declined. The family has been told.`); },
+  ttSubjects: () => { const g = ttGradeOf(); S.subDraft = {g, rows: gSubj(g).map(r => ({...r})), also: new Set()}; subjDrawer(); },
+  sjN: el => { subjSync(); const r = S.subDraft.rows[+el.dataset.i]; r.n = Math.max(0, Math.min(20, r.n + +el.dataset.d)); keepScroll(subjDrawer); },
+  sjRm: el => { subjSync(); S.subDraft.rows.splice(+el.dataset.i, 1); keepScroll(subjDrawer); },
+  sjAdd: () => { subjSync(); const inp = document.getElementById('sjNew'), name = inp.value.trim(), err = document.getElementById('sjErr');
+    if (!name) { err.textContent = 'Type or pick a subject to add.'; inp.focus(); return; }
+    const k = Object.keys(SUBJ_LIB).find(x => x.toLowerCase() === name.toLowerCase()) || name;
+    if (S.subDraft.rows.some(r => r.k === k)) { err.textContent = `${k} is already on the list.`; inp.focus(); return; }
+    if (!SUBJ_LIB[k]) SUBJ_LIB[k] = [['#0EA5E9','#E11D48','#7C3AED','#059669','#D97706'][Object.keys(SUBJ_LIB).length % 5], 'book', '', ''];
+    S.subDraft.rows.push({k, n: 2, t: SUBJ_LIB[k][2], r: SUBJ_LIB[k][3]}); keepScroll(subjDrawer); const b = drawer.querySelector('.drawer-b'); b.scrollTop = b.scrollHeight; },
+  sjCopy: () => { subjSync(); const g = +document.getElementById('sjCopy').value; S.subDraft.rows = gSubj(g).map(r => ({...r})); keepScroll(subjDrawer); toast(`Copied Grade ${g}’s subjects. Adjust them, then save.`); },
+  sjAlso: el => { subjSync(); const g = +el.dataset.g, a = S.subDraft.also; a.has(g) ? a.delete(g) : a.add(g); keepScroll(subjDrawer); },
+  sjSave: () => { subjSync(); const d = S.subDraft, err = document.getElementById('sjErr'), slots = bellLessons(gBell(d.g)) * 5;
+    const rows = d.rows.filter(r => r.n > 0), used = rows.reduce((a, r) => a + r.n, 0);
+    if (!rows.length) { err.textContent = 'Add at least one subject with lessons.'; return; }
+    if (used > slots) { err.textContent = `${used} lessons don’t fit in ${slots} periods. Remove ${used - slots} or add periods in Bell times.`; return; }
+    const bad = [...d.also].find(g => bellLessons(gBell(g)) * 5 < used); if (bad) { err.textContent = `Grade ${bad} has only ${bellLessons(gBell(bad)) * 5} periods a week, fewer than ${used}.`; return; }
+    [d.g, ...d.also].forEach(g => { TTC.subj[g] = rows.map(r => ({...r, t: r.t.trim(), r: r.r.trim()})); ttReset(g); });
+    closeAll(); route(); toast(`Saved subjects for Grade ${[d.g, ...d.also].sort((x, y) => x - y).join(', ')}. Timetables rebuilt.`); },
+  ttBell: () => { S.bellDraft = bellDraftOf(gBell(ttGradeOf())); bellDrawer(); },
+  blPick: el => { S.bellDraft = bellDraftOf(BELLS.find(x => x.id === el.dataset.id)); keepScroll(bellDrawer); },
+  blNew: () => { bellSync(); const d = S.bellDraft; S.bellDraft = {...d, id: 'b' + Date.now().toString(36), name: `${d.name} (copy)`, rows: d.rows.map(r => ({...r})), grades: new Set(), isNew: true}; keepScroll(bellDrawer); const n = document.getElementById('bl_name'); n.focus(); n.select(); },
+  blDur: el => { bellSync(); const r = S.bellDraft.rows[+el.dataset.i]; r.dur = Math.max(5, Math.min(180, (+r.dur || 0) + +el.dataset.d)); const inp = drawer.querySelector(`[data-br="${el.dataset.i}|dur"]`); if (inp) inp.value = r.dur; bellLive(); },
+  blAdd: el => { bellSync(); const d = S.bellDraft; d.rows.push(el.dataset.t === 'L' ? L(d.rows.find(r => r.t === 'L')?.dur || 40) : B('Interval', 15, '')); keepScroll(bellDrawer); const b = drawer.querySelector('.bl-list'); b.lastElementChild.scrollIntoView({block: 'nearest'}); },
+  blRm: el => { bellSync(); S.bellDraft.rows.splice(+el.dataset.i, 1); keepScroll(bellDrawer); },
+  blMove: el => { bellSync(); const r = S.bellDraft.rows, i = +el.dataset.i, j = i + +el.dataset.d; if (j < 0 || j >= r.length) return; [r[i], r[j]] = [r[j], r[i]]; keepScroll(bellDrawer); },
+  blGrade: el => { bellSync(); const g = +el.dataset.g, s0 = S.bellDraft.grades; s0.has(g) ? s0.delete(g) : s0.add(g); keepScroll(bellDrawer); },
+  blDel: () => { const d = S.bellDraft; if (bellGrades(d.id).length) return; BELLS.splice(BELLS.findIndex(x => x.id === d.id), 1); closeAll(); route(); toast(`Deleted ${d.name}`); },
+  blSave: () => { bellSync(); const d = S.bellDraft, err = document.getElementById('blErr'), p = bellPeriods(d);
+    if (!d.name.trim()) { err.textContent = 'Give the schedule a name.'; document.getElementById('bl_name').focus(); return; }
+    if (BELLS.some(x => x.id !== d.id && x.name.toLowerCase() === d.name.trim().toLowerCase())) { err.textContent = `There is already a schedule called ${d.name.trim()}.`; return; }
+    if (!bellLessons(d)) { err.textContent = 'Add at least one lesson.'; return; }
+    const shortRow = d.rows.findIndex(r => !(r.dur >= 5)); if (shortRow >= 0) { err.textContent = `Row ${shortRow + 1} needs at least 5 minutes.`; return; }
+    if (d.rows.some(r => r.t === 'B' && !String(r.label).trim())) { err.textContent = 'Give every interval a name, for example Lunch.'; return; }
+    if (toMin(p[p.length - 1][2]) > 18 * 60) { err.textContent = `The day ends at ${p[p.length - 1][2]}. Shorten it to finish by 18:00.`; return; }
+    const orphan = bellGrades(d.id).filter(g => !d.grades.has(g) && bellDefault(g) === d.id);
+    if (orphan.length) { err.textContent = `Grade ${orphan.join(', ')} ${orphan.length > 1 ? 'need' : 'needs'} a schedule. Turn ${orphan.length > 1 ? 'them' : 'it'} on in another schedule instead.`; return; }
+    const clean = {id: d.id, name: d.name.trim(), start: d.start, rows: d.rows.map(r => r.t === 'L' ? L(+r.dur) : B(String(r.label).trim(), +r.dur, String(r.duty || '').trim()))};
+    const i = BELLS.findIndex(x => x.id === d.id); if (i < 0) BELLS.push(clean); else BELLS[i] = clean;
+    const affected = new Set([...bellGrades(d.id), ...d.grades]);
+    bellGrades(d.id).filter(g => !d.grades.has(g)).forEach(g => delete TTC.bell[g]);
+    d.grades.forEach(g => TTC.bell[g] = d.id);
+    affected.forEach(ttReset);
+    closeAll(); route(); toast(`${d.isNew ? 'Added' : 'Saved'} ${clean.name}${affected.size ? ` · Grade ${[...affected].sort((x, y) => x - y).join(', ')} updated` : ''}`); },
   ttLesson: el => { if (S.ttEdit) return; ttLessonDrawer(+el.dataset.d, +el.dataset.p); },
   ttEdit: () => { S.ttEdit = !S.ttEdit; route(); if (!S.ttEdit) toast('Timetable saved. Teachers and parents have been told about the changes.'); },
   ttEditFrom: () => { closeAll(); S.ttEdit = true; route(); },
