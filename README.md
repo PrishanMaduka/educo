@@ -35,11 +35,13 @@ The mark is a ring cut into four arcs (school, teachers, parents, students) arou
 
 ### Platform console (`design/platform.html`)
 
-Quad is multi-tenant: every school is a tenant with its own data, subdomain, users and settings. The super admin works in the platform console. It has its own look so it is never confused with a school's admin app: a night theme by default (day theme on the toggle), a floating glass sidebar, Sora display type for titles and figures, KPI tiles with sparklines and count-up numbers, a smooth revenue chart with a 6M/12M switch, a plan donut, a gallery of school cards in each school's brand colour, and branded cover banners on school pages.
+Quad is multi-tenant: every school is a tenant with its own data, subdomain, users and settings. The super admin works in the platform console. It shares the warm look of the school apps but has its own accent so it is never confused with a school's staff portal: a teak-brown side bar with gold for the active item, and Quad's own mark. Schools keep their brand colours on their cards and pages.
 
 | Area | Screens and interactions |
 |---|---|
-| Overview | Schools, students on Quad, MRR, uptime, MRR chart, schools needing attention, plan mix, system status, recent activity |
+| Overview | Greeting and a plain-language summary of the platform; **Needs you today** (failed payments, seats near the limit, trials ending, onboarding, falling usage) with one-click actions; early warning for schools; then Schools, students on Quad, MRR, uptime, MRR chart, schools needing attention, plan mix, system status, recent activity |
+| Early warning | Each school's health from staff weekly use (with trend), last admin sign-in, parent app use, billing, support tickets, seats and trial end, with a level (At risk of leaving, Keep an eye on, Thriving, Paused), suggested next step and actions (plan a check-in, retry payment, upgrade, draft an email in Ask Quad). The same signal shows on each school's overview |
+| Ask Quad | Questions about schools at risk, revenue (by plan and country), a school by name, trials ending, seat usage, students by country, uptime and incidents, and how to add a school; drafts renewal, check-in and onboarding emails |
 | Schools | Tenant list with search, plan and status filters, seat usage, modules, region, MRR and health |
 | New school | Six-step wizard: school details with live subdomain check; stages and year groups (loaded from the chosen curriculum template; rename stages, set age ranges, add or remove year groups such as Playgroup, Nursery and Reception, classes per year group, reorder, switch off, add custom stages; live journey bar and totals); branding (logo upload or drag and drop, brand colour picked automatically from the logo, sample crest, short name, live preview of the staff sign-in, staff portal and parent app); plan and modules; first admin; animated provisioning. Ends with buttons to open the new school's staff portal and parent app |
 | School › Stages | The same stages editor for an existing school, with Save; shows which curriculum the school follows |
@@ -108,7 +110,9 @@ Global features: command palette (Ctrl/⌘ K), notifications panel, collapsible 
 
 Based on the iSAMS iParent feature set: one login for all of a parent's children, with dashboard, children, communications, information and settings.
 
-- **Home**: child switcher, today's arrival status, fees due, quick actions, upcoming events, school news
+- **Home**: greeting with Sinhala and Tamil, then the child's day as a story ("Today with Amaya": arrival, what's happening in class now, a note from the teacher with **Say thanks**); a **heads-up** card when something is slipping (what we noticed with trends, why it matters, the teacher's suggestion, **Book a 10-minute chat**, **Message the teacher** with a draft) or good news when the child is improving; things that need you; live class, bus, fees, quick actions, coming up (including Poya holidays), school news
+- **How my child is doing**: attendance against target, each subject with a trend, homework, behaviour and house points, wellbeing, in plain language
+- **Ask Quad**: a bottom sheet (floating button, More, or `/`) that answers about homework, how a child is doing overall or in a subject, attendance, next exam, fees (with Pay now), the bus, lunch, holidays, parents' evening and the class teacher, and drafts absence notes or messages to the teacher
 - **Children**: per-child profile with attendance calendar, results and progress trend, timetable, homework, rewards and conduct, school reports, medical details
 - **Payments**: outstanding balance, pay with a saved card or bank transfer (bottom sheet with a success state), trips with consent and payment, payment history
 - **Messages**: conversations with teachers and offices, new message, school bulletins
