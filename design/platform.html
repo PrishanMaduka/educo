@@ -790,6 +790,29 @@ tr.click:hover td{background:color-mix(in srgb,var(--brand) 6%,transparent)}
 .cur-banner span{flex:1;min-width:200px}
 .cur-from{display:flex;gap:10px;align-items:center;padding:10px 14px;border-radius:12px;background:var(--brand-soft);font-size:13px}
 .qual{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr) 34px;gap:8px;align-items:center}
+
+/* Plan drawer */
+.plan h2{display:flex;align-items:center;gap:8px}
+.plan-dot{width:10px;height:10px;border-radius:50%;background:var(--pc,var(--brand));flex:none}
+.plan.closed{opacity:.72}
+.plan-foot{display:flex;gap:6px;flex-wrap:wrap;margin-top:auto}
+.plan-foot span{font-size:11.5px;font-weight:700;padding:3px 9px;border-radius:20px;background:var(--surface-2,var(--line));color:var(--ink-2)}
+.pd-grid{display:grid;grid-template-columns:minmax(0,1fr) 250px;gap:20px;align-items:start}
+.pd-prev{position:sticky;top:0;display:flex;flex-direction:column;gap:12px}
+.pd-prev .plan{pointer-events:none;box-shadow:var(--shadow-lg)}
+.pd-prev .price{font-size:26px}.pd-prev .price small{display:block;margin-top:2px}
+.pd-impact{border-radius:12px;padding:12px 14px;background:var(--brand-soft);font-size:12.5px;display:flex;flex-direction:column;gap:6px}
+.pd-impact b{font-variant-numeric:tabular-nums}
+.pd-impact .row{display:flex;justify-content:space-between;gap:8px}
+.pd-impact.warn{background:var(--warn-soft);color:var(--warn)}
+.tones{display:flex;gap:8px;flex-wrap:wrap}
+.tones button{width:30px;height:30px;border-radius:50%;border:2px solid transparent;background:var(--tc);box-shadow:inset 0 0 0 3px var(--surface);outline-offset:2px}
+.tones button.on{border-color:var(--tc)}
+.pd-mods{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px}
+.pd-mods .mod{padding:9px 12px;align-items:center}
+.pd-mods .mod b{font-size:13px}
+.in-unit{position:relative}.in-unit .input{padding-left:24px}.in-unit::before{content:attr(data-u);position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--ink-3);font-weight:700;font-size:13px;pointer-events:none}
+@media (max-width:760px){.pd-grid{grid-template-columns:1fr}.pd-prev{position:static;order:-1}.pd-prev .plan ul,.pd-prev .plan .muted{display:none}.pd-prev .plan{padding:14px;gap:8px}}
 </style>
 </head>
 <body>
@@ -851,6 +874,7 @@ const P = {
 };
 const ic = (n, s=18) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${P[n]||''}</svg>`;
 Object.assign(P, {
+  pen:'<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>',
   tenants:'<path d="M3 21h18M5 21V7l7-4 7 4v14M9 9h1M14 9h1M9 13h1M14 13h1M10 21v-4h4v4"/>',
   users:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/>',
   shield:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>', key:'<circle cx="7.5" cy="15.5" r="4.5"/><path d="m10.7 12.3 9.3-9.3M17 6l3 3M14 9l2 2"/>',
@@ -921,10 +945,12 @@ const MODULES = [
   ['lms','Learning management','book'],['fees','Fees & invoicing','fee'],['finance','Finance & accounting','fin'],['parent','Parent app','phone'],['transport','Transport & bus tracking','bus']
 ];
 const PLANS = {
-  Starter:{price:1.2, mods:['admissions','sis','fees','parent'], limit:500, color:'t-violet'},
-  Growth:{price:2.1, mods:['admissions','crm','sis','lms','fees','parent'], limit:1500, color:'t-blue'},
-  Enterprise:{price:3.4, mods:MODULES.map(m => m[0]), limit:5000, color:'t-green'}
+  Starter:{price:1.2, mods:['admissions','sis','fees','parent'], limit:500, color:'t-violet', desc:'For small schools getting started', annual:10, trial:30, open:true},
+  Growth:{price:2.1, mods:['admissions','crm','sis','lms','fees','parent'], limit:1500, color:'t-blue', desc:'For growing schools that teach online too', annual:15, trial:30, open:true, feat:true},
+  Enterprise:{price:3.4, mods:MODULES.map(m => m[0]), limit:5000, color:'t-green', desc:'For school groups and large campuses', annual:20, trial:14, open:true}
 };
+const TONES = [['t-blue','Blue','var(--c1)'],['t-violet','Violet','var(--c4)'],['t-green','Green','var(--c2)'],['t-amber','Amber','var(--c3)'],['t-red','Red','var(--bad)']];
+const toneCol = c => (TONES.find(x => x[0] === c) || TONES[0])[2];
 const REGIONS = {'ap-south':'Asia South (Mumbai)', 'me-central':'Middle East (UAE)', 'ap-southeast':'Asia Pacific (Singapore)'};
 const T = (id, name, sub, country, plan, students, status, color, region, since, extra={}) => ({id, name, sub, country, plan, students, status, color, region, since,
   limit: PLANS[plan].limit, mods: new Set(PLANS[plan].mods), health: extra.health || 'Healthy', tz: extra.tz || 'Asia/Colombo', currency: extra.currency || 'LKR', ...extra});
@@ -1061,8 +1087,7 @@ V.overview = () => {
   const live = tenants.filter(t => t.status !== 'Suspended'), total = tenants.reduce((a, t) => a + mrr(t), 0), students = tenants.reduce((a, t) => a + t.students, 0);
   const all = ['Nov','Dec','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct'], allV = [24.8,25.6,26.9,28.2,29.0,30.4,31.1,32.6,33.9,35.0,35.8, +(total / 1000).toFixed(1)];
   const n = S.range === '6m' ? 6 : 12, labels = all.slice(-n), series = allV.slice(-n), growth = Math.round((series[series.length - 1] / series[0] - 1) * 100);
-  const planCols = {Starter:'var(--c4)', Growth:'var(--c1)', Enterprise:'var(--c2)'};
-  const byPlan = Object.keys(PLANS).map(p => [p, live.filter(t => t.plan === p).length, planCols[p]]);
+  const byPlan = Object.keys(PLANS).map(p => [p, live.filter(t => t.plan === p).length, toneCol(PLANS[p].color)]);
   const countries = [...new Set(tenants.map(t => t.country))].map(c => [c, tenants.filter(t => t.country === c)]).sort((a, b) => b[1].reduce((x, t) => x + t.students, 0) - a[1].reduce((x, t) => x + t.students, 0));
   const maxStu = Math.max(...countries.map(([, ts]) => ts.reduce((x, t) => x + t.students, 0)));
   const attention = [['var(--bad)','Negombo Bay College','Card payment failed 3 hours ago · $1,449 due', 6, 'Retry payment'],['var(--warn)','Malé Bright Future School','1,480 of 1,500 seats used', 4, 'Raise limit'],['var(--info)','Jaffna Northern Scholars','Trial ends 19 Oct · 275 students imported', 7, 'Send offer'],['var(--brand)','Singapore Harbourfront Intl','Onboarding · 3 of 6 setup steps done', 9, 'Open']];
@@ -1208,9 +1233,10 @@ function tDanger(t) {
   </div>`;
 }
 
-V.plans = () => `${pageHead('Platform', 'Plans & billing', 'Prices are per enrolled student per month, billed in US dollars.', `<button class="btn primary" data-act="toast" data-msg="New plan draft created">${ic('plus',16)}New plan</button>`)}
-  <div class="plans">${Object.entries(PLANS).map(([n, p], i) => `<div class="card plan ${i===1?'feat':''}"><div style="display:flex;justify-content:space-between;align-items:center"><h2>${n}</h2>${i===1?'<span class="pill t-blue plain">Most popular</span>':''}</div><div class="price">$${p.price.toFixed(2)} <small>per student / month</small></div><div class="muted" style="font-size:13px">Up to ${fmt(p.limit)} students · ${tenants.filter(t => t.plan === n).length} schools</div>
-    <ul>${p.mods.map(k => `<li>${ic('check',14)}${MODULES.find(m => m[0] === k)[1]}</li>`).join('')}</ul><button class="btn" data-act="toast" data-msg="Editing ${n}">Edit plan</button></div>`).join('')}</div>
+V.plans = () => `${pageHead('Platform', 'Plans & billing', 'Prices are per enrolled student per month, billed in US dollars.', `<button class="btn primary" data-act="openPlan">${ic('plus',16)}New plan</button>`)}
+  <div class="plans">${Object.entries(PLANS).map(([n, p]) => `<div class="card plan ${p.feat?'feat':''} ${p.open===false?'closed':''}" style="--pc:${toneCol(p.color)}"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><h2><i class="plan-dot"></i>${esc(n)}</h2>${p.feat?'<span class="pill t-blue plain">Most popular</span>':p.open===false?'<span class="pill plain">Not offered</span>':''}</div>${p.desc?`<div class="muted" style="font-size:13px;margin-top:-6px">${esc(p.desc)}</div>`:''}<div class="price">$${p.price.toFixed(2)} <small>per student / month</small></div><div class="muted" style="font-size:13px">Up to ${fmt(p.limit)} students · ${tenants.filter(t => t.plan === n).length} schools</div>
+    <ul>${p.mods.map(k => `<li>${ic('check',14)}${MODULES.find(m => m[0] === k)[1]}</li>`).join('')}</ul><div class="plan-foot">${p.annual?`<span>${p.annual}% off yearly</span>`:''}${p.trial?`<span>${p.trial}-day trial</span>`:''}</div><button class="btn" data-act="openPlan" data-p="${esc(n)}">${ic('pen',14)}Edit plan</button></div>`).join('')}
+    <button class="card plan cur-add" data-act="openPlan">${ic('plus',22)}<b>Add a plan</b><span style="font-size:13px">For example a campus bundle or a pilot price</span></button></div>
   <div class="card"><div class="card-h"><h2>Invoices this month</h2></div><div class="tbl-wrap"><table><thead><tr><th>School</th><th>Plan</th><th class="r">Students</th><th class="r">Amount</th><th>Status</th></tr></thead><tbody>
   ${tenants.filter(t => mrr(t)).map(t => `<tr class="click" data-act="openTenant" data-id="${t.id}"><td><div class="who">${tlogo(t)}<b>${t.name}</b></div></td><td>${t.plan}</td><td class="r num">${fmt(t.students)}</td><td class="r num">${usd(mrr(t))}</td><td>${pill(t.status === 'Past due' ? 'Failed' : 'Paid', t.status === 'Past due' ? 't-red' : 't-green')}</td></tr>`).join('')}</tbody></table></div></div>`;
 
@@ -1222,7 +1248,7 @@ V.audit = () => { const f = S.filter.au || 'all'; const rows = AUDIT.filter(a =>
 /* ---------- Overlays ---------- */
 const scrim = document.getElementById('scrim'), drawer = document.getElementById('drawer'), modal = document.getElementById('drawer');
 function openDrawer(html, cls = '') { drawer.className = 'drawer ' + cls; drawer.innerHTML = html; drawer.classList.add('on'); scrim.classList.add('on'); drawer.setAttribute('aria-hidden','false'); }
-const FORM_META = [['Curriculum template','book','Curricula'],['Invite users','users','School users'],['New school','tenants','Platform'],['Suspend','power','Danger zone',true],['Delete','trash','Danger zone',true]];
+const FORM_META = [['New plan','dollar','Plans & billing'],['Edit plan','dollar','Plans & billing'],['Curriculum template','book','Curricula'],['Invite users','users','School users'],['New school','tenants','Platform'],['Suspend','power','Danger zone',true],['Delete','trash','Danger zone',true]];
 /* Form drawers: look up an icon and section label from the form's title */
 function formDrawer(html, cls = '') {
   openDrawer(html, 'form ' + cls);
@@ -1273,7 +1299,7 @@ function tenantWizard() {
       <div class="field"><label>Brand colour${w.picked ? ' <span class="pill t-green plain" style="margin-left:6px;font-size:11px">Picked from your logo</span>' : ''}</label><div class="swatches">${BRAND_SWATCHES.map(x => `<button type="button" class="${x === col ? 'on' : ''}" style="background:${x}" data-act="wColor" data-c="${x}" aria-label="Colour ${x}"></button>`).join('')}<input type="color" id="w_color" value="${col}" aria-label="Custom colour" style="width:34px;height:34px;border:0;padding:0;background:none"></div></div>
       <div class="field"><label for="w_short">Short name</label><input class="input" id="w_short" maxlength="5" value="${esc(w.w_short || shortOf(w.w_name))}"><small class="muted">Shown on the app icon, and anywhere the logo is too small to read</small></div>
     </div><div><div class="eyebrow" style="margin-bottom:10px">Live preview</div><div id="wPrev">${brandMock(w.w_name, col, w.logo, w.w_short || shortOf(w.w_name))}</div></div></div>`; }
-  else if (st === 3) { const plan = w.w_plan || 'Growth'; body = `<div class="plans" style="grid-template-columns:repeat(3,1fr);gap:10px">${Object.entries(PLANS).map(([n, p]) => `<button class="card plan ${n===plan?'feat':''}" data-act="wPlan" data-p="${n}" style="text-align:left;padding:14px;gap:6px"><b>${n}</b><span class="num" style="font:700 20px var(--f-display)">$${p.price.toFixed(2)}</span><small class="muted">${p.mods.length} modules · up to ${fmt(p.limit)}</small></button>`).join('')}</div>
+  else if (st === 3) { const plan = w.w_plan || 'Growth'; body = `<div class="plans" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px">${Object.entries(PLANS).filter(([n, p]) => p.open !== false || n === plan).map(([n, p]) => `<button class="card plan ${n===plan?'feat':''}" data-act="wPlan" data-p="${n}" style="text-align:left;padding:14px;gap:6px"><b>${n}</b><span class="num" style="font:700 20px var(--f-display)">$${p.price.toFixed(2)}</span><small class="muted">${p.mods.length} modules · up to ${fmt(p.limit)}</small></button>`).join('')}</div>
     <div class="mods" style="grid-template-columns:1fr 1fr">${MODULES.map(([k, n, i]) => { const on = (w.mods || new Set(PLANS[plan].mods)).has(k); return `<div class="mod ${on?'':'off'}" style="padding:10px 12px"><div class="meta"><b style="font-size:13px">${n}</b></div>${sw(on, 'wMod', `data-k="${k}" aria-label="${n}"`)}</div>`; }).join('')}</div>
     <label class="checkrow"><input type="checkbox" id="w_trial" ${w.w_trial !== false ? 'checked' : ''}> Start with a 30-day free trial</label>`; }
   else if (st === 4) body = `<p class="muted" style="margin:0;font-size:13px">This person becomes the school admin. They can invite everyone else.</p><div class="form-grid">${f('w_aname','Full name','e.g. Shanthi Wickramasinghe')}${f('w_aemail','Email','principal@school.edu','email')}</div>
@@ -1790,6 +1816,61 @@ function curDrawer(first) {
   S.noFocus = false; bindStages(); const b = drawer.querySelector('.drawer-b'); if (b && !first) b.scrollTop = keep;
 }
 
+/* ---------- Plan drawer (new and edit) ---------- */
+function planSync() {
+  const d = S.planDraft, v = id => { const e = document.getElementById(id); return e ? e.value : null; };
+  if (v('pl_name') === null) return;
+  d.name = v('pl_name'); d.desc = v('pl_desc'); d.price = parseFloat(v('pl_price')); d.limit = parseInt(v('pl_limit'), 10); d.annual = +v('pl_annual'); d.trial = +v('pl_trial');
+}
+function planImpact(d) {
+  const on = d.orig ? tenants.filter(t => t.plan === d.orig) : [], billed = on.filter(t => mrr(t) > 0), old = d.orig ? PLANS[d.orig] : null;
+  const price = isFinite(d.price) ? d.price : 0, delta = old ? billed.reduce((a, t) => a + t.students * (price - old.price), 0) : 0;
+  const over = isFinite(d.limit) ? on.filter(t => t.students > d.limit) : [];
+  const lost = old ? old.mods.filter(k => !d.mods.has(k)) : [];
+  return {on, billed, delta, over, lost, old};
+}
+function planPreview() {
+  planSync(); const d = S.planDraft, box = document.getElementById('pdPrev'); if (!box) return;
+  const price = isFinite(d.price) && d.price > 0 ? d.price : 0, im = planImpact(d);
+  const mods = MODULES.filter(m => d.mods.has(m[0]));
+  box.innerHTML = `<div class="card plan ${d.feat?'feat':''}" style="--pc:${toneCol(d.color)}"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><h2><i class="plan-dot"></i>${esc(d.name || 'Plan name')}</h2>${d.feat?'<span class="pill t-blue plain">Most popular</span>':''}</div>
+    ${d.desc?`<div class="muted" style="font-size:13px;margin-top:-6px">${esc(d.desc)}</div>`:''}<div class="price">$${price.toFixed(2)} <small>per student / month</small></div>
+    <div class="muted" style="font-size:13px">Up to ${isFinite(d.limit) ? fmt(d.limit) : '—'} students</div>
+    <ul>${mods.map(m => `<li>${ic('check',14)}${m[1]}</li>`).join('') || '<li class="muted">No modules yet</li>'}</ul>
+    <div class="plan-foot">${d.annual?`<span>${d.annual}% off yearly</span>`:''}${d.trial?`<span>${d.trial}-day trial</span>`:''}${d.open?'':'<span>Not offered</span>'}</div></div>
+    ${d.orig ? `<div class="pd-impact ${im.over.length || im.lost.length ? 'warn' : ''}"><div class="row"><span>Schools on ${esc(d.orig)}</span><b>${im.on.length}</b></div>
+      <div class="row"><span>Monthly revenue change</span><b>${im.delta >= 0 ? '+' : '−'}${usd(Math.abs(im.delta))}</b></div>
+      ${im.over.length ? `<div>${im.over.length} school${im.over.length>1?'s are':' is'} above this limit: ${im.over.map(t => esc(t.name)).join(', ')}</div>` : ''}
+      ${im.lost.length ? `<div>Schools keep ${im.lost.map(k => MODULES.find(m => m[0] === k)[1]).join(', ')} as paid add-ons</div>` : ''}</div>`
+    : `<div class="pd-impact"><div class="row"><span>A 600-student school pays</span><b>${usd(600 * price)}/mo</b></div><div class="row"><span>Paying yearly</span><b>${usd(600 * price * 12 * (1 - d.annual / 100))}/yr</b></div></div>`}`;
+}
+function planDrawer() {
+  const d = S.planDraft, im = planImpact(d);
+  S.noFocus = !!d.orig;
+  formDrawer(`${head(d.orig ? 'Edit plan · ' + esc(d.orig) : 'New plan', d.orig ? `${im.on.length} school${im.on.length===1?'':'s'} on this plan · prices are per student per month` : 'Price, student limit, modules and trial for a new plan')}
+    <div class="drawer-b"><div class="pd-grid" id="planForm"><div style="display:flex;flex-direction:column;gap:16px;min-width:0">
+      <div class="form-grid">
+        <div class="field"><label for="pl_name">Plan name</label><input class="input" id="pl_name" value="${esc(d.name)}" placeholder="e.g. Campus Plus"></div>
+        <div class="field"><label>Colour</label><div class="tones">${TONES.map(([k, n, c]) => `<button type="button" class="${d.color===k?'on':''}" style="--tc:${c}" data-act="planTone" data-k="${k}" aria-label="${n}" aria-pressed="${d.color===k}"></button>`).join('')}</div></div>
+        <div class="field full"><label for="pl_desc">Tagline</label><input class="input" id="pl_desc" value="${esc(d.desc)}" placeholder="Who this plan is for"></div>
+        <div class="field"><label for="pl_price">Price per student / month</label><div class="in-unit" data-u="$"><input class="input" id="pl_price" type="number" min="0" step="0.05" inputmode="decimal" value="${isFinite(d.price) ? d.price : ''}"></div></div>
+        <div class="field"><label for="pl_limit">Student limit</label><input class="input" id="pl_limit" type="number" min="1" step="50" inputmode="numeric" value="${isFinite(d.limit) ? d.limit : ''}"></div>
+        <div class="field"><label for="pl_annual">Discount for paying yearly</label><select class="input" id="pl_annual">${[0,5,10,15,20,25].map(x => `<option value="${x}" ${x===d.annual?'selected':''}>${x ? x + '%' : 'None'}</option>`).join('')}</select></div>
+        <div class="field"><label for="pl_trial">Free trial</label><select class="input" id="pl_trial">${[0,14,30,60].map(x => `<option value="${x}" ${x===d.trial?'selected':''}>${x ? x + ' days' : 'No trial'}</option>`).join('')}</select></div>
+      </div>
+      <div class="field"><label>Modules included <span class="muted" style="font-weight:500">· ${d.mods.size} of ${MODULES.length}</span></label><div class="pd-mods">${MODULES.map(([k, n, i]) => { const on = d.mods.has(k); return `<div class="mod ${on?'':'off'}"><div class="dot-ic ${on?'t-blue':'t-violet'}">${ic(i,14)}</div><div class="meta"><b>${n}</b></div>${sw(on, 'planMod', `data-k="${k}" aria-label="${n}"`)}</div>`; }).join('')}</div>
+        <div style="display:flex;gap:8px"><button type="button" class="btn sm" data-act="planAll" data-v="1">Select all</button><button type="button" class="btn sm" data-act="planAll" data-v="0">Clear</button></div></div>
+      <div class="setting" style="padding:0;border:0"><div class="meta"><b>Offer to new schools</b><small>Off: hidden from the new-school wizard. Schools already on it keep it.</small></div>${sw(d.open, 'planOpen', 'aria-label="Offer to new schools"')}</div>
+      <div class="setting" style="padding:0;border:0"><div class="meta"><b>Mark as most popular</b><small>Highlights this plan in the catalogue and the wizard.</small></div>${sw(d.feat, 'planFeat', 'aria-label="Most popular"')}</div>
+      ${d.orig && im.billed.length ? `<div class="field"><label>When a price change applies to the ${im.billed.length} paying school${im.billed.length>1?'s':''}</label><div class="chips">${[['next','From the next invoice'],['renewal','At each school’s renewal'],['new','New schools only']].map(([k, l]) => `<button type="button" class="chip ${d.when===k?'on':''}" data-act="planWhen" data-k="${k}">${l}</button>`).join('')}</div></div>` : ''}
+    </div><aside class="pd-prev" id="pdPrev" aria-live="polite"></aside></div>
+    <div class="err-msg" id="planErr"></div></div>
+    <div class="drawer-f">${d.orig ? `<button class="btn" style="margin-right:auto;color:var(--bad)" data-act="planArchive" ${im.on.length ? `disabled title="Move the ${im.on.length} schools to another plan first"` : ''}>${ic('trash',14)}Delete plan</button>` : ''}<button class="btn" data-act="closeAll">Cancel</button><button class="btn primary" data-act="planSave">${d.orig ? 'Save plan' : 'Add plan'}</button></div>`, 'wide');
+  S.noFocus = false; planPreview();
+}
+document.addEventListener('input', e => { if (e.target.closest && e.target.closest('#planForm')) planPreview(); });
+document.addEventListener('change', e => { if (e.target.closest && e.target.closest('#planForm')) planPreview(); });
+
 /* ---------- Router ---------- */
 const NAV = [
   {g:'Platform', items:[['overview','Overview','home'],['tenants','Schools','tenants', tenants.length],['curricula','Curricula','book'],['plans','Plans & billing','dollar'],['audit','Audit log','log']]}
@@ -1879,6 +1960,34 @@ const ACT = {
     else if (tg === 'curd') { S.curDraft.stages = stagesFrom(k); curDrawer(); }
     else { const t = tenants.find(x => x.id === +tg); t.stTpl = k; t.curr = k; t.stages = stagesFrom(k); route(); }
     toast(`Loaded the ${c.name} stages. Edit them to match.`); },
+  openPlan: el => { const n = el.dataset.p, p = n && PLANS[n];
+    S.planDraft = p ? {orig: n, name: n, desc: p.desc || '', price: p.price, limit: p.limit, annual: p.annual || 0, trial: p.trial || 0, color: p.color, mods: new Set(p.mods), open: p.open !== false, feat: !!p.feat, when: 'next'}
+      : {orig: null, name: '', desc: '', price: 1.5, limit: 1000, annual: 10, trial: 30, color: TONES.find(t => !Object.values(PLANS).some(x => x.color === t[0]))?.[0] || 't-amber', mods: new Set(['admissions','sis','fees','parent']), open: true, feat: false, when: 'next'};
+    planDrawer(); },
+  planTone: el => { S.planDraft.color = el.dataset.k; el.parentNode.querySelectorAll('button').forEach(b => { b.classList.toggle('on', b === el); b.setAttribute('aria-pressed', b === el); }); planPreview(); },
+  planMod: el => { const m = S.planDraft.mods, k = el.dataset.k; m.has(k) ? m.delete(k) : m.add(k); const on = m.has(k); el.classList.toggle('on', on); el.setAttribute('aria-checked', on); const row = el.closest('.mod'); row.classList.toggle('off', !on); row.querySelector('.dot-ic').className = 'dot-ic ' + (on ? 't-blue' : 't-violet'); const lb = row.closest('.field').querySelector('label .muted'); if (lb) lb.textContent = `· ${m.size} of ${MODULES.length}`; planPreview(); },
+  planAll: el => { planSync(); S.planDraft.mods = new Set(el.dataset.v === '1' ? MODULES.map(m => m[0]) : []); const b = drawer.querySelector('.drawer-b'), y = b.scrollTop; planDrawer(); drawer.querySelector('.drawer-b').scrollTop = y; },
+  planOpen: el => { const d = S.planDraft; d.open = !d.open; el.classList.toggle('on', d.open); el.setAttribute('aria-checked', d.open); planPreview(); },
+  planFeat: el => { const d = S.planDraft; d.feat = !d.feat; el.classList.toggle('on', d.feat); el.setAttribute('aria-checked', d.feat); planPreview(); },
+  planWhen: el => { S.planDraft.when = el.dataset.k; el.parentNode.querySelectorAll('.chip').forEach(c => c.classList.toggle('on', c === el)); },
+  planSave: () => { planSync(); const d = S.planDraft, err = document.getElementById('planErr'), name = d.name.trim(), bad = (m, id) => { err.textContent = m; if (id) document.getElementById(id).focus(); };
+    if (!name) return bad('Give the plan a name.', 'pl_name');
+    if (Object.keys(PLANS).some(n => n.toLowerCase() === name.toLowerCase() && n !== d.orig)) return bad(`There is already a plan called ${name}.`, 'pl_name');
+    if (!(d.price > 0)) return bad('Enter a price above $0.', 'pl_price');
+    if (!(d.limit > 0)) return bad('Enter a student limit.', 'pl_limit');
+    if (!d.mods.size) return bad('Include at least one module.');
+    const im = planImpact(d);
+    if (im.over.length) return bad(`${im.over.map(t => t.name).join(', ')} ${im.over.length > 1 ? 'have' : 'has'} more students than this limit. Raise the limit or move ${im.over.length > 1 ? 'them' : 'it'} to another plan first.`, 'pl_limit');
+    const clean = {price: Math.round(d.price * 100) / 100, limit: d.limit, mods: MODULES.map(m => m[0]).filter(k => d.mods.has(k)), color: d.color, desc: d.desc.trim(), annual: d.annual, trial: d.trial, open: d.open, feat: d.feat};
+    if (d.feat) Object.values(PLANS).forEach(p => p.feat = false);
+    const entries = Object.entries(PLANS).map(([n, p]) => n === d.orig ? [name, clean] : [n, p]); if (!d.orig) entries.push([name, clean]);
+    Object.keys(PLANS).forEach(k => delete PLANS[k]); entries.forEach(([n, p]) => PLANS[n] = p);
+    if (d.orig) im.on.forEach(t => { t.plan = name; t.limit = d.limit; clean.mods.forEach(k => t.mods.add(k)); });
+    const priceChanged = im.old && im.old.price !== clean.price, whenTxt = {next: 'from the next invoice', renewal: 'at each school’s renewal', new: 'for new schools only'}[d.when];
+    AUDIT.unshift(['Prishan Maduka', d.orig ? `updated the ${name} plan${d.orig !== name ? ` (was ${d.orig})` : ''}${priceChanged ? `: price $${im.old.price.toFixed(2)} → $${clean.price.toFixed(2)} ${whenTxt}` : ''}` : `added the ${name} plan at $${clean.price.toFixed(2)} per student`, 'platform', 'Just now', 'billing']);
+    closeAll(); route(); toast(d.orig ? (priceChanged && im.billed.length ? `Saved. New price applies ${whenTxt}.` : `Saved ${name}`) : `Added ${name}${d.open ? '. It now appears in the new-school wizard.' : ''}`); },
+  planArchive: () => { const d = S.planDraft; if (!d.orig || tenants.some(t => t.plan === d.orig) || Object.keys(PLANS).length < 2) return; delete PLANS[d.orig];
+    AUDIT.unshift(['Prishan Maduka', `deleted the ${d.orig} plan`, 'platform', 'Just now', 'billing']); closeAll(); route(); toast(`Deleted ${d.orig}`); },
   keepStages: () => { saveWiz(); S.wiz.w_curr = S.wiz.stTpl; tenantWizard(); toast('Kept your stages'); },
   openCur: el => { const c = el.dataset.id ? curOf(el.dataset.id) : null; S.curDraft = c ? {...c, stages: copyStages(c.stages), quals: c.quals.map(q => q.slice()), isNew: false} : {id: 'c' + Date.now().toString(36), name: '', short: '', desc: '', grading: 'A to F', quals: [], stages: stagesFrom('cambridge'), isNew: true}; S.curApply = false; curDrawer(true); },
   curQualAdd: () => { curSync(); S.curDraft.quals.push(['', '']); curDrawer(); },

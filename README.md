@@ -41,7 +41,8 @@ Quad is multi-tenant: every school is a tenant with its own data, subdomain, use
 | School › Sign-in & security | Google and Microsoft single sign-on, two-step sign-in rules, password and session policy, IP allowlist |
 | School › Danger zone | Export data, suspend or reactivate (type the subdomain to confirm), schedule deletion |
 | Support access | "Open as school admin" opens the school's admin app with a support banner; actions are written to the audit log |
-| Plans & billing, Audit log | Plan catalogue, this month's invoices, platform-wide audit log with filters |
+| Plans & billing | Plan catalogue and this month's invoices. New plan and Edit plan open in a drawer: name, colour, tagline, price per student, student limit, yearly discount, free trial, included modules, offer to new schools, most popular. A live preview card sits beside the form. When editing, it shows the schools on the plan, the monthly revenue change, schools above a lowered limit (which blocks saving), modules that become paid add-ons, and when a price change applies (next invoice, at renewal, or new schools only). Plans with no schools can be deleted |
+| Audit log | Platform-wide audit log with filters |
 
 The school admin app also has **Settings › Users & roles**, so each school's own admin can invite staff, change roles, deactivate accounts and edit role permissions without the super admin. It uses the same user profile page (also opened from the avatar in the top bar as *My profile*) and the same new role page.
 
