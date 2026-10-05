@@ -632,6 +632,42 @@ select.input{appearance:none;-webkit-appearance:none;background-image:url("data:
   .bl-row .bl-t{grid-column:3;grid-row:2;text-align:right}
   .tt-bell span{display:none}
 }
+
+/* Teachers & classes */
+.av.xs{width:22px;height:22px;font-size:9px}
+.subj-tag{font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:20px;background:color-mix(in srgb,var(--c) 14%,var(--surface));color:color-mix(in srgb,var(--c) 80%,var(--ink));white-space:nowrap}
+.wl{display:flex;align-items:center;gap:8px;font-size:12px}.wl .bar{flex:1;min-width:60px;height:6px}.wl .bar i{background:var(--good)}
+.wl.high .bar i{background:var(--warn)}.wl.over .bar i{background:var(--bad)}.wl.over .num{color:var(--bad);font-weight:700}
+.st-band .card-h{align-items:center}
+.st-head,.tt-ct{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:6px 10px;cursor:pointer;text-align:left;color:var(--ink)}
+.st-head:hover,.tt-ct:hover{border-color:var(--brand)}
+.st-head small,.tt-ct small,.st-ct small,.st-person small{display:block;font-size:10.5px;color:var(--ink-3);font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+.st-head b,.tt-ct b{font-size:13px}
+.tt-ct{padding:4px 10px;font-size:12.5px}
+.st-classes{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;padding:0 18px 18px}
+.st-class{display:flex;flex-direction:column;gap:12px;border:1px solid var(--line);border-radius:14px;padding:14px;background:var(--surface);text-align:left;cursor:pointer;transition:transform .15s,box-shadow .15s;color:var(--ink)}
+.st-class:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg)}
+.st-cn{display:flex;justify-content:space-between;align-items:center;gap:8px}.st-cn b{font-size:15px}
+.st-ct{display:flex;align-items:center;gap:10px;font-size:13px}
+.st-none{color:var(--brand);font-weight:600;display:inline-flex;gap:6px;align-items:center}
+.st-faces{display:flex;align-items:center}.st-faces .av{margin-right:-6px;border:2px solid var(--surface)}.st-faces small{margin-left:12px}
+.st-sections{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+.st-sec{padding:20px;display:flex;flex-direction:column;gap:14px;text-align:left;cursor:pointer;color:var(--ink);transition:transform .15s,box-shadow .15s}
+button.st-sec:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg)}
+.st-sec h3{margin:2px 0 0;font:700 19px var(--f-display)}
+.st-sec.principal{cursor:default;background:var(--surface-2)}
+.st-sec .cur-meta{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--ink-3)}.st-sec .cur-meta b{color:var(--ink)}
+.st-person{display:flex;align-items:center;gap:12px}.st-person b{font-size:14.5px}.st-person.sm b{font-size:13px}
+.st-load{display:flex;flex-direction:column;gap:8px;padding:12px 14px;border-radius:12px;background:var(--surface-2);border:1px solid var(--line)}
+.st-load>div:first-child{display:flex;justify-content:space-between;gap:10px;font-size:13px}.st-load>div:first-child span{color:var(--ink-3)}
+.st-load.over{background:var(--bad-soft);border-color:transparent}.st-load.over>div:first-child span{color:var(--bad);font-weight:600}
+.st-rows{display:flex;flex-direction:column;gap:6px}
+.st-row{display:grid;grid-template-columns:4px minmax(0,1.1fr) minmax(0,1fr) 50px auto 32px;gap:10px;align-items:center;padding:6px 8px;border:1px solid var(--line);border-radius:10px;font-size:13px;background:var(--surface)}
+.st-row>i{width:4px;height:24px;border-radius:2px;background:var(--c)}
+.st-row.cls{grid-template-columns:4px minmax(0,1fr) 50px minmax(0,1.4fr)}
+.st-add{display:grid;grid-template-columns:110px minmax(0,1fr) minmax(0,1.2fr) auto;gap:8px;margin-top:8px}
+.sj-tch{display:flex;flex-direction:column;font-size:12px;line-height:1.35;min-width:0}.sj-tch span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sj-tch em{color:var(--warn);font-style:normal;font-weight:600}
+@media (max-width:760px){.st-row{grid-template-columns:4px minmax(0,1fr) auto 32px}.st-row>span:not(.num),.st-row>small{display:none}.st-row.cls{grid-template-columns:4px minmax(0,1fr) auto}.st-row.cls select{grid-column:2/-1}.st-add{grid-template-columns:1fr 1fr}.st-band .card-h{flex-wrap:wrap;gap:10px}.sj-row .sj-tch{grid-column:2/-1}}
 </style>
 </head>
 <body>
@@ -776,7 +812,7 @@ const NAV = [
   {g:'Pre-admission', items:[['admissions','Admissions pipeline','admit', apps.filter(a=>a.stage!=='enrolled').length]]},
   {g:'Relationships', items:[['crm','CRM & leads','crm'],['inbox','Communications','msg', 2]]},
   {g:'Student information', items:[['students','Students','student'],['attendance','Attendance','check']]},
-  {g:'Learning', items:[['lms','Courses & gradebook','book'],['timetable','Timetable','cal']]},
+  {g:'Learning', items:[['lms','Courses & gradebook','book'],['timetable','Timetable','cal'],['staffing','Teachers & classes','crm']]},
   {g:'Finance', items:[['fees','Fees & invoicing','fee'],['finance','Accounting','fin']]},
   {g:'Settings', items:[['users','Users & roles','shield']]}
 ];
@@ -1579,8 +1615,8 @@ function bellPeriods(b) { let m = toMin(b.start), n = 0; return b.rows.map(r => 
 const bellLessons = b => b.rows.filter(r => r.t === 'L').length;
 const bellSummary = b => { const p = bellPeriods(b), br = b.rows.length - bellLessons(b); return `${bellLessons(b)} lessons · ${br} break${br === 1 ? '' : 's'} · ${p.length ? p[0][1] + '–' + p[p.length - 1][2] : ''}`; };
 const gradeOfCls = cls => +cls.match(/Grade (\d+)/)[1];
-function ttSubj(g, k) { const r = gSubj(g).find(x => x.k === k), lib = SUBJ_LIB[k] || ['#64748B','book','',''];
-  return [lib[0], r ? r.t : lib[2], lib[1], r ? r.r : lib[3]]; }
+function ttSubj(g, k, cls) { const r = gSubj(g).find(x => x.k === k), lib = SUBJ_LIB[k] || ['#64748B','book','',''];
+  return [lib[0], (cls ? taOf(cls, k) : '') || (cls ? 'Unassigned' : r ? r.t : lib[2]), lib[1], r ? r.r : lib[3]]; }
 const ttReset = g => { Object.keys(S.tt || {}).forEach(k => { if (k.startsWith(`Grade ${g} –`)) delete S.tt[k]; }); Object.keys(S.ttSub || {}).forEach(k => { if (k.startsWith(`Grade ${g} –`)) delete S.ttSub[k]; }); };
 const TT_DAYS = [['Mon','5 Oct'],['Tue','6 Oct'],['Wed','7 Oct'],['Thu','8 Oct'],['Fri','9 Oct']];
 const TT_SECTIONS = ['Emerald','Ruby','Sapphire'];
@@ -1604,7 +1640,7 @@ V.timetable = () => {
     if (p === 'brk') { cells += `<div class="pt"><b>${s}</b></div><div class="bk" data-act="ttBell" role="button" tabindex="0">${ic(/lunch/i.test(label) ? 'heart' : 'star',14)}<b>${esc(label)}</b> ${s}–${e} <span>${duty ? '· ' + esc(duty) : ''}</span></div>`; return; }
     pi++; const idx = pi;
     cells += `<div class="pt"><b>${p}</b><span>${s}</span><span>${e}</span></div>` + TT_DAYS.map((_, d) => {
-      const k = g[d][idx], [c, tch, icn, room] = ttSubj(gr, k), st = mins(s), en = mins(e);
+      const k = g[d][idx], [c, tch, icn, room] = ttSubj(gr, k, cls), st = mins(s), en = mins(e);
       const state = d === 0 ? (NOW >= en ? 'past' : NOW >= st ? 'now' : 'today') : '', pct = state === 'now' ? ((NOW - st) / (en - st) * 100).toFixed(1) : 0, sub = subs[`${cls}${wk}-${d}-${idx}`];
       return `<div class="ls ${state} ${k === 'Free study' ? 'free' : ''}" style="--c:${c};--pct:${pct}%" data-act="ttLesson" data-d="${d}" data-p="${idx}" ${edit ? 'draggable="true"' : ''} tabindex="0" aria-label="${esc(k)}, ${TT_DAYS[d][0]} ${p}">
         ${state === 'now' ? '<span class="badge-now">NOW</span>' : ''}<div class="ls-top"><span class="ls-ic">${ic(icn,13)}</span><b>${esc(k)}</b></div>
@@ -1612,13 +1648,13 @@ V.timetable = () => {
     }).join('');
   });
   const today = TT_P.filter(p => p[0] !== 'brk');
-  const agenda = today.map(([p, s, e], i) => { const k = g[0][i], [c, tch, , room] = ttSubj(gr, k), st = mins(s), en = mins(e), state = NOW >= en ? 'done' : NOW >= st ? 'cur' : ''; return `<div class="ag ${state}"><i style="background:${c}"></i><span class="num" style="width:44px">${s}</span><span style="flex:1"><b>${esc(k)}</b><br><small class="muted">${esc(tch)} · ${esc(room)}</small></span>${state === 'cur' ? '<span class="pill t-red plain">Now</span>' : state === 'done' ? ic('check',14) : ''}</div>`; }).join('');
+  const agenda = today.map(([p, s, e], i) => { const k = g[0][i], [c, tch, , room] = ttSubj(gr, k, cls), st = mins(s), en = mins(e), state = NOW >= en ? 'done' : NOW >= st ? 'cur' : ''; return `<div class="ag ${state}"><i style="background:${c}"></i><span class="num" style="width:44px">${s}</span><span style="flex:1"><b>${esc(k)}</b><br><small class="muted">${esc(tch)} · ${esc(room)}</small></span>${state === 'cur' ? '<span class="pill t-red plain">Now</span>' : state === 'done' ? ic('check',14) : ''}</div>`; }).join('');
   const counts = {}; g.flat().forEach(k => counts[k] = (counts[k] || 0) + 1);
   const mx = Math.max(...subj.map(x => x.n), 1), slots = per * 5;
   const warn = planned > slots ? `<div class="tt2-hint warn">${ic('alert',16)}<span>Grade ${gr} plans ${planned} lessons a week but the ${esc(bell.name)} has ${slots} periods, so ${planned - slots} lesson${planned - slots > 1 ? 's don’t' : ' doesn’t'} fit.</span><button class="btn sm" data-act="ttSubjects">Edit subjects</button><button class="btn sm" data-act="ttBell">Edit bell times</button></div>` : '';
   return `${pageHead('Learning management system', 'Timetable', `${cls} · Week ${wk} · ${slots} periods · Term 1, 2026/27`, `<button class="btn" data-act="ttSubjects">${ic('book',16)}Subjects</button><button class="btn" data-act="ttBell">${ic('cal',16)}Bell times</button><button class="btn ${edit ? 'primary' : ''}" data-act="ttEdit">${ic(edit ? 'check' : 'grid',16)}${edit ? 'Done rearranging' : 'Rearrange'}</button><button class="btn" data-act="toast" data-msg="Timetable shared with ${cls} parents in the app">${ic('send',16)}Share with parents</button>`)}
   <div class="tt2-bar card"><select class="input inline" data-filter="ttGrade" aria-label="Grade" data-dd-ic="student" data-dd-q>${GRADE_BANDS.map(([band, from, to]) => `<optgroup label="${band}">${Array.from({length: to - from + 1}, (_, i) => from + i).map(x => `<option value="${x}" data-sub="${ttSecs(x).length} classes · ${gSubj(x).length} subjects · ${esc(gBell(x).name)}" ${gr === x ? 'selected' : ''}>Grade ${x}</option>`).join('')}</optgroup>`).join('')}</select><span class="sep" aria-hidden="true"></span><div class="chips" role="radiogroup" aria-label="Class">${ttSecs(gr).map(x => { const c = `Grade ${gr} – ${x}`; return `<button class="chip ${c === cls ? 'on' : ''}" role="radio" aria-checked="${c === cls}" data-act="ttClass" data-v="${c}">${x}</button>`; }).join('')}</div>
-    <button class="tt-bell" data-act="ttBell" title="Edit bell times">${ic('cal',14)}<b>${esc(bell.name)}</b><span>${bellSummary(bell)}</span></button><span style="flex:1"></span><div class="seg" role="radiogroup" aria-label="Week">${['A','B'].map(w => `<button class="${w === wk ? 'on P' : ''}" data-act="ttWeek" data-v="${w}">Week ${w}</button>`).join('')}</div></div>
+    ${(stBuild(), ST.ct[cls]) ? `<button class="tt-ct" data-act="openClass" data-c="${esc(cls)}">${avatar(ST.ct[cls],'xs')}<span><small>Class teacher</small><b>${esc(ST.ct[cls])}</b></span></button>` : `<button class="tt-ct" data-act="openClass" data-c="${esc(cls)}">${ic('plus',14)}<span>Set class teacher</span></button>`}<button class="tt-bell" data-act="ttBell" title="Edit bell times">${ic('cal',14)}<b>${esc(bell.name)}</b><span>${bellSummary(bell)}</span></button><span style="flex:1"></span><div class="seg" role="radiogroup" aria-label="Week">${['A','B'].map(w => `<button class="${w === wk ? 'on P' : ''}" data-act="ttWeek" data-v="${w}">Week ${w}</button>`).join('')}</div></div>
   ${warn}${edit ? `<div class="tt2-hint">${ic('grid',16)}Drag a lesson onto another to swap them. Teachers and parents are told when you finish.</div>` : ''}
   <div class="tt2-wrap"><div class="card tbl-wrap"><div class="tt2 ${edit ? 'edit' : ''}">${cells}</div></div>
     <aside class="tt2-side"><section class="card agenda"><div class="card-h"><h2>Today · Monday</h2><span class="muted num" style="font-size:12px">09:41</span></div>${agenda}</section>
@@ -1627,13 +1663,165 @@ V.timetable = () => {
         <div class="lr-foot">${planned} of ${slots} periods planned</div></section></aside></div>`;
 };
 function ttLessonDrawer(d, p) {
-  const cls = ttCls(), gr = gradeOfCls(cls), wk = S.ttWeek || 'A', g = ttGrid(cls, wk), k = g[d][p], [c, tch, icn, room] = ttSubj(gr, k), per = bellPeriods(gBell(gr)).filter(x => x[0] !== 'brk')[p], subKey = `${cls}${wk}-${d}-${p}`, sub = (S.ttSub || {})[subKey];
-  const free = [...new Set(Object.values(SUBJ_LIB).map(v => v[2]))].filter(n => n !== tch && n !== 'Library staff').slice(0, 4);
+  const cls = ttCls(), gr = gradeOfCls(cls), wk = S.ttWeek || 'A', g = ttGrid(cls, wk), k = g[d][p], [c, tch, icn, room] = ttSubj(gr, k, cls), per = bellPeriods(gBell(gr)).filter(x => x[0] !== 'brk')[p], subKey = `${cls}${wk}-${d}-${p}`, sub = (S.ttSub || {})[subKey];
+  stBuild(); const free = ST.teachers.filter(t => t.name !== tch && t.subjects.includes(k)).concat(ST.teachers.filter(t => t.name !== tch && !t.subjects.includes(k))).filter(t => teacherLoad(t.name).total < t.max).slice(0, 4).map(t => t.name);
   openDrawer(`<div class="ls-hero" style="--c:${c}"><div class="ad-top"><span class="ls-ic big">${ic(icn,22)}</span><div style="flex:1"><div class="eyebrow" style="color:rgba(255,255,255,.8)">${cls} · Week ${wk}</div><h2>${esc(k)}</h2><div style="opacity:.9">${TT_DAYS[d][0]} ${TT_DAYS[d][1]} · ${per[0]} · ${per[1]}–${per[2]}</div></div><button class="iconbtn" data-act="closeAll" aria-label="Close">${ic('x',16)}</button></div></div>
     <div class="drawer-b"><dl class="kv"><dt>Teacher</dt><dd>${esc(tch)}${sub ? ` <span class="pill t-amber plain">Covered by ${sub}</span>` : ''}</dd><dt>Room</dt><dd>${esc(room)}</dd><dt>This week</dt><dd>${g.flat().filter(x => x === k).length} ${esc(k)} lessons</dd><dt>Learners</dt><dd>32 students</dd></dl>
     <section class="ad-card"><h3>Find cover</h3><p class="muted small" style="margin:0 0 8px">Teachers with a free period at this time.</p>${free.map(n => `<div class="ad-g">${avatar(n,'sm')}<div style="flex:1"><b>${n}</b><div class="muted" style="font-size:12px">Free · ${Math.floor(Math.random() * 3) + 2} periods taught today</div></div><button class="btn sm" data-act="ttCover" data-k="${subKey}" data-v="${n}">Assign</button></div>`).join('')}</section></div>
     <div class="drawer-f"><button class="btn" data-act="toast" data-msg="Message sent to ${esc(tch)}">${ic('msg',16)}Message ${esc(tch.split(' ').slice(-1)[0])}</button><button class="btn primary" data-act="ttEditFrom">${ic('grid',16)}Rearrange the week</button></div>`, 'wide');
 }
+
+/* ---------- Teachers & classes: teaching assignments, class teachers, section heads ---------- */
+const MAX_LOAD = 30;
+const PRIMARY_CORE = ['English', 'Mathematics', 'Environmental studies', 'Sinhala', 'Religion'];
+const SUBJ_GROUP = {'Mathematics':['Mathematics','Combined Maths'], 'Combined Maths':['Combined Maths','Mathematics'], 'Science':['Science','Physics'], 'Physics':['Physics','Science'], 'Chemistry':['Chemistry','Science'], 'Biology':['Biology','Science'],
+  'History':['History','Geography'], 'Geography':['Geography','History'], 'Business studies':['Business studies','ICT']};
+const ST = {teachers: [], ta: {}, ct: {}, heads: {}, deputies: {}, built: false};
+const allClasses = () => Array.from({length:13}, (_, i) => i + 1).flatMap(g => ttSecs(g).map(x => `Grade ${g} – ${x}`));
+const bandOf = g => GRADE_BANDS.find(([, f, t]) => g >= f && g <= t)[0];
+function stBuild() {
+  if (ST.built) return; ST.built = true;
+  const F = ['Dilani','Sanduni','Tharushi','Kumari','Anusha','Chathurika','Ishara','Malsha','Hiruni','Nirosha','Shalini','Fathima','Priya','Nadeesha','Gayani','Ruvini'],
+    M = ['Kasun','Ruwan','Chaminda','Asela','Nuwan','Tharindu','Dinesh','Mahesh','Sampath','Rizwan','Arjun','Lahiru','Pradeep','Suresh'],
+    Ln = ['Perera','Fernando','Silva','Jayasinghe','Wijesinghe','Gunawardena','Herath','Bandara','Ratnayake','Dissanayake','Karunaratne','Abeysekera','Weerasinghe','Samarasinghe','Liyanage','Nanayakkara','Ekanayake','Amarasinghe','Rajan','Nadarajah','Mohamed','De Alwis','Mendis','Peiris','Jayawardena','Fonseka'];
+  const r = ukSeed('staffing'), used = new Set();
+  const mk = (subjects, primary) => { let n; do { const f = r() < .62; n = `${(f ? F : M)[Math.floor(r() * (f ? F : M).length)]} ${Ln[Math.floor(r() * Ln.length)]}`; } while (used.has(n)); used.add(n);
+    const t = {id: 't' + ST.teachers.length, name: n, subjects: [...new Set(subjects)], primary: !!primary, email: n.toLowerCase().replace(/ /g, '.') + '@cis.lk', max: MAX_LOAD}; ST.teachers.push(t); return t; };
+  const load = {}; const add = (t, cls, k, n) => { ST.ta[`${cls}|${k}`] = t.name; load[t.name] = (load[t.name] || 0) + n; };
+  allClasses().forEach(cls => { const g = gradeOfCls(cls);
+    gSubj(g).forEach(({k, n}) => {
+      if (k === 'Free study') return;
+      if (g <= 5 && PRIMARY_CORE.includes(k)) { let t = ST.teachers.find(x => x.primary && x._cls === cls); if (!t) { t = mk(PRIMARY_CORE, true); t._cls = cls; ST.ct[cls] = t.name; } add(t, cls, k, n); return; }
+      const fit = ST.teachers.filter(t => !t.primary && t.subjects.includes(k) && (load[t.name] || 0) + n <= MAX_LOAD - 2)
+        .sort((a, b2) => (Object.keys(ST.ta).some(x => x.startsWith(`Grade ${g} –`) && ST.ta[x] === b2.name) - Object.keys(ST.ta).some(x => x.startsWith(`Grade ${g} –`) && ST.ta[x] === a.name)) || (load[b2.name] || 0) - (load[a.name] || 0));
+      add(fit[0] || mk(SUBJ_GROUP[k] || [k]), cls, k, n);
+    });
+  });
+  // Class teachers for Grades 6–13: the teacher with most lessons in that class who is not already a class teacher
+  allClasses().filter(c => !ST.ct[c]).forEach(cls => { const per = {}; gSubj(gradeOfCls(cls)).forEach(({k, n}) => { const t = ST.ta[`${cls}|${k}`]; if (t) per[t] = (per[t] || 0) + n; });
+    const taken = new Set(Object.values(ST.ct)); const pick = Object.entries(per).filter(([t]) => !taken.has(t)).sort((a, b2) => b2[1] - a[1])[0]; if (pick) ST.ct[cls] = pick[0]; });
+  // Section heads and deputies: experienced teachers who teach mostly in that section and are not class teachers
+  const taken = new Set(Object.values(ST.ct)), lead = new Set();
+  const inBand = (t, f, to) => { const rows = teacherLoad(t.name).rows; return rows.length ? rows.filter(r => { const g = gradeOfCls(r.cls); return g >= f && g <= to; }).length / rows.length : 0; };
+  GRADE_BANDS.forEach(([band, f, to]) => {
+    const pool = ST.teachers.filter(t => !lead.has(t.name) && inBand(t, f, to) >= .6 && (band === 'Primary' ? t.primary : !taken.has(t.name))).sort((a, b2) => teacherLoad(b2.name).total - teacherLoad(a.name).total);
+    ST.heads[band] = pool[0] ? pool[0].name : ''; ST.deputies[band] = pool[1] ? pool[1].name : ''; pool.slice(0, 2).forEach(t => lead.add(t.name));
+  });
+}
+const taOf = (cls, k) => { stBuild(); return k === 'Free study' ? 'Library staff' : ST.ta[`${cls}|${k}`] || ''; };
+function teacherLoad(name) { stBuild(); const rows = []; allClasses().forEach(cls => gSubj(gradeOfCls(cls)).forEach(({k, n}) => { if (ST.ta[`${cls}|${k}`] === name) rows.push({cls, k, n}); })); return {rows, total: rows.reduce((a, x) => a + x.n, 0)}; }
+const ctOf = name => Object.keys(ST.ct).find(c => ST.ct[c] === name) || '';
+const headOf = name => Object.keys(ST.heads).find(b => ST.heads[b] === name) || '';
+const deputyOf = name => Object.keys(ST.deputies).find(b => ST.deputies[b] === name) || '';
+const unassigned = () => { stBuild(); const out = []; allClasses().forEach(cls => gSubj(gradeOfCls(cls)).forEach(({k, n}) => { if (k !== 'Free study' && !ST.ta[`${cls}|${k}`]) out.push({cls, k, n}); })); return out; };
+const loadBar = (n, max) => `<div class="wl ${n > max ? 'over' : n > max - 4 ? 'high' : ''}"><div class="bar"><i style="width:${Math.min(100, n / max * 100)}%"></i></div><span class="num">${n}/${max}</span></div>`;
+const roleChips = name => { const c = ctOf(name), h = headOf(name), d = deputyOf(name);
+  return `${h ? `<span class="pill t-amber plain">${ic('star',12)} Head · ${h}</span>` : ''}${d ? `<span class="pill t-violet plain">Deputy head · ${d}</span>` : ''}${c ? `<span class="pill t-blue plain">Class teacher · ${c.replace('Grade ', 'G')}</span>` : ''}`; };
+
+V.staffing = () => {
+  stBuild(); const t = curTab('stf', 'teachers'), un = unassigned();
+  const kp = `<div class="grid g-kpi">${kpi('crm','t-blue','Teachers', ST.teachers.length, `${ST.teachers.filter(x => x.primary).length} primary class teachers`)}${kpi('student','t-violet','Classes', allClasses().length, `${Object.keys(ST.ct).length} with a class teacher`)}
+    ${kpi('cal','t-green','Lessons a week', allClasses().reduce((a, c) => a + gSubj(gradeOfCls(c)).reduce((x, y) => x + y.n, 0), 0), 'Across all classes')}${kpi('alert', un.length ? 't-amber' : 't-green', 'Unassigned lessons', un.reduce((a, x) => a + x.n, 0), un.length ? `${un.length} class subjects need a teacher` : 'Every lesson has a teacher')}</div>`;
+  let body = '';
+  if (t === 'teachers') {
+    const q = (S.q || '').toLowerCase(), fs = S.filter.stfSubj || 'all', fb = S.filter.stfBand || 'all', fr = S.filter.stfRole || 'all';
+    const rows = ST.teachers.filter(x => (!q || x.name.toLowerCase().includes(q)) && (fs === 'all' || x.subjects.includes(fs)) && (fb === 'all' || teacherLoad(x.name).rows.some(r => bandOf(gradeOfCls(r.cls)) === fb))
+      && (fr === 'all' || (fr === 'ct' ? ctOf(x.name) : fr === 'head' ? headOf(x.name) || deputyOf(x.name) : fr === 'over' ? teacherLoad(x.name).total > x.max : !ctOf(x.name))));
+    const subjects = [...new Set(ST.teachers.flatMap(x => x.subjects))].sort();
+    body = `<div class="card"><div class="toolbar"><div class="searchbox">${ic('search',16)}<input class="input" id="stfSearch" placeholder="Search teachers" value="${esc(S.q || '')}"></div>
+      <select class="input inline" data-filter="stfSubj" aria-label="Subject" data-dd-ic="book" data-dd-q><option value="all">All subjects</option>${subjects.map(x => `<option value="${esc(x)}" data-n="${ST.teachers.filter(y => y.subjects.includes(x)).length}" ${fs === x ? 'selected' : ''}>${esc(x)}</option>`).join('')}</select>
+      <select class="input inline" data-filter="stfBand" aria-label="Section" data-dd-ic="grid"><option value="all">All sections</option>${GRADE_BANDS.map(([b]) => `<option ${fb === b ? 'selected' : ''}>${b}</option>`).join('')}</select>
+      <select class="input inline" data-filter="stfRole" aria-label="Role" data-dd-ic="star"><option value="all">All roles</option>${[['ct','Class teachers'],['head','Heads and deputies'],['none','Not a class teacher'],['over','Over the weekly limit']].map(([k, l]) => `<option value="${k}" ${fr === k ? 'selected' : ''}>${l}</option>`).join('')}</select>
+      <span class="muted" style="font-size:12.5px;margin-left:auto">${rows.length} of ${ST.teachers.length}</span></div>
+      <div class="tbl-wrap"><table><thead><tr><th>Teacher</th><th>Subjects</th><th>Teaches</th><th>Responsibilities</th><th style="width:150px">Periods a week</th></tr></thead><tbody>
+      ${rows.map(x => { const l = teacherLoad(x.name), grades = [...new Set(l.rows.map(r => gradeOfCls(r.cls)))].sort((a, b2) => a - b2);
+        return `<tr class="click" data-act="openTeacher" data-id="${x.id}"><td><div class="who">${avatar(x.name,'sm')}<div><b>${esc(x.name)}</b><small>${x.primary ? 'Primary class teacher' : 'Subject teacher'}</small></div></div></td>
+        <td><div class="chips">${x.subjects.map(k => `<span class="subj-tag" style="--c:${(SUBJ_LIB[k] || ['#64748B'])[0]}">${esc(k)}</span>`).join('')}</div></td>
+        <td class="muted" style="font-size:12.5px">${l.rows.length ? `${new Set(l.rows.map(r => r.cls)).size} class${new Set(l.rows.map(r => r.cls)).size > 1 ? 'es' : ''} · Grade ${grades.length > 2 ? grades[0] + '–' + grades[grades.length - 1] : grades.join(', ')}` : '<span class="pill t-amber plain">No lessons</span>'}</td>
+        <td><div class="chips">${roleChips(x.name) || '<span class="muted">—</span>'}</div></td><td>${loadBar(l.total, x.max)}</td></tr>`; }).join('') || `<tr><td colspan="5" class="muted" style="text-align:center;padding:30px">No teachers match.</td></tr>`}</tbody></table></div></div>`;
+  } else if (t === 'classes') {
+    body = GRADE_BANDS.map(([band, f, to]) => `<section class="card st-band"><div class="card-h"><div><h2>${band}</h2><div class="muted" style="font-size:12.5px">Grades ${f}–${to}</div></div>
+      <button class="st-head" data-act="openSection" data-b="${band}">${avatar(ST.heads[band],'sm')}<span><small>Head of section</small><b>${esc(ST.heads[band])}</b></span>${ic('chev',14)}</button></div>
+      <div class="st-classes">${allClasses().filter(c => { const g = gradeOfCls(c); return g >= f && g <= to; }).map(c => { const subj = gSubj(gradeOfCls(c)).filter(x => x.k !== 'Free study'), miss = subj.filter(x => !ST.ta[`${c}|${x.k}`]).length, ct = ST.ct[c];
+        return `<button class="st-class" data-act="openClass" data-c="${esc(c)}"><div class="st-cn"><b>${c.replace(' – ', ' ')}</b>${miss ? `<span class="pill t-amber plain">${miss} unassigned</span>` : `<span class="pill t-green plain">${subj.length} subjects</span>`}</div>
+          <div class="st-ct">${ct ? `${avatar(ct,'sm')}<span><small>Class teacher</small><b>${esc(ct)}</b></span>` : `<span class="st-none">${ic('plus',14)} Choose a class teacher</span>`}</div>
+          <div class="st-faces">${[...new Set(subj.map(x => ST.ta[`${c}|${x.k}`]).filter(Boolean))].slice(0, 6).map(n => avatar(n, 'xs')).join('')}<small class="muted">${new Set(subj.map(x => ST.ta[`${c}|${x.k}`]).filter(Boolean)).size} teachers</small></div></button>`; }).join('')}</div></section>`).join('');
+  } else {
+    body = `<div class="st-sections">${GRADE_BANDS.map(([band, f, to]) => { const cls = allClasses().filter(c => { const g = gradeOfCls(c); return g >= f && g <= to; }), tch = new Set(cls.flatMap(c => gSubj(gradeOfCls(c)).map(x => ST.ta[`${c}|${x.k}`]).filter(Boolean)));
+      return `<button class="card st-sec" data-act="openSection" data-b="${band}"><div class="st-sec-top"><span class="eyebrow">Grades ${f}–${to}</span><h3>${band}</h3></div>
+        <div class="st-person">${avatar(ST.heads[band])}<div><small>Head of section</small><b>${esc(ST.heads[band])}</b></div></div>
+        <div class="st-person sm">${avatar(ST.deputies[band] || '?','sm')}<div><small>Deputy head</small><b>${esc(ST.deputies[band] || 'Not set')}</b></div></div>
+        <div class="cur-meta"><span><b>${cls.length}</b> classes</span><span><b>${tch.size}</b> teachers</span><span><b>${cls.filter(c => ST.ct[c]).length}/${cls.length}</b> class teachers</span></div></button>`; }).join('')}
+      <div class="card st-sec principal"><div class="st-sec-top"><span class="eyebrow">Whole school</span><h3>Leadership</h3></div><div class="st-person">${avatar('Shanthi Wickramasinghe')}<div><small>Principal</small><b>Shanthi Wickramasinghe</b></div></div><p class="muted" style="font-size:12.5px;margin:0">Section heads report to the principal. Change the principal in Users & roles.</p></div></div>`;
+  }
+  return `${pageHead('Learning', 'Teachers & classes', 'Who teaches what, class teachers and section heads for 2026/27.', `<button class="btn" data-act="go" data-to="timetable">${ic('cal',16)}Timetable</button>`)}
+    ${kp}${tabs('stf', [['teachers', 'Teachers'], ['classes', 'Classes'], ['sections', 'Sections']])}${body}`;
+};
+
+/* Teacher drawer: subjects, lessons by class, class teacher, head of section */
+function teacherDrawer() {
+  const d = S.tDraft, t = ST.teachers.find(x => x.id === d.id), total = d.rows.reduce((a, r) => a + r.n, 0);
+  const g = +(d.addG || 10), gradeSubj = gSubj(g).filter(x => x.k !== 'Free study');
+  formDrawer(`${head(`Teacher · ${esc(t.name)}`, `${esc(t.email)} · ${t.primary ? 'Primary class teacher' : 'Subject teacher'}`)}
+    <div class="drawer-b" id="tchForm">
+      <div class="st-load ${total > d.max ? 'over' : ''}"><div><b>${total} of ${d.max} periods a week</b><span>${total > d.max ? `${total - d.max} over the limit` : `${d.max - total} free periods`}</span></div>${loadBar(total, d.max)}</div>
+      <div class="field"><label>Subjects ${esc(t.name.split(' ')[0])} can teach</label><div class="chips">${Object.keys(SUBJ_LIB).filter(k => k !== 'Free study').map(k => `<button type="button" class="chip ${d.subjects.has(k) ? 'on' : ''}" data-act="tSubj" data-k="${esc(k)}" aria-pressed="${d.subjects.has(k)}">${esc(k)}</button>`).join('')}</div></div>
+      <div class="field"><label>Lessons</label>
+        <div class="st-rows">${d.rows.map((r, i) => `<div class="st-row" style="--c:${(SUBJ_LIB[r.k] || ['#64748B'])[0]}"><i></i><b>${esc(r.cls)}</b><span>${esc(r.k)}</span><span class="num muted">${r.n}/wk</span>${r.from ? `<small class="pill t-violet plain">from ${esc(r.from)}</small>` : '<small></small>'}<button type="button" class="iconbtn" data-act="tRowRm" data-i="${i}" aria-label="Remove ${esc(r.k)} in ${esc(r.cls)}">${ic('x',14)}</button></div>`).join('') || '<div class="muted" style="padding:10px 0">No lessons yet.</div>'}</div>
+        <div class="st-add"><select class="input" id="tAddG" aria-label="Grade">${Array.from({length:13}, (_, i) => i + 1).map(x => `<option value="${x}" ${x === g ? 'selected' : ''}>Grade ${x}</option>`).join('')}</select>
+          <select class="input" id="tAddC" aria-label="Class">${ttSecs(g).map(x => `<option>Grade ${g} – ${x}</option>`).join('')}</select>
+          <select class="input" id="tAddK" aria-label="Subject">${gradeSubj.map(x => { const cur = ST.ta[`Grade ${g} – ${ttSecs(g)[0]}|${x.k}`]; return `<option value="${esc(x.k)}" ${d.subjects.has(x.k) ? '' : ''}>${esc(x.k)} · ${x.n}/wk${d.subjects.has(x.k) ? '' : ' (not in subjects)'}</option>`; }).join('')}</select>
+          <button type="button" class="btn" data-act="tRowAdd">${ic('plus',14)}Add</button></div>
+        <small class="muted">Adding a lesson takes it over from whoever teaches it now.</small></div>
+      <div class="form-grid">
+        <div class="field"><label for="tCt">Class teacher of</label><select class="input" id="tCt"><option value="">Not a class teacher</option>${allClasses().map(c => `<option value="${esc(c)}" ${d.ct === c ? 'selected' : ''}>${esc(c)}${ST.ct[c] && ST.ct[c] !== t.name ? ` · now ${esc(ST.ct[c])}` : ''}</option>`).join('')}</select></div>
+        <div class="field"><label for="tHead">Leadership</label><select class="input" id="tHead"><option value="">None</option>${GRADE_BANDS.map(([b]) => `<option value="H|${b}" ${d.head === 'H|' + b ? 'selected' : ''}>Head of ${b}${ST.heads[b] !== t.name ? ` · now ${esc(ST.heads[b])}` : ''}</option><option value="D|${b}" ${d.head === 'D|' + b ? 'selected' : ''}>Deputy head of ${b}${ST.deputies[b] && ST.deputies[b] !== t.name ? ` · now ${esc(ST.deputies[b])}` : ''}</option>`).join('')}</select></div>
+        <div class="field"><label for="tMax">Most periods a week</label><input class="input" id="tMax" type="number" min="4" max="40" value="${d.max}"></div>
+      </div>
+      <div id="tWarn">${tWarn()}</div>
+      <div class="err-msg" id="tErr"></div>
+    </div>
+    <div class="drawer-f"><button class="btn" data-act="toast" data-msg="Message sent to ${esc(t.name)}" style="margin-right:auto">${ic('msg',16)}Message</button><button class="btn" data-act="closeAll">Cancel</button><button class="btn primary" data-act="tSave">Save</button></div>`, 'wide');
+}
+function tSync() { const d = S.tDraft; if (!d) return; const v = id => { const e = document.getElementById(id); return e ? e.value : null; };
+  if (v('tCt') !== null) { d.ct = v('tCt'); d.head = v('tHead'); d.max = Math.max(4, parseInt(v('tMax'), 10) || MAX_LOAD); d.addG = v('tAddG'); } }
+function tWarn() { const d = S.tDraft, t = ST.teachers.find(x => x.id === d.id), out = [];
+  const off = [...new Set(d.rows.filter(r => !d.subjects.has(r.k)).map(r => r.k))]; if (off.length) out.push(`${off.join(', ')} ${off.length > 1 ? 'are' : 'is'} not in ${t.name.split(' ')[0]}’s subjects`);
+  if (d.ct && ST.ct[d.ct] && ST.ct[d.ct] !== t.name) out.push(`${ST.ct[d.ct]} stops being class teacher of ${d.ct}`);
+  if (d.ct && !d.rows.some(r => r.cls === d.ct)) out.push(`${t.name.split(' ')[0]} has no lessons with ${d.ct}`);
+  const [hk, hb] = (d.head || '').split('|'), cur = hk === 'H' ? ST.heads[hb] : hk === 'D' ? ST.deputies[hb] : ''; if (cur && cur !== t.name) out.push(`${cur} stops being ${hk === 'H' ? 'head' : 'deputy head'} of ${hb}`);
+  const gone = d.orig.filter(o => !d.rows.some(r => r.cls === o.cls && r.k === o.k)); if (gone.length) out.push(`${gone.length} lesson group${gone.length > 1 ? 's' : ''} will have no teacher`);
+  return out.length ? `<div class="tt2-hint warn">${ic('alert',16)}<span>${out.join('. ')}.</span></div>` : ''; }
+
+/* Class drawer: class teacher and a teacher for each subject */
+function classDrawer() {
+  const d = S.cDraft, g = gradeOfCls(d.cls), subj = gSubj(g).filter(x => x.k !== 'Free study');
+  const opts = (k, cur) => { const can = ST.teachers.filter(t => t.subjects.includes(k)), other = ST.teachers.filter(t => !t.subjects.includes(k));
+    const o = t => { const l = teacherLoad(t.name).total; return `<option value="${esc(t.name)}" ${t.name === cur ? 'selected' : ''}>${esc(t.name)} · ${l}/${t.max}${l > t.max ? ' ⚠' : ''}</option>`; };
+    return `<option value="">Unassigned</option><optgroup label="Teaches ${esc(k)}">${can.map(o).join('')}</optgroup><optgroup label="Other teachers">${other.map(o).join('')}</optgroup>`; };
+  const inClass = [...new Set(Object.values(d.ta).filter(Boolean))];
+  formDrawer(`${head(`Class · ${esc(d.cls)}`, `${bandOf(g)} · ${subj.length} subjects · ${esc(gBell(g).name)}`)}
+    <div class="drawer-b" id="clsForm">
+      <div class="field"><label for="cCt">Class teacher</label><select class="input" id="cCt"><option value="">No class teacher</option><optgroup label="Teaches this class">${inClass.map(n => `<option ${n === d.ct ? 'selected' : ''}>${esc(n)}</option>`).join('')}</optgroup><optgroup label="Other teachers">${ST.teachers.filter(t => !inClass.includes(t.name)).map(t => `<option ${t.name === d.ct ? 'selected' : ''}>${esc(t.name)}</option>`).join('')}</optgroup></select>
+        <small class="muted" id="cCtNote">${d.ct && ctOf(d.ct) && ctOf(d.ct) !== d.cls ? `${esc(d.ct)} is class teacher of ${esc(ctOf(d.ct))} now and will move to this class.` : 'Takes registration, writes reports and is the parents’ first contact.'}</small></div>
+      <div class="field"><label>Subject teachers</label><div class="st-rows">${subj.map(x => `<div class="st-row cls" style="--c:${(SUBJ_LIB[x.k] || ['#64748B'])[0]}"><i></i><b>${esc(x.k)}</b><span class="num muted">${x.n}/wk</span><select class="input" data-ct="${esc(x.k)}" aria-label="${esc(x.k)} teacher">${opts(x.k, d.ta[x.k])}</select></div>`).join('')}</div></div>
+      <p class="muted small" style="margin:0">Changes show in the timetable straight away. Teachers and parents of ${esc(d.cls)} are told when you save.</p>
+      <div class="err-msg" id="cErr"></div>
+    </div>
+    <div class="drawer-f"><button class="btn" data-act="go" data-to="timetable" style="margin-right:auto">${ic('cal',16)}Timetable</button><button class="btn" data-act="closeAll">Cancel</button><button class="btn primary" data-act="cSave">Save class</button></div>`, 'wide');
+}
+/* Section drawer: head and deputy */
+function sectionDrawer(b) {
+  const [, f, to] = GRADE_BANDS.find(x => x[0] === b), pool = ST.teachers.filter(t => teacherLoad(t.name).rows.some(r => { const g = gradeOfCls(r.cls); return g >= f && g <= to; })), rest = ST.teachers.filter(t => !pool.includes(t));
+  const sel = (id, cur) => `<select class="input" id="${id}"><option value="">Not set</option><optgroup label="Teaches in ${b}">${pool.map(t => `<option ${t.name === cur ? 'selected' : ''}>${esc(t.name)}</option>`).join('')}</optgroup><optgroup label="Other teachers">${rest.map(t => `<option ${t.name === cur ? 'selected' : ''}>${esc(t.name)}</option>`).join('')}</optgroup></select>`;
+  formDrawer(`${head(`Section · ${b}`, `Grades ${f}–${to} · ${pool.length} teachers`)}
+    <div class="drawer-b"><input type="hidden" id="secB" value="${b}">
+      <div class="form-grid"><div class="field"><label for="secHead">Head of section</label>${sel('secHead', ST.heads[b])}</div><div class="field"><label for="secDep">Deputy head</label>${sel('secDep', ST.deputies[b])}</div></div>
+      <p class="muted small" style="margin:0">The head approves reports and leave for the section and sees every class in it. A teacher can lead one section only.</p>
+      <div class="err-msg" id="secErr"></div></div>
+    <div class="drawer-f"><button class="btn" data-act="closeAll">Cancel</button><button class="btn primary" data-act="secSave">Save section</button></div>`);
+}
+document.addEventListener('change', e => { if (e.target.closest && e.target.closest('#tchForm')) { tSync(); if (e.target.id === 'tAddG') keepScroll(teacherDrawer); else { const w = document.getElementById('tWarn'); if (w) w.innerHTML = tWarn(); } } });
 
 /* ---------- Subjects per grade (drawer) ---------- */
 const keepScroll = fn => { const b0 = drawer.querySelector('.drawer-b'), y = b0 ? b0.scrollTop : 0; S.noFocus = true; fn(); S.noFocus = false; const b1 = drawer.querySelector('.drawer-b'); if (b1) b1.scrollTop = y; };
@@ -1651,10 +1839,10 @@ function subjDrawer() {
   formDrawer(`${head(`Subjects · Grade ${d.g}`, `${esc(b.name)} · ${per} lessons a day · ${per * 5} periods a week`)}
     <div class="drawer-b" id="subjForm">
       ${sjMeter()}
-      <div class="sj-list"><div class="sj-h"><span></span><span>Subject</span><span>Lessons a week</span><span>Teacher</span><span>Room</span><span></span></div>
+      <div class="sj-list"><div class="sj-h"><span></span><span>Subject</span><span>Lessons a week</span><span>Teachers by class</span><span>Room</span><span></span></div>
       ${d.rows.map((r, i) => { const [c, icn] = SUBJ_LIB[r.k] || ['#64748B','book']; return `<div class="sj-row" style="--c:${c}"><span class="ls-ic">${ic(icn,13)}</span><b>${esc(r.k)}</b>
         <div class="stepper"><button type="button" data-act="sjN" data-i="${i}" data-d="-1" aria-label="Fewer ${esc(r.k)} lessons">−</button><input class="input num" type="number" min="0" max="20" data-sr="${i}|n" value="${r.n}" aria-label="${esc(r.k)} lessons a week"><button type="button" data-act="sjN" data-i="${i}" data-d="1" aria-label="More ${esc(r.k)} lessons">+</button></div>
-        <input class="input" data-sr="${i}|t" value="${esc(r.t)}" list="sjTeachers" aria-label="${esc(r.k)} teacher"><input class="input" data-sr="${i}|r" value="${esc(r.r)}" aria-label="${esc(r.k)} room">
+        <span class="sj-tch">${r.k === 'Free study' ? 'Library staff' : (stBuild(), ttSecs(d.g).map(x => { const n = ST.ta[`Grade ${d.g} – ${x}|${r.k}`]; return `<span title="${esc(x)}">${n ? esc(n) : '<em>Unassigned</em>'}</span>`; }).join(''))}</span><input class="input" data-sr="${i}|r" value="${esc(r.r)}" aria-label="${esc(r.k)} room">
         <button type="button" class="iconbtn" data-act="sjRm" data-i="${i}" aria-label="Remove ${esc(r.k)}">${ic('x',14)}</button></div>`; }).join('') || '<div class="muted" style="padding:14px">No subjects yet. Add one below.</div>'}
       <datalist id="sjTeachers">${teachers.map(t => `<option>${esc(t)}</option>`).join('')}</datalist></div>
       <div class="sj-add"><input class="input" id="sjNew" list="sjLib" placeholder="Add a subject, e.g. Geography or a new one"><datalist id="sjLib">${lib.map(k => `<option>${esc(k)}</option>`).join('')}</datalist><button type="button" class="btn" data-act="sjAdd">${ic('plus',14)}Add subject</button></div>
@@ -1662,7 +1850,7 @@ function subjDrawer() {
         <div class="field"><label for="sjCopy">Start from another grade</label><div style="display:flex;gap:8px"><select class="input" id="sjCopy">${Array.from({length:13}, (_, i) => i + 1).filter(x => x !== d.g).map(x => `<option value="${x}">Grade ${x} · ${gSubj(x).length} subjects</option>`).join('')}</select><button type="button" class="btn" data-act="sjCopy">Copy</button></div></div>
         <div class="field"><label>Also use for</label><div class="chips">${peers.map(x => `<button type="button" class="chip ${d.also.has(x) ? 'on' : ''}" data-act="sjAlso" data-g="${x}" aria-pressed="${d.also.has(x)}">Grade ${x}</button>`).join('')}</div></div>
       </div>
-      <p class="muted small" style="margin:0">Saving rebuilds the timetables of ${ttSecs(d.g).length} classes in Grade ${d.g}${d.also.size ? ` and ${d.also.size} other grade${d.also.size > 1 ? 's' : ''}` : ''}. Lessons you moved by hand and cover teachers are reset.</p>
+      <p class="muted small" style="margin:0">Teachers are set per class in <a href="#staffing" data-act="go" data-to="staffing">Teachers & classes</a>. Saving rebuilds the timetables of ${ttSecs(d.g).length} classes in Grade ${d.g}${d.also.size ? ` and ${d.also.size} other grade${d.also.size > 1 ? 's' : ''}` : ''}. Lessons you moved by hand and cover teachers are reset.</p>
       <div class="err-msg" id="sjErr"></div>
     </div>
     <div class="drawer-f"><button class="btn" data-act="closeAll">Cancel</button><button class="btn primary" data-act="sjSave">Save subjects</button></div>`, 'wide');
@@ -1795,7 +1983,7 @@ document.addEventListener('scroll', e => { if (DD.pop && !DD.pop.contains(e.targ
 function afterRender() {
   ddClose(); ddEnhance();
   if (S.route === 'timetable') ttBindDrag();
-  bindSearch('appSearch'); bindSearch('stuSearch'); bindSearch('usrSearch');
+  bindSearch('appSearch'); bindSearch('stfSearch'); bindSearch('stuSearch'); bindSearch('usrSearch');
   if (S.route === 'lms' && curTab('lms','courses') === 'gradebook') recalcGB();
   if (S.route.startsWith('admissions')) bindKanban();
   const m = document.getElementById('msgs'); if (m) m.scrollTop = m.scrollHeight;
@@ -1835,7 +2023,7 @@ function moveApp(id, stage) {
 /* ---------- Overlays ---------- */
 const scrim = document.getElementById('scrim'), drawer = document.getElementById('drawer'), modal = document.getElementById('drawer');
 function openDrawer(html, cls = '') { drawer.className = 'drawer ' + cls; drawer.innerHTML = html; drawer.classList.add('on'); scrim.classList.add('on'); drawer.setAttribute('aria-hidden','false'); }
-const FORM_META = [['Subjects','book','Timetable'],['Bell schedule','cal','Timetable'],['New bell schedule','cal','Timetable'],['New application','admit','Admissions'],['Record payment','fee','Fees & invoicing'],['New journal entry','fin','Accounting'],['Add lead','crm','CRM & leads'],['New broadcast','send','Communications'],['Generate invoices','file','Fees & invoicing'],['Invite staff','crm','Users & roles'],['INV-','fee','Invoice'],['Interested in Grade','crm','Lead']];
+const FORM_META = [['Teacher','crm','Teachers & classes'],['Class ·','student','Teachers & classes'],['Section','grid','Teachers & classes'],['Subjects','book','Timetable'],['Bell schedule','cal','Timetable'],['New bell schedule','cal','Timetable'],['New application','admit','Admissions'],['Record payment','fee','Fees & invoicing'],['New journal entry','fin','Accounting'],['Add lead','crm','CRM & leads'],['New broadcast','send','Communications'],['Generate invoices','file','Fees & invoicing'],['Invite staff','crm','Users & roles'],['INV-','fee','Invoice'],['Interested in Grade','crm','Lead']];
 /* Form drawers: look up an icon and section label from the form's title */
 function formDrawer(html, cls = '') {
   openDrawer(html, 'form ' + cls);
@@ -1941,6 +2129,38 @@ const ACT = {
   appRec: el => { const a = apps.find(x => x.id === el.dataset.id); a.x.rec = el.dataset.v; appDrawer(a.id); toast({offer:'Recommended: offer a place', wait:'Recommended: waitlist', decline:'Recommended: decline'}[el.dataset.v]); },
   appOffer: el => { const a = apps.find(x => x.id === el.dataset.id); if (a.stage !== 'offer') moveApp(a.id, 'offer'); appDrawer(a.id); toast(`Offer letter sent to ${a.parent} by email and the parent app`); },
   appDecline: el => { const a = apps.find(x => x.id === el.dataset.id); if (!el.dataset.sure) { el.dataset.sure = 1; el.textContent = 'Click again to decline'; return; } apps.splice(apps.indexOf(a), 1); closeAll(); route(); toast(`${a.name}’s application declined. The family has been told.`); },
+  openTeacher: el => { stBuild(); const t = ST.teachers.find(x => x.id === el.dataset.id), l = teacherLoad(t.name), h = headOf(t.name), dp = deputyOf(t.name);
+    S.tDraft = {id: t.id, subjects: new Set(t.subjects), rows: l.rows.map(r => ({...r})), orig: l.rows.map(r => ({...r})), ct: ctOf(t.name), head: h ? 'H|' + h : dp ? 'D|' + dp : '', max: t.max, addG: l.rows.length ? gradeOfCls(l.rows[0].cls) : 10}; teacherDrawer(); },
+  tSubj: el => { tSync(); const s0 = S.tDraft.subjects, k = el.dataset.k; s0.has(k) ? s0.delete(k) : s0.add(k); keepScroll(teacherDrawer); },
+  tRowRm: el => { tSync(); S.tDraft.rows.splice(+el.dataset.i, 1); keepScroll(teacherDrawer); },
+  tRowAdd: () => { tSync(); const d = S.tDraft, cls = document.getElementById('tAddC').value, k = document.getElementById('tAddK').value, t = ST.teachers.find(x => x.id === d.id), err = document.getElementById('tErr');
+    if (!k) { err.textContent = 'Pick a subject.'; return; }
+    if (d.rows.some(r => r.cls === cls && r.k === k)) { err.textContent = `${t.name.split(' ')[0]} already teaches ${k} to ${cls}.`; return; }
+    const n = (gSubj(gradeOfCls(cls)).find(x => x.k === k) || {n: 0}).n, cur = ST.ta[`${cls}|${k}`];
+    d.rows.push({cls, k, n, from: cur && cur !== t.name ? cur : ''}); d.subjects.add(k); keepScroll(teacherDrawer); },
+  tSave: () => { tSync(); const d = S.tDraft, t = ST.teachers.find(x => x.id === d.id), err = document.getElementById('tErr');
+    if (!d.subjects.size) { err.textContent = 'Choose at least one subject.'; return; }
+    d.orig.filter(o => !d.rows.some(r => r.cls === o.cls && r.k === o.k)).forEach(o => { if (ST.ta[`${o.cls}|${o.k}`] === t.name) delete ST.ta[`${o.cls}|${o.k}`]; });
+    d.rows.forEach(r => ST.ta[`${r.cls}|${r.k}`] = t.name);
+    t.subjects = [...d.subjects]; t.max = d.max;
+    Object.keys(ST.ct).forEach(c => { if (ST.ct[c] === t.name) delete ST.ct[c]; }); if (d.ct) ST.ct[d.ct] = t.name;
+    Object.keys(ST.heads).forEach(b => { if (ST.heads[b] === t.name) ST.heads[b] = ''; }); Object.keys(ST.deputies).forEach(b => { if (ST.deputies[b] === t.name) ST.deputies[b] = ''; });
+    const [hk, hb] = (d.head || '').split('|'); if (hk === 'H') { ST.heads[hb] = t.name; if (ST.deputies[hb] === t.name) ST.deputies[hb] = ''; } if (hk === 'D') ST.deputies[hb] = t.name;
+    const total = d.rows.reduce((a, r) => a + r.n, 0);
+    closeAll(); route(); toast(`Saved ${t.name}${total > d.max ? ` · ${total - d.max} periods over the limit` : ''}`); },
+  openClass: el => { stBuild(); const cls = el.dataset.c, ta = {}; gSubj(gradeOfCls(cls)).forEach(({k}) => { if (k !== 'Free study') ta[k] = ST.ta[`${cls}|${k}`] || ''; }); S.cDraft = {cls, ct: ST.ct[cls] || '', ta}; classDrawer(); },
+  cSave: () => { const d = S.cDraft; d.ct = document.getElementById('cCt').value; drawer.querySelectorAll('[data-ct]').forEach(sel => d.ta[sel.dataset.ct] = sel.value);
+    Object.entries(d.ta).forEach(([k, n]) => { if (n) { ST.ta[`${d.cls}|${k}`] = n; const t = ST.teachers.find(x => x.name === n); if (t && !t.subjects.includes(k)) t.subjects.push(k); } else delete ST.ta[`${d.cls}|${k}`]; });
+    const prev = ctOf(d.ct); if (prev && prev !== d.cls) delete ST.ct[prev]; if (d.ct) ST.ct[d.cls] = d.ct; else delete ST.ct[d.cls];
+    const miss = Object.values(d.ta).filter(x => !x).length;
+    closeAll(); route(); toast(`Saved ${d.cls}${miss ? ` · ${miss} subject${miss > 1 ? 's' : ''} still need a teacher` : ''}`); },
+  openSection: el => { stBuild(); sectionDrawer(el.dataset.b); },
+  secSave: () => { const b = document.getElementById('secB').value, h = document.getElementById('secHead').value, dp = document.getElementById('secDep').value, err = document.getElementById('secErr');
+    if (!h) { err.textContent = 'Choose a head for this section.'; return; }
+    if (h === dp) { err.textContent = 'The head and deputy must be different people.'; return; }
+    const clash = Object.keys(ST.heads).find(x => x !== b && (ST.heads[x] === h || ST.deputies[x] === h)) || (dp && Object.keys(ST.heads).find(x => x !== b && (ST.heads[x] === dp || ST.deputies[x] === dp)));
+    if (clash) { err.textContent = `${ST.heads[clash] === h || ST.deputies[clash] === h ? h : dp} already leads ${clash}. Change that section first.`; return; }
+    ST.heads[b] = h; ST.deputies[b] = dp; closeAll(); route(); toast(`${h} is head of ${b}`); },
   ttSubjects: () => { const g = ttGradeOf(); S.subDraft = {g, rows: gSubj(g).map(r => ({...r})), also: new Set()}; subjDrawer(); },
   sjN: el => { subjSync(); const r = S.subDraft.rows[+el.dataset.i]; r.n = Math.max(0, Math.min(20, r.n + +el.dataset.d)); keepScroll(subjDrawer); },
   sjRm: el => { subjSync(); S.subDraft.rows.splice(+el.dataset.i, 1); keepScroll(subjDrawer); },
