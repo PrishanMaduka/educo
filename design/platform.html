@@ -7,7 +7,7 @@
 <link rel="icon" href="brand/quad-app-icon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap">
 <style>
 
 /* Layout: Classe365-style shell. Fixed navy module rail on the left, white top bar, cool-grey canvas with card grid. */
@@ -339,9 +339,9 @@ td.r,th.r{text-align:right}
 .health{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600}
 .health i{width:8px;height:8px;border-radius:50%}
 .meter{display:flex;flex-direction:column;gap:6px}
-.meter .top{display:flex;justify-content:space-between;font-size:12.5px}
-.meter .top b{font-variant-numeric:tabular-nums}
-.meter .top span{white-space:nowrap}
+.meter .mt{display:flex;justify-content:space-between;font-size:12.5px}
+.meter .mt b{font-variant-numeric:tabular-nums}
+.meter .mt span{white-space:nowrap}
 .nav a span{overflow:hidden;text-overflow:ellipsis}
 .bulkbar{display:flex;align-items:center;gap:10px;padding:10px 18px;background:var(--brand-soft);border-bottom:1px solid var(--line);flex-wrap:wrap}
 .bulkbar b{color:var(--brand)}
@@ -455,6 +455,182 @@ td.r,th.r{text-align:right}
 .perm input{width:18px;height:18px;accent-color:var(--brand)}
 @media (max-width:1100px){.uk-role{grid-template-columns:minmax(0,1fr)}.uk-aside{position:static}}
 @media (max-width:700px){.uk-scope{grid-template-columns:1fr}}
+
+/* ================= Console theme: "Night" by default, "Day" on request =================
+   Layout: floating glass rail on a deep ink canvas lit by two soft glows; serif display type for titles and figures. */
+:root:not([data-theme="light"]){
+  --canvas:#060A14; --surface:#0D1322; --surface-2:#111A2D; --line:#1B2438; --line-strong:#2A3550;
+  --ink:#EEF2FA; --ink-2:#A9B4CC; --ink-3:#6E7A95;
+  --brand:#6E9BFF; --brand-ink:#06101F; --brand-soft:#15213F; --brand-strong:#9DBBFF;
+  --good:#46D49B; --good-soft:#0F2A22; --warn:#F2B661; --warn-soft:#2E2312; --bad:#FF7B6E; --bad-soft:#331815; --info:#B3A4FF; --info-soft:#221C42;
+  --c1:#4F86F7; --c2:#1BA898; --c3:#B57A26; --c4:#9575F0;
+  --glass:rgba(255,255,255,.035); --glass-2:rgba(255,255,255,.06); --hair:rgba(255,255,255,.07);
+  --glow-a:rgba(27,168,152,.20); --glow-b:rgba(79,134,247,.18);
+  --shadow:0 1px 0 rgba(255,255,255,.04) inset,0 20px 40px -24px rgba(0,0,0,.6); --shadow-lg:0 30px 80px -20px rgba(0,0,0,.7);
+  color-scheme:dark;
+}
+:root[data-theme="light"]{
+  --canvas:#F3F5FA; --surface:#FFFFFF; --surface-2:#F7F9FC; --line:#E5E9F1; --line-strong:#CDD4E1;
+  --ink:#0E1526; --ink-2:#465169; --ink-3:#7A859C;
+  --brand:#2F6FED; --brand-ink:#FFFFFF; --brand-soft:#E9F0FE; --brand-strong:#1F55C7;
+  --good:#138A5B; --good-soft:#E3F5EC; --warn:#B26A00; --warn-soft:#FFF2DC; --bad:#C83A2E; --bad-soft:#FDE8E5; --info:#5B4BC4; --info-soft:#EEEBFC;
+  --c1:#2F6FED; --c2:#12A594; --c3:#E8A33D; --c4:#8B5CF6;
+  --glass:rgba(255,255,255,.72); --glass-2:#FFFFFF; --hair:rgba(14,21,38,.07);
+  --glow-a:rgba(18,165,148,.10); --glow-b:rgba(47,111,237,.10);
+  --shadow:0 1px 2px rgba(14,21,38,.04),0 12px 32px -16px rgba(14,21,38,.14); --shadow-lg:0 30px 70px -20px rgba(14,21,38,.3);
+  color-scheme:light;
+}
+:root{--f-serif:"Instrument Serif","Iowan Old Style","Palatino Linotype",Georgia,serif;--grad:linear-gradient(135deg,#2EC4B0 0%,#4F86F7 100%)}
+body{background:radial-gradient(900px 500px at 12% -10%,var(--glow-a),transparent 60%),radial-gradient(800px 500px at 95% 0%,var(--glow-b),transparent 60%),var(--canvas);background-attachment:fixed}
+
+/* Rail */
+.app{grid-template-columns:284px 1fr}
+.rail{margin:12px 0 12px 12px;height:calc(100vh - 24px);top:12px;border-radius:22px;background:linear-gradient(180deg,#0C1426 0%,#070C18 100%);border:1px solid rgba(255,255,255,.06);box-shadow:0 30px 60px -30px rgba(0,0,0,.6)}
+.brand{padding:20px 20px 16px}
+.brand b{font:400 24px/1 var(--f-serif);letter-spacing:.01em}
+.op-badge{background:none;border:1px solid rgba(46,196,176,.5);color:#5EE0CC;font-size:9px;padding:2px 6px;letter-spacing:.14em}
+.nav-label{font-size:10px;letter-spacing:.16em;color:#5B6783}
+.nav a{border-radius:12px;padding:10px 12px;color:#B9C3D9;font-size:13.5px}
+.nav a:hover{background:rgba(255,255,255,.04);color:#fff}
+.nav a.on{background:linear-gradient(135deg,rgba(46,196,176,.18),rgba(79,134,247,.18));color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
+.nav a.on svg{color:#5EE0CC}
+.nav .count{background:rgba(255,255,255,.07);font-variant-numeric:tabular-nums}
+.rail-foot{border-top:1px solid rgba(255,255,255,.06);margin:0 10px;padding:14px 8px}
+
+/* Top bar */
+.top{background:color-mix(in srgb,var(--canvas) 72%,transparent);backdrop-filter:blur(16px) saturate(140%);-webkit-backdrop-filter:blur(16px) saturate(140%);border-bottom:1px solid var(--hair);padding:12px 32px}
+.iconbtn,.search,.yearpick{background:var(--glass);border-color:var(--hair);border-radius:12px}
+.search{max-width:520px;border-radius:999px;padding:0 16px}
+kbd{background:transparent;border-color:var(--line-strong)}
+.sys-pill{background:transparent!important;border:1px solid color-mix(in srgb,var(--good) 40%,transparent);color:var(--good)!important;padding:0 12px}
+.sys-pill::before{animation:sysPulse 2s infinite}
+@keyframes sysPulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--good) 60%,transparent)}100%{box-shadow:0 0 0 7px transparent}}
+
+/* Content & type */
+.content{padding:32px 36px 48px;gap:24px;max-width:1520px}
+h1{font:400 44px/1.05 var(--f-serif);letter-spacing:-.01em}
+.page-head h1{font-size:46px}
+.crumbs,.eyebrow{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3);font-weight:700}
+h2{font:600 15px/1.3 var(--f-body);letter-spacing:0}
+.muted{color:var(--ink-3)}
+
+/* Surfaces */
+.card{background:linear-gradient(180deg,var(--glass-2),var(--glass));border:1px solid var(--hair);border-radius:20px;box-shadow:var(--shadow);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.card-h{border-bottom:1px solid var(--hair);padding:18px 22px}
+.card-b{padding:20px 22px}
+.drawer,.modal,.cmdk,.uk-res,.notif{background:var(--surface);border:1px solid var(--hair)}
+.modal{border-radius:22px}
+.scrim{background:rgba(3,6,14,.6);backdrop-filter:blur(4px)}
+
+/* Controls */
+.btn{border-radius:12px;height:38px;padding:0 16px;background:var(--glass);border-color:var(--hair);color:var(--ink);transition:transform .15s,box-shadow .2s,background .2s}
+.btn:hover{background:var(--glass-2)}
+.btn:active{transform:translateY(1px)}
+.btn.primary{background:var(--grad);border:0;color:#fff;box-shadow:0 10px 24px -10px rgba(79,134,247,.8)}
+.btn.primary:hover{background:var(--grad);box-shadow:0 14px 30px -10px rgba(46,196,176,.8);transform:translateY(-1px)}
+.btn.sm{height:32px;border-radius:10px}
+.btn.ghost{background:transparent;border-color:transparent}
+.input,select.input,textarea.input{background:var(--surface-2);border-color:var(--line);border-radius:10px}
+.chip{background:transparent;border-color:var(--line-strong);color:var(--ink-2);border-radius:999px}
+.chip.on{background:var(--ink);color:var(--canvas);border-color:var(--ink)}
+.pill{font-weight:600;letter-spacing:.01em;padding:3px 10px;background:transparent!important;border:1px solid color-mix(in srgb,currentColor 35%,transparent)}
+.tabs{border-bottom:1px solid var(--hair);gap:6px;padding:0 10px}
+.tabs button{padding:14px 12px;font-weight:600}
+.tabs button.on{color:var(--ink);border-color:transparent;position:relative}
+.tabs button.on::after{content:"";position:absolute;left:12px;right:12px;bottom:-1px;height:2px;border-radius:2px;background:var(--grad)}
+.toolbar{border-bottom:1px solid var(--hair);padding:14px 22px}
+th{background:transparent;color:var(--ink-3);font-size:10.5px;letter-spacing:.14em;border-bottom:1px solid var(--hair);padding:12px 18px}
+td{border-bottom:1px solid var(--hair);padding:14px 18px}
+tr.click:hover td{background:color-mix(in srgb,var(--brand) 6%,transparent)}
+.bar{background:color-mix(in srgb,var(--ink) 9%,transparent);height:5px}
+.bar i{background:var(--grad)!important}
+.code{background:transparent;border-color:var(--hair);color:var(--ink-3)}
+.tenant-logo{border-radius:12px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.15)}
+.li{border-bottom:1px solid var(--hair);padding:14px 22px}
+.dot-ic{border-radius:10px}
+.inv{background:var(--surface-2);border-color:var(--hair);border-radius:14px}
+.status-row{border-bottom:1px solid var(--hair);padding:12px 22px}
+.setting,.uk-set{border-bottom:1px solid var(--hair)}
+.savebar,.uk-bar{background:var(--surface);color:var(--ink);border:1px solid var(--line-strong);box-shadow:var(--shadow-lg)}
+.toast{background:var(--surface);color:var(--ink);border:1px solid var(--line-strong);border-radius:14px}
+#tip{background:var(--surface);color:var(--ink);border:1px solid var(--line-strong)}
+
+/* KPI tiles */
+.kpi{display:flex;flex-direction:column;align-items:stretch;gap:6px;padding:20px 22px 0;overflow:hidden;position:relative}
+.kpi .kl{display:flex;align-items:center;justify-content:space-between;color:var(--ink-3);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;font-weight:700}
+.kpi .kl svg{opacity:.6}
+.kpi .v{font:400 40px/1 var(--f-serif);letter-spacing:-.01em;margin-top:4px;font-variant-numeric:tabular-nums}
+.kpi .d{font-size:12.5px;color:var(--ink-3);padding-bottom:18px}
+.kpi .spark{display:block;margin:0 -22px;width:calc(100% + 44px);height:46px}
+.kpi.has-spark .d{padding-bottom:6px}
+
+/* Overview hero */
+.hero{display:flex;align-items:flex-end;gap:24px;flex-wrap:wrap;padding:8px 0 4px}
+.hero .grow{flex:1;min-width:280px}
+.hero h1{font-size:clamp(40px,5vw,64px);line-height:1}
+.hero h1 em{font-style:italic;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;padding-right:.08em}
+.hero p{margin:14px 0 0;color:var(--ink-2);font-size:16px;max-width:62ch}
+.hero p b{color:var(--ink);font-weight:600}
+.range{display:inline-flex;border:1px solid var(--hair);border-radius:999px;padding:3px;gap:2px}
+.range button{border:0;background:none;color:var(--ink-3);font-weight:600;font-size:12px;padding:5px 12px;border-radius:999px}
+.range button.on{background:var(--glass-2);color:var(--ink);box-shadow:inset 0 0 0 1px var(--hair)}
+.big-fig{font:400 34px/1 var(--f-serif)}
+.chart .grid-l{stroke:var(--hair)}
+.draw{stroke-dasharray:var(--len,2000);stroke-dashoffset:var(--len,2000);animation:draw 1.4s cubic-bezier(.3,.7,.2,1) .15s forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+.fade-in{opacity:0;animation:fadeIn .9s ease .5s forwards}
+@keyframes fadeIn{to{opacity:1}}
+.donut-wrap{display:flex;gap:22px;align-items:center;flex-wrap:wrap}
+.donut-wrap svg{flex:none}
+.legend-list{display:flex;flex-direction:column;gap:12px;flex:1;min-width:150px}
+.legend-list div{display:flex;align-items:center;gap:10px;font-size:13px}
+.legend-list i{width:10px;height:10px;border-radius:3px;flex:none}
+.legend-list span{flex:1}
+.legend-list b{font-variant-numeric:tabular-nums}
+.country{display:grid;grid-template-columns:1fr auto;gap:6px 12px;align-items:center;padding:12px 22px;border-bottom:1px solid var(--hair);font-size:13.5px}
+.country:last-child{border-bottom:0}
+.country .bar{grid-column:1/-1}
+.sev{width:8px;height:8px;border-radius:50%;flex:none;margin-top:6px}
+
+/* Reveal on route change */
+.content>*{animation:rise .55s cubic-bezier(.2,.8,.2,1) both}
+.content>*:nth-child(2){animation-delay:.05s}.content>*:nth-child(3){animation-delay:.1s}.content>*:nth-child(4){animation-delay:.15s}.content>*:nth-child(5){animation-delay:.2s}.content>*:nth-child(n+6){animation-delay:.25s}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}}
+
+/* School gallery */
+.tgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:18px;padding:22px}
+.tcard{border:1px solid var(--hair);border-radius:18px;overflow:hidden;background:var(--surface-2);cursor:pointer;transition:transform .2s,box-shadow .2s,border-color .2s;display:flex;flex-direction:column}
+.tcard:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg);border-color:color-mix(in srgb,var(--tc) 50%,transparent)}
+.tcard:focus-visible{outline:2px solid var(--brand);outline-offset:3px}
+.tcard .cv{height:78px;background:radial-gradient(120% 140% at 0% 0%,color-mix(in srgb,var(--tc) 85%,#fff 0%),transparent 70%),linear-gradient(135deg,color-mix(in srgb,var(--tc) 70%,#000),color-mix(in srgb,var(--tc) 35%,#060A14));position:relative}
+.tcard .cv .pill{position:absolute;right:12px;top:12px;color:#fff;border-color:rgba(255,255,255,.35)}
+.tcard .tb{padding:0 18px 18px;display:flex;flex-direction:column;gap:12px;margin-top:-22px;position:relative}
+.tcard .tenant-logo{width:46px;height:46px;border-radius:14px;border:3px solid var(--surface-2);box-sizing:content-box}
+.tcard h3{font:400 22px/1.15 var(--f-serif);margin:0}
+.tcard .row{display:flex;justify-content:space-between;align-items:center;font-size:12.5px;color:var(--ink-3);gap:8px}
+.tcard .row b{color:var(--ink);font-variant-numeric:tabular-nums}
+.viewtog{display:inline-flex;border:1px solid var(--hair);border-radius:12px;padding:3px;gap:2px}
+.viewtog button{border:0;background:none;color:var(--ink-3);padding:6px 9px;border-radius:9px;display:grid;place-items:center}
+.viewtog button.on{background:var(--glass-2);color:var(--ink);box-shadow:inset 0 0 0 1px var(--hair)}
+
+/* Tenant cover */
+.t-cover{height:120px;border-radius:20px 20px 0 0;background:radial-gradient(70% 160% at 0% 0%,color-mix(in srgb,var(--tc) 90%,#fff 0%),transparent 70%),radial-gradient(60% 120% at 100% 0%,rgba(79,134,247,.35),transparent 70%),linear-gradient(135deg,color-mix(in srgb,var(--tc) 60%,#000),#070C18);position:relative;overflow:hidden}
+.t-cover::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(115deg,rgba(255,255,255,.05) 0 1px,transparent 1px 22px)}
+.covered .profile-head{margin-top:-46px;position:relative;align-items:flex-end}
+.covered .profile-head .tenant-logo.lg{width:84px;height:84px;border-radius:22px;font-size:28px;border:4px solid var(--surface);box-sizing:content-box}
+.covered .profile-head h1{font-size:40px}
+.covered .profile-head .info{padding-top:50px}
+
+@media (max-width:900px){
+  .rail{margin:0;height:100%;top:0;border-radius:0}
+  .content{padding:20px 16px 40px}
+  .top{padding:10px 16px}
+  .hero h1{font-size:40px}
+  .page-head h1{font-size:36px}
+  .tgrid{padding:16px;grid-template-columns:1fr}
+  .covered .profile-head .info{padding-top:0}
+  .att-cta{display:none}
+}
 </style>
 </head>
 <body>
@@ -664,7 +840,7 @@ const AUDIT = [
 
 /* ---------- State ---------- */
 const S = {route:'overview', tab:{}, filter:{}, q:'', sel:new Set(), roleSel:'teacher', dirty:false, wiz:{step:0}, brandColor:{}};
-try { const t = localStorage.getItem('quad-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+try { const t = localStorage.getItem('quad-console-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
 
 /* ---------- Helpers ---------- */
 const statusTone = {Active:'t-green', Trial:'t-blue', Onboarding:'t-violet', 'Past due':'t-amber', Suspended:'t-red', Invited:'t-blue', Deactivated:'t-red'};
@@ -673,55 +849,106 @@ const healthDot = h => { const c = {Healthy:'var(--good)','Near limit':'var(--wa
 const tabs = (key, list) => { const cur = S.tab[key] || list[0][0]; return `<div class="tabs" role="tablist">${list.map(([k, l]) => `<button role="tab" class="${cur===k?'on':''}" data-act="tab" data-key="${key}" data-val="${k}">${l}</button>`).join('')}</div>`; };
 const curTab = (k, d) => S.tab[k] || d;
 const pageHead = (crumb, title, sub, actions='') => `<div class="page-head"><div class="grow"><div class="crumbs">${crumb}</div><h1>${title}</h1>${sub?`<div class="muted" style="margin-top:4px">${sub}</div>`:''}</div><div class="chips">${actions}</div></div>`;
-const kpi = (icon, tone, label, value, delta) => `<div class="card kpi"><div class="ic ${tone}">${ic(icon,20)}</div><div><div class="l">${label}</div><div class="v">${value}</div><div class="d">${delta}</div></div></div>`;
+const kpi = (icon, tone, label, value, delta, spark) => `<div class="card kpi ${spark ? 'has-spark' : ''}"><div class="kl"><span>${label}</span>${ic(icon,16)}</div><div class="v" ${typeof value === 'number' || /^[$]?[\d,.]+%?$/.test(String(value)) ? `data-count="${String(value)}"` : ''}>${value}</div><div class="d">${delta}</div>${spark ? sparkline(spark.data, spark.color) : ''}</div>`;
+let gid = 0;
+function sparkline(data, color = 'var(--c2)') {
+  const W = 300, H = 46, min = Math.min(...data), max = Math.max(...data), x = i => i * W / (data.length - 1), y = v => H - 6 - (v - min) / (max - min || 1) * (H - 14);
+  const pts = data.map((v, i) => `${x(i).toFixed(1)},${y(v).toFixed(1)}`), id = 'sg' + (++gid), li = data.length - 1;
+  return `<svg class="spark" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${color}" stop-opacity=".35"/><stop offset="1" stop-color="${color}" stop-opacity="0"/></linearGradient></defs>
+    <path class="fade-in" d="M0,${H} L${pts.join(' L')} L${W},${H} Z" fill="url(#${id})"/><polyline class="draw" style="--len:600" points="${pts.join(' ')}" fill="none" stroke="${color}" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linejoin="round"/></svg>`;
+}
+function areaChart({labels, data, color = 'var(--c2)', fmt = v => v, h = 260, tipLabel = 'MRR'}) {
+  const W = 760, L = 48, R = 18, T = 18, B = 30, iw = W - L - R, ih = h - T - B;
+  const mn = Math.min(...data), mx = Math.max(...data); let st = 1, lo = 0;
+  for (st of [1, 2, 2.5, 5, 10, 20, 25, 50, 100]) { lo = Math.floor(mn * .92 / st) * st; if (lo + 4 * st >= mx * 1.04) break; }
+  const hi = lo + 4 * st;
+  const x = i => L + i * iw / (labels.length - 1), y = v => T + ih - (v - lo) / (hi - lo) * ih, id = 'ag' + (++gid), li = data.length - 1;
+  let g = '';
+  for (let k = 0; k <= 4; k++) { const v = lo + (hi - lo) * k / 4; g += `<line class="grid-l" x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}"/><text x="${L - 10}" y="${y(v) + 4}" text-anchor="end">${fmt(v)}</text>`; }
+  labels.forEach((l, i) => g += `<text x="${x(i)}" y="${h - 8}" text-anchor="middle">${l}</text>`);
+  const pts = data.map((v, i) => [x(i), y(v)]);
+  let d = `M${pts[0][0]},${pts[0][1]}`;
+  for (let i = 1; i < pts.length; i++) { const [x0, y0] = pts[i - 1], [x1, y1] = pts[i], cx = (x0 + x1) / 2; d += ` C${cx},${y0} ${cx},${y1} ${x1},${y1}`; }
+  g += `<defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${color}" stop-opacity=".32"/><stop offset="1" stop-color="${color}" stop-opacity="0"/></linearGradient></defs>`;
+  g += `<path class="fade-in" d="${d} L${x(li)},${T + ih} L${L},${T + ih} Z" fill="url(#${id})"/><path class="draw" style="--len:1400" d="${d}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linecap="round"/>`;
+  g += `<line x1="${x(li)}" x2="${x(li)}" y1="${y(data[li])}" y2="${T + ih}" stroke="${color}" stroke-dasharray="2 4" opacity=".6"/><circle cx="${x(li)}" cy="${y(data[li])}" r="6" fill="${color}" stroke="var(--surface)" stroke-width="3"/>`;
+  g += `<text x="${x(li) - 12}" y="${y(data[li]) - 12}" text-anchor="end" style="fill:var(--ink);font-weight:700;font-size:12px">${fmt(data[li])}</text>`;
+  const step = iw / (labels.length - 1);
+  data.forEach((v, i) => g += `<rect class="hit" x="${x(i) - step / 2}" y="${T}" width="${step}" height="${ih}" data-tip="<b>${labels[i]}</b><br>${tipLabel} ${fmt(v)}"/>`);
+  return `<svg class="chart" viewBox="0 0 ${W} ${h}" role="img" aria-label="${tipLabel} trend">${g}</svg>`;
+}
+function donut(segs, size = 150, center = '') {
+  const r = size / 2 - 12, c = 2 * Math.PI * r, tot = segs.reduce((a, s) => a + s[1], 0); let off = 0;
+  const arcs = segs.map(([n, v, col]) => { const len = v / tot * c, gap = 3; const el = `<circle cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none" stroke="${col}" stroke-width="16" stroke-dasharray="${Math.max(0, len - gap)} ${c}" stroke-dashoffset="${-off}" transform="rotate(-90 ${size / 2} ${size / 2})" data-tip="<b>${n}</b><br>${v} schools · ${Math.round(v / tot * 100)}%"/>`; off += len; return el; }).join('');
+  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" role="img" aria-label="Schools by plan">${arcs}<text x="50%" y="48%" text-anchor="middle" style="font:400 34px var(--f-serif);fill:var(--ink)">${tot}</text><text x="50%" y="62%" text-anchor="middle" style="font-size:10.5px;letter-spacing:.14em;fill:var(--ink-3);font-weight:700">SCHOOLS</text></svg>`;
+}
+function countUps() {
+  document.querySelectorAll('[data-count]').forEach(el => {
+    const raw = el.dataset.count, pre = raw.startsWith('$') ? '$' : '', suf = raw.endsWith('%') ? '%' : '', num = parseFloat(raw.replace(/[$,%]/g, '')), dec = (raw.split('.')[1] || '').replace('%', '').length;
+    if (isNaN(num) || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const t0 = performance.now(), D = 1100, f = v => pre + v.toLocaleString('en-US', {minimumFractionDigits: dec, maximumFractionDigits: dec}) + suf;
+    const step = now => { const k = Math.min(1, (now - t0) / D), e = 1 - Math.pow(1 - k, 4); el.textContent = f(num * e); if (k < 1) requestAnimationFrame(step); else el.textContent = raw; };
+    requestAnimationFrame(step);
+  });
+}
+
 const roleName = (t, id) => (tenantRoles(t).find(r => r.id === id) || {n:id}).n;
 const sw = (on, act, extra='', dis=false) => `<button class="switch ${on?'on':''}" role="switch" aria-checked="${on}" data-act="${act}" ${extra} ${dis?'disabled':''}></button>`;
 
 /* ---------- Views ---------- */
 const V = {};
 V.overview = () => {
-  const active = tenants.filter(t => !['Suspended'].includes(t.status)), total = tenants.reduce((a, t) => a + mrr(t), 0);
-  const months = ['Nov','Dec','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct'];
-  const mrrSeries = [24.8,25.6,26.9,28.2,29.0,30.4,31.1,32.6,33.9,35.0,35.8, +(total/1000).toFixed(1)];
-  const byPlan = Object.keys(PLANS).map(p => [p, tenants.filter(t => t.plan === p && t.status !== 'Suspended').length]);
-  const attention = [
-    ['alert','t-red','Negombo Bay College','Card payment failed 3 hours ago · $1,449 due', 6],
-    ['pulse','t-amber','Malé Bright Future School','Using 1,480 of 1,500 student seats', 4],
-    ['cal','t-blue','Jaffna Northern Scholars','Trial ends 19 Oct · 275 students imported', 7],
-    ['layers','t-violet','Singapore Harbourfront Intl','Onboarding · 3 of 6 setup steps done', 9]
-  ];
-  return `${pageHead('Platform', 'Platform overview', 'All schools on Quad · Monday, 5 October 2026', `<button class="btn" data-act="go" data-to="tenants">${ic('tenants',16)}All schools</button><button class="btn primary" data-act="newTenant">${ic('plus',16)}New school</button>`)}
+  const live = tenants.filter(t => t.status !== 'Suspended'), total = tenants.reduce((a, t) => a + mrr(t), 0), students = tenants.reduce((a, t) => a + t.students, 0);
+  const all = ['Nov','Dec','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct'], allV = [24.8,25.6,26.9,28.2,29.0,30.4,31.1,32.6,33.9,35.0,35.8, +(total / 1000).toFixed(1)];
+  const n = S.range === '6m' ? 6 : 12, labels = all.slice(-n), series = allV.slice(-n), growth = Math.round((series[series.length - 1] / series[0] - 1) * 100);
+  const planCols = {Starter:'var(--c4)', Growth:'var(--c1)', Enterprise:'var(--c2)'};
+  const byPlan = Object.keys(PLANS).map(p => [p, live.filter(t => t.plan === p).length, planCols[p]]);
+  const countries = [...new Set(tenants.map(t => t.country))].map(c => [c, tenants.filter(t => t.country === c)]).sort((a, b) => b[1].reduce((x, t) => x + t.students, 0) - a[1].reduce((x, t) => x + t.students, 0));
+  const maxStu = Math.max(...countries.map(([, ts]) => ts.reduce((x, t) => x + t.students, 0)));
+  const attention = [['var(--bad)','Negombo Bay College','Card payment failed 3 hours ago · $1,449 due', 6, 'Retry payment'],['var(--warn)','Malé Bright Future School','1,480 of 1,500 seats used', 4, 'Raise limit'],['var(--info)','Jaffna Northern Scholars','Trial ends 19 Oct · 275 students imported', 7, 'Send offer'],['var(--brand)','Singapore Harbourfront Intl','Onboarding · 3 of 6 setup steps done', 9, 'Open']];
+  return `<section class="hero"><div class="grow"><div class="eyebrow">Monday, 5 October 2026 · Platform overview</div>
+    <h1>Good morning, <em>Prishan.</em></h1>
+    <p><b>${tenants.length} schools</b> in <b>${countries.length} countries</b> are running on Quad, with <b>${fmt(students)} students</b> and <b>${usd(total)}</b> in monthly revenue. Four schools need your attention today.</p></div>
+    <div class="chips"><button class="btn" data-act="go" data-to="tenants">${ic('tenants',16)}All schools</button><button class="btn primary" data-act="newTenant">${ic('plus',16)}New school</button></div></section>
   <div class="grid g-kpi">
-    ${kpi('tenants','t-blue','Schools (tenants)', tenants.length, `${active.length} live · 2 on trial`)}
-    ${kpi('student','t-green','Students on Quad', fmt(tenants.reduce((a, t) => a + t.students, 0)), '<span class="up">▲ 11%</span> this term')}
-    ${kpi('dollar','t-amber','Monthly recurring revenue', usd(total), '<span class="up">▲ 6.4%</span> vs September')}
-    ${kpi('pulse','t-violet','Uptime · 30 days', '99.98%', 'Last incident 19 Sep, 6 min')}
+    ${kpi('tenants','','Live schools', live.length, `<span class="up">+2</span> this month · 2 on trial`, {data:[6,6,7,7,8,8,9,9,10,10,11,live.length], color:'var(--c1)'})}
+    ${kpi('student','','Students', fmt(students), '<span class="up">▲ 11%</span> this term', {data:[9.1,9.4,9.9,10.2,10.6,11.0,11.5,12.0,12.4,12.9,13.3,students / 1000], color:'var(--c2)'})}
+    ${kpi('dollar','','Monthly revenue', usd(total), '<span class="up">▲ 6.4%</span> vs September', {data:allV, color:'var(--c2)'})}
+    ${kpi('pulse','','Uptime · 30 days', '99.98%', 'Last incident 19 Sep · 6 min', {data:[99.9,99.95,99.99,99.97,99.99,100,99.96,99.99,100,99.98,99.99,99.98], color:'var(--c1)'})}
   </div>
   <div class="grid g-2-1">
-    <section class="card"><div class="card-h"><h2>MRR · last 12 months</h2><span class="muted" style="font-size:12px">US$ thousands</span></div>
-      <div class="card-b">${barChart({labels: months, series:[{name:'MRR', data: mrrSeries, color:'var(--c2)'}], fmt:v=>'$'+(+v).toFixed(v%1?1:0)+'k'})}</div></section>
-    <section class="card"><div class="card-h"><h2>Needs attention</h2><span class="pill t-red plain">${attention.length}</span></div>
-      <div class="list">${attention.map(([i, tone, n, d, id]) => `<div class="li" style="cursor:pointer" data-act="openTenant" data-id="${id}"><div class="dot-ic ${tone}">${ic(i,16)}</div><div class="meta"><b>${n}</b><p>${d}</p></div>${ic('arrow',14)}</div>`).join('')}</div></section>
+    <section class="card"><div class="card-h"><div style="flex:1"><h2>Monthly recurring revenue</h2><div class="muted" style="font-size:12.5px;margin-top:2px"><span class="big-fig" style="color:var(--ink)">${usd(total)}</span> &nbsp;<span class="up">▲ ${growth}%</span> over ${n} months</div></div>
+      <div class="range" role="tablist" aria-label="Range">${[['6m','6M'],['12m','12M']].map(([k, l]) => `<button class="${(S.range || '12m') === k ? 'on' : ''}" data-act="range" data-v="${k}">${l}</button>`).join('')}</div></div>
+      <div class="card-b">${areaChart({labels, data:series, fmt:v => '$' + (+v).toFixed(v % 1 ? 1 : 0) + 'k'})}</div></section>
+    <section class="card"><div class="card-h"><h2>Plan mix</h2><a href="#plans" class="btn sm ghost">Plans ${ic('arrow',14)}</a></div><div class="card-b donut-wrap">${donut(byPlan)}
+      <div class="legend-list">${byPlan.map(([p, v, c]) => `<div><i style="background:${c}"></i><span>${p}</span><b>${v}</b></div>`).join('')}<div class="muted" style="font-size:12px">Enterprise brings ${Math.round(live.filter(t => t.plan === 'Enterprise').reduce((a, t) => a + mrr(t), 0) / total * 100)}% of revenue.</div></div></div></section>
   </div>
   <div class="grid g-3">
-    <section class="card"><div class="card-h"><h2>Schools by plan</h2></div><div class="card-b" style="display:flex;flex-direction:column;gap:12px">${byPlan.map(([p, n]) => `<div data-tip="<b>${p}</b><br>${n} schools"><div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:4px"><span>${p}</span><b class="num">${n}</b></div><div class="bar" style="height:10px"><i style="width:${n / tenants.length * 100}%;background:var(--c1)"></i></div></div>`).join('')}</div></section>
-    <section class="card"><div class="card-h"><h2>System status</h2></div><div>${[['API & web apps','Operational','var(--good)','42 ms p50'],['Database clusters','Operational','var(--good)','3 regions'],['Push notifications','Operational','var(--good)','218k sent today'],['Payment gateway','Degraded','var(--warn)','Retries on 2% of cards'],['SMS gateway','Operational','var(--good)','Dialog, Etisalat']].map(([n, s, c, d]) => `<div class="status-row"><i style="width:9px;height:9px;border-radius:50%;background:${c}"></i><span>${n}<br><small>${d}</small></span><b style="font-size:12.5px;color:${c}">${s}</b></div>`).join('')}</div></section>
-    <section class="card"><div class="card-h"><h2>Recent activity</h2><a href="#audit" class="btn sm ghost">Audit log ${ic('arrow',14)}</a></div><div class="list">${AUDIT.slice(0, 4).map(([w, a, sub, at]) => `<div class="li">${avatar(w,'sm')}<div class="meta"><b>${w}</b><p>${a} · <span class="code">${sub}</span></p></div><time>${at}</time></div>`).join('')}</div></section>
-  </div>`;
+    <section class="card"><div class="card-h"><h2>Needs attention</h2><span class="pill t-red">${attention.length}</span></div>
+      <div class="list">${attention.map(([c, nm, d, id, cta]) => `<div class="li" style="cursor:pointer" data-act="openTenant" data-id="${id}"><i class="sev" style="background:${c};box-shadow:0 0 0 4px color-mix(in srgb,${c} 18%,transparent)"></i><div class="meta"><b>${nm}</b><p>${d}</p></div><span class="btn sm att-cta" style="pointer-events:none">${cta}</span></div>`).join('')}</div></section>
+    <section class="card"><div class="card-h"><h2>Where our schools are</h2></div>
+      <div>${countries.map(([c, ts]) => { const st = ts.reduce((x, t) => x + t.students, 0); return `<div class="country" data-tip="<b>${c}</b><br>${ts.length} schools · ${fmt(st)} students"><span>${c} <span class="muted" style="font-size:12px">· ${ts.length} school${ts.length > 1 ? 's' : ''}</span></span><b class="num">${fmt(st)}</b><div class="bar"><i style="width:${st / maxStu * 100}%"></i></div></div>`; }).join('')}</div></section>
+    <section class="card"><div class="card-h"><h2>System status</h2><span class="muted" style="font-size:12px">Updated 1 min ago</span></div>
+      <div>${[['API & web apps','Operational','var(--good)','42 ms median response'],['Databases','Operational','var(--good)','3 regions, replicated'],['Push notifications','Operational','var(--good)','218k sent today'],['Payment gateway','Degraded','var(--warn)','Retrying 2% of card payments'],['SMS gateway','Operational','var(--good)','Dialog and Etisalat']].map(([nm, st, c, d]) => `<div class="status-row"><i class="sev" style="background:${c};margin:0;box-shadow:0 0 0 4px color-mix(in srgb,${c} 18%,transparent)"></i><span>${nm}<br><small>${d}</small></span><b style="font-size:12px;color:${c}">${st}</b></div>`).join('')}</div></section>
+  </div>
+  <section class="card"><div class="card-h"><h2>Recent activity</h2><a href="#audit" class="btn sm ghost">Audit log ${ic('arrow',14)}</a></div><div class="list">${AUDIT.slice(0, 5).map(([w, a, sub, at]) => `<div class="li">${avatar(w,'sm')}<div class="meta"><b>${w}</b> <span class="muted">${a}</span><p><span class="code">${sub}</span></p></div><time>${at}</time></div>`).join('')}</div></section>`;
 };
 
 V.tenants = () => {
   const f = S.filter.st || 'All', q = (S.q || '').toLowerCase(), plan = S.filter.plan || 'all';
   const rows = tenants.filter(t => (f === 'All' || t.status === f) && (plan === 'all' || t.plan === plan) && (!q || (t.name + t.sub + t.country).toLowerCase().includes(q)));
-  return `${pageHead('Platform', 'Schools', 'Each school is a separate tenant with its own data, users, branding and subdomain.', `<button class="btn">${ic('down',16)}Export</button><button class="btn primary" data-act="newTenant">${ic('plus',16)}New school</button>`)}
+  return `${pageHead('Platform', 'Schools', `${tenants.length} schools, each with its own data, users, branding and subdomain.`, `<button class="btn">${ic('down',16)}Export</button><button class="btn primary" data-act="newTenant">${ic('plus',16)}New school</button>`)}
   <div class="card"><div class="toolbar"><div class="searchbox">${ic('search',16)}<input class="input" id="tSearch" placeholder="Search name, subdomain or country" value="${esc(S.q||'')}"></div>
     <select class="input inline" data-filter="plan" aria-label="Plan"><option value="all">All plans</option>${Object.keys(PLANS).map(p => `<option ${plan===p?'selected':''}>${p}</option>`).join('')}</select>
-    <div class="chips">${['All','Active','Trial','Onboarding','Past due','Suspended'].map(s => `<button class="chip ${f===s?'on':''}" data-act="filter" data-key="st" data-val="${s}">${s}<span class="n">${s==='All'?tenants.length:tenants.filter(t=>t.status===s).length}</span></button>`).join('')}</div></div>
+    <div class="chips">${['All','Active','Trial','Onboarding','Past due','Suspended'].map(s => `<button class="chip ${f===s?'on':''}" data-act="filter" data-key="st" data-val="${s}">${s}<span class="n">${s==='All'?tenants.length:tenants.filter(t=>t.status===s).length}</span></button>`).join('')}</div><span style="flex:1"></span><div class="viewtog" role="group" aria-label="View">${[['grid','grid','Gallery'],['list','list','List']].map(([k, i, l]) => `<button class="${(S.tview || 'grid') === k ? 'on' : ''}" data-act="tview" data-v="${k}" aria-label="${l} view" title="${l}">${ic(i,16)}</button>`).join('')}</div></div>
+  ${(S.tview || 'grid') === 'grid' ? `<div class="tgrid">${rows.map(t => `<div class="tcard" style="--tc:${t.color}" data-act="openTenant" data-id="${t.id}" tabindex="0" role="link" aria-label="${esc(t.name)}"><div class="cv">${pill(t.status)}</div><div class="tb">${tlogo(t)}<div><h3>${t.name}</h3><span class="code">${t.sub}.quad.school</span></div>
+      <div class="meter"><div class="mt"><span class="muted">Seats</span><b>${fmt(t.students)} <span class="muted" style="font-weight:500">/ ${fmt(t.limit)}</span></b></div><div class="bar"><i style="width:${Math.min(100, t.students / t.limit * 100)}%"></i></div></div>
+      <div class="row"><span>${t.plan} · ${t.country}</span><b>${mrr(t) ? usd(mrr(t)) + '<span class="muted" style="font-weight:500">/mo</span>' : '–'}</b></div><div class="row">${healthDot(t.health)}<span>${t.mods.size} of ${MODULES.length} modules</span></div></div></div>`).join('') || '<div class="muted" style="padding:40px;text-align:center;grid-column:1/-1">No schools match. Clear the search or choose another status.</div>'}</div>` : `
   <div class="tbl-wrap"><table><thead><tr><th>School</th><th>Plan</th><th>Students</th><th>Modules</th><th>Region</th><th class="r">MRR</th><th>Health</th><th>Status</th></tr></thead><tbody>
   ${rows.map(t => `<tr class="click" data-act="openTenant" data-id="${t.id}"><td><div class="who">${tlogo(t)}<div><b>${t.name}</b><small class="code">${t.sub}.quad.school</small></div></div></td><td>${pill(t.plan, PLANS[t.plan].color)}</td>
-    <td style="min-width:180px"><div class="meter"><div class="top"><b>${fmt(t.students)}</b><span class="muted">of ${fmt(t.limit)}</span></div><div class="bar"><i style="width:${Math.min(100, t.students / t.limit * 100)}%;background:${t.students / t.limit > .95 ? 'var(--warn)' : 'var(--c1)'}"></i></div></div></td>
+    <td style="min-width:180px"><div class="meter"><div class="mt"><b>${fmt(t.students)}</b><span class="muted">of ${fmt(t.limit)}</span></div><div class="bar"><i style="width:${Math.min(100, t.students / t.limit * 100)}%;background:${t.students / t.limit > .95 ? 'var(--warn)' : 'var(--c1)'}"></i></div></div></td>
     <td class="num">${t.mods.size} / ${MODULES.length}</td><td class="muted">${t.country}</td><td class="r num">${mrr(t) ? usd(mrr(t)) : '<span class="muted">–</span>'}</td><td>${healthDot(t.health)}</td><td>${pill(t.status)}</td></tr>`).join('') || `<tr><td colspan="8" class="muted" style="text-align:center;padding:40px">No schools match. Clear the search or choose another status.</td></tr>`}
-  </tbody></table></div><div class="tbl-foot"><span>${rows.length} of ${tenants.length} schools</span></div></div>`;
+  </tbody></table></div>`}<div class="tbl-foot"><span>${rows.length} of ${tenants.length} schools</span></div></div>`;
 };
 
 V.tenant = id => {
@@ -729,7 +956,7 @@ V.tenant = id => {
   const tab = curTab('t' + t.id, 'overview');
   const body = {overview: tOverview, users: tUsers, roles: tRoles, modules: tModules, branding: tBranding, security: tSecurity, danger: tDanger}[tab](t);
   return `<div><a href="#tenants" class="btn sm ghost">${ic('back',14)}All schools</a></div>
-  <div class="card"><div class="profile-head">${tlogo(t,'lg')}<div class="info"><div class="eyebrow">Tenant #${String(t.id).padStart(4,'0')} · ${REGIONS[t.region]}</div><h1>${t.name}</h1><div class="muted" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="code">${t.sub}.quad.school</span>${pill(t.status)}${pill(t.plan, PLANS[t.plan].color)}${healthDot(t.health)}</div></div>
+  <div class="card covered"><div class="t-cover" style="--tc:${t.color}"></div><div class="profile-head">${tlogo(t,'lg')}<div class="info"><div class="eyebrow">Tenant #${String(t.id).padStart(4,'0')} · ${REGIONS[t.region]}</div><h1>${t.name}</h1><div class="muted" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="code">${t.sub}.quad.school</span>${pill(t.status)}${pill(t.plan, PLANS[t.plan].color)}${healthDot(t.health)}</div></div>
   <div class="chips"><button class="btn" data-act="impersonate" data-id="${t.id}" ${t.status==='Suspended'?'disabled':''}>${ic('eye',16)}Open as school admin</button><button class="btn primary" data-act="tab" data-key="t${t.id}" data-val="users">${ic('users',16)}Manage users</button></div></div>
   ${tabs('t' + t.id, [['overview','Overview'],['users','Users'],['roles','Roles & permissions'],['modules','Plan & modules'],['branding','Branding'],['security','Sign-in & security'],['danger','Danger zone']])}</div>${body}`;
 };
@@ -737,7 +964,7 @@ function tOverview(t) {
   const u = tenantUsers(t);
   return `<div class="grid g-kpi">${kpi('student','t-blue','Students', fmt(t.students), `of ${fmt(t.limit)} on ${t.plan}`)}${kpi('users','t-violet','Staff accounts', u.filter(x => x.status !== 'Deactivated').length, `${u.filter(x => x.status === 'Invited').length} invites pending`)}${kpi('phone','t-green','Parents on the app', fmt(Math.round(t.students * .88)), '88% of families')}${kpi('dollar','t-amber','Monthly bill', mrr(t) ? usd(mrr(t)) : '$0', t.status === 'Trial' ? 'Trial ends ' + t.trialEnds : `$${PLANS[t.plan].price.toFixed(2)} per student`)}</div>
   <div class="grid g-2-1"><section class="card"><div class="card-h"><h2>Usage</h2></div><div class="card-b" style="display:flex;flex-direction:column;gap:16px">
-    ${[['Student seats', t.students, t.limit, ''],['Storage', Math.round(t.students * .031), 100, ' GB'],['SMS credits this month', Math.round(t.students * 2.4), 5000, ''],['API calls today', Math.round(t.students * 61), 250000, '']].map(([n, v, max, unit]) => `<div class="meter"><div class="top"><span>${n}</span><b>${fmt(v)}${unit} <span class="muted" style="font-weight:500">/ ${fmt(max)}${unit}</span></b></div><div class="bar" style="height:8px"><i style="width:${Math.min(100, v / max * 100)}%;background:${v / max > .95 ? 'var(--warn)' : 'var(--c1)'}"></i></div></div>`).join('')}
+    ${[['Student seats', t.students, t.limit, ''],['Storage', Math.round(t.students * .031), 100, ' GB'],['SMS credits this month', Math.round(t.students * 2.4), 5000, ''],['API calls today', Math.round(t.students * 61), 250000, '']].map(([n, v, max, unit]) => `<div class="meter"><div class="mt"><span>${n}</span><b>${fmt(v)}${unit} <span class="muted" style="font-weight:500">/ ${fmt(max)}${unit}</span></b></div><div class="bar" style="height:8px"><i style="width:${Math.min(100, v / max * 100)}%;background:${v / max > .95 ? 'var(--warn)' : 'var(--c1)'}"></i></div></div>`).join('')}
   </div></section>
   <section class="card"><div class="card-h"><h2>Details</h2></div><div class="card-b"><dl class="kv"><dt>Country</dt><dd>${t.country}</dd><dt>Time zone</dt><dd>${t.tz}</dd><dt>Currency</dt><dd>${t.currency}</dd><dt>Data region</dt><dd>${REGIONS[t.region]}</dd><dt>Customer since</dt><dd>${t.since}</dd><dt>Owner</dt><dd>${u[0].name}</dd><dt>Custom domain</dt><dd>${t.id === 1 ? 'portal.cis.lk ' + pill('Verified','t-green') : '<span class="muted">None</span>'}</dd></dl></div></section></div>
   <section class="card"><div class="card-h"><h2>Recent activity in this school</h2></div><div class="list">${(u.length > 2 ? [[u[0].name,'invited 3 teachers to Primary campus','20 min ago'],[u[2].name,'posted 46 receipts','1 hour ago'],[u[1].name,'approved 6 offer letters','Yesterday'],['System','nightly backup completed (14.2 GB)','Today, 02:00']] : [['System','created this school and sent the admin invite','Just now'],['System','seeded 7 roles with default permissions','Just now']]).map(([w, a, at]) => `<div class="li">${avatar(w,'sm')}<div class="meta"><b>${w}</b><p>${a}</p></div><time>${at}</time></div>`).join('')}</div></section>`;
@@ -1183,6 +1410,8 @@ function route() {
   renderNav(); closeAll(); document.getElementById('app').classList.remove('mobile-open'); afterRender();
 }
 function afterRender() {
+  countUps();
+  document.querySelectorAll('.tcard').forEach(c => c.onkeydown = e => { if (e.key === 'Enter') c.click(); });
   ['tSearch','uSearch'].forEach(id => { const el = document.getElementById(id); if (el) el.oninput = () => { S.q = el.value; const pos = el.selectionStart; route(); const n = document.getElementById(id); n.focus(); n.setSelectionRange(pos, pos); }; });
   const sr = document.getElementById('seatRange'); if (sr) sr.oninput = () => { const t = tenants.find(x => x.id === +sr.dataset.id); t.limit = +sr.value; document.getElementById('seatLbl').textContent = fmt(t.limit); };
   const ps = document.getElementById('planSel'); if (ps) ps.onchange = () => { const t = tenants.find(x => x.id === +ps.dataset.id); t.plan = ps.value.split(' ')[0]; t.mods = new Set([...t.mods, ...PLANS[t.plan].mods]); route(); toast(`Changed to ${t.plan}. Billing updates from the next invoice.`); };
@@ -1196,9 +1425,11 @@ const curTenant = () => tenants.find(x => S.route === 'tenant-' + x.id);
 const ACT = {
   collapse: () => document.getElementById('app').classList.toggle('collapsed'),
   mobileNav: () => document.getElementById('app').classList.toggle('mobile-open'),
-  theme: () => { const r = document.documentElement; const dark = r.dataset.theme ? r.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches; r.dataset.theme = dark ? 'light' : 'dark'; try { localStorage.setItem('quad-theme', r.dataset.theme); } catch (e) {} themeIcon(); },
+  theme: () => { const r = document.documentElement; r.dataset.theme = r.dataset.theme === 'light' ? 'dark' : 'light'; try { localStorage.setItem('quad-console-theme', r.dataset.theme); } catch (e) {} themeIcon(); route(); },
   cmdk: openCmdk, closeAll,
   go: el => location.hash = el.dataset.to,
+  range: el => { S.range = el.dataset.v; route(); },
+  tview: el => { S.tview = el.dataset.v; route(); },
   toast: el => toast(el.dataset.msg),
   tab: el => { if (S.dirty && !confirmLeave()) return; S.tab[el.dataset.key] = el.dataset.val; S.q = ''; S.sel.clear(); route(); },
   filter: el => { S.filter[el.dataset.key] = el.dataset.val; route(); },
@@ -1263,7 +1494,7 @@ document.addEventListener('submit', e => { e.preventDefault(); if (e.target.data
 document.addEventListener('keydown', e => { if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); openCmdk(); } if (e.key === 'Escape') closeAll(); if (e.key === 'Enter' && e.target.matches('.search')) openCmdk(); });
 const tip = document.getElementById('tip');
 document.addEventListener('mousemove', e => { const t = e.target.closest('[data-tip]'); if (!t) { tip.classList.remove('on'); return; } tip.innerHTML = t.dataset.tip; tip.classList.add('on'); tip.style.left = Math.min(innerWidth - tip.offsetWidth - 8, e.clientX + 14) + 'px'; tip.style.top = (e.clientY + 16) + 'px'; });
-function themeIcon() { const r = document.documentElement; const dark = r.dataset.theme ? r.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches; document.getElementById('themeBtn').innerHTML = ic(dark ? 'sun' : 'moon'); }
+function themeIcon() { const dark = document.documentElement.dataset.theme !== 'light'; const b = document.getElementById('themeBtn'); b.innerHTML = ic(dark ? 'sun' : 'moon'); b.setAttribute('aria-label', dark ? 'Switch to day theme' : 'Switch to night theme'); }
 window.addEventListener('hashchange', () => { if (UK.user) delete UK.user._draft; UK.dirty = false; UK.tab = 'profile'; UK.user = null; UK.ctx = null; if (S.dirty) { S.dirty = false; if (S.permBackup) { const t = tenants.find(x => permsByTenant[x.id] && S.route === 'tenant-' + x.id); if (t) permsByTenant[t.id] = S.permBackup; } S.permBackup = null; } S.q = ''; S.sel.clear(); route(); window.scrollTo(0, 0); });
 themeIcon(); route();
 </script>

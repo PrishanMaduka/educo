@@ -23,7 +23,7 @@ The mark is a ring cut into four arcs (school, teachers, parents, students) arou
 
 ### Platform console (`design/platform.html`)
 
-Quad is multi-tenant: every school is a tenant with its own data, subdomain, users and settings. The super admin works in the platform console, which has a darker rail and a teal accent so it is never confused with a school's own admin app.
+Quad is multi-tenant: every school is a tenant with its own data, subdomain, users and settings. The super admin works in the platform console. It has its own look so it is never confused with a school's admin app: a night theme by default (day theme on the toggle), a floating glass sidebar, serif display type for titles and figures, KPI tiles with sparklines and count-up numbers, a smooth revenue chart with a 6M/12M switch, a plan donut, a gallery of school cards in each school's brand colour, and branded cover banners on school pages.
 
 | Area | Screens and interactions |
 |---|---|
