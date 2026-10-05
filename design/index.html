@@ -1,0 +1,62 @@
+<title>Educo Design Prototypes</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap">
+<style>
+/* Layout: one centred column, two large preview cards that open each prototype, module map below. */
+:root{--bg:#F2F5FA;--surface:#FFFFFF;--line:#E3E8F0;--ink:#16213A;--ink-2:#4A5672;--ink-3:#7C879F;--brand:#2F6FED;--rail:#14203A;--teal:#12A594;
+  --f-display:"Bricolage Grotesque","Plus Jakarta Sans",system-ui,sans-serif;--f-body:"Plus Jakarta Sans",system-ui,sans-serif;color-scheme:light}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#0E1525;--surface:#151E31;--line:#26324B;--ink:#E7ECF6;--ink-2:#AEB8CE;--ink-3:#7D89A3;--brand:#5B8CFF;--rail:#0A1020;--teal:#2EC4B0;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0E1525;--surface:#151E31;--line:#26324B;--ink:#E7ECF6;--ink-2:#AEB8CE;--ink-3:#7D89A3;--brand:#5B8CFF;--rail:#0A1020;--teal:#2EC4B0;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 var(--f-body);padding-inline:16px}
+.wrap{max-width:1040px;margin:0 auto;padding-block:48px 64px;display:flex;flex-direction:column;gap:32px}
+.logo{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#2F6FED,#12A594);color:#fff;display:grid;place-items:center;font:700 22px var(--f-display)}
+h1{font:700 clamp(30px,5vw,44px)/1.1 var(--f-display);letter-spacing:-.02em;margin:14px 0 8px;text-wrap:balance}
+.lede{color:var(--ink-2);max-width:62ch;margin:0}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:18px;overflow:hidden;text-decoration:none;color:inherit;display:flex;flex-direction:column;transition:transform .15s,box-shadow .15s}
+.card:hover{transform:translateY(-3px);box-shadow:0 14px 40px rgba(20,32,58,.14)}
+.card:focus-visible{outline:2px solid var(--brand);outline-offset:3px}
+.pv{height:200px;position:relative;overflow:hidden}
+.pv.admin{background:var(--bg);display:grid;grid-template-columns:56px 1fr}
+.pv.admin .r{background:#14203A;display:flex;flex-direction:column;gap:8px;padding:14px 12px}
+.pv.admin .r i{height:8px;border-radius:4px;background:rgba(255,255,255,.18)}
+.pv.admin .r i:nth-child(2){background:#2F6FED}
+.pv.admin .m{padding:16px;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:44px 1fr;gap:10px}
+.pv.admin .m b{background:var(--surface);border:1px solid var(--line);border-radius:8px}
+.pv.admin .m b.ch{grid-column:1/3;background:linear-gradient(to top,#2F6FED 0 30%,transparent 30%) 12% 100%/8% 70% no-repeat,linear-gradient(to top,#2F6FED 0 60%,transparent 60%) 32% 100%/8% 80% no-repeat,linear-gradient(to top,#E8A33D 0 50%,transparent 50%) 52% 100%/8% 60% no-repeat,linear-gradient(to top,#2F6FED 0 80%,transparent 80%) 72% 100%/8% 90% no-repeat,var(--surface)}
+.pv.parent{background:linear-gradient(140deg,#2F6FED,#12A594);display:flex;justify-content:center;align-items:flex-end}
+.pv.parent .ph{width:150px;height:180px;border-radius:26px 26px 0 0;background:#0B0F1A;padding:8px 8px 0}
+.pv.parent .ph div{height:100%;border-radius:19px 19px 0 0;background:#F3F6FB;padding:26px 10px 0;display:flex;flex-direction:column;gap:7px}
+.pv.parent .ph i{display:block;height:40px;border-radius:10px;background:linear-gradient(135deg,#2F6FED,#1F55C7)}
+.pv.parent .ph s{display:block;height:20px;border-radius:7px;background:#fff;border:1px solid #E3E8F0}
+.cb{padding:18px 20px 20px;display:flex;flex-direction:column;gap:6px}
+.cb h2{font:700 21px var(--f-display);margin:0}
+.cb p{margin:0;color:var(--ink-2);font-size:14px}
+.cb span{color:var(--brand);font-weight:700;font-size:14px;margin-top:6px}
+h3{font:700 13px var(--f-body);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin:0 0 12px}
+.mods{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.mod{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.mod b{display:block;margin-bottom:4px}
+.mod p{margin:0;font-size:13px;color:var(--ink-3)}
+.note{font-size:13px;color:var(--ink-3);margin:0}
+</style>
+<div class="wrap">
+  <header><div class="logo">e</div><h1>Educo design prototypes</h1>
+  <p class="lede">Interactive designs for the school platform. The admin web app covers the six core modules for staff. The parent app follows the iParent model: one login for every child, alerts, results, payments and messages. Both use the same colours and type, and both have light and dark themes.</p></header>
+  <div class="cards">
+    <a class="card" href="admin.html"><div class="pv admin" aria-hidden="true"><div class="r"><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="m"><b></b><b></b><b></b><b class="ch"></b><b></b></div></div>
+      <div class="cb"><h2>Admin web app</h2><p>Dashboard, admissions pipeline, CRM, student records, attendance, LMS, fees and accounting. Press Ctrl K to search.</p><span>Open admin app →</span></div></a>
+    <a class="card" href="parent.html"><div class="pv parent" aria-hidden="true"><div class="ph"><div><i></i><s></s><s></s><s></s></div></div></div>
+      <div class="cb"><h2>Parent mobile app</h2><p>Face ID unlock, child switcher, attendance calendar, results, timetable, homework, card payments, trips, messages and push alerts.</p><span>Open parent app →</span></div></a>
+  </div>
+  <section><h3>Modules in the admin prototype</h3><div class="mods">
+    <div class="mod"><b>Pre-admission & enrolment</b><p>Drag-and-drop pipeline, applicant drawer with document checklist, three-step application form.</p></div>
+    <div class="mod"><b>CRM</b><p>Scored leads, source filters, campaigns, enquiry forms and a parent inbox that replies to the app.</p></div>
+    <div class="mod"><b>Student information</b><p>Directory in table or card view, full profile with attendance heatmap, results, fees and conduct, live register.</p></div>
+    <div class="mod"><b>Learning management</b><p>Course spaces, assignment tracking, weighted gradebook that recalculates as you type, weekly timetable.</p></div>
+    <div class="mod"><b>Fees & invoicing</b><p>Invoice list by status, invoice preview, record payment, bulk billing run, fee structures and receipts.</p></div>
+    <div class="mod"><b>Finance & accounting</b><p>Income vs expenditure, journal entries with a debit/credit balance check, chart of accounts, budgets.</p></div>
+  </div></section>
+  <p class="note">All names, figures and records are sample data for a fictional school.</p>
+</div>

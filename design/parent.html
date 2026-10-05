@@ -1,0 +1,562 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Educo Parent App</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: a phone frame centred on a soft stage with a prototype control panel beside it; full-bleed app on real phones. */
+:root{
+  --stage:#E6ECF5; --bg:#F3F6FB; --surface:#FFFFFF; --surface-2:#F6F8FC; --line:#E3E8F0; --line-strong:#CBD3E0;
+  --ink:#16213A; --ink-2:#4A5672; --ink-3:#7C879F;
+  --brand:#2F6FED; --brand-ink:#FFFFFF; --brand-soft:#E8F0FE; --brand-deep:#14203A;
+  --good:#138A5B; --good-soft:#E3F5EC; --warn:#B26A00; --warn-soft:#FFF2DC; --bad:#C83A2E; --bad-soft:#FDE8E5; --info:#5B4BC4; --info-soft:#EEEBFC;
+  --teal:#12A594;
+  --f-display:"Bricolage Grotesque","Plus Jakarta Sans",system-ui,sans-serif;
+  --f-body:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --shadow:0 1px 2px rgba(20,32,58,.06),0 6px 20px rgba(20,32,58,.06);
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --stage:#070B14; --bg:#0E1525; --surface:#161F33; --surface-2:#1B2540; --line:#26324B; --line-strong:#34425F;
+  --ink:#E7ECF6; --ink-2:#AEB8CE; --ink-3:#7D89A3;
+  --brand:#5B8CFF; --brand-ink:#0B1222; --brand-soft:#1C2C52; --brand-deep:#0A1020;
+  --good:#4CC992; --good-soft:#123326; --warn:#F0B357; --warn-soft:#3A2A10; --bad:#FF7A6B; --bad-soft:#3D1A17; --info:#A99BFF; --info-soft:#262046; --teal:#2EC4B0;
+  --shadow:0 1px 2px rgba(0,0,0,.4); color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --stage:#070B14; --bg:#0E1525; --surface:#161F33; --surface-2:#1B2540; --line:#26324B; --line-strong:#34425F;
+  --ink:#E7ECF6; --ink-2:#AEB8CE; --ink-3:#7D89A3;
+  --brand:#5B8CFF; --brand-ink:#0B1222; --brand-soft:#1C2C52; --brand-deep:#0A1020;
+  --good:#4CC992; --good-soft:#123326; --warn:#F0B357; --warn-soft:#3A2A10; --bad:#FF7A6B; --bad-soft:#3D1A17; --info:#A99BFF; --info-soft:#262046; --teal:#2EC4B0;
+  --shadow:0 1px 2px rgba(0,0,0,.4); color-scheme:dark;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{margin:0;background:var(--stage);color:var(--ink);font:15px/1.45 var(--f-body);-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;background:none;border:0;padding:0}
+:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+.num{font-variant-numeric:tabular-nums}
+h1,h2,h3{margin:0;text-wrap:balance}
+
+.stage{min-height:100%;display:flex;align-items:center;justify-content:center;gap:48px;padding:32px 16px;flex-wrap:wrap}
+.phone{width:390px;height:844px;border-radius:54px;background:#0B0F1A;padding:12px;box-shadow:0 40px 80px rgba(20,32,58,.28),inset 0 0 0 2px #2A3245;position:relative;flex:none}
+.screen{width:100%;height:100%;border-radius:43px;overflow:hidden;background:var(--bg);position:relative;display:flex;flex-direction:column;isolation:isolate}
+.island{position:absolute;top:11px;left:50%;transform:translateX(-50%);width:120px;height:34px;background:#000;border-radius:20px;z-index:50}
+.status{height:50px;flex:none;display:flex;justify-content:space-between;align-items:flex-end;padding:0 30px 6px 34px;font-weight:700;font-size:14px;z-index:5}
+.status .r{display:flex;gap:6px;align-items:center}
+
+/* Panel */
+.panel{width:340px;max-width:100%;display:flex;flex-direction:column;gap:18px}
+.panel h1{font:700 30px/1.1 var(--f-display);letter-spacing:-.02em}
+.panel p{color:var(--ink-2);margin:6px 0 0}
+.panel .group{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.panel .group b{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.pbtn{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--surface-2);font-weight:600;font-size:13.5px;text-align:left}
+.pbtn:hover{border-color:var(--brand)}
+.pbtn span{flex:1}
+.panel a{color:var(--brand);font-weight:600;text-decoration:none}
+
+/* App chrome */
+.nav{flex:none;display:flex;align-items:center;gap:8px;padding:6px 16px 10px;min-height:48px}
+.nav .t{flex:1;font-weight:700;font-size:16px;text-align:center;margin-right:36px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nav.big{flex-direction:column;align-items:stretch;padding:4px 20px 8px}
+.nav.big .row{display:flex;align-items:center;gap:10px}
+.nav.big h1{font:700 30px/1.15 var(--f-display);letter-spacing:-.02em;flex:1}
+.back{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:var(--surface);box-shadow:var(--shadow);color:var(--ink)}
+.body{flex:1;overflow-y:auto;overflow-x:hidden;padding:4px 16px 24px;display:flex;flex-direction:column;gap:14px;scrollbar-width:none}
+.body::-webkit-scrollbar{display:none}
+.body>*{flex-shrink:0}
+.body.in-r{animation:inr .28s cubic-bezier(.2,.8,.2,1)}
+.body.in-l{animation:inl .28s cubic-bezier(.2,.8,.2,1)}
+@keyframes inr{from{transform:translateX(40px);opacity:0}}
+@keyframes inl{from{transform:translateX(-40px);opacity:0}}
+.tabbar{flex:none;display:grid;grid-template-columns:repeat(5,1fr);background:var(--surface);border-top:1px solid var(--line);padding:8px 6px 26px}
+.tabbar button{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10.5px;font-weight:600;color:var(--ink-3);position:relative}
+.tabbar button.on{color:var(--brand)}
+.tabbar .badge{position:absolute;top:-4px;left:calc(50% + 6px);min-width:17px;height:17px;padding:0 5px;border-radius:9px;background:var(--bad);color:#fff;font-size:10px;display:grid;place-items:center;border:2px solid var(--surface)}
+
+/* Components */
+.card{background:var(--surface);border-radius:18px;box-shadow:var(--shadow);border:1px solid var(--line)}
+.pad{padding:16px}
+.sec-h{display:flex;align-items:baseline;justify-content:space-between;margin:6px 4px -4px}
+.sec-h h2{font:700 17px var(--f-display)}
+.sec-h button{color:var(--brand);font-weight:600;font-size:13px}
+.av{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:700;font-size:14px;flex:none}
+.av.sm{width:32px;height:32px;font-size:12px}.av.lg{width:64px;height:64px;font-size:22px}
+.kids{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:0 -16px;padding:2px 16px}
+.kid{display:flex;align-items:center;gap:8px;padding:6px 14px 6px 6px;border-radius:30px;background:var(--surface);border:1.5px solid var(--line);font-weight:600;font-size:13.5px;white-space:nowrap}
+.kid.on{border-color:var(--brand);background:var(--brand-soft);color:var(--brand)}
+.hero{background:linear-gradient(140deg,#2F6FED 0%,#1F55C7 55%,#12A594 130%);color:#fff;border-radius:22px;padding:18px;position:relative;overflow:hidden;border:0}
+.hero::after{content:"";position:absolute;right:-40px;top:-50px;width:180px;height:180px;border-radius:50%;background:rgba(255,255,255,.08)}
+.hero small{opacity:.85;font-weight:600;font-size:12.5px}
+.hero .big{font:700 26px/1.15 var(--f-display);margin:4px 0 12px}
+.hero .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;position:relative;z-index:1}
+.hero .stats div{background:rgba(255,255,255,.14);border-radius:12px;padding:8px 10px;font-size:11.5px}
+.hero .stats b{display:block;font-size:16px}
+.qa{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.qa button{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:11.5px;font-weight:600;color:var(--ink-2);text-align:center;line-height:1.2}
+.qa .i{width:52px;height:52px;border-radius:16px;display:grid;place-items:center}
+.t-blue{background:var(--brand-soft);color:var(--brand)}.t-green{background:var(--good-soft);color:var(--good)}.t-amber{background:var(--warn-soft);color:var(--warn)}.t-violet{background:var(--info-soft);color:var(--info)}.t-red{background:var(--bad-soft);color:var(--bad)}
+.alert{display:flex;gap:12px;align-items:center;padding:14px;border-radius:16px}
+.alert .m{flex:1;min-width:0;font-size:13px}.alert b{display:block;font-size:14px}
+.row{display:flex;gap:12px;align-items:center;padding:13px 16px;border-bottom:1px solid var(--line);width:100%;text-align:left}
+.row:last-child{border-bottom:0}
+.row .m{flex:1;min-width:0}
+.row .m b{display:block;font-weight:600;font-size:14.5px}
+.row .m small{color:var(--ink-3);font-size:12.5px;display:block}
+.row .r{color:var(--ink-3);font-size:12.5px;text-align:right;white-space:nowrap}
+.ico{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;flex:none}
+.chev{color:var(--ink-3)}
+.pill{display:inline-flex;align-items:center;font-size:11.5px;font-weight:700;padding:2px 9px;border-radius:20px;white-space:nowrap}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;height:50px;border-radius:14px;background:var(--brand);color:var(--brand-ink);font-weight:700;font-size:15px;width:100%}
+.btn.sec{background:var(--surface);color:var(--ink);border:1px solid var(--line-strong)}
+.btn:disabled{opacity:.5}
+.seg{display:flex;background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:3px;gap:2px}
+.seg button{flex:1;padding:7px 4px;border-radius:9px;font-weight:600;font-size:13px;color:var(--ink-3)}
+.seg button.on{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:13px;font-weight:700;color:var(--ink-2)}
+.input{height:48px;border-radius:12px;border:1px solid var(--line-strong);background:var(--surface);padding:0 14px;width:100%}
+textarea.input{height:auto;padding:12px 14px;resize:none}
+.input:focus{outline:2px solid var(--brand-soft);border-color:var(--brand)}
+.toggle{width:50px;height:30px;border-radius:15px;background:var(--line-strong);position:relative;flex:none;transition:background .2s}
+.toggle::after{content:"";position:absolute;left:3px;top:3px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .2s}
+.toggle.on{background:var(--good)}
+.toggle.on::after{transform:translateX(20px)}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;text-align:center}
+.cal .h{font-size:11px;font-weight:700;color:var(--ink-3)}
+.cal .d{aspect-ratio:1;border-radius:10px;display:grid;place-items:center;font-size:13px;font-weight:600;max-width:100%}
+.cal .P{background:var(--good-soft);color:var(--good)}.cal .A{background:var(--bad);color:#fff}.cal .L{background:var(--warn-soft);color:var(--warn)}.cal .E{background:var(--info-soft);color:var(--info)}.cal .W{color:var(--ink-3)}.cal .F{color:var(--ink-3);border:1px dashed var(--line-strong)}
+.cal .T{outline:2px solid var(--brand)}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--ink-2)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.ring{position:relative;width:84px;height:84px;flex:none}
+.ring svg{transform:rotate(-90deg)}
+.ring b{position:absolute;inset:0;display:grid;place-items:center;font:700 18px var(--f-display)}
+.days{display:flex;gap:6px}
+.days button{flex:1;border-radius:12px;padding:8px 0;background:var(--surface);border:1px solid var(--line);font-weight:700;font-size:13px;display:flex;flex-direction:column;align-items:center;color:var(--ink-2)}
+.days button small{font-size:10.5px;font-weight:600;color:var(--ink-3)}
+.days button.on{background:var(--brand);border-color:var(--brand);color:var(--brand-ink)}
+.days button.on small{color:inherit;opacity:.8}
+.lesson{display:flex;gap:12px;align-items:stretch}
+.lesson time{width:46px;font-size:12px;color:var(--ink-3);font-weight:700;padding-top:12px;text-align:right;flex:none}
+.lesson .c{flex:1;border-radius:14px;padding:12px 14px;border-left:4px solid}
+.lesson .c b{display:block}
+.lesson .c small{color:var(--ink-3)}
+.grade{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;font:700 16px var(--f-display);flex:none}
+.bubble{max-width:80%;padding:10px 14px;border-radius:18px;font-size:14px;background:var(--surface);border:1px solid var(--line)}
+.bubble.me{align-self:flex-end;background:var(--brand);color:var(--brand-ink);border-color:var(--brand);border-bottom-right-radius:6px}
+.bubble:not(.me){border-bottom-left-radius:6px}
+.bubble small{display:block;font-size:11px;opacity:.7;margin-top:2px}
+.composer{flex:none;display:flex;gap:8px;padding:10px 12px 28px;background:var(--surface);border-top:1px solid var(--line)}
+.composer input{flex:1;height:42px;border-radius:21px;border:1px solid var(--line-strong);background:var(--surface-2);padding:0 16px}
+.composer button{width:42px;height:42px;border-radius:50%;background:var(--brand);color:var(--brand-ink);display:grid;place-items:center}
+.news{overflow:hidden}
+.news .img{height:120px;display:flex;align-items:flex-end;padding:12px;color:#fff;font-weight:700;font-size:12px}
+.news .tx{padding:12px 14px}
+.news .tx b{display:block;font-size:15px;line-height:1.3}
+.news .tx small{color:var(--ink-3)}
+.hscroll{display:flex;gap:12px;overflow-x:auto;scrollbar-width:none;margin:0 -16px;padding:2px 16px 6px;scroll-snap-type:x mandatory}
+.hscroll>*{flex:0 0 78%;scroll-snap-align:start}
+.event{display:flex;gap:12px;align-items:center}
+.event .date{width:48px;height:52px;border-radius:12px;background:var(--brand-soft);color:var(--brand);display:flex;flex-direction:column;align-items:center;justify-content:center;flex:none;line-height:1.1}
+.event .date b{font:700 18px var(--f-display)}
+.event .date small{font-size:10.5px;font-weight:700;text-transform:uppercase}
+
+/* Sheet */
+.scrim{position:absolute;inset:0;background:rgba(10,16,32,.4);opacity:0;pointer-events:none;transition:opacity .25s;z-index:30}
+.scrim.on{opacity:1;pointer-events:auto}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:var(--surface);border-radius:26px 26px 0 0;padding:10px 18px 34px;z-index:31;transform:translateY(105%);transition:transform .32s cubic-bezier(.2,.8,.2,1);max-height:88%;overflow-y:auto;display:flex;flex-direction:column;gap:14px}
+.sheet.on{transform:none}
+.grab{width:40px;height:5px;border-radius:3px;background:var(--line-strong);margin:0 auto 4px}
+.paycard{display:flex;align-items:center;gap:12px;padding:14px;border-radius:14px;border:1.5px solid var(--line);width:100%;text-align:left}
+.paycard.on{border-color:var(--brand);background:var(--brand-soft)}
+.paycard .radio{width:20px;height:20px;border-radius:50%;border:2px solid var(--line-strong);flex:none}
+.paycard.on .radio{border:6px solid var(--brand)}
+.success{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;padding:20px 0}
+.success .ok{width:84px;height:84px;border-radius:50%;background:var(--good);color:#fff;display:grid;place-items:center;animation:pop .45s cubic-bezier(.2,1.6,.4,1)}
+@keyframes pop{from{transform:scale(.3);opacity:0}}
+
+/* Push banner */
+.push{position:absolute;left:10px;right:10px;top:52px;z-index:40;background:color-mix(in srgb,var(--surface) 88%,transparent);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-radius:20px;padding:12px 14px;display:flex;gap:12px;align-items:center;box-shadow:0 10px 30px rgba(0,0,0,.2);transform:translateY(-220%);opacity:0;visibility:hidden;transition:transform .4s cubic-bezier(.2,.9,.2,1),opacity .3s,visibility .4s;text-align:left;border:1px solid var(--line)}
+.push.on{transform:none;opacity:1;visibility:visible}
+.push .logo{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,#2F6FED,#12A594);color:#fff;display:grid;place-items:center;font:700 18px var(--f-display);flex:none}
+.push .m{flex:1;min-width:0;font-size:13px}
+.push .m b{display:flex;justify-content:space-between;font-size:13.5px}
+.push .m b small{font-weight:500;color:var(--ink-3)}
+.toast{position:absolute;left:50%;bottom:104px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:13px;font-weight:600;z-index:45;white-space:nowrap;animation:tin .25s;max-width:92%;overflow:hidden;text-overflow:ellipsis}
+@keyframes tin{from{opacity:0;transform:translate(-50%,10px)}}
+
+/* Lock */
+.lock{position:absolute;inset:0;z-index:60;background:linear-gradient(160deg,#14203A 0%,#1F55C7 70%,#12A594 140%);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:110px 28px 60px;text-align:center;transition:opacity .4s,transform .4s}
+.lock.off{opacity:0;transform:scale(1.04);pointer-events:none;visibility:hidden;transition:opacity .4s,transform .4s,visibility 0s .4s}
+.lock .logo{width:76px;height:76px;border-radius:22px;background:rgba(255,255,255,.14);display:grid;place-items:center;font:700 38px var(--f-display);margin:0 auto 18px}
+.lock h1{font:700 30px var(--f-display)}
+.lock p{opacity:.8;margin:6px 0 0}
+.faceid{width:90px;height:90px;border-radius:26px;border:2px solid rgba(255,255,255,.4);display:grid;place-items:center;color:#fff;margin:0 auto 12px}
+.faceid.scan{animation:scan 1s ease-in-out}
+@keyframes scan{50%{border-color:#4CC992;transform:scale(1.06)}}
+
+@media (max-width:520px){
+  .stage{padding:0;display:block}
+  .panel{display:none}
+  .phone{width:100%;height:100%;border-radius:0;padding:0;box-shadow:none;background:var(--bg)}
+  .screen{border-radius:0}
+  .island,.status{display:none}
+  .push{top:12px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="phone"><div class="screen" id="screen">
+    <div class="island"></div>
+    <div class="status"><span class="num">9:41</span><span class="r"><svg width="18" height="12" viewBox="0 0 18 12" fill="currentColor" aria-hidden="true"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5" width="3" height="7" rx="1"/><rect x="10" y="2" width="3" height="10" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg><svg width="26" height="12" viewBox="0 0 26 12" fill="none" aria-hidden="true"><rect x=".5" y=".5" width="22" height="11" rx="3.5" stroke="currentColor" opacity=".4"/><rect x="2" y="2" width="16" height="8" rx="2" fill="currentColor"/><rect x="24" y="4" width="2" height="4" rx="1" fill="currentColor" opacity=".4"/></svg></span></div>
+    <div id="nav"></div>
+    <div class="body" id="body"></div>
+    <div id="composer"></div>
+    <nav class="tabbar" id="tabbar" aria-label="Main"></nav>
+    <div class="scrim" id="scrim" data-act="closeSheet"></div>
+    <div class="sheet" id="sheet" role="dialog" aria-modal="true"></div>
+    <button class="push" id="push" data-act="openPush"></button>
+    <div class="lock" id="lock">
+      <div><div class="logo">e</div><h1>Educo Parent</h1><p>Colombo International School</p></div>
+      <div><button class="faceid" id="faceid" data-act="unlock" aria-label="Unlock with Face ID"><svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 8V5a2 2 0 0 1 2-2h3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M8 21H5a2 2 0 0 1-2-2v-3M9 9v1M15 9v1M12 9v4h-1M9 16c1.5 1 4.5 1 6 0"/></svg></button><p>Tap to unlock with Face ID</p></div>
+    </div>
+  </div></div>
+
+  <aside class="panel" aria-label="Prototype controls">
+    <div><h1>Educo Parent</h1><p>Interactive prototype of the parent mobile app. Tap through it like a real phone. Use these controls to simulate what the school sends.</p></div>
+    <div class="group"><b>Simulate a push notification</b>
+      <button class="pbtn" data-act="sim" data-k="absence"><span>Absence alert · Kavindu not in register</span>→</button>
+      <button class="pbtn" data-act="sim" data-k="reward"><span>Reward · Amaya earned 5 house points</span>→</button>
+      <button class="pbtn" data-act="sim" data-k="invoice"><span>New invoice · Term 1 transport</span>→</button>
+      <button class="pbtn" data-act="sim" data-k="message"><span>Message from class teacher</span>→</button>
+    </div>
+    <div class="group"><b>Jump to</b>
+      <button class="pbtn" data-act="jump" data-to="pay"><span>Pay fees flow</span>→</button>
+      <button class="pbtn" data-act="jump" data-to="attendance"><span>Attendance calendar</span>→</button>
+      <button class="pbtn" data-act="jump" data-to="results"><span>Results & reports</span>→</button>
+      <button class="pbtn" data-act="jump" data-to="absence"><span>Report an absence</span>→</button>
+      <button class="pbtn" data-act="lockApp"><span>Lock the app</span>↺</button>
+    </div>
+    <p style="font-size:13px">Sample data for a fictional family. <a href="admin.html">Open the admin web app</a></p>
+  </aside>
+</div>
+
+<script>
+const P = {
+  home:'<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+  kids:'<path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>',
+  pay:'<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4"/>',
+  msg:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
+  more:'<circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/>',
+  back:'<path d="M15 18l-6-6 6-6"/>', chev:'<path d="M9 18l6-6-6-6"/>',
+  check:'<path d="M20 6 9 17l-5-5"/>', cal:'<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
+  chart:'<path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 6-6"/>', clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  book:'<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/>', star:'<path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/>',
+  file:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/>', alert:'<path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/>',
+  bus:'<rect x="4" y="3" width="16" height="15" rx="2"/><path d="M4 11h16M8 21v-3M16 21v-3"/>', send:'<path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"/>',
+  bell:'<path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/>', user:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+  news:'<path d="M4 4h13v16H6a2 2 0 0 1-2-2z"/><path d="M17 8h3v10a2 2 0 0 1-2 2M8 8h5M8 12h5M8 16h3"/>', phone:'<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/>',
+  lock:'<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>', moon:'<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>',
+  globe:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>', plus:'<path d="M12 5v14M5 12h14"/>',
+  out:'<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>', heart:'<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21.2l8.8-8.8a5.5 5.5 0 0 0 0-7.8z"/>',
+  card:'<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/>', bank:'<path d="M3 21h18M3 10h18M5 6l7-3 7 3M6 10v8M10 10v8M14 10v8M18 10v8"/>',
+  pin:'<path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>', trophy:'<path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/>'
+};
+const ic = (n, s=20, w=2) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${P[n]||''}</svg>`;
+const money = n => 'Rs ' + Math.round(n).toLocaleString('en-US');
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* ---------- Sample family ---------- */
+const KIDS = [
+  {id:'CIS-24100', name:'Amaya Perera', first:'Amaya', grade:'Grade 4 – Emerald', tutor:'Ms. Nadeesha Jayasinghe', color:'#BE185D', att:96.4, arrived:'07:42', points:42,
+   subjects:[['English','A',88,'Excellent creative writing this term.'],['Mathematics','A*',94,'Consistently accurate; try the challenge sheets.'],['Science','A',86,'Great curiosity in experiments.'],['Sinhala','B',72,'Reading fluency is improving.'],['Art','A*',95,'Beautiful use of colour.'],['PE','A',84,'Strong swimmer.']],
+   homework:[['Mathematics','Fractions worksheet p.24','Tomorrow',false],['English','Read chapter 5 of Charlotte’s Web','Thu',false],['Science','Draw the water cycle','Fri',true]]},
+  {id:'CIS-23187', name:'Kavindu Perera', first:'Kavindu', grade:'Grade 9 – Sapphire', tutor:'Mr. Ruwan Mendis', color:'#0E7490', att:91.8, arrived:'07:55', points:28,
+   subjects:[['English','B',74,'Needs more detail in analytical essays.'],['Mathematics','A',85,'Solid algebra; revise geometry proofs.'],['Physics','A',82,'Good practical work.'],['Chemistry','B',71,'Learn the reactivity series.'],['ICT','A*',96,'Outstanding Python project.'],['History','C',63,'Submit coursework on time.']],
+   homework:[['ICT','Database design task','Tomorrow',false],['History','Source analysis essay','Wed',false],['Chemistry','Balancing equations quiz','Fri',false]]}
+];
+const S = {
+  tab:'home', stack:[], kid:0, sheet:null, payMethod:'card', ttDay:1, attMonth:0, resultView:'term',
+  invoices:[
+    {no:'INV-26-01043', kid:0, title:'Term 1 tuition & levies', amt:310000, paid:0, due:'10 Oct', status:'Due'},
+    {no:'INV-26-01044', kid:1, title:'Term 1 tuition & levies', amt:350000, paid:350000, due:'10 Oct', status:'Paid'},
+    {no:'INV-26-01120', kid:1, title:'Transport · Route 4', amt:42000, paid:0, due:'15 Oct', status:'Due'}
+  ],
+  trips:[{t:'Pinnawala Elephant Orphanage', k:0, d:'Thu 23 Oct', cost:6500, consent:false},{t:'Science Olympiad – Kandy', k:1, d:'Sat 8 Nov', cost:12000, consent:true}],
+  threads:[
+    {id:1, from:'Ms. Nadeesha Jayasinghe', role:'Class teacher · Amaya', unread:1, msgs:[{me:false,t:'Good morning! Amaya did brilliantly in today’s spelling test. Please keep up the reading at home.',at:'08:10'}]},
+    {id:2, from:'Finance Office', role:'Colombo International School', unread:0, msgs:[{me:false,t:'Your payment of Rs 350,000 for Kavindu has been received. Thank you.',at:'Mon'}]},
+    {id:3, from:'Mr. Ruwan Mendis', role:'Form tutor · Kavindu', unread:0, msgs:[{me:false,t:'Reminder: the Science Olympiad consent form is due Friday.',at:'Sun'},{me:true,t:'Thank you, signed in the app just now.',at:'Sun'}]}
+  ],
+  subs:{absence:true, rewards:true, finance:true, news:true, sms:false}, faceid:true, notifs:3
+};
+try { const t = localStorage.getItem('educo-parent-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+const kid = () => KIDS[S.kid];
+const av = (n, c, cls='') => `<div class="av ${cls}" style="background:${c}">${n.split(' ').map(w=>w[0]).slice(0,2).join('')}</div>`;
+const kidSwitch = () => `<div class="kids" role="tablist" aria-label="Choose child">${KIDS.map((k, i) => `<button class="kid ${i===S.kid?'on':''}" data-act="kid" data-i="${i}" role="tab">${av(k.name, k.color, 'sm')}${k.first}</button>`).join('')}</div>`;
+const pill = (t, tone) => `<span class="pill ${tone}">${t}</span>`;
+const row = (icon, tone, title, sub, right='', act='', extra='') => `<button class="row" ${act}>${icon?`<div class="ico ${tone}">${ic(icon,19)}</div>`:''}<div class="m"><b>${title}</b>${sub?`<small>${sub}</small>`:''}</div>${right?`<div class="r">${right}</div>`:''}${extra}<span class="chev">${ic('chev',18)}</span></button>`;
+const sec = (t, link='', act='') => `<div class="sec-h"><h2>${t}</h2>${link?`<button ${act}>${link}</button>`:''}</div>`;
+
+/* ---------- Screens ---------- */
+const SCR = {};
+SCR.home = () => {
+  const k = kid(), due = S.invoices.filter(i => i.amt > i.paid);
+  return { big:'Good morning, Dilhani', right:`<button class="back" data-act="push" data-to="notifications" aria-label="Notifications" style="position:relative">${ic('bell',18)}${S.notifs?'<span style="position:absolute;top:6px;right:7px;width:8px;height:8px;border-radius:50%;background:var(--bad)"></span>':''}</button>`, body: `
+  ${kidSwitch()}
+  <div class="card hero"><small>${k.grade} · Monday 5 Oct</small><div class="big">${k.first} arrived at school at ${k.arrived}</div>
+    <div class="stats"><div><b class="num">${k.att}%</b>Attendance</div><div><b class="num">${k.points}</b>House points</div><div><b class="num">${k.homework.filter(h=>!h[3]).length}</b>Homework due</div></div></div>
+  ${due.length ? `<button class="card alert" data-act="push" data-to="pay" style="text-align:left;width:100%"><div class="ico t-amber">${ic('pay',19)}</div><div class="m"><b>${money(due.reduce((a, i) => a + i.amt - i.paid, 0))} due</b>${due.length} invoice${due.length>1?'s':''} · next due ${due[0].due}</div><span class="pill t-amber">Pay now</span></button>` : `<div class="card alert"><div class="ico t-green">${ic('check',19)}</div><div class="m"><b>All fees paid</b>Nothing due right now</div></div>`}
+  <div class="qa">
+    <button data-act="push" data-to="attendance"><span class="i t-green">${ic('cal',22)}</span>Attendance</button>
+    <button data-act="push" data-to="results"><span class="i t-blue">${ic('chart',22)}</span>Results</button>
+    <button data-act="push" data-to="timetable"><span class="i t-violet">${ic('clock',22)}</span>Timetable</button>
+    <button data-act="push" data-to="homework"><span class="i t-amber">${ic('book',22)}</span>Homework</button>
+    <button data-act="push" data-to="absence"><span class="i t-red">${ic('alert',22)}</span>Report absence</button>
+    <button data-act="push" data-to="conduct"><span class="i t-green">${ic('star',22)}</span>Rewards</button>
+    <button data-act="push" data-to="trips"><span class="i t-blue">${ic('bus',22)}</span>Trips</button>
+    <button data-act="push" data-to="reports"><span class="i t-violet">${ic('file',22)}</span>Reports</button>
+  </div>
+  ${sec('Coming up', 'Calendar', 'data-act="push" data-to="calendar"')}
+  <div class="card">${[['08','Oct','Parent–teacher meeting','Grade 4 · 4:00 pm · Main hall'],['18','Oct','Open day','All day · Campus tours'],['23','Oct','Pinnawala field trip','Grade 4 · consent needed']].map(([d,m,t,s]) => `<div class="row event"><div class="date"><b>${d}</b><small>${m}</small></div><div class="m"><b>${t}</b><small>${s}</small></div></div>`).join('')}</div>
+  ${sec('School news', 'See all', 'data-act="push" data-to="news"')}
+  <div class="hscroll">${NEWS.map((n, i) => `<button class="card news" data-act="push" data-to="article" data-i="${i}" style="text-align:left"><div class="img" style="background:${n.bg}">${n.tag}</div><div class="tx"><b>${n.t}</b><small>${n.d}</small></div></button>`).join('')}</div>` };
+};
+const NEWS = [
+  {t:'Under-14 swimmers win the inter-school championship', d:'2 Oct · Sport', tag:'SPORT', bg:'linear-gradient(135deg,#0E7490,#12A594)', body:'Our Under-14 squad brought home six golds at the Colombo inter-school swimming championship, with Grade 9’s relay team setting a new meet record.'},
+  {t:'New STEM lab opens for Grades 6–13', d:'28 Sep · Facilities', tag:'CAMPUS', bg:'linear-gradient(135deg,#2F6FED,#8B5CF6)', body:'The new lab includes robotics kits, 3D printers and a dedicated electronics bench. Students will use it in ICT and Physics lessons from Week 7.'},
+  {t:'Term 1 parent–teacher meetings', d:'25 Sep · Academics', tag:'NOTICE', bg:'linear-gradient(135deg,#B45309,#E8A33D)', body:'Book a 10-minute slot with each teacher from the Calendar tab. Meetings run from 8 to 10 October, 3:30–6:00 pm.'}
+];
+SCR.children = () => ({ big:'My children', body: `${KIDS.map((k, i) => `<div class="card"><div class="row" style="border:0">${av(k.name, k.color, 'lg')}<div class="m"><b style="font:700 19px var(--f-display)">${k.name}</b><small>${k.grade} · ${k.id}</small><small>Tutor: ${k.tutor}</small></div></div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line);text-align:center">${[['Attendance',k.att+'%'],['Points',k.points],['Avg. mark',Math.round(k.subjects.reduce((a,s)=>a+s[2],0)/k.subjects.length)+'%']].map(([l,v]) => `<div style="padding:10px 4px"><b class="num" style="font-size:16px">${v}</b><div style="font-size:11.5px;color:var(--ink-3)">${l}</div></div>`).join('')}</div>
+    <div style="border-top:1px solid var(--line)">${[['cal','t-green','Attendance','attendance'],['chart','t-blue','Results & assessments','results'],['clock','t-violet','Timetable','timetable'],['book','t-amber','Homework','homework'],['star','t-green','Rewards & conduct','conduct'],['file','t-violet','School reports','reports'],['heart','t-red','Medical & contacts','medical']].map(([icn,t,l,to]) => row(icn, t, l, '', '', `data-act="push" data-to="${to}" data-kid="${i}"`)).join('')}</div></div>`).join('')}` });
+
+SCR.attendance = () => {
+  const k = kid(); const first = 1; // September 2026 starts on a Tuesday (Monday-first index 1)
+  const absent = S.kid ? [9, 22] : [14], late = S.kid ? [2, 16] : [29], exc = S.kid ? [] : [22];
+  let cells = ['M','T','W','T','F','S','S'].map(d => `<div class="h">${d}</div>`).join('') + '<div></div>'.repeat(first);
+  for (let d = 1; d <= 30; d++) { const dow = (first + d - 1) % 7; let c = dow >= 5 ? 'W' : 'P';
+    if (absent.includes(d)) c = 'A'; else if (late.includes(d)) c = 'L'; else if (exc.includes(d)) c = 'E';
+    const lab = {P:'Present',A:'Absent',L:'Late',E:'Excused',W:'Weekend'}[c];
+    cells += `<div class="d ${c}" title="${d} Sep: ${lab}">${d}</div>`; }
+  const pct = k.att, C = 2 * Math.PI * 36;
+  return { title:`${k.first} · Attendance`, body: `${kidSwitch()}
+  <div class="card pad" style="display:flex;gap:16px;align-items:center"><div class="ring"><svg width="84" height="84"><circle cx="42" cy="42" r="36" fill="none" stroke="var(--line)" stroke-width="8"/><circle cx="42" cy="42" r="36" fill="none" stroke="var(--good)" stroke-width="8" stroke-linecap="round" stroke-dasharray="${C*pct/100} ${C}"/></svg><b class="num">${Math.round(pct)}%</b></div>
+  <div style="flex:1"><b style="font-size:16px">This term</b><div style="font-size:13px;color:var(--ink-3)">School target is 95%. ${pct >= 95 ? `${k.first} is above target.` : `${k.first} is ${(95-pct).toFixed(1)} points below target.`}</div></div></div>
+  <div class="card pad" style="display:flex;flex-direction:column;gap:12px"><div style="display:flex;justify-content:space-between;align-items:center"><b>September 2026</b><span style="font-size:12px;color:var(--ink-3)">Today: present, arrived ${k.arrived}</span></div>
+  <div class="cal">${cells}</div>
+  <div class="legend"><span><i style="background:var(--good)"></i>Present</span><span><i style="background:var(--bad)"></i>Absent</span><span><i style="background:var(--warn)"></i>Late</span><span><i style="background:var(--info)"></i>Excused</span></div></div>
+  ${sec('Recent records')}
+  <div class="card">${(S.kid ? [['A','t-red','Absent · 22 Sep','Unexplained · tap to give a reason'],['L','t-amber','Late · 16 Sep','Arrived 08:21 · traffic'],['E','t-red','Absent · 9 Sep','Illness · reported by parent']] : [['L','t-amber','Late · 29 Sep','Arrived 08:12 · dentist'],['E','t-violet','Excused · 22 Sep','Religious observance'],['A','t-red','Absent · 14 Sep','Illness · reported by parent']]).map(([c,t,a,b]) => row('cal', t, a, b, '', c==='A'&&S.kid?'data-act="push" data-to="absence"':'')).join('')}</div>
+  <button class="btn sec" data-act="push" data-to="absence">${ic('alert',18)}Report an absence</button>` };
+};
+
+SCR.results = () => {
+  const k = kid(), tone = g => g.startsWith('A') ? 't-green' : g === 'B' ? 't-blue' : 't-amber';
+  const avg = Math.round(k.subjects.reduce((a, s) => a + s[2], 0) / k.subjects.length);
+  return { title:`${k.first} · Results`, body: `${kidSwitch()}
+  <div class="seg" role="tablist">${[['term','Term 1 grades'],['trend','Progress']].map(([v,l]) => `<button class="${S.resultView===v?'on':''}" data-act="rv" data-v="${v}">${l}</button>`).join('')}</div>
+  ${S.resultView === 'term' ? `<div class="card pad" style="display:flex;justify-content:space-between;align-items:center"><div><small style="color:var(--ink-3)">Average mark</small><div class="num" style="font:700 30px var(--f-display)">${avg}%</div></div><div style="text-align:right"><small style="color:var(--ink-3)">Class average</small><div class="num" style="font:700 20px var(--f-display);color:var(--ink-2)">${avg - 6}%</div></div></div>
+  <div class="card">${k.subjects.map(([n, g, m, c]) => `<details class="row" style="display:block"><summary style="display:flex;gap:12px;align-items:center;list-style:none;cursor:pointer"><div class="grade ${tone(g)}">${g}</div><div class="m"><b>${n}</b><small>${m}% · Mid-term assessment</small></div><span class="chev">${ic('chev',18)}</span></summary><p style="margin:10px 0 2px 54px;font-size:13.5px;color:var(--ink-2)">“${c}”</p></details>`).join('')}</div>`
+  : `<div class="card pad"><b>Average mark by term</b><div style="font-size:12px;color:var(--ink-3);margin-bottom:8px">${k.first} compared with the class average</div>${trend(k)}<div class="legend" style="margin-top:8px"><span><i style="background:var(--brand)"></i>${k.first}</span><span><i style="background:var(--ink-3)"></i>Class average</span></div></div>`}
+  <button class="btn sec" data-act="push" data-to="reports">${ic('file',18)}View full school reports</button>` };
+};
+function trend(k) {
+  const base = Math.round(k.subjects.reduce((a, s) => a + s[2], 0) / k.subjects.length);
+  const me = [base - 9, base - 5, base - 6, base - 2, base], cls = [base - 10, base - 9, base - 8, base - 8, base - 6], L = ['T1 25','T2 25','T3 25','Mid','T1 26'];
+  const W = 320, H = 150, l = 30, r = 12, t = 12, b = 24, x = i => l + i * (W - l - r) / 4, y = v => t + (H - t - b) * (1 - (v - 50) / 50);
+  let g = ''; [50, 75, 100].forEach(v => g += `<line x1="${l}" x2="${W-r}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${l-6}" y="${y(v)+4}" text-anchor="end" font-size="10" fill="var(--ink-3)">${v}</text>`);
+  L.forEach((s, i) => g += `<text x="${x(i)}" y="${H-6}" text-anchor="middle" font-size="10" fill="var(--ink-3)">${s}</text>`);
+  g += `<polyline points="${cls.map((v, i) => `${x(i)},${y(v)}`).join(' ')}" fill="none" stroke="var(--ink-3)" stroke-width="2" stroke-dasharray="4 4"/>`;
+  g += `<polyline points="${me.map((v, i) => `${x(i)},${y(v)}`).join(' ')}" fill="none" stroke="var(--brand)" stroke-width="2.5" stroke-linejoin="round"/>`;
+  me.forEach((v, i) => g += `<circle cx="${x(i)}" cy="${y(v)}" r="${i===4?5:3.5}" fill="var(--brand)" stroke="var(--surface)" stroke-width="2"><title>${L[i]}: ${v}%</title></circle>`);
+  g += `<text x="${x(4)}" y="${y(me[4])-10}" text-anchor="end" font-size="11" font-weight="700" fill="var(--ink)">${me[4]}%</text>`;
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Average mark trend">${g}</svg>`;
+}
+
+SCR.timetable = () => {
+  const k = kid(); const days = [['Mon',5],['Tue',6],['Wed',7],['Thu',8],['Fri',9]];
+  const colors = ['#2F6FED','#12A594','#8B5CF6','#B45309','#BE185D','#0E7490'];
+  const L = k.subjects.map((s, i) => [s[0], colors[i % colors.length]]);
+  const rot = S.ttDay; const lessons = ['08:00','08:40','09:20','10:20','11:00','11:40'].map((t, i) => [t, ...L[(i + rot) % L.length], ['Room 12','Lab 2','Room 4','Studio','Pool','Room 9'][(i + rot) % 6]]);
+  return { title:`${k.first} · Timetable`, body: `${kidSwitch()}
+  <div class="days">${days.map(([d, n], i) => `<button class="${S.ttDay===i?'on':''}" data-act="ttDay" data-i="${i}"><small>${d}</small>${n}</button>`).join('')}</div>
+  ${lessons.map(([t, n, c, room], i) => `${i===3?'<div style="text-align:center;font-size:12px;color:var(--ink-3);font-weight:700;letter-spacing:.08em">INTERVAL · 10:00</div>':''}<div class="lesson"><time>${t}</time><div class="c" style="border-color:${c};background:color-mix(in srgb, ${c} 10%, var(--surface))"><b>${n}</b><small>${room} · 40 min</small></div></div>`).join('')}` };
+};
+
+SCR.homework = () => { const k = kid(); return { title:`${k.first} · Homework`, body: `${kidSwitch()}
+  <div class="card">${k.homework.map(([s, t, d, done], i) => `<label class="row" style="cursor:pointer"><input type="checkbox" data-act="hw" data-i="${i}" ${done?'checked':''} style="width:22px;height:22px;accent-color:var(--good)"><div class="m"><b style="${done?'text-decoration:line-through;color:var(--ink-3)':''}">${t}</b><small>${s} · due ${d}</small></div>${done?pill('Done','t-green'):pill(d,'t-amber')}</label>`).join('')}</div>
+  <p style="font-size:12.5px;color:var(--ink-3);margin:0 4px">Ticking a task only marks it at home. Teachers see submissions in the LMS.</p>` }; };
+
+SCR.conduct = () => { const k = kid(); return { title:`${k.first} · Rewards`, body: `${kidSwitch()}
+  <div class="card pad" style="display:flex;gap:14px;align-items:center"><div class="ico t-amber" style="width:56px;height:56px;border-radius:16px">${ic('trophy',28)}</div><div><div class="num" style="font:700 28px var(--f-display)">${k.points}</div><small style="color:var(--ink-3)">House points this term · ${S.kid?'Sapphire':'Emerald'} house is 2nd</small></div></div>
+  <div class="card">${[['star','t-green','+5 · Science fair project','Ms. Jayasinghe · 2 Oct'],['star','t-green','Merit certificate · Mathematics','Mr. Mendis · 24 Sep'],['alert','t-amber','Late to class','Form tutor · 18 Sep'],['star','t-green','+3 · Helping a classmate','Class teacher · 11 Sep']].map(a => row(...a)).join('')}</div>` }; };
+
+SCR.reports = () => { const k = kid(); return { title:`${k.first} · Reports`, body: `${kidSwitch()}
+  <div class="card">${[['Term 1 mid-term report','Published 3 Oct 2026','New'],['Term 3 end-of-year report','Published 4 Apr 2026',''],['Term 2 report','Published 12 Dec 2025',''],['Cambridge checkpoint results','Published 20 Aug 2025','']].map(([t,d,n]) => row('file','t-violet',t,d, n?pill(n,'t-blue'):'', 'data-act="toast" data-msg="Opening PDF report…"')).join('')}</div>` }; };
+
+SCR.medical = () => { const k = kid(); return { title:`${k.first} · Medical`, body: `
+  <div class="card">${row('heart','t-red','Allergies', S.kid?'None recorded':'Mild peanut allergy · EpiPen in sick bay')}${row('file','t-blue','Immunisations','Up to date · checked Aug 2026')}${row('user','t-violet','Emergency contact','Ruwan Perera · +94 77 412 8890')}</div>
+  <button class="btn sec" data-act="push" data-to="contact">Update details</button>` }; };
+
+SCR.absence = () => ({ title:'Report an absence', body: `
+  <div class="field"><label>Child</label>${kidSwitch()}</div>
+  <form id="absForm" style="display:flex;flex-direction:column;gap:14px">
+  <div class="field"><label for="a_from">From</label><input class="input" id="a_from" type="date" value="2026-10-06"></div>
+  <div class="field"><label for="a_to">To</label><input class="input" id="a_to" type="date" value="2026-10-06"></div>
+  <div class="field"><label for="a_r">Reason</label><select class="input" id="a_r"><option>Illness</option><option>Medical appointment</option><option>Family event</option><option>Religious observance</option><option>Other</option></select></div>
+  <div class="field"><label for="a_n">Note for the class teacher</label><textarea class="input" id="a_n" rows="3" placeholder="e.g. Fever since last night, will return Wednesday"></textarea></div>
+  <button class="btn" type="submit">${ic('send',18)}Send to school</button></form>` });
+
+SCR.trips = () => ({ title:'Trips & bookings', body: S.trips.map((t, i) => `<div class="card pad" style="display:flex;flex-direction:column;gap:10px"><div style="display:flex;gap:12px;align-items:center"><div class="ico t-blue">${ic('bus',19)}</div><div style="flex:1"><b>${t.t}</b><div style="font-size:12.5px;color:var(--ink-3)">${KIDS[t.k].first} · ${t.d} · ${money(t.cost)}</div></div>${t.consent?pill('Booked','t-green'):pill('Action needed','t-amber')}</div>
+  ${t.consent ? '' : `<label style="display:flex;gap:10px;font-size:13.5px;align-items:flex-start"><input type="checkbox" id="consent${i}" style="width:20px;height:20px;accent-color:var(--brand);margin-top:1px">I give consent for ${KIDS[t.k].first} to attend and confirm the medical details are current.</label><button class="btn" data-act="trip" data-i="${i}">Sign & pay ${money(t.cost)}</button>`}</div>`).join('') });
+
+SCR.pay = () => { const open = S.invoices.filter(i => i.amt > i.paid), paid = S.invoices.filter(i => i.amt <= i.paid); const total = open.reduce((a, i) => a + i.amt - i.paid, 0);
+  return { big:'Payments', body: `
+  <div class="card hero" style="background:linear-gradient(140deg,#14203A,#1F55C7)"><small>Outstanding balance</small><div class="big num">${money(total)}</div>
+    ${total ? `<button class="btn" style="background:#fff;color:#14203A;position:relative;z-index:1" data-act="paySheet">${ic('card',18)}Pay all</button>` : '<div style="position:relative;z-index:1;font-weight:600">You’re all paid up. Thank you!</div>'}</div>
+  ${open.length ? sec('Due') + `<div class="card">${open.map(i => row('file','t-amber', i.title, `${KIDS[i.kid].first} · ${i.no} · due ${i.due}`, `<b class="num" style="color:var(--ink)">${money(i.amt - i.paid)}</b>`, `data-act="paySheet" data-no="${i.no}"`)).join('')}</div>` : ''}
+  ${sec('Trips & bookings', 'Open', 'data-act="push" data-to="trips"')}
+  <div class="card">${S.trips.map(t => row('bus','t-blue', t.t, `${KIDS[t.k].first} · ${t.d}`, t.consent?pill('Booked','t-green'):pill('Consent','t-amber'), 'data-act="push" data-to="trips"')).join('')}</div>
+  ${sec('History')}
+  <div class="card">${paid.map(i => row('check','t-green', i.title, `${KIDS[i.kid].first} · ${i.no}`, `<span class="num">${money(i.amt)}</span>`, 'data-act="toast" data-msg="Receipt saved to Files"')).join('')}${row('check','t-green','Term 3 tuition & levies','Amaya · INV-25-00412','<span class="num">Rs 298,000</span>')}</div>` }; };
+
+SCR.inbox = () => ({ big:'Messages', right:`<button class="back" data-act="newMsg" aria-label="New message">${ic('plus',18)}</button>`, body: `
+  <div class="card">${S.threads.map(t => `<button class="row" data-act="push" data-to="thread" data-id="${t.id}">${av(t.from, t.id===2?'#14203A':t.id===1?'#BE185D':'#0E7490')}<div class="m"><b>${t.from}</b><small>${esc(t.msgs[t.msgs.length-1].t)}</small></div><div class="r">${t.msgs[t.msgs.length-1].at}${t.unread?`<div style="margin-top:4px"><span class="pill" style="background:var(--brand);color:var(--brand-ink)">${t.unread}</span></div>`:''}</div></button>`).join('')}</div>
+  ${sec('School bulletins')}
+  <div class="card">${[['Swimming heats moved to Friday','Sport · today'],['Uniform shop: extended hours','Admin · yesterday'],['Exam timetable – Grade 9 & 10','Academics · 1 Oct']].map(([t,d]) => row('news','t-violet',t,d,'','data-act="toast" data-msg="Bulletin opened"')).join('')}</div>` });
+
+SCR.thread = (p) => { const t = S.threads.find(x => x.id === +p.id) || S.threads[0]; t.unread = 0;
+  return { title: t.from, sub: t.role, composer: true, body: `<div style="text-align:center;font-size:11.5px;color:var(--ink-3)">Messages are visible to school staff and kept for 2 years.</div>${t.msgs.map(m => `<div class="bubble ${m.me?'me':''}">${esc(m.t)}<small>${m.at}</small></div>`).join('')}` }; };
+
+SCR.more = () => ({ big:'More', body: `
+  <div class="card"><div class="row" style="border:0">${av('Dilhani Perera','#2F6FED','lg')}<div class="m"><b style="font:700 19px var(--f-display)">Dilhani Perera</b><small>dilhani.perera@example.lk</small><small>Parent of Amaya and Kavindu</small></div></div></div>
+  ${sec('Information')}
+  <div class="card">${row('cal','t-blue','School calendar','Term dates, events, holidays','', 'data-act="push" data-to="calendar"')}${row('news','t-violet','News','Stories from campus','', 'data-act="push" data-to="news"')}${row('phone','t-green','Staff directory','Contact the right person','', 'data-act="push" data-to="directory"')}</div>
+  ${sec('Account')}
+  <div class="card">${row('user','t-blue','Contact details','Address, phone, email','', 'data-act="push" data-to="contact"')}${row('bell','t-amber','Notifications','Choose what the school sends you','', 'data-act="push" data-to="subs"')}
+    <div class="row"><div class="ico t-violet">${ic('lock',19)}</div><div class="m"><b>Face ID</b><small>Unlock the app with Face ID</small></div><button class="toggle ${S.faceid?'on':''}" data-act="faceid" role="switch" aria-checked="${S.faceid}" aria-label="Face ID"></button></div>
+    <div class="row"><div class="ico t-blue">${ic('moon',19)}</div><div class="m"><b>Dark mode</b><small>Follows your phone unless set here</small></div><button class="toggle ${isDark()?'on':''}" data-act="theme" role="switch" aria-checked="${isDark()}" aria-label="Dark mode"></button></div>
+    ${row('globe','t-green','Language','English · සිංහල · தமிழ்')}</div>
+  <button class="btn sec" data-act="lockApp" style="color:var(--bad)">${ic('out',18)}Sign out</button>
+  <p style="text-align:center;font-size:12px;color:var(--ink-3);margin:0">Educo Parent 1.0 · Colombo International School</p>` });
+
+SCR.calendar = () => ({ title:'School calendar', body: `<div class="card">${[['06','Oct','Report absence deadline','Term 1 attendance review'],['08','Oct','Parent–teacher meetings','8–10 Oct · 3:30–6:00 pm'],['10','Oct','Term 1 fees due','Pay in the app'],['18','Oct','Open day','All day'],['23','Oct','Grade 4 Pinnawala trip','Consent required'],['31','Oct','Deepavali holiday','School closed'],['08','Nov','Science Olympiad','Kandy · Grade 9'],['12','Dec','Term 1 ends','Reports published 15 Dec']].map(([d,m,t,s]) => `<div class="row event"><div class="date"><b>${d}</b><small>${m}</small></div><div class="m"><b>${t}</b><small>${s}</small></div><button data-act="toast" data-msg="Added to your phone calendar" aria-label="Add to calendar" style="color:var(--brand)">${ic('plus',20)}</button></div>`).join('')}</div>` });
+SCR.news = () => ({ title:'News', body: NEWS.map((n, i) => `<button class="card news" data-act="push" data-to="article" data-i="${i}" style="text-align:left;width:100%"><div class="img" style="background:${n.bg};height:140px">${n.tag}</div><div class="tx"><b>${n.t}</b><small>${n.d}</small></div></button>`).join('') });
+SCR.article = (p) => { const n = NEWS[+p.i || 0]; return { title:'News', body: `<div class="card news"><div class="img" style="background:${n.bg};height:180px">${n.tag}</div><div class="tx" style="display:flex;flex-direction:column;gap:10px;padding:16px"><small>${n.d}</small><h2 style="font:700 22px/1.2 var(--f-display)">${n.t}</h2><p style="margin:0;color:var(--ink-2)">${n.body}</p></div></div>` }; };
+SCR.directory = () => ({ title:'Staff directory', body: `<input class="input" id="dirSearch" placeholder="Search staff or department" aria-label="Search staff"><div class="card" id="dirList">${dirRows('')}</div>` });
+const STAFF = [['Mrs. Shanthi Wickramasinghe','Principal'],['Ms. Nadeesha Jayasinghe','Grade 4 class teacher'],['Mr. Ruwan Mendis','Grade 9 form tutor · Mathematics'],['Finance Office','Fees, invoices and receipts'],['Admissions Office','Enquiries and enrolment'],['Sick bay','School nurse · 8 am – 3 pm'],['Transport desk','Bus routes and changes']];
+const dirRows = q => STAFF.filter(s => (s[0] + s[1]).toLowerCase().includes(q.toLowerCase())).map(([n, r]) => `<button class="row" data-act="toast" data-msg="Message started with ${esc(n)}">${av(n,'#2F6FED','sm')}<div class="m"><b>${n}</b><small>${r}</small></div><span style="color:var(--brand)">${ic('msg',18)}</span></button>`).join('') || '<div class="pad" style="color:var(--ink-3)">No staff match that search.</div>';
+SCR.contact = () => ({ title:'Contact details', body: `<form id="contactForm" style="display:flex;flex-direction:column;gap:14px">
+  <div class="field"><label for="c_ph">Mobile</label><input class="input" id="c_ph" type="tel" value="+94 77 412 8890"></div>
+  <div class="field"><label for="c_em">Email</label><input class="input" id="c_em" type="email" value="dilhani.perera@example.lk"></div>
+  <div class="field"><label for="c_ad">Home address</label><textarea class="input" id="c_ad" rows="3">27 Nawala Road, Rajagiriya</textarea></div>
+  <p style="font-size:12.5px;color:var(--ink-3);margin:0">The school office reviews changes before they reach student records.</p>
+  <button class="btn" type="submit">Submit changes</button></form>` });
+SCR.subs = () => ({ title:'Notifications', body: `<div class="card">${[['absence','Attendance alerts','Absence and late arrivals'],['rewards','Rewards & conduct','House points, merits, detentions'],['finance','Fees & payments','Invoices, receipts, reminders'],['news','News & bulletins','School stories and notices'],['sms','SMS backup','Also send urgent alerts by text']].map(([k, t, s]) => `<div class="row"><div class="m"><b>${t}</b><small>${s}</small></div><button class="toggle ${S.subs[k]?'on':''}" data-act="sub" data-k="${k}" role="switch" aria-checked="${S.subs[k]}" aria-label="${t}"></button></div>`).join('')}</div>` });
+SCR.notifications = () => { S.notifs = 0; return { title:'Notifications', body: `<div class="card">${[['check','t-green','Amaya arrived at school','07:42 · gate scan'],['star','t-green','Kavindu earned a merit','ICT · Outstanding Python project · Yesterday'],['pay','t-amber','Invoice due in 5 days','Term 1 tuition · Rs 310,000'],['news','t-violet','New bulletin','Swimming heats moved to Friday']].map(a => row(...a)).join('')}</div>` }; };
+
+/* ---------- Render ---------- */
+const ROOTS = {home:'home', children:'children', pay:'pay', inbox:'inbox', more:'more'};
+const isDark = () => { const r = document.documentElement.dataset.theme; return r ? r === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches; };
+function current() { return S.stack.length ? S.stack[S.stack.length - 1] : {to: S.tab, p: {}}; }
+function render(dir) {
+  const c = current(); const s = SCR[c.to](c.p || {});
+  const nav = document.getElementById('nav');
+  if (s.big) nav.innerHTML = `<div class="nav big"><div class="row">${S.stack.length ? `<button class="back" data-act="pop" aria-label="Back">${ic('back',20)}</button>` : ''}<h1>${s.big}</h1>${s.right || ''}</div></div>`;
+  else nav.innerHTML = `<div class="nav"><button class="back" data-act="pop" aria-label="Back">${ic('back',20)}</button><div class="t">${s.title}${s.sub?`<div style="font-size:11.5px;font-weight:500;color:var(--ink-3)">${s.sub}</div>`:''}</div></div>`;
+  const body = document.getElementById('body'); body.className = 'body' + (dir ? ' in-' + dir : ''); body.innerHTML = s.body;
+  if (s.composer) { body.style.gap = '10px'; body.scrollTop = 1e6; } else { body.style.gap = ''; body.scrollTop = 0; }
+  document.getElementById('composer').innerHTML = s.composer ? `<form class="composer" id="composerForm"><input id="msgIn" placeholder="Write a message" autocomplete="off" aria-label="Message"><button aria-label="Send">${ic('send',18)}</button></form>` : '';
+  const unread = S.threads.reduce((a, t) => a + t.unread, 0), due = S.invoices.filter(i => i.amt > i.paid).length;
+  document.getElementById('tabbar').innerHTML = [['home','Home','home'],['children','Children','kids'],['pay','Payments','pay', due],['inbox','Messages','msg', unread],['more','More','more']]
+    .map(([k, l, i, b]) => `<button class="${S.tab===k?'on':''}" data-act="tab" data-t="${k}" aria-current="${S.tab===k?'page':'false'}">${ic(i,23,S.tab===k?2.3:1.8)}${l}${b?`<span class="badge">${b}</span>`:''}</button>`).join('');
+  bindScreen();
+}
+function bindScreen() {
+  const af = document.getElementById('absForm'); if (af) af.onsubmit = e => { e.preventDefault(); pop(); toast(`Absence reported for ${kid().first}. The class teacher has been told.`); };
+  const cf = document.getElementById('contactForm'); if (cf) cf.onsubmit = e => { e.preventDefault(); pop(); toast('Changes sent to the school office for review'); };
+  const mf = document.getElementById('composerForm'); if (mf) mf.onsubmit = e => { e.preventDefault(); const v = document.getElementById('msgIn').value.trim(); if (!v) return; const t = S.threads.find(x => x.id === +current().p.id) || S.threads[0]; t.msgs.push({me:true, t:v, at:'Now'}); render();
+    setTimeout(() => { if (current().to !== 'thread') return; t.msgs.push({me:false, t:'Thank you, I’ll get back to you before the end of the school day.', at:'Now'}); render(); }, 1600); };
+  const ds = document.getElementById('dirSearch'); if (ds) ds.oninput = () => document.getElementById('dirList').innerHTML = dirRows(ds.value);
+}
+function push(to, p={}) { S.stack.push({to, p}); render('r'); }
+function pop() { S.stack.pop(); render('l'); }
+let tt; function toast(m) { document.querySelectorAll('.toast').forEach(t => t.remove()); const t = document.createElement('div'); t.className = 'toast'; t.textContent = m; document.getElementById('screen').appendChild(t); clearTimeout(tt); tt = setTimeout(() => t.remove(), 2600); }
+
+/* ---------- Payment sheet ---------- */
+function openSheet(html) { const sh = document.getElementById('sheet'); sh.innerHTML = '<div class="grab"></div>' + html; sh.classList.add('on'); document.getElementById('scrim').classList.add('on'); }
+function closeSheet() { document.getElementById('sheet').classList.remove('on'); document.getElementById('scrim').classList.remove('on'); }
+function paySheet(no) {
+  const list = no ? S.invoices.filter(i => i.no === no) : S.invoices.filter(i => i.amt > i.paid); const total = list.reduce((a, i) => a + i.amt - i.paid, 0);
+  S.paying = {list: list.map(i => i.no), total};
+  openSheet(`<h2 style="font:700 20px var(--f-display)">Pay ${money(total)}</h2>
+    <div style="font-size:13px;color:var(--ink-3)">${list.map(i => `${KIDS[i.kid].first} · ${i.title}`).join('<br>')}</div>
+    <div style="display:flex;flex-direction:column;gap:8px">${[['card','card','Visa •••• 4821','Expires 08/28'],['bank','bank','Bank transfer','Commercial Bank · instant'],['new','plus','Add a new card','Visa, Mastercard, Amex']].map(([k, i, t, s]) => `<button class="paycard ${S.payMethod===k?'on':''}" data-act="method" data-k="${k}"><div class="ico t-blue">${ic(i,19)}</div><div style="flex:1"><b style="display:block">${t}</b><small style="color:var(--ink-3)">${s}</small></div><span class="radio"></span></button>`).join('')}</div>
+    <button class="btn" data-act="confirmPay" id="payBtn">${ic('lock',18)}Pay ${money(total)} securely</button>
+    <div style="text-align:center;font-size:11.5px;color:var(--ink-3)">Payments are processed by the school’s payment gateway. You’ll get a receipt by email.</div>`);
+}
+function confirmPay() {
+  const b = document.getElementById('payBtn'); b.disabled = true; b.textContent = 'Processing…';
+  setTimeout(() => { S.invoices.forEach(i => { if (S.paying.list.includes(i.no)) { i.paid = i.amt; i.status = 'Paid'; } });
+    openSheet(`<div class="success"><div class="ok">${ic('check',44,3)}</div><h2 style="font:700 22px var(--f-display)">Payment successful</h2><div style="color:var(--ink-3)">${money(S.paying.total)} paid · Receipt RCP-${8840 + Math.floor(Math.random()*90)}</div></div><button class="btn" data-act="closeSheet">Done</button>`); render(); }, 1200);
+}
+
+/* ---------- Push simulation ---------- */
+const PUSHES = {
+  absence:{t:'Attendance alert', m:'Kavindu was not in the 08:00 register. Tap to give a reason.', go:() => { S.kid = 1; S.tab = 'home'; S.stack = [{to:'absence', p:{}}]; }},
+  reward:{t:'Reward earned ⭐', m:'Amaya earned 5 house points for her science fair project.', go:() => { S.kid = 0; S.tab = 'children'; S.stack = [{to:'conduct', p:{}}]; }},
+  invoice:{t:'New invoice', m:'Transport · Route 4 for Kavindu · Rs 42,000 due 15 Oct.', go:() => { S.invoices.forEach(i => { if (i.no === 'INV-26-01120') { i.paid = 0; } }); S.tab = 'pay'; S.stack = []; }},
+  message:{t:'Ms. Nadeesha Jayasinghe', m:'Amaya did brilliantly in today’s spelling test!', go:() => { S.tab = 'inbox'; S.stack = [{to:'thread', p:{id:1}}]; }}
+};
+let pushKey = null, pushT;
+function simulate(k) {
+  if (document.getElementById('lock').classList.contains('off') === false) unlock();
+  const p = PUSHES[k]; pushKey = k; const el = document.getElementById('push');
+  if (k === 'message') { const t = S.threads[0]; t.unread++; t.msgs.push({me:false, t:p.m, at:'Now'}); }
+  el.innerHTML = `<div class="logo">e</div><div class="m"><b>${p.t}<small>now</small></b>${p.m}</div>`;
+  el.classList.add('on'); clearTimeout(pushT); pushT = setTimeout(() => el.classList.remove('on'), 5000); render();
+}
+
+/* ---------- Actions ---------- */
+const ACT = {
+  tab: el => { S.tab = el.dataset.t; S.stack = []; render(); },
+  push: el => { if (el.dataset.kid) S.kid = +el.dataset.kid; push(el.dataset.to, {...el.dataset}); },
+  pop, closeSheet,
+  kid: el => { S.kid = +el.dataset.i; render(); },
+  rv: el => { S.resultView = el.dataset.v; render(); },
+  ttDay: el => { S.ttDay = +el.dataset.i; render(); },
+  hw: el => { kid().homework[+el.dataset.i][3] = el.checked; render(); if (el.checked) toast('Marked as done'); },
+  toast: el => toast(el.dataset.msg),
+  paySheet: el => paySheet(el.dataset.no),
+  method: el => { S.payMethod = el.dataset.k; document.querySelectorAll('.paycard').forEach(c => c.classList.toggle('on', c.dataset.k === S.payMethod)); },
+  confirmPay,
+  trip: el => { const i = +el.dataset.i; if (!document.getElementById('consent' + i).checked) { toast('Tick the consent box to continue'); return; } S.trips[i].consent = true; render(); toast(`Booked · ${money(S.trips[i].cost)} paid`); },
+  sub: el => { const k = el.dataset.k; S.subs[k] = !S.subs[k]; el.classList.toggle('on'); el.setAttribute('aria-checked', S.subs[k]); },
+  faceid: el => { S.faceid = !S.faceid; el.classList.toggle('on'); },
+  theme: () => { const r = document.documentElement; r.dataset.theme = isDark() ? 'light' : 'dark'; try { localStorage.setItem('educo-parent-theme', r.dataset.theme); } catch (e) {} render(); },
+  newMsg: () => openSheet(`<h2 style="font:700 20px var(--f-display)">New message</h2><div class="field"><label for="nm_to">To</label><select class="input" id="nm_to">${STAFF.map(s => `<option>${s[0]}</option>`).join('')}</select></div><div class="field"><label for="nm_b">Message</label><textarea class="input" id="nm_b" rows="4" placeholder="Write your message"></textarea></div><button class="btn" data-act="sendNew">${ic('send',18)}Send</button>`),
+  sendNew: () => { const to = document.getElementById('nm_to').value, b = document.getElementById('nm_b').value.trim(); if (!b) { toast('Write a message before sending'); return; }
+    const id = S.threads.length + 1; S.threads.unshift({id, from: to, role:'Colombo International School', unread:0, msgs:[{me:true, t:b, at:'Now'}]}); closeSheet(); S.tab = 'inbox'; S.stack = [{to:'thread', p:{id}}]; render('r'); },
+  unlock, lockApp: () => { closeSheet(); document.getElementById('lock').classList.remove('off'); },
+  sim: el => simulate(el.dataset.k),
+  openPush: () => { const p = PUSHES[pushKey]; if (!p) return; document.getElementById('push').classList.remove('on'); closeSheet(); p.go(); render('r'); },
+  jump: el => { unlock(); closeSheet(); const to = el.dataset.to; if (to === 'pay') { S.tab = 'pay'; S.stack = []; render(); setTimeout(() => paySheet(), 250); } else { S.tab = 'home'; S.stack = [{to, p:{}}]; render('r'); } }
+};
+function unlock() { const f = document.getElementById('faceid'); f.classList.add('scan'); setTimeout(() => { document.getElementById('lock').classList.add('off'); f.classList.remove('scan'); }, 600); }
+document.addEventListener('click', e => { const el = e.target.closest('[data-act]'); if (!el || !ACT[el.dataset.act]) return; if (el.matches('input')) return; ACT[el.dataset.act](el, e); });
+document.addEventListener('change', e => { if (e.target.matches('[data-act="hw"]')) ACT.hw(e.target); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSheet(); });
+render();
+</script>
+</body>
+</html>
