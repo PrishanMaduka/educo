@@ -424,12 +424,12 @@ td.r,th.r{text-align:right}
 .ad-top h2{font:700 24px/1.15 var(--f-display);margin:2px 0 6px}
 .ad-meta{display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:13px;color:var(--ink-2)}
 .ad-actions{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0 18px}
-.ad-steps{list-style:none;margin:0;padding:0 0 16px;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));position:relative}
+.ad-steps{list-style:none;margin:0;padding:0 0 16px;display:grid;grid-template-columns:repeat(var(--n,6),minmax(0,1fr));position:relative}
 .ad-steps li{position:relative;text-align:center}
 .ad-steps li::before{content:"";position:absolute;top:14px;left:-50%;width:100%;height:3px;background:var(--line);z-index:0}
 .ad-steps li:first-child::before{display:none}
 .ad-steps li.done::before,.ad-steps li.cur::before{background:var(--brand)}
-.ad-steps button{background:none;border:0;display:flex;flex-direction:column;align-items:center;gap:4px;width:100%;position:relative;z-index:1;padding:0;color:var(--ink-3)}
+.ad-steps button,.ad-steps .st{background:none;border:0;display:flex;flex-direction:column;align-items:center;gap:4px;width:100%;position:relative;z-index:1;padding:0;color:var(--ink-3)}
 .ad-steps i{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-weight:800;font-size:12px;background:var(--surface);border:2px solid var(--line-strong);color:var(--ink-3)}
 .ad-steps li.done i{background:var(--brand);border-color:var(--brand);color:#fff}
 .ad-steps li.cur i{border-color:var(--brand);color:var(--brand);box-shadow:0 0 0 5px var(--brand-soft);animation:adPulse 2s infinite}
@@ -536,6 +536,11 @@ td.r,th.r{text-align:right}
 .drawer.form .drawer-f{background:var(--surface);padding:14px 22px;border-top:1px solid var(--line)}
 .drawer.form .err-msg:empty{display:none}
 @media (max-width:600px){.drawer.form .drawer-h{padding:18px 16px 14px}.drawer.form .drawer-b{padding:14px}.fd-ic{width:40px;height:40px}}
+
+.drawer.form .drawer-h{flex-wrap:wrap}
+.drawer.form .drawer-h .fd-steps{flex-basis:100%;margin-top:18px;padding-bottom:2px}
+.drawer.form > .steps{display:none}
+@media (max-width:600px){.fd-steps span{font-size:10px}.fd-steps small{display:none}}
 </style>
 </head>
 <body>
@@ -1570,6 +1575,9 @@ function formDrawer(html, cls = '') {
   const all = hd ? hd.textContent : '', m = FORM_META.find(([p]) => t.startsWith(p) || all.includes(p)) || ['', 'plus', '', false];
   if (hd) { hd.insertAdjacentHTML('afterbegin', `<span class="fd-ic">${ic(m[1], 20)}</span>`); if (m[2]) h2.insertAdjacentHTML('beforebegin', `<div class="eyebrow">${m[2]}</div>`); }
   if (m[3]) drawer.classList.add('danger');
+  const st = drawer.querySelector(':scope > .steps');
+  if (st && hd) { const items = [...st.children], cur = items.reduce((a, el, i) => el.classList.contains('on') ? i : a, 0);
+    hd.insertAdjacentHTML('beforeend', `<ol class="ad-steps fd-steps" style="--n:${items.length}" aria-label="Steps">${items.map((el, i) => `<li class="${i < cur ? 'done' : i === cur ? 'cur' : ''}" ${i === cur ? 'aria-current="step"' : ''}><div class="st"><i>${i < cur ? ic('check', 12) : i + 1}</i><span>${el.textContent.replace(/^\d+\.\s*/, '')}</span><small>${i < cur ? 'Done' : i === cur ? 'Now' : ''}</small></div></li>`).join('')}</ol>`); }
   const b = drawer.querySelector('.drawer-b');
   if (b && !b.querySelector(':scope > .fd-card')) { const w = document.createElement('div'); w.className = 'fd-card'; while (b.firstChild) w.appendChild(b.firstChild); b.appendChild(w); const err = w.querySelector(':scope > .err-msg'); if (err) b.appendChild(err); }
   setTimeout(() => { const f = drawer.querySelector('.drawer-b input:not([type=checkbox]):not([type=file]):not([type=radio]),.drawer-b select,.drawer-b textarea'); if (f) f.focus(); }, 120);
