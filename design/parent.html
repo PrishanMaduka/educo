@@ -384,6 +384,15 @@ input[type=range]{width:100%;accent-color:var(--brand)}
 }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 .rep-ready{display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:0;padding:12px 14px;cursor:pointer;color:var(--ink)}.rep-ready .ic{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;flex:none}.rep-ready span:nth-child(2){flex:1}.rep-ready small{display:block;color:var(--ink-3);font-size:12px}
+
+.todo .row{border-bottom:1px solid var(--line)}.todo .row:last-child{border:0}
+.pe-mine{display:flex;flex-direction:column;gap:6px;margin-top:10px}.pe-mine div{display:flex;gap:10px;align-items:center;background:var(--good-soft,rgba(19,138,91,.12));border-radius:12px;padding:8px 10px;font-size:13px}.pe-mine b{min-width:44px}.pe-mine span{flex:1}.pe-mine button{border:0;background:none;color:var(--ink-3);display:grid}
+.pe-t{display:flex;flex-direction:column;gap:10px}.pe-slots{display:flex;flex-wrap:wrap;gap:6px}
+.pe-slots button{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:6px 8px;font-size:12.5px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--ink)}
+.pe-slots button.taken{background:var(--surface-2,#eef1f6);color:var(--ink-3);text-decoration:line-through;border-color:transparent}.pe-slots button.clash{color:var(--ink-3)}.pe-slots button.me{background:var(--good,#138A5B);border-color:var(--good,#138A5B);color:#fff}.pe-slots button:disabled{cursor:default}.pe-slots button:disabled:not(.taken):not(.me){opacity:.4}.pe-slots button:not(:disabled):hover{border-color:var(--brand)}
+.seg2{display:grid;grid-template-columns:1fr 1fr;gap:6px}.seg2 button{border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:10px;font-weight:700;font-size:13.5px;color:var(--ink)}.seg2 button.on{background:var(--brand);border-color:var(--brand);color:#fff}
+.inp{border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:14px;background:var(--surface);color:var(--ink);width:100%}
+.ferr{color:var(--bad,#C83A2E);font-size:12.5px;min-height:1px}
 </style>
 </head>
 <body>
@@ -503,7 +512,7 @@ const KIDS = [
    subjects:[['English','B',74,'Needs more detail in analytical essays.'],['Mathematics','A',85,'Solid algebra; revise geometry proofs.'],['Physics','A',82,'Good practical work.'],['Chemistry','B',71,'Learn the reactivity series.'],['ICT','A*',96,'Outstanding Python project.'],['History','C',63,'Submit coursework on time.']],
    homework:[['ICT','Database design task','Tomorrow',false],['History','Source analysis essay','Wed',false],['Chemistry','Balancing equations quiz','Fri',false]]}
 ];
-const S = {
+const S = {fAns: {}, 
   tab:'home', stack:[], kid:0, sheet:null, payMethod:'card', ttDay:1, attMonth:0, resultView:'term',
   invoices:[
     {no:'INV-26-01043', kid:0, title:'Term 1 tuition & levies', amt:310000, paid:0, due:'10 Oct', status:'Due'},
@@ -564,6 +573,43 @@ function busLine() {
 }
 /* Reports published from the staff portal for this child's class */
 function pubReport(k) { try { const r = JSON.parse(localStorage.getItem('quad-reports') || 'null'); return r && r.classes && r.classes.includes(acadText(k.grade)) ? r : null; } catch (e) { return null; } }
+/* ---------- From the staff portal: parents' evenings, forms, exams, payment methods ---------- */
+const lsGetP = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k) || 'null'); return v == null ? d : v; } catch (e) { return d; } };
+const lsSetP = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
+const seedP = s => { let h = 7; for (const c of String(s)) h = (h * 31 + c.charCodeAt(0)) % 2147483647; return () => (h = (h * 16807) % 2147483647) / 2147483647; };
+const hmP = m => `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`, toMinP = t => +t.slice(0, 2) * 60 + +t.slice(3, 5);
+const kidClass = k => acadText(k.grade), kidYear = k => kidClass(k).split(' – ')[0];
+const PE_DEFAULT = [{id:'pe1', title:'Parents’ evening', classes:[acadText('Grade 4 – Emerald'), acadText('Grade 4 – Ruby')], date:'2026-10-15', start:'16:00', end:'19:00', slot:10, open:true, teachers:[{name:'Nadeesha Jayasinghe', subj:'English, Mathematics, Science', classes:[acadText('Grade 4 – Emerald')], ct:true},{name:'Ishani De Alwis', subj:'Art & Design', classes:[acadText('Grade 4 – Emerald')]},{name:'Chaminda Herath', subj:'Physical Ed.', classes:[acadText('Grade 4 – Emerald')]},{name:'Malsha Silva', subj:'Music', classes:[acadText('Grade 4 – Emerald')]}]}];
+const peEvents = () => lsGetP('quad-pe', PE_DEFAULT);
+const peFor = k => peEvents().find(e => e.open && e.classes.includes(kidClass(k)));
+const peSlots = e => { const out = []; for (let m = toMinP(e.start); m + e.slot <= toMinP(e.end); m += e.slot) out.push(hmP(m)); return out; };
+const formsFor = k => lsGetP('quad-forms', []).filter(f => f.years.includes('All') || f.years.includes(kidYear(k)));
+const formDone = (f, k) => ((lsGetP('quad-form-replies', {}))[f.id] || {})[k.id];
+const examsFor = k => lsGetP('quad-exams', []).map(se => ({...se, papers: se.papers.filter(p => p.year === kidYear(k)).sort((a, b) => (a.date + a.sess).localeCompare(b.date + b.sess))})).filter(se => se.papers.length);
+const dP = d => new Date(d + 'T00:00').toLocaleDateString('en-GB', {weekday:'short', day:'numeric', month:'short'});
+SCR.evening = () => { const k = kid(), e = peFor(k);
+  if (!e) return {title:'Parents’ evening', body:`${kidSwitch()}<div class="card pad" style="font-size:14px">No parents’ evening is open for ${k.first}’s class at the moment. We’ll let you know when booking opens.</div>`};
+  const book = lsGetP('quad-pe-book', {}), mine = Object.entries(book).filter(([key, who]) => key.startsWith(e.id + '|') && who === 'Dilhani Perera'), mineAt = new Set(mine.map(([key]) => key.split('|')[2]));
+  const ts = e.teachers.filter(t => t.classes.includes(kidClass(k)));
+  return {title:'Parents’ evening', body:`${kidSwitch()}
+  <div class="card pad"><b style="font:700 18px var(--f-display)">${esc(e.title)}</b><div style="font-size:13px;color:var(--ink-3)">${dP(e.date)} · ${e.start}–${e.end} · ${e.slot} minutes with each teacher</div>
+    ${mine.length ? `<div class="pe-mine">${mine.sort((a, b) => a[0].split('|')[2].localeCompare(b[0].split('|')[2])).map(([key]) => { const [, tn, at] = key.split('|'); return `<div><b class="num">${at}</b><span>${esc(tn)}</span><button data-act="peCancel" data-key="${esc(key)}" aria-label="Cancel ${at} with ${esc(tn)}">${ic('x',14)}</button></div>`; }).join('')}</div>` : '<div style="font-size:13px;margin-top:8px">Tap a time under each teacher you’d like to see.</div>'}</div>
+  ${ts.map(t => { const have = mine.find(([key]) => key.split('|')[1] === t.name); return `<div class="card pad pe-t"><div style="display:flex;gap:10px;align-items:center">${av(t.name, t.ct ? '#2F6FED' : '#12A594')}<div style="flex:1;min-width:0"><b>${esc(t.name)}</b><small style="display:block;color:var(--ink-3)">${t.ct ? 'Class teacher · ' : ''}${esc(t.subj)}</small></div>${have ? pill('Booked ' + have[0].split('|')[2], 't-green') : ''}</div>
+    <div class="pe-slots">${peSlots(e).map(at => { const key = `${e.id}|${t.name}|${at}`, who = book[key], other = !who && (r => (r(), r(), r() < .42))(seedP(e.id + t.name + at)), me = who === 'Dilhani Perera', clash = !me && mineAt.has(at);
+      return `<button class="${me ? 'me' : other || who ? 'taken' : clash ? 'clash' : ''}" ${(other || (who && !me) || clash || (have && !me)) ? 'disabled' : ''} data-act="peBook" data-key="${esc(key)}" aria-label="${at}${me ? ', your booking' : other || who ? ', taken' : ''}">${at}</button>`; }).join('')}</div></div>`; }).join('')}`}; };
+SCR.forms = () => { const k = kid(), fs = formsFor(k);
+  return {title:'Forms', body:`${kidSwitch()}${fs.length ? fs.map(f => { const d = formDone(f, k); return `<div class="card pad" style="display:flex;flex-direction:column;gap:10px"><div style="display:flex;gap:12px;align-items:center"><div class="ico ${d ? 't-green' : 't-amber'}">${ic(d ? 'check' : 'file',19)}</div><div style="flex:1"><b>${esc(f.title)}</b><div style="font-size:12.5px;color:var(--ink-3)">${esc(f.kind)} · reply by ${dP(f.deadline)}${f.amount ? ' · ' + money(f.amount) : ''}</div></div></div>
+    <div style="font-size:13.5px">${esc(f.q)}</div>
+    ${d ? `<div style="font-size:13px;color:var(--good);font-weight:700">${d.ok ? 'You said yes' : 'You said no'} · signed ${esc(d.sig)}, ${esc(d.at)}</div>` : `<div class="seg2" role="radiogroup" aria-label="Your answer"><button class="${S.fAns[f.id] === true ? 'on' : ''}" data-act="fAns" data-id="${f.id}" data-v="1">Yes, I agree</button><button class="${S.fAns[f.id] === false ? 'on' : ''}" data-act="fAns" data-id="${f.id}" data-v="0">No</button></div>
+      <label style="font-size:12.5px;color:var(--ink-3)" for="sig-${f.id}">Type your full name to sign</label><input class="inp" id="sig-${f.id}" placeholder="Dilhani Perera" autocomplete="name">
+      <button class="btn" data-act="fSign" data-id="${f.id}">Sign and send${f.amount && S.fAns[f.id] ? ' · ' + money(f.amount) + ' added to Payments' : ''}</button><div class="ferr" id="ferr-${f.id}" role="alert"></div>`}</div>`; }).join('') : '<div class="card pad" style="font-size:14px">Nothing to sign right now.</div>'}`}; };
+SCR.exams = () => { const k = kid(), list = examsFor(k);
+  return {title:'Exams', body:`${kidSwitch()}${list.length ? list.map(se => `${sec(esc(se.name))}<div class="card">${se.papers.map(p => row('', '', `${esc(p.subj)} · ${esc(p.paper)}`, `${dP(p.date)} · ${p.sess === 'AM' ? 'Morning 08:30' : 'Afternoon 12:30'} · ${Math.floor(p.dur / 60)}h${p.dur % 60 ? ' ' + p.dur % 60 + 'm' : ''} · ${esc(p.room)}`, '')).join('')}</div>`).join('') + '<div style="font-size:12px;color:var(--ink-3);text-align:center">Arrive 15 minutes early with a clear pencil case.</div>' : `<div class="card pad" style="font-size:14px">${k.first}’s exam timetable hasn’t been published yet.</div>`}`}; };
+const todoFor = k => { const out = [], e = peFor(k), fs = formsFor(k).filter(f => !formDone(f, k)), ex = examsFor(k);
+  if (fs.length) out.push(['forms', 't-amber', 'file', `${fs.length} form${fs.length > 1 ? 's' : ''} to sign`, fs[0].title]);
+  if (e && !Object.entries(lsGetP('quad-pe-book', {})).some(([key, w]) => key.startsWith(e.id + '|') && w === 'Dilhani Perera')) out.push(['evening', 't-blue', 'cal', 'Book parents’ evening', `${dP(e.date)} · ${e.start}–${e.end}`]);
+  if (ex.length) out.push(['exams', 't-violet', 'book', 'Exam timetable published', ex[0].name]);
+  return out; };
 SCR.home = () => {
   const k = kid(), L = LIVE[S.kid], due = S.invoices.filter(i => i.amt > i.paid), hw = k.homework.filter(h => !h[3]).length;
   const qa = [['attendance','t-green','cal','Attendance'],['results','t-blue','chart','Results'],['timetable','t-violet','clock','Timetable'],['homework','t-amber','book','Homework'],
@@ -573,6 +619,7 @@ SCR.home = () => {
   <div class="stories" aria-label="School stories">${STORIES.map((st, i) => `<button class="story ${st.seen?'seen':''}" data-act="story" data-i="${i}"><span class="ring-s"><span style="background:${st.slides[0].bg}">${ic(st.icon,24)}</span></span>${st.name}</button>`).join('')}</div>
   ${kidSwitch()}
   ${pubReport(k) ? `<button class="card rep-ready" data-act="push" data-to="reports"><span class="ic t-blue">${ic('file',20)}</span><span><b>${k.first}’s ${pubReport(k).cycle} is ready</b><small>${pubReport(k).year} · tap to read</small></span>${ic('chev',18)}</button>` : ''}
+  ${todoFor(k).length ? `<div class="card todo">${todoFor(k).map(([to, tn, i, t, sub]) => row(i, tn, esc(t), esc(sub), ic('chev',18), `data-act="push" data-to="${to}"`)).join('')}</div>` : ''}
   <div class="card hero ${S.heroAnim?'slide-'+S.heroAnim:''}" id="hero"><small>${k.grade} · Monday 5 Oct</small><div class="big">${k.first} arrived at school at ${k.arrived}</div>
     <div class="stats"><div><b class="num" data-count="${k.att}" data-dec="1" data-suf="%">${k.att}%</b>Attendance</div><div><b class="num" data-count="${k.points}">${k.points}</b>House points</div><div><b class="num" data-count="${hw}">${hw}</b>Homework due</div></div></div>
   <div class="dots" aria-hidden="true">${KIDS.map((_, i) => `<i class="${i===S.kid?'on':''}"></i>`).join('')}</div>
@@ -794,6 +841,8 @@ function sendMsg(v) {
 
 SCR.more = () => ({ big:'More', body: `
   <div class="card"><div class="row" style="border:0">${av('Dilhani Perera','#2F6FED','lg')}<div class="m"><b style="font:700 19px var(--f-display)">Dilhani Perera</b><small>dilhani.perera@example.lk</small><small>Parent of Amaya and Kavindu</small></div></div></div>
+  ${sec('School life')}
+  <div class="card">${row('cal','t-blue','Parents’ evening','Book times with teachers','', 'data-act="push" data-to="evening"')}${row('file','t-amber','Forms','Consent and sign-ups','', 'data-act="push" data-to="forms"')}${row('book','t-violet','Exams','Exam timetable','', 'data-act="push" data-to="exams"')}</div>
   ${sec('Information')}
   <div class="card">${row('cal','t-blue','School calendar','Term dates, events, holidays','', 'data-act="push" data-to="calendar"')}${row('news','t-violet','News','Stories from campus','', 'data-act="push" data-to="news"')}${row('phone','t-green','Staff directory','Contact the right person','', 'data-act="push" data-to="directory"')}</div>
   ${sec('Account')}
@@ -857,7 +906,7 @@ function paySheet(no) {
   S.paying = {list: list.map(i => i.no), total};
   openSheet(`<h2 style="font:700 20px var(--f-display)">Pay ${money(total)}</h2>
     <div style="font-size:13px;color:var(--ink-3)">${list.map(i => `${KIDS[i.kid].first} · ${i.title}`).join('<br>')}</div>
-    <div style="display:flex;flex-direction:column;gap:8px">${[['card','card','Visa •••• 4821','Expires 08/28'],['bank','bank','Bank transfer','Commercial Bank · instant'],['new','plus','Add a new card','Visa, Mastercard, Amex']].map(([k, i, t, s]) => `<button class="paycard ${S.payMethod===k?'on':''}" data-act="method" data-k="${k}"><div class="ico t-blue">${ic(i,19)}</div><div style="flex:1"><b style="display:block">${t}</b><small style="color:var(--ink-3)">${s}</small></div><span class="radio"></span></button>`).join('')}</div>
+    <div style="display:flex;flex-direction:column;gap:8px">${(() => { const g = lsGetP('quad-payments', {gw:{payhere:true, stripe:false, bank:true}, plans:true}); return [...(g.gw.payhere ? [['card','card','Visa •••• 4821','PayHere · expires 08/28'],['new','plus','Add a card or wallet','PayHere · Visa, Mastercard, Amex, Genie']] : []), ...(g.gw.stripe ? [['intl','card','International card','Stripe · Apple Pay and Google Pay']] : []), ...(g.gw.bank ? [['bank','bank','Bank transfer','Reference matched automatically']] : []), ...(g.plans ? [['plan','cal','Pay in 3 instalments','First payment today, then monthly']] : [])]; })().map(([k, i, t, s]) => `<button class="paycard ${S.payMethod===k?'on':''}" data-act="method" data-k="${k}"><div class="ico t-blue">${ic(i,19)}</div><div style="flex:1"><b style="display:block">${t}</b><small style="color:var(--ink-3)">${s}</small></div><span class="radio"></span></button>`).join('')}</div>
     <div class="slider" id="slider"><div class="fill" id="sfill"></div><div class="lbl" id="slbl">Slide to pay ${money(total)}</div><button class="knob" id="knob" aria-label="Slide to pay ${money(total)}. Press Enter to pay.">${ic('arrow',22,2.4)}</button></div>
     <div style="text-align:center;font-size:11.5px;color:var(--ink-3)">Payments are processed by the school’s payment gateway. You’ll get a receipt by email.</div>`);
   const sl = document.getElementById('slider'), kn = document.getElementById('knob'), fill = document.getElementById('sfill'), lbl = document.getElementById('slbl'); const max = () => sl.clientWidth - 58;
@@ -1074,6 +1123,14 @@ const ACT = {
   hw: el => { kid().homework[+el.dataset.i][3] = el.checked; render(); if (el.checked) toast('Marked as done'); },
   toast: el => toast(el.dataset.msg),
   paySheet: el => paySheet(el.dataset.no),
+  peBook: el => { const key = el.dataset.key, b = lsGetP('quad-pe-book', {}); b[key] = 'Dilhani Perera'; lsSetP('quad-pe-book', b); render(); const [, tn, at] = key.split('|'); toast(`Booked ${at} with ${tn}`); },
+  peCancel: el => { const b = lsGetP('quad-pe-book', {}); delete b[el.dataset.key]; lsSetP('quad-pe-book', b); render(); toast('Appointment cancelled'); },
+  fAns: el => { S.fAns[el.dataset.id] = el.dataset.v === '1'; const inp = document.getElementById('sig-' + el.dataset.id), v = inp ? inp.value : ''; render(); const i2 = document.getElementById('sig-' + el.dataset.id); if (i2) i2.value = v; },
+  fSign: el => { const id = el.dataset.id, k = kid(), sig = (document.getElementById('sig-' + id).value || '').trim(), err = document.getElementById('ferr-' + id);
+    if (S.fAns[id] === undefined) { err.textContent = 'Choose yes or no first.'; return; } if (sig.split(/\s+/).length < 2) { err.textContent = 'Type your first and last name to sign.'; return; }
+    const r = lsGetP('quad-form-replies', {}); r[id] = r[id] || {}; r[id][k.id] = {ok: S.fAns[id], sig, child: k.name, at: new Date().toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'})}; lsSetP('quad-form-replies', r);
+    const f = lsGetP('quad-forms', []).find(x => x.id === id); if (f && f.amount && S.fAns[id]) S.invoices.push({no: 'INV-F-' + id.slice(-4), kid: S.kid, title: f.title, amt: f.amount, paid: 0, due: f.deadline});
+    render(); toast(S.fAns[id] ? 'Signed. The school has your consent.' : 'Sent. The school knows your answer.'); },
   method: el => { S.payMethod = el.dataset.k; document.querySelectorAll('.paycard').forEach(c => c.classList.toggle('on', c.dataset.k === S.payMethod)); },
   confirmPay,
   trip: el => { const i = +el.dataset.i; if (!document.getElementById('consent' + i).checked) { toast('Tick the consent box to continue'); return; } S.trips[i].consent = true; render(); toast(`Booked · ${money(S.trips[i].cost)} paid`); },
@@ -1118,7 +1175,7 @@ document.addEventListener('click', e => { if (dragged) { e.preventDefault(); ret
 document.addEventListener('change', e => { if (e.target.matches('[data-act="hw"]')) ACT.hw(e.target); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeSheet(); closeStory(); } if (SV && document.activeElement?.id !== 'svIn') { if (e.key === 'ArrowRight') storyStep(1); if (e.key === 'ArrowLeft') storyStep(-1); } });
 applySchoolP();
-window.addEventListener('storage', e => { if (e.key === 'quad-reports') { render(); return; } if (e.key === 'quad-school') { try { const x = JSON.parse(e.newValue || 'null'); if (x && x.acad && JSON.stringify(x.acad.stages.flatMap(y => y.years)) !== JSON.stringify(PLV)) { location.reload(); return; } } catch (er) {} applySchoolP(); render(); } });
+window.addEventListener('storage', e => { if (['quad-reports', 'quad-pe', 'quad-pe-book', 'quad-forms', 'quad-exams', 'quad-payments'].includes(e.key)) { render(); return; } if (e.key === 'quad-school') { try { const x = JSON.parse(e.newValue || 'null'); if (x && x.acad && JSON.stringify(x.acad.stages.flatMap(y => y.years)) !== JSON.stringify(PLV)) { location.reload(); return; } } catch (er) {} applySchoolP(); render(); } });
 render();
 if (!paSignedIn()) paShow();
 </script>
