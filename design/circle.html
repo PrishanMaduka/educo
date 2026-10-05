@@ -1,0 +1,541 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Quad Circle</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+<style>
+/* Layout: the child is the amber centre of the Quad mark; school (blue) and family (teal) form the ring. One live stage, three linked views. */
+:root{
+  --ground:#F1F4FA; --surface:#FFFFFF; --sunk:#E8EDF6; --ink:#14203A; --ink-2:#47536E; --ink-3:#7D89A3; --line:#DCE3EF;
+  --school:#2F6FED; --school-soft:#E3ECFE; --family:#0F9384; --family-soft:#DDF4F0; --child:#E8A33D; --child-soft:#FBEBD3; --care:#C2410C; --care-soft:#FCE7DC;
+  --phone:#0E1626; --shadow:0 24px 60px -28px rgba(20,32,58,.35);
+  --f-display:"Bricolage Grotesque", "Plus Jakarta Sans", system-ui, sans-serif;
+  --f-body:"Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --ground:#0C1322; --surface:#141E33; --sunk:#1B2740; --ink:#E9EEF8; --ink-2:#B3BED4; --ink-3:#7F8BA6; --line:#26324D;
+  --school:#6F9BFF; --school-soft:#1B2B52; --family:#2CC2AE; --family-soft:#123A38; --child:#F0B25A; --child-soft:#3A2C14; --care:#F08B5A; --care-soft:#3B2016;
+  --phone:#05080F; --shadow:0 24px 60px -28px rgba(0,0,0,.7); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --ground:#0C1322; --surface:#141E33; --sunk:#1B2740; --ink:#E9EEF8; --ink-2:#B3BED4; --ink-3:#7F8BA6; --line:#26324D;
+  --school:#6F9BFF; --school-soft:#1B2B52; --family:#2CC2AE; --family-soft:#123A38; --child:#F0B25A; --child-soft:#3A2C14; --care:#F08B5A; --care-soft:#3B2016;
+  --phone:#05080F; --shadow:0 24px 60px -28px rgba(0,0,0,.7); color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--ground);color:var(--ink);font:15px/1.55 var(--f-body);-webkit-font-smoothing:antialiased}
+button,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--school);outline-offset:2px}
+.wrap{max-width:1240px;margin:0 auto;padding-inline:20px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;letter-spacing:-.02em}
+.eyebrow{font-size:11.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+.num{font-variant-numeric:tabular-nums}
+.muted{color:var(--ink-3)}
+
+/* Top */
+.top{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-block:18px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-family:var(--f-display);font-size:19px;text-decoration:none;color:var(--ink)}
+.brand svg{width:30px;height:30px}
+.top nav{display:flex;gap:6px;flex-wrap:wrap}
+.top nav a{font-size:13px;font-weight:700;color:var(--ink-2);text-decoration:none;padding:6px 10px;border-radius:8px}
+.top nav a:hover{background:var(--sunk)}
+
+/* Thesis */
+.thesis{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:40px;align-items:end;padding-block:28px 26px}
+.thesis h1{font-size:clamp(40px,6.4vw,84px);line-height:.95;font-weight:800;letter-spacing:-.045em}
+.thesis h1 .dot{display:inline-block;width:.32em;height:.32em;border-radius:50%;background:var(--child);vertical-align:.08em;margin-left:.06em}
+.thesis h1 em{font-style:normal;color:var(--school)}
+.thesis p{margin:0;max-width:52ch;color:var(--ink-2);font-size:16.5px}
+.legend-k{display:flex;gap:16px;flex-wrap:wrap;margin-top:14px;font-size:13px;font-weight:600;color:var(--ink-2)}
+.legend-k span{display:inline-flex;align-items:center;gap:7px}.legend-k i{width:10px;height:10px;border-radius:50%}
+
+/* Stage */
+.stage{display:grid;grid-template-columns:320px minmax(0,1fr) 320px;gap:22px;align-items:start;padding-block:6px 30px}
+.pane-l{display:flex;flex-direction:column;gap:10px;align-items:center;min-width:0}
+.pane-l > .eyebrow{display:flex;gap:8px;align-items:center}
+.pane-l > .eyebrow i{width:8px;height:8px;border-radius:50%}
+.phone{width:300px;max-width:100%;height:620px;background:var(--phone);border-radius:42px;padding:10px;box-shadow:var(--shadow);position:relative}
+.screen{height:100%;border-radius:33px;overflow:hidden;background:var(--ground);display:flex;flex-direction:column;position:relative}
+.sbar{display:flex;justify-content:space-between;align-items:center;padding:10px 20px 4px;font-size:12px;font-weight:800}
+.sbar .notch{width:84px;height:22px;border-radius:12px;background:var(--phone)}
+.app-h{padding:6px 16px 10px;display:flex;align-items:center;gap:10px}
+.app-h b{font-family:var(--f-display);font-size:19px;letter-spacing:-.02em;display:block;line-height:1.1}
+.app-h small{color:var(--ink-3);font-size:12px}
+.app-b{flex:1;overflow-y:auto;padding:0 12px 12px;display:flex;flex-direction:column;gap:10px;scrollbar-width:none}
+.app-b::-webkit-scrollbar{display:none}
+.tabs{display:flex;border-top:1px solid var(--line);background:var(--surface);padding:6px 6px 12px}
+.tabs button{flex:1;border:0;background:none;padding:6px 0;font-size:11px;font-weight:700;color:var(--ink-3);display:flex;flex-direction:column;align-items:center;gap:2px}
+.tabs button svg{width:20px;height:20px}
+.tabs button.on{color:var(--school)}
+.parent .tabs button.on{color:var(--family)}
+.av{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:12px;color:#fff;flex:none}
+.av.sm{width:26px;height:26px;font-size:10px}.av.lg{width:46px;height:46px;font-size:15px}
+.av.school{background:var(--school)}.av.family{background:var(--family)}.av.child{background:var(--child);color:#3a2507}.av.office{background:var(--ink-2)}
+.card{background:var(--surface);border-radius:18px;padding:12px;border:1px solid var(--line)}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:8px 12px;font-size:13px;font-weight:700;display:inline-flex;align-items:center;gap:6px}
+.btn:hover{border-color:var(--ink-3)}
+.btn.primary{background:var(--school);border-color:var(--school);color:#fff}
+.btn.fam{background:var(--family);border-color:var(--family);color:#fff}
+.btn.sm{padding:5px 9px;font-size:12px;border-radius:10px}
+.btn svg{width:15px;height:15px}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:20px;padding:4px 10px;font-size:12px;font-weight:700;color:var(--ink-2)}
+.chip.on{background:var(--ink);border-color:var(--ink);color:var(--surface)}
+
+/* Parent: day ring */
+.ring-card{padding:6px 6px 10px;display:flex;flex-direction:column;align-items:center}
+.ring-svg{width:100%;max-width:250px;height:auto;display:block}
+.ring-svg text{font-family:var(--f-body)}
+.ring-now{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;fill:var(--ink-3)}
+.ring-what{font-family:var(--f-display);font-size:19px;font-weight:700;fill:var(--ink)}
+.ring-where{font-size:11.5px;fill:var(--ink-3)}
+.ring-key{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;font-size:11px;color:var(--ink-3);font-weight:600}
+.ring-key span{display:inline-flex;gap:5px;align-items:center}.ring-key i{width:8px;height:8px;border-radius:50%}
+.m{display:flex;flex-direction:column;gap:8px;animation:pop .45s ease}
+@keyframes pop{from{transform:translateY(-6px);opacity:.3}}
+.m-h{display:flex;gap:9px;align-items:center}
+.m-h b{font-size:13px;line-height:1.2;display:block}.m-h small{font-size:11.5px;color:var(--ink-3)}
+.m-h .t{margin-left:auto;font-size:11.5px;color:var(--ink-3);font-weight:700}
+.m p{margin:0;font-size:13.5px;line-height:1.5}
+.kind{align-self:flex-start;font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:20px}
+.k-praise{background:var(--child-soft);color:color-mix(in srgb,var(--child) 70%,var(--ink))}
+.k-learning{background:var(--school-soft);color:var(--school)}
+.k-photo{background:var(--family-soft);color:var(--family)}
+.k-care{background:var(--care-soft);color:var(--care)}
+.k-day{background:var(--sunk);color:var(--ink-2)}
+.m.day{flex-direction:row;align-items:center;gap:10px;padding:9px 12px;background:transparent;border-style:dashed}
+.m.day p{font-size:12.5px;color:var(--ink-2)}.m.day .t{margin-left:auto;font-size:11.5px;color:var(--ink-3);font-weight:700}
+.m-acts{display:flex;gap:6px;flex-wrap:wrap}
+.thanked{color:var(--family);font-size:12px;font-weight:700;display:inline-flex;gap:5px;align-items:center}
+.thanked svg{width:14px;height:14px}
+.photo{border-radius:12px;height:120px;position:relative;overflow:hidden}
+.ph-monsoon{background:linear-gradient(180deg,#9DB6E8 0%,#6E8FD6 55%,#3E7F6B 56%,#2F6A57 100%)}
+.ph-monsoon::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(105deg,transparent 0 12px,rgba(255,255,255,.35) 12px 13px)}
+.ph-monsoon::after{content:"";position:absolute;left:12%;right:12%;top:14px;height:2px;background:#5a4632;box-shadow:0 0 0 0 transparent}
+.ph-relay{background:radial-gradient(circle at 70% 30%,#FFD27A 0 14%,transparent 15%),linear-gradient(180deg,#8FD1C7 0 50%,#C9573A 50% 100%)}
+.ph-relay::after{content:"";position:absolute;left:0;right:0;top:62%;height:3px;background:repeating-linear-gradient(90deg,#fff 0 18px,transparent 18px 30px)}
+.ph-class{background:radial-gradient(circle at 25% 40%,#F4C15D 0 10%,transparent 11%),radial-gradient(circle at 55% 55%,#7FB2F0 0 12%,transparent 13%),radial-gradient(circle at 80% 35%,#E98AA8 0 9%,transparent 10%),linear-gradient(160deg,#FFF6E4,#F3E3C6)}
+.tag{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:var(--ink-2);background:var(--sunk);border-radius:8px;padding:2px 7px}
+.banner{position:absolute;left:10px;right:10px;top:42px;z-index:5;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:10px 12px;box-shadow:var(--shadow);display:flex;gap:10px;align-items:center;font-size:12.5px;transform:translateY(-260%);opacity:0;transition:transform .35s cubic-bezier(.2,.9,.3,1.2),opacity .2s}
+.banner.on{transform:none;opacity:1}
+.banner b{display:block;font-size:12.5px}
+.person{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;align-items:start}
+.person b{font-size:13.5px;display:block}.person small{display:block;color:var(--ink-3);font-size:12px}
+.person p{margin:4px 0 6px;font-size:12.5px;color:var(--ink-2)}
+.learn{display:flex;flex-direction:column;gap:6px}.learn b{font-size:13.5px}.learn .try{background:var(--family-soft);border-radius:12px;padding:8px 10px;font-size:12.5px}
+.learn .try b{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--family);display:block}
+
+/* Teacher */
+.capture{display:flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:16px;background:var(--school);color:#fff;font-weight:800;padding:12px;font-size:14px}
+.capture svg{width:18px;height:18px}
+.roster{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.kid{border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10.5px;font-weight:700;color:var(--ink-2);padding:4px 0;border-radius:12px;position:relative}
+.kid .av{width:40px;height:40px;background:var(--sunk);color:var(--ink-2);box-shadow:0 0 0 2px var(--surface)}
+.kid.sel .av{background:var(--school);color:#fff}
+.kid.quiet .av{box-shadow:0 0 0 2px var(--surface),0 0 0 4px var(--child)}
+.kid .n{position:absolute;top:2px;right:8px;background:var(--surface);border:1px solid var(--line);border-radius:10px;font-size:9.5px;padding:0 5px;color:var(--ink-3)}
+.sheet{position:absolute;inset:auto 0 0 0;max-height:88%;background:var(--surface);border-radius:24px 24px 0 0;box-shadow:0 -12px 40px -10px rgba(0,0,0,.35);padding:8px 14px 16px;display:flex;flex-direction:column;gap:10px;transform:translateY(105%);transition:transform .3s ease;z-index:6;overflow-y:auto}
+.sheet.on{transform:none}
+.grab{width:40px;height:4px;border-radius:2px;background:var(--line);align-self:center}
+.seg{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;background:var(--sunk);border-radius:12px;padding:3px}
+.seg button{border:0;background:none;border-radius:9px;padding:6px 0;font-size:11.5px;font-weight:800;color:var(--ink-2)}
+.seg button.on{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+textarea.in{width:100%;border:1px solid var(--line);border-radius:12px;background:var(--ground);padding:9px 10px;font-size:13px;resize:none;line-height:1.45}
+.hint{font-size:12px;border-radius:12px;padding:8px 10px;background:var(--child-soft);color:color-mix(in srgb,var(--child) 55%,var(--ink))}
+.hint.care{background:var(--care-soft);color:var(--care)}
+.pulse-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);font-size:12.5px}
+.pulse-row:last-child{border:0}
+.pulse-row b{display:block;font-size:13px}.pulse-row small{color:var(--ink-3)}
+.ratio{font-size:11.5px;font-weight:800;border-radius:8px;padding:2px 7px;background:var(--family-soft);color:var(--family)}
+.ratio.low{background:var(--child-soft);color:color-mix(in srgb,var(--child) 60%,var(--ink))}
+.sw{width:40px;height:24px;border-radius:12px;background:var(--line);border:0;position:relative;flex:none}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:transform .2s}
+.sw.on{background:var(--family)}.sw.on::after{transform:translateX(16px)}
+.inbox-m{display:flex;gap:10px;align-items:flex-start}
+.inbox-m b{font-size:13px;display:block}.inbox-m p{margin:2px 0 0;font-size:12.5px;color:var(--ink-2)}
+.toast-t{position:absolute;left:10px;right:10px;bottom:74px;z-index:7;background:var(--ink);color:var(--surface);border-radius:14px;padding:10px 12px;font-size:12.5px;font-weight:700;display:flex;gap:8px;align-items:center;transform:translateY(160%);transition:transform .3s ease}
+.toast-t.on{transform:none}
+.toast-t svg{width:16px;height:16px;color:var(--child);flex:none}
+
+/* Circle */
+.circle-pane{display:flex;flex-direction:column;gap:14px;min-width:0}
+.clock{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:10px 14px}
+.clock .play{width:40px;height:40px;border-radius:50%;border:0;background:var(--ink);color:var(--surface);display:grid;place-items:center;flex:none}
+.clock .play svg{width:18px;height:18px}
+.clock .time{font-family:var(--f-display);font-size:28px;font-weight:800;letter-spacing:-.02em;min-width:82px}
+.clock input[type=range]{flex:1;min-width:0;accent-color:var(--school)}
+.clock small{display:block;font-size:11px;color:var(--ink-3);font-weight:700}
+.orbit{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:28px;padding:10px}
+.orbit svg{width:100%;height:auto;display:block}
+.orbit .lbl{font-size:11.5px;font-weight:700;fill:var(--ink)}
+.orbit .sub{font-size:10px;fill:var(--ink-3);font-weight:600}
+.log{display:flex;flex-direction:column;gap:6px;max-height:190px;overflow-y:auto}
+.log div{display:grid;grid-template-columns:44px minmax(0,1fr);gap:10px;font-size:12.5px;color:var(--ink-2);padding:6px 10px;border-radius:10px;background:var(--surface);border:1px solid var(--line)}
+.log div b{color:var(--ink);font-variant-numeric:tabular-nums}
+.log div.new{border-color:var(--child)}
+
+/* Ideas */
+section.band{padding-block:46px 30px;border-top:1px solid var(--line)}
+.band-h{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:30px;align-items:end;margin-bottom:26px}
+.band-h h2{font-size:clamp(28px,3.6vw,44px);font-weight:800;line-height:1.02}
+.band-h p{margin:0;color:var(--ink-2);max-width:60ch}
+.ideas{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.idea{display:grid;grid-template-columns:42px minmax(0,1fr);gap:14px;padding:18px 0;border-top:2px solid var(--ink)}
+.idea .glyph{width:42px;height:42px;border-radius:50%;display:grid;place-items:center}
+.idea .glyph svg{width:20px;height:20px}
+.idea h3{font-size:21px;font-weight:700;margin-bottom:6px}
+.idea p{margin:0;color:var(--ink-2);font-size:14.5px;max-width:58ch}
+.idea ul{margin:8px 0 0;padding-left:18px;color:var(--ink-2);font-size:13.5px;display:flex;flex-direction:column;gap:3px}
+
+/* School */
+.school-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:22px;align-items:start}
+.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:14px 16px}
+.stat b{display:block;font-family:var(--f-display);font-size:34px;font-weight:800;letter-spacing:-.03em;line-height:1.05}
+.stat span{font-size:13px;color:var(--ink-2)}
+.stat small{display:block;font-size:12px;color:var(--ink-3);margin-top:4px}
+.heat{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:16px;overflow-x:auto}
+.heat table{border-collapse:separate;border-spacing:4px;font-size:12px}
+.heat th{font-weight:700;color:var(--ink-3);text-align:left;padding-right:8px;white-space:nowrap}
+.heat td{width:34px;height:30px;border-radius:7px;text-align:center;font-weight:800;font-size:10.5px;color:var(--ink)}
+.heat-key{display:flex;gap:6px;align-items:center;font-size:11.5px;color:var(--ink-3);margin-top:10px;flex-wrap:wrap}
+.heat-key i{width:22px;height:10px;border-radius:3px;display:inline-block}
+
+/* Rollout */
+.roll{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.roll > div{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px}
+.roll h3{font-size:19px}
+.roll ul{margin:0;padding-left:18px;color:var(--ink-2);font-size:13.5px;display:flex;flex-direction:column;gap:5px}
+.roll .who{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.roll .who i{width:10px;height:10px;border-radius:50%}
+footer{padding-block:30px 40px;color:var(--ink-3);font-size:13px}
+
+@media (max-width:1180px){.stage{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.circle-pane{grid-column:1/-1;order:-1}}
+@media (max-width:900px){.thesis,.band-h,.school-grid{grid-template-columns:1fr}.ideas,.roll{grid-template-columns:1fr}}
+@media (max-width:700px){.stage{grid-template-columns:minmax(0,1fr)}.phone{height:600px}.top nav{display:none}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="index.html"><svg viewBox="0 0 64 64" aria-hidden="true"><g fill="none" stroke-width="9"><path d="M20.82 15.42A20 20 0 0 1 43.18 15.42" stroke="#2F6FED"/><path d="M48.58 20.82A20 20 0 0 1 48.58 43.18" stroke="#5B8CFF"/><path d="M15.42 43.18A20 20 0 0 1 15.42 20.82" stroke="#1F55C7"/><path d="M43.18 48.58A20 20 0 0 1 20.82 48.58" stroke="#12A594"/><path d="M39.35 39.35L54.91 54.91" stroke="#12A594" stroke-linecap="round"/></g><circle cx="32" cy="32" r="4.5" fill="#E8A33D"/></svg>Quad Circle</a>
+    <nav aria-label="Sections"><a href="#live">Live day</a><a href="#ideas">Ideas</a><a href="#school">For the school</a><a href="#rollout">In Quad</a></nav>
+  </header>
+
+  <section class="thesis" aria-labelledby="t">
+    <div>
+      <div class="eyebrow">A concept for Quad</div>
+      <h1 id="t">Every child has a <em>circle</em><span class="dot" aria-hidden="true"></span></h1>
+    </div>
+    <div>
+      <p>Schools run on modules: attendance, marks, fees. Families don't. They want to know how their child's day went and who is looking after them. Quad Circle puts the child at the centre and everyone who cares for them around it. Teachers share moments in seconds, the school day shows up for parents as it happens, and the system looks after the relationship between the two.</p>
+      <div class="legend-k"><span><i style="background:var(--child)"></i>The child</span><span><i style="background:var(--school)"></i>School and teachers</span><span><i style="background:var(--family)"></i>Family</span></div>
+    </div>
+  </section>
+
+  <section id="live" class="stage" aria-label="A live school day">
+    <!-- Teacher -->
+    <div class="pane-l">
+      <div class="eyebrow"><i style="background:var(--school)"></i>Ms. Nadeesha · class teacher</div>
+      <div class="phone"><div class="screen teacher" id="tScreen">
+        <div class="sbar"><span class="num" id="tClock">09:45</span><span class="notch"></span><span>5G</span></div>
+        <div class="app-h"><div class="av school">NJ</div><div><b id="tTitle">Year 4 Emerald</b><small id="tSub">24 children · Monday</small></div></div>
+        <div class="app-b" id="tBody"></div>
+        <div class="tabs" id="tTabs"></div>
+        <div class="sheet" id="tSheet" aria-hidden="true"></div>
+        <div class="toast-t" id="tToast" role="status"></div>
+      </div></div>
+    </div>
+    <!-- Circle -->
+    <div class="circle-pane">
+      <div class="clock">
+        <button class="play" id="play" aria-label="Play the school day"></button>
+        <div><small>School day</small><div class="time num" id="clock">09:45</div></div>
+        <input type="range" id="scrub" min="0" max="370" step="1" value="135" aria-label="Time of day">
+      </div>
+      <div class="orbit"><svg id="orbit" viewBox="-50 0 620 440" role="img" aria-label="Amaya's circle: the people around her and the moments travelling between them"></svg></div>
+      <div class="eyebrow">What travelled around the circle</div>
+      <div class="log" id="log" aria-live="polite"></div>
+    </div>
+    <!-- Parent -->
+    <div class="pane-l">
+      <div class="eyebrow"><i style="background:var(--family)"></i>Dilhani · Amaya's mum</div>
+      <div class="phone"><div class="screen parent" id="pScreen">
+        <div class="sbar"><span class="num" id="pClock">09:45</span><span class="notch"></span><span>4G</span></div>
+        <div class="banner" id="pBanner" role="status"></div>
+        <div class="app-h"><div class="av child">AP</div><div><b id="pTitle">Amaya's day</b><small>Year 4 Emerald · Monday 5 Oct</small></div></div>
+        <div class="app-b" id="pBody"></div>
+        <div class="tabs" id="pTabs"></div>
+      </div></div>
+    </div>
+  </section>
+
+  <section id="ideas" class="band">
+    <div class="band-h"><h2>Four ideas behind the circle</h2><p>Each one answers something parents and teachers told us goes wrong with school systems today: silence until there is a problem, messages at 10 pm, and reports that arrive too late to help.</p></div>
+    <div class="ideas">
+      <div class="idea"><span class="glyph" style="background:var(--child-soft);color:var(--child)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span><div><h3>The day, as it happens</h3><p>The parent app opens on a ring of today's timetable. Arrival, registration, lessons, lunch and the bus home fill in on their own from data the school already records. Parents see where their child is without asking.</p></div></div>
+      <div class="idea"><span class="glyph" style="background:var(--school-soft);color:var(--school)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h3l2-3h6l2 3h3v12H4z"/><circle cx="12" cy="13" r="3.5"/></svg></span><div><h3>Moments, not messages</h3><p>Teachers share a moment in under ten seconds: tap the children, pick praise, learning, photo or heads-up, and it reaches only those families. No group chats, no reply-all.</p><ul><li>Templates write the first draft with each child's name</li><li>Skill tags build a picture of progress over the term</li></ul></div></div>
+      <div class="idea"><span class="glyph" style="background:var(--family-soft);color:var(--family)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="9" stroke-dasharray="3 3"/></svg></span><div><h3>Everyone around the child</h3><p>Parents see the people in their child's circle by name and role, what each is working on with the child, and when they reply. Saying thank you is one tap, and it goes to the teacher, not into a void.</p></div></div>
+      <div class="idea"><span class="glyph" style="background:var(--care-soft);color:var(--care)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.5-7 10-7 10z"/></svg></span><div><h3>Good relationships by design</h3><p>A family pulse shows each teacher which families haven't heard anything positive lately, and nudges before a heads-up goes out. Quiet hours hold messages overnight so teachers get their evenings back.</p></div></div>
+    </div>
+  </section>
+
+  <section id="school" class="band">
+    <div class="band-h"><h2>For the school: is every family connected?</h2><p>Leaders get one view of how well the school is talking with families. It shows which classes are sharing positives and which families haven't been reached. It isn't a league table of teachers.</p></div>
+    <div class="school-grid">
+      <div class="stats" id="stats"></div>
+      <div class="heat"><div class="eyebrow" style="margin-bottom:8px">Families who heard something positive in the last 2 weeks</div><div id="heat"></div>
+        <div class="heat-key"><span>Fewer</span><i style="background:color-mix(in srgb,var(--child) 25%,var(--surface))"></i><i style="background:color-mix(in srgb,var(--family) 35%,var(--surface))"></i><i style="background:color-mix(in srgb,var(--family) 65%,var(--surface))"></i><i style="background:var(--family)"></i><span>All families</span></div></div>
+    </div>
+  </section>
+
+  <section id="rollout" class="band">
+    <div class="band-h"><h2>How it lands in Quad</h2><p>The circle reuses what Quad already has: timetables, registers, teaching assignments, reports and branding. It changes what each person sees first.</p></div>
+    <div class="roll">
+      <div><div class="who"><i style="background:var(--family)"></i>Parent app</div><h3>Opens on the child's day</h3><ul><li>Home becomes the day ring and a feed of moments</li><li>A Circle tab lists teachers with office hours and a thank-you button</li><li>Learning tab: this week's topics with one thing to try at home</li><li>Fees, forms and the bus stay one tap away</li></ul></div>
+      <div><div class="who"><i style="background:var(--school)"></i>Teachers</div><h3>Capture and care</h3><ul><li>My teaching gets a Capture button and class roster</li><li>Family pulse with positives, heads-ups and replies per family</li><li>Quiet hours and reply-time expectations shared with parents</li><li>Moments feed report comments at the end of term</li></ul></div>
+      <div><div class="who"><i style="background:var(--child)"></i>School</div><h3>Connection, not surveillance</h3><ul><li>Connection view by section and class</li><li>Families not reached get a gentle follow-up list</li><li>Photo consent and who-sees-what rules per child</li><li>Translation of moments into Sinhala and Tamil</li></ul></div>
+    </div>
+  </section>
+  <footer>Quad Circle concept · sample school day for a fictional family. Names, photos and figures are illustrative.</footer>
+</div>
+
+<script>
+(() => {
+/* ---------- Icons ---------- */
+const P = {
+  heart:'<path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.5-7 10-7 10z"/>',
+  reply:'<path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 6 6v3"/>',
+  cam:'<path d="M4 7h3l2-3h6l2 3h3v12H4z"/><circle cx="12" cy="13" r="3.5"/>',
+  sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+  ring:'<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2.5"/>',
+  people:'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><circle cx="17.5" cy="9" r="2.5"/><path d="M16 14.5a5 5 0 0 1 6 5"/>',
+  book:'<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5"/>',
+  class:'<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/>',
+  pulse:'<path d="M3 12h4l2-5 4 10 2-5h6"/>',
+  inbox:'<path d="M4 4h16v12h-5l-3 3-3-3H4z"/>',
+  play:'<path d="M7 4l13 8-13 8z" fill="currentColor"/>',
+  pause:'<path d="M7 4h3v16H7zM14 4h3v16h-3z" fill="currentColor"/>',
+  star:'<path d="M12 3l2.8 5.7 6.2.9-4.5 4.4 1 6.2L12 17.3 6.5 20.2l1-6.2L3 9.6l6.2-.9z"/>',
+  check:'<path d="M5 12l5 5L20 7"/>',
+  moon:'<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/>'
+};
+const ic = (n, s = 18) => `<svg viewBox="0 0 24 24" width="${s}" height="${s}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${P[n]}</svg>`;
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]);
+const ini = n => n.split(' ').filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase();
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- The day ---------- */
+const START = 7 * 60 + 30, END = START + 370;
+const hm = m => `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
+const tm = s => +s.slice(0, 2) * 60 + +s.slice(3);
+const PEOPLE = {
+  ct:    {name:'Nadeesha Jayasinghe', short:'Ms. Nadeesha', role:'Class teacher', side:'school', works:'Reading confidence and the class postcard project', hours:'Replies 07:30–16:00'},
+  math:  {name:'Kasun Mendis', short:'Mr. Mendis', role:'Maths', side:'school', works:'Fractions this half term', hours:'Replies within a school day'},
+  art:   {name:'Ishani De Alwis', short:'Ms. De Alwis', role:'Art', side:'school', works:'Monsoon paintings for the open day wall', hours:'Replies within a school day'},
+  coach: {name:'Chaminda Herath', short:'Coach Herath', role:'PE', side:'school', works:'Relay team, Friday inter-house', hours:'Replies within a school day'},
+  nurse: {name:'Malini Fonseka', short:'Nurse Malini', role:'School nurse', side:'school', works:'Sick bay and medicines', hours:'On site 07:30–14:30'},
+  office:{name:'School office', short:'School office', role:'Front office', side:'office', works:'Gate, buses and lunches', hours:'07:00–16:30'},
+  mum:   {name:'Dilhani Perera', short:'Dilhani', role:'Mum', side:'family'},
+  dad:   {name:'Ruwan Perera', short:'Ruwan', role:'Dad', side:'family'}
+};
+const LESSONS = [['English','07:50','08:30','ct','#7C5CE0','Room 4'],['Maths','08:30','09:10','math','#2F6FED','Room 4'],['Break','09:10','09:30','','#B8C2D6','Yard'],['Science','09:30','10:10','ct','#0E8A9C','Lab 1'],['Art','10:10','10:50','art','#D0457A','Studio'],['Lunch','10:50','11:30','','#B8C2D6','Hall'],['Sinhala','11:30','12:10','ct','#C2410C','Room 4'],['PE','12:10','12:50','coach','#4D8A1F','Field'],['Story time','12:50','13:20','ct','#7C5CE0','Room 4']];
+let seq = 0;
+const EV = [
+  {t:'07:42', from:'office', kind:'day', text:'Arrived at school through the main gate.'},
+  {t:'07:52', from:'ct', kind:'day', text:'Registered present.'},
+  {t:'08:05', from:'ct', kind:'learning', text:'This week in English we are writing postcards from a place we love. Ask Amaya where hers is from.', tags:['Writing']},
+  {t:'09:02', from:'math', kind:'praise', text:'Amaya scored 8 out of 10 in today\'s fractions quiz and helped her table explain halves and quarters.', tags:['Fractions','Teamwork']},
+  {t:'09:24', from:'nurse', kind:'care', text:'Amaya scraped her knee at break. We cleaned and covered it and she went straight back to class, smiling.'},
+  {t:'10:44', from:'art', kind:'photo', photo:'ph-monsoon', text:'Our monsoon paintings are drying on the line. Amaya\'s is the one with the paper boat.', tags:['Art']},
+  {t:'11:02', from:'office', kind:'day', text:'Lunch: rice, dhal and green beans. Ate most of it.'},
+  {t:'12:44', from:'coach', kind:'praise', photo:'ph-relay', text:'Amaya ran the last leg for the Emerald relay team and didn\'t drop the baton once. Inter-house is on Friday.', tags:['Effort','Teamwork']},
+  {t:'13:12', from:'ct', kind:'learning', text:'Homework: spelling list 6, due Thursday. About 10 minutes a night is plenty.', tags:['Homework']},
+  {t:'13:36', from:'office', kind:'day', text:'Left school on bus 6.'}
+].map(e => ({...e, id: 'e' + (++seq), at: tm(e.t), to:'amaya'}));
+const KIND_L = {praise:'Praise', learning:'Learning', photo:'Photo', care:'Heads-up', day:'Today'};
+const ROSTER = ['Amaya Perera','Kavindu Silva','Sanduni Fernando','Yohan Bandara','Nethmi Gunawardena','Ravindu Mendis','Hiruni Jayasinghe','Senuka Dissanayake','Aisha Khan','Omar Hassan','Liam Patel','Mia Fernando','Arjun Kumar','Priya Ratnayake','Hasini Wickramasinghe','Chamod Herath','Imaya De Alwis','Thisara Perera','Zara Silva','Dinuka Weerasinghe','Tharushi Abeysekera','Kavya Nadarajah','Ishan Liyanage','Sahan Ekanayake'];
+const PULSE = ROSTER.map((n, i) => ({name: n, pos: [2, 5, 9, 3, 21, 4, 1, 26, 6, 2, 8, 19, 3, 5, 2, 11, 4, 7, 23, 3, 6, 2, 9, 5][i], ratio: [6, 4, 3, 5, 1, 4, 7, 0, 3, 5, 2, 1, 4, 6, 5, 2, 4, 3, 1, 5, 3, 6, 2, 4][i], heads: [1, 1, 1, 0, 1, 0, 0, 2, 1, 0, 1, 1, 1, 0, 0, 1, 1, 1, 2, 0, 1, 0, 1, 0][i], term: [9, 7, 5, 6, 2, 6, 8, 1, 5, 7, 4, 2, 6, 7, 6, 3, 5, 4, 2, 6, 5, 7, 4, 5][i]}));
+
+const S = {t: START + 135, playing: false, pTab: 'today', tTab: 'class', sel: new Set(['Amaya Perera']), kind: 'praise', thanks: {}, quiet: true, inbox: [
+  {from:'Mia Fernando\'s dad', text:'Thank you for the extra reading books. Mia read two chapters to us last night.', at:'Sun 19:40', held:true},
+  {from:'Chamod Herath\'s mum', text:'Chamod has a dentist appointment on Wednesday at 10. He will be back after lunch.', at:'08:12'}], log: []};
+
+/* ---------- Orbit ---------- */
+const CX = 260, CY = 215, R = 160;
+const NODES = {ct:-120, math:-75, art:-30, coach:15, nurse:-165, office:160, mum:65, dad:110};
+const npos = k => { const a = NODES[k] * Math.PI / 180; return [CX + R * Math.cos(a), CY + R * Math.sin(a)]; };
+const sideCol = s => s === 'family' ? 'var(--family)' : s === 'office' ? 'var(--ink-2)' : 'var(--school)';
+function drawOrbit() {
+  const svg = document.getElementById('orbit');
+  const arcs = `<circle cx="${CX}" cy="${CY}" r="${R}" fill="none" stroke="var(--line)" stroke-width="2" stroke-dasharray="2 7"/><circle cx="${CX}" cy="${CY}" r="${R - 58}" fill="none" stroke="var(--sunk)" stroke-width="18"/>`;
+  const lines = Object.keys(NODES).map(k => { const [x, y] = npos(k); return `<line x1="${CX}" y1="${CY}" x2="${x}" y2="${y}" stroke="${sideCol(PEOPLE[k].side)}" stroke-opacity=".22" stroke-width="2" id="ln-${k}"/>`; }).join('');
+  const nodes = Object.keys(NODES).map(k => { const [x, y] = npos(k), p = PEOPLE[k], right = x >= CX, lx = x + (right ? 28 : -28);
+    return `<g id="nd-${k}"><circle cx="${x}" cy="${y}" r="21" fill="${sideCol(p.side)}"/><text x="${x}" y="${y + 4}" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">${k === 'office' ? 'SO' : ini(p.name)}</text>
+      <text class="lbl" x="${lx}" y="${y - 1}" text-anchor="${right ? 'start' : 'end'}">${esc(p.short)}</text><text class="sub" x="${lx}" y="${y + 12}" text-anchor="${right ? 'start' : 'end'}">${esc(p.role)}</text></g>`; }).join('');
+  const child = `<circle cx="${CX}" cy="${CY}" r="44" fill="var(--child)"/><circle cx="${CX}" cy="${CY}" r="52" fill="none" stroke="var(--child)" stroke-opacity=".35" stroke-width="2" id="halo"/>
+    <text x="${CX}" y="${CY - 2}" text-anchor="middle" font-size="16" font-weight="800" fill="#3a2507" font-family="var(--f-display)">Amaya</text><text x="${CX}" y="${CY + 15}" text-anchor="middle" font-size="10.5" font-weight="700" fill="#3a2507" opacity=".75" id="orbitNow"></text>`;
+  svg.innerHTML = arcs + lines + `<g id="packets"></g>` + nodes + child;
+}
+function packet(from, targets, color) {
+  const g = document.getElementById('packets'); if (!g) return;
+  const ln = document.getElementById('ln-' + from); if (ln) { ln.setAttribute('stroke-opacity', '.8'); setTimeout(() => ln.setAttribute('stroke-opacity', '.22'), 1400); }
+  if (reduce) return;
+  const [fx, fy] = npos(from);
+  targets.forEach((to, i) => { const [tx, ty] = npos(to), c = document.createElementNS('http://www.w3.org/2000/svg', 'circle'); c.setAttribute('r', 7); c.setAttribute('fill', color); g.appendChild(c);
+    const t0 = performance.now() + i * 120, dur = 1300;
+    const step = now => { let k = Math.min(1, Math.max(0, (now - t0) / dur)); const e = k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+      const [x, y] = e < .5 ? [fx + (CX - fx) * e * 2, fy + (CY - fy) * e * 2] : [CX + (tx - CX) * (e - .5) * 2, CY + (ty - CY) * (e - .5) * 2];
+      c.setAttribute('cx', x); c.setAttribute('cy', y); if (k < 1) requestAnimationFrame(step); else { c.remove(); const ln2 = document.getElementById('ln-' + to); if (ln2) { ln2.setAttribute('stroke-opacity', '.8'); setTimeout(() => ln2.setAttribute('stroke-opacity', '.22'), 900); } } };
+    requestAnimationFrame(step); });
+}
+function addLog(text, isNew) { S.log.unshift({text, t: S.t}); renderLog(isNew); }
+function renderLog(isNew) { document.getElementById('log').innerHTML = S.log.slice(0, 30).map((l, i) => `<div class="${i === 0 && isNew ? 'new' : ''}"><b>${hm(l.t)}</b><span>${l.text}</span></div>`).join(''); }
+
+/* ---------- Day ring (parent) ---------- */
+function ringSVG() {
+  const W = 250, C = 125, r = 100, a0 = -150, span = 300, ang = m => a0 + span * (m - START) / 370;
+  const pt = (a, rr) => { const rad = (a - 90) * Math.PI / 180; return [C + rr * Math.cos(rad), C + rr * Math.sin(rad)]; };
+  const arc = (m1, m2, rr) => { const A = ang(m1), B = ang(m2), [x1, y1] = pt(A, rr), [x2, y2] = pt(B, rr); return `M${x1.toFixed(1)} ${y1.toFixed(1)}A${rr} ${rr} 0 ${B - A > 180 ? 1 : 0} 1 ${x2.toFixed(1)} ${y2.toFixed(1)}`; };
+  const now = Math.min(S.t, END), cur = LESSONS.find(l => tm(l[1]) <= S.t && S.t < tm(l[2]));
+  let s = `<path d="${arc(START, END, r)}" stroke="var(--sunk)" stroke-width="16" fill="none" stroke-linecap="round"/>`;
+  LESSONS.forEach(l => { const done = tm(l[1]) < now; s += `<path d="${arc(tm(l[1]) + 1, tm(l[2]) - 1, r)}" stroke="${l[4]}" stroke-width="16" fill="none" opacity="${done ? 1 : .28}"><title>${l[0]} ${l[1]}–${l[2]}</title></path>`; });
+  EV.filter(e => e.at <= S.t).forEach(e => { const [x, y] = pt(ang(e.at), r + 17); s += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${e.kind === 'day' ? 3 : 5}" fill="${e.kind === 'praise' ? 'var(--child)' : e.kind === 'care' ? 'var(--care)' : e.kind === 'day' ? 'var(--ink-3)' : e.kind === 'photo' ? 'var(--family)' : 'var(--school)'}"/>`; });
+  if (S.t >= START && S.t <= END) { const [x1, y1] = pt(ang(now), r - 14), [x2, y2] = pt(ang(now), r + 10); s += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="var(--ink)" stroke-width="3" stroke-linecap="round"/>`; }
+  [['07:30', START], ['10:30', START + 180], ['13:40', END]].forEach(([l, m]) => { const [x, y] = pt(ang(m), r - 26); s += `<text x="${x}" y="${y + 3}" text-anchor="middle" font-size="9.5" font-weight="700" fill="var(--ink-3)">${l}</text>`; });
+  const what = S.t < tm('07:42') ? 'On the way' : S.t >= tm('13:36') ? 'On bus 6' : cur ? cur[0] : S.t < tm('07:50') ? 'Arrived' : 'Between lessons';
+  const where = S.t >= tm('13:36') ? 'Home by about 14:05' : cur ? `${cur[5]}${cur[3] ? ' · ' + PEOPLE[cur[3]].short : ''}` : '';
+  s += `<text class="ring-now" x="${C}" y="${C - 20}" text-anchor="middle">Now · ${hm(now)}</text><text class="ring-what" x="${C}" y="${C + 6}" text-anchor="middle">${esc(what)}</text><text class="ring-where" x="${C}" y="${C + 26}" text-anchor="middle">${esc(where)}</text>`;
+  return `<svg class="ring-svg" viewBox="0 0 ${W} ${W - 12}" role="img" aria-label="Amaya's school day so far">${s}</svg>`;
+}
+
+/* ---------- Parent app ---------- */
+function moment(e) {
+  const p = PEOPLE[e.from], th = S.thanks[e.id];
+  if (e.kind === 'day') return `<div class="card m day"><span class="kind k-day">${ic('ring', 12)}</span><p>${esc(e.text)}</p><span class="t num">${hm(e.at)}</span></div>`;
+  return `<article class="card m" data-id="${e.id}"><div class="m-h"><div class="av sm ${p.side}">${ini(p.name)}</div><div><b>${esc(p.short)}</b><small>${esc(p.role)}${e.count > 1 ? ` · to ${e.count} families` : ''}</small></div><span class="t num">${hm(e.at)}</span></div>
+    <span class="kind k-${e.kind}">${KIND_L[e.kind]}</span>${e.photo ? `<div class="photo ${e.photo}" role="img" aria-label="Photo from ${esc(p.short)}"></div>` : ''}<p>${esc(e.text)}</p>
+    ${e.tags ? `<div class="m-acts">${e.tags.map(t => `<span class="tag">${ic('star', 11)}${esc(t)}</span>`).join('')}</div>` : ''}
+    <div class="m-acts">${th ? `<span class="thanked">${ic('heart', 14)}You said thank you</span>` : `<button class="btn sm" data-act="thank" data-id="${e.id}">${ic('heart', 15)}Thank ${esc(p.short.split(' ').pop())}</button>`}${e.kind === 'care' ? `<button class="btn sm" data-act="reply" data-id="${e.id}">${ic('reply', 15)}Reply</button>` : ''}</div></article>`;
+}
+function renderParent() {
+  const body = document.getElementById('pBody'), y = body.scrollTop, feed = EV.filter(e => e.at <= S.t && e.to === 'amaya').sort((a, b) => b.at - a.at);
+  let h = '';
+  if (S.pTab === 'today') h = `<div class="card ring-card">${ringSVG()}<div class="ring-key"><span><i style="background:var(--child)"></i>Praise</span><span><i style="background:var(--school)"></i>Learning</span><span><i style="background:var(--family)"></i>Photo</span><span><i style="background:var(--care)"></i>Heads-up</span></div></div>${feed.map(moment).join('') || '<div class="card muted" style="font-size:13px">Amaya\'s day will appear here once she reaches school.</div>'}`;
+  else if (S.pTab === 'circle') h = `<div class="muted" style="font-size:12.5px;padding:0 4px">The people looking after Amaya this year.</div>` + ['ct', 'math', 'art', 'coach', 'nurse', 'office'].map(k => { const p = PEOPLE[k], n = EV.filter(e => e.from === k && e.at <= S.t && e.kind !== 'day').length;
+    return `<div class="card person"><div class="av ${p.side}">${k === 'office' ? 'SO' : ini(p.name)}</div><div><b>${esc(p.name)}</b><small>${esc(p.role)} · ${esc(p.hours)}</small><p>${esc(p.works)}</p><div class="m-acts">${S.thanks['p-' + k] ? `<span class="thanked">${ic('heart', 14)}Thanks sent</span>` : `<button class="btn sm" data-act="thankP" data-k="${k}">${ic('heart', 15)}Say thanks</button>`}${n ? `<span class="tag">${n} moment${n > 1 ? 's' : ''} today</span>` : ''}</div></div></div>`; }).join('');
+  else h = [['English','Postcards from a place you love','Ask Amaya to describe her favourite place in three sentences, then write the address together.'],['Maths','Fractions: halves and quarters','Cut a roti or pizza into halves and quarters and ask which piece is bigger.'],['Science','Floating and sinking','Fill a bowl with water and guess which kitchen things will float before you test them.'],['Sinhala','Reading aloud, story 4','Five minutes of reading aloud before bed. Let her choose the voice for each character.']].map(([s, t, tip]) => `<div class="card learn"><span class="eyebrow">${s} · this week</span><b>${t}</b><div class="try"><b>Try at home</b>${tip}</div></div>`).join('');
+  body.innerHTML = h; body.scrollTop = y;
+  document.getElementById('pTabs').innerHTML = [['today', 'Today', 'ring'], ['circle', 'Circle', 'people'], ['learning', 'Learning', 'book']].map(([k, l, i]) => `<button class="${S.pTab === k ? 'on' : ''}" data-act="pTab" data-k="${k}" aria-pressed="${S.pTab === k}">${ic(i, 20)}${l}</button>`).join('');
+}
+let bannerT;
+function banner(e) { const p = PEOPLE[e.from], b = document.getElementById('pBanner');
+  b.innerHTML = `<div class="av sm ${p.side}">${ini(p.name)}</div><div><b>${esc(p.short)} · ${KIND_L[e.kind]}</b>${esc(e.text.slice(0, 64))}${e.text.length > 64 ? '…' : ''}</div>`; b.classList.add('on'); clearTimeout(bannerT); bannerT = setTimeout(() => b.classList.remove('on'), 3200); }
+
+/* ---------- Teacher app ---------- */
+const TEMPL = {
+  praise: f => `${f} worked really hard today and helped others in the group without being asked.`,
+  learning: f => `Today we started fractions. Ask ${f} to show you a half and a quarter with something at home.`,
+  photo: f => `A snapshot from class today: ${f} presenting the group's poster.`,
+  care: f => `${f} seemed tired and quiet this afternoon. Everything OK at home? No need to reply if all is well.`
+};
+const TAGS = ['Kindness', 'Effort', 'Reading', 'Fractions', 'Teamwork', 'Speaking'];
+function renderTeacher() {
+  const body = document.getElementById('tBody'), y = body.scrollTop;
+  let h = '';
+  if (S.tTab === 'class') {
+    const quiet = PULSE.filter(p => p.pos >= 14).length;
+    h = `<button class="capture" data-act="capture">${ic('cam', 18)}Capture a moment</button>
+      <div class="muted" style="font-size:12px;display:flex;justify-content:space-between"><span>${S.sel.size} selected · tap to choose</span><span>${quiet} need a positive</span></div>
+      <div class="roster">${ROSTER.map((n, i) => { const p = PULSE[i]; return `<button class="kid ${S.sel.has(n) ? 'sel' : ''} ${p.pos >= 14 ? 'quiet' : ''}" data-act="pick" data-n="${esc(n)}" aria-pressed="${S.sel.has(n)}"><span class="av">${ini(n)}</span>${esc(n.split(' ')[0])}<span class="n num">${p.term}</span></button>`; }).join('')}</div>
+      <div class="muted" style="font-size:11.5px">Number: moments shared this term. Amber ring: no positive note in 2 weeks.</div>`;
+  } else if (S.tTab === 'pulse') {
+    const sorted = [...PULSE].sort((a, b) => b.pos - a.pos);
+    h = `<div class="card" style="display:flex;gap:10px;align-items:center"><span style="color:var(--family)">${ic('moon', 20)}</span><div style="flex:1;font-size:12.5px"><b style="display:block;font-size:13px">Quiet hours 18:00–07:00</b>Parents see that you reply in school hours.</div><button class="sw ${S.quiet ? 'on' : ''}" data-act="quiet" role="switch" aria-checked="${S.quiet}" aria-label="Quiet hours"></button></div>
+      <div class="card"><div class="eyebrow" style="margin-bottom:4px">Family pulse · this term</div>${sorted.map(p => `<div class="pulse-row"><div class="av sm" style="background:var(--sunk);color:var(--ink-2)">${ini(p.name)}</div><div><b>${esc(p.name)}</b><small>Last positive ${p.pos === 0 ? 'today' : p.pos === 1 ? 'yesterday' : p.pos + ' days ago'} · ${p.heads} heads-up</small></div><span class="ratio ${p.pos >= 14 ? 'low' : ''}">${p.pos >= 14 ? 'Send a positive' : p.ratio + ' : ' + Math.max(1, p.heads)}</span></div>`).join('')}</div>`;
+  } else {
+    h = S.inbox.map(m => `<div class="card inbox-m"><div class="av sm family">${ini(m.from)}</div><div style="min-width:0"><b>${esc(m.from)}</b><p>${esc(m.text)}</p><small class="muted">${esc(m.at)}${m.held ? ' · held for morning by quiet hours' : ''}</small></div></div>`).join('');
+  }
+  body.innerHTML = h; body.scrollTop = y;
+  const unread = S.inbox.filter(m => m.fresh).length;
+  document.getElementById('tTabs').innerHTML = [['class', 'Class', 'class'], ['pulse', 'Families', 'pulse'], ['inbox', unread ? `Inbox · ${unread}` : 'Inbox', 'inbox']].map(([k, l, i]) => `<button class="${S.tTab === k ? 'on' : ''}" data-act="tTab" data-k="${k}" aria-pressed="${S.tTab === k}">${ic(i, 20)}${l}</button>`).join('');
+}
+function renderSheet() {
+  const sh = document.getElementById('tSheet'), names = [...S.sel], first = names.length === 1 ? names[0].split(' ')[0] : '{name}';
+  const amaya = names.includes('Amaya Perera'), quietKids = names.filter(n => PULSE.find(p => p.name === n).pos >= 14);
+  sh.innerHTML = `<div class="grab"></div><div style="display:flex;justify-content:space-between;align-items:center"><b style="font-family:var(--f-display);font-size:18px">New moment</b><button class="btn sm" data-act="closeSheet">Cancel</button></div>
+    <div class="seg" role="radiogroup" aria-label="Kind">${['praise', 'learning', 'photo', 'care'].map(k => `<button class="${S.kind === k ? 'on' : ''}" data-act="kind" data-k="${k}" role="radio" aria-checked="${S.kind === k}">${KIND_L[k]}</button>`).join('')}</div>
+    <div style="font-size:12px;color:var(--ink-3)">To ${names.length} ${names.length === 1 ? 'family' : 'families'}: ${esc(names.map(n => n.split(' ')[0]).join(', ') || 'choose children first')}</div>
+    ${S.kind === 'photo' ? '<div class="photo ph-class" role="img" aria-label="Photo taken in class"></div>' : ''}
+    <label for="mText" class="eyebrow">Message</label><textarea class="in" id="mText" rows="4">${esc(TEMPL[S.kind](first))}</textarea>
+    <div class="m-acts" id="mTags">${TAGS.map(t => `<button class="chip ${S.tags && S.tags.has(t) ? 'on' : ''}" data-act="tag" data-t="${t}" aria-pressed="${!!(S.tags && S.tags.has(t))}">${t}</button>`).join('')}</div>
+    ${S.kind === 'care' && quietKids.length ? `<div class="hint care">${esc(quietKids.map(n => n.split(' ')[0]).join(', '))}'s family hasn't heard anything positive in over two weeks. Consider sharing something going well first.</div>` : S.kind === 'care' ? '<div class="hint care">Heads-ups go to each family privately and ask for a reply only if needed.</div>' : names.length > 1 ? '<div class="hint">{name} is replaced with each child\'s first name, so every family gets a personal note.</div>' : ''}
+    <button class="btn primary" data-act="share" style="justify-content:center;padding:11px" ${names.length ? '' : 'disabled'}>Share with ${names.length} ${names.length === 1 ? 'family' : 'families'}${amaya ? '' : ''}</button>`;
+}
+let toastT;
+function tToast(msg) { const t = document.getElementById('tToast'); t.innerHTML = ic('heart', 16) + `<span>${msg}</span>`; t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), 3200); }
+
+/* ---------- Clock ---------- */
+let shown = new Set(EV.filter(e => e.at <= S.t).map(e => e.id));
+function setTime(t, quiet) {
+  S.t = Math.max(START, Math.min(END, t));
+  document.getElementById('clock').textContent = hm(S.t); document.getElementById('scrub').value = S.t - START;
+  ['tClock', 'pClock'].forEach(id => document.getElementById(id).textContent = hm(S.t));
+  const cur = LESSONS.find(l => tm(l[1]) <= S.t && S.t < tm(l[2])), on = document.getElementById('orbitNow'); if (on) on.textContent = S.t >= tm('13:36') ? 'on the bus' : cur ? `in ${cur[0]}` : 'at school';
+  const fresh = EV.filter(e => e.at <= S.t && !shown.has(e.id));
+  fresh.forEach(e => { shown.add(e.id); if (!quiet) { packet(e.from, ['mum', 'dad'], e.kind === 'care' ? 'var(--care)' : e.kind === 'praise' ? 'var(--child)' : 'var(--school)'); if (e.kind !== 'day') banner(e); }
+    addLog(`<b style="color:var(--ink)">${esc(PEOPLE[e.from].short)}</b> → Amaya's family · ${KIND_L[e.kind].toLowerCase()}`, !quiet); });
+  EV.filter(e => e.at > S.t && shown.has(e.id)).forEach(e => shown.delete(e.id));
+  if (fresh.length || quiet) renderParent(); else { const svg = document.querySelector('#pBody .ring-svg'); if (svg) svg.outerHTML = ringSVG(); }
+}
+let timer = null;
+function play(on) { S.playing = on; const b = document.getElementById('play'); b.innerHTML = ic(on ? 'pause' : 'play', 18); b.setAttribute('aria-label', on ? 'Pause the school day' : 'Play the school day');
+  clearInterval(timer); if (on) { if (S.t >= END) { setTime(START, true); S.log = []; renderLog(); shown = new Set(); } timer = setInterval(() => { if (S.t >= END) return play(false); setTime(S.t + 1); }, 110); } }
+
+/* ---------- Actions ---------- */
+document.addEventListener('click', ev => { const el = ev.target.closest('[data-act]'); if (!el) return; const a = el.dataset.act;
+  if (a === 'pTab') { S.pTab = el.dataset.k; renderParent(); }
+  else if (a === 'tTab') { S.tTab = el.dataset.k; S.inbox.forEach(m => { if (S.tTab === 'inbox') m.fresh = false; }); renderTeacher(); }
+  else if (a === 'pick') { const n = el.dataset.n; S.sel.has(n) ? S.sel.delete(n) : S.sel.add(n); renderTeacher(); }
+  else if (a === 'capture') { S.tags = new Set(); renderSheet(); const sh = document.getElementById('tSheet'); sh.classList.add('on'); sh.setAttribute('aria-hidden', 'false'); setTimeout(() => document.getElementById('mText').focus({preventScroll: true}), 250); }
+  else if (a === 'closeSheet') { const sh = document.getElementById('tSheet'); sh.classList.remove('on'); sh.setAttribute('aria-hidden', 'true'); }
+  else if (a === 'kind') { S.kind = el.dataset.k; renderSheet(); }
+  else if (a === 'tag') { const t = el.dataset.t; S.tags.has(t) ? S.tags.delete(t) : S.tags.add(t); el.classList.toggle('on'); el.setAttribute('aria-pressed', S.tags.has(t)); }
+  else if (a === 'share') { const names = [...S.sel]; if (!names.length) return; const raw = document.getElementById('mText').value.trim() || TEMPL[S.kind]('{name}');
+    const at = S.t, e = {id: 'e' + (++seq), t: hm(at), at, from: 'ct', kind: S.kind, text: raw.replace(/\{name\}/g, 'Amaya'), tags: S.tags.size ? [...S.tags] : undefined, photo: S.kind === 'photo' ? 'ph-class' : undefined, to: names.includes('Amaya Perera') ? 'amaya' : 'other', count: names.length};
+    EV.push(e); shown.add(e.id); names.forEach(n => { const p = PULSE.find(x => x.name === n); if (p) { p.term++; if (S.kind !== 'care') p.pos = 0; else p.heads++; } });
+    document.getElementById('tSheet').classList.remove('on'); renderTeacher();
+    packet('ct', e.to === 'amaya' ? ['mum', 'dad'] : [], S.kind === 'care' ? 'var(--care)' : S.kind === 'praise' ? 'var(--child)' : 'var(--school)');
+    addLog(`<b style="color:var(--ink)">Ms. Nadeesha</b> → ${names.length} ${names.length === 1 ? 'family' : 'families'} · ${KIND_L[S.kind].toLowerCase()}`, true);
+    if (e.to === 'amaya') { S.pTab = 'today'; renderParent(); banner(e); }
+    tToast(`Shared with ${names.length} ${names.length === 1 ? 'family' : 'families'}${e.to === 'amaya' ? '. Amaya\'s mum has it now.' : ''}`); }
+  else if (a === 'thank' || a === 'thankP') { const id = a === 'thank' ? el.dataset.id : 'p-' + el.dataset.k, from = a === 'thank' ? EV.find(e => e.id === id).from : el.dataset.k; S.thanks[id] = true; renderParent();
+    packet('mum', [from], 'var(--family)'); addLog(`<b style="color:var(--ink)">Dilhani</b> → ${esc(PEOPLE[from].short)} · thank you`, true);
+    if (from === 'ct') { S.inbox.unshift({from: 'Amaya Perera\'s mum', text: 'Thank you! Amaya couldn\'t stop talking about it at dinner.', at: hm(S.t), fresh: true}); renderTeacher(); tToast('Amaya\'s mum said thank you'); } }
+  else if (a === 'reply') { S.thanks[el.dataset.id] = true; renderParent(); packet('mum', ['nurse'], 'var(--family)'); addLog('<b style="color:var(--ink)">Dilhani</b> → Nurse Malini · reply', true); }
+  else if (a === 'quiet') { S.quiet = !S.quiet; renderTeacher(); }
+});
+document.getElementById('play').addEventListener('click', () => play(!S.playing));
+document.getElementById('scrub').addEventListener('input', e => { play(false); setTime(START + +e.target.value, true); });
+
+/* ---------- Connection (school) ---------- */
+const STATS = [['94%', 'of families heard something positive this month', 'Up from 61% before moments'], ['5 : 1', 'positives to heads-ups across the school', 'Healthy is 3 : 1 or better'], ['2 h 40 m', 'median reply time from teachers', 'During school hours'], ['41', 'parent messages held overnight this week', 'Delivered at 07:00']];
+document.getElementById('stats').innerHTML = STATS.map(([b, s, m]) => `<div class="stat"><b class="num">${b}</b><span>${s}</span><small>${m}</small></div>`).join('');
+const YEARS = ['Nursery', 'Reception', 'Year 1', 'Year 2', 'Year 3', 'Year 4', 'Year 5', 'Year 6', 'Year 7', 'Year 8', 'Year 9', 'Year 10', 'Year 11', 'Year 12', 'Year 13'], SECS = ['Emerald', 'Ruby'];
+const VAL = (i, j) => [98, 96, 100, 92, 88, 97, 90, 85, 79, 74, 81, 66, 58, 71, 63][i] - j * [2, 4, 0, 6, 3, 1, 8, 2, 5, 9, 1, 7, 6, 3, 4][i];
+const shade = v => v >= 95 ? 'var(--family)' : v >= 85 ? 'color-mix(in srgb,var(--family) 65%,var(--surface))' : v >= 70 ? 'color-mix(in srgb,var(--family) 35%,var(--surface))' : 'color-mix(in srgb,var(--child) 25%,var(--surface))';
+document.getElementById('heat').innerHTML = `<table><thead><tr><th></th>${YEARS.map(y => `<th style="font-size:10.5px;text-align:center">${y.replace('Year ', 'Y').replace('Reception', 'Rec').replace('Nursery', 'Nur')}</th>`).join('')}</tr></thead><tbody>${SECS.map((s, j) => `<tr><th>${s}</th>${YEARS.map((y, i) => { const v = VAL(i, j); return `<td style="background:${shade(v)};color:${v >= 95 ? '#fff' : 'var(--ink)'}" title="${y} ${s}: ${v}% of families">${v}</td>`; }).join('')}</tr>`).join('')}</tbody></table>`;
+
+/* ---------- Start ---------- */
+drawOrbit(); renderTeacher(); renderSheet();
+EV.filter(e => e.at <= S.t).sort((a, b) => a.at - b.at).forEach(e => S.log.unshift({text: `<b style="color:var(--ink)">${esc(PEOPLE[e.from].short)}</b> → Amaya's family · ${KIND_L[e.kind].toLowerCase()}`, t: e.at}));
+renderLog(); setTime(S.t, true); play(false);
+})();
+</script>
+</body>
+</html>

@@ -9,6 +9,7 @@ Open `design/index.html` in a browser. Each prototype is a single self-contained
 | File | What it is |
 |---|---|
 | `design/index.html` | Launcher with links to both prototypes |
+| `design/circle.html` | Concept: Quad Circle. Every child has a circle of family and school around them; a live school day links a teacher's phone (capture moments, family pulse, quiet hours), the child's circle and a parent's phone (day ring, moments, the people around the child, learning at home), plus the school's connection view |
 | `design/platform.html` | Platform console for the super admin: schools (tenants), plans, each school's users, roles, modules, branding and security |
 | `design/admin.html` | School admin web app: dashboard, the six core modules, and Users & roles |
 | `design/parent.html` | Parent mobile app in a phone frame, with controls to simulate push notifications |
