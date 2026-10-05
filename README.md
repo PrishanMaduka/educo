@@ -11,8 +11,14 @@ Open `design/index.html` in a browser. Each prototype is a single self-contained
 | `design/index.html` | Launcher with links to both prototypes |
 | `design/admin.html` | Admin web app: dashboard and the six core modules |
 | `design/parent.html` | Parent mobile app in a phone frame, with controls to simulate push notifications |
+| `design/brand.html` | Logo guidelines: construction, colours, app icon and usage |
+| `design/brand/` | Logo files (SVG): full logo, white logo, mark, app icon |
 
 Both prototypes have light and dark themes and work at phone width. All data in them is sample data for a fictional school.
+
+### Logo
+
+The mark is a ring cut into four arcs (school, teachers, parents, students) around a shared centre, with a tail that turns it into a Q. The lowercase wordmark is drawn with the same stroke as the mark. See `design/brand.html`.
 
 ### Admin web app (`design/admin.html`)
 

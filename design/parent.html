@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Quad Parent App</title>
+<link rel="icon" href="brand/quad-app-icon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap">
@@ -226,7 +227,7 @@ textarea.input{height:auto;padding:12px 14px;resize:none}
     <div class="sheet" id="sheet" role="dialog" aria-modal="true"></div>
     <button class="push" id="push" data-act="openPush"></button>
     <div class="lock" id="lock">
-      <div><div class="logo">q</div><h1>Quad Parent</h1><p>Colombo International School</p></div>
+      <div><div class="logo"><svg viewBox="0 0 64 64" width="72%" height="72%" aria-hidden="true"><g fill="none" stroke-width="9"><path d="M20.82 15.42A20 20 0 0 1 43.18 15.42" stroke="#FFFFFF"/><path d="M48.58 20.82A20 20 0 0 1 48.58 43.18" stroke="#C9D8FF"/><path d="M15.42 43.18A20 20 0 0 1 15.42 20.82" stroke="#E3EBFF"/><path d="M43.18 48.58A20 20 0 0 1 20.82 48.58" stroke="#FFFFFF"/><path d="M39.35 39.35L54.91 54.91" stroke="#FFFFFF" stroke-linecap="round"/></g><circle cx="32" cy="32" r="4.5" fill="#FFC56B"/></svg></div><h1>Quad Parent</h1><p>Colombo International School</p></div>
       <div><button class="faceid" id="faceid" data-act="unlock" aria-label="Unlock with Face ID"><svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 8V5a2 2 0 0 1 2-2h3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M8 21H5a2 2 0 0 1-2-2v-3M9 9v1M15 9v1M12 9v4h-1M9 16c1.5 1 4.5 1 6 0"/></svg></button><p>Tap to unlock with Face ID</p></div>
     </div>
   </div></div>
@@ -523,7 +524,7 @@ function simulate(k) {
   if (document.getElementById('lock').classList.contains('off') === false) unlock();
   const p = PUSHES[k]; pushKey = k; const el = document.getElementById('push');
   if (k === 'message') { const t = S.threads[0]; t.unread++; t.msgs.push({me:false, t:p.m, at:'Now'}); }
-  el.innerHTML = `<div class="logo">q</div><div class="m"><b>${p.t}<small>now</small></b>${p.m}</div>`;
+  el.innerHTML = `<div class="logo"><svg viewBox="0 0 64 64" width="72%" height="72%" aria-hidden="true"><g fill="none" stroke-width="9"><path d="M20.82 15.42A20 20 0 0 1 43.18 15.42" stroke="#FFFFFF"/><path d="M48.58 20.82A20 20 0 0 1 48.58 43.18" stroke="#C9D8FF"/><path d="M15.42 43.18A20 20 0 0 1 15.42 20.82" stroke="#E3EBFF"/><path d="M43.18 48.58A20 20 0 0 1 20.82 48.58" stroke="#FFFFFF"/><path d="M39.35 39.35L54.91 54.91" stroke="#FFFFFF" stroke-linecap="round"/></g><circle cx="32" cy="32" r="4.5" fill="#FFC56B"/></svg></div><div class="m"><b>${p.t}<small>now</small></b>${p.m}</div>`;
   el.classList.add('on'); clearTimeout(pushT); pushT = setTimeout(() => el.classList.remove('on'), 5000); render();
 }
 

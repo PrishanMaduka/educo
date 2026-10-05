@@ -1,4 +1,5 @@
 <title>Quad Design Prototypes</title>
+<link rel="icon" href="brand/quad-app-icon.svg" type="image/svg+xml">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap">
 <style>
@@ -39,10 +40,16 @@ h3{font:700 13px var(--f-body);letter-spacing:.08em;text-transform:uppercase;col
 .mod{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
 .mod b{display:block;margin-bottom:4px}
 .mod p{margin:0;font-size:13px;color:var(--ink-3)}
+.brandrow{flex-direction:row;align-items:center;gap:20px;padding:18px 20px;flex-wrap:wrap}
+.brandrow img{width:170px;max-width:100%}
+.brandrow div{flex:1;min-width:200px}
+.brandrow b{font:700 18px var(--f-display);display:block}
+.brandrow p{margin:2px 0 0;color:var(--ink-2);font-size:14px}
+.brandrow span{color:var(--brand);font-weight:700;font-size:14px}
 .note{font-size:13px;color:var(--ink-3);margin:0}
 </style>
 <div class="wrap">
-  <header><div class="logo">q</div><h1>Quad design prototypes</h1>
+  <header><div class="logo"><svg viewBox="0 0 64 64" width="72%" height="72%" aria-hidden="true"><g fill="none" stroke-width="9"><path d="M20.82 15.42A20 20 0 0 1 43.18 15.42" stroke="#FFFFFF"/><path d="M48.58 20.82A20 20 0 0 1 48.58 43.18" stroke="#C9D8FF"/><path d="M15.42 43.18A20 20 0 0 1 15.42 20.82" stroke="#E3EBFF"/><path d="M43.18 48.58A20 20 0 0 1 20.82 48.58" stroke="#FFFFFF"/><path d="M39.35 39.35L54.91 54.91" stroke="#FFFFFF" stroke-linecap="round"/></g><circle cx="32" cy="32" r="4.5" fill="#FFC56B"/></svg></div><h1>Quad design prototypes</h1>
   <p class="lede">Interactive designs for the school platform. The admin web app covers the six core modules for staff. The parent app follows the iParent model: one login for every child, alerts, results, payments and messages. Both use the same colours and type, and both have light and dark themes.</p></header>
   <div class="cards">
     <a class="card" href="admin.html"><div class="pv admin" aria-hidden="true"><div class="r"><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="m"><b></b><b></b><b></b><b class="ch"></b><b></b></div></div>
@@ -50,6 +57,7 @@ h3{font:700 13px var(--f-body);letter-spacing:.08em;text-transform:uppercase;col
     <a class="card" href="parent.html"><div class="pv parent" aria-hidden="true"><div class="ph"><div><i></i><s></s><s></s><s></s></div></div></div>
       <div class="cb"><h2>Parent mobile app</h2><p>Face ID unlock, child switcher, attendance calendar, results, timetable, homework, card payments, trips, messages and push alerts.</p><span>Open parent app →</span></div></a>
   </div>
+  <a class="card brandrow" href="brand.html"><img src="brand/quad-logo.svg" alt="Quad logo"><div><b>Brand and logo</b><p>How the mark is built, colours, the app icon and logo files.</p></div><span>Open brand guide →</span></a>
   <section><h3>Modules in the admin prototype</h3><div class="mods">
     <div class="mod"><b>Pre-admission & enrolment</b><p>Drag-and-drop pipeline, applicant drawer with document checklist, three-step application form.</p></div>
     <div class="mod"><b>CRM</b><p>Scored leads, source filters, campaigns, enquiry forms and a parent inbox that replies to the app.</p></div>
