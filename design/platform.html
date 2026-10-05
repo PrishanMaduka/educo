@@ -749,6 +749,31 @@ tr.click:hover td{background:color-mix(in srgb,var(--brand) 6%,transparent)}
 .drawer.form .drawer-h .fd-steps{flex-basis:100%;margin-top:18px;padding-bottom:2px}
 .drawer.form > .steps{display:none}
 @media (max-width:600px){.fd-steps span{font-size:10px}.fd-steps small{display:none}}
+
+/* Stages & year groups */
+.stg-top{display:flex;gap:16px;align-items:flex-end;justify-content:space-between;flex-wrap:wrap}
+.stg-sum{font-size:13px;color:var(--ink-2);text-align:right}
+.stg-sum b{font:600 22px var(--f-head);color:var(--ink);display:block;letter-spacing:-.02em}
+.stg-ladder{display:flex;gap:4px;height:58px;border-radius:12px;overflow:hidden}
+.stg-ladder div{flex:var(--w) 1 0;min-width:0;background:color-mix(in srgb,var(--sc) 22%,var(--surface));border-top:4px solid var(--sc);padding:7px 10px;display:flex;flex-direction:column;justify-content:center;gap:1px}
+.stg-ladder b{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stg-ladder small{font-size:11px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stg-list{display:flex;flex-direction:column;gap:12px}
+.stg{border:1px solid var(--line);border-radius:14px;background:var(--surface-2);overflow:hidden}
+.stg.off{opacity:.55}
+.stg-h{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--sc) 9%,transparent);flex-wrap:wrap}
+.stg-dot{width:12px;height:12px;border-radius:4px;background:var(--sc);flex:none}
+.stg-name{height:34px;font-weight:700;flex:1;min-width:150px;background:var(--surface)!important}
+.stg-ages{width:86px;height:34px;background:var(--surface)!important}
+.stg-tools{display:flex;gap:4px;align-items:center;margin-left:auto}
+.stg-tools .iconbtn{width:30px;height:30px;border-radius:8px}
+.stg-years{display:flex;flex-wrap:wrap;gap:6px;padding:12px}
+.ychip{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 6px 0 12px;border-radius:20px;background:var(--surface);border:1px solid var(--line-strong);font-size:13px;font-weight:600}
+.ychip button{width:20px;height:20px;border-radius:50%;border:0;background:transparent;color:var(--ink-3);display:grid;place-items:center;padding:0}
+.ychip button:hover{background:var(--bad-soft);color:var(--bad)}
+.ychip-add{width:150px;height:30px;border-radius:20px!important;border-style:dashed!important;font-size:13px}
+.stg-f{display:flex;align-items:center;gap:12px;padding:0 12px 12px;font-size:13px;flex-wrap:wrap}
+.stg-f input{width:64px;height:30px}
 </style>
 </head>
 <body>
@@ -1073,11 +1098,11 @@ V.tenants = () => {
 V.tenant = id => {
   const t = tenants.find(x => x.id === +id) || tenants[0];
   const tab = curTab('t' + t.id, 'overview');
-  const body = {overview: tOverview, users: tUsers, roles: tRoles, modules: tModules, branding: tBranding, security: tSecurity, danger: tDanger}[tab](t);
+  const body = {overview: tOverview, stages: tStages, users: tUsers, roles: tRoles, modules: tModules, branding: tBranding, security: tSecurity, danger: tDanger}[tab](t);
   return `<div><a href="#tenants" class="btn sm ghost">${ic('back',14)}All schools</a></div>
   <div class="card covered"><div class="t-cover" style="--tc:${t.color}"></div><div class="profile-head">${tlogo(t,'lg')}<div class="info"><div class="eyebrow">Tenant #${String(t.id).padStart(4,'0')} · ${REGIONS[t.region]}</div><h1>${t.name}</h1><div class="muted" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="code">${t.sub}.quad.school</span>${pill(t.status)}${pill(t.plan, PLANS[t.plan].color)}${healthDot(t.health)}</div></div>
   <div class="chips"><button class="btn" data-act="impersonate" data-id="${t.id}" ${t.status==='Suspended'?'disabled':''}>${ic('eye',16)}Open as school admin</button><button class="btn primary" data-act="tab" data-key="t${t.id}" data-val="users">${ic('users',16)}Manage users</button></div></div>
-  ${tabs('t' + t.id, [['overview','Overview'],['users','Users'],['roles','Roles & permissions'],['modules','Plan & modules'],['branding','Branding'],['security','Sign-in & security'],['danger','Danger zone']])}</div>${body}`;
+  ${tabs('t' + t.id, [['overview','Overview'],['stages','Stages'],['users','Users'],['roles','Roles & permissions'],['modules','Plan & modules'],['branding','Branding'],['security','Sign-in & security'],['danger','Danger zone']])}</div>${body}`;
 };
 function tOverview(t) {
   const u = tenantUsers(t);
@@ -1211,7 +1236,7 @@ function inviteModal(t) {
   ta.oninput = () => { const n = ta.value.split(/[\s,;]+/).filter(Boolean).length; btn.innerHTML = `${ic('send',16)}Send ${n || ''} invite${n === 1 ? '' : 's'}`; };
 }
 function tenantWizard() {
-  const w = S.wiz, st = w.step, steps = ['School','Branding','Plan & modules','First admin','Create'];
+  const w = S.wiz, st = w.step, steps = ['School','Stages','Branding','Plan & modules','First admin','Create'];
   const f = (id, l, ph='', type='text') => `<div class="field"><label for="${id}">${l}</label><input class="input" id="${id}" type="${type}" placeholder="${ph}" value="${esc(w[id]||'')}"></div>`;
   let body = '';
   if (st === 0) body = `<div class="form-grid"><div class="field full"><label for="w_name">School name</label><input class="input" id="w_name" value="${esc(w.w_name||'')}" placeholder="e.g. Matara Lakeside College"></div>
@@ -1220,22 +1245,25 @@ function tenantWizard() {
     <div class="field"><label for="w_region">Data region</label><select class="input" id="w_region">${Object.entries(REGIONS).map(([k, v]) => `<option value="${k}" ${w.w_region===k?'selected':''}>${v}</option>`).join('')}</select></div>
     <div class="field"><label for="w_curr">Curriculum</label><select class="input" id="w_curr"><option>Cambridge (IGCSE / A level)</option><option>Edexcel</option><option>IB</option><option>Local (O/L, A/L)</option></select></div>
     <div class="field"><label for="w_students">Expected students</label><input class="input" id="w_students" type="number" value="${w.w_students||600}"></div></div>`;
-  else if (st === 1) { const col = w.w_color || BRAND_SWATCHES[0];
+  else if (st === 1) { if (!w.stages) { w.stTpl = tplForCurr(w.w_curr); w.stages = stagesFrom(w.stTpl); }
+    body = `<p class="muted" style="margin:0;font-size:13px">How ${esc(w.w_name || 'the school')} is organised. Year groups become the classes students are placed in.</p>${stagesEditor(w.stages, 'wiz', w.stTpl)}`; }
+  else if (st === 2) { const col = w.w_color || BRAND_SWATCHES[0];
     body = `<div class="wb"><div class="wb-l">
       <div class="field"><label>School logo</label>${logoDrop('logoFile', w.logo)}<div class="chips" style="margin-top:8px"><button type="button" class="chip" data-act="wCrest">No logo yet? Make a sample crest</button>${w.logo ? '<button type="button" class="chip" data-act="wRmLogo">Remove logo</button>' : ''}</div></div>
       <div class="field"><label>Brand colour${w.picked ? ' <span class="pill t-green plain" style="margin-left:6px;font-size:11px">Picked from your logo</span>' : ''}</label><div class="swatches">${BRAND_SWATCHES.map(x => `<button type="button" class="${x === col ? 'on' : ''}" style="background:${x}" data-act="wColor" data-c="${x}" aria-label="Colour ${x}"></button>`).join('')}<input type="color" id="w_color" value="${col}" aria-label="Custom colour" style="width:34px;height:34px;border:0;padding:0;background:none"></div></div>
       <div class="field"><label for="w_short">Short name</label><input class="input" id="w_short" maxlength="5" value="${esc(w.w_short || shortOf(w.w_name))}"><small class="muted">Shown on the app icon, and anywhere the logo is too small to read</small></div>
     </div><div><div class="eyebrow" style="margin-bottom:10px">Live preview</div><div id="wPrev">${brandMock(w.w_name, col, w.logo, w.w_short || shortOf(w.w_name))}</div></div></div>`; }
-  else if (st === 2) { const plan = w.w_plan || 'Growth'; body = `<div class="plans" style="grid-template-columns:repeat(3,1fr);gap:10px">${Object.entries(PLANS).map(([n, p]) => `<button class="card plan ${n===plan?'feat':''}" data-act="wPlan" data-p="${n}" style="text-align:left;padding:14px;gap:6px"><b>${n}</b><span class="num" style="font:700 20px var(--f-display)">$${p.price.toFixed(2)}</span><small class="muted">${p.mods.length} modules · up to ${fmt(p.limit)}</small></button>`).join('')}</div>
+  else if (st === 3) { const plan = w.w_plan || 'Growth'; body = `<div class="plans" style="grid-template-columns:repeat(3,1fr);gap:10px">${Object.entries(PLANS).map(([n, p]) => `<button class="card plan ${n===plan?'feat':''}" data-act="wPlan" data-p="${n}" style="text-align:left;padding:14px;gap:6px"><b>${n}</b><span class="num" style="font:700 20px var(--f-display)">$${p.price.toFixed(2)}</span><small class="muted">${p.mods.length} modules · up to ${fmt(p.limit)}</small></button>`).join('')}</div>
     <div class="mods" style="grid-template-columns:1fr 1fr">${MODULES.map(([k, n, i]) => { const on = (w.mods || new Set(PLANS[plan].mods)).has(k); return `<div class="mod ${on?'':'off'}" style="padding:10px 12px"><div class="meta"><b style="font-size:13px">${n}</b></div>${sw(on, 'wMod', `data-k="${k}" aria-label="${n}"`)}</div>`; }).join('')}</div>
     <label class="checkrow"><input type="checkbox" id="w_trial" ${w.w_trial !== false ? 'checked' : ''}> Start with a 30-day free trial</label>`; }
-  else if (st === 3) body = `<p class="muted" style="margin:0;font-size:13px">This person becomes the school admin. They can invite everyone else.</p><div class="form-grid">${f('w_aname','Full name','e.g. Shanthi Wickramasinghe')}${f('w_aemail','Email','principal@school.edu','email')}</div>
+  else if (st === 4) body = `<p class="muted" style="margin:0;font-size:13px">This person becomes the school admin. They can invite everyone else.</p><div class="form-grid">${f('w_aname','Full name','e.g. Shanthi Wickramasinghe')}${f('w_aemail','Email','principal@school.edu','email')}</div>
     <label class="checkrow"><input type="checkbox" checked> Import students and staff from a spreadsheet after setup</label><label class="checkrow"><input type="checkbox" checked> Copy default roles and permissions</label>`;
-  else body = `<div class="prov" id="prov">${['Create isolated database schema','Seed roles and default permissions','Configure ' + (w.w_sub || 'school') + '.quad.school and TLS certificate','Apply branding and modules','Email invite to ' + (w.w_aemail || 'the school admin')].map(s => `<div><i></i>${s}</div>`).join('')}</div><div id="provDone"></div>`;
+  else body = `<div class="prov" id="prov">${['Create isolated database schema','Seed roles and default permissions', (() => { const tt = stageTotals(w.stages || []); return `Create ${tt.stages} stages, ${tt.years} year groups and ${tt.classes} classes`; })(),'Configure ' + (w.w_sub || 'school') + '.quad.school and TLS certificate','Apply branding and modules','Email invite to ' + (w.w_aemail || 'the school admin')].map(s => `<div><i></i>${s}</div>`).join('')}</div><div id="provDone"></div>`;
   openModal(`${head('New school', 'Creates a new tenant with its own data, subdomain and branding')}<div class="steps">${steps.map((s, i) => `<div class="${i<=st?'on':''}">${i+1}. ${s}</div>`).join('')}</div>
     <form class="drawer-b" data-form="wizard" novalidate>${body}<div class="err-msg" id="wErr"></div></form>
-    <div class="drawer-f" id="wFoot">${st && st < 4 ? '<button class="btn" data-act="wBack">Back</button>' : ''}${st < 4 ? `<button class="btn primary" data-act="wNext">${st < 3 ? 'Continue' : 'Create school'}</button>` : ''}</div>`, 'wide');
-  if (st === 1) {
+    <div class="drawer-f" id="wFoot">${st && st < 5 ? '<button class="btn" data-act="wBack">Back</button>' : ''}${st < 5 ? `<button class="btn primary" data-act="wNext">${st < 4 ? 'Continue' : 'Create school'}</button>` : ''}</div>`, 'wide');
+  if (st === 1) bindStages();
+  if (st === 2) {
     const prev = () => { const w2 = S.wiz; document.getElementById('wPrev').innerHTML = brandMock(w2.w_name, w2.w_color || BRAND_SWATCHES[0], w2.logo, w2.w_short || shortOf(w2.w_name)); };
     bindLogoDrop('logoFile', f => readLogo(f, (url, dom) => { saveWiz(); S.wiz.logo = url; if (dom) { S.wiz.w_color = dom; S.wiz.picked = true; } tenantWizard(); toast(dom ? 'Logo added. We picked a brand colour from it.' : 'Logo added'); }));
     document.getElementById('w_color').oninput = e => { S.wiz.w_color = e.target.value; S.wiz.picked = false; document.querySelectorAll('.wb .swatches button').forEach(b => b.classList.remove('on')); prev(); };
@@ -1250,7 +1278,7 @@ function tenantWizard() {
     name.oninput = () => { if (!sub.dataset.touched) { sub.value = name.value.toLowerCase().replace(/[^a-z0-9 ]/g, '').trim().split(/\s+/).slice(0, 2).join('-'); check(); } };
     sub.oninput = () => { sub.dataset.touched = 1; check(); }; check();
   }
-  if (st === 4) provision();
+  if (st === 5) provision();
 }
 function provision() {
   const rows = [...document.querySelectorAll('#prov div')]; let i = 0;
@@ -1258,7 +1286,7 @@ function provision() {
     if (i < rows.length) { rows[i].className = 'run'; i++; setTimeout(step, 650); return; }
     const w = S.wiz, id = Math.max(...tenants.map(t => t.id)) + 1, plan = w.w_plan || 'Growth';
     const t = T(id, w.w_name, w.w_sub, w.w_country || 'Sri Lanka', plan, 0, w.w_trial === false ? 'Onboarding' : 'Trial', w.w_color || BRAND_SWATCHES[0], w.w_region || 'ap-south', '2026-10', {trialEnds:'4 Nov', health:'Setting up', logo: w.logo || null, short: (w.w_short || shortOf(w.w_name)).toUpperCase()});
-    t.mods = w.mods || new Set(PLANS[plan].mods); tenants.push(t);
+    t.mods = w.mods || new Set(PLANS[plan].mods); t.stages = w.stages; t.stTpl = w.stTpl; tenants.push(t);
     usersByTenant[id] = [{id:`${id}-0`, name: w.w_aname, email: w.w_aemail, role:'admin', campus:CAMPUS[0], status:'Invited', mfa:true, last:'Invite sent just now', sso:false}];
     AUDIT.unshift(['Prishan Maduka', `created tenant ${w.w_name}`, w.w_sub, 'Just now', 'tenant']);
     document.getElementById('provDone').innerHTML = `<div class="inv" style="display:flex;gap:12px;align-items:center"><div class="dot-ic t-green">${ic('check',16)}</div><div style="flex:1"><b>${esc(w.w_name)} is ready</b><div class="muted" style="font-size:12.5px">${esc(w.w_sub)}.quad.school · invite sent to ${esc(w.w_aemail)}</div></div></div>`;
@@ -1659,6 +1687,46 @@ function goSchoolApp(t, app) {
   location.href = app === 'parent' ? 'parent.html' : 'admin.html';
 }
 
+
+/* ---------- Stages and year groups ---------- */
+const range = (a, b, f) => Array.from({length: b - a + 1}, (_, i) => f(a + i));
+const STAGE_TEMPLATES = {
+  'British': [['Early Years (EYFS)','3–5',['Playgroup','Nursery','Reception'],'#E8A33D'],['Junior School','5–11',range(1, 6, n => 'Year ' + n),'#12A594'],['Senior School','11–16',range(7, 11, n => 'Year ' + n),'#2F6FED'],['Sixth Form','16–18',['Year 12','Year 13'],'#8B5CF6']],
+  'Sri Lankan national': [['Pre-school','3–5',['Lower KG','Upper KG'],'#E8A33D'],['Primary','5–10',range(1, 5, n => 'Grade ' + n),'#12A594'],['Junior Secondary','10–14',range(6, 9, n => 'Grade ' + n),'#0E7490'],['Senior Secondary (O/L)','14–16',['Grade 10','Grade 11'],'#2F6FED'],['Collegiate (A/L)','16–19',['Grade 12','Grade 13'],'#8B5CF6']],
+  'International Baccalaureate': [['Early Years','3–6',['Pre-K','Kindergarten'],'#E8A33D'],['Primary Years (PYP)','6–11',range(1, 5, n => 'PYP ' + n),'#12A594'],['Middle Years (MYP)','11–16',range(1, 5, n => 'MYP ' + n),'#2F6FED'],['Diploma (DP)','16–19',['DP 1','DP 2'],'#8B5CF6']],
+  'American': [['Pre-K','3–5',['Pre-K 3','Pre-K 4'],'#E8A33D'],['Elementary School','5–11',['Kindergarten', ...range(1, 5, n => 'Grade ' + n)],'#12A594'],['Middle School','11–14',range(6, 8, n => 'Grade ' + n),'#0E7490'],['High School','14–18',range(9, 12, n => 'Grade ' + n),'#2F6FED']]
+};
+const STAGE_COLORS = ['#E8A33D','#12A594','#0E7490','#2F6FED','#8B5CF6','#BE185D','#C2410C','#4D7C0F'];
+const stagesFrom = k => STAGE_TEMPLATES[k].map(([name, ages, years, color]) => ({name, ages, years: years.slice(), color, on: true, sections: 2}));
+const tplForCurr = c => /IB/.test(c || '') ? 'International Baccalaureate' : /Local/.test(c || '') ? 'Sri Lankan national' : 'British';
+function tenantStages(t) { if (!t.stages) { t.stages = stagesFrom(t.country === 'India' ? 'American' : 'British'); t.stTpl = t.country === 'India' ? 'American' : 'British'; } return t.stages; }
+const stageTotals = st => { const on = st.filter(x => x.on); return {stages: on.length, years: on.reduce((a, x) => a + x.years.length, 0), classes: on.reduce((a, x) => a + x.years.length * x.sections, 0)}; };
+function stagesEditor(st, target, tpl) {
+  const tot = stageTotals(st), on = st.filter(x => x.on && x.years.length);
+  return `<div class="stg-top"><div class="field" style="flex:1;min-width:260px"><label>Start from a template</label><div class="chips">${Object.keys(STAGE_TEMPLATES).map(k => `<button type="button" class="chip ${tpl === k ? 'on' : ''}" data-act="stTpl" data-target="${target}" data-v="${k}">${k}</button>`).join('')}</div></div>
+    <div class="stg-sum"><b>${tot.stages} stages · ${tot.years} year groups</b>${tot.classes} classes</div></div>
+    ${on.length ? `<div class="stg-ladder" aria-label="School journey">${on.map(x => `<div style="--sc:${x.color};--w:${x.years.length}" data-tip="<b>${esc(x.name)}</b><br>Ages ${esc(x.ages)} · ${x.years.length} year groups"><b>${esc(x.name)}</b><small>${esc(x.years[0])}${x.years.length > 1 ? ' → ' + esc(x.years[x.years.length - 1]) : ''}</small></div>`).join('')}</div>` : ''}
+    <div class="stg-list">${st.map((x, i) => `<section class="stg ${x.on ? '' : 'off'}" style="--sc:${x.color}">
+      <div class="stg-h"><span class="stg-dot"></span><input class="input stg-name" data-stg="${target}|${i}|name" value="${esc(x.name)}" aria-label="Stage name"><span class="muted" style="font-size:12px">Ages</span><input class="input stg-ages" data-stg="${target}|${i}|ages" value="${esc(x.ages)}" aria-label="Age range">
+        <div class="stg-tools"><button type="button" class="iconbtn" data-act="stMove" data-target="${target}" data-i="${i}" data-d="-1" aria-label="Move ${esc(x.name)} up" ${i === 0 ? 'disabled' : ''}>↑</button><button type="button" class="iconbtn" data-act="stMove" data-target="${target}" data-i="${i}" data-d="1" aria-label="Move ${esc(x.name)} down" ${i === st.length - 1 ? 'disabled' : ''}>↓</button>${sw(x.on, 'stToggle', `data-target="${target}" data-i="${i}" aria-label="Use ${esc(x.name)}"`)}<button type="button" class="iconbtn" data-act="stDel" data-target="${target}" data-i="${i}" aria-label="Remove ${esc(x.name)}">${ic('trash',14)}</button></div></div>
+      <div class="stg-years">${x.years.map((y, j) => `<span class="ychip">${esc(y)}<button type="button" data-act="stRmYear" data-target="${target}" data-i="${i}" data-j="${j}" aria-label="Remove ${esc(y)}">${ic('x',12)}</button></span>`).join('')}<input class="input ychip-add" data-stadd="${target}|${i}" placeholder="+ Add year group" aria-label="Add a year group to ${esc(x.name)}"></div>
+      <div class="stg-f"><label>Classes per year group <input class="input" type="number" min="1" max="10" data-stg="${target}|${i}|sections" value="${x.sections}"></label><span class="muted">${x.years.length * x.sections} classes${x.years.length ? ` · e.g. ${esc(x.years[0])} ${'ABCDEFGHIJ'.slice(0, Math.min(x.sections, 4)).split('').join(', ')}` : ''}</span></div></section>`).join('')}</div>
+    <button type="button" class="btn" data-act="stAdd" data-target="${target}" style="align-self:flex-start">${ic('plus',16)}Add a stage</button>`;
+}
+function stagesOf(target) { if (target === 'wiz') return S.wiz.stages; return tenantStages(tenants.find(x => x.id === +target)); }
+function stagesRerender(target) { if (target === 'wiz') { saveWiz(); tenantWizard(); } else { const y = window.scrollY; route(); window.scrollTo(0, y); } }
+function bindStages() {
+  document.querySelectorAll('[data-stg]').forEach(inp => inp.oninput = () => { const [tg, i, f] = inp.dataset.stg.split('|'), x = stagesOf(tg)[+i]; x[f] = f === 'sections' ? Math.max(1, Math.min(10, +inp.value || 1)) : inp.value; if (f === 'sections') stagesRerender(tg); else if (f === 'name') { const l = document.querySelectorAll('.stg-ladder b')[stagesOf(tg).filter(z => z.on && z.years.length).indexOf(x)]; if (l) l.textContent = inp.value; } });
+  document.querySelectorAll('[data-stadd]').forEach(inp => inp.onkeydown = e => { if (e.key !== 'Enter') return; e.preventDefault(); const v = inp.value.trim(); if (!v) return; const [tg, i] = inp.dataset.stadd.split('|'), x = stagesOf(tg)[+i]; if (x.years.includes(v)) { toast(`${v} is already in ${x.name}`); return; } x.years.push(v); stagesRerender(tg); setTimeout(() => { const n = document.querySelector(`[data-stadd="${tg}|${i}"]`); if (n) n.focus(); }, 30); });
+}
+function stagesError(st) { const on = st.filter(x => x.on); if (!on.length) return 'Turn on at least one stage.'; const e = on.find(x => !x.name.trim()); if (e) return 'Give every stage a name.'; const n = on.find(x => !x.years.length); if (n) return `Add at least one year group to ${n.name}, or turn that stage off.`; return ''; }
+function tStages(t) {
+  const st = tenantStages(t);
+  return `<div class="card"><div class="card-h"><h2>Stages and year groups</h2><span class="muted" style="font-size:12.5px">Used for admissions, classes, timetables, reports and fees</span></div><div class="card-b" style="display:flex;flex-direction:column;gap:16px">
+    ${stagesEditor(st, t.id, t.stTpl)}<div class="err-msg" id="stErr"></div>
+    <div style="display:flex;gap:10px"><button class="btn primary" data-act="stSave" data-id="${t.id}">Save stages</button><span class="muted small" style="align-self:center">Removing a year group with students in it asks you where to move them first.</span></div></div></div>`;
+}
+
 /* ---------- Router ---------- */
 const NAV = [
   {g:'Platform', items:[['overview','Overview','home'],['tenants','Schools','tenants', tenants.length],['plans','Plans & billing','dollar'],['audit','Audit log','log']]}
@@ -1681,6 +1749,7 @@ function route() {
   renderNav(); closeAll(); document.getElementById('app').classList.remove('mobile-open'); afterRender();
 }
 function afterRender() {
+  if (document.querySelector('[data-stg]')) bindStages();
   countUps();
   document.querySelectorAll('.tcard').forEach(c => c.onkeydown = e => { if (e.key === 'Enter') c.click(); });
   ['tSearch','uSearch'].forEach(id => { const el = document.getElementById(id); if (el) el.oninput = () => { S.q = el.value; const pos = el.selectionStart; route(); const n = document.getElementById(id); n.focus(); n.setSelectionRange(pos, pos); }; });
@@ -1711,7 +1780,8 @@ const ACT = {
   wBack: () => { saveWiz(); S.wiz.step--; tenantWizard(); },
   wNext: () => { saveWiz(); const w = S.wiz, err = document.getElementById('wErr');
     if (w.step === 0) { if (!w.w_name || !w.w_sub) { err.textContent = 'Enter the school name and a subdomain to continue.'; return; } if (!/^[a-z0-9-]{3,30}$/.test(w.w_sub) || tenants.some(t => t.sub === w.w_sub)) { err.textContent = 'Choose an available subdomain. Use 3–30 lowercase letters, numbers or hyphens.'; return; } }
-    if (w.step === 3 && (!w.w_aname || !/^\S+@\S+\.\S+$/.test(w.w_aemail || ''))) { err.textContent = 'Enter the admin’s name and a valid email address.'; return; }
+    if (w.step === 1) { const e = stagesError(w.stages || []); if (e) { err.textContent = e; return; } }
+    if (w.step === 4 && (!w.w_aname || !/^\S+@\S+\.\S+$/.test(w.w_aemail || ''))) { err.textContent = 'Enter the admin’s name and a valid email address.'; return; }
     w.step++; tenantWizard(); },
   wPlan: el => { saveWiz(); S.wiz.w_plan = el.dataset.p; S.wiz.mods = new Set(PLANS[el.dataset.p].mods); tenantWizard(); },
   wMod: el => { saveWiz(); const w = S.wiz; w.mods = w.mods || new Set(PLANS[w.w_plan || 'Growth'].mods); w.mods.has(el.dataset.k) ? w.mods.delete(el.dataset.k) : w.mods.add(el.dataset.k); el.classList.toggle('on'); el.closest('.mod').classList.toggle('off'); },
@@ -1741,6 +1811,13 @@ const ACT = {
   confirmDelRole: el => { const t = tenants.find(x => x.id === +el.dataset.id); tenantUsers(t).forEach(u => { if (u.role === S.roleSel) u.role = 'teacher'; }); rolesByTenant[t.id] = tenantRoles(t).filter(r => r.id !== S.roleSel); S.roleSel = 'teacher'; S.dirty = false; closeAll(); route(); toast('Role deleted'); },
   mod: el => { const t = tenants.find(x => x.id === +el.dataset.id), k = el.dataset.k; t.mods.has(k) ? t.mods.delete(k) : t.mods.add(k); route(); toast(`${MODULES.find(m => m[0] === k)[1]} ${t.mods.has(k) ? 'turned on' : 'turned off'} for ${t.name}`); },
   brand: el => setBrand(+el.dataset.id, el.dataset.c),
+  stTpl: el => { const tg = el.dataset.target, k = el.dataset.v; if (tg === 'wiz') { saveWiz(); S.wiz.stTpl = k; S.wiz.stages = stagesFrom(k); tenantWizard(); } else { const t = tenants.find(x => x.id === +tg); t.stTpl = k; t.stages = stagesFrom(k); route(); } toast(`Loaded the ${k} stages. Edit them to match your school.`); },
+  stMove: el => { const st = stagesOf(el.dataset.target), i = +el.dataset.i, j = i + +el.dataset.d; if (j < 0 || j >= st.length) return; [st[i], st[j]] = [st[j], st[i]]; stagesRerender(el.dataset.target); },
+  stToggle: el => { const x = stagesOf(el.dataset.target)[+el.dataset.i]; x.on = !x.on; stagesRerender(el.dataset.target); },
+  stDel: el => { const st = stagesOf(el.dataset.target), x = st[+el.dataset.i]; st.splice(+el.dataset.i, 1); stagesRerender(el.dataset.target); toast(`Removed ${x.name}`); },
+  stRmYear: el => { const x = stagesOf(el.dataset.target)[+el.dataset.i]; x.years.splice(+el.dataset.j, 1); stagesRerender(el.dataset.target); },
+  stAdd: el => { const st = stagesOf(el.dataset.target); st.push({name:'New stage', ages:'', years:[], color: STAGE_COLORS[st.length % STAGE_COLORS.length], on:true, sections:2}); stagesRerender(el.dataset.target); setTimeout(() => { const n = document.querySelectorAll('.stg-name'); if (n.length) { n[n.length - 1].focus(); n[n.length - 1].select(); } }, 40); },
+  stSave: el => { const t = tenants.find(x => x.id === +el.dataset.id), e = stagesError(tenantStages(t)); if (e) { document.getElementById('stErr').textContent = e; return; } const tt = stageTotals(t.stages); AUDIT.unshift(['Prishan Maduka', `updated stages for ${t.name} (${tt.stages} stages, ${tt.years} year groups)`, t.sub, 'Just now', 'tenant']); toast(`Saved · ${tt.stages} stages, ${tt.years} year groups, ${tt.classes} classes`); },
   wColor: el => { saveWiz(); S.wiz.w_color = el.dataset.c; S.wiz.picked = false; tenantWizard(); },
   wCrest: () => { saveWiz(); S.wiz.logo = sampleCrest(S.wiz.w_name || 'New School', S.wiz.w_color || BRAND_SWATCHES[0]); S.wiz.picked = false; tenantWizard(); },
   wRmLogo: () => { saveWiz(); S.wiz.logo = null; S.wiz.picked = false; tenantWizard(); },
