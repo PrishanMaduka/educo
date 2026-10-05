@@ -774,6 +774,22 @@ tr.click:hover td{background:color-mix(in srgb,var(--brand) 6%,transparent)}
 .ychip-add{width:150px;height:30px;border-radius:20px!important;border-style:dashed!important;font-size:13px}
 .stg-f{display:flex;align-items:center;gap:12px;padding:0 12px 12px;font-size:13px;flex-wrap:wrap}
 .stg-f input{width:64px;height:30px}
+
+/* Curricula */
+.cur-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:18px}
+.cur-card{padding:20px;display:flex;flex-direction:column;gap:14px;cursor:pointer;transition:transform .2s,box-shadow .2s;text-align:left}
+.cur-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg)}
+.cur-card:focus-visible{outline:2px solid var(--brand);outline-offset:3px}
+.cur-card h3{font:600 18px/1.25 var(--f-head);margin:0;letter-spacing:-.02em}
+.cur-card p{margin:0;color:var(--ink-3);font-size:13px}
+.cur-meta{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--ink-3)}
+.cur-meta b{color:var(--ink);font-variant-numeric:tabular-nums}
+.cur-add{border:1.5px dashed var(--line-strong);background:transparent;align-items:center;justify-content:center;color:var(--ink-3);min-height:200px;box-shadow:none}
+.cur-add b{color:var(--ink)}
+.cur-banner{display:flex;gap:12px;align-items:center;padding:12px 14px;border-radius:12px;background:var(--warn-soft);color:var(--warn);font-size:13px;font-weight:600;flex-wrap:wrap}
+.cur-banner span{flex:1;min-width:200px}
+.cur-from{display:flex;gap:10px;align-items:center;padding:10px 14px;border-radius:12px;background:var(--brand-soft);font-size:13px}
+.qual{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr) 34px;gap:8px;align-items:center}
 </style>
 </head>
 <body>
@@ -1206,7 +1222,7 @@ V.audit = () => { const f = S.filter.au || 'all'; const rows = AUDIT.filter(a =>
 /* ---------- Overlays ---------- */
 const scrim = document.getElementById('scrim'), drawer = document.getElementById('drawer'), modal = document.getElementById('drawer');
 function openDrawer(html, cls = '') { drawer.className = 'drawer ' + cls; drawer.innerHTML = html; drawer.classList.add('on'); scrim.classList.add('on'); drawer.setAttribute('aria-hidden','false'); }
-const FORM_META = [['Invite users','users','School users'],['New school','tenants','Platform'],['Suspend','power','Danger zone',true],['Delete','trash','Danger zone',true]];
+const FORM_META = [['Curriculum template','book','Curricula'],['Invite users','users','School users'],['New school','tenants','Platform'],['Suspend','power','Danger zone',true],['Delete','trash','Danger zone',true]];
 /* Form drawers: look up an icon and section label from the form's title */
 function formDrawer(html, cls = '') {
   openDrawer(html, 'form ' + cls);
@@ -1219,7 +1235,7 @@ function formDrawer(html, cls = '') {
     hd.insertAdjacentHTML('beforeend', `<ol class="ad-steps fd-steps" style="--n:${items.length}" aria-label="Steps">${items.map((el, i) => `<li class="${i < cur ? 'done' : i === cur ? 'cur' : ''}" ${i === cur ? 'aria-current="step"' : ''}><div class="st"><i>${i < cur ? ic('check', 12) : i + 1}</i><span>${el.textContent.replace(/^\d+\.\s*/, '')}</span><small>${i < cur ? 'Done' : i === cur ? 'Now' : ''}</small></div></li>`).join('')}</ol>`); }
   const b = drawer.querySelector('.drawer-b');
   if (b && !b.querySelector(':scope > .fd-card')) { const w = document.createElement('div'); w.className = 'fd-card'; while (b.firstChild) w.appendChild(b.firstChild); b.appendChild(w); const err = w.querySelector(':scope > .err-msg'); if (err) b.appendChild(err); }
-  setTimeout(() => { const f = drawer.querySelector('.drawer-b input:not([type=checkbox]):not([type=file]):not([type=radio]),.drawer-b select,.drawer-b textarea'); if (f) f.focus(); }, 120);
+  if (!S.noFocus) setTimeout(() => { const f = drawer.querySelector('.drawer-b input:not([type=checkbox]):not([type=file]):not([type=radio]),.drawer-b select,.drawer-b textarea'); if (f) f.focus(); }, 120);
 }
 function openModal(html, cls = '') { formDrawer(html, cls); }
 function closeAll() { [drawer, modal, scrim, document.getElementById('cmdk')].forEach(e => e.classList.remove('on')); drawer.setAttribute('aria-hidden','true'); }
@@ -1243,10 +1259,14 @@ function tenantWizard() {
     <div class="field full"><label for="w_sub">Subdomain</label><div class="addon"><input class="input" id="w_sub" value="${esc(w.w_sub||'')}" placeholder="lakeside" autocomplete="off"><span>.quad.school</span></div><div class="avail" id="subAvail"></div></div>
     <div class="field"><label for="w_country">Country</label><select class="input" id="w_country">${['Sri Lanka','Maldives','India','UAE','Singapore'].map(c => `<option ${w.w_country===c?'selected':''}>${c}</option>`).join('')}</select></div>
     <div class="field"><label for="w_region">Data region</label><select class="input" id="w_region">${Object.entries(REGIONS).map(([k, v]) => `<option value="${k}" ${w.w_region===k?'selected':''}>${v}</option>`).join('')}</select></div>
-    <div class="field"><label for="w_curr">Curriculum</label><select class="input" id="w_curr"><option>Cambridge (IGCSE / A level)</option><option>Edexcel</option><option>IB</option><option>Local (O/L, A/L)</option></select></div>
+    <div class="field"><label for="w_curr">Curriculum</label><select class="input" id="w_curr">${CURRICULA.map(c => `<option value="${c.id}" ${(w.w_curr || 'cambridge') === c.id ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}</select></div>
     <div class="field"><label for="w_students">Expected students</label><input class="input" id="w_students" type="number" value="${w.w_students||600}"></div></div>`;
-  else if (st === 1) { if (!w.stages) { w.stTpl = tplForCurr(w.w_curr); w.stages = stagesFrom(w.stTpl); }
-    body = `<p class="muted" style="margin:0;font-size:13px">How ${esc(w.w_name || 'the school')} is organised. Year groups become the classes students are placed in.</p>${stagesEditor(w.stages, 'wiz', w.stTpl)}`; }
+  else if (st === 1) { const cur = curOf(w.w_curr || 'cambridge');
+    if (!w.stages || (w.stTpl !== cur.id && !w.stEdited)) { w.stTpl = cur.id; w.stages = stagesFrom(cur.id); w.stEdited = false; }
+    const changed = w.stTpl !== cur.id;
+    body = `${changed ? `<div class="cur-banner">${ic('alert',16)}<span>You changed the curriculum to ${esc(cur.name)}, but these stages came from ${esc(curOf(w.stTpl).name)} and you’ve edited them.</span><button type="button" class="btn sm" data-act="stTpl" data-target="wiz" data-v="${cur.id}">Load ${esc(cur.short)} stages</button><button type="button" class="btn sm ghost" data-act="keepStages">Keep mine</button></div>` : ''}
+      <div class="cur-from">${ic('book',16)}<span>Stages from the <b>${esc(curOf(w.stTpl).name)}</b> curriculum template${w.stEdited ? ', edited for this school' : ''}. Grading: ${esc(curOf(w.stTpl).grading)}.</span></div>
+      ${stagesEditor(w.stages, 'wiz', w.stTpl)}`; }
   else if (st === 2) { const col = w.w_color || BRAND_SWATCHES[0];
     body = `<div class="wb"><div class="wb-l">
       <div class="field"><label>School logo</label>${logoDrop('logoFile', w.logo)}<div class="chips" style="margin-top:8px"><button type="button" class="chip" data-act="wCrest">No logo yet? Make a sample crest</button>${w.logo ? '<button type="button" class="chip" data-act="wRmLogo">Remove logo</button>' : ''}</div></div>
@@ -1286,7 +1306,7 @@ function provision() {
     if (i < rows.length) { rows[i].className = 'run'; i++; setTimeout(step, 650); return; }
     const w = S.wiz, id = Math.max(...tenants.map(t => t.id)) + 1, plan = w.w_plan || 'Growth';
     const t = T(id, w.w_name, w.w_sub, w.w_country || 'Sri Lanka', plan, 0, w.w_trial === false ? 'Onboarding' : 'Trial', w.w_color || BRAND_SWATCHES[0], w.w_region || 'ap-south', '2026-10', {trialEnds:'4 Nov', health:'Setting up', logo: w.logo || null, short: (w.w_short || shortOf(w.w_name)).toUpperCase()});
-    t.mods = w.mods || new Set(PLANS[plan].mods); t.stages = w.stages; t.stTpl = w.stTpl; tenants.push(t);
+    t.mods = w.mods || new Set(PLANS[plan].mods); t.stages = w.stages; t.stTpl = w.stTpl; t.curr = w.w_curr || w.stTpl; tenants.push(t);
     usersByTenant[id] = [{id:`${id}-0`, name: w.w_aname, email: w.w_aemail, role:'admin', campus:CAMPUS[0], status:'Invited', mfa:true, last:'Invite sent just now', sso:false}];
     AUDIT.unshift(['Prishan Maduka', `created tenant ${w.w_name}`, w.w_sub, 'Just now', 'tenant']);
     document.getElementById('provDone').innerHTML = `<div class="inv" style="display:flex;gap:12px;align-items:center"><div class="dot-ic t-green">${ic('check',16)}</div><div style="flex:1"><b>${esc(w.w_name)} is ready</b><div class="muted" style="font-size:12.5px">${esc(w.w_sub)}.quad.school · invite sent to ${esc(w.w_aemail)}</div></div></div>`;
@@ -1690,20 +1710,29 @@ function goSchoolApp(t, app) {
 
 /* ---------- Stages and year groups ---------- */
 const range = (a, b, f) => Array.from({length: b - a + 1}, (_, i) => f(a + i));
-const STAGE_TEMPLATES = {
-  'British': [['Early Years (EYFS)','3–5',['Playgroup','Nursery','Reception'],'#E8A33D'],['Junior School','5–11',range(1, 6, n => 'Year ' + n),'#12A594'],['Senior School','11–16',range(7, 11, n => 'Year ' + n),'#2F6FED'],['Sixth Form','16–18',['Year 12','Year 13'],'#8B5CF6']],
-  'Sri Lankan national': [['Pre-school','3–5',['Lower KG','Upper KG'],'#E8A33D'],['Primary','5–10',range(1, 5, n => 'Grade ' + n),'#12A594'],['Junior Secondary','10–14',range(6, 9, n => 'Grade ' + n),'#0E7490'],['Senior Secondary (O/L)','14–16',['Grade 10','Grade 11'],'#2F6FED'],['Collegiate (A/L)','16–19',['Grade 12','Grade 13'],'#8B5CF6']],
-  'International Baccalaureate': [['Early Years','3–6',['Pre-K','Kindergarten'],'#E8A33D'],['Primary Years (PYP)','6–11',range(1, 5, n => 'PYP ' + n),'#12A594'],['Middle Years (MYP)','11–16',range(1, 5, n => 'MYP ' + n),'#2F6FED'],['Diploma (DP)','16–19',['DP 1','DP 2'],'#8B5CF6']],
-  'American': [['Pre-K','3–5',['Pre-K 3','Pre-K 4'],'#E8A33D'],['Elementary School','5–11',['Kindergarten', ...range(1, 5, n => 'Grade ' + n)],'#12A594'],['Middle School','11–14',range(6, 8, n => 'Grade ' + n),'#0E7490'],['High School','14–18',range(9, 12, n => 'Grade ' + n),'#2F6FED']]
-};
+const CURRICULA = [
+  {id:'cambridge', name:'Cambridge International', short:'Cambridge', desc:'Cambridge Primary, Lower Secondary, IGCSE and A Level. British year groups.', grading:'A* to U', quals:[['Year 6','Cambridge Primary Checkpoint'],['Year 9','Lower Secondary Checkpoint'],['Year 11','IGCSE'],['Year 13','International A Level']],
+    stages:[['Early Years (EYFS)','3–5',['Playgroup','Nursery','Reception'],'#E8A33D'],['Junior School','5–11',range(1, 6, n => 'Year ' + n),'#12A594'],['Senior School','11–16',range(7, 11, n => 'Year ' + n),'#2F6FED'],['Sixth Form','16–18',['Year 12','Year 13'],'#8B5CF6']]},
+  {id:'edexcel', name:'Pearson Edexcel', short:'Edexcel', desc:'International GCSE and International A Level, graded 9 to 1 at GCSE.', grading:'9 to 1', quals:[['Year 11','International GCSE'],['Year 13','International A Level']],
+    stages:[['Early Years (EYFS)','3–5',['Nursery','Reception'],'#E8A33D'],['Primary','5–11',range(1, 6, n => 'Year ' + n),'#12A594'],['Secondary','11–16',range(7, 11, n => 'Year ' + n),'#2F6FED'],['Sixth Form','16–18',['Year 12','Year 13'],'#8B5CF6']]},
+  {id:'ib', name:'International Baccalaureate', short:'IB', desc:'Primary Years, Middle Years and Diploma Programmes.', grading:'1 to 7', quals:[['MYP 5','MYP eAssessment'],['DP 2','IB Diploma']],
+    stages:[['Early Years','3–6',['Pre-K','Kindergarten'],'#E8A33D'],['Primary Years (PYP)','6–11',range(1, 5, n => 'PYP ' + n),'#12A594'],['Middle Years (MYP)','11–16',range(1, 5, n => 'MYP ' + n),'#2F6FED'],['Diploma (DP)','16–19',['DP 1','DP 2'],'#8B5CF6']]},
+  {id:'local', name:'Sri Lankan national', short:'Sri Lankan', desc:'Ministry of Education syllabus with G.C.E. Ordinary and Advanced Level exams.', grading:'A, B, C, S, W', quals:[['Grade 5','Scholarship exam'],['Grade 11','G.C.E. O/L'],['Grade 13','G.C.E. A/L']],
+    stages:[['Pre-school','3–5',['Lower KG','Upper KG'],'#E8A33D'],['Primary','5–10',range(1, 5, n => 'Grade ' + n),'#12A594'],['Junior Secondary','10–14',range(6, 9, n => 'Grade ' + n),'#0E7490'],['Senior Secondary (O/L)','14–16',['Grade 10','Grade 11'],'#2F6FED'],['Collegiate (A/L)','16–19',['Grade 12','Grade 13'],'#8B5CF6']]},
+  {id:'american', name:'American', short:'American', desc:'Common Core based, with Advanced Placement in high school. Grades K to 12.', grading:'A to F · GPA 4.0', quals:[['Grade 8','MAP Growth'],['Grade 11','SAT / PSAT'],['Grade 12','High School Diploma and AP']],
+    stages:[['Pre-K','3–5',['Pre-K 3','Pre-K 4'],'#E8A33D'],['Elementary School','5–11',['Kindergarten', ...range(1, 5, n => 'Grade ' + n)],'#12A594'],['Middle School','11–14',range(6, 8, n => 'Grade ' + n),'#0E7490'],['High School','14–18',range(9, 12, n => 'Grade ' + n),'#2F6FED']]}
+].map(c => ({...c, stages: c.stages.map(([name, ages, years, color]) => ({name, ages, years, color, on: true, sections: 2}))}));
+const curOf = id => CURRICULA.find(c => c.id === id) || CURRICULA[0];
+const copyStages = st => st.map(x => ({...x, years: x.years.slice()}));
 const STAGE_COLORS = ['#E8A33D','#12A594','#0E7490','#2F6FED','#8B5CF6','#BE185D','#C2410C','#4D7C0F'];
-const stagesFrom = k => STAGE_TEMPLATES[k].map(([name, ages, years, color]) => ({name, ages, years: years.slice(), color, on: true, sections: 2}));
-const tplForCurr = c => /IB/.test(c || '') ? 'International Baccalaureate' : /Local/.test(c || '') ? 'Sri Lankan national' : 'British';
-function tenantStages(t) { if (!t.stages) { t.stages = stagesFrom(t.country === 'India' ? 'American' : 'British'); t.stTpl = t.country === 'India' ? 'American' : 'British'; } return t.stages; }
+const stagesFrom = k => copyStages(curOf(k).stages);
+const tplForCurr = c => curOf(c).id;
+const tenantCurr = t => t.curr || (t.curr = t.country === 'India' ? 'american' : t.id === 3 ? 'local' : t.id % 3 === 0 ? 'edexcel' : 'cambridge');
+function tenantStages(t) { if (!t.stages) { t.stTpl = tenantCurr(t); t.stages = stagesFrom(t.stTpl); } return t.stages; }
 const stageTotals = st => { const on = st.filter(x => x.on); return {stages: on.length, years: on.reduce((a, x) => a + x.years.length, 0), classes: on.reduce((a, x) => a + x.years.length * x.sections, 0)}; };
 function stagesEditor(st, target, tpl) {
   const tot = stageTotals(st), on = st.filter(x => x.on && x.years.length);
-  return `<div class="stg-top"><div class="field" style="flex:1;min-width:260px"><label>Start from a template</label><div class="chips">${Object.keys(STAGE_TEMPLATES).map(k => `<button type="button" class="chip ${tpl === k ? 'on' : ''}" data-act="stTpl" data-target="${target}" data-v="${k}">${k}</button>`).join('')}</div></div>
+  return `<div class="stg-top"><div class="field" style="flex:1;min-width:260px"><label>${target === 'curd' ? 'Copy stages from another curriculum' : 'Load stages from a curriculum'}</label><div class="chips">${CURRICULA.filter(c => target !== 'curd' || c.id !== S.curDraft.id).map(c => `<button type="button" class="chip ${tpl === c.id ? 'on' : ''}" data-act="stTpl" data-target="${target}" data-v="${c.id}">${esc(c.short)}</button>`).join('')}</div></div>
     <div class="stg-sum"><b>${tot.stages} stages · ${tot.years} year groups</b>${tot.classes} classes</div></div>
     ${on.length ? `<div class="stg-ladder" aria-label="School journey">${on.map(x => `<div style="--sc:${x.color};--w:${x.years.length}" data-tip="<b>${esc(x.name)}</b><br>Ages ${esc(x.ages)} · ${x.years.length} year groups"><b>${esc(x.name)}</b><small>${esc(x.years[0])}${x.years.length > 1 ? ' → ' + esc(x.years[x.years.length - 1]) : ''}</small></div>`).join('')}</div>` : ''}
     <div class="stg-list">${st.map((x, i) => `<section class="stg ${x.on ? '' : 'off'}" style="--sc:${x.color}">
@@ -1713,23 +1742,57 @@ function stagesEditor(st, target, tpl) {
       <div class="stg-f"><label>Classes per year group <input class="input" type="number" min="1" max="10" data-stg="${target}|${i}|sections" value="${x.sections}"></label><span class="muted">${x.years.length * x.sections} classes${x.years.length ? ` · e.g. ${esc(x.years[0])} ${'ABCDEFGHIJ'.slice(0, Math.min(x.sections, 4)).split('').join(', ')}` : ''}</span></div></section>`).join('')}</div>
     <button type="button" class="btn" data-act="stAdd" data-target="${target}" style="align-self:flex-start">${ic('plus',16)}Add a stage</button>`;
 }
-function stagesOf(target) { if (target === 'wiz') return S.wiz.stages; return tenantStages(tenants.find(x => x.id === +target)); }
-function stagesRerender(target) { if (target === 'wiz') { saveWiz(); tenantWizard(); } else { const y = window.scrollY; route(); window.scrollTo(0, y); } }
+function stagesOf(target) { if (target === 'wiz') return S.wiz.stages; if (target === 'curd') return S.curDraft.stages; return tenantStages(tenants.find(x => x.id === +target)); }
+function stagesRerender(target) { if (target === 'wiz') { S.wiz.stEdited = true; saveWiz(); const b0 = drawer.querySelector('.drawer-b'), y = b0 ? b0.scrollTop : 0; S.noFocus = true; tenantWizard(); S.noFocus = false; const b1 = drawer.querySelector('.drawer-b'); if (b1) b1.scrollTop = y; } else if (target === 'curd') curDrawer(); else { const y = window.scrollY; route(); window.scrollTo(0, y); } }
 function bindStages() {
-  document.querySelectorAll('[data-stg]').forEach(inp => inp.oninput = () => { const [tg, i, f] = inp.dataset.stg.split('|'), x = stagesOf(tg)[+i]; x[f] = f === 'sections' ? Math.max(1, Math.min(10, +inp.value || 1)) : inp.value; if (f === 'sections') stagesRerender(tg); else if (f === 'name') { const l = document.querySelectorAll('.stg-ladder b')[stagesOf(tg).filter(z => z.on && z.years.length).indexOf(x)]; if (l) l.textContent = inp.value; } });
+  document.querySelectorAll('[data-stg]').forEach(inp => inp.oninput = () => { const [tg, i, f] = inp.dataset.stg.split('|'), x = stagesOf(tg)[+i]; if (tg === 'wiz') S.wiz.stEdited = true; x[f] = f === 'sections' ? Math.max(1, Math.min(10, +inp.value || 1)) : inp.value; if (f === 'sections') stagesRerender(tg); else if (f === 'name') { const l = document.querySelectorAll('.stg-ladder b')[stagesOf(tg).filter(z => z.on && z.years.length).indexOf(x)]; if (l) l.textContent = inp.value; } });
   document.querySelectorAll('[data-stadd]').forEach(inp => inp.onkeydown = e => { if (e.key !== 'Enter') return; e.preventDefault(); const v = inp.value.trim(); if (!v) return; const [tg, i] = inp.dataset.stadd.split('|'), x = stagesOf(tg)[+i]; if (x.years.includes(v)) { toast(`${v} is already in ${x.name}`); return; } x.years.push(v); stagesRerender(tg); setTimeout(() => { const n = document.querySelector(`[data-stadd="${tg}|${i}"]`); if (n) n.focus(); }, 30); });
 }
 function stagesError(st) { const on = st.filter(x => x.on); if (!on.length) return 'Turn on at least one stage.'; const e = on.find(x => !x.name.trim()); if (e) return 'Give every stage a name.'; const n = on.find(x => !x.years.length); if (n) return `Add at least one year group to ${n.name}, or turn that stage off.`; return ''; }
 function tStages(t) {
   const st = tenantStages(t);
-  return `<div class="card"><div class="card-h"><h2>Stages and year groups</h2><span class="muted" style="font-size:12.5px">Used for admissions, classes, timetables, reports and fees</span></div><div class="card-b" style="display:flex;flex-direction:column;gap:16px">
+  return `<div class="card"><div class="card-h"><h2>Stages and year groups · ${esc(curOf(tenantCurr(t)).name)}</h2><span class="muted" style="font-size:12.5px">Used for admissions, classes, timetables, reports and fees</span></div><div class="card-b" style="display:flex;flex-direction:column;gap:16px">
     ${stagesEditor(st, t.id, t.stTpl)}<div class="err-msg" id="stErr"></div>
     <div style="display:flex;gap:10px"><button class="btn primary" data-act="stSave" data-id="${t.id}">Save stages</button><span class="muted small" style="align-self:center">Removing a year group with students in it asks you where to move them first.</span></div></div></div>`;
 }
 
+
+V.curricula = () => {
+  CURRICULA.forEach(c => c.used = tenants.filter(t => tenantCurr(t) === c.id).length);
+  return `${pageHead('Platform', 'Curricula', 'Each curriculum is a template of stages, year groups, grading and exams. New schools start from the curriculum they choose.', `<button class="btn primary" data-act="openCur">${ic('plus',16)}Add curriculum</button>`)}
+  <div class="cur-grid">${CURRICULA.map(c => { const tt = stageTotals(c.stages); return `<div class="card cur-card" data-act="openCur" data-id="${c.id}" tabindex="0" role="button" aria-label="Edit ${esc(c.name)}">
+    <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><h3>${esc(c.name)}</h3><span class="pill t-blue">${c.used} school${c.used === 1 ? '' : 's'}</span></div><p>${esc(c.desc)}</p>
+    <div class="stg-ladder" style="height:46px">${c.stages.filter(x => x.on && x.years.length).map(x => `<div style="--sc:${x.color};--w:${x.years.length}"><b>${esc(x.name)}</b><small>${x.years.length} years</small></div>`).join('')}</div>
+    <div class="cur-meta"><span><b>${tt.stages}</b> stages</span><span><b>${tt.years}</b> year groups</span><span>Grading <b>${esc(c.grading)}</b></span></div>
+    ${c.quals.length ? `<div class="chips">${c.quals.map(q => `<span class="pill t-violet plain">${esc(q[1])} · ${esc(q[0])}</span>`).join('')}</div>` : ''}</div>`; }).join('')}
+    <button class="card cur-card cur-add" data-act="openCur">${ic('plus',22)}<b>Add a curriculum</b><span style="font-size:13px">For example Australian, Indian CBSE or a school’s own</span></button></div>`;
+};
+function curSync() { const d = S.curDraft; if (!d) return; [['cur_name','name'],['cur_short','short'],['cur_desc','desc'],['cur_grading','grading']].forEach(([id, k]) => { const el = document.getElementById(id); if (el) d[k] = el.value; });
+  document.querySelectorAll('[data-qual]').forEach(el => { const [i, j] = el.dataset.qual.split('|'); if (d.quals[+i]) d.quals[+i][+j] = el.value; }); }
+function curDrawer(first) {
+  if (!first) curSync();
+  const d = S.curDraft, users = tenants.filter(t => tenantCurr(t) === d.id).length, years = [...new Set(d.stages.flatMap(x => x.years))];
+  const keep = drawer.querySelector('.drawer-b') ? drawer.querySelector('.drawer-b').scrollTop : 0;
+  S.noFocus = !first;
+  formDrawer(`${head(d.isNew ? 'New curriculum' : d.name, 'Curriculum template · stages, year groups, grading and exams')}
+    <div class="drawer-b">
+      <div class="form-grid"><div class="field"><label for="cur_name">Name</label><input class="input" id="cur_name" value="${esc(d.name)}" placeholder="e.g. Indian CBSE"></div><div class="field"><label for="cur_short">Short name</label><input class="input" id="cur_short" value="${esc(d.short)}" placeholder="e.g. CBSE"></div>
+        <div class="field full"><label for="cur_desc">Description</label><input class="input" id="cur_desc" value="${esc(d.desc)}" placeholder="What schools on this curriculum teach and sit"></div>
+        <div class="field"><label for="cur_grading">Grading scale</label><input class="input" id="cur_grading" value="${esc(d.grading)}" list="gradeScales"><datalist id="gradeScales"><option>A* to U</option><option>9 to 1</option><option>1 to 7</option><option>A, B, C, S, W</option><option>A to F · GPA 4.0</option><option>Percentage</option></datalist></div></div>
+      <div class="field"><label>Exams and milestones</label><datalist id="yearList">${years.map(y => `<option>${esc(y)}</option>`).join('')}</datalist>
+        ${d.quals.map((q, i) => `<div class="qual"><input class="input" list="yearList" data-qual="${i}|0" value="${esc(q[0])}" placeholder="Year group" aria-label="Year group"><input class="input" data-qual="${i}|1" value="${esc(q[1])}" placeholder="Exam or qualification" aria-label="Exam"><button type="button" class="iconbtn" style="width:34px;height:34px" data-act="curQualRm" data-i="${i}" aria-label="Remove">${ic('x',14)}</button></div>`).join('')}
+        <button type="button" class="btn sm" data-act="curQualAdd" style="align-self:flex-start">${ic('plus',14)}Add an exam</button></div>
+      ${stagesEditor(d.stages, 'curd', '')}
+      ${d.isNew ? '' : `<div class="setting" style="padding:12px 0 0;border:0"><div class="meta"><b>Also update the ${users} school${users === 1 ? '' : 's'} on this curriculum</b><small>Off: only new schools get these stages. On: replaces the stages of existing schools too.</small></div>${sw(S.curApply, 'curApply', 'aria-label="Apply to existing schools"', !users)}</div>`}
+      <div class="err-msg" id="curErr"></div>
+    </div>
+    <div class="drawer-f"><button class="btn" data-act="closeAll">Cancel</button><button class="btn primary" data-act="curSave">${d.isNew ? 'Add curriculum' : 'Save template'}</button></div>`, 'wide');
+  S.noFocus = false; bindStages(); const b = drawer.querySelector('.drawer-b'); if (b && !first) b.scrollTop = keep;
+}
+
 /* ---------- Router ---------- */
 const NAV = [
-  {g:'Platform', items:[['overview','Overview','home'],['tenants','Schools','tenants', tenants.length],['plans','Plans & billing','dollar'],['audit','Audit log','log']]}
+  {g:'Platform', items:[['overview','Overview','home'],['tenants','Schools','tenants', tenants.length],['curricula','Curricula','book'],['plans','Plans & billing','dollar'],['audit','Audit log','log']]}
 ];
 function renderNav() {
   const base = S.route.split('-')[0], active = base === 'tenant' ? 'tenants' : base;
@@ -1751,7 +1814,7 @@ function route() {
 function afterRender() {
   if (document.querySelector('[data-stg]')) bindStages();
   countUps();
-  document.querySelectorAll('.tcard').forEach(c => c.onkeydown = e => { if (e.key === 'Enter') c.click(); });
+  document.querySelectorAll('.tcard,.cur-card').forEach(c => c.onkeydown = e => { if (e.key === 'Enter') c.click(); });
   ['tSearch','uSearch'].forEach(id => { const el = document.getElementById(id); if (el) el.oninput = () => { S.q = el.value; const pos = el.selectionStart; route(); const n = document.getElementById(id); n.focus(); n.setSelectionRange(pos, pos); }; });
   const sr = document.getElementById('seatRange'); if (sr) sr.oninput = () => { const t = tenants.find(x => x.id === +sr.dataset.id); t.limit = +sr.value; document.getElementById('seatLbl').textContent = fmt(t.limit); };
   const ps = document.getElementById('planSel'); if (ps) ps.onchange = () => { const t = tenants.find(x => x.id === +ps.dataset.id); t.plan = ps.value.split(' ')[0]; t.mods = new Set([...t.mods, ...PLANS[t.plan].mods]); route(); toast(`Changed to ${t.plan}. Billing updates from the next invoice.`); };
@@ -1811,7 +1874,26 @@ const ACT = {
   confirmDelRole: el => { const t = tenants.find(x => x.id === +el.dataset.id); tenantUsers(t).forEach(u => { if (u.role === S.roleSel) u.role = 'teacher'; }); rolesByTenant[t.id] = tenantRoles(t).filter(r => r.id !== S.roleSel); S.roleSel = 'teacher'; S.dirty = false; closeAll(); route(); toast('Role deleted'); },
   mod: el => { const t = tenants.find(x => x.id === +el.dataset.id), k = el.dataset.k; t.mods.has(k) ? t.mods.delete(k) : t.mods.add(k); route(); toast(`${MODULES.find(m => m[0] === k)[1]} ${t.mods.has(k) ? 'turned on' : 'turned off'} for ${t.name}`); },
   brand: el => setBrand(+el.dataset.id, el.dataset.c),
-  stTpl: el => { const tg = el.dataset.target, k = el.dataset.v; if (tg === 'wiz') { saveWiz(); S.wiz.stTpl = k; S.wiz.stages = stagesFrom(k); tenantWizard(); } else { const t = tenants.find(x => x.id === +tg); t.stTpl = k; t.stages = stagesFrom(k); route(); } toast(`Loaded the ${k} stages. Edit them to match your school.`); },
+  stTpl: el => { const tg = el.dataset.target, k = el.dataset.v, c = curOf(k);
+    if (tg === 'wiz') { saveWiz(); S.wiz.stTpl = k; S.wiz.w_curr = k; S.wiz.stages = stagesFrom(k); S.wiz.stEdited = false; tenantWizard(); }
+    else if (tg === 'curd') { S.curDraft.stages = stagesFrom(k); curDrawer(); }
+    else { const t = tenants.find(x => x.id === +tg); t.stTpl = k; t.curr = k; t.stages = stagesFrom(k); route(); }
+    toast(`Loaded the ${c.name} stages. Edit them to match.`); },
+  keepStages: () => { saveWiz(); S.wiz.w_curr = S.wiz.stTpl; tenantWizard(); toast('Kept your stages'); },
+  openCur: el => { const c = el.dataset.id ? curOf(el.dataset.id) : null; S.curDraft = c ? {...c, stages: copyStages(c.stages), quals: c.quals.map(q => q.slice()), isNew: false} : {id: 'c' + Date.now().toString(36), name: '', short: '', desc: '', grading: 'A to F', quals: [], stages: stagesFrom('cambridge'), isNew: true}; S.curApply = false; curDrawer(true); },
+  curQualAdd: () => { curSync(); S.curDraft.quals.push(['', '']); curDrawer(); },
+  curQualRm: el => { curSync(); S.curDraft.quals.splice(+el.dataset.i, 1); curDrawer(); },
+  curApply: el => { S.curApply = !S.curApply; el.classList.toggle('on', S.curApply); el.setAttribute('aria-checked', S.curApply); },
+  curSave: () => { curSync(); const d = S.curDraft, err = document.getElementById('curErr');
+    if (!d.name.trim()) { err.textContent = 'Give the curriculum a name.'; document.getElementById('cur_name').focus(); return; }
+    const se = stagesError(d.stages); if (se) { err.textContent = se; return; }
+    if (!d.short.trim()) d.short = d.name;
+    const users = tenants.filter(t => t.curr === d.id); let i = CURRICULA.findIndex(c => c.id === d.id);
+    const clean = {id: d.id, name: d.name.trim(), short: d.short.trim(), desc: d.desc.trim(), grading: d.grading.trim(), quals: d.quals.filter(q => q[0] && q[1]), stages: copyStages(d.stages)};
+    if (i < 0) CURRICULA.push(clean); else CURRICULA[i] = clean;
+    if (S.curApply) users.forEach(t => { t.stages = copyStages(clean.stages); t.stTpl = clean.id; });
+    AUDIT.unshift(['Prishan Maduka', `${d.isNew ? 'added' : 'updated'} the ${clean.name} curriculum template${S.curApply && users.length ? ` and applied it to ${users.length} schools` : ''}`, 'platform', 'Just now', 'tenant']);
+    closeAll(); route(); toast(d.isNew ? `Added ${clean.name}. It now appears in the new-school wizard.` : S.curApply && users.length ? `Saved and applied to ${users.length} school${users.length > 1 ? 's' : ''}` : 'Saved. New schools get these stages; existing schools keep theirs.'); },
   stMove: el => { const st = stagesOf(el.dataset.target), i = +el.dataset.i, j = i + +el.dataset.d; if (j < 0 || j >= st.length) return; [st[i], st[j]] = [st[j], st[i]]; stagesRerender(el.dataset.target); },
   stToggle: el => { const x = stagesOf(el.dataset.target)[+el.dataset.i]; x.on = !x.on; stagesRerender(el.dataset.target); },
   stDel: el => { const st = stagesOf(el.dataset.target), x = st[+el.dataset.i]; st.splice(+el.dataset.i, 1); stagesRerender(el.dataset.target); toast(`Removed ${x.name}`); },
