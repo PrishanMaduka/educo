@@ -10,8 +10,8 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap">
 <style>
 
-/* Quad platform console · "Warm and local".
-   Paper canvas, a teak/cinnamon rail with a gold liyawela vine, terracotta for actions and gold as the console's own accent,
+/* Quad platform console.
+   Off-white canvas, a deep indigo rail with lilac as the console's own accent and coral for actions,
    so operators always know they are above the schools (each school keeps its own brand colour on its cards and pages). */
 :root{
   --canvas:#FAF8F5; --surface:#FFFFFF; --surface-2:#F6F3EF; --line:#ECE8E3; --line-strong:#DCD6CF;
@@ -1144,7 +1144,7 @@ const PLANS = {
   Growth:{price:2.1, mods:['admissions','crm','sis','lms','fees','parent'], limit:1500, color:'t-blue', desc:'For growing schools that teach online too', annual:15, trial:30, open:true, feat:true},
   Enterprise:{price:3.4, mods:MODULES.map(m => m[0]), limit:5000, color:'t-green', desc:'For school groups and large campuses', annual:20, trial:14, open:true}
 };
-const TONES = [['t-blue','Terracotta','var(--c1)'],['t-violet','Indigo','var(--c4)'],['t-green','Tea green','var(--c2)'],['t-amber','Turmeric','var(--c3)'],['t-red','Lotus red','var(--bad)']];
+const TONES = [['t-blue','Coral','var(--c1)'],['t-violet','Lilac','var(--c3)'],['t-green','Indigo','var(--c2)'],['t-amber','Amber','var(--c4)'],['t-red','Red','var(--bad)']];
 const toneCol = c => (TONES.find(x => x[0] === c) || TONES[0])[2];
 const REGIONS = {'ap-south':'Asia South (Mumbai)', 'me-central':'Middle East (UAE)', 'ap-southeast':'Asia Pacific (Singapore)'};
 const T = (id, name, sub, country, plan, students, status, color, region, since, extra={}) => ({id, name, sub, country, plan, students, status, color, region, since,
@@ -1915,7 +1915,7 @@ function schoolAcad(t) { const c = curOf(tenantCurr(t));
   return {curr: {id: c.id, name: c.name, short: c.short, grading: c.grading, quals: c.quals}, stages: tenantStages(t).filter(x => x.on && x.years.length).map(x => ({name: x.name, ages: x.ages, years: x.years.slice(), color: x.color, sections: x.sections}))}; }
 /* If this school is the one open in the school apps, push the change there too */
 function republishIfLive(t) { try { const cur = JSON.parse(localStorage.getItem('quad-school') || 'null'); if (cur && cur.sub === t.sub) { publishSchool(t); return true; } } catch (e) {} return false; }
-/* Colombo International used the old blue default; stored copies of it become terracotta */
+/* Colombo International used older default colours; stored copies of them become the current coral */
 const fixCisColor = (sub, c) => sub === 'colombo-intl' && /^#DD4A42$/i.test(c || '') ? '#DD4A42' : c;
 (function migrateStoredSchool() { try { const cur = JSON.parse(localStorage.getItem('quad-school') || 'null'); if (cur && cur.sub === 'colombo-intl' && fixCisColor(cur.sub, cur.color) !== cur.color) { cur.color = '#DD4A42'; localStorage.setItem('quad-school', JSON.stringify(cur)); } } catch (e) {} })();
 function publishSchool(t) {

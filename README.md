@@ -126,21 +126,33 @@ Based on the iSAMS iParent feature set: one login for all of a parent's children
 - **Gestures**: swipe the Home card to switch child, pull to refresh, drag from the left edge to go back, swipe conversations for actions, drag sheets down to close, swipe push banners away
 - **Chat**: quick replies, "Seen" receipts and a typing indicator
 
-## Proposed monorepo structure
+## Implementation
+
+The end-to-end implementation specification is in [`docs/spec/`](docs/spec/README.md):
+- the product, architecture and stack;
+- design tokens, the data model, auth and permissions, and the API;
+- every app and module;
+- early warning, Ask Quad and Moments;
+- security, testing, and a milestone-by-milestone delivery plan.
+
+[`CLAUDE.md`](CLAUDE.md) holds the rules Claude Code follows in this repo. Build with Claude Code one milestone at a time:
+
+```
+claude
+> /build-milestone M0
+```
+
+Planned layout (details in [docs/spec/02-architecture.md](docs/spec/02-architecture.md)):
 
 ```
 quad/
 ├── apps/
-│   ├── web/          # Admin, teacher and student portal (Next.js)
-│   ├── parent/       # Parent mobile app (React Native / Expo)
-│   └── api/          # Backend API (Node.js, REST + webhooks)
-├── packages/
-│   ├── ui/           # Shared design tokens and components
-│   ├── db/           # Database schema and migrations (PostgreSQL)
-│   ├── auth/         # Platform roles (super admin, support) and per-school roles
-│   ├── tenancy/      # Tenant resolution by subdomain, per-tenant schema, plan limits
-│   └── config/       # Shared lint, TypeScript and test config
-└── design/           # Interactive HTML prototypes (this folder)
+│   ├── api/          # NestJS API and background workers
+│   ├── staff/        # Staff portal (Next.js), one subdomain per school
+│   ├── console/      # Platform console (Next.js)
+│   └── parent/       # Parent mobile app (Expo)
+├── packages/         # tokens, ui, contracts, client, db, domain, config
+├── design/           # Interactive HTML prototypes (reference)
+├── docs/spec/        # Implementation specification
+└── infra/            # Terraform
 ```
-
-This structure is a proposal for review. The stack is not decided yet.

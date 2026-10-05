@@ -1,0 +1,16 @@
+---
+description: Build one milestone from the Quad delivery plan (for example /build-milestone M3)
+argument-hint: M<number>
+---
+
+Build milestone $ARGUMENTS of Quad.
+
+1. Read `docs/spec/18-delivery-plan.md` and find the section for $ARGUMENTS. Read every spec file it lists under **Read**, and skim `CLAUDE.md` again.
+2. Open the matching prototype screens in `design/` (admin.html, parent.html, platform.html) to see the exact layout, copy and behaviour.
+3. Check what already exists in the repo, so you build on it rather than duplicate it.
+4. Write a short plan: the files to add or change, the migrations, the endpoints, the screens, and the tests. Show it to me and wait for my approval before writing code.
+5. Implement the scope in small, reviewable steps. Business logic goes in `packages/domain` with unit tests first. Every endpoint gets integration tests (happy path, validation, permission denied, cross-tenant). Add the Playwright or Maestro journeys the milestone names.
+6. Run `pnpm verify`. Fix every failure; do not skip or disable tests.
+7. Take screenshots of the new screens at 1440×900 and 390×844, in light and dark, and compare them with the prototype. Fix visible differences.
+8. Update the Progress checklist in `docs/spec/18-delivery-plan.md`, and add any new decisions to the decision log in `docs/spec/02-architecture.md`.
+9. Report back: what was built, the test results, any differences from the spec and why, and what is left for later.
