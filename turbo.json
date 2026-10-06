@@ -1,0 +1,25 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "globalDependencies": [".env.example", ".nvmrc", ".fvmrc"],
+  "globalEnv": ["APP_ENV", "NODE_ENV"],
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build", "tokens:build"],
+      "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
+    },
+    "dev": {
+      "dependsOn": ["^build"],
+      "cache": false,
+      "persistent": true
+    },
+    "typecheck": { "dependsOn": ["^build"], "outputs": [] },
+    "lint": { "outputs": [] },
+    "test": { "dependsOn": ["^build"], "outputs": ["coverage/**"] },
+    "test:api": { "dependsOn": ["^build"], "cache": false },
+    "e2e": { "dependsOn": ["build"], "cache": false, "outputs": ["playwright-report/**"] },
+    "tokens:build": {
+      "outputs": ["packages/tokens/dist/**", "apps/parent/lib/theme/tokens.g.dart"]
+    },
+    "i18n:build": { "outputs": ["apps/parent/lib/l10n/*.arb"] }
+  }
+}

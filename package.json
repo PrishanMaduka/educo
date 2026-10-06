@@ -1,0 +1,37 @@
+{
+  "name": "quad",
+  "version": "0.0.0",
+  "private": true,
+  "packageManager": "pnpm@9.15.9",
+  "engines": {
+    "node": ">=22 <23"
+  },
+  "scripts": {
+    "dev": "turbo run dev --filter=!@quad/parent",
+    "build": "turbo run build",
+    "typecheck": "turbo run typecheck",
+    "lint": "turbo run lint",
+    "format": "prettier --write . && (cd apps/parent 2>/dev/null && dart format . || true)",
+    "db:migrate": "pnpm --filter @quad/db migrate",
+    "db:generate": "pnpm --filter @quad/db generate",
+    "db:seed": "pnpm --filter @quad/db seed",
+    "db:reset": "pnpm --filter @quad/db reset",
+    "api:client": "pnpm --filter @quad/api api:client",
+    "tokens:build": "pnpm --filter @quad/tokens build",
+    "i18n:build": "pnpm --filter @quad/contracts i18n:build",
+    "codegen:check": "pnpm api:client && pnpm tokens:build && pnpm i18n:build && git diff --exit-code",
+    "parent:run": "cd apps/parent && fvm flutter run --flavor dev --dart-define-from-file=env/dev.json",
+    "test": "turbo run test",
+    "test:api": "turbo run test:api",
+    "e2e": "turbo run e2e",
+    "e2e:mobile": "pnpm --filter @quad/parent e2e:mobile",
+    "eval:assistant": "echo \"Ask Quad evaluation arrives in M10\"",
+    "verify": "pnpm typecheck && pnpm lint && pnpm test && pnpm codegen:check && pnpm test:api && pnpm e2e && pnpm audit --prod"
+  },
+  "devDependencies": {
+    "eslint": "9.39.5",
+    "prettier": "3.9.9",
+    "turbo": "2.11.7",
+    "typescript": "5.9.3"
+  }
+}

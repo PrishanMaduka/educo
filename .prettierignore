@@ -1,0 +1,16 @@
+node_modules
+.next
+dist
+coverage
+.turbo
+pnpm-lock.yaml
+playwright-report
+test-results
+design
+docs
+.superpowers
+**/*.g.dart
+packages/contracts/openapi.json
+.claude
+CLAUDE.md
+README.md

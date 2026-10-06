@@ -1,0 +1,26 @@
+node_modules
+.next
+dist
+coverage
+.turbo
+.env
+.env.*.local
+*.tsbuildinfo
+playwright-report
+test-results
+.DS_Store
+
+# Controller scratch files; never commit
+.superpowers/
+
+# Flutter / Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.fvm/flutter_sdk
+**/build/
+**/ios/Pods/
+**/android/.gradle/
+**/android/local.properties
+**/.pub-cache/
+**/.pub/
