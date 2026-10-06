@@ -200,6 +200,24 @@ To run a milestone in Claude Code, type `/build-milestone M3`, or paste the mile
 **Prompt:**
 > Build milestone M9 (docs/spec/10, 12 Moments, 08 Dashboard, 09 Home). Implement the early-warning scoring in packages/domain with a unit test per rule, Moments end to end with realtime, and the story-first home pages. Add journeys 5 and 11. Run pnpm verify.
 
+## M9b Quad Circle
+**Read:** 12 (Quad Circle to Good relationships by design), 09 (Circle tab, Home day ring, Day, recap), 08 (Family connection, Communications quiet hours, student profile), 14 (My teaching), 05 (Relatives), 16.
+**Scope:**
+- `packages/domain/circle`: day-ring events from registers, gate scans, moments, canteen and bus; family pulse; connection figures; weekly recap; quiet-hours delivery time. Unit tests first.
+- Moments: skill tags, photo-consent scopes in the share drawer and the feed, quiet-hours scheduling (`deliver_at` with a BullMQ delayed job).
+- This week in class: staff card and drawer, parent Learning segment, We tried it, term skill tally.
+- Parent Circle tab (Moments · People · Learning), person screen, Home day ring and Day screen, weekly recap job (Friday 15:00 school time) and push.
+- Family circle: invite, OTP sign-in with `kind: relative` tokens, the reduced relative app (Moments only), removal with token revocation.
+- Staff: Family pulse, Family connection view, Quiet hours setting, student profile Circle lines.
+
+**Accept:**
+- Journeys 14, 15 and 16.
+- Relative tokens get 403 on every `/family` route except the moments routes (a generated test walks the route list).
+- Golden tests for the Circle tab segments and the Home day ring, light and dark.
+
+**Prompt:**
+> Build milestone M9b (docs/spec/12 Quad Circle sections, 09 Circle tab and Home day ring, 08 Family connection and quiet hours, 05 Relatives). Match design/parent.html (Circle tab, Day, recap) and design/admin.html (My teaching Family pulse and This week in class, Family connection, Communications quiet hours). Put the Circle maths in packages/domain/circle with unit tests. Add journeys 14, 15 and 16 and the relative-token route test. Run pnpm verify.
+
 ## M10 Ask Quad
 **Read:** 11. In Claude Code, run `/claude-api` first for current SDK usage.
 **Scope:**
@@ -264,6 +282,7 @@ To run a milestone in Claude Code, type `/build-milestone M3`, or paste the mile
 - [ ] M7 Fees, payments and finance
 - [ ] M8 Pastoral, learning, exams, reports, evenings and forms
 - [ ] M9 Moments, early warning and the story-first homes
+- [ ] M9b Quad Circle
 - [ ] M10 Ask Quad
 - [ ] M11 Transport, wallet, stories, calendar, year rollover
 - [ ] M12 Hardening and launch

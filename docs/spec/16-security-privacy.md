@@ -12,6 +12,8 @@ Quad holds children's data, so every design choice errs on the side of least acc
 |---|---|
 | One school reads another school's data | Tenant from the session only; RLS on every table; cross-tenant tests in CI on every endpoint |
 | A parent reads another family's child | `student_guardians` check on every `/family` route; tests that swap ids |
+| A relative in a family circle sees more than moments, or a restricted person is added | `kind: relative` tokens reach only the moments routes; tests on every other `/family` route; adding is refused for students with a contact restriction; any guardian or the school can remove at once |
+| Photos of a child reach people the family did not agree to | Photo consent scope (`class`, `family`, `none`) checked by the API when a moment is created and when the feed is read; changes are audited |
 | A staff member sees safeguarding records without the right | Sensitive key guard, view logging, and support view always blocked |
 | Account takeover | Argon2id, breached-password check, lockout, TOTP (required for admins by default), SSO, session revocation, new-device email |
 | Parent OTP abuse (SMS pumping) | Per-number and per-IP limits, country allowlist per school, captcha after 3 attempts, spend alerts |
@@ -27,7 +29,7 @@ Quad holds children's data, so every design choice errs on the side of least acc
 - Compliance: Sri Lanka's Personal Data Protection Act No. 9 of 2022, GDPR for schools in the EU/UK, and UAE and Maldives data rules. Data stays in the school's region (v1: `ap-south-1`).
 - Data subject requests: export a student's or guardian's data (JSON + PDF) and delete on request. Records the school must keep by law are retained and marked.
 - Retention defaults: student records for 7 years after leaving; attendance for 7 years; safeguarding for 25 years from date of birth (configurable); Ask Quad conversations for 90 days (or none); audit for 7 years. The `purge-deleted` job enforces these.
-- Consent: photo consent and trip consent come from forms and are stored in `consents`. Moments respect photo consent.
+- Consent: photo consent and trip consent come from forms and are stored in `consents`. Moments respect photo consent, which guardians set per child in the parent app (class, family only, or no photos).
 - Children never sign in to v1.
 
 ## Operational security

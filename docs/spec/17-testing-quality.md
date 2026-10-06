@@ -33,6 +33,9 @@
 11. Early warning: the signal appears, a plan is started with "tell parents", and the parent sees the heads-up card.
 12. Ask Quad, with a mocked model: "Who needs attention in Year 9?" calls `list_early_warning`, the answer cites sources, and the action button navigates.
 13. Year rollover: preview, then run; students are promoted and the final year graduates.
+14. Circle learning: a teacher posts this week's learning; the parent sees it in Circle → Learning, taps We tried it with a note, and the teacher's card shows the try and the note live.
+15. Photo consent: the parent sets "Family only" for Amaya; the teacher's share drawer says only Amaya's family will see the photo, and a parent of another child in the class does not get it. With "No photos", Photo is disabled for Amaya.
+16. Family circle: a parent invites a grandparent, who signs in with OTP and sees only Moments (hearts work; every other route is refused); the parent removes them and their session ends.
 
 ## Quality gate (`pnpm verify`)
 `turbo run typecheck lint test` (Turborepo runs `flutter analyze` and `flutter test` through `apps/parent/package.json`) → a check that generated code (API clients, tokens, ARB) is up to date → API integration tests → Playwright smoke (the journeys for completed milestones) → `pnpm audit --prod` (no high or critical issues). A milestone is accepted only when `pnpm verify` passes and its own journeys pass.

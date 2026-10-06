@@ -925,6 +925,48 @@ body:has(.savebar,.uk-bar,.bulkbar) .askq-fab{bottom:92px}
 .mom{display:flex;gap:12px;padding:12px 18px;border-bottom:1px dashed var(--line)}.mom:last-child{border-bottom:0}
 .mom>div{flex:1;min-width:0}.mom b{display:block;font-size:13px}.mom p{margin:2px 0;font-size:13px;color:var(--ink-2)}.mom small{color:var(--ink-3);font-size:12px}
 .mom-heart{color:var(--c1);font-weight:700}
+.mom-skill{display:inline-block;font-size:11px;font-weight:700;color:var(--info);background:var(--info-soft);border-radius:20px;padding:0 7px}
+.mom-skills .chip{font-size:12px}
+.mom-cons,.mom-aud{display:flex;gap:8px;align-items:flex-start;padding:10px 12px;border-radius:12px;font-size:13px;background:var(--surface-2);border:1px solid var(--line);color:var(--ink-2)}
+.mom-cons svg,.mom-aud svg{flex:none;margin-top:2px}.mom-cons.class{color:var(--ink-2)}.mom-cons.family{background:var(--info-soft);border-color:transparent;color:var(--info)}.mom-cons.none{background:var(--warn-soft);border-color:transparent;color:var(--warn)}
+.mom-aud span{min-width:0}.mom-aud small{display:block;color:var(--ink-3);font-size:12px;margin-top:2px}.mom-aud.quiet{background:var(--gold-soft);border-color:transparent;color:var(--ink)}
+.seg button:disabled{opacity:.45;cursor:not-allowed}
+/* Quad Circle: family pulse, this week in class, quiet hours, family connection */
+.circle-row{align-items:start}
+.fp-sum{margin:0;padding:0 18px 12px;font-size:13.5px;color:var(--ink-2);line-height:1.5}.fp-sum b{color:var(--ink)}
+.fp-list{display:flex;flex-direction:column}
+.fp-row{display:flex;gap:12px;padding:12px 18px;border-top:1px dashed var(--line)}.fp-row .av{flex:none}
+.fp-row.quiet{background:color-mix(in srgb,var(--gold-soft) 55%,transparent)}
+.fp-m{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px;align-items:flex-start}.fp-m b{font-size:13.5px}
+.fp-tags{display:flex;flex-wrap:wrap;gap:6px}.fp-tags span{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:600;color:var(--ink-3);background:var(--surface-2);border:1px solid var(--line);border-radius:20px;padding:1px 8px}
+.fp-tags span.pos{color:var(--good);background:var(--good-soft);border-color:transparent}.fp-tags span.off{color:var(--warn);background:var(--warn-soft);border-color:transparent}
+.fp-nudge{margin:0;font-size:13px;color:var(--ink-2)}
+.fp-last{color:var(--ink-3);font-size:12px}
+.fp-more{margin:8px 18px 4px}
+.fp-hint{display:flex;gap:8px;align-items:flex-start;margin:10px 18px 4px;font-size:12.5px;color:var(--ink-2)}.fp-hint svg{flex:none;color:var(--warn);margin-top:1px}
+.fp-foot{display:flex;gap:8px;align-items:flex-start;padding:10px 18px;border-top:1px dashed var(--line);font-size:12.5px;color:var(--ink-3)}.fp-foot svg{flex:none;margin-top:2px}
+.fp-all{border-top:1px solid var(--line);margin-top:8px}.fp-all summary{cursor:pointer;padding:12px 18px;font-weight:700;font-size:13px;color:var(--brand)}.fp-all[open] summary{border-bottom:1px solid var(--line)}
+.ln-list{display:flex;flex-direction:column}
+.ln{padding:14px 18px;border-top:1px dashed var(--line);display:flex;flex-direction:column;gap:6px}.ln p{margin:0;font-size:13px;color:var(--ink-2)}
+.ln-h{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.ln-h b{font-size:14px}
+.ln-try{display:flex;gap:8px;align-items:flex-start;padding:9px 12px;border-radius:12px;background:var(--surface-2);font-size:13px;color:var(--ink-2)}.ln-try svg{flex:none;margin-top:2px;color:var(--c5)}.ln-try b{color:var(--ink)}
+.ln-n{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ink-2)}.ln-n b{color:var(--ink)}.ln-dot{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;background:var(--good-soft);color:var(--good)}
+.ln-notes{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}.ln-notes li{font-size:12.5px;color:var(--ink-2);background:var(--good-soft);border-radius:10px;padding:7px 10px}.ln-notes small{display:block;color:var(--ink-3);font-size:11.5px}.ln-notes b{color:var(--ink)}
+.qh-b{display:flex;gap:14px;align-items:flex-start}.qh-ic{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;flex:none;background:var(--gold-soft);color:var(--gold)}
+.qh-sum{margin:0;font-size:14px;line-height:1.55;color:var(--ink-2)}.qh-sum b{color:var(--ink)}
+.qh-acts{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;margin-top:14px}.qh-demo{display:inline-flex;gap:8px;align-items:center}
+.cx-wrap{overflow-x:auto;padding:4px 18px 8px}
+.cx-heat{border-collapse:separate;border-spacing:6px;width:auto}.cx-heat th{background:none;border:0;padding:4px 6px;text-transform:none;letter-spacing:0;font-size:12px;color:var(--ink-3)}.cx-heat th[scope=row]{text-align:left;white-space:nowrap;color:var(--ink-2)}
+.cx-heat td{padding:0;border:0;min-width:84px;width:136px}
+.cx-c{width:100%;min-height:44px;border:1px solid var(--line);border-radius:10px;color:var(--ink);font:700 13px var(--f-body);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;cursor:pointer;padding:4px}
+.cx-c small{font-weight:600;font-size:10.5px;color:var(--ink-2)}.cx-c:hover{border-color:var(--ink-3)}.cx-c.on{outline:2px solid var(--brand);outline-offset:1px}
+.cx-leg{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:4px 18px 16px;font-size:12px;color:var(--ink-3)}.cx-leg i{width:120px;height:10px;border-radius:6px;background:linear-gradient(90deg,var(--surface-2),color-mix(in srgb,var(--c5) 62%,var(--surface-2)));border:1px solid var(--line)}.cx-leg small{margin-left:auto}
+.cx-list{display:flex;flex-direction:column}
+.cx-row{display:flex;gap:12px;align-items:center;padding:12px 18px;border-top:1px dashed var(--line);flex-wrap:wrap}.cx-row .av{flex:none}
+.cx-m{flex:1;min-width:180px}.cx-m b{display:block;font-size:13.5px}.cx-m small{color:var(--ink-3);font-size:12px}
+.cx-acts{display:flex;gap:8px;flex-wrap:wrap}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+@media (max-width:640px){.cx-acts{width:100%;padding-left:44px}.cx-leg small{margin-left:0;width:100%}.qh-b{flex-direction:column}}
 
 /* greeting section with a full-width morning scene behind it */
 .mscene{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;display:block}
@@ -1073,6 +1115,8 @@ const students = Array.from({length: 64}, (_, i) => {
     guardian: pick(FIRST) + ' ' + name.split(' ')[1], phone: '+94 77 ' + (1000000 + Math.floor(rnd() * 8999999)),
     balance: rnd() > .7 ? Math.round(rnd() * 180) * 1000 : 0, dob: `${2026 - 3 - grade}-0${1 + Math.floor(rnd() * 9)}-${10 + Math.floor(rnd() * 18)}` };
 });
+/* The parent app demo follows Amaya Perera (CIS-24100) in Grade 4 – Emerald: keep her record the same here */
+Object.assign(students[0], {name: 'Amaya Perera', cls: acadText('Grade 4 – Emerald'), grade: gradeOfCls(acadText('Grade 4 – Emerald')), house: 'Emerald', gender: 'F', att: 96.4, status: 'Active', guardian: 'Ruwan Perera'});
 const STAGES = [
   {k:'enquiry', n:'Enquiry', c:'var(--ink-3)'}, {k:'application', n:'Application', c:'var(--c1)'},
   {k:'assessment', n:'Assessment', c:'var(--c4)'}, {k:'interview', n:'Interview', c:'var(--c3)'},
@@ -1247,7 +1291,8 @@ V.inbox = () => {
   <div class="card inbox"><div class="threads">${threads.map(t => `<div class="thread ${t.id===th.id?'on':''}" data-act="thread" data-id="${t.id}">${avatar(t.name,'sm')}<div class="meta"><b style="${t.unread?'':'font-weight:500'}">${t.name}</b>${t.unread?' <span class="pill t-blue plain" style="font-size:10px">New</span>':''}<p>${t.sub}</p></div><time class="muted" style="font-size:11px">${t.msgs[t.msgs.length-1].at}</time></div>`).join('')}</div>
   <div class="conv"><div class="card-h"><div class="who">${avatar(th.name,'sm')}<div><b>${th.name}</b><small>${th.sub}</small></div></div><span style="flex:1"></span><button class="btn sm">${ic('phone',14)}Call</button></div>
   <div class="msgs" id="msgs">${th.msgs.map(m => `<div class="msg ${m.me?'me':''}">${esc(m.t)}<small>${m.at}</small></div>`).join('')}</div>
-  <form class="compose" data-form="reply"><input class="input" id="replyInput" placeholder="Write a reply… (sent to the iParent app)" autocomplete="off"><button class="btn primary">${ic('send',16)}Send</button></form></div></div>`;
+  <form class="compose" data-form="reply"><input class="input" id="replyInput" placeholder="Write a reply… (sent to the iParent app)" autocomplete="off"><button class="btn primary">${ic('send',16)}Send</button></form></div></div>
+  ${quietCard()}`;
 };
 
 V.students = () => {
@@ -1278,6 +1323,7 @@ V.student = (id) => {
     <div class="card"><div class="card-h"><h2>Guardians & contacts</h2><button class="btn sm">${ic('plus',14)}Add</button></div><div class="list">
     <div class="li">${avatar(s.guardian,'sm')}<div class="meta"><b>${s.guardian}</b> <span class="pill t-blue plain">Primary · Fee payer</span><p>${s.phone} · iParent app active</p></div></div>
     <div class="li">${avatar('Dilhani '+s.name.split(' ')[1],'sm')}<div class="meta"><b>Dilhani ${s.name.split(' ')[1]}</b> <span class="pill t-violet plain">Mother</span><p>+94 71 552 0193 · Email only</p></div></div>
+    ${circleLines(s)}
     <div class="li"><div class="dot-ic t-red">${ic('heart',16)}</div><div class="meta"><b>Medical</b><p>Mild peanut allergy · EpiPen at the sick bay</p></div></div></div></div></div>`;
   else if (t === 'attendance') { const c = k => days.filter(d => d === k).length; body = `<div class="card"><div class="card-h"><h2>Term 1 attendance</h2>${legend([['Present','var(--good)'],['Absent','var(--bad)'],['Late','var(--warn)'],['Excused','var(--info)']])}</div><div class="card-b" style="display:flex;flex-direction:column;gap:16px">
     <div class="heat">${days.map((d, i) => `<span class="${d}" data-tip="Day ${i+1}: ${{P:'Present',A:'Absent',L:'Late',E:'Excused',H:'Weekend'}[d]}"></span>`).join('')}</div>
@@ -2537,6 +2583,7 @@ V.teach = () => {
           <div class="cur-meta"><span><b>${ro.length}</b> students</span><span><b>${regs['reg|' + myCls] ? Object.values(S.regMarks['reg|' + myCls] || {}).filter(v => v !== 'P').length : '—'}</b> absent today</span><span><b>${Math.round(p.ct * 100)}%</b> class comments</span></div>
           <div class="st-faces">${ro.slice(0, 9).map(n => avatar(n, 'xs')).join('')}<small class="muted">${ro.length}</small></div>
           <div class="tl-acts"><button class="btn sm" data-act="openRepClass" data-c="${esc(myCls)}">Class reports</button><button class="btn sm" data-act="go" data-to="timetable">Timetable</button></div></div></section>`; })() : ''}</div></div>
+    <div class="grid g-1-1 circle-row">${pulseCard(t)}${learnCard(t)}</div>
     <section class="card"><div class="card-h"><h2>My week</h2><span class="muted" style="font-size:12px">${load.total} periods · ${new Set(load.rows.map(r => r.cls)).size} classes</span></div><div class="wk">${week.map(({d, l}, i) => `<div class="wk-d ${i === 0 ? 'today' : ''}"><div class="wk-h"><b>${d[0]}</b><small>${d[1]}</small></div>${(cl => l.map(x => `<div class="wk-l ${cl.has(x) ? 'clash' : ''}" style="--c:${ttSubj(x.g, x.k, x.cls)[0]}" ${cl.has(x) ? 'title="Booked in two classes at this time"' : ''}><b class="num">${x.s}</b><span>${esc(x.cls.replace(/^(Year|Grade) /, ''))}</span><small>${cl.has(x) ? 'Clash · ' : ''}${esc(x.k)}</small></div>`).join(''))(teacherClashes(t.name, i)) || '<small class="muted">Free</small>'}</div>`).join('')}</div></section>`;
 };
 function registerDrawer(cls, key, label) {
@@ -3389,34 +3436,226 @@ const momArt = (k, big) => { const a = MOM_ART.find(x => x[0] === k) || MOM_ART[
   return `<span class="mom-art ${big ? 'big' : ''}" style="--a:${cs[i % 4]};--b:${cs[(i + 1) % 4]}">${ic(a[2], big ? 30 : 18)}<small>${a[1]}</small></span>`; };
 function momShareDrawer() { const t = teachAs(), d = S.momDraft, load = teacherLoad(t.name), classes = [...new Set([ctOf(t.name), ...load.rows.map(r => r.cls)].filter(Boolean))];
   if (!d.cls || !classes.includes(d.cls)) d.cls = classes[0] || allClasses()[0];
-  const demo = acadText('Grade 4 – Emerald'), roster = [...(d.cls === demo ? ['Amaya Perera'] : []), ...classRoster(d.cls)];
+  const demo = acadText('Grade 4 – Emerald'), roster = [...new Set([...(d.cls === demo ? ['Amaya Perera'] : []), ...classRoster(d.cls)])];
+  if (d.kid && !roster.includes(d.kid)) d.kid = '';
+  const first = d.kid ? d.kid.split(' ')[0] : '', cons = first ? photoConsent(first) : 'class', noPhoto = cons === 'none';
+  if (noPhoto && d.kind === 'photo') d.kind = 'praise';
+  const q = quiet(), held = inQuiet(), rel = first ? circleOf(first) : [];
+  const aud = !first ? `Parents of ${d.cls} will see this` : d.kind === 'photo' ? (cons === 'family' ? `Only ${first}’s family will see this photo` : `${first}’s family and the parents of ${d.cls} will see this photo`) : `Only ${first}’s family will see this`;
+  const consTxt = {class: `Photo consent: ${first}’s family is happy for class photos to be shared with the class’s parents.`, family: `Photo consent: photos of ${first} go to ${first}’s family only.`, none: `Photo consent: ${first}’s family has asked for no photos. You can still share praise or great work.`}[cons];
   formDrawer(`${head('Share a moment', `As ${esc(t.name)} · parents see it in the ${esc(SCHOOL.short)} Parent app`)}
     <div class="drawer-b"><div class="form-grid"><div class="field"><label for="mo_cls">Class</label><select class="input" id="mo_cls" data-act-change="momCls">${classes.map(c => `<option ${c === d.cls ? 'selected' : ''}>${esc(c)}</option>`).join('')}</select></div>
       <div class="field"><label for="mo_kid">Who is it about?</label><select class="input" id="mo_kid"><option value="">The whole class</option>${roster.map(n => `<option value="${esc(n)}" ${n === d.kid ? 'selected' : ''}>${esc(n)}</option>`).join('')}</select></div></div>
-      <div class="field"><label>Type</label>${seg('momKind', d.kind, [['photo', 'Photo'], ['praise', 'Praise'], ['work', 'Great work']])}</div>
+      ${first ? `<div class="mom-cons ${cons}" id="moCons">${ic(noPhoto ? 'alert' : 'check', 14)}<span>${esc(consTxt)}</span></div>` : ''}
+      <div class="field"><label id="mo_kind_l">Type</label><div class="seg pick" role="radiogroup" aria-labelledby="mo_kind_l">${[['photo', 'Photo'], ['praise', 'Praise'], ['work', 'Great work']].map(([k, l]) => { const off = k === 'photo' && noPhoto;
+        return `<button type="button" class="${d.kind === k ? 'on P' : ''}" data-act="momKind" data-k="${k}" role="radio" aria-checked="${d.kind === k}" ${off ? `disabled aria-disabled="true" title="${esc(first)}’s family has asked for no photos"` : ''}>${l}</button>`; }).join('')}</div>
+        ${noPhoto ? `<small class="muted" id="moNoPhoto">Photo is off for ${esc(first)} because the family has asked for no photos. Choose the whole class for a class photo.</small>` : ''}</div>
       ${d.kind === 'photo' ? `<div class="field"><label>Photo</label><div class="mom-pick">${MOM_ART.map(([k, l]) => `<button type="button" class="${d.art === k ? 'on' : ''}" data-act="momArt" data-k="${k}" aria-label="${l}" aria-pressed="${d.art === k}">${momArt(k)}</button>`).join('')}</div><small class="muted">In the real app this opens the camera. Faces of other children are blurred automatically.</small></div>` : ''}
       <div class="field"><label for="mo_t">What happened?</label><textarea class="input" id="mo_t" rows="3" maxlength="240" placeholder="For example: Amaya chose the colours for the paddy fields in our canteen mural.">${esc(d.text || '')}</textarea></div>
+      <div class="field"><label id="mo_sk_l">Skill it shows <span class="muted" style="font-weight:500">· optional</span></label><div class="chips mom-skills" role="group" aria-labelledby="mo_sk_l">${SKILLS.map(k => `<button type="button" class="chip ${d.skill === k ? 'on' : ''}" data-act="momSkill" data-k="${esc(k)}" aria-pressed="${d.skill === k}">${esc(k)}</button>`).join('')}</div></div>
+      <div class="mom-aud" id="moAud">${ic('crm', 14)}<span>${esc(aud)}${rel.length && first ? `<small>Also seen by ${esc(rel.map(r => `${r.name} (${r.rel})`).join(', '))} in ${esc(first)}’s family circle</small>` : ''}</span></div>
+      ${held ? `<div class="mom-aud quiet" id="moQuiet">${ic('moon', 14)}<span><b>Scheduled for ${q.to}.</b> Parents get this at ${q.to}, when quiet hours end. It’s ${demoClock()} now.</span></div>` : ''}
       <div class="err-msg" id="moErr"></div></div>
-    <div class="drawer-f"><button class="btn" data-act="closeAll">Cancel</button><button class="btn primary" data-act="momSend">${ic('send', 16)}Share with parents</button></div>`); }
+    <div class="drawer-f"><button class="btn" data-act="closeAll">Cancel</button><button class="btn primary" data-act="momSend">${ic('send', 16)}${held ? `Schedule for ${q.to}` : 'Share with parents'}</button></div>`); }
 function momSync() { const v = id => { const e = document.getElementById(id); return e ? e.value : null; }; const d = S.momDraft; if (v('mo_t') === null) return; d.cls = v('mo_cls'); d.kid = v('mo_kid'); d.text = v('mo_t'); }
-function momCard(t) { const mine = lsGet('quad-moments', []).filter(m => m.by === t.name).slice(0, 4), re = lsGet('quad-moment-reacts', {});
+function momCard(t) { const mine = momAll().filter(m => m.by === t.name).slice(0, 4), re = lsGet('quad-moment-reacts', {});
   return `<section class="card"><div class="card-h"><h2>Moments</h2><button class="btn sm primary" data-act="momShare">${ic('plus', 14)}Share a moment</button></div>
-    ${mine.length ? `<div class="mom-list">${mine.map(m => { const r = re[m.id] || {}; return `<div class="mom">${m.kind === 'photo' ? momArt(m.art) : `<span class="mom-art" style="--a:var(--c3);--b:var(--c1)">${ic(m.kind === 'praise' ? 'star' : 'file', 18)}</span>`}<div><b>${esc(m.kid || 'Whole class')} · ${esc(m.cls)}</b><p>${esc(m.text)}</p><small>${esc(m.at)}${r.heart ? ' · <span class="mom-heart">♥ parent loved this</span>' : ''}${r.thanks ? ` · “${esc(r.thanks)}”` : ''}</small></div></div>`; }).join('')}</div>`
+    ${mine.length ? `<div class="mom-list">${mine.map(m => { const r = re[m.id] || {}; return `<div class="mom">${m.kind === 'photo' ? momArt(m.art) : `<span class="mom-art" style="--a:var(--c3);--b:var(--c1)">${ic(m.kind === 'praise' ? 'star' : 'file', 18)}</span>`}<div><b>${esc(m.kid || 'Whole class')} · ${esc(m.cls)}</b><p>${esc(m.text)}</p><small>${m.skill ? `<span class="mom-skill">${esc(m.skill)}</span> · ` : ''}${esc(m.at)}${r.heart ? ' · <span class="mom-heart">♥ parent loved this</span>' : ''}${r.thanks ? ` · “${esc(r.thanks)}”` : ''}</small></div></div>`; }).join('')}</div>`
       : `<p class="muted" style="padding:16px 18px;margin:0">Share a photo or a line of praise. Parents see it straight away in the app and can say thanks. It takes ten seconds and families love it.</p>`}
     ${(() => { const demo = acadText('Grade 4 – Emerald'), ctn = ST.ct[demo], x = ST.teachers.find(q => q.name === ctn); return x && x.name !== t.name ? `<div class="mom-demo">${ic('phone', 14)}<span>The parent app demo follows Amaya in ${esc(demo)}.</span><button class="linkbtn" data-act="momDemo" data-id="${x.id}">View as ${esc(x.name.split(' ')[0])}</button></div>` : ''; })()}</section>`; }
 Object.assign(ACT, {
   momDemo: el => { S.filter.teachAs = el.dataset.id; route(); scrollTo(0, 0); toast('Now viewing My teaching as Amaya’s class teacher'); },
-  momShare: () => { S.momDraft = {kind: 'photo', art: 'mural', text: '', kid: ''}; momShareDrawer(); },
+  momShare: el => { S.momDraft = {kind: 'photo', art: 'mural', text: '', kid: el.dataset.kid || '', cls: el.dataset.cls || '', skill: ''}; momShareDrawer(); },
+  momSkill: el => { momSync(); S.momDraft.skill = S.momDraft.skill === el.dataset.k ? '' : el.dataset.k; keepScroll(momShareDrawer); },
   momKind: el => { momSync(); S.momDraft.kind = el.dataset.v || el.dataset.val || el.dataset.k; keepScroll(momShareDrawer); },
   momArt: el => { momSync(); S.momDraft.art = el.dataset.k; keepScroll(momShareDrawer); },
   momSend: () => { momSync(); const d = S.momDraft, t = teachAs(); if (!d.text || d.text.trim().length < 5) { document.getElementById('moErr').textContent = 'Write a sentence about what happened.'; document.getElementById('mo_t').focus(); return; }
     const load = teacherLoad(t.name), subj = (load.rows.find(r => r.cls === d.cls) || {}).k, kid = d.kid ? d.kid.split(' ')[0] : '';
-    const m = {id: 'm' + Date.now(), by: t.name, role: ctOf(t.name) === d.cls ? 'Class teacher' : (subj || 'Teacher'), cls: d.cls, kid, kind: d.kind, text: d.text.trim(), art: d.kind === 'photo' ? d.art : '', at: '09:41', date: '2026-10-05'};
-    lsSet('quad-moments', [m, ...lsGet('quad-moments', [])]); closeAll(); const y = scrollY; route(); scrollTo(0, y); petals(18); toast(`Shared with ${kid ? kid + '’s parents' : 'parents of ' + d.cls}`); }
+    if (kid && d.kind === 'photo' && photoConsent(kid) === 'none') { document.getElementById('moErr').textContent = `${kid}’s family has asked for no photos. Share praise or great work instead.`; return; }
+    const held = inQuiet(), q = quiet();
+    const m = {id: 'm' + Date.now(), by: t.name, role: ctOf(t.name) === d.cls ? 'Class teacher' : (subj || 'Teacher'), cls: d.cls, kid, kind: d.kind, text: d.text.trim(), art: d.kind === 'photo' ? d.art : '', skill: d.skill || '', at: held ? q.to : demoClock(), date: '2026-10-05'};
+    lsSet('quad-moments', [m, ...momAll()]); closeAll(); const y = scrollY; route(); scrollTo(0, y); petals(18);
+    const who = kid ? (d.kind === 'photo' && photoConsent(kid) !== 'family' ? `${kid}’s family and the parents of ${d.cls}` : `${kid}’s family`) : 'parents of ' + d.cls;
+    toast(held ? `Scheduled for ${q.to} · ${who} get it when quiet hours end` : `Shared with ${who}`); }
 });
-document.addEventListener('change', e => { if (e.target.id === 'mo_cls') { momSync(); S.momDraft.kid = ''; keepScroll(momShareDrawer); } });
-window.addEventListener('storage', e => { if (['quad-moments', 'quad-moment-reacts'].includes(e.key) && S.route === 'teach') { const y = scrollY; route(); scrollTo(0, y); } });
+document.addEventListener('change', e => { if (e.target.id === 'mo_cls') { momSync(); S.momDraft.kid = ''; keepScroll(momShareDrawer); } if (e.target.id === 'mo_kid') { momSync(); keepScroll(momShareDrawer); const k = document.getElementById('mo_kid'); k && k.focus(); } if (e.target.id === 'ln_cls') { lnSync(); S.lnDraft.subj = ''; keepScroll(learnDrawer); } });
+window.addEventListener('storage', e => { const keys = ['quad-moments', 'quad-moment-reacts', 'quad-learning', 'quad-learning-tried', 'quad-photo-consent', 'quad-family-circle', 'quad-quiet']; if (!keys.includes(e.key)) return;
+  if (drawer.classList.contains('on')) { if (S.momDraft && document.getElementById('mo_t') && ['quad-photo-consent', 'quad-family-circle', 'quad-quiet'].includes(e.key)) { momSync(); keepScroll(momShareDrawer); } return; }
+  const base = S.route.split('-')[0], live = {teach: keys, connect: ['quad-moments', 'quad-moment-reacts'], student: ['quad-photo-consent', 'quad-family-circle'], inbox: ['quad-quiet']};
+  if ((live[base] || []).includes(e.key)) { const y = scrollY; route(); scrollTo(0, y); } });
 FORM_META.push(['Share a moment', 'heart', 'Moments']);
+
+/* ---------- Quad Circle: family pulse, this week in class, quiet hours, photo consent and the family circle (shared with the parent app through localStorage) ---------- */
+P.people = '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/><circle cx="17.5" cy="9" r="2.6"/><path d="M17 14.6c2.4.3 4 2 4.6 5.4"/>';
+const SKILLS = ['Confidence', 'Kindness', 'Teamwork', 'Creativity', 'Curiosity', 'Perseverance', 'Reading', 'Problem solving'];
+const CIRCLE_DAY = '2026-10-05', CIRCLE_WEEK = '2026-10-05';
+function momSeed() { const A = acadText('Grade 4 – Emerald'), K = acadText('Grade 9 – Sapphire');
+  return [
+    {id:'m-a1', by:'Ms. Jayasinghe', role:'Class teacher', cls:A, kid:'Amaya', kind:'photo', art:'mural', skill:'Creativity', text:'Amaya painted the canteen mural today! She chose the colours for the paddy fields herself.', at:'08:55', date:'2026-10-05'},
+    {id:'m-k1', by:'Mr. Mendis', role:'Form tutor', cls:K, kid:'Kavindu', kind:'praise', art:'', skill:'Teamwork', text:'Kavindu helped two classmates fix their Python projects this morning. A real team player.', at:'08:30', date:'2026-10-05'},
+    {id:'m-a2', by:'Mr. Herath', role:'Physical Ed.', cls:A, kid:'Amaya', kind:'photo', art:'sports', skill:'Perseverance', text:'Amaya swam her first full length of butterfly. The biggest smile in the pool!', at:'Friday', date:'2026-10-02'},
+    {id:'m-k2', by:'Mrs. Gunawardena', role:'Physics', cls:K, kid:'Kavindu', kind:'work', art:'science', skill:'Problem solving', text:'Kavindu’s pendulum write-up was the clearest in the class: labelled graphs, error bars and a thoughtful conclusion.', at:'Friday', date:'2026-10-02'},
+    {id:'m-a3', by:'Ms. Silva', role:'Music', cls:A, kid:'', kind:'photo', art:'music', skill:'', text:'Emerald class played their first round on the recorder today. A lovely, noisy morning!', at:'Thursday', date:'2026-10-01'},
+    {id:'m-k3', by:'Mr. Mendis', role:'Mathematics', cls:K, kid:'', kind:'photo', art:'maths', skill:'Curiosity', text:'Sapphire class built a giant proof of Pythagoras out of paper squares.', at:'Wednesday', date:'2026-09-30'},
+    {id:'m-a4', by:'Ms. Jayasinghe', role:'English', cls:A, kid:'Amaya', kind:'work', art:'reading', skill:'Reading', text:'Amaya’s book review of Charlotte’s Web made the whole class want to read it.', at:'Tuesday', date:'2026-09-29'},
+    {id:'m-a5', by:'Ms. Jayasinghe', role:'Class teacher', cls:A, kid:'', kind:'photo', art:'garden', skill:'', text:'Our class herb garden has its first mint leaves. Everyone took a turn with the watering can.', at:'Monday', date:'2026-09-28'}
+  ]; }
+function momAll() { let m = lsGet('quad-moments', null); if (!Array.isArray(m)) { m = momSeed(); lsSet('quad-moments', m); } return m.filter(x => x && x.id); }
+function learnSeed() { const A = acadText('Grade 4 – Emerald'), K = acadText('Grade 9 – Sapphire'), w = CIRCLE_WEEK;
+  return [
+    {id:'l-a1', cls:A, subj:'English', by:'Ms. Jayasinghe', role:'Class teacher', week:w, topic:'Writing a postcard', why:'We are learning to write to a real reader, with a greeting, three news sentences and a sign-off.', tryHome:'Write a postcard together to a grandparent and post it this week.', mins:15},
+    {id:'l-a2', cls:A, subj:'Maths', by:'Mr. Perera', role:'Mathematics', week:w, topic:'Fractions of a shape', why:'Halves, quarters and eighths, using paper folding and pizza drawings.', tryHome:'Cut a roti or sandwich into quarters and ask which pieces make a half.', mins:5},
+    {id:'l-a3', cls:A, subj:'Science', by:'Ms. Fernando', role:'Science', week:w, topic:'How plants drink', why:'We put celery in coloured water to watch water travel up the stem.', tryHome:'Find three plants at home and guess which one needs the most water.', mins:10},
+    {id:'l-k1', cls:K, subj:'Mathematics', by:'Mr. Mendis', role:'Form tutor', week:w, topic:'Simultaneous equations', why:'Solving two equations together by elimination, then checking on a graph.', tryHome:'Ask Kavindu to explain the phone-plan problem from Tuesday in two minutes.', mins:5},
+    {id:'l-k2', cls:K, subj:'Physics', by:'Mrs. Gunawardena', role:'Physics', week:w, topic:'Energy transfer', why:'Where energy goes when a kettle boils, and why some is wasted.', tryHome:'Read the electricity bill together and spot the month you used most.', mins:10}
+  ]; }
+function learnAll() { let l = lsGet('quad-learning', null); if (!Array.isArray(l)) { l = learnSeed(); lsSet('quad-learning', l); } return l.filter(x => x && x.id); }
+/* Other families who tried it, so the demo looks like a real class; real "We tried it" taps from the parent app are added on top */
+const LEARN_SAMPLE = {'l-a1': 6, 'l-a2': 3, 'l-a3': 4, 'l-k1': 2, 'l-k2': 5};
+const learnTried = id => { const real = (lsGet('quad-learning-tried', {}) || {})[id] || {}; return {real, n: Object.keys(real).length + (LEARN_SAMPLE[id] || 0)}; };
+const photoConsent = first => { const v = (lsGet('quad-photo-consent', {}) || {})[first]; return ['class', 'family', 'none'].includes(v) ? v : 'class'; };
+const FC_SEED = [{id:'f1', name:'Kamala Perera', rel:'Grandmother', phone:'+94 77 *** 4410', kids:['Amaya', 'Kavindu'], sees:'moments', status:'joined', at:'2026-09-14'}];
+const circleOf = first => { const l = lsGet('quad-family-circle', null); return (Array.isArray(l) ? l : FC_SEED).filter(r => r && (r.kids || []).includes(first)); };
+/* Quiet hours: the school sets them, the parent app shows them */
+const QUIET_DEF = {on: true, from: '18:00', to: '07:00', weekends: true};
+const quiet = () => ({...QUIET_DEF, ...(lsGet('quad-quiet', {}) || {})});
+/* The demo clock: 09:41 on Monday 5 October unless set (demoClock('19:30') shows the quiet-hours behaviour) */
+function demoClock(t) { if (t !== undefined) S.demoTime = t || ''; return S.demoTime || '09:41'; }
+function inQuiet(t = demoClock()) { const q = quiet(); if (!q.on) return false; const m = toMin(t), f = toMin(q.from), e = toMin(q.to); return f > e ? (m >= f || m < e) : f < e ? (m >= f && m < e) : false; }
+const daysSince = d => { const n = Math.round((Date.parse(CIRCLE_DAY) - Date.parse(d)) / 864e5); return isNaN(n) ? 0 : Math.max(0, n); };
+const agoTxt = n => n == null ? 'not yet this term' : n === 0 ? 'today' : n === 1 ? 'yesterday' : `${n} days ago`;
+const DEMO_KIDS = {'CIS-24100': 'Amaya'};
+
+/* ---------- Family pulse: for each family in a class, the last positive, the last heads-up and whether they replied ---------- */
+const PULSE_POS = ['Helped a friend with fractions', 'Read aloud to the class', 'Kind to a new classmate', 'Great effort in PE', 'Asked a brilliant question in science', 'Careful, tidy handwriting'];
+const PULSE_HEADS = ['Forgot homework twice this week', 'Seemed tired in the afternoon', 'Scraped a knee at break', 'Upset after a falling-out at lunch', 'Late three mornings this week'];
+const PULSE = {};
+function pulseRows(cls) {
+  const demo = acadText('Grade 4 – Emerald'), ms = momAll().filter(m => m.cls === cls && m.kid), re = lsGet('quad-moment-reacts', {}) || {};
+  if (!PULSE[cls]) { const r = ukSeed('pulse' + cls + YEAR.cur), lim = .04 + ukSeed('pulse-class' + cls)() * .36;
+    PULSE[cls] = [...new Set([...(cls === demo ? ['Amaya Perera'] : []), ...classRoster(cls)])].map(name => { const a = r(), b = r(), c = r(), d = r(), e = r(), f = r();
+      const pos = a < lim ? (b < .4 ? null : 15 + Math.floor(b * 16)) : Math.floor(b * 13), heads = c < .28 ? Math.floor(d * 20) : null;
+      return {name, pos, posTxt: PULSE_POS[Math.floor(f * PULSE_POS.length)], heads, headsTxt: PULSE_HEADS[Math.floor(d * PULSE_HEADS.length)], replied: pos != null && e < .7, n2w: pos != null && pos <= 14 ? 1 + Math.floor(f * 4) : 0}; }); }
+  return PULSE[cls].map(x => { const first = x.name.split(' ')[0], mine = ms.filter(m => m.kid === first).sort((p, q) => (q.date || '').localeCompare(p.date || ''));
+    if (!mine.length) return cls === demo && x.name === 'Amaya Perera' ? {...x, first, real: true, pos: null, replied: false, thanks: '', n2w: 0, quiet: true} : {...x, first, quiet: x.pos == null || x.pos > 14};
+    const pos = daysSince(mine[0].date), rr = mine.map(m => re[m.id]).filter(Boolean), last = re[mine[0].id] || {};
+    return {...x, first, real: true, pos, posTxt: mine[0].text, posBy: mine[0].by, replied: rr.length > 0, thanks: last.thanks || '', n2w: mine.filter(m => daysSince(m.date) <= 14).length, quiet: pos > 14}; })
+    .sort((p, q) => (q.quiet - p.quiet) || (p.quiet ? (q.pos == null ? 999 : q.pos) - (p.pos == null ? 999 : p.pos) : 0)); }
+const fpTags = x => `<div class="fp-tags"><span class="${x.quiet ? 'off' : 'pos'}">${ic('star', 12)}Positive ${agoTxt(x.pos)}</span><span>${ic('alert', 12)}${x.heads == null ? 'No heads-up' : `Heads-up ${agoTxt(x.heads)}`}</span><span class="${x.replied ? 'pos' : ''}">${ic('msg', 12)}${x.replied ? 'Replied' : 'No reply yet'}</span></div>`;
+function pulseCard(t) { const cls = ctOf(t.name); if (!cls) return '';
+  const rows = pulseRows(cls), quietRows = rows.filter(x => x.quiet), N = rows.length, k = N - quietRows.length, show = S.fpAll ? quietRows : quietRows.slice(0, 4);
+  const heads = rows.filter(x => !x.quiet && x.heads != null && x.heads < x.pos);
+  return `<section class="card fp" id="fpCard" aria-labelledby="fpH"><div class="card-h"><h2 id="fpH">Family pulse · ${esc(cls)}</h2><span class="muted" style="font-size:12px">Last two weeks</span></div>
+    <p class="fp-sum"><b>${k} of ${N} families</b> heard something positive from ${esc(cls)} in the last two weeks.${quietRows.length ? ` ${quietRows.length === 1 ? 'One family hasn’t' : `${quietRows.length} haven’t`} yet. A short note about something good is all it takes.` : ' Every family has. Lovely.'}</p>
+    ${quietRows.length ? `<div class="fp-list">${show.map(x => `<div class="fp-row quiet">${avatar(x.name, 'sm')}<div class="fp-m"><b>${esc(x.name)}</b>${fpTags(x)}
+      <p class="fp-nudge">${x.pos == null ? `Nothing positive has gone home about ${esc(x.first)} this term.` : `It’s been ${x.pos} days since ${esc(x.first)}’s family heard something good.`}${x.heads != null && (x.pos == null || x.heads < x.pos) ? ` Their last news was a heads-up: ${esc(x.headsTxt.toLowerCase())}.` : ''}</p>
+      <button class="btn sm primary" data-act="momShare" data-kid="${esc(x.name)}" data-cls="${esc(cls)}">${ic('heart', 14)}Share a moment about ${esc(x.first)}</button></div></div>`).join('')}</div>
+      ${quietRows.length > show.length ? `<button class="linkbtn fp-more" data-act="fpAll">Show ${quietRows.length - show.length} more ${quietRows.length - show.length === 1 ? 'family' : 'families'}</button>` : ''}` : ''}
+    ${heads.length ? `<p class="fp-hint">${ic('alert', 14)}<span>${heads.length === 1 ? `${esc(heads[0].first)}’s family’s` : `${heads.length} families’`} latest news was a heads-up. Something good next keeps the balance.</span></p>` : ''}
+    <details class="fp-all"><summary>All ${N} families</summary><div class="fp-list">${rows.filter(x => !x.quiet).map(x => `<div class="fp-row">${avatar(x.name, 'sm')}<div class="fp-m"><b>${esc(x.name)}</b>${fpTags(x)}${x.real ? `<small class="fp-last">“${esc(x.posTxt)}”${x.thanks ? ` · they said “${esc(x.thanks)}”` : ''}</small>` : ''}</div></div>`).join('')}</div></details>
+    <div class="fp-foot">${ic('heart', 14)}<span>Just for you, to help every family hear something good. It isn’t shared, scored or used to compare teachers.</span></div></section>`; }
+
+/* ---------- This week in class: what the class is learning and one thing to try at home ---------- */
+const myClasses = t => { const load = teacherLoad(t.name); return [...new Set([ctOf(t.name), ...load.rows.map(r => r.cls)].filter(Boolean))]; };
+function learnCard(t) { const cls = myClasses(t), posts = learnAll().filter(l => cls.includes(l.cls) && l.week === CIRCLE_WEEK);
+  const tot = posts.reduce((a, l) => a + learnTried(l.id).n, 0);
+  return `<section class="card ln-card" id="lnCard" aria-labelledby="lnH"><div class="card-h"><h2 id="lnH">This week in class</h2><button class="btn sm primary" data-act="learnNew">${ic('plus', 14)}Post this week’s learning</button></div>
+    <p class="fp-sum">${posts.length ? `Families can see <b>${posts.length} ${posts.length === 1 ? 'topic' : 'topics'}</b> from your classes this week, each with one thing to try at home. <b>${tot} ${tot === 1 ? 'family has' : 'families have'}</b> tried one so far.` : `Nothing posted for your classes this week. Tell families what you’re learning and one small thing to try at home. It takes a minute.`}</p>
+    ${posts.length ? `<div class="ln-list">${posts.map(l => { const tr = learnTried(l.id), real = Object.entries(tr.real);
+      return `<article class="ln"><div class="ln-h"><span class="pill t-violet plain">${esc(l.subj)}</span><b>${esc(l.topic)}</b></div><small class="muted">${esc(l.cls)} · ${esc(l.by)} · about ${+l.mins || 10} minutes</small>
+        <p>${esc(l.why)}</p><div class="ln-try">${ic('home', 14)}<span><b>Try at home:</b> ${esc(l.tryHome)}</span></div>
+        <div class="ln-n" data-id="${esc(l.id)}"><span class="ln-dot">${ic('check', 12)}</span><b class="num">${tr.n}</b> ${tr.n === 1 ? 'family' : 'families'} tried it at home</div>
+        ${real.length ? `<ul class="ln-notes">${real.map(([kid, v]) => `<li><b>${esc(kid)}’s family</b>${v && v.note ? ` “${esc(v.note)}”` : ' tried it'}<small>${esc((v && v.at) || '')}</small></li>`).join('')}</ul>` : ''}</article>`; }).join('')}</div>` : ''}</section>`; }
+function learnDrawer() { const t = teachAs(), d = S.lnDraft, cls = myClasses(t); if (!d.cls || !cls.includes(d.cls)) d.cls = cls[0] || allClasses()[0];
+  const mine = teacherLoad(t.name).rows.filter(r => r.cls === d.cls).map(r => r.k), subs = [...new Set([...mine, ...gSubj(gradeOfCls(d.cls)).map(x => x.k)])].filter(k => k !== 'Free study');
+  if (!d.subj || !subs.includes(d.subj)) d.subj = subs[0] || '';
+  formDrawer(`${head('Post this week’s learning', `Families of ${esc(d.cls)} see it in the ${esc(SCHOOL.short)} Parent app`)}
+    <div class="drawer-b"><div class="form-grid"><div class="field"><label for="ln_cls">Class</label><select class="input" id="ln_cls">${cls.map(c => `<option ${c === d.cls ? 'selected' : ''}>${esc(c)}</option>`).join('')}</select></div>
+      <div class="field"><label for="ln_subj">Subject</label><select class="input" id="ln_subj">${subs.map(k => `<option ${k === d.subj ? 'selected' : ''}>${esc(k)}</option>`).join('')}</select></div></div>
+      <div class="field"><label for="ln_topic">What are you learning?</label><input class="input" id="ln_topic" maxlength="60" value="${esc(d.topic || '')}" placeholder="For example: Writing a postcard"></div>
+      <div class="field"><label for="ln_why">Why it matters, in one sentence</label><textarea class="input" id="ln_why" rows="2" maxlength="180" placeholder="For example: We are learning to write to a real reader.">${esc(d.why || '')}</textarea></div>
+      <div class="field"><label for="ln_try">One thing to try at home</label><input class="input" id="ln_try" maxlength="120" value="${esc(d.tryHome || '')}" placeholder="Short, concrete and free. For example: write a postcard to a grandparent"></div>
+      <div class="field"><label for="ln_mins">About how long?</label><select class="input" id="ln_mins">${[5, 10, 15, 20].map(m => `<option value="${m}" ${+d.mins === m ? 'selected' : ''}>${m} minutes</option>`).join('')}</select></div>
+      <p class="muted small" style="margin:0">Keep it to one thing that needs nothing to buy. Families can tap “We tried it” and leave you a note.</p>
+      <div class="err-msg" id="lnErr"></div></div>
+    <div class="drawer-f"><button class="btn" data-act="closeAll">Cancel</button><button class="btn primary" data-act="learnSave">${ic('send', 16)}Post to families</button></div>`); }
+function lnSync() { const v = id => { const e = document.getElementById(id); return e ? e.value : null; }, d = S.lnDraft; if (!d || v('ln_topic') === null) return;
+  d.cls = v('ln_cls'); d.subj = v('ln_subj'); d.topic = v('ln_topic'); d.why = v('ln_why'); d.tryHome = v('ln_try'); d.mins = +v('ln_mins'); }
+
+/* ---------- Quiet hours (Communications) ---------- */
+function quietCard() { const q = quiet(), now = inQuiet();
+  return `<section class="card qh" id="qhCard" aria-labelledby="qhH"><div class="card-h"><h2 id="qhH">Quiet hours</h2>${q.on ? '<span class="pill t-green plain">On</span>' : '<span class="pill t-amber plain">Off</span>'}</div>
+    <div class="card-b qh-b"><span class="qh-ic">${ic('moon', 20)}</span><div style="flex:1;min-width:0">
+      <p class="qh-sum">${q.on ? `<b>Families and staff aren’t disturbed from ${q.from} to ${q.to}${q.weekends ? ' or at weekends' : ' on school nights'}.</b> Messages and moments sent in quiet hours are delivered at ${q.to}${q.weekends ? ', or on Monday morning at weekends' : ''}. Urgent safety alerts always go through straight away.` : `<b>Quiet hours are off.</b> Messages and moments reach families as soon as they are sent, day or night.`}</p>
+      <p class="muted small" style="margin:6px 0 0">${q.on ? `Parents see “Teachers read messages ${q.to}–${q.from}” under the message box.` : 'Parents see that teachers usually reply within the school day.'}${now ? ` It’s ${demoClock()} now, so new messages wait until ${q.to}.` : ''}</p>
+      <div class="qh-acts"><button class="btn" data-act="qhEdit">${ic('settings', 16)}Change quiet hours</button><span class="qh-demo"><span class="muted small" id="qhDemoL">Demo clock</span>${seg('qhDemo', demoClock(), [['09:41', '09:41'], ['19:30', '19:30']], 'aria-describedby="qhDemoL"')}</span></div></div></div></section>`; }
+function quietDrawer() { const q = quiet();
+  formDrawer(`${head('Quiet hours', 'Evenings and weekends stay calm for families and staff')}
+    <div class="drawer-b"><div class="setting" style="border-top:0"><div class="meta"><b>Use quiet hours</b><small>Hold messages and moments until the morning.</small></div>${ukSw(q.on, 'id="qh_on" data-act="spTell" aria-label="Use quiet hours"')}</div>
+      <div class="form-grid"><div class="field"><label for="qh_from">Quiet from</label><input class="input" type="time" id="qh_from" value="${q.from}" step="900"></div><div class="field"><label for="qh_to">Until</label><input class="input" type="time" id="qh_to" value="${q.to}" step="900"></div></div>
+      <div class="setting"><div class="meta"><b>Include weekends</b><small>Saturday and Sunday are quiet all day. Messages arrive on Monday at the end of quiet hours.</small></div>${ukSw(q.weekends, 'id="qh_we" data-act="spTell" aria-label="Include weekends"')}</div>
+      <div class="tt2-hint">${ic('moon', 16)}<span>Messages and moments sent inside quiet hours are delivered when they end. Urgent safety alerts, like a lockdown or a child not collected, always go through straight away.</span></div>
+      <div class="err-msg" id="qhErr"></div></div>
+    <div class="drawer-f"><button class="btn" data-act="closeAll">Cancel</button><button class="btn primary" data-act="qhSave">Save quiet hours</button></div>`); }
+
+/* ---------- Student profile: family circle and photo consent (read only, set by the family in the app) ---------- */
+function circleLines(s) { const first = DEMO_KIDS[s.id], rel = first ? circleOf(first) : [], cons = first ? photoConsent(first) : 'class', f = s.name.split(' ')[0];
+  const consTxt = {class: `Photos can be shared with the class’s parents`, family: `Photos of ${f} go to ${f}’s family only`, none: `No photos of ${f}. Teachers share praise and work only`}[cons];
+  return `<div class="li" id="stuCircle"><div class="dot-ic t-violet">${ic('people', 16)}</div><div class="meta"><b>Family circle</b> <span class="pill t-violet plain">Set by parents</span><p>${rel.length ? rel.map(r => `${esc(r.name)} (${esc(r.rel)}${r.status === 'invited' ? ', invited' : ''})`).join(', ') + ` ${rel.length === 1 ? 'sees' : 'see'} moments` : 'No relatives invited. Parents can invite grandparents to see moments from the app.'}</p></div></div>
+    <div class="li" id="stuConsent"><div class="dot-ic ${cons === 'none' ? 't-amber' : 't-green'}">${ic(cons === 'none' ? 'alert' : 'check', 16)}</div><div class="meta"><b>Photo consent</b> <span class="pill ${cons === 'none' ? 't-amber' : 't-green'} plain">${{class: 'Class', family: 'Family only', none: 'No photos'}[cons]}</span><p>${esc(consTxt)}</p></div></div>`; }
+
+/* ---------- Family connection: is every family hearing something positive? ---------- */
+function connBuild() { const by = {}; allClasses().forEach(c => { const rows = pulseRows(c); by[c] = {rows, n: rows.length, k: rows.filter(x => !x.quiet).length, m: rows.reduce((a, x) => a + x.n2w, 0), rep: rows.filter(x => x.replied).length}; }); return by; }
+const connPct = x => x.n ? Math.round(x.k / x.n * 100) : 0;
+V.connect = () => { const by = connBuild(), cs = Object.keys(by), N = cs.reduce((a, c) => a + by[c].n, 0), K = cs.reduce((a, c) => a + by[c].k, 0), M = cs.reduce((a, c) => a + by[c].m, 0), R = cs.reduce((a, c) => a + by[c].rep, 0);
+  const all100 = cs.filter(c => by[c].k === by[c].n).length, low = [...cs].sort((a, b) => connPct(by[a]) - connPct(by[b])).slice(0, 2), fg = S.filter.connG || 'all', fc = S.filter.connCls || '';
+  const secs = SECTION_NAMES.slice(0, Math.max(...LV.map(x => x.sections)));
+  const miss = cs.flatMap(c => by[c].rows.filter(x => x.quiet).map(x => ({...x, cls: c, g: gradeOfCls(c)}))).filter(x => (fg === 'all' || x.g == fg) && (!fc || x.cls === fc)).sort((a, b) => (b.pos == null ? 99 : b.pos) - (a.pos == null ? 99 : a.pos));
+  const done = S.connDone || {}, shown = S.filter.connAll ? miss : miss.slice(0, 10);
+  const cell = c => { const x = by[c], p = connPct(x), on = fc === c; return `<button class="cx-c ${on ? 'on' : ''}" style="background:color-mix(in srgb,var(--c5) ${Math.round(Math.max(0, p - 40) / 60 * 62)}%,var(--surface-2))" data-act="connCell" data-c="${esc(c)}" aria-pressed="${on}" aria-label="${esc(c)}: ${p}% of ${x.n} families heard something positive">${p}%<small>${x.n - x.k ? `${x.n - x.k} not yet` : 'all'}</small></button>`; };
+  return `${pageHead('Relationships', 'Family connection', '', `<button class="btn" data-act="go" data-to="inbox">${ic('moon', 16)}Quiet hours</button>`)}
+  <section class="card story"><div class="story-t"><span class="local">Last two weeks</span><p><b>${K.toLocaleString('en-US')} of ${N.toLocaleString('en-US')} families heard something positive in the last two weeks.</b> ${(N - K).toLocaleString('en-US')} haven’t yet, most of them in ${low.map(esc).join(' and ')}. A friendly reminder to the class teacher, or a short note from the office, is usually all it takes.</p></div>${morningArt('sm')}</section>
+  <div class="grid g-kpi">${kpi('heart', 't-green', 'Families reached', `${Math.round(K / N * 100)}%`, `${K.toLocaleString('en-US')} of ${N.toLocaleString('en-US')} heard something good`)}${kpi('star', 't-violet', 'Positive moments', M.toLocaleString('en-US'), 'shared by teachers in two weeks')}${kpi('msg', 't-blue', 'Families replied', `${Math.round(R / N * 100)}%`, 'said thanks or loved a moment')}${kpi('people', 't-amber', 'Every family reached', `${all100} of ${cs.length}`, 'classes where nobody was missed')}</div>
+  <section class="card" aria-labelledby="cxH"><div class="card-h"><h2 id="cxH">Families who heard something positive, by class</h2>${fc ? `<button class="btn sm" data-act="connCell" data-c="">Show every class</button>` : ''}</div>
+    <div class="cx-wrap"><table class="cx-heat"><caption class="sr-only">Share of families in each class who heard something positive in the last two weeks</caption><thead><tr><th scope="col">${GL.one}</th>${secs.map(x => `<th scope="col">${esc(x)}</th>`).join('')}</tr></thead>
+      <tbody>${LV.map((l, i) => `<tr><th scope="row">${esc(l.label)}</th>${secs.map(sec => { const c = clsName(i + 1, sec); return `<td>${by[c] ? cell(c) : ''}</td>`; }).join('')}</tr>`).join('')}</tbody></table></div>
+    <div class="cx-leg"><span>Fewer</span><i aria-hidden="true"></i><span>All families</span><small class="muted">Select a class to see its families below</small></div></section>
+  <section class="card" aria-labelledby="cxN"><div class="card-h"><h2 id="cxN">Families not reached</h2><span class="pill t-amber plain">${miss.length}</span></div>
+    <div class="toolbar"><select class="input inline" data-filter="connG" aria-label="${GL.one}" data-dd-ic="student"><option value="all">${GL.all}</option>${YL().map((l, i) => `<option value="${i + 1}" ${fg == i + 1 ? 'selected' : ''}>${esc(l)}</option>`).join('')}</select>${fc ? `<span class="chip on">${esc(fc)}</span>` : ''}</div>
+    <div class="cx-list">${shown.map(x => { const key = x.cls + '|' + x.name, st = done[key], ct = ST.ct[x.cls] || 'the class teacher';
+      return `<div class="cx-row">${avatar(x.name, 'sm')}<div class="cx-m"><b>${esc(x.name)}</b><small>${esc(x.cls)} · ${x.pos == null ? 'nothing positive yet this term' : `last positive ${x.pos} days ago`}${x.heads != null ? ` · last heads-up ${agoTxt(x.heads)}` : ''}</small></div>
+        <div class="cx-acts">${st ? `<span class="pill t-green plain">${ic('check', 12)}${st === 'remind' ? 'Reminder sent' : 'Note sent'}</span>` : `<button class="btn sm" data-act="connRemind" data-k="${esc(key)}" data-ct="${esc(ct)}" data-kid="${esc(x.first)}">Remind ${esc(ct.split(' ')[0])}</button><button class="btn sm ghost" data-act="connNote" data-k="${esc(key)}" data-kid="${esc(x.name)}" data-c="${esc(x.cls)}">Send a note from the office</button>`}</div></div>`; }).join('') || `<div class="empty"><b>Every family here has heard something good</b><p class="muted">Nothing to follow up for these filters.</p></div>`}</div>
+    ${miss.length > shown.length ? `<div class="tbl-foot"><button class="btn sm" data-act="filter" data-key="connAll" data-val="1">Show all ${miss.length} families</button></div>` : ''}
+    <div class="fp-foot">${ic('heart', 14)}<span>This view is about families, not a league table of teachers. It counts moments, never ranks staff, and doesn’t use safeguarding, medical or early warning records.</span></div></section>`; };
+NAV[2].items.splice(2, 0, ['connect', 'Family connection', 'people']);
+
+Object.assign(ACT, {
+  fpAll: () => { S.fpAll = true; const y = scrollY; route(); scrollTo(0, y); },
+  learnNew: () => { S.lnDraft = {topic: '', why: '', tryHome: '', mins: 10}; learnDrawer(); },
+  learnSave: () => { lnSync(); const d = S.lnDraft, t = teachAs(), err = (m, id) => { document.getElementById('lnErr').textContent = m; document.getElementById(id).focus(); };
+    if (!d.topic || d.topic.trim().length < 3) return err('Say what the class is learning.', 'ln_topic');
+    if (!d.why || d.why.trim().length < 10) return err('Add one sentence on why it matters.', 'ln_why');
+    if (!d.tryHome || d.tryHome.trim().length < 8) return err('Add one thing families can try at home.', 'ln_try');
+    const l = {id: 'l' + Date.now(), cls: d.cls, subj: d.subj, by: t.name, role: ctOf(t.name) === d.cls ? 'Class teacher' : d.subj, week: CIRCLE_WEEK, topic: d.topic.trim(), why: d.why.trim(), tryHome: d.tryHome.trim(), mins: d.mins || 10};
+    lsSet('quad-learning', [l, ...learnAll()]); closeAll(); const y = scrollY; route(); scrollTo(0, y); const q = quiet();
+    toast(`Posted · families of ${d.cls} see it in the parent app${inQuiet() ? ` at ${q.to}` : ''}`); },
+  qhEdit: () => quietDrawer(),
+  qhDemo: el => { demoClock(el.dataset.k); const y = scrollY; route(); scrollTo(0, y); toast(`Demo clock set to ${el.dataset.k}`); },
+  qhSave: () => { const v = id => document.getElementById(id), on = v('qh_on').getAttribute('aria-checked') === 'true', we = v('qh_we').getAttribute('aria-checked') === 'true', from = v('qh_from').value, to = v('qh_to').value;
+    if (on && (!from || !to || from === to)) { v('qhErr').textContent = 'Choose different start and end times.'; return; }
+    lsSet('quad-quiet', {on, from: from || QUIET_DEF.from, to: to || QUIET_DEF.to, weekends: we}); closeAll(); const y = scrollY; route(); scrollTo(0, y);
+    toast(on ? `Quiet hours saved · messages sent ${from}–${to} reach families at ${to}` : 'Quiet hours turned off · messages reach families straight away'); },
+  connCell: el => { S.filter.connCls = S.filter.connCls === el.dataset.c ? '' : el.dataset.c; S.filter.connAll = ''; const y = scrollY; route(); scrollTo(0, y); },
+  connRemind: el => { (S.connDone = S.connDone || {})[el.dataset.k] = 'remind'; const y = scrollY; route(); scrollTo(0, y); toast(`Reminder sent to ${el.dataset.ct} · ${el.dataset.kid} is at the top of their family pulse`); },
+  connNote: el => { S.cxNote = {k: el.dataset.k, kid: el.dataset.kid, cls: el.dataset.c}; const f = el.dataset.kid.split(' ')[0];
+    formDrawer(`${head('Note from the office', `To ${esc(f)}’s family · ${esc(el.dataset.c)}`)}
+      <div class="drawer-b"><div class="field"><label for="cx_t">Message</label><textarea class="input" id="cx_t" rows="5">Dear ${esc(f)}’s family, we just wanted to say how glad we are to have ${esc(f)} in ${esc(el.dataset.c)} this term. If there’s anything you’d like to share with us, just reply here. Warm wishes from the ${esc(SCHOOL.short)} office.</textarea></div>
+        <p class="muted small" style="margin:0">Sent to the parent app. Keep it warm and general. ${inQuiet() ? `Quiet hours are on, so it arrives at ${quiet().to}.` : ''}</p><div class="err-msg" id="cxErr"></div></div>
+      <div class="drawer-f"><button class="btn" data-act="closeAll">Cancel</button><button class="btn primary" data-act="connSend">${ic('send', 16)}Send note</button></div>`); },
+  connSend: () => { const x = S.cxNote, t = document.getElementById('cx_t').value.trim(); if (t.length < 10) { document.getElementById('cxErr').textContent = 'Write a short note first.'; return; }
+    (S.connDone = S.connDone || {})[x.k] = 'note'; closeAll(); const y = scrollY; route(); scrollTo(0, y); toast(`Note sent to ${x.kid.split(' ')[0]}’s family from the school office`); }
+});
+FORM_META.push(['Post this week’s learning', 'book', 'My teaching'], ['Quiet hours', 'moon', 'Communications'], ['Note from the office', 'msg', 'Family connection']);
 applySchool();
 window.addEventListener('storage', e => { if (['quad-pe-book', 'quad-form-replies'].includes(e.key) && ['events'].includes(S.route)) { const y = window.scrollY; route(); window.scrollTo(0, y); return; } if (e.key === 'quad-school') { if (JSON.stringify(loadAcad()) !== JSON.stringify(ACAD)) { location.reload(); return; } applySchool(); route(); } });
 themeIcon(); route();

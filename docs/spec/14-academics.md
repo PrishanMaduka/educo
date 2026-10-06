@@ -60,6 +60,7 @@ Rules: a primary-stage class teacher teaches most subjects in their class by def
   - morning registration for my class;
   - parent messages waiting.
 - **Moments:** see [12](12-moments-messaging.md#staff-side-my-teaching--moments-card-and-a-share-a-moment-button).
+- **Family pulse** (class teachers) and **This week in class** (every teacher): see [12](12-moments-messaging.md#good-relationships-by-design) and [12](12-moments-messaging.md#this-week-in-class).
 - **My class:** students, absent today, report-comment progress, faces, and links.
 - **My week:** five columns of lessons, with clashes highlighted (there should be none after generation).
 

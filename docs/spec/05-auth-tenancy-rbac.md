@@ -56,6 +56,8 @@ Permission keys live in `packages/contracts/permissions.ts` (for example `sis.vi
 
 Parents are not role-based: a guardian can read and act only for students linked to them in `student_guardians`, and each route checks that link.
 
+**Relatives (family circle).** A relative invited by a guardian signs in with phone and OTP like a guardian, but gets a token with `kind: relative`. Relative tokens reach only `GET /family/moments`, `POST /family/moments/:id/heart`, `GET /family/me` and sign-out, and only for students linked through `family_circle_students` whose member status is `joined`. Every other `/family` route returns 403 for them. Removing a relative revokes their refresh tokens at once.
+
 ## Plan and module guard
 
 - A route that belongs to a module carries `@Module('lms')`. If the school's plan does not include the module, the API returns `403 { code: 'module_not_in_plan' }`, and the apps hide that navigation item.

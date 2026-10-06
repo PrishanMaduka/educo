@@ -7,7 +7,7 @@ Quad runs a whole school (admissions, records, timetable, teaching, pastoral car
 1. **Story first.** Every home screen opens with what is happening and what needs doing, in plain sentences, before tables or charts.
 2. **Early warning.** Quad notices students (and, in the console, schools) that have started slipping, says why, and suggests who should act. One click starts a support plan.
 3. **Ask Quad.** An assistant in every app answers plain-English questions from the school's own records, with sources, and drafts letters.
-4. **Moments.** Teachers share a photo or a line of praise in two taps. Parents see it straight away and can say thanks. This brings the "Quad Circle" concept into the product in a simple way.
+4. **Quad Circle.** Every child has a circle of people at school and at home. Teachers share moments in two taps and post one thing to try at home each week; parents see the child's day as it happens, who looks after their child, and can say thanks in one tap; relatives can be invited to see moments; and quiet hours, a family pulse and a family-connection view keep the relationship healthy. See [12](12-moments-messaging.md#quad-circle).
 
 ## People
 
@@ -72,7 +72,7 @@ Everything in the feature map, except what is listed below.
 - A payroll or HR system. Staff records cover what the school apps need.
 - Sinhala and Tamil interfaces. The app is built ready for localisation (see [15](15-cross-cutting.md#localisation)), but only English ships. The parent app says "Sinhala and Tamil coming soon".
 - Native desktop apps.
-- Building `design/circle.html` as its own app. Its idea ships as Moments.
+- Building `design/circle.html` as its own app. Its ideas ship inside the parent app (Circle tab, Home day ring) and the staff portal (My teaching, Family connection).
 
 ## Success measures
 

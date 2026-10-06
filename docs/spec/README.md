@@ -27,7 +27,7 @@ This folder is the end-to-end specification for building Quad, a multi-tenant sc
 | 09 | [Parent app](09-parent-app.md) | Mobile app: every screen, gestures, offline, push |
 | 10 | [Early warning](10-early-warning.md) | Signals, scoring, support plans, the school version in the console |
 | 11 | [Ask Quad](11-ask-quad.md) | The assistant: Claude API, tools, safety, per-app intents, evaluation |
-| 12 | [Moments, messages and notifications](12-moments-messaging.md) | Moments, inbox, broadcasts, push, SMS, email |
+| 12 | [Circle, moments, messages and notifications](12-moments-messaging.md) | Quad Circle (moments, day ring, people, learning, family circle, photo consent, quiet hours, family pulse and connection), inbox, broadcasts, push, SMS, email |
 | 13 | [Fees, payments and finance](13-fees-payments-finance.md) | Fee structures, billing runs, invoices, gateways, accounting |
 | 14 | [Academics](14-academics.md) | Curriculum, year groups, timetable, staffing, cover, LMS, exams, reports, year rollover |
 | 15 | [Cross-cutting](15-cross-cutting.md) | Files, search, jobs, audit, localisation, accessibility, performance, observability |

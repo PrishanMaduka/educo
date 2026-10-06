@@ -74,6 +74,7 @@ Grouped by module. `→` notes the main behaviour. Every list endpoint supports 
 - `GET /threads`, `POST /threads`, `GET /threads/:id/messages`, `POST /threads/:id/messages`, `POST /threads/:id/read`
 - `GET/POST /broadcasts`, `POST /broadcasts/:id/send`
 - `GET/POST /moments`, `DELETE /moments/:id`, `GET /moments/:id/reactions`
+- Circle (staff): `GET/POST /learning-posts`, `PATCH/DELETE /learning-posts/:id`, `GET /learning-posts/:id/tries`; `GET /circle/pulse?classId=` (class teacher of that class only); `GET /circle/connection?yearGroupId=` (`circle.connection.read`); `POST /circle/connection/reminders` (`{classId}` → class teacher), `GET/PUT /settings/quiet-hours`; photo consent and family circle are read-only on `GET /students/:id`
 - `GET/POST /events`, `GET /events/:id/grid`, `PATCH /events/:id`, `GET/POST /forms`, `GET /forms/:id/responses`, `POST /forms/:id/remind`
 - `GET/POST /news`, `GET/POST /stories`, `GET /notifications`, `POST /notifications/read`
 
@@ -88,7 +89,11 @@ Grouped by module. `→` notes the main behaviour. Every list endpoint supports 
 ### Parent app (`/family/...`, guardian tokens only)
 - `GET /family/home` → one call for Home: children, today story, latest moment, heads-up, to-dos, live class, bus, dues, coming up, news
 - `GET /family/children/:studentId/attendance|results|timetable|homework|conduct|reports|exams|medical|doing`
-- `GET /family/moments?studentId=`, `POST /family/moments/:id/heart`, `POST /family/moments/:id/thanks`
+- `GET /family/moments?studentId=&skill=`, `POST /family/moments/:id/heart`, `POST /family/moments/:id/thanks`
+- Circle: `GET /family/day?studentId=` (day ring events and still-to-come), `GET /family/circle/people?studentId=`, `GET /family/circle/people/:staffId?studentId=`, `POST /family/circle/people/:staffId/thanks`, `POST /family/circle/people/:staffId/chat-request`
+- Learning: `GET /family/learning?studentId=&week=` (posts, tries, term skill tally), `POST /family/learning/:postId/tries` (`{studentId, note?}`), `DELETE /family/learning/:postId/tries/:studentId`
+- Family circle: `GET/POST /family/circle/relatives`, `DELETE /family/circle/relatives/:id`; photo consent `GET/PUT /family/children/:studentId/photo-consent`
+- `GET /family/recaps?studentId=&week=`
 - `GET /family/events/:id/slots`, `POST /family/events/:id/bookings`, `DELETE /family/bookings/:id`
 - `GET /family/forms`, `POST /family/forms/:id/responses`
 - `GET /family/invoices`, `POST /family/payments/intent` (gateway session), `GET /family/payments/methods`
@@ -108,6 +113,10 @@ Clients connect with their session or token and join `tenant:{id}` and `user:{id
 |---|---|---|---|
 | `moment.created` | guardians of the class or student | moment summary | Parent Home, Moments tab, push banner |
 | `moment.reaction.created` | `user:{teacherId}` | momentId, heart, thanks | My teaching, Moments card |
+| `learning.posted` | guardians of the class | post summary | Circle → Learning |
+| `learning.tried` | `user:{teacherId}` | postId, studentId, note | My teaching, This week in class |
+| `consent.photo.changed` | staff of the student's classes | studentId, scope | Share drawer |
+| `family_circle.changed` | guardians of the student, staff of the student's classes | studentId | Circle → People, student profile |
 | `event.booking.created` / `.cancelled` | `tenant:{id}` | eventId, teacherId, time | Evenings booking grid |
 | `form.response.created` | `tenant:{id}` | formId, counts | Forms list |
 | `message.created` | thread participants | thread, message | Inbox, parent Messages |

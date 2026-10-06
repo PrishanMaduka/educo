@@ -83,7 +83,7 @@ Postgres 16, defined in Drizzle in `packages/db/schema/*.ts`. This document list
 | `student_guardians` | student_id, guardian_user_id, relationship, primary bool, fee_payer bool, lives_with bool, can_collect bool |
 | `houses` | id, tenant_id, name, color |
 | `medical_conditions` | id, student_id, condition, severity enum(`low`,`med`,`high`), medication, storage, care_plan_review_on, emergency_contact, notes |
-| `consents` | id, student_id, kind enum(`photo`,`trips`,`medical_treatment`), granted bool, source_form_response_id, updated_at |
+| `consents` | id, student_id, kind enum(`photo`,`trips`,`medical_treatment`), granted bool, photo_scope enum(`class`,`family`,`none`) (photo only), changed_by_user_id, source_form_response_id, updated_at |
 | `pickup_people` | id, student_id, name, relationship, phone, photo_file_id, active |
 
 ## Attendance [T]
@@ -153,9 +153,14 @@ Postgres 16, defined in Drizzle in `packages/db/schema/*.ts`. This document list
 | `thread_participants` | thread_id, user_id, role_label, last_read_at |
 | `messages` | id, thread_id, sender_user_id, body, attachments, created_at, edited_at |
 | `broadcasts` | id, title, body, audience jsonb (year groups, classes, roles), channels text[], scheduled_at, sent_at, stats jsonb |
-| `moments` **[S]** | id, tenant_id, by_user_id, role_label, class_id, student_id (nullable = whole class), kind enum(`photo`,`praise`,`work`), text (≤240), photo_file_id, art_key, created_at |
+| `moments` **[S]** | id, tenant_id, by_user_id, role_label, class_id, student_id (nullable = whole class), kind enum(`photo`,`praise`,`work`), text (≤240), photo_file_id, art_key, skill enum(`confidence`,`kindness`,`teamwork`,`creativity`,`curiosity`,`perseverance`,`reading`,`problem_solving`) nullable, deliver_at (quiet hours), created_at |
 | `moment_reactions` | moment_id, guardian_user_id, heart bool, thanks_text, at |
 | `moment_reads` | moment_id, guardian_user_id, read_at |
+| `learning_posts` | id, class_id, subject_id, by_user_id, week_start date, topic, why, try_home, minutes smallint (5–20), created_at; unique (class_id, subject_id, week_start) |
+| `learning_tries` | learning_post_id, student_id, guardian_user_id, note (≤140), at; unique (learning_post_id, student_id) |
+| `family_circle_members` | id, guardian_user_id (inviter), relative_user_id (nullable until joined), name, relation, phone_e164, status enum(`invited`,`joined`,`removed`), invited_at, joined_at, removed_at, removed_by |
+| `family_circle_students` | member_id, student_id |
+| `weekly_recaps` | id, student_id, week_start, payload jsonb (computed), created_at |
 | `notifications` | id, user_id, category, title, body, deep_link, read_at, created_at |
 | `news_posts` | id, title, body, tag, cover_file_id, published_at |
 | `stories` | id, name, icon, slides jsonb, expires_at |

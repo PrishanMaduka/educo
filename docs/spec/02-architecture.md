@@ -165,6 +165,7 @@ Record every decision that changes this spec. Newest last.
 | D5 | 2026-10-05 | Ask Quad uses the Claude API with read-only, tenant-scoped tools (not text-to-SQL) | Safety, permission checks per tool, explainable sources |
 | D6 | 2026-10-05 | Palette A (indigo, coral, lilac), Figtree type, four-tile logo | Chosen by the product owner |
 | D7 | 2026-10-05 | English only in v1, built for localisation | Product owner removed Sinhala and Tamil greetings; i18n framework kept |
-| D8 | 2026-10-05 | Quad Circle ships as Moments inside the existing apps | Product owner chose the simplest version |
+| D8 | 2026-10-05 | Quad Circle ships as Moments inside the existing apps (superseded by D11) | Product owner chose the simplest version |
 | D9 | 2026-10-06 | Tailwind CSS v4 for all web front-end styling | Product owner decision |
 | D10 | 2026-10-06 | The parent app is built with Flutter (not Expo / React Native) | Product owner decision. Consequences: the OpenAPI document is the contract for mobile; business logic stays on the server; tokens and strings are generated to Dart; push uses FCM directly |
+| D11 | 2026-10-06 | Replaces D8: the full Quad Circle ships inside the parent app and staff portal (Circle tab, Home day ring, My teaching cards, Family connection), with relatives as a separate `kind: relative` token limited to moments | Product owner asked for the full Circle concept in the parent app. A separate token kind keeps relatives out of every other `/family` route by default instead of relying on per-route checks |

@@ -9,7 +9,7 @@ Academics (timetable, staffing, cover, LMS, exams, reports, academic year, My te
 |---|---|
 | Overview | Dashboard, My teaching |
 | Pre-admission | Admissions pipeline (open applicants count) |
-| Relationships | CRM & leads, Communications (unread count), Evenings & forms |
+| Relationships | CRM & leads, Communications (unread count), Family connection, Evenings & forms |
 | Student information | Students, Early warning (Needs a conversation count), Attendance, Pastoral care |
 | Learning | Courses & gradebook, Timetable, Teachers & classes, Staff cover, Exams, Reports |
 | Finance | Fees & invoicing, Accounting |
@@ -73,7 +73,11 @@ All year-group labels come from the school's curriculum (Year 4, Grade 4, PYP 4)
 ## Communications
 - **Inbox:** threads with parents (unread first), a conversation pane, a reply composer with templates, and attachments. Replies arrive in the parent app's Messages.
 - **Broadcasts:** compose a title and body; choose the audience (whole school, stages, year groups, classes, roles), the channels (app, SMS, email) and a schedule; preview, then send. Delivery stats come afterwards (delivered, opened).
+- **Quiet hours** card: on/off, from, until and include weekends (default 18:00–07:00 and weekends). See [12](12-moments-messaging.md#good-relationships-by-design).
 - **News and stories:** publish news posts (with a cover image and tag) and parent-app stories (slides with a background, title and text; they expire after 24 hours).
+
+## Family connection
+For leaders (`circle.connection.read`): a story sentence, stat tiles, a heatmap of year group × class of families who heard something positive in the last two weeks (selecting a cell filters the list), and **Families not reached** with **Remind {teacher}** and **Send a note from the office** (drawer). A footnote says it is about families, not a ranking of teachers. Details in [12](12-moments-messaging.md#good-relationships-by-design).
 
 ## Evenings & forms
 Two tabs. The prototype is the reference.
@@ -106,6 +110,7 @@ Two tabs. The prototype is the reference.
   - Add student.
 - **Student profile:**
   - A header with the avatar, ID, name, class, house and status. Facts: attendance, GPA, fee balance and house points. Actions: message parent, report card.
+  - Read-only Circle lines: **Family circle** (relatives who see moments) and **Photo consent** (class, family only, or no photos), as set by the guardians.
   - An **early-warning banner** when the student has a signal (level, reasons, link).
   - Tabs:
     - Overview: personal details, guardians and contacts with app status, medical summary (needs sensitive access);
