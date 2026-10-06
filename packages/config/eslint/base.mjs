@@ -3,6 +3,8 @@ import importX from 'eslint-plugin-import-x';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
+import { quad } from './plugin.mjs';
+
 export const importOrderRule = [
   'error',
   {
@@ -42,5 +44,12 @@ export default tseslint.config(
   {
     plugins: { 'import-x': importX },
     rules: { 'import-x/order': importOrderRule },
+  },
+  {
+    plugins: { quad },
+    rules: {
+      'quad/no-raw-db-client': 'error',
+      'quad/no-with-platform-outside-platform': 'error',
+    },
   },
 );
