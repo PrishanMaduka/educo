@@ -14,3 +14,4 @@ packages/contracts/openapi.json
 .claude
 CLAUDE.md
 README.md
+packages/db/migrations

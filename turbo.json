@@ -15,7 +15,11 @@
     },
     "typecheck": { "dependsOn": ["^build"], "outputs": [] },
     "lint": { "outputs": [] },
-    "test": { "dependsOn": ["^build"], "outputs": ["coverage/**"] },
+    "test": {
+      "dependsOn": ["^build"],
+      "env": ["DATABASE_URL", "DATABASE_PLATFORM_URL", "DATABASE_OWNER_URL", "DATABASE_POOL_MAX"],
+      "outputs": ["coverage/**"]
+    },
     "test:api": { "dependsOn": ["^build"], "cache": false },
     "e2e": { "dependsOn": ["build"], "cache": false, "outputs": ["playwright-report/**"] },
     "tokens:build": {
