@@ -9,7 +9,7 @@ App: `apps/parent` (Flutter, Dart 3; packages in [02](02-architecture.md#parent-
 - **Fast.** Home loads from one call (`GET /family/home`) and is cached for offline use. It refreshes on pull-down and on realtime events.
 
 ## Navigation
-Tab bar: **Home**, **Moments** (unread badge), **Payments** (due badge), **Messages** (unread badge), **More**. The active tab is a coral pill with a small dot. Children's profiles are under More and in the "Profiles" chip after the child switcher on Home.
+Tab bar: **Home**, **Circle** (unread moments badge), **Payments** (due badge), **Messages** (unread badge), **More**. The active tab is a coral pill with a small dot. Children's profiles are under More and in the "Profiles" chip after the child switcher on Home.
 
 ## Start-up
 1. Splash in the school's brand colour, with its logo and name, and "powered by Quad".
@@ -29,7 +29,7 @@ Order from top to bottom:
    - "Needs a conversation" or "Keep an eye on": what we noticed with trends, why it matters, and the teacher's suggestion, with the actions **Book a 10-minute chat** and **Message {teacher}**.
    - Or "Improving" good news.
 6. **Needs you:** forms to sign, parents' evening to book, an exam timetable published, a report ready. Each opens its screen.
-7. **Right now in class:** subject, teacher, room, minutes left, a live progress bar, and what is next.
+7. **{child}'s day** (the day ring, see [12](12-moments-messaging.md#the-day-as-it-happens)): a ring of today's lessons from the start to the end of the school day, done lessons solid and upcoming ones faded, a "now" hand and event dots (arrived, registered, moment, lunch, bus). Beside it a LIVE headline ("Two of seven lessons done") and a sentence ("Arrived 07:42, registered present and a moment from Ms. Jayasinghe"); under it "Right now: Science with Ms. Fernando". Tap → **Day** screen: the larger ring, "So far today" timeline, and "Still to come".
 8. **School bus:** status line ("On the way · 7 min from home"), with LIVE when the bus is moving.
 9. **Fees:** "{amount} due · next due {date}" with Pay now, or "All fees paid".
 10. **Quick actions:**
@@ -42,21 +42,38 @@ Order from top to bottom:
 
 A floating round Ask Quad button sits at the bottom right and never covers content.
 
-## Moments tab
+## Circle tab
+The tab opens with a segmented control: **Moments · People · Learning**. The Moments segment shows its own unseen count when another segment is open. Moments are marked seen only while the Moments segment is showing. Specification of the parts: [12](12-moments-messaging.md#quad-circle).
+
+### Moments
+- At the top, on and after Friday 15:00: **Last week with {child}** → the recap screen (moments, skills noticed, days in school, learning tried at home, and "One thing for the weekend" with its own **We tried it**).
 - A header line such as "Ten moments from Amaya's and Kavindu's teachers this fortnight."
 - Filter chips: All children, then one per child.
 - The feed is grouped by day (Today, Yesterday, then the date). Each card has:
   - the teacher's avatar, name, role and class, and the time;
   - a photo, or a large praise or work tile;
   - the child tag ("Kavindu's class" for whole-class moments);
-  - a "New" marker until it has been seen.
+  - a "New" marker until it has been seen;
+  - a "Skill noticed" chip when the teacher tagged a skill.
 - Actions:
   - **Love**, which toggles a heart and shows a petal burst;
   - **Say thanks**, which sends a thank-you to the teacher. A sent bubble appears under the card, and the button turns into "Thanks sent".
 - New moments arrive live with an in-app banner ("Ms. Jayasinghe shared a moment of Amaya") and push.
 
+### People
+- Child chips, then a sentence: "Seven people look after Amaya at school, and three at home."
+- The orbit: the child in the centre, family on the inner ring (amber), school on the outer ring (indigo). Each node can be tapped. The SVG has a label naming everyone; the lists below are the accessible equivalent.
+- **At school:** name, role, and the "working on" line. Tap → **person screen** (role, working on with {child}, reply hours, their recent moments for this child; **Message**, **Say thanks**, **Ask for a 10-minute chat**).
+- **Family:** guardians, relatives (with "Invited" until they join) and pickup people. **Invite family** opens a sheet (name, relation, phone, children) that says what relatives can and can never see. Tapping a relative opens a sheet with **Remove from circle**.
+- **Photos of {child}:** the photo-consent setting (Class, Family only, No photos), also reachable from the child's profile.
+
+### Learning
+- Child chips, then a sentence: "This week Amaya's class is learning writing a postcard, fractions of a shape and how plants drink." with "Three ideas to try at home, about 30 minutes in all".
+- **This week in class:** one card per subject (subject pill, teacher, topic, why, a **Try at home · 15 min** box, and **We tried it**, which opens a sheet for an optional note; afterwards "Tried · Mon 18:20 · Ms. Jayasinghe can see this").
+- **What teachers noticed this term:** skill bars from the child's moments; each opens the moments with that skill.
+
 ## Children (profile)
-Overview of each child: class, class teacher, house, attendance, average, house points, and links to every child screen.
+Overview of each child: class, class teacher, house, attendance, average, house points, and links to every child screen, plus **Circle** (people) and **Photos** tiles.
 
 ## Child screens
 Each one opens with a one-sentence summary and works for both children.
@@ -81,7 +98,7 @@ Each one opens with a one-sentence summary and works for both children.
 - **Canteen wallet:** balance, top-up amounts, daily limit, recent purchases.
 
 ## Messages
-Threads with teachers and offices: unread first, swipe for actions (mark read, mute), a new message to a staff member from the child's contacts, quick replies, "Seen" receipts and a typing indicator. A school bulletins section is included.
+Threads with teachers and offices: unread first, swipe for actions (mark read, mute), a new message to a staff member from the child's contacts, quick replies, "Seen" receipts and a typing indicator. Under the composer, a quiet-hours line (see [12](12-moments-messaging.md#good-relationships-by-design)). A school bulletins section is included.
 
 ## School life (from More and from to-dos)
 - **Parents' evening:**
@@ -115,7 +132,7 @@ Threads with teachers and offices: unread first, swipe for actions (mark read, m
 - Sign out.
 
 ## Notifications
-- Push categories map to the preferences above. Each push deep-links to its screen (`quad://moments/{id}`, `quad://pay/{invoiceId}`).
+- Push categories map to the preferences above. Each push deep-links to its screen (`quad://moments/{id}`, `quad://circle/learning`, `quad://circle/recap/{week}`, `quad://pay/{invoiceId}`).
 - There is also an in-app notification list.
 - Pushes go to every signed-in device of the guardian. A bounced token is removed.
 

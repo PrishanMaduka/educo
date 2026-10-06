@@ -37,7 +37,7 @@ Teachers share small good things, and parents see them straight away.
 - Limits: 20 moments per teacher per day.
 
 ### Parent side
-See [09](09-parent-app.md#moments-tab). Who receives a moment: the guardians of the selected student, or of every student in the class for a whole-class moment. A thank-you creates a message in the thread with that teacher ("Thank you, Ms. Jayasinghe! …"), and the teacher also sees it on the moment.
+See [09](09-parent-app.md#moments). Who receives a moment: the guardians of the selected student, or of every student in the class for a whole-class moment. A thank-you creates a message in the thread with that teacher ("Thank you, Ms. Jayasinghe! …"), and the teacher also sees it on the moment.
 
 ## The day, as it happens
 The parent's Home shows a **day ring** for the selected child: today's lessons as arcs from the start to the end of the school day (done lessons solid, upcoming faded), a "now" hand, and event dots. Events come from records the school already keeps:

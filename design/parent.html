@@ -798,6 +798,76 @@ button.it:active{background:var(--surface-2)}
 .ms-sun{transform-box:fill-box;transform-origin:center;animation:msRise 1.4s cubic-bezier(.2,.8,.2,1) backwards}
 @keyframes msRise{from{transform:translateY(40px);opacity:0}}
 @media (prefers-reduced-motion:reduce){.ms-sun{animation:none}}
+
+/* Quad Circle: segments, skills, people orbit, family, photos, learning, the day ring, recap, quiet hours */
+.sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.circ-seg{margin-top:-2px}
+.circ-seg button{display:inline-flex;align-items:center;justify-content:center;gap:5px}
+.seg-n{display:inline-grid;place-items:center;min-width:17px;height:17px;padding:0 5px;border-radius:9px;background:var(--bad);color:var(--surface);font-size:10px;font-weight:800}
+.mo-sk{display:flex;align-items:center;gap:8px;margin:10px 14px 0;font-size:12px;font-weight:700;color:var(--ink-3)}
+.mo-skill,.sk-chip{display:inline-flex;align-items:center;gap:5px;height:26px;padding:0 10px;border-radius:999px;background:color-mix(in srgb,var(--sk) 14%,var(--surface));color:color-mix(in srgb,var(--sk) 70%,var(--ink));border:1px solid color-mix(in srgb,var(--sk) 30%,transparent);font-size:12px;font-weight:800;white-space:nowrap}
+.sh-t{font:800 21px/1.2 var(--f-display);letter-spacing:-.015em}
+.sh-p{margin:0;font-size:13.5px;color:var(--ink-2);line-height:1.5}
+.recap-c{display:flex;align-items:center;gap:12px;padding:14px;width:100%;text-align:left;color:var(--ink);background:radial-gradient(120% 130% at 100% 0%,color-mix(in srgb,var(--c4) 20%,transparent),transparent 60%),var(--surface)}
+.recap-c .m{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.recap-c b{font:800 16px/1.25 var(--f-display)}.recap-c small{font-size:12.5px;color:var(--ink-3);line-height:1.4}
+.orbit{padding:8px 8px 14px;display:flex;flex-direction:column;align-items:center;gap:6px;background:radial-gradient(55% 55% at 50% 48%,color-mix(in srgb,var(--c3) 11%,transparent),transparent 72%),var(--surface)}
+.orbit svg{width:100%;max-width:340px;height:auto;display:block}
+.orbit .nd{cursor:pointer}.orbit .nd:hover circle{stroke-width:3}
+.orbit .legend{justify-content:center}.orbit .legend i{border-radius:50%}
+.fam-l{list-style:none;margin:0;padding:12px 14px;display:flex;flex-direction:column;gap:9px;border-radius:14px;background:var(--surface-2);border:1px solid var(--line)}
+.fam-l li{display:flex;gap:10px;align-items:flex-start;font-size:13.5px;line-height:1.4;color:var(--ink-2)}
+.fam-l li svg{flex:none;margin-top:1px}.fam-l .y svg{color:var(--good)}.fam-l .n svg{color:var(--bad)}
+.fam-h{display:flex;gap:12px;align-items:center}.fam-h .m{flex:1;min-width:0}.fam-h small{display:block;color:var(--ink-3);font-size:12.5px;font-weight:600}
+.fam-kids{display:flex;gap:16px;flex-wrap:wrap}
+.btn.danger{color:var(--bad)}
+.ph-opts{display:flex;flex-direction:column;gap:8px;padding:10px}
+.ph-opts .paycard{align-items:flex-start}.ph-opts .paycard .m{flex:1;min-width:0}.ph-opts .paycard b{display:block;font-size:14.5px}.ph-opts .paycard small{display:block;color:var(--ink-3);font-size:12.5px;line-height:1.45;margin-top:2px}
+.ph-opts .paycard .radio{margin-top:9px}
+.pp-hero .pp-work{padding:12px 14px;border-radius:14px;background:var(--surface-2);border:1px solid var(--line)}
+.pp-work p{margin:4px 0 0;font-size:14.5px;line-height:1.45;font-weight:600;color:var(--ink)}
+.ppl .tx small{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.pp-acts{display:flex;flex-direction:column;gap:8px}
+.pp-hrs{display:inline-flex;align-items:center;gap:5px}
+.lrn{padding:16px;display:flex;flex-direction:column;gap:10px}
+.lrn-h{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.lrn-s{display:inline-flex;align-items:center;height:24px;padding:0 10px;border-radius:999px;font-size:11.5px;font-weight:800;letter-spacing:.04em;background:color-mix(in srgb,var(--lc) 15%,var(--surface));color:color-mix(in srgb,var(--lc) 72%,var(--ink))}
+.lrn-h small{font-size:12px;color:var(--ink-3);font-weight:600}
+.lrn-t{font:800 18px/1.25 var(--f-display);letter-spacing:-.015em}
+.lrn>p{margin:0;font-size:13.5px;line-height:1.5;color:var(--ink-2)}
+.lrn-try{display:flex;gap:10px;align-items:flex-start;padding:12px;border-radius:14px;background:color-mix(in srgb,var(--c5) 9%,var(--surface));border:1px dashed color-mix(in srgb,var(--c5) 45%,var(--line))}
+.lrn-try .ico{width:32px;height:32px}.lrn-try>div{min-width:0}
+.lrn-try p{margin:3px 0 0;font-size:14px;line-height:1.45;font-weight:600;color:var(--ink)}
+.lrn-done{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:14px;background:var(--good-soft);color:var(--ink-2);font-size:12.5px;line-height:1.4}
+.lrn-done svg{color:var(--good);flex:none;margin-top:1px}.lrn-done b{display:block;color:var(--ink);font-size:13.5px}.lrn-done i{display:block;font-style:normal;color:var(--ink)}
+.lrn .btn{align-self:flex-start}
+.sk-row{display:grid;grid-template-columns:minmax(0,max-content) minmax(40px,1fr) 20px 16px;align-items:center;gap:10px;padding:11px 16px;width:100%;text-align:left;color:var(--ink)}
+.sk-row+.sk-row{border-top:1px dashed var(--line)}
+.sk-row .bar{min-width:0}
+.sk-row b{font:800 15px var(--f-display);text-align:right}.sk-row>svg{color:var(--ink-3)}
+.sk-chips{display:flex;gap:6px;flex-wrap:wrap}
+.dr svg{display:block;width:100%;height:100%}
+.dayc{display:grid;grid-template-columns:112px minmax(0,1fr);gap:4px 14px;align-items:center;padding:14px 16px;text-align:left;width:100%;color:var(--ink)}
+.dayc .dr{width:112px;height:112px}
+.dayc .m{display:flex;flex-direction:column;gap:5px;min-width:0}
+.dayc .m b{font:800 17px/1.25 var(--f-display);letter-spacing:-.01em}
+.dayc .m small{font-size:12.5px;color:var(--ink-3);line-height:1.4;font-weight:600}
+.dayc .top{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink-3);font-weight:700}
+.dev{display:flex;flex-wrap:wrap;gap:4px}
+.dev span{width:22px;height:22px;border-radius:50%;display:grid;place-items:center}
+.dayc-now{grid-column:1/-1;display:flex;align-items:center;gap:8px;margin-top:8px;padding:9px 12px;border-radius:12px;background:var(--surface-2);font-size:13.5px;color:var(--ink-2);min-width:0}
+.dayc-now span{flex:1;min-width:0}.dayc-now b{color:var(--ink)}.dayc-now svg{flex:none;color:var(--ink-3)}
+.day-big{padding:14px 16px 16px;display:flex;flex-direction:column;align-items:center;gap:12px}
+.day-big .dr{width:min(100%,270px);aspect-ratio:1}
+.day-demo{width:100%;display:flex;flex-direction:column;gap:6px}
+.day-demo label{font-size:12.5px;font-weight:700;color:var(--ink-3);display:flex;justify-content:space-between;gap:8px}
+.day-demo input{width:100%;accent-color:var(--brand)}
+.tl-c .ev-s{display:block;margin-top:3px;color:var(--ink-2);font-size:12.5px;line-height:1.4}
+.tl-i.ev .tl-c{background:var(--surface);border-style:dashed}
+.tl-i.ev .tl-d::after{background:var(--lc)}
+.qn{display:flex;align-items:center;gap:7px;margin:0;padding:0 18px 20px;background:var(--surface);font-size:12px;color:var(--ink-3);font-weight:600;line-height:1.35}
+.qn svg{flex:none;color:var(--c3)}
+.composer:has(+.qn){padding-bottom:8px}
+.dchip.tm{width:56px;padding:9px 0}.dchip.tm b{font-size:14.5px;letter-spacing:0}
 </style>
 </head>
 <body>
@@ -851,7 +921,11 @@ button.it:active{background:var(--surface-2)}
     </div>
     <div class="group"><b>Jump to</b>
       <button class="pbtn" data-act="jump" data-to="askq"><span>Ask Quad (or press /)</span>→</button>
-      <button class="pbtn" data-act="jump" data-to="moments"><span>Moments from teachers</span>→</button>
+      <button class="pbtn" data-act="jump" data-to="moments"><span>Circle · moments from teachers</span>→</button>
+      <button class="pbtn" data-act="jump" data-to="people"><span>Circle · everyone around Amaya</span>→</button>
+      <button class="pbtn" data-act="jump" data-to="learning"><span>Circle · this week in class</span>→</button>
+      <button class="pbtn" data-act="jump" data-to="day"><span>Amaya’s day, as it happens</span>→</button>
+      <button class="pbtn" data-act="jump" data-to="quiet"><span>Evening message · quiet hours</span>→</button>
       <button class="pbtn" data-act="jump" data-to="doing"><span>How Kavindu is doing · early warning</span>→</button>
       <button class="pbtn" data-act="jump" data-to="stories"><span>School stories</span>→</button>
       <button class="pbtn" data-act="jump" data-to="bus"><span>Live bus tracker</span>→</button>
@@ -905,6 +979,7 @@ const P = {
   image:'<rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5-9 9"/>',
   up:'<path d="M7 17 17 7M9 7h8v8"/>', down:'<path d="M7 7l10 10M17 9v8H9"/>', flat:'<path d="M5 12h14M14 7l5 5-5 5"/>',
   leaf:'<path d="M5 19c0-9 6-14 15-14 0 9-5 15-14 15"/><path d="M5 19c3-4 6-7 10-9"/>', copy:'<rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/>',
+  orbit:'<circle cx="12" cy="12" r="2.8"/><path d="M19.6 7.5A9 9 0 1 1 15 3.6"/><circle cx="19" cy="4.8" r="1.8" fill="currentColor" stroke="none"/>',
   smile:'<circle cx="12" cy="12" r="9"/><path d="M8.5 14.5c1.8 2 5.2 2 7 0M9 9.5h.01M15 9.5h.01"/>', trophy:'<path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/>'
 };
 const ic = (n, s=20, w=1.9) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${P[n]||''}</svg>`;
@@ -981,7 +1056,7 @@ const S = {fAns: {},
   pk:{who:0, kids:[true, true], ver:1, expires:Date.now() + 300000},
   pickers:[['Dilhani Perera','You'],['Ruwan Perera','Father'],['Kamala Perera','Grandmother']],
   wallet:[
-    {bal:2350, limit:800, spent:[['Chicken fried rice','Mon · 12:10',450],['Mango juice','Mon · 10:05',150],['Vegetable roti and tea','Fri · 12:20',380]]},
+    {bal:2350, limit:800, spent:[['Chicken fried rice','Mon · 12:25',450],['Mango juice','Mon · 10:05',150],['Vegetable roti and tea','Fri · 12:20',380]]},
     {bal:640, limit:1200, spent:[['Chicken kottu','Mon · 12:30',650],['Fruit salad','Fri · 10:10',200],['Fish bun and milk','Thu · 10:15',260]]}
   ]
 };
@@ -996,7 +1071,7 @@ const sec = (t, link='', act='') => `<div class="sec-h"><h2>${t}</h2>${link?`<bu
 /* ---------- Screens ---------- */
 const SCR = {};
 const LIVE = [
-  {s:'Science', who:'Ms. Jayasinghe', room:'Lab 1', c:'var(--c2)', icon:'star', next:'English at 10:00'},
+  {s:'Science', who:'Ms. Fernando', room:'Lab 1', c:'var(--c2)', icon:'star', next:'English at 10:00'},
   {s:'Mathematics', who:'Mr. Mendis', room:'Room 9B', c:'var(--c1)', icon:'chart', next:'Physics at 10:00'}
 ];
 const sg = c => `linear-gradient(160deg,color-mix(in srgb,var(--${c}) 88%,var(--deep)),color-mix(in srgb,var(--${c}) 30%,var(--deep)))`;
@@ -1075,14 +1150,14 @@ const ART_L = {mural:'paint on the canteen wall', science:'a flask with bubbles'
 const momArt = (a, cls = '') => a && ART[a] ? `<svg class="mo-art ${cls}" viewBox="0 0 160 120" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Illustration: ${ART_L[a]}">${ART[a]()}</svg>` : '';
 function momSeed() { const A = acadText('Grade 4 – Emerald'), K = acadText('Grade 9 – Sapphire');
   return [
-    {id:'m-a1', by:'Ms. Jayasinghe', role:'Class teacher', cls:A, kid:'Amaya', kind:'photo', art:'mural', text:'Amaya painted the canteen mural today! She chose the colours for the paddy fields herself.', at:'08:55', date:'2026-10-05'},
-    {id:'m-k1', by:'Mr. Mendis', role:'Form tutor', cls:K, kid:'Kavindu', kind:'praise', art:'', text:'Kavindu helped two classmates fix their Python projects this morning. A real team player.', at:'08:30', date:'2026-10-05'},
-    {id:'m-a2', by:'Mr. Herath', role:'Physical Ed.', cls:A, kid:'Amaya', kind:'photo', art:'sports', text:'Amaya swam her first full length of butterfly. The biggest smile in the pool!', at:'Friday', date:'2026-10-02'},
-    {id:'m-k2', by:'Mrs. Gunawardena', role:'Physics', cls:K, kid:'Kavindu', kind:'work', art:'science', text:'Kavindu’s pendulum write-up was the clearest in the class: labelled graphs, error bars and a thoughtful conclusion.', at:'Friday', date:'2026-10-02'},
-    {id:'m-a3', by:'Ms. Silva', role:'Music', cls:A, kid:'', kind:'photo', art:'music', text:'Emerald class played their first round on the recorder today. A lovely, noisy morning!', at:'Thursday', date:'2026-10-01'},
-    {id:'m-k3', by:'Mr. Mendis', role:'Mathematics', cls:K, kid:'', kind:'photo', art:'maths', text:'Sapphire class built a giant proof of Pythagoras out of paper squares.', at:'Wednesday', date:'2026-09-30'},
-    {id:'m-a4', by:'Ms. Jayasinghe', role:'English', cls:A, kid:'Amaya', kind:'work', art:'reading', text:'Amaya’s book review of Charlotte’s Web made the whole class want to read it.', at:'Tuesday', date:'2026-09-29'},
-    {id:'m-a5', by:'Ms. Jayasinghe', role:'Class teacher', cls:A, kid:'', kind:'photo', art:'garden', text:'Our class herb garden has its first mint leaves. Everyone took a turn with the watering can.', at:'Monday', date:'2026-09-28'}
+    {id:'m-a1', by:'Ms. Jayasinghe', role:'Class teacher', cls:A, kid:'Amaya', kind:'photo', art:'mural', text:'Amaya painted the canteen mural today! She chose the colours for the paddy fields herself.', at:'08:55', date:'2026-10-05', skill:'Creativity'},
+    {id:'m-k1', by:'Mr. Mendis', role:'Form tutor', cls:K, kid:'Kavindu', kind:'praise', art:'', text:'Kavindu helped two classmates fix their Python projects this morning. A real team player.', at:'08:30', date:'2026-10-05', skill:'Teamwork'},
+    {id:'m-a2', by:'Mr. Herath', role:'Physical Ed.', cls:A, kid:'Amaya', kind:'photo', art:'sports', text:'Amaya swam her first full length of butterfly. The biggest smile in the pool!', at:'Friday', date:'2026-10-02', skill:'Perseverance'},
+    {id:'m-k2', by:'Mrs. Gunawardena', role:'Physics', cls:K, kid:'Kavindu', kind:'work', art:'science', text:'Kavindu’s pendulum write-up was the clearest in the class: labelled graphs, error bars and a thoughtful conclusion.', at:'Friday', date:'2026-10-02', skill:'Problem solving'},
+    {id:'m-a3', by:'Ms. Silva', role:'Music', cls:A, kid:'', kind:'photo', art:'music', text:'Emerald class played their first round on the recorder today. A lovely, noisy morning!', at:'Thursday', date:'2026-10-01', skill:''},
+    {id:'m-k3', by:'Mr. Mendis', role:'Mathematics', cls:K, kid:'', kind:'photo', art:'maths', text:'Sapphire class built a giant proof of Pythagoras out of paper squares.', at:'Wednesday', date:'2026-09-30', skill:'Curiosity'},
+    {id:'m-a4', by:'Ms. Jayasinghe', role:'English', cls:A, kid:'Amaya', kind:'work', art:'reading', text:'Amaya’s book review of Charlotte’s Web made the whole class want to read it.', at:'Tuesday', date:'2026-09-29', skill:'Reading'},
+    {id:'m-a5', by:'Ms. Jayasinghe', role:'Class teacher', cls:A, kid:'', kind:'photo', art:'garden', text:'Our class herb garden has its first mint leaves. Everyone took a turn with the watering can.', at:'Monday', date:'2026-09-28', skill:''}
   ]; }
 function moments() { let m = lsGetP('quad-moments', null); if (!Array.isArray(m)) { m = momSeed(); lsSetP('quad-moments', m); } return m.filter(x => x && x.id); }
 const momKids = m => KIDS.filter(k => m.cls === kidClass(k) && (!m.kid || m.kid === k.first));
@@ -1101,6 +1176,7 @@ function momCard(m) {
     : `<div class="mo-pic">${momArt(m.art || 'garden')}${tag}</div><p class="mo-tx">${esc(m.text)}</p>`;
   return `<article class="card mo ${fresh ? 'fresh' : ''}" data-mid="${esc(m.id)}"><div class="mo-h">${av(m.by, avc(m.by), 'sm')}<div class="m"><b>${esc(m.by)}</b><small>${esc(m.role)} · ${esc(m.cls)}</small></div><span class="mo-at">${fresh ? '<i class="mo-new">New</i>' : ''}${esc(m.at)}</span></div>
     ${body}
+    ${m.skill ? `<div class="mo-sk">Skill noticed ${skChip(m.skill)}</div>` : ''}
     <div class="mo-f"><button class="mo-heart ${r.heart ? 'on' : ''}" data-act="momHeart" data-id="${esc(m.id)}" aria-pressed="${!!r.heart}" aria-label="${r.heart ? 'Loved' : 'Love this moment'}">${ic(r.heart ? 'heartF' : 'heart', 19, 2)}<span>${r.heart ? 'Loved' : 'Love'}</span></button>
       <button class="thx ${r.thanks ? 'done' : ''}" data-act="momThanks" data-id="${esc(m.id)}" ${r.thanks ? 'aria-disabled="true"' : ''}>${ic(r.thanks ? 'check' : 'smile', 15, 2.2)}${r.thanks ? 'Thanks sent' : 'Say thanks'}</button></div>
     ${r.thanks ? `<div class="mo-sent">${ic('send', 13)}<span>You: “${esc(r.thanks)}”</span><small>${esc(r.at || '')}</small></div>` : ''}</article>`; }
@@ -1112,14 +1188,16 @@ function momThank(id) { const m = moments().find(x => x.id === id); if (!m) retu
   if (isT) { const t = threadFor(k); t.msgs.push({me:true, t:text, at:'Now'});
     setTimeout(() => { t.msgs.push({me:false, t:`You’re very welcome! ${k.first} made our day too.`, at:'Now'}); t.unread++; if (['home', 'moments'].includes(current().to)) rerender(); else renderTabbar(); }, 2600); }
   return m; }
-SCR.moments = () => {
+SCR.moments = () => { const cs = S.circ || 'moments';
+  if (cs === 'people') return {big:'Circle', body: circSeg(cs) + circPeople()};
+  if (cs === 'learning') return {big:'Circle', body: circSeg(cs) + circLearning()};
   if (!S.momVisit) { S.momVisit = true; S.momFresh = momUnseen().map(m => m.id); }
   lsSetP('quad-parent-moments-seen', moments().map(m => m.id));
   const f = S.momF || 'all', all = moments().filter(m => momKids(m).length), list = f === 'all' ? all : all.filter(m => momKids(m).includes(KIDS[+f]));
   const fresh = list.filter(m => S.momFresh.includes(m.id)), names = [...new Set(fresh.map(m => m.by))];
   const whose = f === 'all' ? 'Amaya’s and Kavindu’s' : KIDS[+f].first + '’s';
   const days = [...new Set(list.map(m => m.date))];
-  return { big:'Moments', body: `${sum(fresh.length ? `<b>${cap(plural(fresh.length, 'new moment'))}</b> from ${names.join(' and ')}.` : `${cap(plural(list.length, 'moment'))} from ${whose} teachers this fortnight.`, 'Photos and praise shared by teachers as they happen. Tap the heart or say thanks.')}
+  return { big:'Circle', body: `${circSeg(cs)}${recapCard()}${sum(fresh.length ? `<b>${cap(plural(fresh.length, 'new moment'))}</b> from ${names.join(' and ')}.` : `${cap(plural(list.length, 'moment'))} from ${whose} teachers this fortnight.`, 'Photos and praise shared by teachers as they happen. Tap the heart or say thanks.')}
   <div class="chips" role="tablist" aria-label="Show moments for">${[['all', 'All children', ''], ...KIDS.map((k, i) => [String(i), k.first, av(k.name, k.color, 'xs')])].map(([v, l, a]) => `<button class="chip ${f === v ? 'on' : ''}" role="tab" aria-selected="${f === v}" data-act="momF" data-v="${v}">${a}${l}</button>`).join('')}</div>
   ${list.length ? days.map(d => `${secX(momDay(d), plural(list.filter(m => m.date === d).length, 'moment'))}${list.filter(m => m.date === d).map(momCard).join('')}`).join('') : empty(`No moments for ${f === 'all' ? 'your children' : KIDS[+f].first} yet.`, 'When a teacher shares a photo or a line of praise, it appears here.')}
   <p class="note">Moments are shared by ${esc(SCHOOL.short)} staff and only parents of the class can see them.</p>` }; };
@@ -1127,8 +1205,217 @@ let MOM_IDS = new Set(moments().map(m => m.id));
 function momentsChanged() {
   const list = moments(), fresh = list.filter(m => !MOM_IDS.has(m.id) && momKids(m).length); MOM_IDS = new Set(list.map(m => m.id));
   if (S.momVisit) S.momFresh = [...(S.momFresh || []), ...fresh.map(m => m.id)];
-  if (fresh.length) { const m = fresh[0]; showPush(`${m.by} shared a moment of ${m.kid || momWho(m).replace('’s class', '’s class')}`, esc(m.text), () => { S.tab = 'moments'; S.stack = []; S.momF = 'all'; }); }
-  if (['home', 'moments'].includes(current().to)) rerender(); else renderTabbar(); }
+  if (fresh.length) { const m = fresh[0]; showPush(`${m.by} shared a moment of ${m.kid || momWho(m).replace('’s class', '’s class')}`, esc(m.text), () => { S.tab = 'moments'; S.circ = 'moments'; S.stack = []; S.momF = 'all'; }); }
+  if (CIRC_LIVE.includes(current().to)) rerender(); else renderTabbar(); }
+/* ---------- Quad Circle: everyone around the child, family, photos, learning, the day as it happens ---------- */
+const CIRC_LIVE = ['home', 'moments', 'person', 'skill', 'recap', 'day'];
+const listJoin = a => a.length < 2 ? a.join('') : a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1];
+const objP = k => k.he === 'she' ? 'her' : 'him';
+const SKILLS = {Confidence:'var(--c1)', Kindness:'var(--c5)', Teamwork:'var(--c2)', Creativity:'var(--c3)', Curiosity:'var(--c4)', Perseverance:'var(--good)', Reading:'var(--info)', 'Problem solving':'var(--warn)'};
+const skCol = s => SKILLS[s] || 'var(--c3)';
+const skChip = s => `<span class="mo-skill" style="--sk:${skCol(s)}">${ic('spark', 12)}${esc(s)}</span>`;
+const skillTally = k => { const t = {}; momFor(k).forEach(m => { if (m.skill) t[m.skill] = (t[m.skill] || 0) + 1; }); return Object.entries(t).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])); };
+const circSeg = cs => { const mn = cs === 'moments' ? 0 : momUnseen().length;
+  return `<div class="seg circ-seg" role="tablist" aria-label="Circle">${[['moments', 'Moments'], ['people', 'People'], ['learning', 'Learning']].map(([v, l]) => `<button role="tab" aria-selected="${cs === v}" class="${cs === v ? 'on' : ''}" data-act="circ" data-v="${v}">${l}${v === 'moments' && mn ? `<span class="seg-n" aria-label="${mn} new">${mn}</span>` : ''}</button>`).join('')}</div>`; };
+/* "This week in class" posts from the staff portal (shared key quad-learning) */
+function learnSeed() { const A = acadText('Grade 4 – Emerald'), K = acadText('Grade 9 – Sapphire'), w = '2026-10-05';
+  return [
+    {id:'l-a1', cls:A, subj:'English', by:'Ms. Jayasinghe', role:'Class teacher', week:w, topic:'Writing a postcard', why:'We are learning to write to a real reader, with a greeting, three news sentences and a sign-off.', tryHome:'Write a postcard together to a grandparent and post it this week.', mins:15},
+    {id:'l-a2', cls:A, subj:'Maths', by:'Mr. Perera', role:'Mathematics', week:w, topic:'Fractions of a shape', why:'Halves, quarters and eighths, using paper folding and pizza drawings.', tryHome:'Cut a roti or sandwich into quarters and ask which pieces make a half.', mins:5},
+    {id:'l-a3', cls:A, subj:'Science', by:'Ms. Fernando', role:'Science', week:w, topic:'How plants drink', why:'We put celery in coloured water to watch water travel up the stem.', tryHome:'Find three plants at home and guess which one needs the most water.', mins:10},
+    {id:'l-k1', cls:K, subj:'Mathematics', by:'Mr. Mendis', role:'Form tutor', week:w, topic:'Simultaneous equations', why:'Solving two equations together by elimination, then checking on a graph.', tryHome:'Ask Kavindu to explain the phone-plan problem from Tuesday in two minutes.', mins:5},
+    {id:'l-k2', cls:K, subj:'Physics', by:'Mrs. Gunawardena', role:'Physics', week:w, topic:'Energy transfer', why:'Where energy goes when a kettle boils, and why some is wasted.', tryHome:'Read the electricity bill together and spot the month you used most.', mins:10}
+  ]; }
+function learning() { let l = lsGetP('quad-learning', null); if (!Array.isArray(l)) { l = learnSeed(); lsSetP('quad-learning', l); } return l.filter(x => x && x.id); }
+const learnFor = k => { const ls = learning().filter(l => l.cls === kidClass(k)), wk = ls.reduce((a, l) => l.week > a ? l.week : a, ''); return ls.filter(l => l.week === wk); };
+const triedBy = (l, k) => ((lsGetP('quad-learning-tried', {}))[l.id] || {})[k.first];
+const subjCol = (k, subj) => { const i = k.subjects.findIndex(s => s[0] === subj || (subj === 'Maths' && s[0] === 'Mathematics')); return i < 0 ? 'var(--c3)' : TT_COL[i % TT_COL.length]; };
+/* Who may see photos of each child (shared key quad-photo-consent) */
+const photoOf = k => (lsGetP('quad-photo-consent', {}))[k.first] || 'class';
+const photoOpts = k => [
+  ['class', 'Class parents can see them', `Photos that include ${k.first} can be shared with the parents in ${k.his} class. This is the usual setting.`, `Photos of ${k.first} can be shared with the parents in ${k.his} class.`, 'kids', 't-blue', 'Class parents'],
+  ['family', 'Only our family', `Teachers can still share photos of ${k.first}, but only you, Ruwan and relatives in your circle will see them.`, `Only ${k.first}’s family will see photos of ${objP(k)}.`, 'heart', 't-lotus', 'Only our family'],
+  ['none', `No photos of ${k.first}`, `Teachers won’t tag ${k.first} in photos. You’ll still get praise and work moments in words.`, `Teachers won’t share photos of ${k.first}.`, 'lock', 't-violet', 'No photos']];
+/* Quiet hours set by the school (shared key quad-quiet) and a demo clock so evenings can be shown */
+const quiet = () => ({on:true, from:'18:00', to:'07:00', weekends:true, ...lsGetP('quad-quiet', {})});
+const demoMin = () => S.demoT != null ? S.demoT : Math.floor(simSec() / 60) % 1440;
+const inQuiet = (m = demoMin()) => { const q = quiet(), f = toMinP(q.from), t = toMinP(q.to); return !!q.on && (f > t ? m >= f || m < t : m >= f && m < t); };
+const shortName = n => String(n).replace(/^(Ms|Mr|Mrs|Dr)\. \S+ /, '$1. ');
+function quietLine(t) { const q = quiet(), who = shortName(t.from), m = demoMin();
+  return inQuiet(m) ? `Teachers read messages ${q.to}–${q.from}. Sent now, it reaches ${who} at ${q.to} ${m >= toMinP(q.from) ? 'tomorrow' : 'this morning'}.` : `${who} usually replies within the school day.`; }
+const replyHrs = P => P.nurse ? 'In the sick bay 08:00–15:00' : P.care ? 'Free on Thursdays, 08:00–14:00' : quiet().on ? `Reads messages ${quiet().to}–${quiet().from} on school days` : 'Usually replies within the school day';
+/* Everyone around each child at school */
+const PEOPLE_C = {
+  'CIS-24100': [
+    {key:'ct', name:'Ms. Nadeesha Jayasinghe', short:'Ms. Jayasinghe', role:'Class teacher · English', as:'class teacher', subj:['English'], ct:true, works:'Writing for a real reader. This week it’s a postcard to someone Amaya loves.'},
+    {key:'maths', name:'Mr. Dinesh Perera', short:'Mr. Perera', role:'Mathematics', as:'Maths teacher', subj:['Mathematics'], works:'Fractions of a shape, with paper folding and pizza drawings.'},
+    {key:'sci', name:'Ms. Ruvini Fernando', short:'Ms. Fernando', role:'Science', as:'Science teacher', subj:['Science'], works:'How plants drink: the celery experiment, and asking good questions.'},
+    {key:'art', name:'Ms. Ishani De Alwis', short:'Ms. De Alwis', role:'Art', as:'Art teacher', subj:['Art'], works:'The paddy-field mural for the new canteen wall.'},
+    {key:'pe', name:'Mr. Chaminda Herath', short:'Mr. Herath', role:'PE and swimming', as:'PE and swimming teacher', subj:['PE'], works:'Butterfly stroke, after her first full length on Friday.'},
+    {key:'music', name:'Ms. Malsha Silva', short:'Ms. Silva', role:'Music', as:'Music teacher', subj:['Music'], works:'Recorder rounds for the end-of-term concert.'},
+    {key:'nurse', name:'Ms. Shiromi Dias', short:'Nurse Dias', role:'School nurse', as:'school nurse', subj:[], nurse:true, works:'Keeps Amaya’s care plan up to date and the sick bay ready.'}],
+  'CIS-23187': [
+    {key:'ct', name:'Mr. Ruwan Mendis', short:'Mr. Mendis', role:'Form tutor · Mathematics', as:'form tutor and Maths teacher', subj:['Mathematics'], ct:true, works:'Simultaneous equations, and a simple weekly plan for History coursework.'},
+    {key:'phys', name:'Mrs. Dilrukshi Gunawardena', short:'Mrs. Gunawardena', role:'Physics', as:'Physics teacher', subj:['Physics'], works:'Energy transfer, after a very clear pendulum write-up.'},
+    {key:'ict', name:'Mr. Asanka Dissanayake', short:'Mr. Dissanayake', role:'ICT', as:'ICT teacher', subj:['ICT'], works:'The database design task, building on his Python project.'},
+    {key:'hist', name:'Ms. Tharushi Abeysekera', short:'Ms. Abeysekera', role:'History', as:'History teacher', subj:['History'], works:'The source analysis essay, due on Wednesday.'},
+    {key:'coach', name:'Mr. Chaminda Herath', short:'Mr. Herath', role:'Swimming coach', as:'swimming coach', subj:[], works:'Under-14 squad training, Mondays at 6:30 am.'},
+    {key:'couns', name:'Mrs. Anoma Fonseka', short:'Mrs. Fonseka', role:'School counsellor', as:'school counsellor', subj:[], care:true, works:'Here on Thursdays if Kavindu would like to talk about a busy term.'},
+    {key:'nurse', name:'Ms. Shiromi Dias', short:'Nurse Dias', role:'School nurse', as:'school nurse', subj:[], nurse:true, works:'Looks after the sick bay and first aid on sports days.'}]
+};
+const schoolPeople = k => PEOPLE_C[k.id] || [];
+const personOf = (k, key) => schoolPeople(k).find(P => P.key === key);
+function personThread(k, P) { if (P.ct) return threadFor(k); let t = S.threads.find(x => x.from === P.name);
+  if (!t) { t = {id: Math.max(0, ...S.threads.map(x => x.id)) + 1, from: P.name, role: `${P.role} · ${k.first}`, unread: 0, msgs: []}; S.threads.unshift(t); } return t; }
+/* Family circle: relatives see moments and can heart them, nothing else (shared key quad-family-circle) */
+const FAM_SEED = [{id:'f1', name:'Kamala Perera', rel:'Grandmother', phone:'+94 77 *** 4410', kids:['Amaya','Kavindu'], sees:'moments', status:'joined', at:'2026-09-14'}];
+function famCircle() { let f = lsGetP('quad-family-circle', null); if (!Array.isArray(f)) { f = FAM_SEED; lsSetP('quad-family-circle', f); } return f.filter(x => x && x.id); }
+function familyOf(k) { const out = [{key:'me', name:'Dilhani Perera', rel:'Mum · you', kind:'parent'}, {key:'dad', name:'Ruwan Perera', rel:'Dad', kind:'parent'}];
+  famCircle().filter(f => (f.kids || []).includes(k.first)).forEach(f => out.push({key:'f:' + f.id, id:f.id, name:f.name, rel:f.rel, kind:'relative', status:f.status, kids:f.kids, at:f.at}));
+  S.pickers.forEach(([n, r], i) => { if (!out.some(x => x.name === n)) out.push({key:'pk:' + i, name:n, rel:`${r} · pickup`, kind:'pickup'}); });
+  return out; }
+const NEVER = 'messages, fees, results, attendance or health';
+/* The orbit: the child in the middle, family close in, the school around them */
+function orbitSvg(k) { const sc = schoolPeople(k), fam = familyOf(k), cx = 170, cy = 152, R1 = 122, R2 = 64, ini = n => n.replace(/^(Ms|Mr|Mrs|Dr|Nurse)\.? /, '').split(' ').map(w => w[0]).slice(0, 2).join('');
+  const pos = (n, R, off) => Array.from({length:n}, (_, i) => { const a = (off + i * 360 / n - 90) * Math.PI / 180; return [cx + R * Math.cos(a), cy + R * Math.sin(a)]; });
+  const node = ([x, y], name, label, col, r, act, R) => `<g class="nd" data-act="${act[0]}" data-to="${act[1] || ''}" data-key="${esc(act[2])}"><line x1="${cx}" y1="${cy}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="${col}" stroke-opacity=".22" stroke-width="1.5"/><circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r}" style="fill:color-mix(in srgb,${col} 20%,var(--surface))" stroke="${col}" stroke-width="2"/><text x="${x.toFixed(1)}" y="${(y + 4).toFixed(1)}" text-anchor="middle" font-size="${r > 15 ? 11.5 : 10.5}" font-weight="800" style="fill:color-mix(in srgb,${col} 70%,var(--ink))">${esc(ini(name))}</text><text x="${x.toFixed(1)}" y="${(y < cy - R * .75 ? y - r - 6 : y + r + 13).toFixed(1)}" text-anchor="middle" font-size="10.5" font-weight="700" fill="var(--ink-2)">${esc(label)}</text></g>`;
+  const sp = pos(sc.length, R1, 0), fp = pos(fam.length, R2, 180 / Math.max(1, fam.length) + 90);
+  const lines = sc.map((P, i) => node(sp[i], P.name, P.short.replace(/^(Ms|Mr|Mrs)\. /, ''), 'var(--c2)', 16, ['push', 'person', P.key], R1)).join('') + fam.map((f, i) => node(fp[i], f.name, f.key === 'me' ? 'You' : f.name.split(' ')[0], 'var(--c4)', 14, ['famSheet', '', f.key], R2)).join('');
+  const label = `${k.first}’s circle. At school: ${sc.map(P => `${P.short}, ${P.role}`).join('; ')}. Family: ${fam.map(f => `${f.name}, ${f.rel}`).join('; ')}.`;
+  return `<svg viewBox="0 0 340 304" role="img" aria-label="${esc(label)}"><circle cx="${cx}" cy="${cy}" r="${R1}" fill="none" stroke="var(--c2)" stroke-opacity=".28" stroke-width="1.5" stroke-dasharray="3 5"/><circle cx="${cx}" cy="${cy}" r="${R2}" fill="none" stroke="var(--c4)" stroke-opacity=".45" stroke-width="1.5" stroke-dasharray="3 5"/>${lines}
+    <circle cx="${cx}" cy="${cy}" r="29" style="fill:color-mix(in srgb,var(--c1) 18%,var(--surface))" stroke="var(--c1)" stroke-width="3"/><text x="${cx}" y="${cy + 5}" text-anchor="middle" font-size="14" font-weight="800" fill="var(--ink)">${esc(k.first)}</text></svg>`; }
+function circPeople() { const k = kid(), sc = schoolPeople(k), fam = familyOf(k), O = photoOpts(k).find(o => o[0] === photoOf(k));
+  return `${kidSwitch()}
+  ${sum(`<b>${cap(numWord(sc.length))} people</b> look after ${k.first} at school, and ${numWord(fam.length)} at home.`, `Tap anyone to see what they’re working on with ${k.first}, or to say thank you.`)}
+  <div class="card orbit">${orbitSvg(k)}<div class="legend" aria-hidden="true"><span><i style="background:var(--c2)"></i>At school</span><span><i style="background:var(--c4)"></i>Family</span><span><i style="background:var(--c1)"></i>${k.first}</span></div></div>
+  ${secX('At school', `${numWord(sc.length)} people`)}
+  <div class="card list ppl">${sc.map(P => it(av(P.name, avc(P.name), 'sm'), esc(P.name), `${esc(P.role)} · ${esc(P.works)}`, ic('chev', 16, 2.4), `data-act="push" data-to="person" data-key="${P.key}"`, 'button')).join('')}</div>
+  ${secX('Family', '', `Invite family`, 'data-act="famInvite"')}
+  <div class="card list">${fam.map(f => it(av(f.name, 'var(--c4)', 'sm'), esc(f.name), esc(f.rel), f.kind === 'relative' ? pill(f.status === 'joined' ? 'Sees moments' : 'Invite sent', f.status === 'joined' ? 't-green' : 't-amber') : ic('chev', 16, 2.4), `data-act="famSheet" data-key="${esc(f.key)}"`, 'button')).join('')}</div>
+  <div class="card tip">${icoT('heart', 't-lotus', 17)}<p>Relatives you invite see ${k.first}’s moments and can heart them. They never see ${NEVER}.</p></div>
+  <button class="btn sec" data-act="famInvite">${ic('plus', 18)}Invite family to see moments</button>
+  ${secX('Privacy')}
+  <div class="card list">${it(icoT('image', 't-gold'), `Photos of ${k.first}`, `${O[6]} · ${esc(O[3])}`, ic('chev', 16, 2.4), 'data-act="push" data-to="photos"', 'button')}</div>`; }
+SCR.person = p => { const k = kid(), P = personOf(k, p.key) || schoolPeople(k)[0], id = k.id + '|' + P.key, ms = momFor(k).filter(m => m.by === P.short), th = (S.pthx || {})[id], ch = P.ct ? chatFor(k) : (S.pchats || {})[id];
+  return {title: P.short, body: `${sum(`${esc(P.short)} is ${k.first}’s ${P.as}.`, `${replyHrs(P)} · ${ms.length ? plural(ms.length, 'moment') + ' shared this fortnight' : 'no moments shared yet'}`)}
+  <div class="card hc pp-hero"><div class="hc-row">${av(P.name, avc(P.name), 'lg')}<div class="m"><span class="eyebrow">${esc(P.role)}</span><b class="hc-t">${esc(P.name)}</b><small class="hc-s pp-hrs">${ic('clock', 13, 2.2)}${replyHrs(P)}</small></div></div>
+    <div class="pp-work"><span class="eyebrow">Working on with ${k.first}</span><p>${esc(P.works)}</p></div>
+    ${ch ? `<div class="h-booked">${ic('check', 16, 2.6)}Chat ${P.ct ? 'booked' : 'requested'} · ${esc(ch)}</div>` : ''}
+    <div class="pp-acts"><button class="btn" data-act="pMsg" data-key="${P.key}">${ic('msg', 18)}Message ${esc(P.short)}</button>
+      <button class="btn sec" data-act="pThanks" data-key="${P.key}" ${th ? 'aria-disabled="true"' : ''}>${ic(th ? 'check' : 'smile', 18)}${th ? `Thanks sent at ${th}` : 'Say thanks'}</button>
+      ${ch ? '' : `<button class="btn sec" data-act="pChat" data-key="${P.key}">${ic('cal', 18)}Ask for a 10-minute chat</button>`}</div></div>
+  ${secX('Recent moments', ms.length ? plural(ms.length, 'moment') : '')}
+  ${ms.length ? ms.slice(0, 3).map(momCard).join('') : empty(`No moments from ${esc(P.short)} yet.`, `When ${esc(P.short)} shares a photo or a line of praise about ${k.first}, it shows here.`)}` }; };
+function famSheet(key) { const k = kid(), f = familyOf(k).find(x => x.key === key); if (!f) return; const first = f.name.split(' ')[0];
+  const head = `<div class="fam-h">${av(f.name, 'var(--c4)')}<div class="m"><h2 class="sh-t">${esc(f.name)}</h2><small>${esc(f.rel)}${f.kind === 'relative' ? ` · ${f.status === 'joined' ? `joined ${dP(f.at || TODAY)}` : 'invite sent, waiting for them to join'}` : ''}</small></div></div>`;
+  if (f.kind === 'parent') return openSheet(`${head}<p class="sh-p">${f.key === 'me' ? `That’s you. You see everything for ${k.first}: moments, messages, fees, results, attendance and health.` : `${first} has his own parent account and sees everything you see for ${k.first}.`}</p><button class="btn sec" data-act="closeSheet">Done</button>`);
+  if (f.kind === 'pickup') return openSheet(`${head}<p class="sh-p">${first} can collect ${k.first} at the gate with a pickup pass. Pickup people don’t see moments.</p><button class="btn" data-act="famInvite" data-name="${esc(f.name)}">${ic('heart', 18)}Invite ${esc(first)} to see moments</button><button class="btn sec" data-act="famPickup">${ic('qr', 18)}Open the pickup pass</button>`);
+  const kids = (f.kids || []).join(' and ');
+  openSheet(`${head}<ul class="fam-l" aria-label="What ${esc(first)} can see"><li class="y">${ic('check', 16, 2.6)}<span>Moments of ${esc(kids)}: photos and praise from teachers</span></li><li class="y">${ic('heart', 16, 2.2)}<span>A heart on a moment, which the teacher sees</span></li><li class="n">${ic('x', 16, 2.4)}<span>Never ${NEVER}</span></li></ul>
+    <button class="btn sec danger" data-act="famRemove" data-id="${esc(f.id)}">${ic('x', 18)}Remove from circle</button><button class="btn ghost" data-act="closeSheet">Keep ${esc(first)} in the circle</button>`); }
+function famInvite(name) { const k = kid();
+  openSheet(`<h2 class="sh-t">Invite family to see moments</h2><p class="sh-p">Grandparents, aunts and uncles can see the moments teachers share and send a heart. They never see ${NEVER}.</p>
+    <div class="field"><label for="fi_n">Their name</label><input class="input" id="fi_n" autocomplete="off" placeholder="e.g. Nimal Perera" value="${esc(name || '')}"></div>
+    <div class="field"><label for="fi_r">Relation to the children</label><select class="input" id="fi_r">${['Grandmother', 'Grandfather', 'Aunt', 'Uncle', 'Older cousin', 'Family friend'].map(r => `<option>${r}</option>`).join('')}</select></div>
+    <div class="field"><label for="fi_p">Their mobile number</label><input class="input" id="fi_p" type="tel" inputmode="tel" autocomplete="off" placeholder="+94 77 123 4567"></div>
+    <fieldset class="field" style="border:0;margin:0;padding:0"><legend class="fm-l" style="margin-bottom:6px">Which children’s moments</legend><div class="fam-kids">${KIDS.map((x, i) => `<label class="consent"><input type="checkbox" class="fi-k" value="${x.first}" ${x === k ? 'checked' : ''}>${x.first}</label>`).join('')}</div></fieldset>
+    <div class="ferr" id="fi_e" role="alert"></div>
+    <button class="btn" data-act="famSend">${ic('send', 18)}Send invite</button><button class="btn sec" data-act="closeSheet">Cancel</button>`); }
+SCR.photos = () => { const k = kid(), cur = photoOf(k), O = photoOpts(k);
+  return {title: `Photos of ${k.first}`, body: `${kidSwitch()}
+  ${sum(esc(O.find(o => o[0] === cur)[3]), 'You can change this at any time. Teachers see your choice before they share a photo.')}
+  <div class="card ph-opts" role="radiogroup" aria-label="Who can see photos of ${k.first}">${O.map(([v, t, s, , icn, tone]) => `<button class="paycard ${cur === v ? 'on' : ''}" role="radio" aria-checked="${cur === v}" data-act="photoSet" data-v="${v}">${icoT(icn, tone)}<span class="m"><b>${esc(t)}</b><small>${esc(s)}</small></span><span class="radio"></span></button>`).join('')}</div>
+  <p class="note">Class photos where no child is named are not affected. Praise and work moments always reach you.</p>` }; };
+/* Learning: this week in class, one thing to try at home */
+function lrnCard(l, k) { const t = triedBy(l, k);
+  return `<article class="card lrn" style="--lc:${subjCol(k, l.subj)}"><div class="lrn-h"><span class="lrn-s">${esc(l.subj)}</span><small>${esc(l.by)} · ${esc(l.role)}</small></div>
+    <b class="lrn-t">${esc(l.topic)}</b><p>${esc(l.why)}</p>
+    <div class="lrn-try">${icoT('leaf', 't-lotus', 16)}<div><span class="eyebrow">Try at home · ${+l.mins || 5} min</span><p>${esc(l.tryHome)}</p></div></div>
+    ${t ? `<div class="lrn-done">${ic('check', 16, 2.6)}<span><b>Tried · Mon ${esc(t.at)}</b>${t.note ? `<i>“${esc(t.note)}”</i>` : ''}${esc(l.by)} can see that you tried it at home.</span></div>` : `<button class="btn sm" data-act="lrnTry" data-id="${esc(l.id)}">${ic('check', 16, 2.4)}We tried it</button>`}</article>`; }
+function circLearning() { const k = kid(), ls = learnFor(k), mins = ls.reduce((a, l) => a + (+l.mins || 0), 0), tr = ls.filter(l => triedBy(l, k)), tally = skillTally(k), max = Math.max(1, ...tally.map(x => x[1]));
+  return `${kidSwitch()}
+  ${ls.length ? sum(`This week ${k.first}’s class is learning <b>${esc(listJoin(ls.map(l => l.topic.toLowerCase())))}</b>.`, `${cap(plural(ls.length, 'idea'))} to try at home, about ${mins} minutes in all · ${tr.length ? `${numWord(tr.length)} tried so far` : 'none tried yet'}`) : sum(`${k.first}’s teachers haven’t posted this week’s learning yet.`)}
+  ${secX('This week in class', ls.length ? `Week of ${dP(ls[0].week)}` : '')}
+  ${ls.length ? ls.map(l => lrnCard(l, k)).join('') : empty('Nothing posted yet.', 'Teachers share what the class is learning each Monday.')}
+  ${secX('What teachers noticed this term')}
+  ${tally.length ? `<div class="card list">${tally.map(([s, n]) => `<button class="sk-row" data-act="push" data-to="skill" data-s="${esc(s)}" aria-label="${esc(s)}: noticed ${n} time${n > 1 ? 's' : ''}. Show these moments">${skChip(s)}${bar(n / max * 100, skCol(s))}<b class="num">${n}</b>${ic('chev', 16, 2.4)}</button>`).join('')}</div>
+    <p class="note">Each skill comes from a moment a teacher shared. Tap one to see those moments.</p>` : empty(`No skills tagged for ${k.first} yet.`, 'When teachers tag a skill on a moment, it builds up here over the term.')}`; }
+SCR.skill = p => { const k = kid(), s = p.s, ms = momFor(k).filter(m => m.skill === s), by = [...new Set(ms.map(m => m.by))];
+  return {title: `${s} · ${k.first}`, body: `${sum(ms.length ? `${listJoin(by.map(esc))} noticed ${k.first}’s <b>${esc(s.toLowerCase())}</b> ${ms.length > 1 ? numWord(ms.length) + ' times' : 'once'} this term.` : `No moments tagged ${esc(s.toLowerCase())} for ${k.first} yet.`, 'Skill tags come from the moments teachers share.')}
+  ${ms.length ? ms.map(momCard).join('') : empty('Nothing here yet.')}` }; };
+/* Last week with the child */
+const WEEK_PREV = ['2026-09-28', '2026-10-04'];
+const ATT_SEP = i => i ? {absent:[9, 22], late:[2, 16], exc:[]} : {absent:[14], late:[29], exc:[22]};
+function weekRecap(k) { const i = KIDS.indexOf(k), ms = momFor(k).filter(m => m.date >= WEEK_PREV[0] && m.date <= WEEK_PREV[1]), sk = [...new Set(ms.map(m => m.skill).filter(Boolean))], a = ATT_SEP(i), wd = [28, 29, 30];
+  const away = wd.filter(d => a.absent.includes(d) || a.exc.includes(d)).length, late = wd.filter(d => a.late.includes(d)), ls = learnFor(k), tr = ls.filter(l => triedBy(l, k));
+  return {ms, sk, days: 5 - away, late, ls, tr, one: ls.find(l => !triedBy(l, k)) || ls[0]}; }
+function recapCard() { const k = S.momF && S.momF !== 'all' ? KIDS[+S.momF] : kid(), r = weekRecap(k);
+  return `<button class="card recap-c" data-act="push" data-to="recap" data-kid="${KIDS.indexOf(k)}">${icoT('spark', 't-gold')}<span class="m"><span class="eyebrow">Week recap</span><b>Last week with ${k.first}</b><small>${cap(plural(r.ms.length, 'moment'))} · ${plural(r.sk.length, 'skill')} noticed · ${r.days} of 5 days in school</small></span>${ic('chev', 18)}</button>`; }
+SCR.recap = () => { const k = kid(), r = weekRecap(k), T = k.teacher;
+  return {title: `Last week with ${k.first}`, body: `${kidSwitch()}
+  ${sum(`${k.first} was in school <b>${r.days === 5 ? 'every day' : `${numWord(r.days)} of five days`}</b> last week, and teachers shared ${plural(r.ms.length, 'moment')}${r.sk.length ? `, noticing ${esc(listJoin(r.sk.map(s => s.toLowerCase())))}` : ''}.`, `Monday 28 September to Friday 2 October${r.late.length ? ` · one late arrival (${dP('2026-09-' + r.late[0])})` : ''}`)}
+  ${tiles([[r.ms.length, 'Moments'], [`${r.days}/5`, 'In school', r.days === 5 ? 'good' : 'warn'], [`${r.tr.length}/${r.ls.length}`, 'Tried at home', r.tr.length ? 'good' : '']])}
+  ${r.one ? `<div class="card hc" style="--hc:var(--c5)"><span class="eyebrow">${ic('leaf', 14, 2.2)}One thing for the weekend</span><b class="hc-t">${esc(r.one.tryHome)}</b><p class="hc-p">About ${+r.one.mins || 5} minutes · from ${esc(r.one.by)}, who is teaching ${esc(r.one.topic.toLowerCase())} in ${esc(r.one.subj)}.</p>
+    ${triedBy(r.one, k) ? `<div class="lrn-done">${ic('check', 16, 2.6)}<span><b>Tried · Mon ${esc(triedBy(r.one, k).at)}</b>${esc(r.one.by)} can see that you tried it.</span></div>` : `<button class="btn sm" data-act="lrnTry" data-id="${esc(r.one.id)}" style="align-self:flex-start">${ic('check', 16, 2.4)}We tried it</button>`}</div>` : ''}
+  ${secX('Skills teachers noticed')}
+  ${r.sk.length ? `<div class="card pad sk-chips">${r.sk.map(s => `<button data-act="push" data-to="skill" data-s="${esc(s)}" aria-label="Show ${esc(s)} moments">${skChip(s)}</button>`).join('')}</div>` : empty('No skills tagged last week.', `${T.name} tags skills on some moments.`)}
+  ${secX('Learning tried at home', `${r.tr.length} of ${r.ls.length}`)}
+  <div class="card list">${r.ls.map(l => it(icoT(triedBy(l, k) ? 'check' : 'leaf', triedBy(l, k) ? 't-green' : 't-lotus', 17), esc(l.topic), `${esc(l.subj)} · ${triedBy(l, k) ? `tried at ${esc(triedBy(l, k).at)}` : `not tried yet · about ${+l.mins || 5} minutes`}`, '', 'data-act="circGo" data-v="learning"', 'button')).join('')}</div>
+  ${secX('Moments from last week', plural(r.ms.length, 'moment'))}
+  ${r.ms.length ? r.ms.map(momCard).join('') : empty(`No moments of ${k.first} last week.`)}` }; };
+/* The day, as it happens: today's lessons as arcs around a ring, with events as dots */
+const DAY0 = 7 * 60 + 30, DAY1 = 14 * 60 + 30, TT_COL = ['var(--c1)', 'var(--c2)', 'var(--c3)', 'var(--c4)', 'var(--c5)', 'var(--info)'];
+function dayPlan(k) { const i = KIDS.indexOf(k), LV = LIVE[i] || LIVE[0], rooms = ['Room 12', 'Lab 2', 'Room 4', 'Studio', 'Pool', 'Room 9'];
+  const L = ['08:00', '08:40', '09:20', '10:20', '11:00', '11:40'].map((t, j) => { const sb = k.subjects[j % k.subjects.length]; return {s: toMinP(t), e: toMinP(t) + 40, subj: sb[0], c: TT_COL[j % 6], room: rooms[j % 6], kind: 'lesson'}; });
+  L[2] = {...L[2], subj: LV.s, c: LV.c, room: LV.room, who: LV.who};
+  L.forEach(l => { if (!l.who) { const P = schoolPeople(k).find(x => x.subj.includes(l.subj)); l.who = P ? P.short : ''; } });
+  return [...L.slice(0, 3), {s: 600, e: 620, subj: 'Interval', kind: 'break', room: 'Playground'}, ...L.slice(3), {s: 740, e: 780, subj: 'Lunch', kind: 'break', room: 'Canteen'}, {s: 780, e: 840, subj: i ? 'Coding club' : 'Art club', c: 'var(--c3)', kind: 'lesson', room: i ? 'ICT lab' : 'Studio', who: i ? 'Mr. Dissanayake' : 'Ms. De Alwis'}]; }
+function dayEvents(k) { const i = KIDS.indexOf(k), T = k.teacher;
+  const out = [{t: toMinP(k.arrived), icon: 'pin', tone: 't-green', c: 'var(--good)', text: 'Arrived at school through the main gate', short: `arrived ${k.arrived}`, src: 'Gate scan'},
+    {t: 8 * 60, icon: 'check', tone: 't-blue', c: 'var(--brand)', text: `Registered present by ${T.name}`, short: 'registered present', src: 'Class register'}];
+  momFor(k).filter(m => m.date === TODAY && /^\d\d:\d\d$/.test(m.at)).forEach(m => out.push({t: toMinP(m.at), icon: 'image', tone: 't-gold', c: 'var(--gold)', text: `${m.by} shared a moment${m.kid ? '' : ' of the class'}`, short: `a moment from ${m.by}`, sub: m.text, src: 'Moments'}));
+  (S.wallet[i] || {spent: []}).spent.filter(x => /^Mon/.test(x[1])).forEach(([n, d, a]) => out.push({t: toMinP(d.slice(-5)), icon: 'food', tone: 't-amber', c: 'var(--c4)', text: `Bought ${n.toLowerCase()} at the canteen`, short: `${n.toLowerCase()} from the canteen`, sub: `${money(a)} from ${k.his} canteen card`, src: 'Canteen wallet'}));
+  out.push({t: 14 * 60 + 10, icon: 'bus', tone: 't-green', c: 'var(--c5)', text: 'Left school on bus Route 4', short: 'on bus Route 4', fut: 'Leaves school on bus Route 4', src: 'Bus scan'}, {t: 14 * 60 + 29, icon: 'home', tone: 't-violet', c: 'var(--info)', text: 'Dropped off at home, 27 Nawala Road', short: 'home at 14:29', fut: 'Home at 27 Nawala Road', src: 'Bus scan'});
+  return out.sort((a, b) => a.t - b.t); }
+function nowLine(k, m = demoMin()) { const cur = dayPlan(k).find(l => l.s <= m && m < l.e);
+  if (m >= 14 * 60 + 29 || m < 6 * 60) return `${k.first} is home. The bus dropped ${objP(k)} off at 14:29`;
+  if (m >= 14 * 60 + 10) return `on bus Route 4, home by about 14:29`;
+  if (m < toMinP(k.arrived)) return 'on the way to school. The first lesson starts at 08:00';
+  if (!cur) return m >= 840 ? 'waiting for the bus home at 14:10' : m < 480 ? 'in the playground before the bell' : 'between lessons';
+  return cur.kind === 'break' ? `${cur.subj.toLowerCase()} in the ${cur.room.toLowerCase()}` : `${cur.subj} with ${cur.who || k.teacher.name}`; }
+function dayRing(k, big) { const m = demoMin(), C = 120, r = 88, sw = big ? 13 : 16, span = 300, a0 = -150, cl = x => Math.max(DAY0, Math.min(DAY1, x)), ang = x => a0 + span * (cl(x) - DAY0) / (DAY1 - DAY0);
+  const pt = (a, rr) => { const q = (a - 90) * Math.PI / 180; return [C + rr * Math.cos(q), C + rr * Math.sin(q)]; };
+  const arc = (x1, x2, rr) => { const A = ang(x1), B = ang(x2), [p, q] = pt(A, rr), [u, v] = pt(B, rr); return `M${p.toFixed(1)} ${q.toFixed(1)}A${rr} ${rr} 0 ${B - A > 180 ? 1 : 0} 1 ${u.toFixed(1)} ${v.toFixed(1)}`; };
+  const P = dayPlan(k), E = dayEvents(k).filter(e => e.t <= m), cur = P.find(l => l.s <= m && m < l.e), lessons = P.filter(l => l.kind === 'lesson'), done = lessons.filter(l => l.e <= m).length;
+  let s = `<path d="${arc(DAY0, DAY1, r)}" fill="none" stroke="var(--surface-2)" stroke-width="${sw + 8}" stroke-linecap="round"/>`;
+  P.forEach(l => { const col = l.kind === 'break' ? 'var(--line-strong)' : l.c;
+    s += `<path d="${arc(l.s + 1.5, l.e - 1.5, r)}" fill="none" style="stroke:${l.e <= m ? col : `color-mix(in srgb,${col} 28%,var(--surface))`}" stroke-width="${sw}"/>`;
+    if (l.s <= m && m < l.e) s += `<path d="${arc(l.s + 1.5, m, r)}" fill="none" stroke="${col}" stroke-width="${sw}"/>`; });
+  E.forEach(e => { const [x, y] = pt(ang(e.t), r + sw / 2 + 9); s += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${big ? 5 : 6}" fill="${e.c}" stroke="var(--surface)" stroke-width="2"/>`; });
+  if (m >= DAY0 && m <= DAY1) { const [x1, y1] = pt(ang(m), r - sw / 2 - 5), [x2, y2] = pt(ang(m), r + sw / 2 + 2); s += `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="var(--ink)" stroke-width="3" stroke-linecap="round"/><circle cx="${x1.toFixed(1)}" cy="${y1.toFixed(1)}" r="4" fill="var(--ink)"/>`; }
+  if (big) [['07:30', DAY0], ['11:00', 660], ['14:30', DAY1]].forEach(([l, x]) => { const [tx, ty] = pt(ang(x), r - sw - 14); s += `<text x="${tx.toFixed(1)}" y="${(ty + 4).toFixed(1)}" text-anchor="middle" font-size="10.5" font-weight="700" fill="var(--ink-3)">${l}</text>`; });
+  const what = m >= 14 * 60 + 29 || m < 6 * 60 ? 'At home' : m >= 14 * 60 + 10 ? 'On the bus' : cur ? cur.subj : m < toMinP(k.arrived) ? 'On the way' : 'Free time';
+  s += big ? `<text x="${C}" y="${C - 18}" text-anchor="middle" font-size="12" font-weight="700" fill="var(--ink-3)">Now · ${hmP(m)}</text><text x="${C}" y="${C + 6}" text-anchor="middle" font-size="21" font-weight="800" fill="var(--ink)">${esc(what)}</text><text x="${C}" y="${C + 26}" text-anchor="middle" font-size="12" font-weight="600" fill="var(--ink-3)">${done} of ${lessons.length} lessons done</text>`
+    : `<text x="${C}" y="${C + 4}" text-anchor="middle" font-size="34" font-weight="800" fill="var(--ink)">${hmP(m)}</text><text x="${C}" y="${C + 34}" text-anchor="middle" font-size="22" font-weight="700" fill="var(--ink-3)">now</text>`;
+  return `<div class="dr" ${big ? 'id="dayRingBig"' : ''}><svg viewBox="0 0 240 240" role="img" aria-label="${esc(`${k.first}’s day at ${hmP(m)}: ${done} of ${lessons.length} lessons done. Right now: ${nowLine(k, m)}. ${E.length} updates so far.`)}">${s}</svg></div>`; }
+function dayCard(k) { const m = demoMin(), E = dayEvents(k).filter(e => e.t <= m), lessons = dayPlan(k).filter(l => l.kind === 'lesson'), done = lessons.filter(l => l.e <= m).length;
+  return `<button class="card dayc" data-act="push" data-to="day" aria-label="Open ${k.first}’s day">${dayRing(k)}<div class="m"><span class="top">${m >= DAY0 && m < 14 * 60 + 29 ? '<span class="live">LIVE</span>' : ''}${k.first}’s day</span><b>${done ? `${cap(numWord(done))} of ${numWord(lessons.length)} lessons done` : `${cap(numWord(lessons.length))} lessons today`}</b><small>${E.length ? cap(listJoin(E.slice(-3).map(e => e.short))) : 'Nothing yet today'}</small><span class="dev" aria-hidden="true">${E.map(e => `<span class="${e.tone}">${ic(e.icon, 12, 2.4)}</span>`).join('')}</span></div>
+    <div class="dayc-now">${ic('clock', 16, 2.2)}<span>Right now: <b>${esc(nowLine(k, m))}</b></span>${ic('chev', 16, 2.4)}</div></button>`; }
+SCR.day = () => { const k = kid(), m = demoMin(), P = dayPlan(k), E = dayEvents(k), past = E.filter(e => e.t <= m), fut = E.filter(e => e.t > m), lessons = P.filter(l => l.kind === 'lesson');
+  const tlEv = e => `<div class="tl-i ev" style="--lc:${e.c}"><time class="num">${hmP(e.t)}</time><span class="tl-d"></span><div class="tl-c"><b>${esc(e.text)}</b>${e.sub ? `<span class="ev-s">${esc(e.sub)}</span>` : ''}<small>${e.src}</small></div></div>`;
+  const tlL = l => { const on = l.s <= m && m < l.e; return `<div class="tl-i ${on ? 'now' : ''}" style="--lc:${l.kind === 'break' ? 'var(--line-strong)' : l.c}"><time class="num">${hmP(l.s)}<small>${hmP(l.e)}</small></time><span class="tl-d"></span><div class="tl-c"><b>${esc(l.subj)}${on ? ' · now' : ''}</b><small>${esc(l.room)}${l.who ? ' · ' + esc(l.who) : ''}</small></div></div>`; };
+  const soFar = [...past.map(e => [e.t, tlEv(e)]), ...P.filter(l => l.s <= m).map(l => [l.s + .5, tlL(l)])].sort((a, b) => a[0] - b[0]).map(x => x[1]).join('');
+  const toCome = [...fut.map(e => [e.t, it(`<span class="dchip tm mute"><b class="num">${hmP(e.t)}</b></span>`, esc(e.fut || e.text), e.src)]), ...P.filter(l => l.s > m).map(l => [l.s, it(`<span class="dchip tm ${l.kind === 'break' ? 'mute' : ''}"><b class="num">${hmP(l.s)}</b></span>`, esc(l.subj), `${esc(l.room)}${l.who ? ' · ' + esc(l.who) : ''} · until ${hmP(l.e)}`)])].sort((a, b) => a[0] - b[0]).map(x => x[1]).join('');
+  return {title: `${k.first}’s day`, body: `${kidSwitch()}
+  ${sum(`${k.first} arrived at ${k.arrived}. Right now: <b>${esc(nowLine(k, m))}</b>.`, `${lessons.filter(l => l.e <= m).length} of ${lessons.length} lessons done · ${plural(past.length, 'update')} so far · filled in from the gate, the register, the canteen and the bus`)}
+  <div class="card day-big">${dayRing(k, true)}<div class="legend" aria-hidden="true"><span><i style="background:var(--good)"></i>Arrived</span><span><i style="background:var(--brand)"></i>Register</span><span><i style="background:var(--gold)"></i>Moment</span><span><i style="background:var(--c4)"></i>Canteen</span><span><i style="background:var(--c5)"></i>Bus</span></div>
+    <div class="day-demo"><label for="dayT"><span>Move through the day (demo)</span><b class="num" id="dayTl">${hmP(Math.max(DAY0, Math.min(DAY1, m)))}</b></label><input type="range" id="dayT" min="${DAY0}" max="${DAY1}" step="5" value="${Math.max(DAY0, Math.min(DAY1, m))}" aria-label="Demo time of day">
+    ${S.demoT != null ? `<button class="btn sm sec" data-act="demoNow" style="align-self:flex-start">${ic('clock', 16)}Back to the live time</button>` : ''}</div></div>
+  ${secX('So far today', plural(past.length, 'update'))}
+  ${soFar ? `<div class="tl">${soFar}</div>` : empty(`${k.first}’s day hasn’t started yet.`, 'The gate scan, register and lessons fill in here as they happen.')}
+  ${secX('Still to come')}
+  ${toCome ? `<div class="card list">${toCome}</div>` : empty(`That’s ${k.first}’s day done.`, `See you tomorrow, ${k.first}!`)}
+  <p class="note">Nothing here needs you. It fills in on its own from what the school already records.</p>` }; };
 
 SCR.evening = () => { const k = kid(), e = peFor(k);
   if (!e) return {title:'Parents’ evening', body:`${kidSwitch()}${sum(`There’s no parents’ evening open for ${k.first}’s class yet.`)}${empty('We’ll let you know when booking opens.', `You can still book a 10-minute chat with ${k.teacher.name} from How ${k.first} is doing.`)}`};
@@ -1248,11 +1535,8 @@ SCR.home = () => {
   <div class="dots" aria-hidden="true">${KIDS.map((_, i) => `<i class="${i===S.kid?'on':''}"></i>`).join('')}</div>
   ${headsUp(k)}
   ${pubReport(k) ? `<button class="card rep-ready" data-act="push" data-to="reports"><span class="ic t-blue">${ic('file',20)}</span><span><b>${k.first}’s ${pubReport(k).cycle} is ready</b><small>${pubReport(k).year} · tap to read</small></span>${ic('chev',18)}</button>` : ''}
-  ${todoFor(k).length ? `${sec('Needs you')}<div class="card todo">${todoFor(k).map(([to, tn, i, t, sub]) => row(i, tn, esc(t), esc(sub), ic('chev',18), `data-act="push" data-to="${to}"`)).join('')}</div>` : ''}
-  <button class="card pad now" data-act="push" data-to="timetable"><div class="top"><span class="live">LIVE</span><span>Right now in class</span><span style="margin-left:auto" class="num" id="nowLeft"></span></div>
-    <div style="display:flex;gap:12px;align-items:center"><div class="ico" style="background:color-mix(in srgb, ${L.c} 15%, var(--surface));color:${L.c}">${ic(L.icon,19)}</div><div class="m" style="flex:1"><b style="font:800 17px var(--f-display);display:block">${L.s}</b><small style="color:var(--ink-3)">${L.who} · ${L.room}</small></div></div>
-    <div class="prog"><i id="nowBar"></i></div>
-    <div style="display:flex;justify-content:space-between;font-size:11.5px;color:var(--ink-3)"><span>09:20</span><span>Next: ${L.next}</span></div></button>
+  ${todoFor(k).length ? `${sec('Needs you')}<div class="card todo">${todoFor(k).map(([to, tn, i, t, sub]) => row(i, tn, esc(t), esc(sub), '', `data-act="push" data-to="${to}"`)).join('')}</div>` : ''}
+  ${dayCard(k)}
   <button class="card alert" data-act="push" data-to="bus" style="text-align:left;width:100%"><div class="ico t-green">${ic('bus',19)}</div><div class="m"><b>School bus · Route 4</b><span id="busCardSub">${busLine()}</span></div><span class="pill t-green">${S.bus.running?'<span class="live" style="color:inherit">LIVE</span>':'Track'}</span></button>
   ${due.length ? `<button class="card alert" data-act="push" data-to="pay" style="text-align:left;width:100%"><div class="ico t-gold">${ic('pay',19)}</div><div class="m"><b>${money(due.reduce((a, i) => a + i.amt - i.paid, 0))} due</b>${due.length} invoice${due.length>1?'s':''} · next due ${due[0].due}</div><span class="pill t-gold">Pay now</span></button>` : `<div class="card alert"><div class="ico t-green">${ic('check',19)}</div><div class="m"><b>All fees paid</b>Nothing due right now</div></div>`}
   ${sec('Quick links')}
@@ -1380,7 +1664,7 @@ SCR.children = () => { const xs = KIDS.map(k => insight(k));
       <div class="prof-st"><span class="pill ${tone}">${x.level[1]}</span><span>Student ID ${k.id}</span></div>
       ${tiles([[k.att + '%', 'Attendance', k.att >= 95 ? 'good' : 'warn'], [avg + '%', 'Avg. mark'], [k.points, 'Points']])}
       <button class="prof-doing" data-act="push" data-to="doing" data-kid="${i}">${icoT('leaf', tone, 17)}<span class="m"><b>How ${k.first} is doing</b><small>${x.focus ? esc(x.focus.t) : 'Attendance, learning and wellbeing'}</small></span>${ic('chev', 16, 2.4)}</button>
-      <div class="go-grid">${[['cal','t-green','Attendance',`${k.att}% this term`,'attendance'],['chart','t-blue','Results',`${avg}% average`,'results'],['clock','t-violet','Timetable','6 lessons today','timetable'],['book','t-gold','Homework',hw ? `${hw} to do` : 'All done','homework'],['star','t-lotus','Rewards',`${k.points} points`,'conduct'],['file','t-blue','Reports','Term 1 mid-term','reports'],['heart','t-red','Medical', i ? 'Nothing recorded' : 'Peanut allergy','medical'],['image','t-gold','Moments', `${momFor(k).length} shared`, '']].map(([icn, t, l, s, to]) => `<button class="go" ${to ? `data-act="push" data-to="${to}"` : 'data-act="momGo"'} data-kid="${i}">${icoT(icn, t, 17)}<span class="m"><b>${l}</b><small>${s}</small></span></button>`).join('')}</div></div>`; }).join('')}` }; };
+      <div class="go-grid">${[['cal','t-green','Attendance',`${k.att}% this term`,'attendance'],['chart','t-blue','Results',`${avg}% average`,'results'],['clock','t-violet','Timetable','6 lessons today','timetable'],['book','t-gold','Homework',hw ? `${hw} to do` : 'All done','homework'],['star','t-lotus','Rewards',`${k.points} points`,'conduct'],['file','t-blue','Reports','Term 1 mid-term','reports'],['heart','t-red','Medical', i ? 'Nothing recorded' : 'Peanut allergy','medical'],['image','t-gold','Moments', `${momFor(k).length} shared`, ''],['orbit','t-violet','Circle', `${numWord(schoolPeople(k).length + familyOf(k).length)} people`, 'people', 'circGo'],['lock','t-lotus','Photos', photoOpts(k).find(o => o[0] === photoOf(k))[6], 'photos']].map(([icn, t, l, s, to, act]) => `<button class="go" ${act ? `data-act="${act}" data-v="${to}"` : to ? `data-act="push" data-to="${to}"` : 'data-act="momGo"'} data-kid="${i}">${icoT(icn, t, 17)}<span class="m"><b>${l}</b><small>${s}</small></span></button>`).join('')}</div></div>`; }).join('')}` }; };
 
 SCR.attendance = () => {
   const k = kid(), first = 1; // September 2026 starts on a Tuesday (Monday-first index 1)
@@ -1530,7 +1814,7 @@ SCR.inbox = () => { const unread = S.threads.filter(t => t.unread);
   <div class="card list">${[['Swimming heats moved to Friday','Sport · today','t-green','trophy'],['Uniform shop: extended hours','Admin · yesterday','t-blue','clock'],['Exam timetable – Grade 9 & 10','Academics · 1 Oct','t-violet','book']].map(([t, d, tn, i]) => it(icoT(i, tn), t, d, '', 'data-act="toast" data-msg="Bulletin opened"', 'button')).join('')}</div>` }; };
 
 SCR.thread = (p) => { const t = S.threads.find(x => x.id === +p.id) || S.threads[0]; t.unread = 0;
-  return { title: t.from, sub: t.role, composer: true, body: `<div class="th-card">${thAv(t)}<div class="m"><b>${t.from}</b><small>${esc(t.role)} · usually replies the same school day</small></div></div><div class="day-sep"><span>Today</span></div>${t.msgs.map(m => { const h = `<div class="bubble ${m.me?'me':''} ${m.isNew?'new':''}">${esc(m.t)}<small>${m.at}</small></div>`; m.isNew = false; return h; }).join('')}${t.seen && t.msgs[t.msgs.length-1].me ? `<div class="seen">${ic('check',13,2.6)}Seen</div>` : ''}${S.typing ? '<div class="typing" aria-label="Typing"><i></i><i></i><i></i></div>' : ''}<p class="note">Messages are visible to school staff and kept for 2 years.</p>` }; };
+  return { title: t.from, sub: t.role, composer: true, quiet: quietLine(t), body: `<div class="th-card">${thAv(t)}<div class="m"><b>${t.from}</b><small>${esc(t.role)} · usually replies the same school day</small></div></div><div class="day-sep"><span>Today</span></div>${t.msgs.map(m => { const h = `<div class="bubble ${m.me?'me':''} ${m.isNew?'new':''}">${esc(m.t)}<small>${m.at}</small></div>`; m.isNew = false; return h; }).join('')}${t.seen && t.msgs[t.msgs.length-1].me ? `<div class="seen">${ic('check',13,2.6)}Seen</div>` : ''}${S.typing ? '<div class="typing" aria-label="Typing"><i></i><i></i><i></i></div>' : ''}<p class="note">Messages are visible to school staff and kept for 2 years.</p>` }; };
 const QUICK = ['Thank you!', 'Can we talk tomorrow?', 'Noted, thanks', 'Is everything okay?'];
 function replyTo(v) {
   if (/thank|noted/i.test(v)) return 'You’re welcome! Have a lovely day.';
@@ -1548,7 +1832,7 @@ function sendMsg(v) {
 SCR.more = () => ({ big:'More', body: `
   <div class="card me-card">${av('Dilhani Perera', 'var(--brand)', 'lg')}<div class="m"><b>Dilhani Perera</b><small>dilhani.perera@example.lk</small><div class="me-kids">${KIDS.map((k, i) => `<button class="chip" data-act="push" data-to="children" data-kid="${i}">${av(k.name, k.color, 'xs')}${k.first}</button>`).join('')}</div></div></div>
   ${secX('Your children')}
-  <div class="card">${row('kids','t-blue','My children','Profiles, classes and teachers','', 'data-act="push" data-to="children"')}${KIDS.map((k, i) => row('leaf', insight(k).level[0] === 'good' ? 't-green' : 't-amber', `How ${k.first} is doing`, insight(k).level[1] + ' · attendance, learning, wellbeing', '', `data-act="push" data-to="doing" data-kid="${i}"`)).join('')}${row('image','t-gold','Moments','Photos and praise from teachers','', 'data-act="tab" data-t="moments"')}</div>
+  <div class="card">${row('kids','t-blue','My children','Profiles, classes and teachers','', 'data-act="push" data-to="children"')}${KIDS.map((k, i) => row('leaf', insight(k).level[0] === 'good' ? 't-green' : 't-amber', `How ${k.first} is doing`, insight(k).level[1] + ' · attendance, learning, wellbeing', '', `data-act="push" data-to="doing" data-kid="${i}"`)).join('')}${row('orbit','t-gold','Circle','Moments, the people around your children and this week’s learning','', 'data-act="circGo" data-v="moments"')}</div>
   ${secX('School life')}
   <div class="card">${row('spark','t-gold','Ask Quad','Ask about homework, fees, the bus…','', 'data-act="aqOpen"')}${row('cal','t-blue','Parents’ evening','Book times with teachers','', 'data-act="push" data-to="evening"')}${row('file','t-amber','Forms','Consent and sign-ups','', 'data-act="push" data-to="forms"')}${row('book','t-violet','Exams','Exam timetable','', 'data-act="push" data-to="exams"')}${row('pin','t-green','Trips & bookings','Consent and payment','', 'data-act="push" data-to="trips"')}</div>
   ${secX('Information')}
@@ -1603,7 +1887,7 @@ const isDark = () => { const r = document.documentElement.dataset.theme; return 
 function current() { return S.stack.length ? S.stack[S.stack.length - 1] : {to: S.tab, p: {}}; }
 function renderTabbar() {
   const unread = S.threads.reduce((a, t) => a + t.unread, 0), due = S.invoices.filter(i => i.amt > i.paid).length, mn = momUnseen().length;
-  document.getElementById('tabbar').innerHTML = [['home','Home','home'],['moments','Moments','image', mn],['pay','Payments','pay', due],['inbox','Messages','msg', unread],['more','More','more']]
+  document.getElementById('tabbar').innerHTML = [['home','Home','home'],['moments','Circle','orbit', mn],['pay','Payments','pay', due],['inbox','Messages','msg', unread],['more','More','more']]
     .map(([k, l, i, b]) => `<button class="${S.tab===k?'on':''}" data-act="tab" data-t="${k}" aria-current="${S.tab===k?'page':'false'}" ${b ? `aria-label="${l}, ${b} new"` : ''}><span class="ti">${ic(i,21,S.tab===k?2.2:1.8)}</span>${l}${b?`<span class="badge">${b}</span>`:''}</button>`).join('');
 }
 function render(dir) {
@@ -1615,7 +1899,7 @@ function render(dir) {
   else nav.innerHTML = `<div class="nav"><button class="back" data-act="pop" aria-label="Back">${ic('back',20)}</button><div class="t">${s.title}${s.sub?`<div style="font-size:11.5px;font-weight:500;color:var(--ink-3)">${s.sub}</div>`:''}</div></div>`;
   const body = document.getElementById('body'); body.className = 'body' + (dir ? ' in-' + dir : ''); body.innerHTML = acadText(s.body);
   if (s.composer) { body.style.gap = '10px'; body.scrollTop = 1e6; } else { body.style.gap = ''; body.scrollTop = 0; }
-  document.getElementById('composer').innerHTML = s.composer ? `<div class="quick">${QUICK.map(q => `<button data-act="quick" data-q="${q}">${q}</button>`).join('')}</div><form class="composer" id="composerForm"><input id="msgIn" placeholder="Write a message" autocomplete="off" aria-label="Message"><button aria-label="Send">${ic('send',18)}</button></form>` : '';
+  document.getElementById('composer').innerHTML = s.composer ? `<div class="quick">${QUICK.map(q => `<button data-act="quick" data-q="${q}">${q}</button>`).join('')}</div><form class="composer" id="composerForm"><input id="msgIn" placeholder="Write a message" autocomplete="off" aria-label="Message"><button aria-label="Send">${ic('send',18)}</button></form>${s.quiet ? `<p class="qn" id="quietNote">${ic(inQuiet() ? 'moon' : 'clock', 14, 2.2)}<span>${esc(s.quiet)}</span></p>` : ''}` : '';
   renderTabbar();
   const fab = document.getElementById('aqFab'); fab.hidden = c.to !== 'home'; fab.classList.add('mini');
   const mi = document.getElementById('msgIn'); if (mi && S.draft) { mi.value = S.draft; S.draft = null; setTimeout(() => { try { mi.focus(); mi.setSelectionRange(mi.value.length, mi.value.length); } catch (e) {} }, 350); }
@@ -1627,6 +1911,7 @@ function bindScreen() {
   const cf = document.getElementById('contactForm'); if (cf) cf.onsubmit = e => { e.preventDefault(); pop(); toast('Changes sent to the school office for review'); };
   const mf = document.getElementById('composerForm'); if (mf) mf.onsubmit = e => { e.preventDefault(); const v = document.getElementById('msgIn').value.trim(); if (v) sendMsg(v); };
   bindGestures();
+  const dt = document.getElementById('dayT'); if (dt) { dt.oninput = () => { S.demoT = +dt.value; const r = document.getElementById('dayRingBig'); if (r) r.outerHTML = dayRing(kid(), true); document.getElementById('dayTl').textContent = hmP(S.demoT); }; dt.onchange = () => { S.demoT = +dt.value; rerender(); }; }
   const ds = document.getElementById('dirSearch'); if (ds) ds.oninput = () => document.getElementById('dirList').innerHTML = dirRows(ds.value);
 }
 function push(to, p={}) { S.stack.push({to, p}); render('r'); }
@@ -1862,9 +2147,9 @@ function petals(el) { if (reduced() || !el) return; const sc = document.getEleme
   w.innerHTML = Array.from({length:24}, (_, i) => { const a = (i / 24) * Math.PI * 2 + Math.random() * .4, d = 60 + Math.random() * 70; return `<i class="${i % 3 ? '' : 'sq'}" style="--pc:${cols[i % cols.length]};--dx:${Math.cos(a) * d}px;--dy:${Math.sin(a) * d - 40}px;--rot:${Math.round(Math.random() * 540 - 270)}deg;animation-delay:${Math.random() * 90}ms"></i>`; }).join('');
   sc.appendChild(w); setTimeout(() => w.remove(), 1500); }
 const CHAT_DAYS = ['2026-10-06','2026-10-07','2026-10-08'], CHAT_TIMES = ['15:00','15:10','15:20','15:30','15:40','15:50'];
-function chatSheet(k) { const T = k.teacher;
+function chatSheet(k, P) { const T = P && !P.ct ? {name:P.short, role:P.role} : k.teacher, who = P && !P.ct ? `data-who="${P.key}"` : '';
   openSheet(`<h2 style="font:800 21px var(--f-display)">A 10-minute chat with ${T.name}</h2><p class="hint" style="margin:0">${cap(T.role)} · in person at school or by phone. Pick a time that suits you.</p>
-  ${CHAT_DAYS.map(d => `<div class="slots-day">${dP(d)}</div><div class="pe-slots">${CHAT_TIMES.map(t => { const taken = (r => (r(), r() < .35))(seedP(k.id + d + t)); return `<button class="${taken ? 'taken' : ''}" ${taken ? 'disabled' : ''} data-act="chatPick" data-v="${dP(d)}, ${t}" aria-label="${dP(d)} ${t}${taken ? ', taken' : ''}">${t}</button>`; }).join('')}</div>`).join('')}
+  ${CHAT_DAYS.map(d => `<div class="slots-day">${dP(d)}</div><div class="pe-slots">${CHAT_TIMES.map(t => { const taken = (r => (r(), r() < .35))(seedP(k.id + d + t)); return `<button class="${taken ? 'taken' : ''}" ${taken ? 'disabled' : ''} data-act="chatPick" ${who} data-v="${dP(d)}, ${t}" aria-label="${dP(d)} ${t}${taken ? ', taken' : ''}">${t}</button>`; }).join('')}</div>`).join('')}
   <button class="btn sec" data-act="closeSheet">Not now</button>`); }
 /* ---------- Ask Quad: answers computed from this app's own records ---------- */
 const AQ = {open:false, started:false, drafts:{}, n:0};
@@ -1977,9 +2262,10 @@ const ACT = {
   brandDemo: el => { const d = BRAND_DEMOS.find(x => x[2] === el.dataset.v); try { localStorage.setItem('quad-school', JSON.stringify({name:d[0], short:d[1], sub:d[2], color:d[3], logo:null})); } catch (e) {} applySchoolP(); render(); toast(`Showing the app for ${d[0]}`); },
   sim: el => simulate(el.dataset.k),
   openPush: () => { if (!pushGo || dragged) return; document.getElementById('push').classList.remove('on'); closeSheet(); aqClose(); closeStory(); pushGo(); render('r'); },
-  jump: el => { if (!document.getElementById('signin').hidden) paFinish(); else unlock(); closeSheet(); closeStory(); aqClose(); const to = el.dataset.to;
+  jump: el => { if (!document.getElementById('signin').hidden) paFinish(); else unlock(); closeSheet(); closeStory(); aqClose(); const to = el.dataset.to; S.demoT = null;
     if (to === 'pay') { S.tab = 'pay'; S.stack = []; render(); setTimeout(() => paySheet(), 250); }
-    else if (to === 'moments') { S.tab = 'moments'; S.stack = []; S.momF = 'all'; render(); }
+    else if (['moments', 'people', 'learning'].includes(to)) { S.tab = 'moments'; S.stack = []; S.circ = to; if (to !== 'moments') S.kid = 0; if (to === 'moments') S.momF = 'all'; render(); }
+    else if (to === 'quiet') { S.demoT = 19 * 60 + 30; S.tab = 'inbox'; S.stack = [{to:'thread', p:{id:1}}]; render('r'); toast('Demo clock set to 19:30, inside quiet hours'); }
     else if (to === 'askq') { S.tab = 'home'; S.stack = []; render(); setTimeout(() => aqOpen(), 200); }
     else if (to === 'doing') { S.kid = 1; S.tab = 'home'; S.stack = [{to, p:{}}]; render('r'); }
     else if (to === 'stories') { S.tab = 'home'; S.stack = []; render(); setTimeout(() => openStory(0), 300); }
@@ -2000,18 +2286,20 @@ const ACT = {
   amt: el => { S.topAmt = +el.dataset.a; document.querySelectorAll('.amts button').forEach(b => b.classList.toggle('on', +b.dataset.a === S.topAmt)); document.getElementById('topBtn').innerHTML = `${ic('wallet',18)}Top up ${money(S.topAmt)}`; },
   sayThanks: el => { const m = momThank(el.dataset.id || (momFor(kid())[0] || {}).id); if (!m) return; rerender(); petals(document.querySelector('[data-act="sayThanks"]')); toast(`Thank-you sent to ${m.by}`); },
   hBook: () => { const k = kid(); if (peFor(k)) push('evening'); else chatSheet(k); },
-  chatPick: el => { const k = kid(), T = k.teacher; S.chats = S.chats || {}; S.chats[k.id] = el.dataset.v; closeSheet();
+  chatPick: el => { const k = kid(), T = k.teacher;
+    if (el.dataset.who) { const P = personOf(k, el.dataset.who); S.pchats = S.pchats || {}; S.pchats[k.id + '|' + P.key] = el.dataset.v; closeSheet();
+      personThread(k, P).msgs.push({me:true, t:`Hello ${P.short}, could we have a 10-minute chat about ${k.first}? ${el.dataset.v} would suit me. Thank you!`, at:'Now'}); rerender(); toast(`Chat requested with ${P.short} for ${el.dataset.v}`); return; } S.chats = S.chats || {}; S.chats[k.id] = el.dataset.v; closeSheet();
     threadFor(k).msgs.push({me:true, t:`I’ve booked a 10-minute chat for ${el.dataset.v} about ${k.first}. Thank you!`, at:'Now'}); rerender(); toast(`Booked: ${T.name} · ${el.dataset.v}`); },
   hMsg: () => { const k = kid(), x = insight(k), T = k.teacher, hw = x.focus && x.hw.find(h => h[0] === x.focus.subj);
     openThread(k, x.focus ? `Hello ${T.name}, thank you for the heads-up about ${x.focus.subj}. How can I best help ${k.first} at home with the ${hw ? hw[1].toLowerCase() : 'coursework'} this week?` : `Hello ${T.name}, thank you for everything you’re doing for ${k.first} this term. `); },
   aqOpen: el => aqOpen(el && el.dataset && el.dataset.q), aqClose,
   aqAsk: el => aqAsk(el.dataset.q),
   aqGo: el => { aqClose(); closeSheet(); const to = el.dataset.to, kd = el.dataset.kid;
-    if (to === 'moments') { S.momF = kd === '' || kd === undefined ? 'all' : kd; S.tab = 'moments'; S.stack = []; render(); return; }
+    if (to === 'moments') { S.momF = kd === '' || kd === undefined ? 'all' : kd; S.tab = 'moments'; S.circ = 'moments'; S.stack = []; render(); return; }
     if (kd !== undefined && kd !== '') S.kid = +kd; if (['pay','inbox','more'].includes(to)) { S.tab = to; S.stack = []; render(); } else push(to); },
   aqThanks: el => { const m = momThank(el.dataset.id); el.innerHTML = ic('check',14) + 'Thanks sent'; el.disabled = true; if (m) { petals(el); toast(`Thank-you sent to ${m.by}`); } if (['home','moments'].includes(current().to)) rerender(); },
   momF: el => { S.momF = el.dataset.v; rerender(); },
-  momGo: el => { S.momF = el.dataset.kid !== undefined ? el.dataset.kid : 'all'; S.tab = 'moments'; S.stack = []; render('r'); },
+  momGo: el => { S.momF = el.dataset.kid !== undefined ? el.dataset.kid : 'all'; S.tab = 'moments'; S.circ = 'moments'; S.stack = []; render('r'); },
   momHeart: el => { const id = el.dataset.id, Rx = reacts(), on = !(Rx[id] && Rx[id].heart); Rx[id] = {thanks:'', ...(Rx[id] || {}), heart:on, at:(Rx[id] && Rx[id].at) || nowHM()}; lsSetP('quad-moment-reacts', Rx); rerender();
     if (on) petals(document.querySelector(`[data-act="momHeart"][data-id="${id}"]`)); },
   momThanks: el => { const m = momThank(el.dataset.id); if (!m) return; rerender(); petals(document.querySelector(`[data-act="momThanks"][data-id="${m.id}"]`)); toast(`Thank-you sent to ${m.by}`); },
@@ -2023,6 +2311,28 @@ const ACT = {
   aqThread: el => openThread(KIDS[+el.dataset.kid]),
   aqCopy: el => { const d = AQ.drafts[el.dataset.id]; try { navigator.clipboard.writeText(d.text).catch(() => {}); } catch (e) {} el.innerHTML = ic('check',14) + 'Copied'; toast('Draft copied'); },
   aqSend: el => { const d = AQ.drafts[el.dataset.id]; openThread(KIDS[d.ki]); sendMsg(d.text); toast(`Sent to ${KIDS[d.ki].teacher.name}`); },
+  circ: el => { S.circ = el.dataset.v; render(); },
+  circGo: el => { if (el.dataset.kid !== undefined) S.kid = +el.dataset.kid; closeSheet(); S.circ = el.dataset.v; if (el.dataset.v === 'moments') S.momF = 'all'; S.tab = 'moments'; S.stack = []; render('r'); },
+  famSheet: el => famSheet(el.dataset.key),
+  famInvite: el => famInvite(el && el.dataset && el.dataset.name),
+  famPickup: () => { closeSheet(); push('pickup'); },
+  famSend: () => { const n = document.getElementById('fi_n').value.trim(), ph = document.getElementById('fi_p').value.trim(), d = ph.replace(/\D/g, ''), ks = [...document.querySelectorAll('.fi-k:checked')].map(x => x.value), err = document.getElementById('fi_e');
+    if (n.split(/\s+/).length < 2) { err.textContent = 'Enter their first and last name.'; return; } if (d.length < 9) { err.textContent = 'Enter their mobile number, like +94 77 123 4567.'; return; } if (!ks.length) { err.textContent = 'Choose at least one child.'; return; }
+    const f = famCircle(); f.push({id:'f' + Date.now().toString(36), name:n, rel:document.getElementById('fi_r').value, phone:`+94 ${d.slice(-9, -7)} *** ${d.slice(-4)}`, kids:ks, sees:'moments', status:'invited', at:TODAY}); lsSetP('quad-family-circle', f);
+    closeSheet(); rerender(); toast(`Invite sent to ${n.split(' ')[0]}. They’ll see ${listJoin(ks)}’s moments once they join.`); },
+  famRemove: el => { const f = famCircle(), x = f.find(y => y.id === el.dataset.id); lsSetP('quad-family-circle', f.filter(y => y.id !== el.dataset.id)); closeSheet(); rerender(); if (x) toast(`${x.name} is no longer in the circle and can’t see moments`); },
+  photoSet: el => { const k = kid(), c = lsGetP('quad-photo-consent', {}); c[k.first] = el.dataset.v; lsSetP('quad-photo-consent', c); rerender(); toast('Saved. ' + photoOpts(k).find(o => o[0] === el.dataset.v)[3]); },
+  lrnTry: el => { const l = learning().find(x => x.id === el.dataset.id); if (!l) return; const k = kid();
+    openSheet(`<h2 class="sh-t">You tried it at home</h2><p class="sh-p">“${esc(l.tryHome)}”</p><div class="field"><label for="lt_n">A line for ${esc(l.by)} (optional)</label><textarea class="input" id="lt_n" rows="3" maxlength="140" placeholder="e.g. ${esc(k.first)} wrote to her grandmother in Kandy"></textarea></div><button class="btn" data-act="lrnSave" data-id="${esc(l.id)}">${ic('check', 18, 2.4)}Tell ${esc(l.by)} we tried it</button><button class="btn sec" data-act="closeSheet">Not now</button>`.replace('her grandmother', k.he === 'she' ? 'her grandmother' : 'his grandmother')); },
+  lrnSave: el => { const l = learning().find(x => x.id === el.dataset.id), k = kid(), T = lsGetP('quad-learning-tried', {}), note = (document.getElementById('lt_n').value || '').trim().slice(0, 140);
+    T[l.id] = T[l.id] || {}; T[l.id][k.first] = {at:hmP(demoMin()), note}; lsSetP('quad-learning-tried', T); closeSheet(); rerender(); toast(`Thanks! ${l.by} will see that you tried it at home.`); },
+  pMsg: el => { const k = kid(), P = personOf(k, el.dataset.key), t = personThread(k, P); closeSheet(); S.tab = 'inbox'; S.stack = [{to:'thread', p:{id:t.id}}]; render('r'); },
+  pThanks: el => { const k = kid(), P = personOf(k, el.dataset.key), id = k.id + '|' + P.key; S.pthx = S.pthx || {}; if (S.pthx[id]) return;
+    const t = personThread(k, P); t.msgs.push({me:true, t:`Thank you, ${P.short}, for everything you’re doing with ${k.first} this term. It really shows at home.`, at:'Now'}); S.pthx[id] = nowHM(); rerender();
+    petals(document.querySelector('[data-act="pThanks"]')); toast(`Thank-you sent to ${P.short}`);
+    setTimeout(() => { t.msgs.push({me:false, t:`Thank you, that’s so kind! ${k.first} is a joy to have around.`, at:'Now'}); if (current().to === 'thread') rerender(); else { t.unread++; renderTabbar(); } }, 2600); },
+  pChat: el => { const k = kid(); chatSheet(k, personOf(k, el.dataset.key)); },
+  demoNow: () => { S.demoT = null; rerender(); toast('Back to the live time'); },
   topup: () => { const w = S.wallet[S.kid], el = document.getElementById('walBal'), from = w.bal; w.bal += S.topAmt; countTo(el, from, w.bal); petals(document.getElementById('topBtn')); floatText(el.closest('.hero'), '+' + money(S.topAmt)); toast(`${money(S.topAmt)} added to ${kid().first}’s canteen card`); }
 };
 function unlock() { const f = document.getElementById('faceid'); f.classList.add('scan'); setTimeout(() => { document.getElementById('lock').classList.add('off'); f.classList.remove('scan'); }, 600); }
@@ -2034,7 +2344,9 @@ document.getElementById('aqForm').onsubmit = e => { e.preventDefault(); const i 
 document.addEventListener('keydown', e => { if (e.key === '/' && !e.ctrlKey && !e.metaKey && !e.target.closest('input,textarea,select,[contenteditable]') && document.getElementById('signin').hidden && document.getElementById('lock').classList.contains('off') && !AQ.open) { e.preventDefault(); aqOpen(); return; }
   if (e.key === 'Escape' && AQ.open) { aqClose(); return; } if (e.key === 'Escape') { closeSheet(); closeStory(); } if (SV && document.activeElement?.id !== 'svIn') { if (e.key === 'ArrowRight') storyStep(1); if (e.key === 'ArrowLeft') storyStep(-1); } });
 applySchoolP();
-window.addEventListener('storage', e => { if (e.key === 'quad-moments') { momentsChanged(); return; } if (e.key === 'quad-moment-reacts') { if (['home', 'moments'].includes(current().to)) rerender(); return; } if (['quad-reports', 'quad-pe', 'quad-pe-book', 'quad-forms', 'quad-exams', 'quad-payments'].includes(e.key)) { render(); return; } if (e.key === 'quad-school') { try { const x = JSON.parse(e.newValue || 'null'); if (x && x.acad && JSON.stringify(x.acad.stages.flatMap(y => y.years)) !== JSON.stringify(PLV)) { location.reload(); return; } } catch (er) {} applySchoolP(); render(); } });
+window.addEventListener('storage', e => { if (e.key === 'quad-moments') { momentsChanged(); return; } if (e.key === 'quad-moment-reacts') { if (CIRC_LIVE.includes(current().to)) rerender(); return; }
+  if (['quad-learning', 'quad-learning-tried', 'quad-photo-consent', 'quad-family-circle'].includes(e.key)) { if ([...CIRC_LIVE, 'photos', 'children'].includes(current().to)) rerender(); return; }
+  if (e.key === 'quad-quiet') { const c = current().to, mi = document.getElementById('msgIn'), v = mi ? mi.value : ''; if (['thread', 'person'].includes(c)) { rerender(); const m2 = document.getElementById('msgIn'); if (m2 && v) m2.value = v; } return; } if (['quad-reports', 'quad-pe', 'quad-pe-book', 'quad-forms', 'quad-exams', 'quad-payments'].includes(e.key)) { render(); return; } if (e.key === 'quad-school') { try { const x = JSON.parse(e.newValue || 'null'); if (x && x.acad && JSON.stringify(x.acad.stages.flatMap(y => y.years)) !== JSON.stringify(PLV)) { location.reload(); return; } } catch (er) {} applySchoolP(); render(); } });
 render();
 if (!paSignedIn()) paShow();
 </script>
