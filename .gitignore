@@ -1,6 +1,7 @@
 node_modules
 .next
 dist
+!packages/tokens/dist
 coverage
 .turbo
 .env
