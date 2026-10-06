@@ -15,18 +15,17 @@ const GENERATED = [
   'apps/parent/packages/quad_api',
   'packages/tokens/dist',
   'apps/parent/lib/theme/tokens.g.dart',
-  'apps/parent/lib/l10n',
+  'apps/parent/lib/l10n/*.arb',
 ];
 
 run('pnpm', ['api:client']);
 if (existsSync(resolve(root, 'packages/tokens/package.json'))) run('pnpm', ['tokens:build']);
 run('pnpm', ['i18n:build']);
 
-const changed = out(['diff', '--name-only', '--', ...GENERATED]).split('\n');
-const untracked = out(['ls-files', '--others', '--exclude-standard', '--', ...GENERATED]).split(
-  '\n',
-);
-const stale = [...changed, ...untracked].filter(Boolean);
+// Porcelain status covers staged, unstaged, deleted and untracked files.
+const stale = out(['status', '--porcelain', '--untracked-files=all', '--', ...GENERATED])
+  .split('\n')
+  .filter(Boolean);
 
 if (stale.length > 0) {
   process.stderr.write(

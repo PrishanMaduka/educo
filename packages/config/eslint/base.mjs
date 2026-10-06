@@ -24,6 +24,7 @@ export default tseslint.config(
       '**/coverage/**',
       '**/.turbo/**',
       '**/generated/**',
+      // Flutter app: Dart is checked by flutter analyze; add TS here only with its own lint config.
       'apps/parent/**',
     ],
   },

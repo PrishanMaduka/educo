@@ -21,9 +21,3 @@ run('pnpm', [
 // Start clean so removed endpoints do not leave stale files behind.
 rmSync(resolve(root, 'apps/parent/packages/quad_api'), { recursive: true, force: true });
 run('pnpm', ['exec', 'openapi-generator-cli', 'generate']);
-run('pnpm', [
-  'exec',
-  'prettier',
-  '--write',
-  resolve(root, 'packages/client/src/generated/schema.d.ts'),
-]);
