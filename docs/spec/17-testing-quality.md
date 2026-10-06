@@ -89,4 +89,5 @@
 - No `any`; use `unknown` and narrow it. Exhaustive `switch` statements on enums.
 - Domain logic only in `packages/domain`. Controllers stay thin and call services. Services never take a tenant id from input.
 - Components: one per file, props typed, no inline styles except token CSS variables, every interactive element labelled.
+- The detailed rules and recipes are the `quad-*` skills in `.claude/skills/` (D23); run `quad-review` on every diff before committing.
 - Commits follow Conventional Commits. Each milestone is one pull request (or a few) with screenshots.

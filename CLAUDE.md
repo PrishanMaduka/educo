@@ -8,6 +8,26 @@ Quad is a multi-tenant school platform with three apps: a platform console for Q
 - Finish every milestone with `pnpm verify` green, and tick it off in the Progress list of `docs/spec/18-delivery-plan.md`.
 - Never edit `design/`, except to fix a prototype bug you were asked to fix. Never import from `design/` into an app.
 
+## Skills (`.claude/skills/`)
+Load the matching skill before you start, and run `quad-review` on your diff before every commit.
+- `quad-architecture` (which layer code belongs in) and `quad-reuse` (search before writing). Use both before creating a file.
+- `quad-coding-standards` covers TypeScript, React, NestJS, SQL and Dart.
+- `quad-tdd` gives the test-first loop and the required tests.
+- Recipes:
+  - `quad-api-endpoint` for routes;
+  - `quad-tenant-table` for schema and migrations;
+  - `quad-domain-logic` for business rules;
+  - `quad-web-screen` for staff and console pages;
+  - `quad-flutter-screen` for the parent app.
+- `quad-debugging` is for root-cause fixes.
+
+The Superpowers plugin (brainstorming, writing and executing plans, TDD, systematic debugging, verification before completion, code review) complements these. The Quad skills add the project's own rules on top.
+
+`.claude/settings.json` does three things:
+- It enables Superpowers.
+- It allow-lists the routine `pnpm`, `docker compose`, `fvm` and read-only `git` commands, and denies reading `.env` and force pushes.
+- It runs two hooks. One blocks hand edits to generated files (regenerate them instead). The other formats each edited file with ESLint and Prettier (or `dart format`) once they are installed.
+
 ## Stack (details in docs/spec/02-architecture.md)
 pnpm + Turborepo, TypeScript strict, NestJS (Fastify) API, PostgreSQL 16 with Drizzle and row-level security, Redis + BullMQ, Socket.IO, Next.js 15 with **Tailwind CSS v4** for `apps/staff` and `apps/console`, **Flutter** (Dart 3, Riverpod, go_router) for `apps/parent`, Zod contracts in `packages/contracts`, pure business logic in `packages/domain`, tokens in `packages/tokens`, web components in `packages/ui`.
 

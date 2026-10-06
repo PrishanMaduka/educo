@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "extraKnownMarketplaces": {
+    "superpowers-marketplace": {
+      "source": { "source": "github", "repo": "obra/superpowers-marketplace" }
+    }
+  },
+  "enabledPlugins": {
+    "superpowers@superpowers-marketplace": true
+  },
+  "permissions": {
+    "allow": [
+      "Bash(pnpm install)",
+      "Bash(pnpm install --frozen-lockfile)",
+      "Bash(pnpm dev)",
+      "Bash(pnpm build)",
+      "Bash(pnpm verify)",
+      "Bash(pnpm test)",
+      "Bash(pnpm test:*)",
+      "Bash(pnpm typecheck)",
+      "Bash(pnpm lint)",
+      "Bash(pnpm format)",
+      "Bash(pnpm codegen:check)",
+      "Bash(pnpm api:client)",
+      "Bash(pnpm tokens:build)",
+      "Bash(pnpm i18n:build)",
+      "Bash(pnpm db:migrate)",
+      "Bash(pnpm db:seed)",
+      "Bash(pnpm db:generate)",
+      "Bash(pnpm e2e)",
+      "Bash(pnpm e2e *)",
+      "Bash(pnpm --filter *)",
+      "Bash(pnpm exec vitest *)",
+      "Bash(pnpm exec playwright test *)",
+      "Bash(docker compose ps)",
+      "Bash(docker compose up -d)",
+      "Bash(docker compose logs *)",
+      "Bash(fvm flutter analyze *)",
+      "Bash(fvm flutter analyze)",
+      "Bash(fvm flutter test *)",
+      "Bash(fvm flutter test)",
+      "Bash(fvm flutter pub get)",
+      "Bash(fvm dart format *)",
+      "Bash(fvm dart run build_runner build *)",
+      "Bash(git status)",
+      "Bash(git diff *)",
+      "Bash(git diff)",
+      "Bash(git log *)",
+      "Bash(git show *)",
+      "Bash(rg *)"
+    ],
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.local)",
+      "Read(./.env.*.local)",
+      "Read(./infra/**/*.tfvars)",
+      "Bash(git push --force *)",
+      "Bash(git push -f *)",
+      "Bash(terraform apply *)",
+      "Bash(terraform destroy *)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [{ "type": "command", "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/protect-generated.mjs\"" }]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [{ "type": "command", "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/format-file.mjs\"" }]
+      }
+    ]
+  }
+}
