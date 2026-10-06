@@ -6,31 +6,36 @@ describe('greetingPeriod', () => {
   const timeZone = 'Asia/Colombo';
 
   describe('table-driven test cases', () => {
-    it.each<[string, string, 'morning' | 'afternoon' | 'evening' | 'night', string]>([
-      // Local time 04:59 → night, "Hello"
-      ['2026-10-05T23:29:00Z', '04:59', 'night', 'Hello'],
-      // Local time 05:00 → morning, "Good morning"
-      ['2026-10-05T23:30:00Z', '05:00', 'morning', 'Good morning'],
-      // Local time 11:59 → morning, "Good morning"
-      ['2026-10-06T06:29:00Z', '11:59', 'morning', 'Good morning'],
-      // Local time 12:00 → afternoon, "Good afternoon"
-      ['2026-10-06T06:30:00Z', '12:00', 'afternoon', 'Good afternoon'],
-      // Local time 16:59 → afternoon, "Good afternoon"
-      ['2026-10-06T11:29:00Z', '16:59', 'afternoon', 'Good afternoon'],
-      // Local time 17:00 → evening, "Good evening"
-      ['2026-10-06T11:30:00Z', '17:00', 'evening', 'Good evening'],
-      // Local time 19:59 → evening, "Good evening"
-      ['2026-10-06T14:29:00Z', '19:59', 'evening', 'Good evening'],
-      // Local time 20:00 → night, "Good evening"
-      ['2026-10-06T14:30:00Z', '20:00', 'night', 'Good evening'],
-      // Local time 23:59 → night, "Good evening"
-      ['2026-10-06T18:29:00Z', '23:59', 'night', 'Good evening'],
-      // Local time 00:00 → night, "Hello"
-      ['2026-10-05T18:30:00Z', '00:00', 'night', 'Hello'],
+    it.each<{
+      iso: string;
+      localTime: string;
+      period: 'morning' | 'afternoon' | 'evening' | 'night';
+      word: string;
+    }>([
+      { iso: '2026-10-05T23:29:00Z', localTime: '04:59', period: 'night', word: 'Hello' },
+      { iso: '2026-10-05T23:30:00Z', localTime: '05:00', period: 'morning', word: 'Good morning' },
+      { iso: '2026-10-06T06:29:00Z', localTime: '11:59', period: 'morning', word: 'Good morning' },
+      {
+        iso: '2026-10-06T06:30:00Z',
+        localTime: '12:00',
+        period: 'afternoon',
+        word: 'Good afternoon',
+      },
+      {
+        iso: '2026-10-06T11:29:00Z',
+        localTime: '16:59',
+        period: 'afternoon',
+        word: 'Good afternoon',
+      },
+      { iso: '2026-10-06T11:30:00Z', localTime: '17:00', period: 'evening', word: 'Good evening' },
+      { iso: '2026-10-06T14:29:00Z', localTime: '19:59', period: 'evening', word: 'Good evening' },
+      { iso: '2026-10-06T14:30:00Z', localTime: '20:00', period: 'night', word: 'Good evening' },
+      { iso: '2026-10-06T18:29:00Z', localTime: '23:59', period: 'night', word: 'Good evening' },
+      { iso: '2026-10-05T18:30:00Z', localTime: '00:00', period: 'night', word: 'Hello' },
     ])(
-      'at $2 ($1) should be $3 with "$4"',
-      (utcIsoString, localTime, expectedPeriod, expectedWord) => {
-        const now = new Date(utcIsoString);
+      'at $localTime is $period with "$word"',
+      ({ iso, period: expectedPeriod, word: expectedWord }) => {
+        const now = new Date(iso);
         const result = greetingPeriod(now, timeZone);
 
         expect(result.period).toBe(expectedPeriod);
@@ -39,7 +44,7 @@ describe('greetingPeriod', () => {
     );
   });
 
-  it('Review Focus #4: 2026-10-05T23:30:00Z in Asia/Colombo is morning', () => {
+  it('treats a UTC time on the previous calendar day as local morning in Colombo', () => {
     const now = new Date('2026-10-05T23:30:00Z');
     const result = greetingPeriod(now, timeZone);
 
