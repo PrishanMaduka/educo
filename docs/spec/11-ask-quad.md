@@ -72,7 +72,8 @@ Covers:
 | `child_exams(childId)` | published papers |
 | `my_invoices()` | due and paid |
 | `bus_status(childId)` | live status line |
-| `school_menu(date)` | lunch |
+| `school_menu(date)` | the canteen menu for the day |
+| `child_wallet(childId)` | canteen balance, daily limit, recent purchases (never tops up) |
 | `upcoming_holidays()` | next holidays, including Poya days |
 | `parents_evening_status(childId)` | open evenings, my bookings |
 | `child_contacts(childId)` | class teacher and subject teachers |
@@ -98,9 +99,19 @@ SSE events: `delta` (text), `tool` (name, for a "Looking at attendance…" statu
 ## Safety and privacy
 - Tools run under the caller's identity in the tenant's RLS transaction. They can never reach another tenant.
 - Personal data sent to the model is kept to what the question needs (names, classes, figures). Medical, safeguarding and contact details are never available to tools.
-- The school can turn Ask Quad off (Settings, Ask Quad). Usage is logged without full message text when the school chooses "Don't keep conversations".
+- The school can turn Ask Quad off (Settings → School settings → Ask Quad). Usage is logged without full message text when the school chooses "Don't keep conversations".
 - Rate limits: 30 messages per hour per user and 2,000 per day per school (configurable by plan).
+- Data residency: prompts and tool results are sent to Anthropic, a sub-processor outside the region (see [16](16-security-privacy.md)). Anthropic does not train on API data; use zero data retention where the account has it. The privacy policy and the DPA say so, and schools can turn Ask Quad off.
 - Prompt injection: tool results are wrapped as data, and the system prompt says to treat record text (notes, messages) as data, never as instructions.
+
+## Cost controls
+- **Budget per school:** each plan sets `assistant_monthly_tokens` (input + output). `assistant_usage` keeps the month's tokens and cost per school (and one row for the console).
+- **Alerts:** at 80% of the budget the school's admins get a notification and email, and the console's Needs you today lists the school. The `assistant-budget` job checks hourly; the API also checks before each request.
+- **Hard cap:** at 100% Ask Quad answers "Ask Quad has reached this month's limit for {school}. It will be back on {date}, or your admin can ask Quad to raise it." Platform owners can raise a school's budget for the month in the console.
+- **Per request:** history is trimmed to the last 20 turns, tool results are capped (50 rows, summarised beyond that), and prompt caching keeps the frozen prefix cheap. The usage of every answer is stored on `assistant_messages`.
+- **Outages:** if the Anthropic API errors or times out (30 s to first token), the panel says "Ask Quad isn't available right now. Everything else in Quad works as normal." The SDK retries twice with backoff; no fallback model is used. Errors and latency are on the dashboards ([15](15-cross-cutting.md#observability)).
+- **Deletion:** with "Keep conversations" off, message text is deleted after the answer is streamed and only usage is kept. Otherwise conversations are kept for 90 days, then purged. Deleting a school deletes its conversations.
+- School admins see this month's use against the budget in School settings → Ask Quad (`GET /assistant/usage`).
 
 ## Evaluation (M10)
 - `apps/api/test/assistant/eval/` holds 60 questions per app with expected facts and expected sources, built on the seed data. Each case passes when the answer contains the expected facts, cites the right sources, makes no claims beyond the tool results, and proposes only valid actions.

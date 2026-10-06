@@ -30,23 +30,28 @@ Quad runs a whole school (admissions, records, timetable, teaching, pastoral car
 | Staff portal | School staff | `design/admin.html` | Web (desktop first, works on phone) |
 | Parent app | Parents and guardians | `design/parent.html` | iOS and Android, built with Flutter |
 
+The public landing page (`design/landing.html`: product story, demo request and the sign-in dialog) is served at `quad-edu.com/` by the staff portal app; see [08](08-staff-portal.md#public-landing-page).
+
+The parent app is **one Quad app for every school**, "Quad – School & Family" in the App Store and Google Play. It is not white-labelled: it opens Quad-branded and shows the school's logo, colour and name after sign-in.
+
 Supporting design files: `design/index.html` (launcher), `design/brand.html` (logo guide), `design/brand/*.svg` (logo files), `design/circle.html` (the original Circle concept, for reference only; do not build it as a separate app).
 
 ## Feature map
 
 | Area | Console | Staff portal | Parent app |
 |---|---|---|---|
-| Home | Overview: greeting, summary, needs you today, early warning for schools, revenue, plan mix, status | The school today: greeting, summary, needs you today, good news, early warning, the numbers | Greeting, today with child (story), latest moment, heads-up, to-dos, live class, bus, fees, quick actions, coming up, news |
-| Tenancy | Schools, new-school wizard, stages, curricula, plans and billing, branding, security, danger zone, support access, audit log | Branding is applied from the console | Branding is applied from the console |
-| People | Platform users; each school's users and roles | Users and roles, teachers and classes, students, guardians | Children, contacts |
+| Home | Overview: greeting, summary, needs you today, early warning for schools, revenue, plan mix, status | The school today: greeting, summary, needs you today, good news, early warning, the numbers, my tasks | Greeting, stories, child switcher, the day ring ({child}'s day), needs you (including the early-warning heads-up row), bus, fees, quick actions, coming up, news |
+| Tenancy | Schools, new-school wizard, stages, curricula, plans and billing, branding, security, danger zone, support access, audit log | School settings, audit; branding is applied from the console | Branding is applied after sign-in, from the console |
+| People | Platform users; each school's users and roles | Users and roles, teachers and classes, students, guardians, changes from parents | Children, contact details, staff directory |
+| Onboarding | Leads (demo requests), optional data import after the wizard | Settings → Import data ([21](21-onboarding-import.md)) | Invite codes |
 | Admissions and CRM | – | Pipeline, applicant drawer, leads, campaigns, enquiry forms | – |
-| Communication | – | Inbox, broadcasts, Moments sharing, parents' evenings, consent forms | Messages, Moments tab, push, bookings, forms |
+| Communication | – | Inbox, broadcasts, news and stories, Moments sharing, parents' evenings, consent forms, trips | Messages, Circle tab (Moments, People, Learning), push, bookings, forms, trips, news, calendar |
 | Academics | Curriculum templates | Timetable, subjects and bells per year group, staffing, cover, courses and gradebook, exams, reports, academic year | Timetable, homework, results, reports, exams |
 | Attendance | – | Registers, school attendance | Attendance calendar, report absence |
 | Pastoral | – | Behaviour, house points, medical, sick bay, safeguarding | Rewards, medical details |
-| Early warning | Schools at risk | Students who need a conversation, support plans | Heads-up card, "How is my child doing" |
-| Money | Plans, subscriptions, platform invoices | Fee structures, billing runs, invoices, online payments, accounting | Payments, pay sheet, wallet, trips |
-| Transport | Module switch | Routes (v2) | Live bus, pickup pass |
+| Early warning | Schools at risk, check-ins | Students who need a conversation, support plans | Heads-up row in Needs you, How {child} is doing (with the full heads-up card) |
+| Money | Plans, subscriptions, platform invoices | Fee structures, billing runs, invoices, online payments (the school's own gateways), refunds, canteen, accounting | Payments, pay sheet, canteen wallet, trips |
+| Transport | Module switch | Routes and stops, pickup-pass scanner | Live bus, pickup pass |
 | Assistant | Ask Quad (platform data) | Ask Quad (school data) | Ask Quad (my children) |
 
 ## Glossary
@@ -69,7 +74,8 @@ Everything in the feature map, except what is listed below.
 ## Non-goals for v1
 
 - A student login and student app.
-- Full transport management (routes, drivers, GPS hardware). The parent bus screen uses a provider adapter with a simulator.
+- GPS hardware integration and driver apps (v2). v1 has staff routes and stops (built in M11), and the parent bus screen uses a provider adapter with a simulator.
+- Bank-statement import, accounting integrations (QuickBooks, Xero) and a canteen point-of-sale integration (v2).
 - A payroll or HR system. Staff records cover what the school apps need.
 - Sinhala and Tamil interfaces. The app is built ready for localisation (see [15](15-cross-cutting.md#localisation)), but only English ships. The parent app says "Sinhala and Tamil coming soon".
 - Native desktop apps.

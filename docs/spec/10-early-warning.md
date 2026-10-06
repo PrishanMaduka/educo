@@ -73,7 +73,7 @@ Shown on parent Home as a **Needs you** row ("Heads-up: History needs a little s
   - "Keep an eye on" for medium;
   - "Improving" for good news (for example "Sinhala reading is up 9 points – well done").
 - The card has: what we noticed (each item with its trend, e.g. "History has slipped from B to C this term · 72% → 63% · teacher says: 'Submit coursework on time.'"), why it matters (one short paragraph), and the teacher's suggestion (a quote). Actions:
-  - **Book a 10-minute chat**: opens parents' evening if one is open for the child; otherwise a simple slot picker from the teacher's free periods, which creates a meeting and posts to the thread.
+  - **Book a 10-minute chat**: opens parents' evening if one is open for the child; otherwise the 10-minute chat sheet with the class teacher's office-hour slots (rules in [09](09-parent-app.md#people)), which books the chat and posts to the thread.
   - **Message {teacher}**: opens the thread with a draft already written.
 - Parents see a signal only after the school approves sharing (school setting "Share early warning with parents": Off, After a plan is started (default), Automatically).
 
@@ -103,6 +103,15 @@ The early warning page has:
 - cards with the school colour badge, plan, country and MRR;
 - a staff-use sparkline with the current % and reasons;
 - a suggested next step (for example "Book a check-in call with Sanjeewa Senanayake, the principal", "Retry the card, then call the bursar", "Upgrade to Enterprise – 96% seats used", "Say thank you, and ask if they would share their story");
-- actions: Plan a check-in (a drawer with date, owner and note), Retry payment, Upgrade, and Draft email (Ask Quad).
+- actions: Plan a check-in, Retry payment, Upgrade, and Draft email (Ask Quad).
+
+**Plan a check-in** (drawer, titled with the school and its level):
+- **With:** the school's admins and principal (principal preselected);
+- **When:** suggested slot chips (tomorrow, and the next two working days at the school's time zone), skipping the school's holidays with a note ("Not Mon 26 Oct: it's Vap Poya and Sri Lankan schools are closed"), or a custom date and time;
+- **How:** Phone call, Video call or School visit;
+- **What to talk about:** prefilled with the school's signal reasons as bullets plus "What would make Quad easier for the team", editable;
+- **Send {first name} a calendar invite** (on by default; an email with an `.ics` invite from the owner).
+
+**Plan check-in** saves a `school_checkins` row owned by the signed-in platform user and shows it on the school's Overview and in the card ("Check-in planned · Thu 8 Oct, phone"). After the date the owner marks it done with an outcome, or cancels it.
 
 The same panel appears at the top of each school's overview.

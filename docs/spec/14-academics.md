@@ -7,7 +7,7 @@ Prototypes: Timetable, Teachers & classes, My teaching, Staff cover, Courses & g
 - Each stage has a **kind**: `early`, `primary`, `middle`, `exam` or `sixth`. The kind is inferred from the stage name and ages, and can be changed. It sets defaults:
   - **Subjects:** Early Years get Literacy, Numeracy, Understanding the world, Creative play and Physical play. Primary gets English, Mathematics, Science, Sinhala or second language, Art, Music, PE and ICT. Secondary and exam stages get qualification subjects. Sixth form gets option blocks. IB uses PYP units, MYP subject groups, and DP with TOK.
   - **Bell schedule:** for example, Early Years 08:00–12:00 with 2 breaks, Primary 08:00–13:30, Senior 07:50–14:20 with 8 lessons and 2 breaks.
-- **Subjects per year group:** in the Subjects drawer, add or remove subjects, set periods per week, and reorder. A warning shows when the total periods do not equal the lessons in the bell schedule × 5 (or × 10 for an A/B week).
+- **Subjects per year group:** in the Subjects drawer, add or remove subjects, set periods per week, and reorder. A warning shows when the total periods do not equal the lessons in the bell schedule × 5 (or × 10 for an A/B week). **Copy to other year groups** lists the other year groups in the same stage (and, below, other stages) with checkboxes; copying replaces their subject list and periods with this one after a confirmation that names what will change ("Year 5 and Year 6 will get these 9 subjects. Teaching assignments for removed subjects are kept as Not assigned.").
 - **Bell times per stage:** in the Bell times drawer, add or remove periods and breaks, set times (validated: no overlaps, increasing), and label breaks ("Interval", "Lunch").
 
 ## Teachers & classes (staffing)
@@ -20,6 +20,9 @@ Tabs:
   - Each class card shows: the class teacher, number of students, and subjects with their teacher. A subject with no teacher shows "Not assigned".
   - Assign by picking a teacher from those who teach that subject. The picker shows their current load.
 - **Sections:** heads and deputies per stage.
+- **Rooms:** a table of rooms (name, kind: classroom, lab, hall, sports, studio or ICT, capacity, and the classes or subjects that use it by default) with Add room and an edit drawer. Rooms feed the timetable generator, class default rooms and exam room allocation. A room in use cannot be deleted; it can be switched off.
+- **Unavailability:** in the teacher drawer, a week grid (days × periods, Week A/B when used) where you tap periods or whole days the teacher cannot teach (part-time days, regular commitments), with a reason. The generator treats them as hard constraints. The teacher list shows "Part time · not Fridays".
+- **Office hours:** in the teacher drawer, the times parents can book a 10-minute chat (default 15:00–16:00 on school days). See [09](09-parent-app.md#people).
 
 Rules: a primary-stage class teacher teaches most subjects in their class by default. A teacher's load is the sum of periods per week across their assignments.
 
@@ -52,10 +55,11 @@ Rules: a primary-stage class teacher teaches most subjects in their class by def
 - A "view as teacher" picker for admins; teachers see their own view.
 - Greeting with today's lesson count and weekly periods.
 - **Hero:** the current lesson (time left) or the next lesson.
+- **Working on with {child}:** a small card per class taught, with one short line per subject ("Fractions of a shape and reading a ruler"), editable inline (≤120 characters) and optionally per student. Parents see it on the person screen in Circle → People. When empty, parents see the subject's current topic from this week's learning post.
 - Stats: lessons done today, reports to write, my class.
 - **Today timeline:** each lesson with its time, subject, class, room and period. Actions: Register, and Marks & comments. Past lessons are greyed out and the current one is highlighted. Cover lessons have a "Cover" pill.
 - **Needs you:**
-  - cover requests (Accept / Can't cover);
+  - cover requests (**Accept** / **Can't cover**; `POST /cover/requests/:id/accept|decline`). Can't cover returns the lesson to the cover board with "Declined by {name}";
   - report comments to write per class;
   - morning registration for my class;
   - parent messages waiting.
@@ -65,7 +69,7 @@ Rules: a primary-stage class teacher teaches most subjects in their class by def
 - **My week:** five columns of lessons, with clashes highlighted (there should be none after generation).
 
 ## Staff cover
-- Shows today's absent staff: name, reason, part of the day, and the number of lessons. **Report absence** opens a drawer with teacher, date, full day / morning / afternoon, and reason.
+- Shows today's absent staff: name, reason, part of the day, and the number of lessons. **Report absence** opens a drawer with teacher, date, full day / morning / afternoon, and reason. **Back in school** on an absent teacher removes the absence; unpublished cover for it is dropped, and cover teachers who were already told get "Cover no longer needed: {lesson}".
 - **Cover board:** every lesson that needs cover (time, absent teacher, class and subject, room), each with a "Cover" picker. The picker lists only free teachers, sorted by:
   1. subject specialists first;
   2. fewest covers today;
@@ -83,14 +87,15 @@ Rules: a primary-stage class teacher teaches most subjects in their class by def
   - students × assignments, with marks editable inline;
   - the weighted average recalculates as you type and is converted to a grade on the school's scale;
   - missing work is highlighted;
-  - export CSV.
+  - **Publish to parents**: choose the assignments (or all marked ones); parents then see those marks and the running grade in Results. Unpublished marks are never shown to parents. Publishing again after edits updates what parents see and notes "updated";
+  - **Export CSV** (students × assignments with marks, weighted average and grade).
 
 ## Exams
 - **Series:** an internal Term 1 series plus one series per qualification in the curriculum (for example Checkpoint, IGCSE and A Level for Cambridge; Scholarship, O/L and A/L for the Sri Lankan curriculum). Each series has dates and status.
 - **Generator** (`packages/domain/exams`):
   - Each year group gets sequential sessions (AM 08:30 and PM 12:30 on school days), one paper per session, so there are never two papers for the same year group in a session.
   - Room allocation by capacity: Main hall 220, Sports hall 160, classrooms 30 each. Candidates are the year group's student count, or the qualification entries.
-- **Timetable view:** papers laid out by day and session, each with subject, paper, year group, duration, room and candidates. Add or edit a paper in a drawer.
+- **Timetable view:** papers laid out by day and session, each with subject, paper, year group, duration, room and candidates. **Add paper** and edit open a drawer (year group, subject, paper name, date, session, duration, room, invigilators); the drawer also has **Remove paper**. Every change re-runs the clash check.
 - **Clash check:** the same year group in the same session, or a room over capacity. Clashing papers are flagged in red with a reason, and **Publish** is turned off while any exist.
 - Publishing makes the series visible in the parent app (Exams, and a to-do on Home) and notifies parents.
 
@@ -99,11 +104,12 @@ Rules: a primary-stage class teacher teaches most subjects in their class by def
 - Per class, the steps are:
   1. **marks and comments**: subject teachers enter a mark (with the grade derived from the scale), effort and a comment;
   2. **class teacher comment**;
-  3. **head review**: approve, or send back with a note;
+  3. **head review**: approve, or **send back with a note** (the class goes back to draft, the teachers concerned get the note in My teaching, and the class shows "Sent back · {note}");
   4. **publish**.
   
-  Progress bars per class show the comments completed.
-- Comment helpers: a comment bank per subject, plus Ask Quad "Suggest a comment from marks and notes", which the teacher must edit and confirm (never auto-filled).
+  Progress bars per class show the comments completed. An approved class can be **reopened** by the approver to fix a mistake before publishing.
+- **Unpublish** (after publishing, principal or admin, with a reason): parents of that class lose access to the PDF and see "This report is being corrected. We'll let you know when it's back." Republishing renders new PDFs and notifies them again. Both are audited.
+- Comment helpers: a **comment bank** per subject (and one for class-teacher comments), with shared comments managed by section heads and each teacher's own; comments are grouped by band (excellent, good, steady, needs support) and use placeholders (`{first name}`, `{he/she/they}`), filled in when inserted. Plus Ask Quad "Suggest a comment from marks and notes", which the teacher must edit and confirm (never auto-filled).
 - Publishing renders a PDF per student (school letterhead, grades, comments, attendance) with the `render-report-pdfs` job. Parents get "{child}'s Term 1 report is ready" on Home, and the report appears under Reports.
 - Grades always come from the curriculum's scale (`gradeFor(mark)`).
 
@@ -115,7 +121,13 @@ Rules: a primary-stage class teacher teaches most subjects in their class by def
   - next year's classes set up;
   - final-year students marked as leaving;
   - timetable drafted for next year.
-- **Rollover** (a job with a preview of every change):
+- **Rollover wizard** (a drawer with steps; it runs as a job after a preview of every change):
+  1. **New year:** name ("2027/28"), start and end dates, and term dates (prefilled from this year plus one year, editable), and holidays to copy.
+  2. **Exceptions:** students who **repeat the year** (stay in their year group), students **leaving** (with a leaving date and reason; final-year students are preselected), and class moves (a different class name next year). Searchable by year group and class.
+  3. **New intake:** enrolled applicants for the new year with their class placement (auto-placed by free capacity, editable).
+  4. **Review:** counts per year group before and after, students graduating, balances to carry forward, and the warnings from the pre-rollover checks. **Start rollover**.
+  
+  The job:
   - promotes each student one year group, keeping the same class name by default (editable);
   - graduates the final year;
   - archives the year as read-only;
