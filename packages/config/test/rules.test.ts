@@ -1,3 +1,5 @@
+import { fileURLToPath } from 'node:url';
+
 import { RuleTester } from 'eslint';
 import tseslint from 'typescript-eslint';
 import { describe, it } from 'vitest';
@@ -13,7 +15,7 @@ const tester = new RuleTester({
 });
 
 // RuleTester resolves filenames against cwd; the repo root is found by walking up to pnpm-workspace.yaml.
-const repo = (rel: string) => new URL(`../../../${rel}`, import.meta.url).pathname;
+const repo = (rel: string) => fileURLToPath(new URL(`../../../${rel}`, import.meta.url));
 const rawRule = quad.rules['no-raw-db-client'];
 const platformRule = quad.rules['no-with-platform-outside-platform'];
 
@@ -61,6 +63,24 @@ tester.run('quad/no-raw-db-client', rawRule, {
     { code: "const m = import('pg');", filename: repo('apps/api/src/x.ts'), errors: raw },
     { code: "const m = require('pg');", filename: repo('apps/api/src/x.ts'), errors: raw },
     { code: "import 'pg';", filename: repo('apps/api/src/x.ts'), errors: raw },
+    { code: "const m = await import('pg');", filename: repo('apps/api/src/x.ts'), errors: raw },
+    { code: "import pg = require('pg');", filename: repo('apps/api/src/x.ts'), errors: raw },
+    {
+      code: "export * from '@quad/db/internal';",
+      filename: repo('apps/api/src/x.ts'),
+      errors: raw,
+    },
+    { code: "const m = require('pg-pool');", filename: repo('apps/api/src/x.ts'), errors: raw },
+    {
+      code: "import { Pool } from 'pg';",
+      filename: repo('apps/api/src/platformer/x.ts'),
+      errors: raw,
+    },
+    {
+      code: "import { Pool } from 'pg';",
+      filename: repo('apps/dbx/packages/db/x.ts'),
+      errors: raw,
+    },
   ],
 });
 
@@ -87,13 +107,22 @@ tester.run('quad/no-with-platform-outside-platform', platformRule, {
       filename: repo('apps/api/src/modules/students/s.ts'),
     },
     {
-      code: "import { withPlatform } from './local';",
-      filename: repo('apps/api/src/modules/students/s.ts'),
-    },
-    {
       code: "import * as db from '@quad/db'; db.withTenant();",
       filename: repo('apps/api/src/modules/students/s.ts'),
     },
+    {
+      code: "const { withTenant } = await import('@quad/db');",
+      filename: repo('apps/api/src/modules/students/s.ts'),
+    },
+    {
+      code: "const { withTenant } = require('@quad/db');",
+      filename: repo('apps/api/src/modules/students/s.ts'),
+    },
+    {
+      code: "import { createPlatformDb } from '@quad/db';",
+      filename: repo('apps/api/src/platform/x.ts'),
+    },
+    { code: "export * from '@quad/db';", filename: repo('apps/api/src/platform/x.ts') },
   ],
   invalid: [
     {
@@ -124,6 +153,71 @@ tester.run('quad/no-with-platform-outside-platform', platformRule, {
     {
       code: "import { withPlatform } from '@quad/db';",
       filename: repo('apps/api/src/platformish/s.ts'),
+      errors: platform,
+    },
+    {
+      code: "import { createPlatformDb } from '@quad/db';",
+      filename: repo('apps/api/src/modules/students/s.ts'),
+      errors: platform,
+    },
+    {
+      code: "import { withPlatform } from '../platform/x';",
+      filename: repo('apps/api/src/modules/students/s.ts'),
+      errors: platform,
+    },
+    {
+      code: "import { createPlatformDb as c } from './x';",
+      filename: repo('apps/api/src/modules/students/s.ts'),
+      errors: platform,
+    },
+    {
+      code: "export * from '@quad/db';",
+      filename: repo('apps/api/src/modules/students/s.ts'),
+      errors: platform,
+    },
+    {
+      code: "export { withPlatform } from './x';",
+      filename: repo('apps/api/src/modules/students/s.ts'),
+      errors: platform,
+    },
+    {
+      code: "const { withPlatform } = await import('@quad/db');",
+      filename: repo('apps/api/src/modules/students/s.ts'),
+      errors: platform,
+    },
+    {
+      code: "const { withPlatform: wp } = require('@quad/db');",
+      filename: repo('apps/api/src/modules/students/s.ts'),
+      errors: platform,
+    },
+    {
+      code: "const { createPlatformDb } = require('./x');",
+      filename: repo('apps/api/src/modules/students/s.ts'),
+      errors: platform,
+    },
+    {
+      code: "const m = await import('@quad/db'); m.withPlatform(f);",
+      filename: repo('apps/api/src/modules/students/s.ts'),
+      errors: platform,
+    },
+    {
+      code: "const m = require('./x'); m.createPlatformDb({});",
+      filename: repo('apps/api/src/modules/students/s.ts'),
+      errors: platform,
+    },
+    {
+      code: "import('@quad/db').then((m) => m.withPlatform);",
+      filename: repo('apps/api/src/modules/students/s.ts'),
+      errors: platform,
+    },
+    {
+      code: "const { ...all } = require('@quad/db');",
+      filename: repo('apps/api/src/modules/students/s.ts'),
+      errors: platform,
+    },
+    {
+      code: "import * as x from './x'; x.withPlatform();",
+      filename: repo('apps/api/src/modules/students/s.ts'),
       errors: platform,
     },
   ],

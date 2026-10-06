@@ -6,49 +6,72 @@ import { assertTenantId, createTenantRunner } from './tenant';
 import type { PlatformRunner, PlatformTx } from './platform';
 import type { TenantRunner, TenantTx } from './tenant';
 
-export interface DbConfig {
-  /** `quad_app` connection URL (DATABASE_URL). */
-  readonly appUrl: string;
-  /** `quad_platform` connection URL (DATABASE_PLATFORM_URL). */
-  readonly platformUrl: string;
-  /** Maximum connections in the `quad_app` pool (DATABASE_POOL_MAX). Default 10. */
+interface PoolConfig {
+  /** Maximum connections in the pool. */
   readonly poolMax?: number;
-  /** Maximum connections in the separate, small `quad_platform` pool. Default 2. */
-  readonly platformPoolMax?: number;
   /** Called when an idle connection fails; pass the app logger. */
   readonly onPoolError?: (error: Error) => void;
 }
 
-/** The database handles the API and worker use. */
-export interface QuadDb {
+export interface TenantDbConfig extends PoolConfig {
+  /** `quad_app` connection URL (DATABASE_URL). Default pool size 10. */
+  readonly appUrl: string;
+}
+
+export interface PlatformDbConfig extends PoolConfig {
+  /** `quad_platform` connection URL (DATABASE_PLATFORM_URL). Default pool size 2. */
+  readonly platformUrl: string;
+}
+
+/** A `quad_app` handle: `withTenant` on its own pool. */
+export interface QuadTenantDb {
   readonly withTenant: TenantRunner;
-  readonly withPlatform: PlatformRunner;
-  /** Ends both pools. */
+  /** Ends the pool. */
   close(): Promise<void>;
 }
 
-/** Builds `withTenant` and `withPlatform` on two separate pools. Connections open on first use. */
-export function createDb(config: DbConfig): QuadDb {
-  const appPool = createPool(config.appUrl, {
+/** A `quad_platform` handle. Only reachable through `createPlatformDb` / `withPlatform`, both lint-restricted. */
+export interface QuadPlatformDb {
+  readonly withPlatform: PlatformRunner;
+  /** Ends the pool. */
+  close(): Promise<void>;
+}
+
+/** Builds `withTenant` on its own `quad_app` pool. Connections open on first use. */
+export function createTenantDb(config: TenantDbConfig): QuadTenantDb {
+  const pool = createPool(config.appUrl, {
     max: config.poolMax ?? 10,
     applicationName: 'quad-app',
     ...(config.onPoolError ? { onError: config.onPoolError } : {}),
   });
-  const platformPool = createPool(config.platformUrl, {
-    max: config.platformPoolMax ?? 2,
-    applicationName: 'quad-platform',
-    ...(config.onPoolError ? { onError: config.onPoolError } : {}),
-  });
   return {
-    withTenant: createTenantRunner(appPool),
-    withPlatform: createPlatformRunner(platformPool),
+    withTenant: createTenantRunner(pool),
     close: async () => {
-      await Promise.all([appPool.end(), platformPool.end()]);
+      await pool.end();
     },
   };
 }
 
-let defaultDb: QuadDb | undefined;
+/**
+ * Builds `withPlatform` on its own small `quad_platform` pool. Only for
+ * `apps/api/src/platform/**` and `apps/api/src/worker/platform-jobs/**`.
+ */
+export function createPlatformDb(config: PlatformDbConfig): QuadPlatformDb {
+  const pool = createPool(config.platformUrl, {
+    max: config.poolMax ?? 2,
+    applicationName: 'quad-platform',
+    ...(config.onPoolError ? { onError: config.onPoolError } : {}),
+  });
+  return {
+    withPlatform: createPlatformRunner(pool),
+    close: async () => {
+      await pool.end();
+    },
+  };
+}
+
+let defaultTenantDb: QuadTenantDb | undefined;
+let defaultPlatformDb: QuadPlatformDb | undefined;
 
 function parsePoolMax(value: string | undefined): number | undefined {
   if (value === undefined || value === '') {
@@ -61,13 +84,17 @@ function parsePoolMax(value: string | undefined): number | undefined {
   return max;
 }
 
-function getDefaultDb(): QuadDb {
-  defaultDb ??= createDb({
+function getDefaultTenantDb(): QuadTenantDb {
+  defaultTenantDb ??= createTenantDb({
     appUrl: databaseUrls().appUrl,
-    platformUrl: databaseUrls().platformUrl,
     poolMax: parsePoolMax(process.env.DATABASE_POOL_MAX),
   });
-  return defaultDb;
+  return defaultTenantDb;
+}
+
+function getDefaultPlatformDb(): QuadPlatformDb {
+  defaultPlatformDb ??= createPlatformDb({ platformUrl: databaseUrls().platformUrl });
+  return defaultPlatformDb;
 }
 
 /**
@@ -79,7 +106,7 @@ export async function withTenant<T>(
   fn: (tx: TenantTx) => Promise<T>,
 ): Promise<T> {
   assertTenantId(tenantId);
-  return getDefaultDb().withTenant(tenantId, fn);
+  return getDefaultTenantDb().withTenant(tenantId, fn);
 }
 
 /**
@@ -88,12 +115,14 @@ export async function withTenant<T>(
  * `apps/api/src/worker/platform-jobs/**`.
  */
 export async function withPlatform<T>(fn: (tx: PlatformTx) => Promise<T>): Promise<T> {
-  return getDefaultDb().withPlatform(fn);
+  return getDefaultPlatformDb().withPlatform(fn);
 }
 
 /** Ends the default pools (call on shutdown). Safe to call when they were never used. */
 export async function closeDb(): Promise<void> {
-  const db = defaultDb;
-  defaultDb = undefined;
-  await db?.close();
+  const tenantDb = defaultTenantDb;
+  const platformDb = defaultPlatformDb;
+  defaultTenantDb = undefined;
+  defaultPlatformDb = undefined;
+  await Promise.all([tenantDb?.close(), platformDb?.close()]);
 }

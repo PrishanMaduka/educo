@@ -1,4 +1,4 @@
-import { isInside, repoRelativePath } from './repo-path.mjs';
+import { dynamicSource, isInside, isPackageOrSubpath, repoRelativePath } from './repo-path.mjs';
 
 const ALLOWED_FOLDERS = ['packages/db/'];
 const BANNED = [
@@ -10,7 +10,7 @@ const BANNED = [
 ];
 
 function isBanned(source) {
-  if (BANNED.some((name) => source === name || source.startsWith(`${name}/`))) return true;
+  if (BANNED.some((name) => isPackageOrSubpath(source, name))) return true;
   return source === '@quad/db/internal' || source.startsWith('@quad/db/src/');
 }
 
@@ -49,16 +49,17 @@ export default {
       },
       ExportAllDeclaration: checkDeclaration,
       ImportExpression(node) {
-        if (node.source.type === 'Literal') check(node, node.source.value);
+        check(node, dynamicSource(node));
       },
       CallExpression(node) {
-        const [arg] = node.arguments;
-        if (
-          node.callee.type === 'Identifier' &&
-          node.callee.name === 'require' &&
-          arg?.type === 'Literal'
-        ) {
-          check(node, arg.value);
+        check(node, dynamicSource(node));
+      },
+      // import x = require('pg')
+      TSImportEqualsDeclaration(node) {
+        if (node.importKind === 'type') return;
+        const ref = node.moduleReference;
+        if (ref.type === 'TSExternalModuleReference' && ref.expression.type === 'Literal') {
+          check(node, ref.expression.value);
         }
       },
     };

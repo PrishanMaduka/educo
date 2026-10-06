@@ -1,6 +1,6 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalDependencies": [".env.example", ".nvmrc", ".fvmrc"],
+  "globalDependencies": [".env.example", ".nvmrc", ".fvmrc", "packages/config/eslint/**", "eslint.config.mjs"],
   "agentGuidance": false,
   "globalEnv": ["APP_ENV", "NODE_ENV"],
   "tasks": {

@@ -5,8 +5,9 @@ import { beforeAll, describe, expect, it, vi } from 'vitest';
 import {
   InvalidTenantIdError,
   TransactionClosedError,
-  createDb,
+  createPlatformDb,
   createPlatformRunner,
+  createTenantDb,
   createTenantRunner,
   tenantRlsSql,
   tenants,
@@ -322,10 +323,10 @@ describe('quad_owner is filtered too (FORCE RLS)', () => {
   });
 });
 
-describe('createDb', () => {
-  it('builds withTenant and withPlatform from URLs and closes its pools', async () => {
+describe('createTenantDb / createPlatformDb', () => {
+  it('builds withTenant on its own pool and closes it', async () => {
     await insertProbe(schoolB.id, 'via-create-db');
-    const db = createDb({ appUrl: testDb().appUrl, platformUrl: testDb().platformUrl, poolMax: 2 });
+    const db = createTenantDb({ appUrl: testDb().appUrl, poolMax: 2 });
     try {
       const labels = await db.withTenant(schoolB.id, async (tx) => {
         const result = await tx.execute<ProbeRow>(
@@ -335,6 +336,14 @@ describe('createDb', () => {
       });
       expect(labels).toContainEqual({ tenant_id: schoolB.id, label: 'via-create-db' });
       expect(labels.every((row) => row.tenant_id === schoolB.id)).toBe(true);
+    } finally {
+      await db.close();
+    }
+  });
+
+  it('builds withPlatform on its own pool and closes it', async () => {
+    const db = createPlatformDb({ platformUrl: testDb().platformUrl, poolMax: 1 });
+    try {
       const count = await db.withPlatform(async (tx) => (await tx.select().from(tenants)).length);
       expect(count).toBeGreaterThanOrEqual(2);
     } finally {
