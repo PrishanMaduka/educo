@@ -7,7 +7,7 @@ App: `apps/console`. Prototype: `design/platform.html`. Users: Quad staff (see [
   - **Platform:** Overview, Early warning (count of at-risk schools), Schools (count), Curricula, Plans & billing, Audit log.
   - **Pinned schools:** up to 6, each with its colour badge.
   - **Apps:** links that open the staff portal and parent app preview of the selected school.
-- Top bar: search (schools, users, subdomains; Ctrl K), system status pill ("All systems normal"), Ask Quad, theme toggle, profile.
+- Top bar: search (schools, users; Ctrl K), system status pill ("All systems normal"), Ask Quad, theme toggle, profile.
 
 ## Overview
 - **Greeting section** with the morning scene: "Good morning, {name}", then the sentence "{n} schools in {c} countries now run on Quad, looking after {students} students and bringing in {MRR} a month. Most of them are doing well: {k} are thriving. There are {x} things that need you today, and {y} schools are showing early signs they might leave." Also a calendar note (next public holiday that affects many schools) and the actions New school, All schools and Ask Quad.
@@ -18,12 +18,12 @@ App: `apps/console`. Prototype: `design/platform.html`. Users: Quad staff (see [
 - **System status:** API, web, push, SMS, payments and email. **Recent activity:** from `platform_audit`.
 
 ## Schools
-- Gallery and list views. The gallery uses school cards with the school's colour cover, logo, name, subdomain, seats used/limit bar, plan, country, MRR, health pill and modules count.
+- Gallery and list views. The gallery uses school cards with the school's colour cover, logo, name, country, seats used/limit bar, plan, country, MRR, health pill and modules count.
 - Search, a plan filter, and status chips (All, Active, Trial, Onboarding, Past due, Suspended) with counts.
 - Export (CSV) and New school.
 
 ## New-school wizard (drawer, six steps)
-1. **School details:** name, short name (auto-suggested), subdomain with a live availability check and suggestion, country (sets currency and time zone), region, curriculum (template list).
+1. **School details:** name, short name (auto-suggested), country (sets currency and time zone), region, curriculum (template list).
 2. **Stages and year groups:** loaded from the chosen curriculum. In the editor you can:
    - rename stages and set age ranges;
    - add or remove year groups (chips with ×, an "+ Add year group" input; duplicates are rejected);
@@ -34,12 +34,12 @@ App: `apps/console`. Prototype: `design/platform.html`. Users: Quad staff (see [
 3. **Branding:** logo upload by drag and drop or file picker (PNG, JPG or SVG up to 2 MB, square recommended). The brand colour is picked automatically from the logo (dominant non-neutral colour) and can be changed with swatches or a hex. Also a short name, "No logo yet? Make a sample crest", and live previews of the staff sign-in, staff portal and parent app sign-in and home.
 4. **Plan and modules:** Starter, Growth or Enterprise cards. Module switches are limited to what the plan includes. A seat slider, and a live monthly total of seats × the per-student price.
 5. **First admin:** name and email (validated). They get an invite email.
-6. **Create:** an animated provisioning checklist streamed from the job: create the school, set up stages and classes, roles and permissions, branding, parent app listing, invite the admin. When done: "{School} is live on Quad. Congratulations!", a petal burst, and buttons to open the staff portal and the parent app.
+6. **Create:** an animated provisioning checklist streamed from the job: create the school record (a `tenants` row in the shared database; no domain or schema is created), set up stages and classes, roles and permissions, branding, parent app listing, invite the admin. When done: "{School} is live on Quad. Congratulations!", the line "Staff sign in at quad-edu.com. Quad opens {School} for them from their account.", a petal burst, and buttons to open the staff portal and the parent app.
 
 Acceptance: the wizard keeps its state when closed and reopened. Back and Next keep the edits. A provisioning failure shows the failed step with Retry. Creating a school writes `platform_audit`.
 
 ## School page (`/schools/:id`)
-- A cover banner in the school colour with the logo tile, name, subdomain, status, plan and health pills, and the actions "Open as school admin" and "Manage users".
+- A cover banner in the school colour with the logo tile, name, country, status, plan and health pills, and the actions "Open as school admin" and "Manage users".
 - Tabs:
   - **Overview:** an early-warning panel (level, sparkline of staff weekly use, reasons, suggested next step, actions), KPI tiles (students/seat limit, staff accounts and pending invites, parents on the app and % of families, monthly bill and per-student price), usage chart and details.
   - **Stages:** the same editor as wizard step 2, with Save and the school's curriculum name.
@@ -60,11 +60,11 @@ Acceptance: the wizard keeps its state when closed and reopened. Back and Next k
       - the matrix with row and column shortcuts and presets;
       - sensitive switches, a people search, and a live summary with validation.
   - **Plan & modules:** module switches, a plan change, a seat slider, and the live monthly total.
-  - **Branding:** logo, colour, live previews, app store name, custom domain (shows the DNS records to add and a verification status). **Publish** pushes the branding to the school's apps live (`tenant.branding.updated`).
+  - **Branding:** logo, colour, live previews, app store name. There is no per-school domain: every school is reached at `quad-edu.com`, and its branding shows once a member signs in. **Publish** pushes the branding to the school's apps live (`tenant.branding.updated`).
   - **Sign-in & security:** Google and Microsoft SSO with the allowed domain, two-step rules, password minimum, session length, IP allowlist.
   - **Danger zone:**
     - export all data (a job that emails a download link);
-    - suspend or reactivate, by typing the subdomain to confirm;
+    - suspend or reactivate, by typing the school's name to confirm;
     - schedule deletion, with a 30-day grace period and the same typed confirmation.
 
 ## Curricula

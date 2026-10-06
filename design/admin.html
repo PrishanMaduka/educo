@@ -407,6 +407,7 @@ td.r,th.r{text-align:right}
 .auth-spin{width:44px;height:44px;border-radius:50%;border:4px solid var(--brand-soft);border-top-color:var(--brand);animation:authSpin .8s linear infinite}@keyframes authSpin{to{transform:rotate(360deg)}}
 .rail-foot .so{margin-left:auto;width:32px;height:32px;background:transparent;border:1px solid rgba(255,255,255,.14);color:var(--rail-ink,#C5CFE3);border-radius:9px}
 .rail-foot .so:hover{background:rgba(255,255,255,.08);color:#fff}
+.rail-foot .sw{margin-left:auto;width:32px;height:32px;background:transparent;border:1px solid rgba(255,255,255,.14);color:var(--rail-ink,#C5CFE3);border-radius:9px}.rail-foot .sw:hover{background:rgba(255,255,255,.08);color:#fff}.rail-foot .sw:not([hidden]) + .so{margin-left:6px}
 @media (max-width:860px){.auth{grid-template-columns:1fr;overflow-y:auto;grid-template-rows:auto 1fr}.auth-art{padding:24px}.auth-quote h2{font-size:26px}.auth-stats{display:none}.auth-panel{justify-content:flex-start;padding-top:28px}}
 @media (prefers-reduced-motion:reduce){.auth,.auth-card{animation:none}}
 
@@ -990,6 +991,10 @@ body:has(.savebar,.uk-bar,.bulkbar) .askq-fab{bottom:92px}
 @media (max-width:900px){.dc-row{grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"sw name del" "pct pct pct" "base base base" "who who who" "amt amt amt"}.dc-row .dc-amt{flex-direction:row;justify-content:space-between;align-items:baseline;padding:0;min-width:0}}
 .in-unit.suf .input{padding-left:10px;padding-right:26px}.in-unit.suf::before{left:auto;right:10px}
 @media (max-width:900px){.dc-row{grid-template-columns:auto minmax(0,1fr) auto}.dc-row .field:nth-of-type(1){grid-column:2/3}.dc-row .field:nth-of-type(n+2),.dc-row .dc-amt{grid-column:1/-1}.dc-row .dc-amt{flex-direction:row;justify-content:space-between;align-items:baseline;padding:0}.dc-row .iconbtn{grid-row:1;grid-column:3}}
+.auth-schools{display:flex;flex-direction:column;gap:8px;margin:6px 0 4px}
+.auth-school{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;text-align:left;padding:10px 12px;border-radius:14px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.auth-school:hover{border-color:var(--brand)}.auth-school b{display:block;font-size:14.5px}.auth-school small{color:var(--ink-3);font-size:12.5px}
+.auth-logo.sm{width:40px;height:40px;border-radius:12px;font-size:13px;box-shadow:none}
 </style>
 </head>
 <body>
@@ -999,7 +1004,7 @@ body:has(.savebar,.uk-bar,.bulkbar) .askq-fab{bottom:92px}
     <div class="brand"><div class="logo"><svg viewBox="0 0 64 64" width="72%" height="72%" aria-hidden="true"><rect x="9" y="9" width="21" height="21" rx="7" fill="#FFFFFF"/><rect x="34" y="9" width="21" height="21" rx="7" fill="#C9C4F5"/><rect x="9" y="34" width="21" height="21" rx="7" fill="#C9C4F5"/><rect x="34" y="34" width="21" height="21" rx="7" fill="#FF7A6E"/><path d="M49 49l9 9" stroke="#FF7A6E" stroke-width="7" stroke-linecap="round"/></svg></div><div><b>Quad</b><small>Colombo International School</small></div></div>
     <div class="vine" aria-hidden="true"></div>
     <nav class="nav" id="nav"></nav>
-    <div class="rail-foot"><div class="av sm" style="background:#7A68E8">PM</div><div style="font-size:12px;min-width:0"><b style="color:#fff;display:block">Prishan Maduka</b><span style="color:var(--rail-ink-2)">Super admin</span></div><button class="iconbtn so" data-act="signOut" aria-label="Sign out" title="Sign out"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
+    <div class="rail-foot"><div class="av sm" style="background:#7A68E8">PM</div><div style="font-size:12px;min-width:0"><b style="color:#fff;display:block">Prishan Maduka</b><span style="color:var(--rail-ink-2)">Super admin</span></div><button class="iconbtn sw" data-act="switchSchool" id="swSchool" hidden aria-label="Switch school" title="Switch school"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M7 7h11l-3-3M17 17H6l3 3"/></svg></button><button class="iconbtn so" data-act="signOut" aria-label="Sign out" title="Sign out"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
   </aside>
   <div class="main">
     <header class="top">
@@ -1786,6 +1791,9 @@ function authRender() {
     <form class="auth-form" id="authForgot" novalidate><div class="field"><label for="au_fe">Email</label><input class="input" id="au_fe" type="email" value="${esc(AUTH.email || c.email)}"></div><div class="err-msg" id="auErr" role="alert"></div><button class="btn primary big">Send reset link</button></form>`;
   else if (st === 'sent') f = `<div class="auth-ok">${ic('mail', 26)}</div><h1>Check your inbox</h1><p class="muted">If <b>${esc(AUTH.email)}</b> has an account, a reset link is on its way. It expires in 30 minutes.</p><button class="btn big" data-auth="back">Back to sign in</button>`;
   else if (st === 'sso') f = `<div class="auth-spin" aria-hidden="true"></div><h1>Signing you in…</h1><p class="muted">Waiting for ${esc(AUTH.sso)} to confirm your account.</p>`;
+  else if (st === 'school') { const ms = membershipsFor(AUTH.email); f = `<h1>Choose a school</h1><p class="muted"><b>${esc(AUTH.email)}</b> is linked to ${ms.length} schools on Quad. You can switch later from the menu.</p>
+    <div class="auth-schools" role="list">${ms.map((m, i) => `<button class="auth-school" role="listitem" data-auth="pick" data-i="${i}"><span class="auth-logo sm" style="background:${m.color};color:#fff">${esc(m.short)}</span><span><b>${esc(m.name)}</b><small>${esc(m.role)}</small></span>${ic('chev', 16)}</button>`).join('')}</div>
+    <label class="checkrow"><input type="checkbox" id="au_rem" checked> Remember my choice on this device</label>`; }
   a.innerHTML = `<div class="auth-art">${c.art()}</div><div class="auth-panel"><div class="auth-card">${f}</div><div class="auth-foot">${c.foot}</div></div>`;
   const ae = () => document.getElementById('auErr');
   const form = document.getElementById('authForm');
@@ -1807,13 +1815,20 @@ function authRender() {
 function authVerify() {
   const ins = [...document.querySelectorAll('#otp input')];
   if (ins.some(x => !x.value)) { document.getElementById('auErr').textContent = 'Enter all 6 digits.'; const o = document.getElementById('otp'); o.classList.remove('shake'); void o.offsetWidth; o.classList.add('shake'); return; }
-  const b = document.getElementById('auVerify'); if (b.disabled) return; b.disabled = true; b.textContent = 'Verifying…'; setTimeout(authDone, 700);
+  const b = document.getElementById('auVerify'); if (b.disabled) return; b.disabled = true; b.textContent = 'Verifying…'; setTimeout(authAfter, 700);
 }
-function authDone() { const c = AUTH.cfg; try { sessionStorage.setItem('quad-auth-' + c.key, '1'); } catch (e) {} const a = document.getElementById('auth'); a.classList.add('leave'); setTimeout(() => { a.hidden = true; a.classList.remove('leave'); a.innerHTML = ''; }, 450); if (c.done) c.done(); }
+/* One domain for every school: the school comes from the account's memberships, chosen after sign-in */
+const MEMBER_SCHOOLS = {cis: {name:'Colombo International School', short:'CIS', sub:'colombo-intl', color:'#DD4A42'}, kha: {name:'Kandy Hill Academy', short:'KHA', sub:'kandyhill', color:'#2BB0A0'}};
+const membershipsFor = em => /^ruwan\.mendis@/i.test(em || '') ? [{...MEMBER_SCHOOLS.cis, role:'Teacher · Mathematics'}, {...MEMBER_SCHOOLS.kha, role:'Head of Mathematics'}] : [{...(SCHOOL.sub === 'kandyhill' ? MEMBER_SCHOOLS.kha : MEMBER_SCHOOLS.cis), role:'Administrator'}];
+function authAfter() { try { sessionStorage.setItem('quad-account', AUTH.email || ''); } catch (e) {} const ms = membershipsFor(AUTH.email); if (AUTH.cfg.key === 'school' && ms.length > 1) { AUTH.step = 'school'; authRender(); } else authDone(); }
+function pickSchool(m) { if (!m) return; try { const cur = JSON.parse(localStorage.getItem('quad-school') || 'null'); if (!cur || cur.sub !== m.sub) localStorage.setItem('quad-school', JSON.stringify(m.sub === 'colombo-intl' && cur && cur.sub === 'colombo-intl' ? cur : {name:m.name, short:m.short, sub:m.sub, color:m.color, logo:null})); } catch (e) {} applySchool(); authDone(); route(); toast(`Signed in to ${m.name}`); }
+function updateSwitch() { const b = document.getElementById('swSchool'); if (!b) return; let em = ''; try { em = sessionStorage.getItem('quad-account') || ''; } catch (e) {} b.hidden = membershipsFor(em).length < 2; }
+function authDone() { const c = AUTH.cfg; try { sessionStorage.setItem('quad-auth-' + c.key, '1'); } catch (e) {} const a = document.getElementById('auth'); a.classList.add('leave'); setTimeout(() => { a.hidden = true; a.classList.remove('leave'); a.innerHTML = ''; }, 450); if (c.done) c.done(); updateSwitch(); }
 function authSignOut(cfg) { try { sessionStorage.removeItem('quad-auth-' + cfg.key); } catch (e) {} AUTH.email = ''; authOpen(cfg); }
 document.addEventListener('click', e => {
   const el = e.target.closest('[data-auth]'); if (!el) return; e.preventDefault(); const k = el.dataset.auth;
-  if (k === 'sso') { AUTH.sso = el.dataset.v; AUTH.step = 'sso'; authRender(); setTimeout(authDone, 1300); }
+  if (k === 'sso') { AUTH.sso = el.dataset.v; AUTH.step = 'sso'; authRender(); setTimeout(authAfter, 1300); }
+  if (k === 'pick') pickSchool(membershipsFor(AUTH.email)[+el.dataset.i]);
   if (k === 'forgot') { const em = document.getElementById('au_e'); if (em) AUTH.email = em.value.trim(); AUTH.step = 'forgot'; authRender(); }
   if (k === 'back') { AUTH.step = 'signin'; authRender(); }
   if (k === 'show') { const p = document.getElementById('au_p'); p.type = p.type === 'password' ? 'text' : 'password'; el.textContent = p.type === 'password' ? 'Show' : 'Hide'; }
@@ -1835,13 +1850,13 @@ function applySchool() {
   document.title = SCHOOL.name + ' · Staff portal';
 }
 const schoolAuth = () => ({
-  key:'school', title:'Welcome back', sub:`Sign in to the ${esc(SCHOOL.name)} staff portal.`, email:`prishan.maduka@${SCHOOL.sub}.edu`, emailLabel:'Work email', sso:['Google Workspace','Microsoft 365'],
-  below:`<p class="muted small">Are you a parent? Use the <a href="parent.html">${esc(SCHOOL.short)} Parent app</a> on your phone.</p>`,
-  foot:`Protected by two-step sign-in · Powered by <b>Quad</b>`,
-  art:() => `<div class="auth-brand"><div class="auth-logo">${schoolMark()}</div><div><b>${esc(SCHOOL.name)}</b><small>Staff portal</small></div></div>
-    <div class="auth-quote"><h2>Good morning. Your school day starts here.</h2><p>Admissions, students, learning, fees and finance in one place.</p></div>
-    <div class="auth-stats"><div><b>1,248</b><span>students</span></div><div><b>94.6%</b><span>attendance today</span></div><div><b>Week 6</b><span>Term 1, 2026/27</span></div></div>`,
-  done:() => toast(`Signed in to ${SCHOOL.name}`)
+  key:'school', title:'Sign in to Quad', sub:'One sign-in for every school on Quad. We’ll open your school once you’re signed in.', email:'prishan.maduka@colombo-intl.lk', emailLabel:'Work email', sso:['Google Workspace','Microsoft 365'],
+  below:`<p class="muted small">Teaching at more than one school? Try <b>ruwan.mendis@quad.local</b> to see the school picker.<br>Parents and guardians: use the <a href="parent.html">Quad parent app</a> on your phone.</p>`,
+  foot:`quad-edu.com · Protected by two-step sign-in`,
+  art:() => `<div class="auth-brand"><div class="auth-logo q"><svg viewBox="0 0 64 64" aria-hidden="true"><rect x="9" y="9" width="21" height="21" rx="7" fill="#FFFFFF"/><rect x="34" y="9" width="21" height="21" rx="7" fill="#C9C4F5"/><rect x="9" y="34" width="21" height="21" rx="7" fill="#C9C4F5"/><rect x="34" y="34" width="21" height="21" rx="7" fill="#FF7A6E"/><path d="M49 49l9 9" stroke="#FF7A6E" stroke-width="7" stroke-linecap="round"/></svg></div><div><b>Quad</b><small>quad-edu.com</small></div></div>
+    <div class="auth-quote"><h2>Every school. One address.</h2><p>Sign in with your work email. Quad finds your school and opens it with your school’s own name, logo and colours.</p></div>
+    <div class="auth-stats"><div><b>1</b><span>sign-in for all your schools</span></div><div><b>2-step</b><span>protection for staff</span></div><div><b>Your</b><span>school’s branding inside</span></div></div>`,
+  done:() => { if (AUTH.step !== 'school') toast(`Signed in to ${SCHOOL.name}`); }
 });
 
 /* ---------- Applicant panel (admissions pipeline) ---------- */
@@ -3139,6 +3154,7 @@ const ACT = {
   ttWeek: el => { S.ttWeek = el.dataset.v; route(); },
   ttCover: el => { S.ttSub = S.ttSub || {}; S.ttSub[el.dataset.k] = el.dataset.v; closeAll(); route(); toast(`${el.dataset.v} will cover this lesson`); },
   signOut: () => authSignOut(schoolAuth()),
+  switchSchool: () => { let em = ''; try { em = sessionStorage.getItem('quad-account') || ''; } catch (e) {} AUTH.email = em; authOpen(schoolAuth()); AUTH.step = 'school'; authRender(); },
   advance: el => { const a = apps.find(x => x.id === el.dataset.id); const i = STAGES.findIndex(s => s.k === a.stage); if (i < 5) { moveApp(a.id, STAGES[i+1].k); appDrawer(a.id); } },
   openStudent: (el, e) => { if (e && e.target.matches('input')) return; S.tab.stu = 'overview'; location.hash = 'student-' + el.dataset.id; },
   selAll: el => document.querySelectorAll('.rowsel').forEach(c => c.checked = el.checked),
@@ -3697,6 +3713,7 @@ applySchool();
 window.addEventListener('storage', e => { if (['quad-pe-book', 'quad-form-replies'].includes(e.key) && ['events'].includes(S.route)) { const y = window.scrollY; route(); window.scrollTo(0, y); return; } if (e.key === 'quad-school') { if (JSON.stringify(loadAcad()) !== JSON.stringify(ACAD)) { location.reload(); return; } applySchool(); route(); } });
 themeIcon(); route();
 (() => { let imp = null; try { imp = sessionStorage.getItem('quad-impersonate'); } catch (e) {} if (!imp && !authSignedIn('school')) authOpen(schoolAuth()); })();
+updateSwitch();
 </script>
 </body>
 </html>

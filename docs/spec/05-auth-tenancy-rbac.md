@@ -2,25 +2,32 @@
 
 ## Sign-in flows
 
-### Staff portal (`{school}.quad.school`)
-Reference: the sign-in screens in `design/admin.html` (branded with the school's logo and colour).
+### Staff portal (`quad-edu.com`)
+Reference: the sign-in on `design/landing.html` (Quad-branded, since the school is not known yet) and the sign-in screen in `design/admin.html`.
 
-1. **Single sign-on.** "Continue with Google Workspace" and "Continue with Microsoft 365" appear only when the school has turned them on. OIDC authorization code flow with PKCE. The ID token email must match the school's `sso_domain` and an active staff user. The first SSO sign-in links an `identities` row.
-2. **Email and password.** Work email, then password (with Show/Hide), then "Keep me signed in on this device". Passwords are Argon2id with at least 10 characters (the school can set more) and are checked against a breached-password list (k-anonymity API).
-3. **Two-step.** Required when the school's rule covers the user's role. TOTP (authenticator app) with 10 recovery codes. "Trust this device for 30 days" is optional.
-4. **Forgot password.** An email link valid for 30 minutes, single use; all sessions are revoked on reset.
-5. **Lockout.** Five failures in 15 minutes lock the account for 15 minutes and email the user.
+Every school's staff use the same address. Sign-in is **identifier first**:
+1. **Work email.** `POST /auth/identify {email}` always answers the same shape, whether or not the account exists (no account enumeration): `{methods: ['password'] | ['sso:google'|'sso:microsoft', 'password']}`. SSO buttons appear when the email's domain matches the `sso_domain` of a school that has SSO on. Rate-limited per IP and per email.
+2. **Single sign-on.** OIDC authorization code flow with PKCE. The ID token email must match the school's `sso_domain` and an active staff membership. The first SSO sign-in links an `identities` row to the account.
+3. **Email and password.** Work email, then password (with Show/Hide), then "Keep me signed in on this device". Passwords are Argon2id with at least 10 characters (the school can set more) and are checked against a breached-password list (k-anonymity API).
+4. **Two-step.** Required when the rule of any school the person belongs to covers their role there (the strictest rule wins, because one account opens all of them). TOTP (authenticator app) with 10 recovery codes. "Trust this device for 30 days" is optional.
+5. **Choose a school.** The API reads the account's active staff memberships (`auth_memberships`). None: "This account isn't linked to a school yet. Ask your school's admin to invite you." One: open it. Several: a list of schools (logo, name, your role) and "Remember my choice on this device". The session stores `active_tenant_id`; the staff portal then loads that school's branding.
+6. **Forgot password.** An email link valid for 30 minutes, single use; all sessions are revoked on reset.
+7. **Lockout.** Five failures in 15 minutes lock the account for 15 minutes and email the user.
 
-Session: an opaque session id in a `__Host-` cookie (HttpOnly, Secure, SameSite=Lax). Idle timeout comes from the school setting (default 12 hours; 30 days with "keep me signed in"). The session row is in Postgres and cached in Redis.
+Switching school (profile menu → the other schools) re-checks the membership, rotates the session id and reloads `/app`. Signing out ends the session for every school.
 
-### Platform console (`console.quad.school`)
-Quad staff only: Google Workspace SSO for `@quad.school`, with mandatory TOTP. Separate cookie, session table rows with `kind='console'`, and an idle timeout of 8 hours. Every sign-in is written to `platform_audit`.
+The sign-in page may remember the last school on the device (a non-sensitive `quad_last_school` cookie holding its name and logo URL) to say "Welcome back to Colombo International School". It never pre-selects a tenant on the server.
+
+Session: an opaque session id in a `__Host-` cookie (HttpOnly, Secure, SameSite=Lax) on `quad-edu.com`. Idle timeout comes from the school setting (default 12 hours; 30 days with "keep me signed in"). The session row is in Postgres and cached in Redis.
+
+### Platform console (`console.quad-edu.com`)
+Quad staff only: Google Workspace SSO for `@quad-edu.com`, with mandatory TOTP. Separate cookie, session table rows with `kind='console'`, and an idle timeout of 8 hours. Every sign-in is written to `platform_audit`.
 
 ### Parent app
 Reference: the lock and sign-in screens in `design/parent.html`.
 
 1. Enter a mobile number (E.164, Sri Lanka default `+94`). The API sends a 6-digit OTP by SMS (rate limit: 3 per 15 minutes per number, 10 per day). Email OTP is the fallback when the guardian has an email and no SMS is delivered within 60 s.
-2. On a valid OTP, the API finds guardian users with that phone across tenants and returns their memberships. If there are none, it shows "We couldn't find you. Ask your school to add this number."
+2. On a valid OTP, the API finds the account with that phone and returns its guardian memberships (`auth_memberships`). If there are none, it shows "We couldn't find you. Ask your school to add this number."
 3. Tokens: an access JWT (15 minutes; claims: sub, tid, kind, roles hash) and a rotating refresh token (60 days) kept in `flutter_secure_storage`. Reusing an old refresh token revokes the whole token family.
 4. **Face ID / fingerprint unlock** (`local_auth`): after the first sign-in the app offers biometric unlock. It then gates opening the app and approving payments. "Use passcode" falls back to the device passcode.
 5. Signing out on one device revokes that device's refresh family and push token.

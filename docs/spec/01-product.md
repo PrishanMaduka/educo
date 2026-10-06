@@ -51,7 +51,8 @@ Supporting design files: `design/index.html` (launcher), `design/brand.html` (lo
 
 ## Glossary
 
-- **Tenant / school**: one school, with its own subdomain (`colombo-intl.quad.school`), data, users, branding and plan.
+- **Tenant / school**: one school, with its own data, users, branding and plan, all in the shared database under its `tenant_id`. Every school uses the same address, `quad-edu.com`; the school opens from the signed-in person's membership.
+- **Account / membership**: an account is one person's sign-in (email or phone, password, two-step). A membership links the account to one school with a role. A teacher at two schools has one account and two memberships.
 - **Curriculum template**: Cambridge International, Pearson Edexcel, IB, Sri Lankan national, American, or a custom one. It holds stages, year groups, grading scale and exam milestones.
 - **Stage**: a group of year groups with an age range and a colour (Early Years, Junior School…). Each stage has its own default subjects and bell schedule.
 - **Class / section**: a teaching group in a year group, named by the school (Emerald, Ruby or A, B).

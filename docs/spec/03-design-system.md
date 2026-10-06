@@ -101,7 +101,7 @@ Small uppercase crumb, page title, optional one-line description, and actions on
 - Header: a coloured icon tile, a section eyebrow, the title and subtitle, and a close button. Multi-step forms show a numbered stepper in the header.
 - Body: fields grouped in a white card. Footer: Cancel and the primary action, right-aligned.
 - Escape closes the drawer; focus goes to the first field and returns to the opener on close. Unsaved changes prompt "Discard changes?" inline.
-- Danger drawers (suspend, delete) use the `bad` accent and require the subdomain or name to be typed.
+- Danger drawers (suspend, delete) use the `bad` accent and require the school's name to be typed.
 
 ### Filters
 - Toolbar filters are custom dropdowns, not native selects. A dropdown shows an icon, the label and the value. An active filter shows its value and a × to clear it, and the menu shows a count next to each option. It can have search (for long lists) and option groups (year groups grouped by stage). "Clear filters" appears with an "N of M" count when any filter is active.

@@ -2,7 +2,7 @@
 
 ## Conventions
 
-- Base URLs: `https://api.quad.school/v1` (school and parent routes) and `https://api.quad.school/v1/platform` (console routes).
+- Base URLs: `https://quad-edu.com/api/v1` (school and parent routes, same origin as the web app) and `https://console.quad-edu.com/api/v1/platform` (console routes, proxied to the same API service and accepted only with a console session).
 - JSON with `camelCase` keys. Every request and response body has a Zod schema in `packages/contracts`, and OpenAPI is generated from them at `/v1/openapi.json`. `packages/client` is regenerated from it with `pnpm api:client`.
 - Auth: a session cookie (web) or `Authorization: Bearer` (mobile). The tenant always comes from the session or token.
 - Lists: cursor pagination `?cursor=&limit=` (default 50, max 200). The response is `{ items, nextCursor }`. Filters are query parameters matching the UI filters (`?yearGroupId=&status=`). Search is `?q=`.
@@ -17,13 +17,14 @@
 Grouped by module. `→` notes the main behaviour. Every list endpoint supports the filters in the matching UI.
 
 ### Me and auth
-- `POST /auth/password`, `POST /auth/sso/:provider/start`, `GET /auth/sso/:provider/callback`, `POST /auth/totp/verify`, `POST /auth/otp/request`, `POST /auth/otp/verify`, `POST /auth/refresh`, `POST /auth/sign-out`, `POST /auth/password/forgot`, `POST /auth/password/reset`
+All routes are served from `https://quad-edu.com/api` (the same origin as the web app). There is no per-school host.
+
+- `POST /auth/identify` (`{email}` → sign-in methods; same response shape whether or not the account exists), `GET /auth/memberships` (after the password, SSO or OTP step: the person's schools), `POST /auth/select-school` (`{tenantId}`, must be one of the memberships; rotates the session), `POST /auth/password`, `POST /auth/sso/:provider/start`, `GET /auth/sso/:provider/callback`, `POST /auth/totp/verify`, `POST /auth/otp/request`, `POST /auth/otp/verify`, `POST /auth/refresh`, `POST /auth/sign-out`, `POST /auth/password/forgot`, `POST /auth/password/reset`
 - `GET /me`, `GET /me/permissions`, `PATCH /me` (name, theme, locale), `GET /me/sessions`, `DELETE /me/sessions/:id`, `POST /me/totp`, `POST /me/devices` (push token)
 
 ### Platform (console)
 - `GET /platform/overview` → counts, MRR series (6M/12M), plan mix, system status, needs-you-today list, activity feed
 - `GET/POST /platform/tenants`, `GET/PATCH /platform/tenants/:id`, `POST /platform/tenants/:id/suspend|reactivate|schedule-deletion|export`
-- `GET /platform/subdomains/check?value=` → `{ available, suggestion }`
 - `POST /platform/tenants` runs the provisioning job and returns `{ tenantId, jobId }`; progress is streamed on `platform.provisioning.{jobId}`
 - `GET/PUT /platform/tenants/:id/stages`, `GET/PUT /platform/tenants/:id/modules`, `PUT /platform/tenants/:id/plan`, `GET/PUT /platform/tenants/:id/branding`, `POST /platform/tenants/:id/branding/publish`, `GET/PUT /platform/tenants/:id/security`
 - `GET/POST/PATCH /platform/tenants/:id/users`, `POST /platform/tenants/:id/users/bulk` (role change, require two-step, deactivate), `POST …/users/:uid/reset-password`, `POST …/users/:uid/sign-out-everywhere`

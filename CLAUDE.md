@@ -23,7 +23,8 @@ pnpm + Turborepo, TypeScript strict, NestJS (Fastify) API, PostgreSQL 16 with Dr
 
 ## Rules that matter
 - **Tenancy:**
-  - The tenant comes only from the session or token, never from request input.
+  - One domain for all schools (`quad-edu.com`). No subdomains, custom domains or per-school schemas.
+  - The tenant comes only from the session or token (the membership chosen at sign-in), never from request input, the URL or the host.
   - Every query on tenant tables runs inside `withTenant()`.
   - Every new tenant table needs `tenant_id`, an RLS policy and a cross-tenant test.
 - **Permissions:**
@@ -51,4 +52,4 @@ pnpm + Turborepo, TypeScript strict, NestJS (Fastify) API, PostgreSQL 16 with Dr
 - **Tests:** every endpoint gets happy-path, validation, permission-denied and cross-tenant tests. Every user journey in `docs/spec/17-testing-quality.md` stays green once added.
 
 ## Seeded local accounts
-Platform owner `owner@quad.local`; school admin `prishan.maduka@colombo-intl.local` on `colombo-intl.localhost:3000`; teacher `nadeesha.jayasinghe@colombo-intl.local`; parent phone `+94 77 000 0001`. Local OTP and TOTP codes are `000000`.
+Everything runs on one domain, `quad-edu.com` (locally `localhost:3000`); the school comes from the signed-in person's membership, never from the URL. Platform owner `owner@quad.local` on `localhost:3001`; school admin `prishan.maduka@colombo-intl.local` on `localhost:3000`; `ruwan.mendis@quad.local` belongs to two schools (school picker); teacher `nadeesha.jayasinghe@colombo-intl.local`; parent phone `+94 77 000 0001`. Local OTP and TOTP codes are `000000`.

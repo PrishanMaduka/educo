@@ -266,6 +266,37 @@ img.lt{display:var(--show-lt)}img.dk{display:var(--show-dk)}
 .ph figcaption span{font-size:13.5px;color:var(--ink-2)}
 @media (max-width:900px){.show-g{grid-template-columns:1fr}.st-tabs{flex-direction:row;overflow-x:auto;scrollbar-width:none;margin-inline:-20px;padding-inline:20px}.st-tabs button{flex:none;width:200px}
   .phones{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;margin-inline:-20px;padding:4px 20px 12px;scrollbar-width:none}.ph{flex:none;width:64vw;max-width:260px;scroll-snap-align:center}}
+
+/* Sign-in dialog */
+.signin-btn{height:40px;padding:0 18px;font-size:14px}
+@media (max-width:820px){.signin-btn{margin-left:auto}.nav .btn.primary{display:none}}
+dialog.si{width:min(440px,calc(100% - 32px));border:1px solid var(--line);border-radius:24px;padding:28px;background:var(--surface);color:var(--ink);box-shadow:0 40px 80px -30px rgba(0,0,0,.5)}
+dialog.si::backdrop{background:rgba(19,20,42,.55);backdrop-filter:blur(3px)}
+.si-x{position:absolute;top:14px;right:14px;margin:0}
+.si-close{all:unset;cursor:pointer;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-size:22px;color:var(--ink-3)}
+.si-close:hover{background:var(--surface-2)}
+.si-brand{display:flex;align-items:center;gap:8px;font-weight:800;font-size:13px;color:var(--ink-3);margin-bottom:18px}.si-brand svg{width:26px;height:26px}
+.si h2{font-size:26px}
+.si p.sub{color:var(--ink-2);margin-top:6px;font-size:15px}
+.si form.f{display:flex;flex-direction:column;gap:12px;margin-top:18px}
+.si label{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:800;color:var(--ink-2)}
+.si input[type=email],.si input[type=password],.si input.code{height:48px;border-radius:12px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);padding:0 14px;font:600 15.5px var(--f-body);width:100%}
+.si input:focus{outline:none;border-color:var(--coral)}
+.si input.code{letter-spacing:.5em;text-align:center;font-size:22px;font-variant-numeric:tabular-nums}
+.si .btn{justify-content:center;width:100%}
+.si .sso{background:var(--surface);border:1.5px solid var(--line);color:var(--ink)}
+.si .err{color:var(--coral);font-size:13.5px;font-weight:700;min-height:1.2em}
+.si .acct{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700;background:var(--surface-2);border-radius:999px;padding:6px 6px 6px 14px;margin-top:14px}
+.si .acct button{all:unset;cursor:pointer;margin-left:auto;color:var(--coral);font-weight:800;font-size:13px;padding:4px 10px}
+.si .schools{display:flex;flex-direction:column;gap:8px;margin-top:16px}
+.si .school{all:unset;cursor:pointer;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 14px;border-radius:16px;border:1.5px solid var(--line)}
+.si .school:hover,.si .school:focus-visible{border-color:var(--coral)}
+.si .school .lg{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;color:#fff;font-weight:900;font-size:13px}
+.si .school b{display:block}.si .school small{color:var(--ink-3);font-size:13px}
+.si .hint{font-size:12.5px;color:var(--ink-3);margin-top:16px;line-height:1.5}
+.si .hint b{color:var(--ink-2)}
+.si .row2{display:flex;justify-content:space-between;gap:10px;font-size:13px}
+.si .row2 a{color:var(--coral);font-weight:800;text-decoration:none}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}html{scroll-behavior:auto}}
 </style>
 </head>
@@ -278,7 +309,7 @@ img.lt{display:var(--show-lt)}img.dk{display:var(--show-dk)}
       Quad
     </a>
     <nav aria-label="Sections"><a href="#circle">Quad Circle</a><a href="#different">Why Quad</a><a href="#school">Your whole school</a><a href="#apps">Apps</a><a href="#trust">Privacy</a></nav>
-    <a class="btn primary" href="#demo">Book a demo</a>
+    <button class="btn ghost signin-btn" type="button" data-signin>Sign in</button><a class="btn primary" href="#demo">Book a demo</a>
   </div>
 </header>
 
@@ -291,6 +322,7 @@ img.lt{display:var(--show-lt)}img.dk{display:var(--show-dk)}
         <h1 style="margin-top:16px">Every child has a <span class="serif">circle.</span></h1>
         <p class="lede">Quad runs your whole school, from admissions and timetables to fees and report cards. And it keeps everyone who looks after a child connected: teachers share small good moments, parents see the school day as it happens, and nobody waits for a report card to find out how things are going.</p>
         <div class="ctas"><a class="btn primary" href="#demo">Book a demo</a><a class="btn ghost" href="#circle">See a day in the circle <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"/></svg></a></div>
+        <p class="fine" style="margin-top:16px;color:var(--ink-2);font-size:14.5px">Already on Quad? <button type="button" data-signin style="all:unset;cursor:pointer;color:var(--coral);font-weight:800">Sign in to your school</button></p>
         <div class="fine"><span><i></i>Cambridge, Edexcel, IB and national curricula</span><span><i></i>Rupees, PayHere and Poya days built in</span></div>
       </div>
       <div class="orbit" aria-label="Amaya's circle: seven people at school and three at home">
@@ -455,7 +487,7 @@ img.lt{display:var(--show-lt)}img.dk{display:var(--show-dk)}
         <div class="show-h"><span class="who">For staff · web</span><h3>Staff portal</h3></div>
         <div class="show-g">
           <div class="st-tabs" role="tablist" aria-label="Staff portal screens"><button type="button" role="tab" id="st-0" aria-selected="true" aria-controls="stp" data-i="0" class="on"><b>The school today</b><span>A morning summary in sentences, then what needs you and the good news.</span></button><button type="button" role="tab" id="st-1" aria-selected="false" aria-controls="stp" data-i="1" class=""><b>Early warning</b><span>Students who have started slipping, why, and the suggested next step.</span></button><button type="button" role="tab" id="st-2" aria-selected="false" aria-controls="stp" data-i="2" class=""><b>My teaching</b><span>A teacher’s day, family pulse and this week’s learning.</span></button><button type="button" role="tab" id="st-3" aria-selected="false" aria-controls="stp" data-i="3" class=""><b>Fees & invoicing</b><span>Billing runs, discounts and online payments in rupees.</span></button></div>
-          <div class="browser" id="stp" role="tabpanel" aria-labelledby="st-0"><div class="bar" aria-hidden="true"><i></i><i></i><i></i><span>colombo-intl.quad.school</span></div><div class="shots"><div class="shot" data-i="0" ><img class="lt " src="landing/staff-today-light.jpg" alt="Staff portal dashboard: Good morning, Prishan. 1,181 of 1,248 students are in school today, with five things that need attention and good news." loading="lazy" decoding="async"><img class="dk " src="landing/staff-today-dark.jpg" alt="" aria-hidden="true" loading="lazy" decoding="async"></div><div class="shot" data-i="1" hidden><img class="lt " src="landing/staff-warning-light.jpg" alt="Early warning page: 11 students need a conversation, each card showing attendance, behaviour, homework and fee signals with a suggested next step." loading="lazy" decoding="async"><img class="dk " src="landing/staff-warning-dark.jpg" alt="" aria-hidden="true" loading="lazy" decoding="async"></div><div class="shot" data-i="2" hidden><img class="lt " src="landing/staff-teach-light.jpg" alt="My teaching: a teacher’s timetable for today, the family pulse for their class and this week in class." loading="lazy" decoding="async"><img class="dk " src="landing/staff-teach-dark.jpg" alt="" aria-hidden="true" loading="lazy" decoding="async"></div><div class="shot" data-i="3" hidden><img class="lt " src="landing/staff-fees-light.jpg" alt="Fees and invoicing: invoices, collection progress and the billing run." loading="lazy" decoding="async"><img class="dk " src="landing/staff-fees-dark.jpg" alt="" aria-hidden="true" loading="lazy" decoding="async"></div></div></div>
+          <div class="browser" id="stp" role="tabpanel" aria-labelledby="st-0"><div class="bar" aria-hidden="true"><i></i><i></i><i></i><span>quad-edu.com/app</span></div><div class="shots"><div class="shot" data-i="0" ><img class="lt " src="landing/staff-today-light.jpg" alt="Staff portal dashboard: Good morning, Prishan. 1,181 of 1,248 students are in school today, with five things that need attention and good news." loading="lazy" decoding="async"><img class="dk " src="landing/staff-today-dark.jpg" alt="" aria-hidden="true" loading="lazy" decoding="async"></div><div class="shot" data-i="1" hidden><img class="lt " src="landing/staff-warning-light.jpg" alt="Early warning page: 11 students need a conversation, each card showing attendance, behaviour, homework and fee signals with a suggested next step." loading="lazy" decoding="async"><img class="dk " src="landing/staff-warning-dark.jpg" alt="" aria-hidden="true" loading="lazy" decoding="async"></div><div class="shot" data-i="2" hidden><img class="lt " src="landing/staff-teach-light.jpg" alt="My teaching: a teacher’s timetable for today, the family pulse for their class and this week in class." loading="lazy" decoding="async"><img class="dk " src="landing/staff-teach-dark.jpg" alt="" aria-hidden="true" loading="lazy" decoding="async"></div><div class="shot" data-i="3" hidden><img class="lt " src="landing/staff-fees-light.jpg" alt="Fees and invoicing: invoices, collection progress and the billing run." loading="lazy" decoding="async"><img class="dk " src="landing/staff-fees-dark.jpg" alt="" aria-hidden="true" loading="lazy" decoding="async"></div></div></div>
         </div>
         <a class="go" href="admin.html">Open the staff portal →</a>
       </div>
@@ -500,6 +532,13 @@ img.lt{display:var(--show-lt)}img.dk{display:var(--show-dk)}
     </div>
   </section>
 </main>
+
+<!-- Sign in: one address for every school. The school opens from the account's memberships. -->
+<dialog class="si" id="signin" aria-labelledby="siH">
+  <form method="dialog" class="si-x"><button class="si-close" aria-label="Close">×</button></form>
+  <div class="si-brand"><svg viewBox="0 0 64 64" aria-hidden="true"><rect x="9" y="9" width="21" height="21" rx="7" fill="var(--indigo)"/><rect x="34" y="9" width="21" height="21" rx="7" fill="var(--lilac)"/><rect x="9" y="34" width="21" height="21" rx="7" fill="var(--lilac)"/><rect x="34" y="34" width="21" height="21" rx="7" fill="var(--coral)"/><path d="M49 49l9 9" stroke="var(--coral)" stroke-width="7" stroke-linecap="round"/></svg><span>quad-edu.com</span></div>
+  <div id="siBody"></div>
+</dialog>
 
 <footer><div class="wrap">
   <a class="brand" href="#top" style="font-size:17px"><svg class="mk" viewBox="0 0 64 64" style="width:24px;height:24px" aria-hidden="true"><rect x="9" y="9" width="21" height="21" rx="7" fill="var(--indigo)"/><rect x="34" y="9" width="21" height="21" rx="7" fill="var(--lilac)"/><rect x="9" y="34" width="21" height="21" rx="7" fill="var(--lilac)"/><rect x="34" y="34" width="21" height="21" rx="7" fill="var(--coral)"/><path d="M49 49l9 9" stroke="var(--coral)" stroke-width="7" stroke-linecap="round"/></svg>Quad</a>
@@ -553,6 +592,46 @@ img.lt{display:var(--show-lt)}img.dk{display:var(--show-dk)}
     panel.querySelectorAll('.shot').forEach(sh => sh.hidden = +sh.dataset.i !== i); panel.setAttribute('aria-labelledby', tabs[i].id); };
   tabs.forEach((t, i) => { t.addEventListener('click', () => pick(i)); t.addEventListener('keydown', e => { if (e.key === 'ArrowDown' || e.key === 'ArrowRight') { e.preventDefault(); pick((i + 1) % tabs.length); tabs[(i + 1) % tabs.length].focus(); } if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') { e.preventDefault(); const k = (i - 1 + tabs.length) % tabs.length; pick(k); tabs[k].focus(); } }); });
   pick(0); })();
+
+// Sign in at quad-edu.com: email first, then password (or SSO), two-step, then the school from the account's memberships
+(() => {
+  const dlg = document.getElementById('signin'), body = document.getElementById('siBody');
+  const SCH = {cis: {name:'Colombo International School', short:'CIS', sub:'colombo-intl', color:'#DD4A42'}, kha: {name:'Kandy Hill Academy', short:'KHA', sub:'kandyhill', color:'#2BB0A0'}};
+  const members = em => /^ruwan\.mendis@/i.test(em) ? [[SCH.cis, 'Teacher · Mathematics'], [SCH.kha, 'Head of Mathematics']] : /@kandyhill\./i.test(em) ? [[SCH.kha, 'Staff']] : [[SCH.cis, /^prishan/i.test(em) ? 'Administrator' : 'Staff']];
+  const ssoFor = em => /@(colombo-intl\.lk|kandyhill\.edu\.lk)$/i.test(em) ? 'Google Workspace' : '';
+  const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]);
+  const st = {email: ''};
+  const who = () => `<div class="acct"><span>${esc(st.email)}</span><button type="button" data-si="change">Change</button></div>`;
+  const view = {
+    email: () => `<h2 id="siH">Sign in to Quad</h2><p class="sub">One address for every school. Use your work email and we’ll open your school.</p>
+      <form class="f" id="siF" novalidate><label>Work email<input type="email" id="siEmail" autocomplete="username" value="${esc(st.email)}" placeholder="name@yourschool.lk"></label><div class="err" id="siErr" role="alert"></div><button class="btn primary">Continue</button></form>
+      <p class="hint">Try <b>prishan.maduka@colombo-intl.lk</b> (one school) or <b>ruwan.mendis@quad.local</b> (two schools). Any password and the code 000000 work in this prototype.<br>Parents and guardians sign in on the <a href="parent.html" style="color:var(--coral);font-weight:800">Quad parent app</a>.</p>`,
+    password: () => { const sso = ssoFor(st.email); return `<h2 id="siH">Welcome back</h2>${who()}
+      <form class="f" id="siF" novalidate>${sso ? `<button type="button" class="btn sso" data-si="sso">Continue with ${sso}</button><div class="row2" style="justify-content:center;color:var(--ink-3)">or use your password</div>` : ''}
+      <label>Password<input type="password" id="siPw" autocomplete="current-password"></label><div class="row2"><span></span><a href="#" data-si="forgot">Forgot password?</a></div><div class="err" id="siErr" role="alert"></div><button class="btn primary">Sign in</button></form>`; },
+    code: () => `<h2 id="siH">Two-step sign-in</h2>${who()}<p class="sub">Enter the 6-digit code from your authenticator app.</p>
+      <form class="f" id="siF" novalidate><input class="code" id="siCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" aria-label="6-digit code"><div class="err" id="siErr" role="alert"></div><button class="btn primary">Verify</button></form>`,
+    school: () => `<h2 id="siH">Choose a school</h2>${who()}<p class="sub">Your account is linked to ${members(st.email).length} schools. You can switch later from the menu.</p>
+      <div class="schools">${members(st.email).map(([m, r], i) => `<button class="school" data-si="pick" data-i="${i}"><span class="lg" style="background:${m.color}">${m.short}</span><span><b>${esc(m.name)}</b><small>${esc(r)}</small></span><span aria-hidden="true">›</span></button>`).join('')}</div>`,
+    forgot: () => `<h2 id="siH">Check your inbox</h2>${who()}<p class="sub">If this email has a Quad account, a reset link is on its way. It expires in 30 minutes.</p><div class="f"><button class="btn ghost" type="button" data-si="back">Back to sign in</button></div>`,
+    opening: () => `<h2 id="siH">Opening ${esc(st.school.name)}…</h2><p class="sub">Loading your school’s portal and branding.</p>`
+  };
+  const go = step => { st.step = step; body.innerHTML = view[step](); const f = document.getElementById('siF'); if (f) { f.onsubmit = submit; const inp = f.querySelector('input'); if (inp) setTimeout(() => inp.focus(), 30); } };
+  const err = t => { document.getElementById('siErr').textContent = t; };
+  function submit(e) { e.preventDefault();
+    if (st.step === 'email') { const v = document.getElementById('siEmail').value.trim(); if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)) return err('Enter your work email, like name@yourschool.lk.'); st.email = v; return go('password'); }
+    if (st.step === 'password') { if (!document.getElementById('siPw').value) return err('Enter your password.'); return go('code'); }
+    if (st.step === 'code') { if (!/^\d{6}$/.test(document.getElementById('siCode').value.trim())) return err('Enter the 6 digits from your authenticator app.'); return afterAuth(); } }
+  function afterAuth() { const ms = members(st.email); if (ms.length > 1) go('school'); else open(ms[0][0]); }
+  function open(m) { st.school = m; go('opening');
+    try { const cur = JSON.parse(localStorage.getItem('quad-school') || 'null'); if (!cur || cur.sub !== m.sub) localStorage.setItem('quad-school', JSON.stringify({name:m.name, short:m.short, sub:m.sub, color:m.color, logo:null})); } catch (e) {}
+    try { sessionStorage.setItem('quad-auth-school', '1'); sessionStorage.setItem('quad-account', st.email); } catch (e) {}
+    setTimeout(() => { location.href = 'admin.html#dashboard'; }, 700); }
+  body.addEventListener('click', e => { const b = e.target.closest('[data-si]'); if (!b) return; e.preventDefault(); const k = b.dataset.si;
+    if (k === 'change' || k === 'back') go('email'); if (k === 'sso') afterAuth(); if (k === 'forgot') go('forgot'); if (k === 'pick') open(members(st.email)[+b.dataset.i][0]); });
+  document.querySelectorAll('[data-signin]').forEach(b => b.addEventListener('click', () => { go('email'); dlg.showModal(); }));
+  if (location.hash === '#signin') { go('email'); dlg.showModal(); }
+})();
 
 // Family connection heatmap (sample school)
 (() => { const rows = [['Year 1', 92, 88, 95], ['Year 2', 85, 90, 78], ['Year 3', 81, 64, 87], ['Year 4', 96, 83, 90], ['Year 5', 72, 86, 58], ['Year 6', 88, 91, 80]];

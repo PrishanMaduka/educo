@@ -36,7 +36,7 @@ The mark is four soft rounded tiles, one each for the school (indigo), teachers 
 
 ### Platform console (`design/platform.html`)
 
-Quad is multi-tenant: every school is a tenant with its own data, subdomain, users and settings. The super admin works in the platform console. It shares the warm look of the school apps but has its own accent so it is never confused with a school's staff portal: a teak-brown side bar with gold for the active item, and Quad's own mark. Schools keep their brand colours on their cards and pages.
+Quad is multi-tenant: every school is a tenant with its own data, users and settings in one shared database (`tenant_id` on every school table). All schools use one domain, `quad-edu.com`: the landing page has the sign-in, and the school (with its branding) opens from the signed-in person's account. The super admin works in the platform console. It shares the warm look of the school apps but has its own accent so it is never confused with a school's staff portal: a teak-brown side bar with gold for the active item, and Quad's own mark. Schools keep their brand colours on their cards and pages.
 
 | Area | Screens and interactions |
 |---|---|
@@ -44,7 +44,7 @@ Quad is multi-tenant: every school is a tenant with its own data, subdomain, use
 | Early warning | Each school's health from staff weekly use (with trend), last admin sign-in, parent app use, billing, support tickets, seats and trial end, with a level (At risk of leaving, Keep an eye on, Thriving, Paused), suggested next step and actions (plan a check-in, retry payment, upgrade, draft an email in Ask Quad). The same signal shows on each school's overview |
 | Ask Quad | Questions about schools at risk, revenue (by plan and country), a school by name, trials ending, seat usage, students by country, uptime and incidents, and how to add a school; drafts renewal, check-in and onboarding emails |
 | Schools | Tenant list with search, plan and status filters, seat usage, modules, region, MRR and health |
-| New school | Six-step wizard: school details with live subdomain check; stages and year groups (loaded from the chosen curriculum template; rename stages, set age ranges, add or remove year groups such as Playgroup, Nursery and Reception, classes per year group, reorder, switch off, add custom stages; live journey bar and totals); branding (logo upload or drag and drop, brand colour picked automatically from the logo, sample crest, short name, live preview of the staff sign-in, staff portal and parent app); plan and modules; first admin; animated provisioning. Ends with buttons to open the new school's staff portal and parent app |
+| New school | Six-step wizard: school details (name, short name, country, curriculum; no domain to set up); stages and year groups (loaded from the chosen curriculum template; rename stages, set age ranges, add or remove year groups such as Playgroup, Nursery and Reception, classes per year group, reorder, switch off, add custom stages; live journey bar and totals); branding (logo upload or drag and drop, brand colour picked automatically from the logo, sample crest, short name, live preview of the staff sign-in, staff portal and parent app); plan and modules; first admin; animated provisioning. Ends with buttons to open the new school's staff portal and parent app |
 | School › Stages | The same stages editor for an existing school, with Save; shows which curriculum the school follows |
 | Curricula | Curriculum templates (Cambridge International, Pearson Edexcel, IB, Sri Lankan national, American, and custom ones) with stages, year groups, grading scale and exam milestones. Each template opens in a drawer for editing, with an option to apply the changes to schools already on that curriculum. The new-school wizard loads the chosen curriculum's stages; if you change the curriculum after editing the stages, it asks whether to load the new template or keep your edits |
 | School › Users | Staff accounts with role and status filters, invite by email (validated), bulk change role / require two-step sign-in / deactivate |
@@ -54,7 +54,7 @@ Quad is multi-tenant: every school is a tenant with its own data, subdomain, use
 | School › Plan & modules | Module switches, plan change, seat slider, live monthly total |
 | School › Branding | Logo upload, brand colour, live preview, app store name, custom domain; Publish pushes the branding to the staff portal and parent app (also live in other open tabs) |
 | School › Sign-in & security | Google and Microsoft single sign-on, two-step sign-in rules, password and session policy, IP allowlist |
-| School › Danger zone | Export data, suspend or reactivate (type the subdomain to confirm), schedule deletion |
+| School › Danger zone | Export data, suspend or reactivate (type the school name to confirm), schedule deletion |
 | Support access | "Open as school admin" opens the school's admin app with a support banner; actions are written to the audit log |
 | Plans & billing | Plan catalogue and this month's invoices. New plan and Edit plan open in a drawer: name, colour, tagline, price per student, student limit, yearly discount, free trial, included modules, offer to new schools, most popular. A live preview card sits beside the form. When editing, it shows the schools on the plan, the monthly revenue change, schools above a lowered limit (which blocks saving), modules that become paid add-ons, and when a price change applies (next invoice, at renewal, or new schools only). Plans with no schools can be deleted |
 | Audit log | Platform-wide audit log with filters |
@@ -149,7 +149,7 @@ Planned layout (details in [docs/spec/02-architecture.md](docs/spec/02-architect
 quad/
 ├── apps/
 │   ├── api/          # NestJS API and background workers
-│   ├── staff/        # Staff portal (Next.js + Tailwind CSS), one subdomain per school
+│   ├── staff/        # Staff portal (Next.js + Tailwind CSS), landing + sign-in + portal on quad-edu.com for every school
 │   ├── console/      # Platform console (Next.js + Tailwind CSS)
 │   └── parent/       # Parent mobile app (Flutter)
 ├── packages/         # tokens, ui, contracts, client, db, domain, config

@@ -10,7 +10,9 @@ Quad holds children's data, so every design choice errs on the side of least acc
 ## Threat model (main risks and controls)
 | Risk | Control |
 |---|---|
-| One school reads another school's data | Tenant from the session only; RLS on every table; cross-tenant tests in CI on every endpoint |
+| One school reads another school's data | Tenant from the session only (never from the host, path, body or the `?school=` hint); RLS on every table; cross-tenant tests in CI on every endpoint |
+| Sign-in lookup reveals accounts or schools | `POST /auth/identify` answers the same way whether or not the account exists; memberships are returned only after the password, SSO or OTP step; `auth_memberships` is the only cross-tenant read and returns no personal data |
+| A person switches into a school they no longer belong to | `select-school` and every request re-check that the membership and the tenant are active; deactivating a membership revokes that tenant's sessions |
 | A parent reads another family's child | `student_guardians` check on every `/family` route; tests that swap ids |
 | A relative in a family circle sees more than moments, or a restricted person is added | `kind: relative` tokens reach only the moments routes; tests on every other `/family` route; adding is refused for students with a contact restriction; any guardian or the school can remove at once |
 | Photos of a child reach people the family did not agree to | Photo consent scope (`class`, `family`, `none`) checked by the API when a moment is created and when the feed is read; changes are audited |

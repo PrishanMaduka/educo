@@ -39,10 +39,10 @@ To run a milestone in Claude Code, type `/build-milestone M3`, or paste the mile
 ## M1 Auth, tenancy and permissions
 **Read:** 04 (Platform, Identity), 05, 06 (Me and auth), 16.
 **Scope:**
-- Identity tables and RLS policies on every tenant table, with a migration test that fails if any `[T]` table lacks a policy.
+- Global `accounts` and per-school memberships (`users`), the `auth_memberships` security-definer function, and RLS policies on every tenant table, with a migration test that fails if any `[T]` table lacks a policy.
 - Staff sign-in:
-  - password, TOTP, Google and Microsoft OIDC (mocked in tests), forgot password, lockout;
-  - branded sign-in pages.
+  - identifier-first sign-in at `quad-edu.com` (landing page and `/sign-in`), password, TOTP, Google and Microsoft OIDC (mocked in tests), forgot password, lockout;
+  - **Choose a school** for accounts with several memberships, Switch school in the profile menu, and the school's branding applied after sign-in.
 - Console sign-in (Google + TOTP).
 - Parent OTP sign-in, JWT + refresh rotation, biometric unlock (Flutter, `local_auth`).
 - Roles, the permission matrix, sensitive keys, `@Can` and `@Module` guards, `/me/permissions`.
@@ -51,7 +51,8 @@ To run a milestone in Claude Code, type `/build-milestone M3`, or paste the mile
 - Seed: platform owner, two schools, the users listed in [02](02-architecture.md#local-development).
 
 **Accept:**
-- Sign-in works in all three apps.
+- Sign-in works in all three apps, all from one domain: a one-school account opens its school directly, and `ruwan.mendis@quad.local` sees the picker and lands in the school they choose.
+- `/auth/identify` returns the same response for unknown emails; `select-school` refuses a tenant the account is not a member of.
 - Cross-tenant and wrong-role tests fail with 403/404.
 - The support banner shows in support view.
 - Safeguarding routes refuse support sessions.

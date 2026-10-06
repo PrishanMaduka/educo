@@ -17,7 +17,7 @@ Postgres 16, defined in Drizzle in `packages/db/schema/*.ts`. This document list
 
 | Table | Key columns |
 |---|---|
-| `tenants` | id, name, short_name (≤4 chars), subdomain (unique), custom_domain, country, region enum(`ap-south`,`me-central`,`ap-southeast`), time_zone, currency, locale, status enum(`trial`,`onboarding`,`active`,`past_due`,`suspended`,`deleted`), plan_id, seat_limit, trial_ends_at, curriculum_template_id, since, health_override, deleted_at |
+| `tenants` | id, name, short_name (≤4 chars), slug (unique; internal reference for support, search and exports, never used for routing), country, region enum(`ap-south`,`me-central`,`ap-southeast`), time_zone, currency, locale, status enum(`trial`,`onboarding`,`active`,`past_due`,`suspended`,`deleted`), plan_id, seat_limit, trial_ends_at, curriculum_template_id, since, health_override, deleted_at |
 | `tenant_branding` | tenant_id (pk), brand_color, logo_file_id, app_store_name, accent_mode, updated_at, published_at |
 | `tenant_modules` | tenant_id, module enum(`admissions`,`crm`,`sis`,`lms`,`fees`,`finance`,`parent`,`transport`), enabled |
 | `tenant_security` | tenant_id, sso_google bool, sso_microsoft bool, sso_domain, two_step enum(`off`,`admins`,`staff`,`all`), password_min_length, session_hours, ip_allowlist text[] |
@@ -38,10 +38,11 @@ Postgres 16, defined in Drizzle in `packages/db/schema/*.ts`. This document list
 
 | Table | Key columns |
 |---|---|
-| `users` **[T][S]** | id, tenant_id, kind enum(`staff`,`guardian`), name, email, phone_e164, avatar_file_id, status enum(`invited`,`active`,`deactivated`), locale, theme, last_sign_in_at |
-| `credentials` | user_id, password_hash (argon2id), totp_secret_enc, totp_enabled, recovery_codes_hash[] |
-| `identities` | id, user_id, provider enum(`google`,`microsoft`), subject, email |
-| `sessions` | id, user_id or platform_user_id, kind enum(`web`,`mobile`,`console`), refresh_hash, device_name, ip, user_agent, created_at, last_seen_at, expires_at, revoked_at |
+| `accounts` (global, no tenant_id) | id, email citext (unique, nullable), phone_e164 (unique, nullable; at least one of the two), status enum(`active`,`locked`,`disabled`), created_at, last_sign_in_at. One per person across every school |
+| `users` **[T][S]** | id, tenant_id, account_id, kind enum(`staff`,`guardian`,`relative`), name, email, phone_e164, avatar_file_id, status enum(`invited`,`active`,`deactivated`), locale, theme, last_sign_in_at; unique (tenant_id, account_id). This is the person's **membership** in one school |
+| `credentials` (global) | account_id, password_hash (argon2id), totp_secret_enc, totp_enabled, recovery_codes_hash[]. One password and one authenticator for all of a person's schools |
+| `identities` (global) | id, account_id, provider enum(`google`,`microsoft`), subject, email |
+| `sessions` | id, account_id or platform_user_id, active_tenant_id (nullable until a school is chosen), active_user_id, kind enum(`web`,`mobile`,`console`), refresh_hash, device_name, ip, user_agent, created_at, last_seen_at, expires_at, revoked_at |
 | `devices` **[T]** | id, user_id, platform enum(`ios`,`android`), fcm_token, app_version, biometric_enabled, last_seen_at |
 | `otp_challenges` | id, phone_e164 or email, code_hash, purpose, attempts, expires_at |
 | `roles` **[T]** | id, tenant_id, key, name, description, color, system bool, scope enum(`school`,`campus`,`own_classes`), base_role_key |

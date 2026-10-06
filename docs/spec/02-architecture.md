@@ -13,8 +13,8 @@
 | ORM and migrations | Drizzle ORM + drizzle-kit | SQL-first; migrations checked in; RLS policies in migrations |
 | Cache, queues, realtime fan-out | Redis 7 | BullMQ for jobs; Socket.IO Redis adapter; rate limits |
 | Realtime | Socket.IO (WebSocket) | Rooms per tenant, per user, per class |
-| Staff portal | Next.js 15 (App Router), React 19, Tailwind CSS v4 | `apps/staff`, served on `{school}.quad.school` |
-| Platform console | Next.js 15 (App Router), React 19, Tailwind CSS v4 | `apps/console`, served on `console.quad.school`, separate deploy and cookie domain |
+| Public site and staff portal | Next.js 15 (App Router), React 19, Tailwind CSS v4 | `apps/staff`, served on **`quad-edu.com`** for every school: the landing page and sign-in at `/`, the signed-in staff portal under `/app`. No per-school domains |
+| Platform console | Next.js 15 (App Router), React 19, Tailwind CSS v4 | `apps/console`, served on `console.quad-edu.com` (Quad staff only), separate deploy and cookie |
 | Parent app | Flutter (latest stable) and Dart 3 | `apps/parent`; iOS and Android. See [Parent app (Flutter)](#parent-app-flutter) |
 | Web styling | **Tailwind CSS v4** for all front-end styling. Tokens from `packages/tokens` are mapped into Tailwind's `@theme`; Radix UI primitives for behaviour; `class-variance-authority` + `tailwind-merge` for component variants | No CSS-in-JS, CSS modules or component-library themes. Components live in `packages/ui` |
 | Mobile styling | Flutter `ThemeData` + `ThemeExtension`s generated from `packages/tokens` (Dart file) | |
@@ -75,7 +75,7 @@ Rules:
 | Concern | Package or approach |
 |---|---|
 | State and dependency injection | `flutter_riverpod` with `riverpod_generator` |
-| Routing and deep links | `go_router` (`quad://moments/{id}`, `quad://pay/{invoiceId}`, universal links on `{school}.quad.school/app/...`) |
+| Routing and deep links | `go_router` (`quad://moments/{id}`, `quad://pay/{invoiceId}`, universal links on `quad-edu.com/app/...`, which open in the app when installed) |
 | API | Generated `quad_api` (dio) with an auth interceptor for token refresh; models with `freezed` and `json_serializable` |
 | Secure storage | `flutter_secure_storage` (refresh token) |
 | Biometrics | `local_auth` (Face ID, fingerprint, device passcode fallback) |
@@ -100,10 +100,15 @@ Folder layout in `apps/parent/lib`: `features/<area>/` (screens, widgets, provid
 - Shared database and schema. Every school-owned table has `tenant_id uuid not null` and a row-level security policy `tenant_id = current_setting('app.tenant_id')::uuid`.
 - The API opens a transaction per request and runs `select set_config('app.tenant_id', $1, true)` before any query. A Drizzle wrapper (`withTenant(tenantId, fn)`) enforces this; a lint rule bans the raw client outside `packages/db`.
 - Platform tables (tenants, plans, curricula templates, platform users, platform audit) have no `tenant_id` and are only reachable from console routes.
-- Tenant resolution:
-  - Staff portal: from the host (`colombo-intl.quad.school` → subdomain `colombo-intl`), or a verified custom domain.
-  - Parent app: a guardian belongs to one or more tenants. After sign-in, the API returns the guardian's memberships. The app shows the school picker only if there is more than one.
-  - API: tenant comes from the session or token, never from a request body. Console routes that act on a school take `/:tenantId` and require a platform role.
+- **One domain for every school.** Creating a school in the console creates a tenant row and its settings; it does not create a domain, subdomain or database schema. Every school's staff sign in at `quad-edu.com`, and every parent uses the same Quad parent app.
+- Tenant resolution (who you are decides which school you see):
+  - A person has one global **account** (email and/or phone, password, two-step) and one **membership** (`users` row) per school they belong to. See [04](04-data-model.md#identity-tenant-scoped-unless-noted).
+  - Staff portal: the person signs in at `quad-edu.com`. The API looks up the account's active memberships. One membership opens that school straight away; several show **Choose a school** (logo, name, role). The chosen `tenant_id` is stored on the server-side session. The school's branding (logo, colour, name) is applied after sign-in.
+  - Switching school: the profile menu lists the other memberships; switching rotates the session and reloads `/app`.
+  - Links in emails and notifications are `quad-edu.com/app/...` and may carry `?school={tenantId}` as a hint. The hint only selects among the person's own memberships; it is never trusted as the tenant.
+  - Parent app: the same model. After OTP sign-in the API returns the guardian's memberships; the app shows the school picker only if there is more than one, and the access token carries the chosen `tid`.
+  - API: tenant comes from the session or token, never from a request body, path or host. Console routes that act on a school take `/:tenantId` and require a platform role.
+- The sign-in lookup runs before a tenant is known, so it uses one narrow `SECURITY DEFINER` function, `auth_memberships(account_id)`, that returns only tenant id, tenant name, logo, colour, membership kind and role names for active memberships of active tenants. No other code reads across tenants.
 - Each tenant has `region` (`ap-south`, `me-central`, `ap-southeast`). v1 deploys one region and stores the field for later.
 - Plan limits (student seats, modules) are enforced in the API by a `PlanGuard` (see [05](05-auth-tenancy-rbac.md#plan-and-module-guard)).
 
@@ -111,10 +116,12 @@ Folder layout in `apps/parent/lib`: `features/<area>/` (screens, widgets, provid
 
 | Env | Hosts | Data |
 |---|---|---|
-| local | `*.localhost:3000` (staff), `console.localhost:3001`, `api.localhost:4000`, the Flutter app on a simulator or device | Docker Compose, seeded sample school |
+| local | `localhost:3000` (landing, sign-in and staff portal; `/api` proxied to the API on :4000), `localhost:3001` (console), the Flutter app on a simulator or device | Docker Compose, seeded sample schools |
 | preview | One per pull request (staff, console, api), seeded | Ephemeral |
-| staging | `*.staging.quad.school` | Anonymised copy plus sample schools |
-| production | `*.quad.school`, `console.quad.school`, `api.quad.school` | Real |
+| staging | `staging.quad-edu.com`, `console.staging.quad-edu.com` | Anonymised copy plus sample schools |
+| production | `quad-edu.com` (landing, sign-in, staff portal, and the API at `quad-edu.com/api`), `console.quad-edu.com` | Real |
+
+Routing in production: one load balancer for `quad-edu.com` sends `/api/*` and `/socket.io/*` to the API and everything else to `apps/staff`. Serving the API on the same origin keeps the session cookie first-party and removes CORS for the web app. The parent app calls `https://quad-edu.com/api`. `www.quad-edu.com` redirects to `quad-edu.com`.
 
 Configuration comes only from environment variables, validated at boot with Zod (`apps/api/src/config.ts`). See `.env.example`.
 
@@ -133,9 +140,9 @@ pnpm parent:run                 # flutter run --flavor dev (simulator or device)
 
 On an Android emulator the API is at `http://10.0.2.2:4000`; on a physical device use your machine's LAN address (`--dart-define=API_URL=…`).
 
-Seeded sign-ins (local only): `owner@quad.local` (platform owner), `prishan.maduka@colombo-intl.local` (school admin), `nadeesha.jayasinghe@colombo-intl.local` (class teacher, Year 4 – Emerald), parent phone `+94 77 000 0001` (Dilhani Perera, children Amaya and Kavindu). Local one-time passwords and OTPs are always `000000` and are printed to the API log.
+Seeded sign-ins (local only): `owner@quad.local` (platform owner, console), `prishan.maduka@colombo-intl.local` (school admin), `nadeesha.jayasinghe@colombo-intl.local` (class teacher, Year 4 – Emerald), `ruwan.mendis@quad.local` (teacher at both seeded schools), parent phone `+94 77 000 0001` (Dilhani Perera, children Amaya and Kavindu). Local one-time passwords and OTPs are always `000000` and are printed to the API log.
 
-`*.localhost` subdomains resolve to 127.0.0.1 in modern browsers. The staff portal reads the tenant from the subdomain (`colombo-intl.localhost:3000`).
+Open `http://localhost:3000`, sign in as a seeded user, and the API picks the school from your memberships. `ruwan.mendis@quad.local` belongs to both seeded schools, so it shows **Choose a school**.
 
 ## Cross-app data flows (formerly localStorage in the prototypes)
 
@@ -169,3 +176,4 @@ Record every decision that changes this spec. Newest last.
 | D9 | 2026-10-06 | Tailwind CSS v4 for all web front-end styling | Product owner decision |
 | D10 | 2026-10-06 | The parent app is built with Flutter (not Expo / React Native) | Product owner decision. Consequences: the OpenAPI document is the contract for mobile; business logic stays on the server; tokens and strings are generated to Dart; push uses FCM directly |
 | D11 | 2026-10-06 | Replaces D8: the full Quad Circle ships inside the parent app and staff portal (Circle tab, Home day ring, My teaching cards, Family connection), with relatives as a separate `kind: relative` token limited to moments | Product owner asked for the full Circle concept in the parent app. A separate token kind keeps relatives out of every other `/family` route by default instead of relying on per-route checks |
+| D12 | 2026-10-06 | One domain, `quad-edu.com`, for every school. The school is chosen from the signed-in person's memberships, not from the host. Global accounts with per-school memberships. API on the same origin under `/api`. No subdomains or custom domains per school | Product owner decision. Simpler DNS, TLS and onboarding (creating a school is only a database operation); one public landing page with sign-in. Consequences: identifier-first sign-in, a school picker for people in several schools, and a narrow cross-tenant lookup at sign-in |

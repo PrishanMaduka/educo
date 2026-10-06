@@ -1,6 +1,8 @@
 # 08 Staff portal
 
-App: `apps/staff`. Prototype: `design/admin.html`. URL: `{subdomain}.quad.school`.
+App: `apps/staff`. Prototypes: `design/landing.html` (public landing page and sign-in) and `design/admin.html` (the signed-in portal). URL: `quad-edu.com` (landing and sign-in) and `quad-edu.com/app/...` (portal) for every school; see [02](02-architecture.md#tenancy).
+
+The profile menu shows the current school and, for people in more than one school, **Switch school**.
 
 Academics (timetable, staffing, cover, LMS, exams, reports, academic year, My teaching) are in [14](14-academics.md). Fees and finance are in [13](13-fees-payments-finance.md). Early warning is in [10](10-early-warning.md), Moments and messaging in [12](12-moments-messaging.md), and Ask Quad in [11](11-ask-quad.md).
 
