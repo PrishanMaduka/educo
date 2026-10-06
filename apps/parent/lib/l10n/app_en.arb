@@ -1,0 +1,42 @@
+{
+  "@@locale": "en",
+  "navStaffHome": "Home",
+  "navStaffStudents": "Students",
+  "navStaffAttendance": "Attendance",
+  "navStaffTeaching": "Teaching",
+  "navStaffFees": "Fees",
+  "navStaffMessages": "Messages",
+  "navStaffSettings": "Settings",
+  "navConsoleOverview": "Overview",
+  "navConsoleSchools": "Schools",
+  "navConsolePlans": "Plans",
+  "navConsoleBilling": "Billing",
+  "navConsoleSystem": "System",
+  "navParentHome": "Home",
+  "navParentCircle": "Circle",
+  "navParentPayments": "Payments",
+  "navParentMessages": "Messages",
+  "navParentMore": "More",
+  "themeSystem": "System",
+  "themeLight": "Light",
+  "themeDark": "Dark",
+  "themeToggle": "Change theme",
+  "greetingMorning": "Good morning",
+  "greetingAfternoon": "Good afternoon",
+  "greetingEvening": "Good evening",
+  "greetingHello": "Hello",
+  "notFoundTitle": "We couldn't find that page",
+  "notFoundBody": "The link may be old, or the page may have moved. Head back to Home and try again.",
+  "notFoundAction": "Go to Home",
+  "searchPlaceholder": "Search students, staff and pages",
+  "askQuadLabel": "Ask Quad",
+  "authSignOut": "Sign out",
+  "studentsCount": "{count, plural, one {# student} other {# students}}",
+  "@studentsCount": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  }
+}
