@@ -3,7 +3,7 @@
 Quad is a multi-tenant school platform with three apps: a platform console for Quad staff, a staff portal for each school, and a parent mobile app. The full specification is in `docs/spec/` (start with `docs/spec/README.md`). The HTML prototypes in `design/` are the visual and behavioural reference.
 
 ## How to work in this repo
-- Build milestone by milestone, following `docs/spec/18-delivery-plan.md`. Use `/build-milestone M<n>`. Before writing code, read the spec files the milestone lists and open the matching prototype.
+- Build milestone by milestone, following `docs/spec/18-delivery-plan.md`. Use `/build-milestone M<n>` (ids like `M0b`, `M1b`, `M9b` are valid). Before writing code, read the spec files the milestone lists and open the matching prototype.
 - **Spec wins over prototype.** Where the spec is silent, copy the prototype. If you have to decide something new, add a row to the decision log in `docs/spec/02-architecture.md` in the same change.
 - Finish every milestone with `pnpm verify` green, and tick it off in the Progress list of `docs/spec/18-delivery-plan.md`.
 - Never edit `design/`, except to fix a prototype bug you were asked to fix. Never import from `design/` into an app.
@@ -12,21 +12,21 @@ Quad is a multi-tenant school platform with three apps: a platform console for Q
 pnpm + Turborepo, TypeScript strict, NestJS (Fastify) API, PostgreSQL 16 with Drizzle and row-level security, Redis + BullMQ, Socket.IO, Next.js 15 with **Tailwind CSS v4** for `apps/staff` and `apps/console`, **Flutter** (Dart 3, Riverpod, go_router) for `apps/parent`, Zod contracts in `packages/contracts`, pure business logic in `packages/domain`, tokens in `packages/tokens`, web components in `packages/ui`.
 
 ## Commands
-- `docker compose up -d` starts Postgres, Redis, MinIO and Mailpit.
+- `docker compose up -d` starts Postgres, Redis, MinIO, Mailpit and ClamAV. Versions are pinned (`.nvmrc`, `packageManager`, `.fvmrc`).
 - `pnpm dev` runs everything. `pnpm --filter @quad/api dev` runs one app.
 - `pnpm db:migrate`, `pnpm db:seed`, `pnpm db:reset`.
 - `pnpm api:client` regenerates the typed client after API changes.
 - `pnpm parent:run` runs the Flutter app (`flutter run --flavor dev`). Inside `apps/parent`, the usual `flutter analyze`, `flutter test` and `dart run build_runner build` apply.
 - `pnpm tokens:build`, `pnpm i18n:build` and `pnpm api:client` regenerate tokens (CSS + Dart), strings (ARB) and API clients (TypeScript + Dart).
 - `pnpm test` (unit), `pnpm test:api` (integration, needs Docker), `pnpm e2e` (Playwright), `pnpm e2e:mobile` (integration_test + Maestro).
-- `pnpm verify` is the full quality gate.
+- `pnpm verify` is the full quality gate. It does not run `pnpm e2e:mobile` (Maestro runs nightly in CI) or `pnpm eval:assistant` (paid, manual).
 
 ## Rules that matter
 - **Tenancy:**
-  - One domain for all schools (`quad-edu.com`). No subdomains, custom domains or per-school schemas.
-  - The tenant comes only from the session or token (the membership chosen at sign-in), never from request input, the URL or the host.
-  - Every query on tenant tables runs inside `withTenant()`.
-  - Every new tenant table needs `tenant_id`, an RLS policy and a cross-tenant test.
+  - One domain for all schools (`quad-edu.com`, API at `/api/v1`). No per-school subdomains, custom domains or schemas. The only Quad subdomains are `console.`, `staging.`, `mail.` and `status.`.
+  - The tenant comes from the session or token (the membership chosen at sign-in). For the tenant-less entry points listed in `docs/spec/02-architecture.md` (signed links, payment webhooks, the enquiry form, sign-in), it comes from a verified signed token or one of the named security-definer lookups. Never from plain request input, the URL or the host.
+  - Every query on tenant tables runs inside `withTenant()`. The app connects as `quad_app` (no `BYPASSRLS`); `withPlatform()` is only for `apps/api/src/platform/**` and `apps/api/src/worker/platform-jobs/**`.
+  - Every new tenant table, child tables included, needs `tenant_id`, a `(tenant_id, …)` index, `FORCE ROW LEVEL SECURITY` with a policy, and a cross-tenant test.
 - **Permissions:**
   - Guard every route with `@Can(...)` and, where needed, `@Module(...)`.
   - Parent routes check the guardian–student link.

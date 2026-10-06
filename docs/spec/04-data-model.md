@@ -6,7 +6,7 @@ Postgres 16, defined in Drizzle in `packages/db/schema/*.ts`. This document list
 
 - Primary keys: `id uuid` (UUID v7, so they sort by time).
 - Every school-owned table has `tenant_id uuid not null references tenants(id)` and an RLS policy. It is marked **[T]** below. Every table under a **[T]** heading carries `tenant_id`, including child tables such as `terms`, `year_groups`, `attendance_marks`, `invoice_lines` and `journal_lines`. The key-column lists below leave `tenant_id` out of child tables for brevity; the Drizzle schema must still add it, with a composite index starting with `tenant_id`.
-- Row-level security: every [T] table has `ENABLE ROW LEVEL SECURITY` **and** `FORCE ROW LEVEL SECURITY`, with the policy `tenant_id = current_setting('app.tenant_id')::uuid` for select, insert, update and delete. Migrations run as the owner role `quad_owner`. The API and the worker connect as `quad_app` (no `BYPASSRLS`). Platform code and cross-tenant jobs (health snapshots, billing, retention purge, provisioning) use `withPlatform()` on a separate pool connecting as `quad_platform` (`BYPASSRLS`); a lint rule allows it only in `apps/api/src/platform/**` and `apps/worker/src/platform-jobs/**`. See [02](02-architecture.md#tenancy).
+- Row-level security: every [T] table has `ENABLE ROW LEVEL SECURITY` **and** `FORCE ROW LEVEL SECURITY`, with the policy `tenant_id = current_setting('app.tenant_id')::uuid` for select, insert, update and delete. Migrations run as the owner role `quad_owner`. The API and the worker connect as `quad_app` (no `BYPASSRLS`). Platform code and cross-tenant jobs (health snapshots, billing, retention purge, provisioning) use `withPlatform()` on a separate pool connecting as `quad_platform` (`BYPASSRLS`); a lint rule allows it only in `apps/api/src/platform/**` and `apps/api/src/worker/platform-jobs/**`. See [02](02-architecture.md#tenancy).
 - Every new [T] table needs a cross-tenant test (see [17](17-testing-quality.md)).
 - Timestamps: `created_at`, `updated_at` (`timestamptz`, defaults to now), and `deleted_at` on tables that support soft delete (marked **[S]**).
 - Audit columns: `created_by`, `updated_by` (user ids) on editable records.
@@ -260,6 +260,15 @@ Platform tables have no RLS policy and are reached only from console routes and 
 | Table | Key columns |
 |---|---|
 | `files` **[T]** | id, tenant_id, owner_user_id, bucket_key, mime, size, width, height, purpose enum(`logo`,`avatar`,`moment`,`document`,`attachment`,`report_pdf`), scanned enum(`pending`,`clean`,`infected`), created_at |
+
+## Imports, retention and delivery
+
+| Table | Key columns |
+|---|---|
+| `import_batches` **[T]** | id, tenant_id, entity, status enum(`uploaded`,`mapped`,`validated`,`committing`,`committed`,`failed`,`rolled_back`), file_id, mapping jsonb, counts jsonb, error_report_file_id, created_by, committed_at, rolled_back_at, rolled_back_by (rollback allowed for 7 days). See [21](21-onboarding-import.md) |
+| `import_batch_rows` **[T]** | tenant_id, batch_id, row_no, action enum(`created`,`updated`,`linked`,`skipped`), target_type, target_id, before jsonb |
+| `legal_holds` **[T]** | id, tenant_id, target_type, target_id, reason, set_by, set_at, released_at. Rows on hold are skipped by the retention purge (see [16](16-security-privacy.md)) |
+| `email_suppressions` (platform) | address citext (pk), reason enum(`bounce`,`complaint`,`manual`), source, at. Filled from SES bounce and complaint notifications (see [20](20-infrastructure-operations.md)) |
 
 ## Tenant-less lookups (security-definer functions)
 

@@ -36,7 +36,7 @@ The mark is four soft rounded tiles, one each for the school (indigo), teachers 
 
 ### Platform console (`design/platform.html`)
 
-Quad is multi-tenant: every school is a tenant with its own data, users and settings in one shared database (`tenant_id` on every school table). All schools use one domain, `quad-edu.com`: the landing page has the sign-in, and the school (with its branding) opens from the signed-in person's account. The super admin works in the platform console. It shares the warm look of the school apps but has its own accent so it is never confused with a school's staff portal: a teak-brown side bar with gold for the active item, and Quad's own mark. Schools keep their brand colours on their cards and pages.
+Quad is multi-tenant: every school is a tenant with its own data, users and settings in one shared database (`tenant_id` on every school table). All schools use one domain, `quad-edu.com`: the landing page has the sign-in, and the school (with its branding) opens from the signed-in person's account. The super admin works in the platform console. It shares the look of the school apps but has its own accent so it is never confused with a school's staff portal: a deep indigo side bar (`#15173A`) with lilac for the active item, and Quad's own mark. Schools keep their brand colours on their cards and pages.
 
 | Area | Screens and interactions |
 |---|---|
@@ -52,7 +52,7 @@ Quad is multi-tenant: every school is a tenant with its own data, users and sett
 | New role page | Full-page role builder: name, description, colour, start from an existing role, scope (whole school, campuses, own classes), permission matrix with row/column shortcuts and presets, sensitive access switches, people search, live summary with validation; also used to edit and delete custom roles |
 | School › Roles & permissions | Role list and a module × action matrix (view, create, edit, delete, approve), locked built-in roles, custom roles, save or discard bar |
 | School › Plan & modules | Module switches, plan change, seat slider, live monthly total |
-| School › Branding | Logo upload, brand colour, live preview, app store name, custom domain; Publish pushes the branding to the staff portal and parent app (also live in other open tabs) |
+| School › Branding | Logo upload, brand colour and live preview; Publish pushes the branding to the staff portal and the Quad parent app (also live in other open tabs). There is no per-school domain or app listing: every school uses `quad-edu.com` and the one Quad app |
 | School › Sign-in & security | Google and Microsoft single sign-on, two-step sign-in rules, password and session policy, IP allowlist |
 | School › Danger zone | Export data, suspend or reactivate (type the school name to confirm), schedule deletion |
 | Support access | "Open as school admin" opens the school's admin app with a support banner; actions are written to the audit log |
@@ -134,7 +134,8 @@ The end-to-end implementation specification is in [`docs/spec/`](docs/spec/READM
 - design tokens, the data model, auth and permissions, and the API;
 - every app and module;
 - early warning, Ask Quad and Moments;
-- security, testing, and a milestone-by-milestone delivery plan.
+- security, testing, and a milestone-by-milestone delivery plan;
+- the public site, infrastructure and operations, and onboarding and data import.
 
 [`CLAUDE.md`](CLAUDE.md) holds the rules Claude Code follows in this repo. Build with Claude Code one milestone at a time:
 
@@ -154,6 +155,9 @@ quad/
 │   └── parent/       # Parent mobile app (Flutter)
 ├── packages/         # tokens, ui, contracts, client, db, domain, config
 ├── design/           # Interactive HTML prototypes (reference)
-├── docs/spec/        # Implementation specification
-└── infra/            # Terraform
+├── docs/spec/        # Implementation specification (01–18, plus:)
+│   ├── 19-public-site.md                 # landing page, demo requests, legal pages
+│   ├── 20-infrastructure-operations.md   # AWS, CI/CD, providers, stores, SLOs, on-call
+│   └── 21-onboarding-import.md           # moving from Classe365 or spreadsheets
+└── infra/            # Terraform (staging in M0b, production in M12)
 ```

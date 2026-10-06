@@ -5,7 +5,7 @@ This folder is the end-to-end specification for building Quad, a multi-tenant sc
 ## How to use this with Claude Code
 
 1. Clone the repo and open a terminal in its root. Claude Code reads `CLAUDE.md` automatically. That file holds the project rules and points here.
-2. Install the prerequisites in [02 Architecture → Local development](02-architecture.md#local-development).
+2. Install the prerequisites in [02 Architecture → Local development](02-architecture.md#local-development) (pinned versions in [Repository bootstrap](02-architecture.md#repository-bootstrap)).
 3. Build in the order in [18 Delivery plan](18-delivery-plan.md). Each milestone has its scope, the spec sections to read, acceptance criteria and a prompt you can paste. Two project commands are provided:
    - `/build-milestone M3` reads the milestone, plans, builds, tests and reports.
    - `/verify` runs the full quality gate (types, lint, unit, API, end-to-end).
@@ -17,7 +17,7 @@ This folder is the end-to-end specification for building Quad, a multi-tenant sc
 | # | Document | What it covers |
 |---|---|---|
 | 01 | [Product](01-product.md) | Vision, people, the three apps, glossary, scope and non-goals |
-| 02 | [Architecture](02-architecture.md) | Stack, monorepo layout, tenancy, environments, local development, decision log |
+| 02 | [Architecture](02-architecture.md) | Stack, monorepo layout, tenancy and database roles, environments and paths, local development, repository bootstrap (scripts, Turborepo, Docker, environment variables), decision log |
 | 03 | [Design system](03-design-system.md) | Tokens, type, logo, components, page patterns, the morning scene, motion, accessibility |
 | 04 | [Data model](04-data-model.md) | Every entity, field and relation, tenancy columns, indexes |
 | 05 | [Auth, tenancy and permissions](05-auth-tenancy-rbac.md) | Sign-in flows, sessions, roles, the permission matrix, support access, audit |
@@ -31,9 +31,12 @@ This folder is the end-to-end specification for building Quad, a multi-tenant sc
 | 13 | [Fees, payments and finance](13-fees-payments-finance.md) | Fee structures, billing runs, invoices, gateways, accounting |
 | 14 | [Academics](14-academics.md) | Curriculum, year groups, timetable, staffing, cover, LMS, exams, reports, year rollover |
 | 15 | [Cross-cutting](15-cross-cutting.md) | Files, search, jobs, audit, localisation, accessibility, performance, observability |
-| 16 | [Security and privacy](16-security-privacy.md) | Children's data, safeguarding access, threat model, retention, compliance |
+| 16 | [Security and privacy](16-security-privacy.md) | Children's data, safeguarding access, threat model, data residency and sub-processors, retention and purge, compliance |
 | 17 | [Testing and quality](17-testing-quality.md) | Test pyramid, fixtures, end-to-end suites, the quality gate, CI |
-| 18 | [Delivery plan](18-delivery-plan.md) | Milestones M0 to M12 with acceptance criteria and Claude Code prompts |
+| 18 | [Delivery plan](18-delivery-plan.md) | Milestones M0 to M12 (with M0b, M1b and M9b) with acceptance criteria and Claude Code prompts |
+| 19 | [Public site](19-public-site.md) | The landing page at `quad-edu.com`, sign-in entry, demo requests, legal pages and sub-processors, SEO, analytics, performance budget |
+| 20 | [Infrastructure and operations](20-infrastructure-operations.md) | AWS architecture, DNS and routing, Terraform, CI/CD and migrations, providers, app store publishing, observability, SLOs, on-call, support, backups, tenant deletion |
+| 21 | [Onboarding and data import](21-onboarding-import.md) | Moving from Classe365 or spreadsheets: templates, mapping, dry run, account deduplication, batches and rollback, opening balances, historic data |
 
 ## Conventions in this spec
 
