@@ -17,7 +17,15 @@ export const importOrderRule = [
 /** Base flat config for every TypeScript package: strict, type-checked, no `any`. */
 export default tseslint.config(
   {
-    ignores: ['**/node_modules/**', '**/dist/**', '**/.next/**', '**/coverage/**', '**/.turbo/**'],
+    ignores: [
+      '**/node_modules/**',
+      '**/dist/**',
+      '**/.next/**',
+      '**/coverage/**',
+      '**/.turbo/**',
+      '**/generated/**',
+      'apps/parent/**',
+    ],
   },
   eslint.configs.recommended,
   tseslint.configs.strictTypeChecked,

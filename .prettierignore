@@ -15,3 +15,5 @@ packages/contracts/openapi.json
 CLAUDE.md
 README.md
 packages/db/migrations
+**/generated/**
+apps/parent
