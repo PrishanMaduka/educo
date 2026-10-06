@@ -16,8 +16,11 @@ GRANT USAGE ON SCHEMA public TO quad_app, quad_platform;
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
 CREATE EXTENSION IF NOT EXISTS citext;
 
--- Tables and sequences that quad_owner creates later (migrations) are usable by the app roles.
+-- Tables and sequences that quad_owner creates later (migrations) are usable by quad_platform.
+-- quad_app gets no default privileges: tenantRlsSql grants it DML per tenant table, so platform
+-- tables stay closed to it. The first migration repeats these, because default privileges are
+-- per database and per schema.
 ALTER DEFAULT PRIVILEGES FOR ROLE quad_owner IN SCHEMA public
-  GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO quad_app, quad_platform;
+  GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO quad_platform;
 ALTER DEFAULT PRIVILEGES FOR ROLE quad_owner IN SCHEMA public
-  GRANT USAGE, SELECT ON SEQUENCES TO quad_app, quad_platform;
+  GRANT USAGE, SELECT ON SEQUENCES TO quad_platform;

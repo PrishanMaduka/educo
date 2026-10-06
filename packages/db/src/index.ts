@@ -2,6 +2,7 @@ export type { DbConfig, QuadDb } from './db';
 export { closeDb, createDb, withPlatform, withTenant } from './db';
 export type { PlatformRunner, PlatformTx } from './platform';
 export { PLATFORM_TABLES } from './platform-tables';
+export { TransactionClosedError } from './client';
 export { pingDatabase } from './ping';
 export type { SqlQueryable } from './rls';
 export { findTenancyViolations, tenantRlsSql } from './rls';

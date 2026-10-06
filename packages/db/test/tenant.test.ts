@@ -4,6 +4,7 @@ import { beforeAll, describe, expect, it, vi } from 'vitest';
 
 import {
   InvalidTenantIdError,
+  TransactionClosedError,
   createDb,
   createPlatformRunner,
   createTenantRunner,
@@ -14,7 +15,7 @@ import {
 import { insertTenant } from './factories';
 import { useTestDatabase } from './setup';
 
-import type { PlatformRunner, Tenant, TenantRunner } from '../src/internal';
+import type { PlatformRunner, Tenant, TenantRunner, TenantTx } from '../src/internal';
 
 const testDb = useTestDatabase();
 
@@ -174,6 +175,44 @@ describe('withTenant', () => {
       expect(await labelsFor(schoolA.id)).toContain('a-only');
       const after = await rawCheck();
       expect(after.count).toBe(0);
+    });
+
+    it('resets session-level settings made inside the callback before releasing the connection', async () => {
+      const { app } = testDb();
+      const defaultPath = (await app.query<{ search_path: string }>('show search_path')).rows[0]!
+        .search_path;
+      const insidePid = await withTenant(schoolA.id, async (tx) => {
+        await tx.execute(sql`select set_config('app.tenant_id', ${schoolA.id}, false)`);
+        await tx.execute(sql`select set_config('search_path', 'pg_catalog', false)`);
+        const result = await tx.execute<{ pid: number }>(sql`select pg_backend_pid() as pid`);
+        return result.rows[0]!.pid;
+      });
+      const after = await rawCheck();
+      expect(after.pid).toBe(insidePid);
+      expect(after.count).toBe(0);
+      expect(after.setting ?? '').toBe('');
+      const path = (await app.query<{ search_path: string }>('show search_path')).rows[0]!
+        .search_path;
+      expect(path).toBe(defaultPath);
+    });
+
+    it('refuses queries from a transaction that escaped its callback, without reaching the database', async () => {
+      let escaped: TenantTx | undefined;
+      await withTenant(schoolA.id, (tx) => {
+        escaped = tx;
+        return Promise.resolve();
+      });
+      const error: unknown = await escaped!
+        .execute(
+          sql`insert into rls_probe_items (tenant_id, label) values (${schoolA.id}, 'escaped')`,
+        )
+        .catch((caught: unknown) => caught);
+      const cause = error instanceof TransactionClosedError ? error : (error as Error).cause;
+      expect(cause).toBeInstanceOf(TransactionClosedError);
+      const { rowCount } = await testDb().platform.query(
+        `select 1 from rls_probe_items where label = 'escaped'`,
+      );
+      expect(rowCount).toBe(0);
     });
 
     it('returns 0 rows without an error when app.tenant_id was never set', async () => {

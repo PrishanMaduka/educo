@@ -33,6 +33,7 @@ describe('migrations and the tenancy check', () => {
           'rls_probe: no index starting with tenant_id',
           'rls_probe: FORCE ROW LEVEL SECURITY missing',
           'rls_probe: no row level security policy',
+          'rls_probe: quad_app missing SELECT, INSERT, UPDATE, DELETE',
         ]);
       },
     );
@@ -60,18 +61,82 @@ describe('migrations and the tenancy check', () => {
     );
   });
 
-  it('fails for a policy that does not filter by app.tenant_id', async () => {
+  it('fails for a partial index on tenant_id', async () => {
+    await withProbeTable(
+      `create table rls_probe (tenant_id uuid not null, archived boolean);
+       create index rls_probe_tenant_idx on rls_probe (tenant_id) where not archived;
+       ${tenantRlsSql('rls_probe')}`,
+      (violations) => {
+        expect(violations).toEqual(['rls_probe: no index starting with tenant_id']);
+      },
+    );
+  });
+
+  it('fails for an extra permissive policy that opens the table', async () => {
     await withProbeTable(
       `create table rls_probe (tenant_id uuid not null);
        create index rls_probe_tenant_idx on rls_probe (tenant_id);
        ${tenantRlsSql('rls_probe')}
-       create policy open_door on rls_probe using (true);`,
+       create policy open_select on rls_probe for select using (true);`,
       (violations) => {
         expect(violations).toEqual([
-          'rls_probe: policy open_door does not filter by app.tenant_id',
+          'rls_probe: policy open_select does not match the tenant isolation expression',
         ]);
       },
     );
+  });
+
+  it('fails for a policy that mentions app.tenant_id without matching on it', async () => {
+    await withProbeTable(
+      `create table rls_probe (tenant_id uuid not null);
+       create index rls_probe_tenant_idx on rls_probe (tenant_id);
+       alter table rls_probe enable row level security;
+       alter table rls_probe force row level security;
+       grant select, insert, update, delete on rls_probe to quad_app;
+       create policy weak on rls_probe using (current_setting('app.tenant_id', true) is not null);`,
+      (violations) => {
+        expect(violations).toEqual([
+          'rls_probe: policy weak does not match the tenant isolation expression',
+          'rls_probe: no permissive tenant isolation policy',
+        ]);
+      },
+    );
+  });
+
+  it('allows an extra restrictive policy, which can only narrow access', async () => {
+    await withProbeTable(
+      `create table rls_probe (tenant_id uuid not null);
+       create index rls_probe_tenant_idx on rls_probe (tenant_id);
+       ${tenantRlsSql('rls_probe')}
+       create policy narrow on rls_probe as restrictive for delete using (false);`,
+      (violations) => {
+        expect(violations).toEqual([]);
+      },
+    );
+  });
+
+  it('fails for a tenant table quad_app cannot fully use', async () => {
+    await withProbeTable(
+      `create table rls_probe (tenant_id uuid not null);
+       create index rls_probe_tenant_idx on rls_probe (tenant_id);
+       ${tenantRlsSql('rls_probe')}
+       revoke insert, update, delete on rls_probe from quad_app;`,
+      (violations) => {
+        expect(violations).toEqual(['rls_probe: quad_app missing INSERT, UPDATE, DELETE']);
+      },
+    );
+  });
+
+  it('fails for a platform table that quad_app can touch', async () => {
+    const { owner } = testDb();
+    await owner.query('grant select on tenants to quad_app');
+    try {
+      expect(await findTenancyViolations(owner)).toEqual([
+        'tenants: quad_app must have no privileges',
+      ]);
+    } finally {
+      await owner.query('revoke all on tenants from quad_app');
+    }
   });
 
   it('passes for a table set up with tenantRlsSql and a tenant_id index', async () => {
@@ -103,15 +168,36 @@ describe('migrations and the tenancy check', () => {
     await expect(app.query('select count(*) from tenants')).rejects.toThrow(/permission denied/);
   });
 
-  it('gives quad_app and quad_platform DML on tables quad_owner creates later, in a brand-new database', async () => {
+  it('gives quad_platform, but not quad_app, DML on tables quad_owner creates later', async () => {
     const { app, owner, platform } = testDb();
     await owner.query('create table default_grant_probe (id int)');
     try {
-      await expect(app.query('insert into default_grant_probe values (1)')).resolves.toBeTruthy();
+      await expect(
+        platform.query('insert into default_grant_probe values (1)'),
+      ).resolves.toBeTruthy();
       const { rows } = await platform.query<{ id: number }>('select id from default_grant_probe');
       expect(rows).toEqual([{ id: 1 }]);
+      await expect(app.query('select id from default_grant_probe')).rejects.toThrow(
+        /permission denied/,
+      );
     } finally {
       await owner.query('drop table default_grant_probe');
+    }
+  });
+
+  it('gives nobody EXECUTE on functions quad_owner creates later', async () => {
+    const { owner } = testDb();
+    await owner.query(
+      'create function default_grant_fn() returns int language sql as $$ select 1 $$',
+    );
+    try {
+      const { rows } = await owner.query<{ app: boolean; platform: boolean }>(
+        `select has_function_privilege('quad_app', 'default_grant_fn()', 'EXECUTE') as app,
+                has_function_privilege('quad_platform', 'default_grant_fn()', 'EXECUTE') as platform`,
+      );
+      expect(rows).toEqual([{ app: false, platform: false }]);
+    } finally {
+      await owner.query('drop function default_grant_fn()');
     }
   });
 });

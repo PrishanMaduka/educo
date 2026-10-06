@@ -35,15 +35,56 @@ export function createPool(url: string, options: PoolOptions = {}): pg.Pool {
   return pool;
 }
 
+/** Thrown when code uses a transaction after `withTenant` / `withPlatform` has finished it. */
+export class TransactionClosedError extends Error {
+  readonly code = 'transaction_closed';
+
+  constructor() {
+    super('This transaction has already finished; run the query inside the callback.');
+    this.name = 'TransactionClosedError';
+  }
+}
+
+/**
+ * The connection as Drizzle sees it: identical, except that once the transaction has finished
+ * every `query` is refused. A transaction that escapes its callback (a fire-and-forget query, a
+ * stored reference) can then never run on a connection that has gone back to the pool and may
+ * be serving another school.
+ */
+function guardClient(client: pg.PoolClient, isClosed: () => boolean): pg.PoolClient {
+  return new Proxy(client, {
+    get(target, property) {
+      const value: unknown = Reflect.get(target, property, target);
+      if (typeof value !== 'function') {
+        return value;
+      }
+      if (property !== 'query') {
+        const bound: unknown = value.bind(target);
+        return bound;
+      }
+      return (...args: unknown[]): unknown => {
+        if (isClosed()) {
+          return Promise.reject(new TransactionClosedError());
+        }
+        const result: unknown = Reflect.apply(value, target, args);
+        return result;
+      };
+    },
+  });
+}
+
 /**
  * Runs `fn` in one transaction on one checked-out connection, then always releases it.
  *
- * We check out the connection ourselves rather than handing Drizzle the pool, so every
- * statement (including `prepare`) is guaranteed to run on that connection. While it is checked
- * out we listen for its `error` event (the pool only listens on idle connections, so a database
- * restart mid-transaction would otherwise crash the process). If the transaction fails we send a
- * defensive `rollback`; if the connection errored or even that fails, it is destroyed instead of
- * returning to the pool in an unknown state.
+ * - We check out the connection ourselves rather than handing Drizzle the pool, so every
+ *   statement (including `prepare`) runs on that connection.
+ * - Drizzle gets a guarded view of it that refuses queries once we have settled.
+ * - While it is checked out we listen for its `error` event (the pool only listens on idle
+ *   connections, so a database restart mid-transaction would otherwise crash the process).
+ * - Before release, `RESET ALL` clears anything `fn` set at session level (`set_config(…,
+ *   false)`, `SET`), so nothing outlives the transaction on a pooled connection.
+ * - A connection that errored, or that we could not return to a clean state, is destroyed
+ *   instead of going back to the pool.
  */
 export async function runInTransaction<T>(
   pool: pg.Pool,
@@ -51,28 +92,45 @@ export async function runInTransaction<T>(
   fn: (tx: QuadTransaction) => Promise<T>,
 ): Promise<T> {
   const client = await pool.connect();
+  let closed = false;
   let broken: Error | undefined;
   const onError = (error: Error): void => {
     broken = error;
   };
   client.on('error', onError);
   try {
-    const db = drizzle({ client, schema });
+    const db = drizzle({ client: guardClient(client, () => closed), schema });
     return await db.transaction(async (tx) => {
       await prepare(tx);
       return fn(tx);
     });
   } catch (error) {
+    // Drizzle has already sent ROLLBACK, but if that failed it throws the rollback error and we
+    // cannot tell whether the transaction is still open. RESET ALL below would succeed inside an
+    // open transaction, so roll back once more on this failure path only. When Drizzle's
+    // rollback did work, Postgres answers with a harmless "no transaction in progress" notice.
     if (!broken) {
       try {
         await client.query('rollback');
       } catch (rollbackError) {
-        broken = rollbackError instanceof Error ? rollbackError : new Error(String(rollbackError));
+        broken = toError(rollbackError);
       }
     }
     throw error;
   } finally {
+    closed = true;
+    if (!broken) {
+      try {
+        await client.query('reset all');
+      } catch (resetError) {
+        broken = toError(resetError);
+      }
+    }
     client.off('error', onError);
     client.release(broken ?? false);
   }
+}
+
+function toError(value: unknown): Error {
+  return value instanceof Error ? value : new Error(String(value));
 }

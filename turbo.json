@@ -15,12 +15,12 @@
     },
     "typecheck": { "dependsOn": ["^build"], "outputs": [] },
     "lint": { "outputs": [] },
-    "test": {
+    "test": { "dependsOn": ["^build"], "outputs": ["coverage/**"] },
+    "test:api": {
       "dependsOn": ["^build"],
-      "env": ["DATABASE_URL", "DATABASE_PLATFORM_URL", "DATABASE_OWNER_URL", "DATABASE_POOL_MAX"],
-      "outputs": ["coverage/**"]
+      "cache": false,
+      "env": ["DATABASE_URL", "DATABASE_PLATFORM_URL", "DATABASE_OWNER_URL", "DATABASE_POOL_MAX"]
     },
-    "test:api": { "dependsOn": ["^build"], "cache": false },
     "e2e": { "dependsOn": ["build"], "cache": false, "outputs": ["playwright-report/**"] },
     "tokens:build": {
       "outputs": ["packages/tokens/dist/**", "apps/parent/lib/theme/tokens.g.dart"]

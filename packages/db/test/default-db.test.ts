@@ -1,25 +1,48 @@
 import { sql } from 'drizzle-orm';
-import { afterAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { InvalidTenantIdError, closeDb, withPlatform, withTenant } from '../src/index';
 import { SEED_TENANTS } from '../src/seed-data';
 
-// The module-level helpers connect with DATABASE_URL / DATABASE_PLATFORM_URL (local defaults
-// here). These checks read only session settings, so they need no tables.
+import { useTestDatabase } from './setup';
+
+const testDb = useTestDatabase();
+const ENV_KEYS = ['DATABASE_URL', 'DATABASE_PLATFORM_URL'] as const;
+const savedEnv = new Map<string, string | undefined>();
+
+// The module-level helpers read DATABASE_URL / DATABASE_PLATFORM_URL on first use; point them
+// at this file's fresh database and put the environment back afterwards.
+beforeAll(() => {
+  for (const key of ENV_KEYS) {
+    savedEnv.set(key, process.env[key]);
+  }
+  process.env.DATABASE_URL = testDb().appUrl;
+  process.env.DATABASE_PLATFORM_URL = testDb().platformUrl;
+});
+
 afterAll(async () => {
   await closeDb();
+  for (const key of ENV_KEYS) {
+    const value = savedEnv.get(key);
+    if (value === undefined) {
+      Reflect.deleteProperty(process.env, key);
+    } else {
+      process.env[key] = value;
+    }
+  }
 });
 
 describe('default withTenant and withPlatform', () => {
   it('sets app.tenant_id for the transaction only', async () => {
     const id = SEED_TENANTS.colomboIntl.id;
     const inside = await withTenant(id, async (tx) => {
-      const result = await tx.execute<{ tenant: string; role: string }>(
-        sql`select current_setting('app.tenant_id', true) as tenant, current_user as role`,
+      const result = await tx.execute<{ tenant: string; role: string; db: string }>(
+        sql`select current_setting('app.tenant_id', true) as tenant, current_user as role,
+                   current_database() as db`,
       );
       return result.rows[0];
     });
-    expect(inside).toEqual({ tenant: id, role: 'quad_app' });
+    expect(inside).toEqual({ tenant: id, role: 'quad_app', db: testDb().name });
   });
 
   it('throws InvalidTenantIdError before connecting', async () => {
