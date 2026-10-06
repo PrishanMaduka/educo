@@ -65,7 +65,7 @@ Rules are checked in this order; the first match wins:
 
 ## Parents
 
-Shown on parent Home as a **heads-up card**, and in full on **How {child} is doing**.
+Shown on parent Home as a **Needs you** row ("Heads-up: History needs a little support"), which opens **How {child} is doing** with the full heads-up card and its actions. "Improving" news shows only on How {child} is doing.
 
 - Parent-facing signals use only attendance, learning (subjects and trend), homework, and behaviour/house points the school shared. Fees are never shown as a "signal" to parents (they have the Payments tab).
 - Levels shown to parents:

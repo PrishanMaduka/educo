@@ -30,7 +30,7 @@
 8. A form with a fee: the parent signs yes, and the fee is added to Payments.
 9. Exams: generate, introduce a clash, Publish is blocked, fix the clash, publish, and the parent sees the exam timetable.
 10. Cover: report an absence, auto-assign, publish, and the cover appears in the cover teacher's My teaching.
-11. Early warning: the signal appears, a plan is started with "tell parents", and the parent sees the heads-up card.
+11. Early warning: the signal appears, a plan is started with "tell parents", and the parent sees the heads-up row in Needs you, which opens the heads-up card on How {child} is doing.
 12. Ask Quad, with a mocked model: "Who needs attention in Year 9?" calls `list_early_warning`, the answer cites sources, and the action button navigates.
 13. Year rollover: preview, then run; students are promoted and the final year graduates.
 14. Circle learning: a teacher posts this week's learning; the parent sees it in Circle → Learning, taps We tried it with a note, and the teacher's card shows the try and the note live.

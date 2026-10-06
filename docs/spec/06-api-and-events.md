@@ -87,7 +87,7 @@ Grouped by module. `→` notes the main behaviour. Every list endpoint supports 
 - `GET /finance/summary`, `GET/POST /journal`, `GET /accounts`, `GET/PUT /budgets`
 
 ### Parent app (`/family/...`, guardian tokens only)
-- `GET /family/home` → one call for Home: children, today story, latest moment, heads-up, to-dos, live class, bus, dues, coming up, news
+- `GET /family/home` → one call for Home: children, day ring (same payload as `/family/day`), to-dos (including the heads-up row), bus, dues, coming up, news
 - `GET /family/children/:studentId/attendance|results|timetable|homework|conduct|reports|exams|medical|doing`
 - `GET /family/moments?studentId=&skill=`, `POST /family/moments/:id/heart`, `POST /family/moments/:id/thanks`
 - Circle: `GET /family/day?studentId=` (day ring events and still-to-come), `GET /family/circle/people?studentId=`, `GET /family/circle/people/:staffId?studentId=`, `POST /family/circle/people/:staffId/thanks`, `POST /family/circle/people/:staffId/chat-request`

@@ -868,6 +868,18 @@ button.it:active{background:var(--surface-2)}
 .qn svg{flex:none;color:var(--c3)}
 .composer:has(+.qn){padding-bottom:8px}
 .dchip.tm{width:56px;padding:9px 0}.dchip.tm b{font-size:14.5px;letter-spacing:0}
+
+/* Home: slim greeting and compact child switcher */
+.ghead.scene.slim{margin:8px 12px 10px;padding:12px 14px 14px;border-radius:20px}
+.ghead.scene.slim .gt{align-items:center}
+.ghead.scene.slim .hello{font-size:11.5px}
+.ghead.scene.slim h1{font:800 21px/1.15 var(--f-display);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ghead.scene.slim .mscene{opacity:.55}
+.ghead.scene.slim .back{width:36px;height:36px}
+.kids{gap:6px}
+.kid{gap:6px;padding:3px 12px 3px 3px;font-size:13px;border-width:1px}
+.kid.on .av{box-shadow:0 0 0 1.5px var(--surface),0 0 0 3px var(--gold)}
+.kid.kid-all{padding:0;width:32px;justify-content:center;margin-left:auto;color:var(--ink-2)}
 </style>
 </head>
 <body>
@@ -1063,7 +1075,7 @@ const S = {fAns: {},
 try { const t = localStorage.getItem('quad-parent-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
 const kid = () => KIDS[S.kid];
 const av = (n, c, cls='') => `<div class="av ${cls}" style="--avc:${c}">${n.split(' ').map(w=>w[0]).slice(0,2).join('')}</div>`;
-const kidSwitch = (prof) => `<div class="kids" role="tablist" aria-label="Choose child">${KIDS.map((k, i) => `<button class="kid ${i===S.kid?'on':''}" data-act="kid" data-i="${i}" role="tab">${av(k.name, k.color, 'sm')}${k.first}</button>`).join('')}${prof ? `<button class="kid kid-all" data-act="push" data-to="children">${ic('kids',16)}Profiles</button>` : ''}</div>`;
+const kidSwitch = (prof) => `<div class="kids" role="tablist" aria-label="Choose child">${KIDS.map((k, i) => `<button class="kid ${i===S.kid?'on':''}" data-act="kid" data-i="${i}" role="tab">${av(k.name, k.color, 'xs')}${k.first}</button>`).join('')}${prof ? `<button class="kid kid-all" data-act="push" data-to="children" aria-label="Profiles" title="Profiles">${ic('kids',16)}</button>` : ''}</div>`;
 const pill = (t, tone) => `<span class="pill ${tone}">${t}</span>`;
 const row = (icon, tone, title, sub, right='', act='', extra='') => `<button class="row" ${act}>${icon?`<div class="ico ${tone}">${ic(icon,19)}</div>`:''}<div class="m"><b>${title}</b>${sub?`<small>${sub}</small>`:''}</div>${right?`<div class="r">${right}</div>`:''}${extra}<span class="chev">${ic('chev',18)}</span></button>`;
 const sec = (t, link='', act='') => `<div class="sec-h"><h2>${t}</h2>${link?`<button ${act}>${link}</button>`:''}</div>`;
@@ -1452,6 +1464,7 @@ const todoFor = k => { const out = [], e = peFor(k), fs = formsFor(k).filter(f =
   if (fs.length) out.push(['forms', 't-amber', 'file', `${fs.length} form${fs.length > 1 ? 's' : ''} to sign`, fs[0].title]);
   if (e && !Object.entries(lsGetP('quad-pe-book', {})).some(([key, w]) => key.startsWith(e.id + '|') && w === 'Dilhani Perera')) out.push(['evening', 't-blue', 'cal', 'Book parents’ evening', `${dP(e.date)} · ${e.start}–${e.end}`]);
   if (ex.length) out.push(['exams', 't-violet', 'book', 'Exam timetable published', ex[0].name]);
+  const x = insight(k); if (x.level[0] !== 'good') out.unshift(['doing', x.level[0] === 'high' ? 't-red' : 't-amber', 'leaf', x.focus ? `Heads-up: ${x.focus.subj} needs a little support` : `Heads-up: ${k.first} could use a little support`, `${x.level[1]} · from ${k.teacher.name}`]);
   return out; };
 /* ---------- Story-first home ---------- */
 function homeMoment(k) { const ms = momFor(k), m = ms[0], T = k.teacher, ki = KIDS.indexOf(k);
@@ -1522,21 +1535,13 @@ SCR.home = () => {
   const qa = [['attendance','t-green','cal','Attendance'],['results','t-blue','chart','Results'],['timetable','t-violet','clock','Timetable'],['homework','t-gold','book','Homework'],
     ['bus','t-green','bus','Track bus'],['pickup','t-blue','qr','Pickup pass'],['wallet','t-gold','wallet','Canteen'],['absence','t-red','alert','Report absence'],
     ['conduct','t-lotus','star','Rewards'],['trips','t-violet','pin','Trips'],['reports','t-blue','file','Reports'],['calendar','t-green','cal','Calendar']];
-  return { head:`<div class="ghead scene">${morningScene('ph')}<div class="gt"><div class="gx"><div class="hello">Monday 5 October</div><h1>Good morning, ${scribble('Dilhani')}</h1></div>
+  return { head:`<div class="ghead scene slim">${morningScene('ph')}<div class="gt"><div class="gx"><div class="hello">Monday 5 October</div><h1>Good morning, Dilhani</h1></div>
       <button class="back" data-act="push" data-to="notifications" aria-label="Notifications" style="position:relative">${ic('bell',18)}${S.notifs?'<span style="position:absolute;top:7px;right:8px;width:8px;height:8px;border-radius:50%;background:var(--bad);box-shadow:0 0 0 2px var(--surface)"></span>':''}</button></div></div>`, body: `
   <div class="stories" aria-label="School stories">${STORIES.map((st, i) => `<button class="story ${st.seen?'seen':''}" data-act="story" data-i="${i}"><span class="ring-s"><span style="background:${st.slides[0].bg}">${ic(st.icon,24)}</span></span>${st.name}</button>`).join('')}</div>
   ${kidSwitch(true)}
-  <div class="card hero today ${S.heroAnim?'slide-'+S.heroAnim:''}" id="hero" aria-label="Today with ${k.first}"><div class="tin">
-    <div class="t-eye"><b>Today with ${k.first}</b><small>Monday 5 Oct · ${k.grade}</small></div>
-    <p class="big">${k.first} arrived at ${k.arrived}, ${mb > 0 ? `${numWord(mb)} minutes before the bell` : 'just as the bell rang'}.</p>
-    <p class="t-now">Right now ${k.he}’s in <b>${L.s}</b> with ${L.who} in ${L.room}. Next is ${L.next.replace(/^(\w+)/, '<b>$1</b>')}${hw ? `, and there ${hw > 1 ? 'are' : 'is'} ${numWord(hw)} piece${hw > 1 ? 's' : ''} of homework to do` : ''}.</p>
-    ${homeMoment(k)}
-    <div class="stats"><div><b class="num" data-count="${k.att}" data-dec="1" data-suf="%">${k.att}%</b>Attendance</div><div><b class="num" data-count="${k.points}">${k.points}</b>House points</div><div><b class="num" data-count="${hw}">${hw}</b>Homework due</div></div></div></div>
-  <div class="dots" aria-hidden="true">${KIDS.map((_, i) => `<i class="${i===S.kid?'on':''}"></i>`).join('')}</div>
-  ${headsUp(k)}
+  ${dayCard(k)}
   ${pubReport(k) ? `<button class="card rep-ready" data-act="push" data-to="reports"><span class="ic t-blue">${ic('file',20)}</span><span><b>${k.first}’s ${pubReport(k).cycle} is ready</b><small>${pubReport(k).year} · tap to read</small></span>${ic('chev',18)}</button>` : ''}
   ${todoFor(k).length ? `${sec('Needs you')}<div class="card todo">${todoFor(k).map(([to, tn, i, t, sub]) => row(i, tn, esc(t), esc(sub), '', `data-act="push" data-to="${to}"`)).join('')}</div>` : ''}
-  ${dayCard(k)}
   <button class="card alert" data-act="push" data-to="bus" style="text-align:left;width:100%"><div class="ico t-green">${ic('bus',19)}</div><div class="m"><b>School bus · Route 4</b><span id="busCardSub">${busLine()}</span></div><span class="pill t-green">${S.bus.running?'<span class="live" style="color:inherit">LIVE</span>':'Track'}</span></button>
   ${due.length ? `<button class="card alert" data-act="push" data-to="pay" style="text-align:left;width:100%"><div class="ico t-gold">${ic('pay',19)}</div><div class="m"><b>${money(due.reduce((a, i) => a + i.amt - i.paid, 0))} due</b>${due.length} invoice${due.length>1?'s':''} · next due ${due[0].due}</div><span class="pill t-gold">Pay now</span></button>` : `<div class="card alert"><div class="ico t-green">${ic('check',19)}</div><div class="m"><b>All fees paid</b>Nothing due right now</div></div>`}
   ${sec('Quick links')}

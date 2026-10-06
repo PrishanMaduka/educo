@@ -130,7 +130,7 @@ To run a milestone in Claude Code, type `/build-milestone M3`, or paste the mile
 **Scope:**
 - Parent app:
   - start-up, lock and sign-in;
-  - Home (without moments, heads-up and Ask Quad) from `/family/home`;
+  - Home (without the day ring, heads-up row and Ask Quad) from `/family/home`;
   - child switcher with swipe;
   - Attendance, Timetable, Homework, Results, Rewards, Children profile;
   - Messages, More, notification settings, offline cache.
@@ -183,7 +183,7 @@ To run a milestone in Claude Code, type `/build-milestone M3`, or paste the mile
 ## M9 Moments, early warning and the story-first homes
 **Read:** 10, 12 (Moments), 08 (Dashboard), 09 (Home).
 **Scope:**
-- Moments: staff drawer with the photo consent check, parent Moments tab, Home latest moment, reactions, thank-you messages, realtime, push.
+- Moments: staff drawer with the photo consent check, parent Moments (Circle tab), reactions, thank-you messages, realtime, push.
 - Early warning:
   - the `compute-signals` job and domain scoring;
   - the Early warning page, cards, plan drawer, How this works, review reminders;

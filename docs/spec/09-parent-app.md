@@ -18,27 +18,22 @@ Tab bar: **Home**, **Circle** (unread moments badge), **Payments** (due badge), 
 
 ## Home
 Order from top to bottom:
-1. **Greeting card** with the morning scene: the date, "Good morning, {first name}" with the highlighted name, and the notifications bell.
+1. **Greeting bar:** a slim card (about 64 px tall) with a soft morning scene behind it: the date, "Good morning, {first name}" on one line, and the notifications bell.
 2. **Stories:** round tiles (Sports, STEM lab, Lunch, Principal, Art week). Tapping one opens full-screen slides: tap to advance, hold to pause, swipe down to close, and double-tap for a heart.
-3. **Child switcher** (chips) and "Profiles".
-4. **Today with {child}:**
-   - A story in sentences: arrival time compared with the bell, what is happening in class now, what is next, and homework due.
-   - Then the **latest moment** (thumbnail, teacher, text, time), with "All N moments" and **Say thanks**.
-   - Swiping the card switches child, with a slide animation.
-5. **Heads-up card** (see [10](10-early-warning.md#parents)):
-   - "Needs a conversation" or "Keep an eye on": what we noticed with trends, why it matters, and the teacher's suggestion, with the actions **Book a 10-minute chat** and **Message {teacher}**.
-   - Or "Improving" good news.
-6. **Needs you:** forms to sign, parents' evening to book, an exam timetable published, a report ready. Each opens its screen.
-7. **{child}'s day** (the day ring, see [12](12-moments-messaging.md#the-day-as-it-happens)): a ring of today's lessons from the start to the end of the school day, done lessons solid and upcoming ones faded, a "now" hand and event dots (arrived, registered, moment, lunch, bus). Beside it a LIVE headline ("Two of seven lessons done") and a sentence ("Arrived 07:42, registered present and a moment from Ms. Jayasinghe"); under it "Right now: Science with Ms. Fernando". Tap → **Day** screen: the larger ring, "So far today" timeline, and "Still to come".
-8. **School bus:** status line ("On the way · 7 min from home"), with LIVE when the bus is moving.
-9. **Fees:** "{amount} due · next due {date}" with Pay now, or "All fees paid".
-10. **Quick actions:**
+3. **Child switcher:** small pills (24 px avatar and first name) and a round Profiles icon button at the end of the row.
+4. **{child}'s day** (the day ring, see [12](12-moments-messaging.md#the-day-as-it-happens)): a ring of today's lessons from the start to the end of the school day, done lessons solid and upcoming ones faded, a "now" hand and event dots (arrived, registered, moment, lunch, bus). Beside it a LIVE headline ("Two of seven lessons done") and a sentence ("Arrived 07:42, registered present and a moment from Ms. Jayasinghe"); under it "Right now: Science with Ms. Fernando". Tap → **Day** screen: the larger ring, "So far today" timeline, and "Still to come".
+5. **Needs you:** a heads-up from early warning when the level is "Needs a conversation" or "Keep an eye on" (it opens How {child} is doing, which holds the full heads-up card), then forms to sign, parents' evening to book, an exam timetable published, and a report ready. Each opens its screen.
+6. **School bus:** status line ("On the way · 7 min from home"), with LIVE when the bus is moving.
+7. **Fees:** "{amount} due · next due {date}" with Pay now, or "All fees paid".
+8. **Quick actions:**
     - Attendance, Results, Timetable, Homework;
     - Track bus, Pickup pass, Canteen, Report absence;
     - Rewards, Trips, Reports, Calendar.
-11. **Coming up:** the next three events, including holidays such as Poya days.
-12. **School news:** a horizontal scroll of cards.
-13. "Updated at {time} · pull down to refresh".
+9. **Coming up:** the next three events, including holidays such as Poya days.
+10. **School news:** a horizontal scroll of cards.
+11. "Updated at {time} · pull down to refresh".
+
+Moments and the "Improving" good news are not on Home; they live in the Circle tab and on How {child} is doing.
 
 A floating round Ask Quad button sits at the bottom right and never covers content.
 

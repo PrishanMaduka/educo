@@ -6,7 +6,7 @@ Every child has a circle: the people at school and at home who look after them. 
 
 | Part | Parent app | Staff portal |
 |---|---|---|
-| Moments | Circle tab → Moments; latest moment on Home | Share a moment (My teaching) |
+| Moments | Circle tab → Moments; a moment dot on the Home day ring | Share a moment (My teaching) |
 | The day, as it happens | Day ring on Home, Day screen | (from registers, gate, canteen, bus) |
 | Everyone around the child | Circle tab → People, person screen | – |
 | This week in class | Circle tab → Learning, **We tried it** | This week in class card and drawer (My teaching) |
