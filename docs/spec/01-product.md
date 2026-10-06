@@ -28,7 +28,7 @@ Quad runs a whole school (admissions, records, timetable, teaching, pastoral car
 |---|---|---|---|
 | Platform console | Quad staff | `design/platform.html` | Web (desktop first, works on phone) |
 | Staff portal | School staff | `design/admin.html` | Web (desktop first, works on phone) |
-| Parent app | Parents and guardians | `design/parent.html` | iOS and Android (Expo); the same screens can run as a web preview |
+| Parent app | Parents and guardians | `design/parent.html` | iOS and Android, built with Flutter |
 
 Supporting design files: `design/index.html` (launcher), `design/brand.html` (logo guide), `design/brand/*.svg` (logo files), `design/circle.html` (the original Circle concept, for reference only; do not build it as a separate app).
 

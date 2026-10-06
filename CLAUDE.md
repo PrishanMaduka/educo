@@ -9,14 +9,16 @@ Quad is a multi-tenant school platform with three apps: a platform console for Q
 - Never edit `design/`, except to fix a prototype bug you were asked to fix. Never import from `design/` into an app.
 
 ## Stack (details in docs/spec/02-architecture.md)
-pnpm + Turborepo, TypeScript strict, NestJS (Fastify) API, PostgreSQL 16 with Drizzle and row-level security, Redis + BullMQ, Socket.IO, Next.js 15 for `apps/staff` and `apps/console`, Expo for `apps/parent`, Zod contracts in `packages/contracts`, pure business logic in `packages/domain`, tokens in `packages/tokens`, web components in `packages/ui`.
+pnpm + Turborepo, TypeScript strict, NestJS (Fastify) API, PostgreSQL 16 with Drizzle and row-level security, Redis + BullMQ, Socket.IO, Next.js 15 with **Tailwind CSS v4** for `apps/staff` and `apps/console`, **Flutter** (Dart 3, Riverpod, go_router) for `apps/parent`, Zod contracts in `packages/contracts`, pure business logic in `packages/domain`, tokens in `packages/tokens`, web components in `packages/ui`.
 
 ## Commands
 - `docker compose up -d` starts Postgres, Redis, MinIO and Mailpit.
 - `pnpm dev` runs everything. `pnpm --filter @quad/api dev` runs one app.
 - `pnpm db:migrate`, `pnpm db:seed`, `pnpm db:reset`.
 - `pnpm api:client` regenerates the typed client after API changes.
-- `pnpm test` (unit), `pnpm test:api` (integration, needs Docker), `pnpm e2e` (Playwright), `pnpm e2e:mobile` (Maestro).
+- `pnpm parent:run` runs the Flutter app (`flutter run --flavor dev`). Inside `apps/parent`, the usual `flutter analyze`, `flutter test` and `dart run build_runner build` apply.
+- `pnpm tokens:build`, `pnpm i18n:build` and `pnpm api:client` regenerate tokens (CSS + Dart), strings (ARB) and API clients (TypeScript + Dart).
+- `pnpm test` (unit), `pnpm test:api` (integration, needs Docker), `pnpm e2e` (Playwright), `pnpm e2e:mobile` (integration_test + Maestro).
 - `pnpm verify` is the full quality gate.
 
 ## Rules that matter
@@ -33,7 +35,8 @@ pnpm + Turborepo, TypeScript strict, NestJS (Fastify) API, PostgreSQL 16 with Dr
 - **Money** is integer minor units with a currency code. Never use floats for money.
 - **Year-group labels** come from the school's curriculum. Never hard-code "Grade" or "Year".
 - **UI:**
-  - Use `packages/tokens` and `packages/ui`. No raw hex colours in components.
+  - Web: style only with Tailwind CSS utilities mapped to the tokens, and use `packages/ui`. No raw hex colours, arbitrary colour values, CSS modules or CSS-in-JS.
+  - Flutter: colours and type only from the generated tokens (`QuadColors` theme extension). The app displays what the API computes and never re-implements business rules.
   - Forms open in right-side drawers.
   - Pages are story first: a summary sentence and what needs doing, then detail.
   - Everything works at 390 px wide and in dark mode, with labels for screen readers.

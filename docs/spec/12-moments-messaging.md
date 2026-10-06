@@ -52,6 +52,6 @@ The cost of SMS is shown before sending, at the school's SMS rate.
 | `events` | booking opens, form to sign, report ready, exam timetable published | push |
 
 - Guardians control each category in More, Notifications. The school can mark a broadcast "urgent", which overrides the preferences.
-- Push uses Expo Push (FCM and APNs behind it). Retry invalid tokens once, then remove them.
+- Push uses Firebase Cloud Messaging (HTTP v1 API via `firebase-admin` in the API); iOS delivery goes through APNs configured in Firebase. A token that FCM reports as unregistered is removed.
 - Every notification is also stored in `notifications` for the in-app list.
 - The quiet hours rule applies to staff pushes, not to guardians.

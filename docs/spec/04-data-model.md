@@ -42,7 +42,7 @@ Postgres 16, defined in Drizzle in `packages/db/schema/*.ts`. This document list
 | `credentials` | user_id, password_hash (argon2id), totp_secret_enc, totp_enabled, recovery_codes_hash[] |
 | `identities` | id, user_id, provider enum(`google`,`microsoft`), subject, email |
 | `sessions` | id, user_id or platform_user_id, kind enum(`web`,`mobile`,`console`), refresh_hash, device_name, ip, user_agent, created_at, last_seen_at, expires_at, revoked_at |
-| `devices` **[T]** | id, user_id, platform enum(`ios`,`android`,`web`), expo_push_token, biometric_enabled, last_seen_at |
+| `devices` **[T]** | id, user_id, platform enum(`ios`,`android`), fcm_token, app_version, biometric_enabled, last_seen_at |
 | `otp_challenges` | id, phone_e164 or email, code_hash, purpose, attempts, expires_at |
 | `roles` **[T]** | id, tenant_id, key, name, description, color, system bool, scope enum(`school`,`campus`,`own_classes`), base_role_key |
 | `role_permissions` **[T]** | role_id, module, actions bit(5) (view, create, edit, delete, approve) |

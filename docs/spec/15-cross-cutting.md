@@ -22,13 +22,13 @@ BullMQ, with one queue per kind (see [06](06-api-and-events.md#background-jobs-b
 See [05](05-auth-tenancy-rbac.md#audit). There is an append-only `audit_log` and `platform_audit`: no updates or deletes, enforced by a database trigger. Retention: 7 years.
 
 ## Localisation
-- Every user-visible string goes through `i18next` (web) or `i18next` with `react-i18next` (mobile), with keys in `packages/contracts/i18n/en.json`. No string concatenation for sentences; use ICU messages with plurals ("{count, plural, one {# student} other {# students}}").
+- Every user-visible string goes through `i18next` (web) or Flutter's `intl` with ARB files (mobile). Keys live once in `packages/contracts/i18n/en.json`; `pnpm i18n:build` generates `apps/parent/lib/l10n/app_en.arb`. No string concatenation for sentences; use ICU messages with plurals ("{count, plural, one {# student} other {# students}}").
 - Dates, numbers and money use `Intl` with the school's locale and currency (`Rs 310,000`, `5 Oct`, `Monday 5 October`).
 - v1 ships `en` only. Add `si` and `ta` later; check that the layouts work with longer strings.
 - The year-group labels and the school's own names (classes, houses) are data, not translations.
 
 ## Accessibility
-WCAG 2.2 AA. See [03](03-design-system.md#accessibility). Automated checks: `@axe-core/playwright` on every page in the end-to-end suite must report zero serious or critical issues.
+WCAG 2.2 AA. See [03](03-design-system.md#accessibility). Automated checks: `@axe-core/playwright` on every page in the end-to-end suite must report zero serious or critical issues. In the Flutter app, widget tests use `meetsGuideline(androidTapTargetGuideline)`, `iOSTapTargetGuideline`, `labeledTapTargetGuideline` and `textContrastGuideline` on every screen.
 
 ## Performance budgets
 | Surface | Budget |

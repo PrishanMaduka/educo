@@ -6,7 +6,9 @@
 | Unit | Vitest | `packages/domain` algorithms (timetable, cover order, exam clashes, early-warning scores, fee maths, grading), Zod contracts, UI component logic | `*.test.ts` next to the code |
 | API integration | Vitest + Supertest + Testcontainers (Postgres 16, Redis 7) | Every endpoint: happy path, validation, permission denied, cross-tenant denied, parent-not-linked denied | `apps/api/test/**` |
 | Web end-to-end | Playwright (Chromium, WebKit) at 1440×900 and 390×844, light and dark | Key journeys per milestone, plus an axe check per page | `apps/staff/e2e`, `apps/console/e2e` |
-| Mobile end-to-end | Maestro flows on the Expo dev build; Playwright against the Expo web build for fast checks | Parent journeys | `apps/parent/e2e` |
+| Mobile unit and widget | `flutter_test` with Riverpod overrides and a mocked `quad_api` | Providers, formatting, every screen's states (loading, empty, error, data) | `apps/parent/test` |
+| Mobile golden | Golden image tests at 390×844, light and dark, text scale 1.0 and 2.0 | Home, Moments, pay sheet, child screens | `apps/parent/test/goldens` |
+| Mobile end-to-end | `integration_test` against the local API, plus Maestro flows on iOS and Android builds | Parent journeys | `apps/parent/integration_test`, `apps/parent/maestro` |
 | Visual | Playwright screenshots compared with approved baselines (threshold 0.2%) | Home pages, drawers, early warning, parent Home | `**/e2e/visual` |
 | Assistant eval | Custom runner (see [11](11-ask-quad.md#evaluation-m10)) | Facts, sources, no leaks | `apps/api/test/assistant/eval` (manual) |
 
@@ -33,7 +35,7 @@
 13. Year rollover: preview, then run; students are promoted and the final year graduates.
 
 ## Quality gate (`pnpm verify`)
-`turbo run typecheck lint test` → API integration tests → Playwright smoke (the journeys for completed milestones) → `pnpm audit --prod` (no high or critical issues). A milestone is accepted only when `pnpm verify` passes and its own journeys pass.
+`turbo run typecheck lint test` (Turborepo runs `flutter analyze` and `flutter test` through `apps/parent/package.json`) → a check that generated code (API clients, tokens, ARB) is up to date → API integration tests → Playwright smoke (the journeys for completed milestones) → `pnpm audit --prod` (no high or critical issues). A milestone is accepted only when `pnpm verify` passes and its own journeys pass.
 
 ## CI (GitHub Actions)
 - On pull requests: install with cache, `pnpm verify`, build every app, deploy preview environments, and post the preview links.
@@ -41,7 +43,7 @@
 - Required checks: typecheck, lint, unit, api-integration, e2e-smoke, and build.
 
 ## Coding standards
-- ESLint (typescript-eslint strict, react, react-hooks, jsx-a11y, import order) and Prettier.
+- ESLint (typescript-eslint strict, react, react-hooks, jsx-a11y, import order, Tailwind class rules) and Prettier for TypeScript; `dart format` and `very_good_analysis` for Dart (`flutter analyze` must report no issues).
 - No `any`; use `unknown` and narrow it. Exhaustive `switch` statements on enums.
 - Domain logic only in `packages/domain`. Controllers stay thin and call services. Services never take a tenant id from input.
 - Components: one per file, props typed, no inline styles except token CSS variables, every interactive element labelled.

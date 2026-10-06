@@ -148,9 +148,9 @@ Planned layout (details in [docs/spec/02-architecture.md](docs/spec/02-architect
 quad/
 ├── apps/
 │   ├── api/          # NestJS API and background workers
-│   ├── staff/        # Staff portal (Next.js), one subdomain per school
-│   ├── console/      # Platform console (Next.js)
-│   └── parent/       # Parent mobile app (Expo)
+│   ├── staff/        # Staff portal (Next.js + Tailwind CSS), one subdomain per school
+│   ├── console/      # Platform console (Next.js + Tailwind CSS)
+│   └── parent/       # Parent mobile app (Flutter)
 ├── packages/         # tokens, ui, contracts, client, db, domain, config
 ├── design/           # Interactive HTML prototypes (reference)
 ├── docs/spec/        # Implementation specification

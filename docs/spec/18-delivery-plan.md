@@ -13,7 +13,7 @@ To run a milestone in Claude Code, type `/build-milestone M3`, or paste the mile
 - Shared configs: tsconfig, ESLint, Prettier, Vitest.
 - `docker-compose.yml` with postgres:16, redis:7, minio and mailpit.
 - `.env.example` and Zod config validation in the API.
-- `packages/tokens`:
+- `packages/tokens` (with `pnpm tokens:build` generating the Tailwind `@theme` CSS and the Dart tokens):
   - all colour, type, radius and shadow tokens for light, dark and console;
   - a generated `tokens.css`;
   - logo components made from `design/brand/*.svg`.
@@ -22,7 +22,7 @@ To run a milestone in Claude Code, type `/build-milestone M3`, or paste the mile
   - Drawer with Stepper, Toast, Tooltip, Tabs, Avatar, Empty state;
   - Morning scene, Sparkline, Petal burst, Command palette shell.
 - `apps/staff` and `apps/console` shells (side bar, top bar, theme toggle, routing, a 404 page) and a placeholder home.
-- `apps/parent` Expo shell (tab bar, theme, fonts).
+- `apps/parent` Flutter shell: flavors, `go_router` tab bar, theme from the generated `tokens.g.dart`, Figtree fonts, the generated `quad_api` client, and a `package.json` wrapper so Turborepo runs `flutter analyze` and `flutter test`.
 - `apps/api` NestJS app with health checks, OpenAPI, the Pino logger and OpenTelemetry. `packages/client` generation.
 - `packages/db` with Drizzle set up, the `tenants` table, `withTenant()` and an RLS helper.
 - GitHub Actions CI.
@@ -44,7 +44,7 @@ To run a milestone in Claude Code, type `/build-milestone M3`, or paste the mile
   - password, TOTP, Google and Microsoft OIDC (mocked in tests), forgot password, lockout;
   - branded sign-in pages.
 - Console sign-in (Google + TOTP).
-- Parent OTP sign-in, JWT + refresh rotation, biometric unlock (Expo).
+- Parent OTP sign-in, JWT + refresh rotation, biometric unlock (Flutter, `local_auth`).
 - Roles, the permission matrix, sensitive keys, `@Can` and `@Module` guards, `/me/permissions`.
 - Audit log and platform audit.
 - Support sessions with the banner.
@@ -135,15 +135,15 @@ To run a milestone in Claude Code, type `/build-milestone M3`, or paste the mile
   - Attendance, Timetable, Homework, Results, Rewards, Children profile;
   - Messages, More, notification settings, offline cache.
 - Staff side: the Inbox and Broadcasts.
-- Expo push with deep links and the in-app notification list. Realtime connection in all apps.
+- FCM push with deep links (`go_router`) and the in-app notification list. Realtime connection in all apps.
 
 **Accept:**
 - Journey 4 (push).
-- The parent app passes Maestro flows for sign-in, Home, switching child, and sending a message.
-- Dynamic type at 200%.
+- The parent app passes Maestro and `integration_test` flows for sign-in, Home, switching child, and sending a message.
+- Golden tests pass at text scale 2.0.
 
 **Prompt:**
-> Build milestone M6 (docs/spec/09 except Moments, Payments and School life; docs/spec/12 Messages, Broadcasts, Notifications). Match design/parent.html screen by screen; the side panel in the prototype is not part of the app. Add Maestro flows and the Playwright web checks. Run pnpm verify.
+> Build milestone M6 (docs/spec/09 except Moments, Payments and School life; docs/spec/12 Messages, Broadcasts, Notifications). Match design/parent.html screen by screen; the side panel in the prototype is not part of the app. Build it in Flutter (apps/parent) as described in docs/spec/02 "Parent app (Flutter)". Add widget, golden, integration_test and Maestro flows. Run pnpm verify.
 
 ## M7 Fees, payments and finance
 **Read:** 13.
@@ -240,7 +240,7 @@ To run a milestone in Claude Code, type `/build-milestone M3`, or paste the mile
 - Terraform for AWS in `infra/`, backups, restore drill scripts.
 - Runbooks (incident, restore, onboarding a school, rotating keys).
 - Accessibility audit fixes.
-- App store builds (EAS) and store listings with school white-label names.
+- App store builds with Flutter flavors and fastlane (or Codemagic), and store listings with school white-label names.
 
 **Accept:**
 - Every budget in [15](15-cross-cutting.md#performance-budgets) is met.
@@ -249,7 +249,7 @@ To run a milestone in Claude Code, type `/build-milestone M3`, or paste the mile
 - Staging passes every journey.
 
 **Prompt:**
-> Build milestone M12 (docs/spec/15, 16, 17). Measure against the performance budgets, fix what fails, add the Terraform, dashboards, alerts and runbooks, and produce EAS builds. Report every budget with its measured value.
+> Build milestone M12 (docs/spec/15, 16, 17). Measure against the performance budgets, fix what fails, add the Terraform, dashboards, alerts and runbooks, and produce signed Flutter release builds for iOS and Android. Report every budget with its measured value.
 
 ---
 

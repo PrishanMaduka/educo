@@ -12,7 +12,7 @@ The prototypes in `design/` are the visual reference. This document turns them i
 
 ## Tokens (`packages/tokens`)
 
-Export the tokens as a TypeScript object and generate CSS variables (`tokens.css`) for web. Names match the prototypes.
+Tokens are defined once in TypeScript. `pnpm tokens:build` generates (1) a Tailwind v4 CSS file with an `@theme` block and the light/dark CSS variables for web, and (2) `apps/parent/lib/theme/tokens.g.dart` (a `QuadTokens` class plus `ThemeExtension`s for light and dark) for the Flutter app. Names match the prototypes.
 
 ### Colour, light theme
 
@@ -58,7 +58,7 @@ Theme rules:
 
 ### Type
 
-- Font: **Figtree** (400, 500, 600, 700, 800). Fallback stack: `system-ui, -apple-system, "Segoe UI", sans-serif`. Self-host the font files with `next/font` and `expo-font`.
+- Font: **Figtree** (400, 500, 600, 700, 800). Fallback stack: `system-ui, -apple-system, "Segoe UI", sans-serif`. Self-host the font files with `next/font` on web, and bundle them as assets in the Flutter app.
 - Headings use weight 800 and letter-spacing −0.02em. Page title 30 px (staff, console) and 29 px (parent Home); card title 18 px; body 14.5 px (web) and 15 px (mobile); captions 12–12.5 px; labels in uppercase are 11 px, weight 800, letter-spacing 0.08–0.12em.
 - Numbers in tables use `font-variant-numeric: tabular-nums`.
 - Highlight a key word in greetings with a lilac marker: `box-shadow: inset 0 -0.3em 0 var(--gold-soft)`.
@@ -75,7 +75,7 @@ Theme rules:
 - The mark is four rounded tiles on a 64-unit grid: squares of 21 units with 7-unit corners and a 4-unit gap. The top-left tile is indigo `#1F2559` (school), the top-right and bottom-left tiles are lilac `#8B7CF6` (teachers, parents), and the bottom-right tile is coral `#E5534B` (students). A tail goes from (49,49) to (58,58), 7 units wide with round caps, and turns the square into a Q.
 - On dark backgrounds: the indigo tile becomes `#FFFFFF`, the lilac tiles `#C9C4F5` and the coral tile `#FF7A6E`.
 - The wordmark is custom lowercase "quad" drawn with a 9-unit stroke in indigo.
-- Source files: `design/brand/quad-logo.svg`, `quad-logo-white.svg`, `quad-mark.svg`, `quad-mark-white.svg`, `quad-app-icon.svg`. Export them as React and React Native components. Usage rules are in `design/brand.html`.
+- Source files: `design/brand/quad-logo.svg`, `quad-logo-white.svg`, `quad-mark.svg`, `quad-mark-white.svg`, `quad-app-icon.svg`. Export them as React components for web, and use the SVG files with `flutter_svg` in the parent app. Usage rules are in `design/brand.html`.
 - A school's own logo (uploaded in the console) is shown in its staff portal side bar and the parent app. Quad's mark appears only as "powered by Quad" and in the console.
 
 ## Page patterns
@@ -129,7 +129,14 @@ A small illustration or icon, one warm sentence, and the next action.
 
 Button (primary, secondary, ghost, danger; sizes sm and md; icon), IconButton, Input, Textarea, Select (native fallback), Dropdown (filter variant with search and groups), Segmented control, Switch, Checkbox, Chip, Pill (status), Card (with header), KPI tile, Table (sortable, selectable), Drawer (with Stepper), Toast, Tooltip, Tabs, Avatar (initials with a deterministic colour from a fixed palette that passes AA), Empty state, Morning scene, Sparkline, Bar chart, Line chart, Donut, Heatmap (attendance), Timeline, Command palette, Ask Quad panel, Petal burst.
 
-The mobile equivalents live in `apps/parent/src/ui` and use the same tokens.
+The Flutter equivalents live in `apps/parent/lib/ui` (for example `QuadButton`, `QuadCard`, `QuadPill`, `MorningScene` as a `CustomPainter`, `PetalBurst`, `Sparkline`) and read colours only from the generated tokens through `Theme.of(context).extension<QuadColors>()`.
+
+## Tailwind CSS (web)
+- All web styling uses Tailwind CSS v4 utility classes. The generated `@theme` maps tokens to utilities (`bg-canvas`, `bg-surface`, `text-ink-2`, `border-line`, `bg-brand`, `text-brand-ink`, `rounded-card`, `shadow-card`, `font-sans`).
+- Dark mode uses a custom variant tied to `data-theme` and `prefers-color-scheme`. Because the colours are CSS variables, components rarely need `dark:` classes.
+- The school brand colour is set at runtime by writing `--brand` and its derived variables on `<html>`. Tailwind utilities read the variables, so a published brand change re-themes the page live.
+- Component variants use `class-variance-authority`, and class strings are merged with `tailwind-merge` (`cn()` helper in `packages/ui`).
+- Not allowed: raw hex values in class names (`bg-[#DD4A42]`), inline styles except CSS variables, CSS modules and CSS-in-JS. A lint rule (`eslint-plugin-tailwindcss` or a custom rule) flags arbitrary colour values.
 
 ## Icons
 

@@ -1,8 +1,9 @@
 # 09 Parent app
 
-App: `apps/parent` (Expo, Expo Router). Prototype: `design/parent.html` (shown in a phone frame, with a side panel of simulation controls that are **not** part of the product).
+App: `apps/parent` (Flutter, Dart 3; packages in [02](02-architecture.md#parent-app-flutter)). Prototype: `design/parent.html` (shown in a phone frame, with a side panel of simulation controls that are **not** part of the product).
 
 ## Principles
+- **Display only.** The app shows what the API computes (summaries, levels, totals, grades). It never recalculates business rules.
 - **One login for every child.** A child switcher appears on screens that are about one child (chips, plus a swipe on the Home card).
 - **Story first.** Each screen opens with one plain sentence ("Amaya's average is 87%, 6 points above her class. Strongest in Art and Mathematics."), then one main element, then grouped cards.
 - **Fast.** Home loads from one call (`GET /family/home`) and is cached for offline use. It refreshes on pull-down and on realtime events.
@@ -119,9 +120,9 @@ Threads with teachers and offices: unread first, swipe for actions (mark read, m
 - Pushes go to every signed-in device of the guardian. A bounced token is removed.
 
 ## Offline and performance
-- Cache Home, the timetable, the last 50 moments, messages and invoices (TanStack Query persisted with MMKV). Show "Updated at …" and an offline banner.
+- Cache Home, the timetable, the last 50 moments, messages and invoices (Riverpod providers backed by a `drift` SQLite cache). Show "Updated at …" and an offline banner.
 - Payments, bookings and form signing need a connection; queue nothing for them.
 - Images: thumbnails at 2× the display size, served as WebP or AVIF from the CDN.
 
 ## Accessibility
-Dynamic type up to 200% without clipping. VoiceOver and TalkBack labels on every control (copy them from the prototype's `aria-label`s). Reduced motion turns off the sunrise, petals and confetti.
+Text scaling up to 200% (`MediaQuery.textScaler`) without clipping. `Semantics` labels on every control for VoiceOver and TalkBack (copy them from the prototype's `aria-label`s). Reduced motion turns off the sunrise, petals and confetti.

@@ -21,8 +21,8 @@ Reference: the lock and sign-in screens in `design/parent.html`.
 
 1. Enter a mobile number (E.164, Sri Lanka default `+94`). The API sends a 6-digit OTP by SMS (rate limit: 3 per 15 minutes per number, 10 per day). Email OTP is the fallback when the guardian has an email and no SMS is delivered within 60 s.
 2. On a valid OTP, the API finds guardian users with that phone across tenants and returns their memberships. If there are none, it shows "We couldn't find you. Ask your school to add this number."
-3. Tokens: an access JWT (15 minutes; claims: sub, tid, kind, roles hash) and a rotating refresh token (60 days) kept in `expo-secure-store`. Reusing an old refresh token revokes the whole token family.
-4. **Face ID / fingerprint unlock** (`expo-local-authentication`): after the first sign-in the app offers biometric unlock. It then gates opening the app and approving payments. "Use passcode" falls back to the device passcode.
+3. Tokens: an access JWT (15 minutes; claims: sub, tid, kind, roles hash) and a rotating refresh token (60 days) kept in `flutter_secure_storage`. Reusing an old refresh token revokes the whole token family.
+4. **Face ID / fingerprint unlock** (`local_auth`): after the first sign-in the app offers biometric unlock. It then gates opening the app and approving payments. "Use passcode" falls back to the device passcode.
 5. Signing out on one device revokes that device's refresh family and push token.
 
 ## Roles
