@@ -29,9 +29,13 @@
     "verify": "pnpm typecheck && pnpm lint && pnpm test && pnpm codegen:check && pnpm test:api && pnpm e2e && pnpm audit --prod"
   },
   "devDependencies": {
+    "@types/node": "22.20.5",
+    "@types/pg": "8.11.10",
     "eslint": "9.39.5",
+    "pg": "8.13.1",
     "prettier": "3.9.9",
     "turbo": "2.11.7",
-    "typescript": "5.9.3"
+    "typescript": "5.9.3",
+    "vitest": "3.2.7"
   }
 }
