@@ -1,5 +1,6 @@
 import { loadBootConfig } from './boot';
 import { startTracing } from './observability/tracing';
+import { createShutdown, onShutdownSignals } from './shutdown';
 import { LOGGER } from './tokens';
 
 import type { Logger } from 'pino';
@@ -13,17 +14,7 @@ async function main(): Promise<void> {
   const app = await createApp(config);
   const logger = app.get<symbol, Logger>(LOGGER);
 
-  let stopping = false;
-  const stop = async (signal: NodeJS.Signals): Promise<void> => {
-    if (stopping) return;
-    stopping = true;
-    logger.info({ signal }, 'API stopping');
-    await app.close();
-    await tracing.shutdown();
-    process.exit(0);
-  };
-  process.once('SIGTERM', (signal) => void stop(signal));
-  process.once('SIGINT', (signal) => void stop(signal));
+  onShutdownSignals(createShutdown('API', { logger, tracing, close: () => app.close() }));
 
   // 0.0.0.0 so the API is reachable from containers, emulators and the LAN in local dev.
   await app.listen({ port: config.API_PORT, host: '0.0.0.0' });

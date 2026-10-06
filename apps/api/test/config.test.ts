@@ -146,6 +146,39 @@ describe('loadConfig', () => {
     ]);
   });
 
+  it('reads TRUST_PROXY_HOPS as a small whole number, default 0', () => {
+    expect(loadConfig(localEnv()).TRUST_PROXY_HOPS).toBe(0);
+    expect(loadConfig(localEnv({ TRUST_PROXY_HOPS: '2' })).TRUST_PROXY_HOPS).toBe(2);
+    expect(configErrorOf(localEnv({ TRUST_PROXY_HOPS: '-1' })).problems).toEqual([
+      { variable: 'TRUST_PROXY_HOPS', problem: 'must be a whole number from 0 to 10' },
+    ]);
+  });
+
+  it('refuses the compose database passwords outside local', () => {
+    const compose = {
+      DATABASE_URL: 'postgres://quad_app:quad_app@db.internal:5432/quad',
+      DATABASE_PLATFORM_URL: 'postgres://quad_platform:quad_platform@db.internal:5432/quad',
+    };
+    expect(() => loadConfig(localEnv(compose))).not.toThrow();
+    const error = configErrorOf(productionEnv({ ...compose, APP_ENV: 'staging' }));
+    expect(error.problems).toEqual([
+      { variable: 'DATABASE_URL', problem: 'uses the local compose password' },
+      { variable: 'DATABASE_PLATFORM_URL', problem: 'uses the local compose password' },
+    ]);
+  });
+
+  it('requires different session and link secrets outside local', () => {
+    const same = 's'.repeat(40);
+    expect(() =>
+      loadConfig(localEnv({ SESSION_SECRET: same, LINK_SIGNING_SECRET: same })),
+    ).not.toThrow();
+    const error = configErrorOf(productionEnv({ SESSION_SECRET: same, LINK_SIGNING_SECRET: same }));
+    expect(error.problems).toEqual([
+      { variable: 'LINK_SIGNING_SECRET', problem: 'must differ from SESSION_SECRET' },
+    ]);
+    expect(error.message).not.toContain(same);
+  });
+
   it('accepts a complete production environment', () => {
     expect(loadConfig(productionEnv()).APP_ENV).toBe('production');
   });

@@ -2,18 +2,21 @@ import { describe, expect, it } from 'vitest';
 
 import { buildOpenApiDocument } from '../src/openapi/document';
 
-import { CLOSED_PORTS, captureLogs, useTestApp } from './app';
+import { CLOSED_PORTS, useTestApp } from './app';
 
-const logs = captureLogs();
-const app = useTestApp(CLOSED_PORTS, logs.logger);
-
-/** Routes Nest mapped at startup, from its `Mapped {/api/v1/x, GET} route` log lines. */
-function mappedRoutes(): string[] {
-  return logs.lines.flatMap((line) => {
-    const match = /^Mapped \{(.+), (\w+)\} route$/.exec(String(line.msg));
-    return match ? [`${match[2]?.toLowerCase() ?? ''} ${match[1] ?? ''}`] : [];
-  });
-}
+/** Every route Fastify registers, as `get /api/v1/x`, collected by an onRoute hook. */
+const served: string[] = [];
+const app = useTestApp(CLOSED_PORTS, {
+  beforeInit: (fastify) => {
+    fastify.addHook('onRoute', (route) => {
+      const methods = Array.isArray(route.method) ? route.method : [route.method];
+      for (const method of methods) {
+        // Fastify adds HEAD for every GET by itself.
+        if (method !== 'HEAD') served.push(`${method.toLowerCase()} ${route.url}`);
+      }
+    });
+  },
+});
 
 describe('OpenAPI document', () => {
   const document = buildOpenApiDocument();
@@ -51,9 +54,8 @@ describe('OpenAPI document', () => {
     const documented = Object.entries(paths).flatMap(([path, item]) =>
       Object.keys(item).map((method) => `${method} ${path.replace(/\{(\w+)\}/g, ':$1')}`),
     );
-    const mapped = mappedRoutes();
-    expect(mapped.length).toBeGreaterThan(0);
-    expect(mapped.filter((route) => !documented.includes(route))).toEqual([]);
+    expect(served.length).toBeGreaterThan(0);
+    expect(served.filter((route) => !documented.includes(route))).toEqual([]);
   });
 
   it('is served at /api/v1/openapi.json', async () => {

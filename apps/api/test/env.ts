@@ -27,6 +27,8 @@ export function productionEnv(
     NODE_ENV: 'production',
     PUBLIC_WEB_URL: 'https://quad-edu.com',
     CONSOLE_URL: 'https://console.quad-edu.com',
+    DATABASE_URL: 'postgres://quad_app:prod-app-password@db.internal:5432/quad',
+    DATABASE_PLATFORM_URL: 'postgres://quad_platform:prod-platform-password@db.internal:5432/quad',
     SESSION_SECRET: 'p'.repeat(48),
     LINK_SIGNING_SECRET: 'l'.repeat(48),
     ...overrides,

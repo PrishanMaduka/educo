@@ -10,11 +10,28 @@ import { PinoNestLogger, createLogger } from './observability/logger';
 
 import type { Config } from './config';
 import type { NestFastifyApplication } from '@nestjs/platform-fastify';
+import type { FastifyInstance } from 'fastify';
 import type { Logger } from 'pino';
 
 export interface CreateAppOptions {
   /** Defaults to a pino logger at `LOG_LEVEL` writing JSON to stdout. */
   readonly logger?: Logger;
+  /**
+   * Runs on the Fastify instance before Nest registers its routes. For tests and tooling only
+   * (route listing, test-only routes); app behaviour belongs in modules.
+   */
+  readonly beforeInit?: (fastify: FastifyInstance) => void;
+}
+
+/**
+ * Trusts exactly `hops` proxies in front of the API (CloudFront + ALB on AWS, spec 20): the
+ * socket peer and the next `hops - 1` X-Forwarded-For entries, read from the right. A client
+ * therefore cannot choose its own IP with a forged leftmost entry. Fastify 5.12 refuses a plain
+ * number (it cannot tell a proxy from a direct client), so this relies on the API being
+ * reachable only through those proxies; 0 trusts nothing.
+ */
+function trustHops(hops: number): false | ((address: string, hop: number) => boolean) {
+  return hops > 0 ? (_address, hop) => hop < hops : false;
 }
 
 /**
@@ -32,8 +49,7 @@ export async function createApp(
     genReqId: (request: { headers: Record<string, string | string[] | undefined> }) =>
       requestIdFrom(request.headers['x-request-id']),
     requestIdHeader: false,
-    // Behind CloudFront and the ALB (spec 20); needed for client IPs in rate limits.
-    trustProxy: config.APP_ENV !== 'local',
+    trustProxy: trustHops(config.TRUST_PROXY_HOPS),
   });
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule.forRoot(config, logger),
@@ -64,6 +80,7 @@ export async function createApp(
     done();
   });
 
+  options.beforeInit?.(fastify);
   await app.init();
   return app;
 }

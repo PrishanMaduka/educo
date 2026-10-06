@@ -72,6 +72,9 @@ const ConfigSchema = z.object({
   PUBLIC_WEB_URL: req(httpUrl),
   CONSOLE_URL: req(httpUrl),
   API_PORT: withDefault(port, '4000'),
+  // Proxies in front of the API whose X-Forwarded-For entries are trusted (2 on AWS:
+  // CloudFront + ALB). 0 trusts none, so the client IP is the socket peer.
+  TRUST_PROXY_HOPS: withDefault(integer(0, 10), '0'),
 
   // Database. DATABASE_OWNER_URL is deliberately absent: migrations only (D17).
   DATABASE_URL: req(postgresUrl),
@@ -203,6 +206,9 @@ export const LOCAL_DEV_SECRETS = {
 
 const MIN_SECRET_LENGTH = 32;
 
+/** Credentials of the compose Postgres roles (docker/postgres/init); fine locally only. */
+const COMPOSE_CREDENTIALS = ['quad_app:quad_app@', 'quad_platform:quad_platform@'];
+
 export interface ConfigProblem {
   readonly variable: string;
   readonly problem: string;
@@ -238,7 +244,7 @@ function describeIssue(issue: z.ZodIssue): string {
 
 type RawEnv = Readonly<Record<string, string | undefined>>;
 
-/** Rules that depend on APP_ENV (spec 02, D22). */
+/** Rules for staging and production: real secrets and passwords, no local-only flags (D22). */
 function environmentRules(env: RawEnv): ConfigProblem[] {
   const appEnv = blank(env.APP_ENV);
   if (appEnv !== 'staging' && appEnv !== 'production') {
@@ -255,6 +261,16 @@ function environmentRules(env: RawEnv): ConfigProblem[] {
         variable: name,
         problem: `must be at least ${MIN_SECRET_LENGTH} characters outside local`,
       });
+    }
+  }
+  const session = blank(env.SESSION_SECRET);
+  if (typeof session === 'string' && session === blank(env.LINK_SIGNING_SECRET)) {
+    problems.push({ variable: 'LINK_SIGNING_SECRET', problem: 'must differ from SESSION_SECRET' });
+  }
+  for (const name of ['DATABASE_URL', 'DATABASE_PLATFORM_URL'] as const) {
+    const url = env[name] ?? '';
+    if (COMPOSE_CREDENTIALS.some((credentials) => url.includes(credentials))) {
+      problems.push({ variable: name, problem: 'uses the local compose password' });
     }
   }
   if (appEnv === 'production') {

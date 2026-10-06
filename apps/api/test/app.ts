@@ -9,6 +9,7 @@ import { createLogger } from '../src/observability/logger';
 
 import { localEnv } from './env';
 
+import type { CreateAppOptions } from '../src/app';
 import type { NestFastifyApplication } from '@nestjs/platform-fastify';
 import type { Logger } from 'pino';
 
@@ -18,12 +19,15 @@ import type { Logger } from 'pino';
  */
 export function useTestApp(
   overrides: Record<string, string | undefined> = {},
-  logger: Logger = pino({ level: 'silent' }),
+  options: CreateAppOptions = {},
 ): () => NestFastifyApplication {
   let app: NestFastifyApplication | undefined;
 
   beforeAll(async () => {
-    app = await createApp(loadConfig(localEnv(overrides)), { logger });
+    app = await createApp(loadConfig(localEnv(overrides)), {
+      logger: pino({ level: 'silent' }),
+      ...options,
+    });
     await app.getHttpAdapter().getInstance().ready();
   });
 

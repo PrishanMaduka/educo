@@ -33,9 +33,21 @@ const INTERNAL: ErrorResponse = {
   body: { code: 'internal', message: DEFAULT_MESSAGES.internal },
 };
 
+/**
+ * The status of a framework error: a Nest HttpException, or a Fastify error (its `code` starts
+ * with `FST_`). A `statusCode` on anything else (an HTTP client's error, a driver error) says
+ * nothing about this request, so those stay unknown and become a logged 500.
+ */
 function statusOf(error: unknown): number | undefined {
   if (error instanceof HttpException) return error.getStatus();
-  if (error instanceof Error && 'statusCode' in error && typeof error.statusCode === 'number') {
+  if (
+    error instanceof Error &&
+    'code' in error &&
+    typeof error.code === 'string' &&
+    error.code.startsWith('FST_') &&
+    'statusCode' in error &&
+    typeof error.statusCode === 'number'
+  ) {
     return error.statusCode;
   }
   return undefined;
@@ -78,7 +90,7 @@ export function toErrorResponse(error: unknown): ErrorResponse {
 export function sendError(error: unknown, reply: FastifyReply, logger: Logger): void {
   const response = toErrorResponse(error);
   if (response.status >= 500) {
-    logger.error({ err: errorForLog(error) }, 'Request failed with an unexpected error');
+    logger.error({ error: errorForLog(error) }, 'Request failed with an unexpected error');
   }
   void reply.status(response.status).send(response.body);
 }

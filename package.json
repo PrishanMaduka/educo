@@ -40,7 +40,7 @@
   },
   "pnpm": {
     "overrides": {
-      "fastify": "5.12.5"
+      "@nestjs/platform-fastify>fastify": "5.12.5"
     }
   }
 }

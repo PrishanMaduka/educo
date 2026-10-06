@@ -1,6 +1,6 @@
 import { OpenApiGeneratorV31 } from '@asteasolutions/zod-to-openapi';
 
-import packageJson from '../../package.json';
+import { version } from '../../package.json';
 import { healthRoutes } from '../health/health.routes';
 
 import { openApiRoutes } from './openapi.routes';
@@ -23,7 +23,7 @@ export function buildOpenApiDocument(routes: readonly ApiRoute[] = API_ROUTES): 
     openapi: '3.1.0',
     info: {
       title: 'Quad API',
-      version: packageJson.version,
+      version,
       description: 'School, parent and console routes. Errors are `{ code, message, fields? }`.',
     },
   });

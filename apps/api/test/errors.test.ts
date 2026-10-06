@@ -1,9 +1,9 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { ErrorBodySchema } from '@quad/contracts';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { z } from 'zod';
 
-import { toErrorResponse } from '../src/common/error.filter';
+import { sendError, toErrorResponse } from '../src/common/error.filter';
 import {
   AppError,
   BusinessRuleError,
@@ -12,6 +12,10 @@ import {
   NotFoundError,
   ValidationError,
 } from '../src/common/errors';
+
+import { captureLogs } from './app';
+
+import type { FastifyReply } from 'fastify';
 
 describe('AppError hierarchy', () => {
   it('carries code, message, status and fields', () => {
@@ -82,14 +86,26 @@ describe('toErrorResponse', () => {
     expect(response.body.message).not.toContain('/secret/path');
   });
 
-  it('maps errors that carry a 4xx statusCode (Fastify body errors)', () => {
+  it('maps Fastify errors (FST_ codes) by their statusCode', () => {
     const error = Object.assign(new Error('Unexpected token } in JSON at position 7'), {
+      code: 'FST_ERR_CTP_INVALID_JSON_BODY',
       statusCode: 400,
     });
     const response = toErrorResponse(error);
     expect(response.status).toBe(400);
     expect(response.body.code).toBe('validation');
     expect(response.body.message).not.toContain('Unexpected token');
+  });
+
+  it('does not trust a statusCode on other errors (for example an HTTP client error)', () => {
+    const { lines, logger } = captureLogs();
+    const reply = { status: vi.fn().mockReturnThis(), send: vi.fn().mockReturnThis() };
+    const error = Object.assign(new Error('x'), { statusCode: 401 });
+    expect(toErrorResponse(error).status).toBe(500);
+    sendError(error, reply as unknown as FastifyReply, logger);
+    expect(reply.status).toHaveBeenCalledWith(500);
+    expect(lines).toHaveLength(1);
+    expect(lines[0]).toMatchObject({ level: 'error', error: { type: 'Error', message: 'x' } });
   });
 
   it('hides unknown errors behind a 500 internal', () => {

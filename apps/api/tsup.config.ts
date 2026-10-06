@@ -3,8 +3,10 @@ import { defineConfig } from 'tsup';
 /**
  * Bundles the API, worker and OpenAPI export into CommonJS files under `dist/`.
  * - `@quad/*` workspace packages ship TypeScript source, so they are bundled in (they are
- *   devDependencies for that reason); npm `dependencies` stay external and load from
- *   node_modules, which also lets OpenTelemetry patch them as they are required.
+ *   devDependencies for that reason). Every npm package they use at runtime (`pg`,
+ *   `drizzle-orm`, `zod`) must also be an apps/api dependency, so it stays external, loads from
+ *   node_modules and can be patched by OpenTelemetry. `scripts/check-dist.mjs` fails the build
+ *   otherwise.
  * - tsup transpiles with SWC because `emitDecoratorMetadata` is on in tsconfig.json; Nest's
  *   dependency injection needs that metadata.
  */
@@ -23,6 +25,4 @@ export default defineConfig({
   // `import.meta.url` in bundled workspace code (for example @quad/db's env helpers).
   shims: true,
   noExternal: [/^@quad\//],
-  // Optional native binding that `pg` only loads on request.
-  external: ['pg-native'],
 });

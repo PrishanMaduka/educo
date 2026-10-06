@@ -5,7 +5,7 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
-  fastify: 5.12.5
+  '@nestjs/platform-fastify>fastify': 5.12.5
 
 importers:
 
@@ -74,12 +74,18 @@ importers:
       bullmq:
         specifier: 6.3.11
         version: 6.3.11(ioredis@6.0.0)(pg@8.13.1)
+      drizzle-orm:
+        specifier: 0.45.3
+        version: 0.45.3(@opentelemetry/api@1.9.1)(@types/pg@8.15.6)(pg@8.13.1)
       fastify:
         specifier: 5.12.5
         version: 5.12.5
       ioredis:
         specifier: 6.0.0
         version: 6.0.0
+      pg:
+        specifier: 8.13.1
+        version: 8.13.1
       pino:
         specifier: 10.4.0
         version: 10.4.0
@@ -5686,6 +5692,12 @@ snapshots:
     optionalDependencies:
       '@opentelemetry/api': 1.9.1
       '@types/pg': 8.11.10
+      pg: 8.13.1
+
+  drizzle-orm@0.45.3(@opentelemetry/api@1.9.1)(@types/pg@8.15.6)(pg@8.13.1):
+    optionalDependencies:
+      '@opentelemetry/api': 1.9.1
+      '@types/pg': 8.15.6
       pg: 8.13.1
 
   dunder-proto@1.0.1:

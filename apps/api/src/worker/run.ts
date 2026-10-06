@@ -1,7 +1,8 @@
 import { Worker } from 'bullmq';
 import { Redis } from 'ioredis';
 
-import { createLogger } from '../observability/logger';
+import { createLogger, errorForLog } from '../observability/logger';
+import { createShutdown, onShutdownSignals } from '../shutdown';
 
 import type { Config } from '../config';
 import type { Tracing } from '../observability/tracing';
@@ -36,7 +37,7 @@ export async function runWorkers(config: Config, tracing: Tracing): Promise<void
   // BullMQ needs `maxRetriesPerRequest: null` so blocking commands wait through reconnects.
   const connection = new Redis(config.REDIS_URL, { maxRetriesPerRequest: null });
   connection.on('error', (error) => {
-    logger.error({ err: { type: error.name, message: error.message } }, 'Redis connection error');
+    logger.error({ error: errorForLog(error) }, 'Redis connection error');
   });
   await waitForRedis(connection);
 
@@ -45,16 +46,14 @@ export async function runWorkers(config: Config, tracing: Tracing): Promise<void
   );
   logger.info({ queues: Object.keys(PROCESSORS) }, 'Worker ready');
 
-  let stopping = false;
-  const stop = async (signal: NodeJS.Signals): Promise<void> => {
-    if (stopping) return;
-    stopping = true;
-    logger.info({ signal }, 'Worker stopping');
-    await Promise.all(workers.map((worker) => worker.close()));
-    await connection.quit();
-    await tracing.shutdown();
-    process.exit(0);
-  };
-  process.once('SIGTERM', (signal) => void stop(signal));
-  process.once('SIGINT', (signal) => void stop(signal));
+  onShutdownSignals(
+    createShutdown('Worker', {
+      logger,
+      tracing,
+      close: async () => {
+        await Promise.all(workers.map((worker) => worker.close()));
+        await connection.quit();
+      },
+    }),
+  );
 }

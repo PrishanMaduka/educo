@@ -107,7 +107,7 @@ export class PinoNestLogger implements LoggerService {
   private write(level: pino.Level, message: unknown, context?: string, stack?: string): void {
     const fields = { ...(context ? { context } : {}), ...(stack ? { stack } : {}) };
     if (message instanceof Error) {
-      this.logger[level]({ ...fields, err: errorForLog(message) }, message.message);
+      this.logger[level]({ ...fields, error: errorForLog(message) }, message.message);
     } else {
       this.logger[level](fields, typeof message === 'string' ? message : JSON.stringify(message));
     }
