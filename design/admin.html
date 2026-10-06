@@ -1011,6 +1011,11 @@ body.rv-ro .page-head .chips > .btn{display:none}
 .rv-card{margin-bottom:16px}.rv-roles{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;padding:14px 18px 18px}
 .rv-role{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;text-align:left;padding:10px 12px;border-radius:14px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
 .rv-role:hover{border-color:var(--brand)}.rv-role b{display:block;font-size:14px}.rv-role small{color:var(--ink-3);font-size:12px}
+
+/* Greeting scenes by time of day (brand/greeting/scenes.js) */
+.gs-star{animation:gsTw 3.6s ease-in-out infinite}
+@keyframes gsTw{50%{opacity:.25}}
+@media (prefers-reduced-motion:reduce){.gs-star{animation:none}}
 </style>
 </head>
 <body>
@@ -1047,6 +1052,7 @@ body.rv-ro .page-head .chips > .btn{display:none}
 <div id="tip"></div>
 <div class="toasts" id="toasts"></div>
 
+<script src="brand/greeting/scenes.js"></script>
 <script>
 /* ---------- Icons ---------- */
 const P = {
@@ -2635,7 +2641,7 @@ V.teach = () => {
       <div class="muted" style="font-size:12.5px">${esc(l.cls)} · ${esc(l.room)} · ${l.p}</div>
       <div class="tl-acts">${regs[key] ? `<span class="pill t-green plain">${ic('check',12)} Register taken</span>` : `<button class="btn sm ${st === 'now' ? 'primary' : ''}" data-act="openRegister" data-c="${esc(l.cls)}" data-key="${esc(key)}" data-l="${esc(l.k)} · ${l.p}">${ic('check',14)}Register</button>`}<button class="btn sm" data-act="openComments" data-c="${esc(l.cls)}" data-k="${esc(l.k)}">${ic('file',14)}Marks & comments</button></div></div></div>`; };
   const week = TT_DAYS.map((d, i) => ({d, l: teacherDay(t.name, i)}));
-  return `${pageHead('Overview', `Good morning, ${esc(first)}`, `${TT_DAYS[0][0]} ${TT_DAYS[0][1]} · ${today.length} lessons today · ${load.total} periods a week`, `<select class="input inline teach-pick" data-filter="teachAs" aria-label="View as teacher" data-dd-ic="crm" data-dd-q>${ST.teachers.map(x => `<option value="${x.id}" data-sub="${esc(x.subjects.slice(0, 3).join(', '))}" ${x.id === t.id ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select>`)}
+  return `${pageHead('Overview', `${greetPeriod().word}, ${esc(first)}`, `${TT_DAYS[0][0]} ${TT_DAYS[0][1]} · ${today.length} lessons today · ${load.total} periods a week`, `<select class="input inline teach-pick" data-filter="teachAs" aria-label="View as teacher" data-dd-ic="crm" data-dd-q>${ST.teachers.map(x => `<option value="${x.id}" data-sub="${esc(x.subjects.slice(0, 3).join(', '))}" ${x.id === t.id ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select>`)}
     <div class="teach-hero card" style="--c:${next ? ttSubj(next.g, next.k, next.cls)[0] : 'var(--brand)'}">${cur ? `<div><small>Now · until ${cur.e}</small><b>${esc(cur.k)} with ${esc(cur.cls)}</b><span>${esc(cur.room)} · ${Math.max(0, toMin(cur.e) - NOW_MIN)} minutes left</span></div>` : next ? `<div><small>Next lesson · ${next.s}</small><b>${esc(next.k)} with ${esc(next.cls)}</b><span>${esc(next.room)} · in ${toMin(next.s) - NOW_MIN} minutes</span></div>` : `<div><small>Today</small><b>No more lessons today</b><span>Time to catch up on marking</span></div>`}
       <div class="teach-stats"><div><b class="num">${today.filter(l => toMin(l.e) <= NOW_MIN).length}/${today.length}</b><small>lessons done</small></div><div><b class="num">${toWrite.reduce((a, x) => a + x.n, 0)}</b><small>reports to write</small></div><div><b class="num">${myCls ? esc(myCls.replace(/^(Year|Grade) /, '')) : '—'}</b><small>my class</small></div></div></div>
     <div class="grid g-2-1 teach-grid"><section class="card"><div class="card-h"><h2>Today</h2><span class="muted num" style="font-size:12px">09:41</span></div><div class="tl-list">${today.map(lessonCard).join('') || '<div class="muted" style="padding:24px;text-align:center">No lessons today.</div>'}</div></section>
@@ -3274,17 +3280,7 @@ P.trend = '<path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/>';
 const scrib = w => `<span class="scrib">${w}</span>`;
 /* Morning over the hills: sun, layered hills, tea rows, two birds. Colours follow the theme. */
 /* Morning scene drawn across the whole greeting section: soft sky, a sun rising on the right, rolling hills along the bottom */
-const morningScene = (id = 'ms') => `<svg class="mscene" viewBox="0 0 1200 320" preserveAspectRatio="xMaxYMax slice" aria-hidden="true">
-  <defs><linearGradient id="${id}-sky" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color:var(--surface)"/><stop offset=".55" style="stop-color:color-mix(in srgb,var(--c3) 10%,var(--surface))"/><stop offset="1" style="stop-color:color-mix(in srgb,var(--c1) 16%,var(--surface))"/></linearGradient>
-  <radialGradient id="${id}-glow" cx="1010" cy="190" r="300" gradientUnits="userSpaceOnUse"><stop offset="0" style="stop-color:var(--c1);stop-opacity:.32"/><stop offset=".45" style="stop-color:var(--c1);stop-opacity:.1"/><stop offset="1" style="stop-color:var(--c1);stop-opacity:0"/></radialGradient></defs>
-  <rect width="1200" height="320" fill="url(#${id}-sky)"/><rect width="1200" height="320" fill="url(#${id}-glow)"/>
-  <circle class="ms-sun" cx="1010" cy="196" r="58" style="fill:var(--c1)" opacity=".85"/>
-  <g fill="none" style="stroke:var(--ink-3)" stroke-width="2.4" stroke-linecap="round" opacity=".7"><path d="M842 92q9-9 18 0q9-9 18 0"/><path d="M892 64q7-7 14 0q7-7 14 0"/><path d="M790 120q6-6 12 0q6-6 12 0"/></g>
-  <path d="M0 236C170 214 330 226 500 212S820 150 1000 168 1150 176 1200 170V320H0Z" style="fill:var(--c3)" opacity=".16"/>
-  <path d="M0 262C210 240 400 258 610 240S960 206 1200 222V320H0Z" style="fill:var(--c3)" opacity=".3"/>
-  <path d="M0 290C260 272 500 290 760 272S1060 252 1200 262V320H0Z" style="fill:var(--c2)" opacity=".42"/>
-  <g fill="none" style="stroke:var(--surface)" stroke-width="2" stroke-linecap="round" opacity=".35"><path d="M560 300c80-10 170-12 250-6"/><path d="M860 290c80-9 170-11 260-6"/><path d="M700 312c90-8 190-9 280-4"/></g>
-  <path d="M0 308C300 298 620 310 900 300S1120 292 1200 296V320H0Z" style="fill:var(--c2)" opacity=".6"/></svg>`;
+const morningScene = (id = 'ms') => greetScene(greetPeriod(), id); // time-of-day scene from brand/greeting/scenes.js
 
 const morningArt = (cls = '') => `<svg class="morning ${cls}" viewBox="0 0 320 150" aria-hidden="true">
   <circle cx="226" cy="74" r="34" fill="var(--c1)" opacity=".9"/><circle cx="226" cy="74" r="50" fill="var(--c1)" opacity=".14"/>
@@ -3373,7 +3369,7 @@ V.dashboard = () => {
   pastBuild(); const houses = HOUSES.map(h => [h, PAST.beh.filter(b => b.type === 'house' && stuOf(b.sid).house === h).reduce((a, b) => a + b.pts, 0)]).sort((a, b) => b[1] - a[1]);
   const merits = PAST.beh.filter(b => b.date >= '2026-09-29' && b.pts > 0).length;
   return `
-  <section class="hello"><div class="hello-t"><h1>Good morning, ${scrib(rvMe()[0].split(' ').filter(w => !/^(Dr|Mr|Mrs|Ms)\.?$/.test(w))[0])}</h1>
+  <section class="hello"><div class="hello-t"><h1>${greetPeriod().word}, ${scrib(rvMe()[0].split(' ').filter(w => !/^(Dr|Mr|Mrs|Ms)\.?$/.test(w))[0])}</h1>
     <p class="hello-s"><b>1,181 of 1,248 students</b> are in school today, 94.6%. ${byYear.length ? `${esc(byYear[0][0])} is the lowest at ${byYear[0][1].toFixed(0)}%. ` : ''}Term 1 fees are 78% collected and <b>${nd.length} ${nd.length === 1 ? 'thing' : 'things'}</b> ${nd.length === 1 ? 'needs' : 'need'} you before assembly.</p>
     <div class="hello-m">Monday 5 October · Week 6 of Term 1 · next holiday Vap Poya, Mon 26 Oct</div>
     <div class="chips" style="margin-top:14px"><button class="btn primary" data-act="go" data-to="attendance">${ic('check',16)}Take attendance</button><button class="btn" data-act="newApp">${ic('plus',16)}New application</button></div></div>${morningScene('hello')}</section>

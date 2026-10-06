@@ -86,12 +86,22 @@ Theme rules:
 - Top bar: sticky, translucent; collapse button, search (Ctrl K), Ask Quad button with a `/` hint, academic year picker (staff), theme toggle, notifications, and the profile menu.
 - Content: max width 1480 px, 24 px padding, 20 px gaps.
 
-### The greeting section ("Good morning")
-- A full-width card with a **morning scene** behind the whole section. The scene has a soft sky gradient from `surface` to lilac and then coral tints, a coral sun rising behind layered lilac and indigo hills along the bottom, and a few birds. It is one SVG with `preserveAspectRatio="xMaxYMax slice"`, positioned `absolute; inset: 0`. Reference: `morningScene()` in `design/admin.html`.
-- Text sits on the plain part of the sky (max width about 64%), with the hills below the buttons (bottom padding of about 70 px).
+### The greeting section (time of day)
+- **Greeting and scene follow the time of day**, in the school's time zone on the web and the phone's time in the parent app:
+
+| Period | Hours | Words | Scene |
+|---|---|---|---|
+| Morning | 05:00–11:59 | Good morning | Coral sun rising behind lilac and indigo hills, birds; sky `surface` → lilac → coral |
+| Afternoon | 12:00–16:59 | Good afternoon | High amber sun with a dotted halo and a few clouds; teal and indigo hills |
+| Evening | 17:00–19:59 | Good evening | Amber-to-coral sun setting behind the far hill, short rays, birds; sky lilac → coral → amber |
+| Night | 20:00–04:59 | Good evening (until midnight), then Hello | Crescent moon, twinkling stars, deep indigo sky on the right, dark hills |
+
+- **Assets** (source of truth `design/brand/greeting/`): `scenes.js` (one generator for every scene, palette-driven), the exported `{morning,afternoon,evening,night}-{light,dark}.svg` (1200 × 320), PNG renders in `png/` at @1x and @2x, and 24 px icons `icon-{period}.svg`. Re-export with `node design/brand/greeting/export.js`. The brand page (`design/brand.html#greeting`) shows them all and opens the staff portal at any period.
+- **Web** (`packages/ui`): `<GreetingScene period>` is a port of `scenes.js` that colours the SVG with the theme tokens (CSS variables), so it follows light and dark mode and the school's brand colour without separate files. `greetingPeriod(date, timeZone)` lives in `packages/domain/greeting` with unit tests for every boundary (04:59, 05:00, 11:59, 12:00, 16:59, 17:00, 19:59, 20:00, 23:59, 00:00).
+- **Flutter**: the parent header uses the icons (`assets/greeting/icon-*.svg` via `flutter_svg`, tinted amber for morning and afternoon, coral for evening, lilac for night). The API's `GET /family/home` returns the period computed for the device's time zone header, and the app falls back to the device clock offline.
+- The scene is one SVG with `preserveAspectRatio="xMaxYMax slice"`, positioned `absolute; inset: 0`, behind the whole section. Text always sits on the calm left side of the sky (max width about 64%), with the hills below the buttons (bottom padding of about 70 px).
 - On narrow screens the scene shrinks to a band about 130 px tall along the bottom, and the text uses the full width.
-- In the parent app the scene sits in a rounded card with 10 px above it and 16 px below it.
-- The sun rises once on load (1.4 s); there is no animation with reduced motion.
+- Motion: the sun or moon rises once on load (1.4 s) and the stars twinkle slowly; nothing moves with reduced motion.
 - Content: a small date line, then "Good morning, {first name}" with the highlighted name, a one- or two-sentence summary computed from live data, a context line (week of term, next holiday) and up to three actions.
 
 ### Page head
@@ -152,7 +162,7 @@ Reference: `design/landing.html`. It uses the same tokens as the apps, plus:
 
 Button (primary, secondary, ghost, danger; sizes sm and md; icon), IconButton, Input, Textarea, Select (native fallback), Dropdown (filter variant with search and groups), Segmented control, Switch, Checkbox, Chip, Pill (status), Card (with header), KPI tile, Table (sortable, selectable), Drawer (with Stepper), Toast, Tooltip, Tabs, Avatar (initials with a deterministic colour from a fixed palette that passes AA), Empty state, Morning scene, Sparkline, Bar chart, Line chart, Donut, Heatmap (attendance), Timeline, Command palette, Ask Quad panel, Petal burst.
 
-The Flutter equivalents live in `apps/parent/lib/ui` (for example `QuadButton`, `QuadCard`, `QuadPill`, `MorningScene` as a `CustomPainter`, `PetalBurst`, `Sparkline`) and read colours only from the generated tokens through `Theme.of(context).extension<QuadColors>()`.
+The Flutter equivalents live in `apps/parent/lib/ui` (for example `QuadButton`, `QuadCard`, `QuadPill`, `GreetingIcon` (time-of-day icon), `PetalBurst`, `Sparkline`) and read colours only from the generated tokens through `Theme.of(context).extension<QuadColors>()`.
 
 ## Tailwind CSS (web)
 - All web styling uses Tailwind CSS v4 utility classes. The generated `@theme` maps tokens to utilities (`bg-canvas`, `bg-surface`, `text-ink-2`, `border-line`, `bg-brand`, `text-brand-ink`, `rounded-card`, `shadow-card`, `font-sans`).

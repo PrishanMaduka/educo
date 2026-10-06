@@ -1003,6 +1003,11 @@ body:has(.savebar,.uk-bar,.bulkbar) .askq-fab{bottom:92px}
 /* tabs that end a card: the card's own edge is the divider, so no extra line over the rounded corners */
 .card > .tabs:last-child{border-bottom:0}
 .card > .tabs:last-child button.on::after{bottom:0}
+
+/* Greeting scenes by time of day (brand/greeting/scenes.js) */
+.gs-star{animation:gsTw 3.6s ease-in-out infinite}
+@keyframes gsTw{50%{opacity:.25}}
+@media (prefers-reduced-motion:reduce){.gs-star{animation:none}}
 </style>
 </head>
 <body>
@@ -1040,6 +1045,7 @@ body:has(.savebar,.uk-bar,.bulkbar) .askq-fab{bottom:92px}
   <div class="askq-b" id="aqList" aria-live="polite"></div>
   <form class="askq-f" id="askqForm"><input class="input" id="askqIn" placeholder="Ask about schools, revenue, trials…" autocomplete="off" aria-label="Ask Quad a question"><button class="btn primary" aria-label="Send"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"/></svg></button></form></aside>
 
+<script src="brand/greeting/scenes.js"></script>
 <script>
 const P = {
   home:'<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
@@ -1292,7 +1298,7 @@ V.overview = () => {
   const sig = signals(), risk = sig.filter(x => x.s.lvl === 'risk'), watch = sig.filter(x => x.s.lvl === 'watch'), good = sig.filter(x => x.s.lvl === 'good'), today = todayItems();
   const ent = live.filter(t => t.plan === 'Enterprise').reduce((a, t) => a + mrr(t), 0);
   return `<section class="hero"><div class="vine" aria-hidden="true"></div><div class="grow"><div class="greet">Monday, 5 October 2026</div>
-    <h1>Good morning, <span class="wavy">Prishan</span></h1>
+    <h1>${greetPeriod().word}, <span class="wavy">Prishan</span></h1>
     <p><b>${tenants.length} schools</b> in <b>${countries.length} countries</b> now run on Quad, looking after <b>${fmt(students)} students</b> and bringing in <b>${usd(total)}</b> a month. Most of them are doing well: ${good.length} are thriving. ${today.length ? `There ${today.length === 1 ? 'is one thing' : `are ${today.length} things`} that need you today` : 'Nothing needs you today'}${risk.length ? `, and ${risk.length === 1 ? 'one school is' : risk.length + ' schools are'} showing early signs they might leave.` : '.'}</p>
     <div class="cal-note">${ic('cal',15)}<span><b>Mon 26 Oct · Vap Poya</b> – Sri Lankan schools closed, expect a quiet day for attendance and SMS</span></div>
     <div class="chips"><button class="btn primary" data-act="newTenant">${ic('plus',16)}New school</button><button class="btn" data-act="go" data-to="tenants">${ic('tenants',16)}All schools</button><button class="btn gold" data-act="askq">${ic('spark',16)}Ask Quad</button></div></div>
@@ -2173,17 +2179,7 @@ function todayItems() {
   return out;
 }
 /* Morning scene drawn across the whole greeting section: soft sky, a sun rising on the right, rolling hills along the bottom */
-const morningScene = (id = 'ms') => `<svg class="mscene" viewBox="0 0 1200 320" preserveAspectRatio="xMaxYMax slice" aria-hidden="true">
-  <defs><linearGradient id="${id}-sky" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color:var(--surface)"/><stop offset=".55" style="stop-color:color-mix(in srgb,var(--c3) 10%,var(--surface))"/><stop offset="1" style="stop-color:color-mix(in srgb,var(--c1) 16%,var(--surface))"/></linearGradient>
-  <radialGradient id="${id}-glow" cx="1010" cy="190" r="300" gradientUnits="userSpaceOnUse"><stop offset="0" style="stop-color:var(--c1);stop-opacity:.32"/><stop offset=".45" style="stop-color:var(--c1);stop-opacity:.1"/><stop offset="1" style="stop-color:var(--c1);stop-opacity:0"/></radialGradient></defs>
-  <rect width="1200" height="320" fill="url(#${id}-sky)"/><rect width="1200" height="320" fill="url(#${id}-glow)"/>
-  <circle class="ms-sun" cx="1010" cy="196" r="58" style="fill:var(--c1)" opacity=".85"/>
-  <g fill="none" style="stroke:var(--ink-3)" stroke-width="2.4" stroke-linecap="round" opacity=".7"><path d="M842 92q9-9 18 0q9-9 18 0"/><path d="M892 64q7-7 14 0q7-7 14 0"/><path d="M790 120q6-6 12 0q6-6 12 0"/></g>
-  <path d="M0 236C170 214 330 226 500 212S820 150 1000 168 1150 176 1200 170V320H0Z" style="fill:var(--c3)" opacity=".16"/>
-  <path d="M0 262C210 240 400 258 610 240S960 206 1200 222V320H0Z" style="fill:var(--c3)" opacity=".3"/>
-  <path d="M0 290C260 272 500 290 760 272S1060 252 1200 262V320H0Z" style="fill:var(--c2)" opacity=".42"/>
-  <g fill="none" style="stroke:var(--surface)" stroke-width="2" stroke-linecap="round" opacity=".35"><path d="M560 300c80-10 170-12 250-6"/><path d="M860 290c80-9 170-11 260-6"/><path d="M700 312c90-8 190-9 280-4"/></g>
-  <path d="M0 308C300 298 620 310 900 300S1120 292 1200 296V320H0Z" style="fill:var(--c2)" opacity=".6"/></svg>`;
+const morningScene = (id = 'ms') => greetScene(greetPeriod(), id); // time-of-day scene from brand/greeting/scenes.js
 
 function morningArt(cls = 'hero-art') {
   return `<svg class="${cls}" viewBox="0 0 320 170" aria-hidden="true" focusable="false">

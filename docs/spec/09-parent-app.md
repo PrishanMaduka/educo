@@ -26,7 +26,7 @@ Tab bar: **Home**, **Circle** (unread moments badge), **Payments** (due badge), 
 
 ## Home
 Order from top to bottom:
-1. **Greeting header:** no card or illustration: a small amber sun dot with the date, "Good morning, {first name}" on one line (22 px), and the notifications bell on the right.
+1. **Greeting header:** no card or illustration: a small time-of-day icon (sunrise, sun, sunset or moon; see [03](03-design-system.md#the-greeting-section-time-of-day)) with the date, "Good morning / afternoon / evening, {first name}" on one line (22 px), and the notifications bell on the right.
 2. **Stories:** round tiles (Sports, STEM lab, Lunch, Principal, Art week). Tapping one opens full-screen slides: tap to advance, hold to pause, swipe down to close, double-tap or the heart button for a heart (`POST /family/stories/:id/heart`), and "Reply to the school" (sent to the office as a message).
 3. **Child switcher:** small pills (24 px avatar and first name) and a round Profiles icon button at the end of the row.
 4. **{child}'s day** (the day ring, see [12](12-moments-messaging.md#the-day-as-it-happens)): a ring of today's lessons from the start to the end of the school day, done lessons solid and upcoming ones faded, a "now" hand and event dots (arrived, registered, moment, lunch, bus). Beside it a LIVE headline ("Two of seven lessons done") and a sentence ("Arrived 07:42, registered present and a moment from Ms. Jayasinghe"); under it "Right now: Science with Ms. Fernando". Tap → **Day** screen: the larger ring, "So far today" timeline, and "Still to come".

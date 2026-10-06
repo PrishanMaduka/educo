@@ -14,7 +14,7 @@ Open `design/index.html` in a browser. Each prototype is a single self-contained
 | `design/platform.html` | Platform console for the super admin: schools (tenants), plans, each school's users, roles, modules, branding and security |
 | `design/admin.html` | School admin web app: dashboard, the six core modules, and Users & roles. **View as** (top bar, or Users & roles → Preview a role) shows the portal as each role sees it |
 | `design/parent.html` | Parent mobile app in a phone frame, with controls to simulate push notifications |
-| `design/brand.html` | Logo guidelines: construction, colours, app icon and usage |
+| `design/brand.html` | Logo guidelines: construction, colours, app icon and usage | Includes **Greeting by time of day**: morning, afternoon, evening and night scenes (light and dark) and icons in `design/brand/greeting/`.
 | `design/brand/` | Logo files (SVG): full logo, white logo, mark, app icon |
 
 Both prototypes have light and dark themes and work at phone width. All data in them is sample data for a fictional school.

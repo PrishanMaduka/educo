@@ -880,6 +880,14 @@ button.it:active{background:var(--surface-2)}
 .kid{gap:6px;padding:3px 12px 3px 3px;font-size:13px;border-width:1px}
 .kid.on .av{box-shadow:0 0 0 1.5px var(--surface),0 0 0 3px var(--gold)}
 .kid.kid-all{padding:0;width:32px;justify-content:center;margin-left:auto;color:var(--ink-2)}
+
+/* Greeting icon by time of day: morning amber, afternoon amber, evening coral, night lilac */
+.ghead.slim .gico{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:color-mix(in srgb,currentColor 16%,transparent)}
+.gi-morning,.gi-afternoon{color:var(--c4)}.gi-evening{color:var(--c1)}.gi-night{color:var(--c3)}
+/* Greeting scenes by time of day (brand/greeting/scenes.js) */
+.gs-star{animation:gsTw 3.6s ease-in-out infinite}
+@keyframes gsTw{50%{opacity:.25}}
+@media (prefers-reduced-motion:reduce){.gs-star{animation:none}}
 </style>
 </head>
 <body>
@@ -962,6 +970,7 @@ button.it:active{background:var(--surface-2)}
   </aside>
 </div>
 
+<script src="brand/greeting/scenes.js"></script>
 <script>
 const P = {
   home:'<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
@@ -1535,7 +1544,7 @@ SCR.home = () => {
   const qa = [['attendance','t-green','cal','Attendance'],['results','t-blue','chart','Results'],['timetable','t-violet','clock','Timetable'],['homework','t-gold','book','Homework'],
     ['bus','t-green','bus','Track bus'],['pickup','t-blue','qr','Pickup pass'],['wallet','t-gold','wallet','Canteen'],['absence','t-red','alert','Report absence'],
     ['conduct','t-lotus','star','Rewards'],['trips','t-violet','pin','Trips'],['reports','t-blue','file','Reports'],['calendar','t-green','cal','Calendar']];
-  return { head:`<div class="ghead slim"><div class="gt"><div class="gx"><div class="hello"><span class="sun" aria-hidden="true"></span>Monday 5 October</div><h1>Good morning, Dilhani</h1></div>
+  return { head:`<div class="ghead slim"><div class="gt"><div class="gx"><div class="hello"><span class="gico gi-${greetPeriod().k}" aria-hidden="true">${greetIcon(greetPeriod(), 'currentColor', 15)}</span>Monday 5 October</div><h1>${greetPeriod().word}, Dilhani</h1></div>
       <button class="back" data-act="push" data-to="notifications" aria-label="Notifications" style="position:relative">${ic('bell',18)}${S.notifs?'<span style="position:absolute;top:7px;right:8px;width:8px;height:8px;border-radius:50%;background:var(--bad);box-shadow:0 0 0 2px var(--surface)"></span>':''}</button></div></div>`, body: `
   <div class="stories" aria-label="School stories">${STORIES.map((st, i) => `<button class="story ${st.seen?'seen':''}" data-act="story" data-i="${i}"><span class="ring-s"><span style="background:${st.slides[0].bg}">${ic(st.icon,24)}</span></span>${st.name}</button>`).join('')}</div>
   ${kidSwitch(true)}

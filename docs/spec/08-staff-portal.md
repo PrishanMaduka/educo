@@ -30,7 +30,7 @@ All year-group labels come from the school's curriculum (Year 4, Grade 4, PYP 4)
 ## Dashboard: "the school today"
 Loaded with one call, `GET /dashboard`; blocks refresh on `dashboard.changed`. Each block is shown only to people who may see its data.
 
-1. **Greeting section** with the morning scene: "Good morning, {first name}", then a summary built from live data: "{present} of {enrolled} students are in school today, {pct}%. {lowest year group} is the lowest at {pct}%. Term {n} fees are {pct}% collected and {k} things need you before assembly." Below that, a context line ("Monday 5 October · Week 6 of Term 1 · next holiday Vap Poya, Mon 26 Oct") and the actions Take attendance and New application.
+1. **Greeting section** with the time-of-day scene (see [03](03-design-system.md#the-greeting-section-time-of-day)): "Good morning / afternoon / evening, {first name}", then a summary built from live data: "{present} of {enrolled} students are in school today, {pct}%. {lowest year group} is the lowest at {pct}%. Term {n} fees are {pct}% collected and {k} things need you before assembly." Below that, a context line ("Monday 5 October · Week 6 of Term 1 · next holiday Vap Poya, Mon 26 Oct") and the actions Take attendance and New application.
 2. **Needs you today:** up to 6 rows, most urgent first, each with an icon, a sentence, detail and one action. This is the one list of row kinds (other files refer to it):
    1. lessons with no cover (Arrange cover);
    2. students who need a conversation (See who);

@@ -54,6 +54,21 @@ p{margin:0;color:var(--ink-2);max-width:62ch}
 .ok{background:#1F8A5B}.no{background:#D13A3A}
 .clear{outline:1.5px dashed #8B7CF6;outline-offset:14px}
 @media (max-width:760px){.hero,.two{grid-template-columns:1fr}.panel{padding:20px}}
+.gs-grid{display:grid;grid-template-columns:200px minmax(0,1fr) minmax(0,1fr);gap:12px 14px;align-items:center}
+.gs-h{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.gs-l b{display:block;font-size:16px}.gs-l small{display:block;color:var(--ink-2);font-size:12.5px;line-height:1.45}
+.gs-f{margin:0;position:relative;border-radius:16px;overflow:hidden;aspect-ratio:1200/320;border:1px solid var(--line)}
+.gs-f img{width:100%;height:100%;display:block;object-fit:cover}
+.gs-f figcaption{position:absolute;left:4%;top:12%;font-weight:800;font-size:clamp(13px,1.6vw,20px)}
+.gs-f.lt figcaption{color:#1C1B2E}.gs-f.dk figcaption{color:#F1F1FA}
+.gs-icons{display:flex;flex-wrap:wrap;gap:18px}
+.gs-icons>div{display:grid;grid-template-columns:auto auto;column-gap:10px;align-items:center}
+.gs-icons small{grid-column:2;color:var(--ink-3);font-size:12px}
+.gi{grid-row:span 2;width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:var(--surface-2)}
+.gs-try{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:14px;color:var(--ink-2)}
+.gs-try button{font:700 13.5px inherit;font-family:inherit;padding:7px 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.gs-try button:hover{border-color:var(--ink-3)}
+@media (max-width:760px){.gs-grid{grid-template-columns:1fr}.gs-h{display:none}}
 </style>
 </head>
 <body>
@@ -103,14 +118,28 @@ p{margin:0;color:var(--ink-2);max-width:62ch}
     </div>
   </section>
 
+  <section class="panel" id="greeting"><div><h2>Greeting by time of day</h2><p>Home screens greet people with the right words and a scene for the time of day: the school’s time zone on the web, the phone’s time in the parent app. Each scene comes in light and dark. Text always sits on the calm left side.</p></div>
+    <div class="gs-grid">
+      <div class="gs-h"></div><b class="gs-h">Light</b><b class="gs-h">Dark</b>
+      <div class="gs-l"><b>Morning</b><small>05:00–11:59 · “Good morning”</small><small>The sun rises over the hills</small></div><figure class="gs-f lt"><img src="brand/greeting/morning-light.svg" alt="Morning scene, light"><figcaption>Good morning, Prishan</figcaption></figure><figure class="gs-f dk"><img src="brand/greeting/morning-dark.svg" alt="Morning scene, dark"><figcaption>Good morning, Prishan</figcaption></figure><div class="gs-l"><b>Afternoon</b><small>12:00–16:59 · “Good afternoon”</small><small>High sun and a few clouds</small></div><figure class="gs-f lt"><img src="brand/greeting/afternoon-light.svg" alt="Afternoon scene, light"><figcaption>Good afternoon, Prishan</figcaption></figure><figure class="gs-f dk"><img src="brand/greeting/afternoon-dark.svg" alt="Afternoon scene, dark"><figcaption>Good afternoon, Prishan</figcaption></figure><div class="gs-l"><b>Evening</b><small>17:00–19:59 · “Good evening”</small><small>The sun sets behind the hills</small></div><figure class="gs-f lt"><img src="brand/greeting/evening-light.svg" alt="Evening scene, light"><figcaption>Good evening, Prishan</figcaption></figure><figure class="gs-f dk"><img src="brand/greeting/evening-dark.svg" alt="Evening scene, dark"><figcaption>Good evening, Prishan</figcaption></figure><div class="gs-l"><b>Night</b><small>20:00–04:59 · “Good evening”, then “Hello” after midnight</small><small>Moon and stars</small></div><figure class="gs-f lt"><img src="brand/greeting/night-light.svg" alt="Night scene, light"><figcaption>Good evening, Prishan</figcaption></figure><figure class="gs-f dk"><img src="brand/greeting/night-dark.svg" alt="Night scene, dark"><figcaption>Good evening, Prishan</figcaption></figure>
+    </div>
+    <div class="gs-icons"><div><span class="gi gi-morning"><img src="brand/greeting/icon-morning.svg" alt="" width="22" height="22"></span><b>Morning</b><small>icon-morning.svg</small></div><div><span class="gi gi-afternoon"><img src="brand/greeting/icon-afternoon.svg" alt="" width="22" height="22"></span><b>Afternoon</b><small>icon-afternoon.svg</small></div><div><span class="gi gi-evening"><img src="brand/greeting/icon-evening.svg" alt="" width="22" height="22"></span><b>Evening</b><small>icon-evening.svg</small></div><div><span class="gi gi-night"><img src="brand/greeting/icon-night.svg" alt="" width="22" height="22"></span><b>Night</b><small>icon-night.svg</small></div></div>
+    <div class="gs-try"><span>See it in the apps:</span><button type="button" data-gs-try="morning">Morning</button><button type="button" data-gs-try="afternoon">Afternoon</button><button type="button" data-gs-try="evening">Evening</button><button type="button" data-gs-try="night">Night</button><button type="button" data-gs-try="">Use the real time</button></div>
+  </section>
   <section class="panel"><div><h2>Files</h2><p>All in <code>design/brand/</code> as SVG, so they scale to any size.</p></div>
     <div class="legend">
       <div><i style="background:#1F2559"></i><div><b>quad-logo.svg</b><span>Full logo for light backgrounds</span></div></div>
       <div><i style="background:#8B7CF6"></i><div><b>quad-logo-white.svg</b><span>Full logo for dark backgrounds</span></div></div>
       <div><i style="background:#E5534B"></i><div><b>quad-mark.svg · quad-mark-white.svg</b><span>The mark alone, for avatars and tight spaces</span></div></div>
       <div><i style="background:#1F2559"></i><div><b>quad-app-icon.svg</b><span>1024 × 1024 app icon and favicon</span></div></div>
+      <div><i style="background:#F2A93B"></i><div><b>greeting/</b><span>Time-of-day scenes (morning, afternoon, evening, night × light, dark) as SVG and PNG (1200 × 320, @1x and @2x), 24 px icons, and scenes.js, the source the apps use</span></div></div>
     </div>
   </section>
 </div>
+<script>
+document.addEventListener('click', e => { const b = e.target.closest('[data-gs-try]'); if (!b) return; const k = b.dataset.gsTry;
+  try { if (k) sessionStorage.setItem('quad-greet-period', k); else sessionStorage.removeItem('quad-greet-period'); } catch (er) {}
+  location.href = 'admin.html#dashboard'; });
+</script>
 </body>
 </html>
