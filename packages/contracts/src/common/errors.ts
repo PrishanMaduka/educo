@@ -1,6 +1,9 @@
 import { z } from 'zod';
 
-/** Error codes from spec 06 (Conventions). */
+/**
+ * Error codes from spec 06 (Conventions), plus `internal` for the 500 the API returns when
+ * something unexpected fails (the cause is logged, never sent to the client).
+ */
 export const ErrorCode = z.enum([
   'validation',
   'unauthorized',
@@ -16,6 +19,7 @@ export const ErrorCode = z.enum([
   'business_rule',
   'app_update_required',
   'rate_limited',
+  'internal',
 ]);
 export type ErrorCode = z.infer<typeof ErrorCode>;
 

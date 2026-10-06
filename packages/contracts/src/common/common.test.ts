@@ -34,7 +34,11 @@ describe('contracts', () => {
       ErrorBodySchema.safeParse({ code: 'forbidden', message: 'No', fields: { a: 'b' } }).success,
     ).toBe(true);
     expect(ErrorCode.options).toContain('app_update_required');
-    expect(ErrorCode.options).toHaveLength(14);
+    expect(ErrorCode.options).toHaveLength(15);
+  });
+
+  it('has an internal code for unexpected server errors (500)', () => {
+    expect(ErrorCode.parse('internal')).toBe('internal');
   });
 
   it('permission keys stub', () => {
