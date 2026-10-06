@@ -80,6 +80,8 @@ Assignments in Teachers & classes give extra scope automatically:
 - **Class teacher** of a class: registration, class reports, parents' messages and moments for that class.
 - **Section head / deputy** of a stage: read everything for students in the stage; approve reports in that stage; early-warning plans.
 
+**Previewing a role:** school admins can preview the staff portal as any role (see [08](08-staff-portal.md#users--roles)). The session keeps the admin's identity and adds `preview_role_id`; guards evaluate the previewed role, writes are refused, and the audit log records the start and end. Support's "sign in as" (console only) is a different, reasoned, time-limited session.
+
 Custom roles come from the role builder in the console or the staff portal (Users & roles). They have a name, description, colour, a scope (whole school, campuses, own classes), start from an existing role, a permission matrix, sensitive-access switches and members.
 
 ### Permission matrix

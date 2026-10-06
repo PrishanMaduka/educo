@@ -74,14 +74,14 @@ To run a milestone in Claude Code, type `/build-milestone M3` (ids with a letter
   - **Choose a school** for accounts with several memberships, Switch school in the profile menu, and the school's branding applied after sign-in.
 - Console sign-in: Google Workspace + TOTP, and email + password + TOTP when `CONSOLE_PASSWORD_LOGIN=true` (local and staging only, D22).
 - Parent OTP sign-in, JWT + refresh rotation, biometric unlock (Flutter, `local_auth`).
-- Roles, the permission matrix, sensitive keys, `@Can` and `@Module` guards, `/me/permissions`.
+- Roles, the permission matrix, sensitive keys, `@Can` and `@Module` guards, `/me/permissions`, and **Preview a role** (read-only role preview for school admins).
 - School side: **Settings → Users & roles** (invite by email, change role, remind two-step, reset password, sign out everywhere, deactivate; no "sign in as", which is console-only), the **School settings** screen with its General and Sign-in sections and the `school_settings` table (other sections arrive with their features), and **Settings → Audit** (`GET /audit`, filterable).
 - Audit log and platform audit.
 - Support sessions with the banner (reason always required).
 - Seed: platform owner, two schools, the users listed in [02](02-architecture.md#local-development).
 
 **Accept:**
-- Journeys 17, 18, 19, 42 and 43 (signed links and the enquiry key; the webhook part from M7) in [17](17-testing-quality.md#cross-app-journeys-must-stay-green-from-the-milestone-that-introduces-them).
+- Journeys 17, 18, 19, 42, 43 and 50 (signed links and the enquiry key; the webhook part from M7) in [17](17-testing-quality.md#cross-app-journeys-must-stay-green-from-the-milestone-that-introduces-them).
 - Sign-in works in all three apps, all from one domain.
 - `/auth/identify` returns the same response for unknown emails; `select-school` refuses a tenant the account is not a member of; a tampered or reused signed link is refused.
 - Cross-tenant and wrong-role tests fail with 403/404; the app role cannot read another tenant's rows even with a raw query.

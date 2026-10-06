@@ -995,6 +995,22 @@ body:has(.savebar,.uk-bar,.bulkbar) .askq-fab{bottom:92px}
 .auth-school{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;text-align:left;padding:10px 12px;border-radius:14px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
 .auth-school:hover{border-color:var(--brand)}.auth-school b{display:block;font-size:14.5px}.auth-school small{color:var(--ink-3);font-size:12.5px}
 .auth-logo.sm{width:40px;height:40px;border-radius:12px;font-size:13px;box-shadow:none}
+
+/* Preview a role: what each role sees */
+#rvBar:empty{display:none}
+.rv-bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:12px 24px 0;padding:10px 14px;border-radius:14px;background:var(--gold-soft);border:1px solid color-mix(in srgb,var(--gold) 35%,transparent);font-size:13.5px}
+.rv-bar .rv-ic{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--gold);color:#fff;flex:none}
+.rv-bar b{font-weight:800}.rv-bar small{display:block;color:var(--ink-2);font-size:12.5px}
+.rv-bar .btn{margin-left:auto}
+.rv-ro-pill{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:800;padding:4px 10px;border-radius:999px;background:var(--surface-2);color:var(--ink-2);border:1px solid var(--line)}
+body.rv-ro .page-head .chips > .btn{display:none}
+.rv-deny{max-width:560px;margin:56px auto;text-align:center;display:flex;flex-direction:column;align-items:center;gap:12px}
+.rv-deny .rv-ic{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;background:var(--surface-2);color:var(--ink-3)}
+.rv-deny p{color:var(--ink-2);margin:0}
+@media (max-width:900px){.rv-bar{margin:10px 12px 0}#rvPick + .dd-btn,.dd-btn[aria-label^="View as"]{max-width:150px}}
+.rv-card{margin-bottom:16px}.rv-roles{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;padding:14px 18px 18px}
+.rv-role{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;text-align:left;padding:10px 12px;border-radius:14px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.rv-role:hover{border-color:var(--brand)}.rv-role b{display:block;font-size:14px}.rv-role small{color:var(--ink-3);font-size:12px}
 </style>
 </head>
 <body>
@@ -1012,12 +1028,13 @@ body:has(.savebar,.uk-bar,.bulkbar) .askq-fab{bottom:92px}
       <button class="iconbtn collapse-btn" data-act="collapse" aria-label="Collapse sidebar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/></svg></button>
       <div class="search" data-act="cmdk" role="button" tabindex="0"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><span>Search students, invoices, pages…</span><kbd>Ctrl K</kbd></div>
       <div class="spacer"></div>
+      <select class="yearpick" id="rvPick" aria-label="View as role" data-dd-ic="shield" data-dd-top></select>
       <select class="yearpick" id="yearpick" aria-label="Academic year" data-dd-ic="cal" data-dd-top><optgroup label="2026/27"><option data-sub="5 Oct – 18 Dec · current" selected>2026/27 · Term 1</option><option data-sub="5 Jan – 27 Mar">2026/27 · Term 2</option><option data-sub="20 Apr – 10 Jul">2026/27 · Term 3</option></optgroup><optgroup label="Past years"><option data-sub="Read only">2025/26 · Term 3</option><option data-sub="Read only">2025/26 · Term 2</option></optgroup></select>
       <button class="iconbtn" data-act="theme" aria-label="Toggle theme" id="themeBtn"></button>
       <button class="iconbtn" data-act="notif" aria-label="Notifications"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></svg><i class="dot"></i></button>
       <div class="me" data-act="go" data-to="user-s0" title="My profile" style="cursor:pointer"><div class="av" style="background:#DD4A42">PM</div><div><b>Prishan M.</b><small>Administrator</small></div></div>
     </header>
-    <div id="supportBar"></div>
+    <div id="supportBar"></div><div id="rvBar"></div>
     <main class="content" id="view"></main>
   </div>
 </div>
@@ -1193,7 +1210,7 @@ const NAV = [
 function renderNav() {
   const base = S.route.split('-')[0];
   const active = base === 'student' ? 'students' : base === 'user' || base === 'role' ? 'users' : base;
-  document.getElementById('nav').innerHTML = NAV.map(g => `<div class="nav-group"><div class="nav-label">${g.g}</div>${g.items.map(([k,l,i,c]) =>
+  document.getElementById('nav').innerHTML = NAV.map(g => ({...g, items: g.items.filter(([k]) => rvCan(k))})).filter(g => g.items.length).map(g => `<div class="nav-group"><div class="nav-label">${g.g}</div>${g.items.map(([k,l,i,c]) =>
     `<a href="#${k}" class="${active===k?'on':''}" title="${l}">${ic(i)}<span>${l}</span>${c?`<em class="count">${c}</em>`:''}</a>`).join('')}</div>`).join('');
 }
 
@@ -1493,6 +1510,7 @@ V.users = () => {
     const rows = staff.filter(u => (rf === 'all' || u.role === rf) && (!q || (u.name + u.email).toLowerCase().includes(q)));
     return `${pageHead('Settings', 'Users & roles', `Staff accounts for ${SCHOOL.name}. Parents and students are managed from student records.`, `<button class="btn primary" data-act="inviteStaff">${ic('plus',16)}Invite staff</button>`)}
     ${tabs('usr', [['people','People'],['roles','Roles & permissions']])}
+    ${rvCard()}
     <div class="card"><div class="toolbar"><div class="searchbox">${ic('search',16)}<input class="input" id="usrSearch" placeholder="Search name or email" value="${esc(S.q||'')}"></div>
     <div class="chips">${[['all','Everyone'], ...STAFF_ROLES.map(r => [r[0], r[1]])].map(([k, l]) => `<button class="chip ${rf===k?'on':''}" data-act="filter" data-key="urole" data-val="${k}">${l}<span class="n">${k==='all'?staff.length:staff.filter(u=>u.role===k).length}</span></button>`).join('')}</div></div>
     <div class="tbl-wrap"><table><thead><tr><th>Person</th><th>Role</th><th>Two-step sign-in</th><th>Last active</th><th>Status</th><th></th></tr></thead><tbody>
@@ -2760,6 +2778,7 @@ function route() {
   else if (base === 'user') { const u = staff.find(x => x.id === rest.join('-')); view.innerHTML = u ? ukProfilePage(schoolCtx(), u) : V.users(); }
   else if (base === 'role') view.innerHTML = ukRolePage(schoolCtx(), rest[0] === 'new' ? null : rest.join('-'));
   else view.innerHTML = (V[base] || V.dashboard)();
+  if (!rvCan(base === 'student' ? 'students' : base === 'user' || base === 'role' ? 'users' : V[base] ? base : 'dashboard')) view.innerHTML = rvDenied(base);
   view.innerHTML = acadText(view.innerHTML);
   renderNav(); afterRender(); closeAll(); document.getElementById('app').classList.remove('mobile-open');
 }
@@ -2772,7 +2791,7 @@ function ddPaint(sel, btn) { const {val, active} = ddLabel(sel), lab = sel.getAt
   btn.innerHTML = `${sel.dataset.ddIc ? `<span class="dd-ic">${ic(sel.dataset.ddIc, 15)}</span>` : ''}${active ? `<span class="dd-l">${esc(lab)}</span>` : ''}<span class="dd-v">${esc(val)}</span>${active ? `<span class="dd-x" role="button" aria-label="Clear ${esc(lab)} filter" data-ddx>${ic('x', 12)}</span>` : `<span class="dd-chev">${ic('chev', 15)}</span>`}`;
   btn.setAttribute('aria-label', `${lab}: ${val}`); }
 function ddEnhance(root = document) {
-  root.querySelectorAll('.toolbar select.input.inline:not([data-act-change]), .tt2-bar select, select.teach-pick, select#yearpick').forEach(sel => {
+  root.querySelectorAll('.toolbar select.input.inline:not([data-act-change]), .tt2-bar select, select.teach-pick, select#yearpick, select#rvPick').forEach(sel => {
     if (sel.classList.contains('dd-native')) return;
     sel.classList.add('dd-native'); sel.tabIndex = -1; sel.setAttribute('aria-hidden', 'true');
     const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'dd' + (sel.dataset.ddTop !== undefined ? ' dd-top yearpick' : '');
@@ -2820,7 +2839,7 @@ window.addEventListener('resize', ddClose);
 document.addEventListener('scroll', e => { if (DD.pop && !DD.pop.contains(e.target) && Date.now() - DD.at > 400) ddClose(); }, true);
 
 function afterRender() {
-  ddClose(); ddEnhance();
+  ddClose(); ddEnhance(); rvAfter();
   if (S.route === 'timetable') ttBindDrag();
   bindSearch('appSearch'); bindSearch('stfSearch'); bindSearch('stuSearch'); bindSearch('usrSearch');
   if (S.route === 'lms' && curTab('lms','courses') === 'gradebook') recalcGB();
@@ -3341,7 +3360,7 @@ function needsToday() { sigBuild(); coverBuild(); examsBuild(); const out = [];
   const cl = EXAMS.series.reduce((a, se) => a + examClashes(se).clash.size, 0); if (cl) out.push(['warn', 'file', `${cl} exam papers clash`, 'Fix them before you publish the timetable to parents.', 'exams', 'Fix']);
   const od = invoices.filter(i => i.status === 'Overdue'); if (od.length) out.push(['warn', 'fee', `${od.length} invoices are overdue`, `${money(od.reduce((a, i) => a + i.amt - i.paid, 0))} outstanding. A friendly reminder usually works.`, 'fees', 'Remind']);
   const wait = apps.filter(a => a.days > 14 && a.stage !== 'enrolled').length; if (wait) out.push(['info', 'admit', `${wait} applicants waiting over two weeks`, 'Families decide quickly. A call today keeps them warm.', 'admissions', 'Open pipeline']);
-  return out; }
+  return out.filter(r => rvCan(r[4])); }
 V.dashboard = () => {
   sigBuild(); const months = ['Apr','May','Jun','Jul','Aug','Sep','Oct'];
   const collected = [38.4, 6.2, 4.1, 41.2, 7.5, 5.3, 48.2], outstanding = [4.1, 1.2, .8, 6.3, 1.9, 1.1, 13.3];
@@ -3354,8 +3373,8 @@ V.dashboard = () => {
   pastBuild(); const houses = HOUSES.map(h => [h, PAST.beh.filter(b => b.type === 'house' && stuOf(b.sid).house === h).reduce((a, b) => a + b.pts, 0)]).sort((a, b) => b[1] - a[1]);
   const merits = PAST.beh.filter(b => b.date >= '2026-09-29' && b.pts > 0).length;
   return `
-  <section class="hello"><div class="hello-t"><h1>Good morning, ${scrib('Prishan')}</h1>
-    <p class="hello-s"><b>1,181 of 1,248 students</b> are in school today, 94.6%. ${byYear.length ? `${esc(byYear[0][0])} is the lowest at ${byYear[0][1].toFixed(0)}%. ` : ''}Term 1 fees are 78% collected and <b>${nd.length} things</b> need you before assembly.</p>
+  <section class="hello"><div class="hello-t"><h1>Good morning, ${scrib(rvMe()[0].split(' ').filter(w => !/^(Dr|Mr|Mrs|Ms)\.?$/.test(w))[0])}</h1>
+    <p class="hello-s"><b>1,181 of 1,248 students</b> are in school today, 94.6%. ${byYear.length ? `${esc(byYear[0][0])} is the lowest at ${byYear[0][1].toFixed(0)}%. ` : ''}Term 1 fees are 78% collected and <b>${nd.length} ${nd.length === 1 ? 'thing' : 'things'}</b> ${nd.length === 1 ? 'needs' : 'need'} you before assembly.</p>
     <div class="hello-m">Monday 5 October · Week 6 of Term 1 · next holiday Vap Poya, Mon 26 Oct</div>
     <div class="chips" style="margin-top:14px"><button class="btn primary" data-act="go" data-to="attendance">${ic('check',16)}Take attendance</button><button class="btn" data-act="newApp">${ic('plus',16)}New application</button></div></div>${morningScene('hello')}</section>
   <div class="vine" aria-hidden="true"></div>
@@ -3714,6 +3733,49 @@ window.addEventListener('storage', e => { if (['quad-pe-book', 'quad-form-replie
 themeIcon(); route();
 (() => { let imp = null; try { imp = sessionStorage.getItem('quad-impersonate'); } catch (e) {} if (!imp && !authSignedIn('school')) authOpen(schoolAuth()); })();
 updateSwitch();
+
+/* ---------- Preview a role: see the staff portal the way each role sees it (spec 08 "Preview a role") ---------- */
+var RV = {
+  admin:      {n:'School admin', who:['Prishan Maduka', 'PM', 'Administrator'], home:'dashboard', see:'*', ro:[], hide:[]},
+  principal:  {n:'Principal', who:['Dr. Anura Wickramasinghe', 'AW', 'Principal'], home:'dashboard', see:'*', no:['users', 'year'], ro:['finance'], hide:[]},
+  finance:    {n:'Finance officer', who:['Dilini Fernando', 'DF', 'Finance officer'], home:'dashboard', see:['dashboard', 'fees', 'finance', 'students', 'inbox'], ro:['students'], hide:['Early warning', 'Admissions funnel', 'Daily attendance', 'Today', 'Enrolled students', 'Attendance today', 'Open applications']},
+  admissions: {n:'Admissions officer', who:['Shanika Rodrigo', 'SR', 'Admissions officer'], home:'dashboard', see:['dashboard', 'admissions', 'crm', 'inbox', 'events', 'students'], ro:['students'], hide:['Early warning', 'Fee collection', 'Overdue invoices', 'Daily attendance', 'Term 1 fees collected', 'Attendance today']},
+  teacher:    {n:'Teacher', who:null, home:'teach', see:['teach', 'attendance', 'students', 'pastoral', 'lms', 'timetable', 'exams', 'reports', 'inbox'], ro:['students', 'timetable', 'exams'], hide:[]},
+  counsellor: {n:'Counsellor', who:['Harsha Weerasinghe', 'HW', 'Counsellor'], home:'dashboard', see:['dashboard', 'students', 'signals', 'pastoral', 'attendance', 'inbox'], ro:['students', 'attendance'], hide:['Fee collection', 'Admissions funnel', 'Overdue invoices', 'Term 1 fees collected', 'Open applications', 'Enrolled students']},
+  frontdesk:  {n:'Front desk', who:['Chamari Silva', 'CS', 'Front desk'], home:'attendance', see:['attendance', 'students', 'inbox', 'events'], ro:['students', 'events'], hide:[]}
+};
+var RV_KEY = 'admin'; try { RV_KEY = sessionStorage.getItem('quad-view-as') || 'admin'; } catch (e) {} if (!RV[RV_KEY]) RV_KEY = 'admin';
+function rv() { return RV[RV_KEY]; }
+function rvTeacher() { stBuild(); const ctn = ST.ct[acadText('Grade 4 – Emerald')]; return ST.teachers.find(x => x.name === ctn) || ST.teachers[0]; }
+function rvMe() { if (!RV) return ['Prishan Maduka', 'PM', 'Administrator']; const r = rv(); if (r.who) return r.who; const t = rvTeacher(); return [t.name, t.name.split(' ').filter(w => !/\./.test(w)).map(w => w[0]).slice(0, 2).join(''), 'Teacher · class teacher']; }
+function rvCan(k) { if (!RV) return true; const r = rv(); if (!k) return true; if (r.see === '*') return !(r.no || []).includes(k); return r.see.includes(k); }
+function rvDenied(base) { const r = rv(); const label = (NAV.flatMap(g => g.items).find(x => x[0] === base) || [0, 'This page'])[1];
+  return `<div class="rv-deny"><span class="rv-ic">${ic('shield', 26)}</span><h1>${esc(label)} isn’t part of the ${esc(r.n.toLowerCase())} role</h1><p>${esc(rvMe()[0])} won’t see this page in the menu. A school admin can change what this role can do in Users & roles.</p><a class="btn primary" href="#${r.home}">Go to ${esc((NAV.flatMap(g => g.items).find(x => x[0] === r.home) || [0, 'home'])[1])}</a></div>`; }
+function rvPaint() {
+  const pick = document.getElementById('rvPick'); if (pick) { const ob = pick.nextElementSibling; if (ob && ob.classList.contains('dd')) { ob.remove(); pick.classList.remove('dd-native'); } pick.innerHTML = `<optgroup label="View the portal as">${Object.entries(RV).map(([k, r]) => `<option value="${k}" ${k === RV_KEY ? 'selected' : ''} data-sub="${esc(k === 'admin' ? 'Your own view' : (k === 'teacher' ? rvTeacher().name : r.who[0]))}">${esc(k === 'admin' ? 'View as: Admin (you)' : 'View as: ' + r.n)}</option>`).join('')}</optgroup>`; ddEnhance(); }
+  const [nm, ini, title] = rvMe(), me = document.querySelector('header.top .me'); if (me) { me.querySelector('.av').textContent = ini; me.querySelector('b').textContent = nm.replace(/^(\S+) (\S).*$/, (m, a, b) => /\.$/.test(a) ? m : a + ' ' + b + '.'); me.querySelector('small').textContent = title; }
+  const rf = document.querySelector('.rail-foot'); if (rf) { rf.querySelector('.av').textContent = ini; rf.querySelector('b').textContent = nm; rf.querySelector('span').textContent = RV_KEY === 'admin' ? 'Super admin' : title; }
+  const bar = document.getElementById('rvBar'); bar.innerHTML = RV_KEY === 'admin' ? '' : `<div class="rv-bar" role="status"><span class="rv-ic">${ic('shield', 16)}</span><div><b>Previewing as ${esc(rv().n)}</b> · ${esc(nm)}<small>You see the menu, pages and actions this role has. Pages marked “View only” can’t be changed by this role.</small></div><button class="btn sm" data-act="rvBack">Back to my view</button></div>`; }
+function rvSet(k) { if (!RV[k]) return; RV_KEY = k; try { sessionStorage.setItem('quad-view-as', k); } catch (e) {}
+  if (k === 'teacher') S.filter.teachAs = rvTeacher().id;
+  rvPaint(); const base = (location.hash || '#dashboard').slice(1).split('-')[0]; if (!rvCan(base === 'student' ? 'students' : base) || base !== rv().home && k !== 'admin') location.hash = rv().home; else route();
+  toast(k === 'admin' ? 'Back to your own view' : `Showing the portal as ${rv().n.toLowerCase()}`); }
+function rvAfter() { if (!RV) return; const base = S.route.split('-')[0], key = base === 'student' ? 'students' : base, ro = (rv().ro || []).includes(key);
+  document.body.classList.toggle('rv-ro', ro);
+  const ph = document.querySelector('#view .page-head .chips'); if (ro && ph && !ph.querySelector('.rv-ro-pill')) ph.insertAdjacentHTML('afterbegin', `<span class="rv-ro-pill">${ic('shield', 13)}View only</span>`);
+  if (base === 'dashboard') document.querySelectorAll('#view .hello .chips [data-to], #view .hello .chips [data-act=newApp]').forEach(b => { if (!rvCan(b.dataset.to || 'admissions')) b.remove(); });
+  if (base === 'dashboard' && rv().hide.length) { const v = document.getElementById('view');
+    v.querySelectorAll('section.card').forEach(sec => { const h = sec.querySelector('.card-h h2'); if (h && rv().hide.some(t => h.textContent.trim().startsWith(t))) sec.remove(); });
+    v.querySelectorAll('.g-kpi > *').forEach(k => { if (rv().hide.some(t => k.textContent.includes(t))) k.remove(); });
+    v.querySelectorAll('.grid').forEach(g => { if (!g.children.length) g.remove(); else if (g.children.length === 1) g.style.gridTemplateColumns = '1fr'; }); } }
+function rvCard() { if (!RV || RV_KEY !== 'admin') return '';
+  return `<section class="card rv-card"><div class="card-h"><h2>Preview a role</h2><span class="muted" style="font-size:12.5px">See the portal exactly as each role sees it. Nothing changes for them.</span></div>
+    <div class="rv-roles">${Object.entries(RV).filter(([k]) => k !== 'admin').map(([k, r]) => `<button class="rv-role" data-act="rvGo" data-k="${k}"><span class="av sm" style="background:${['#3B4AA8','#178276','#7A68E8','#DD4A42','#C2457E','#2C3370'][Object.keys(RV).indexOf(k) % 6]}">${esc(k === 'teacher' ? rvTeacher().name.split(' ').filter(w => !/\./.test(w)).map(w => w[0]).slice(0, 2).join('') : r.who[1])}</span><span><b>${esc(r.n)}</b><small>${r.see === '*' ? 'Everything except ' + (r.no || []).length + ' settings pages' : r.see.length + ' pages'} · opens on ${esc((NAV.flatMap(g => g.items).find(x => x[0] === r.home) || [0, ''])[1])}</small></span>${ic('arrow', 15)}</button>`).join('')}</div></section>`; }
+ACT.rvGo = el => rvSet(el.dataset.k);
+ACT.rvBack = () => rvSet('admin');
+document.addEventListener('change', e => { if (e.target.id === 'rvPick') rvSet(e.target.value); });
+if (RV_KEY === 'teacher') S.filter.teachAs = rvTeacher().id;
+rvPaint(); route();
 </script>
 </body>
 </html>
