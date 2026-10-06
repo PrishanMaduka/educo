@@ -11,4 +11,3 @@ export {
 export { publicSite, heatHex, type PublicSet, type PublicTokenName } from './public-site';
 export { radius, shadow, spacing } from './shape';
 export { fontFamily, fontName, type } from './type';
-export * from './logo';

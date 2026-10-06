@@ -65,6 +65,8 @@ class QuadColors extends ThemeExtension<QuadColors> {
     required this.brandStrong,
     required this.brandSoft,
     required this.brandInk,
+    required this.brandFill,
+    required this.brandFillStrong,
     required this.rail,
     required this.rail2,
     required this.railInk,
@@ -116,6 +118,8 @@ class QuadColors extends ThemeExtension<QuadColors> {
   final Color brandStrong;
   final Color brandSoft;
   final Color brandInk;
+  final Color brandFill;
+  final Color brandFillStrong;
   final Color rail;
   final Color rail2;
   final Color railInk;
@@ -167,6 +171,8 @@ class QuadColors extends ThemeExtension<QuadColors> {
     brandStrong: Color(0xFFC23B34),
     brandSoft: Color(0xFFFDE7E5),
     brandInk: Color(0xFFFFFFFF),
+    brandFill: Color(0xFFD0463E),
+    brandFillStrong: Color(0xFFA63832),
     rail: Color(0xFF1F2559),
     rail2: Color(0xFF2C3370),
     railInk: Color(0xFFE6E7F5),
@@ -219,6 +225,8 @@ class QuadColors extends ThemeExtension<QuadColors> {
     brandStrong: Color(0xFFFF978C),
     brandSoft: Color(0xFF3D1F2A),
     brandInk: Color(0xFF1B1D3A),
+    brandFill: Color(0xFFFF7A6E),
+    brandFillStrong: Color(0xFFFF978C),
     rail: Color(0xFF0E0F22),
     rail2: Color(0xFF2C3370),
     railInk: Color(0xFFE6E7F5),
@@ -272,6 +280,8 @@ class QuadColors extends ThemeExtension<QuadColors> {
     brandStrong: Color(0xFFC23B34),
     brandSoft: Color(0xFFFDE7E5),
     brandInk: Color(0xFFFFFFFF),
+    brandFill: Color(0xFFD0463E),
+    brandFillStrong: Color(0xFFA63832),
     rail: Color(0xFF15173A),
     rail2: Color(0xFF23265A),
     railInk: Color(0xFFE6E7F5),
@@ -324,6 +334,8 @@ class QuadColors extends ThemeExtension<QuadColors> {
     brandStrong: Color(0xFFFF978C),
     brandSoft: Color(0xFF3D1F2A),
     brandInk: Color(0xFF1B1D3A),
+    brandFill: Color(0xFFFF7A6E),
+    brandFillStrong: Color(0xFFFF978C),
     rail: Color(0xFF0C0D20),
     rail2: Color(0xFF23265A),
     railInk: Color(0xFFE6E7F5),
@@ -377,6 +389,8 @@ class QuadColors extends ThemeExtension<QuadColors> {
     Color? brandStrong,
     Color? brandSoft,
     Color? brandInk,
+    Color? brandFill,
+    Color? brandFillStrong,
     Color? rail,
     Color? rail2,
     Color? railInk,
@@ -428,6 +442,8 @@ class QuadColors extends ThemeExtension<QuadColors> {
       brandStrong: brandStrong ?? this.brandStrong,
       brandSoft: brandSoft ?? this.brandSoft,
       brandInk: brandInk ?? this.brandInk,
+      brandFill: brandFill ?? this.brandFill,
+      brandFillStrong: brandFillStrong ?? this.brandFillStrong,
       rail: rail ?? this.rail,
       rail2: rail2 ?? this.rail2,
       railInk: railInk ?? this.railInk,
@@ -484,6 +500,8 @@ class QuadColors extends ThemeExtension<QuadColors> {
       brandStrong: Color.lerp(brandStrong, other.brandStrong, t)!,
       brandSoft: Color.lerp(brandSoft, other.brandSoft, t)!,
       brandInk: Color.lerp(brandInk, other.brandInk, t)!,
+      brandFill: Color.lerp(brandFill, other.brandFill, t)!,
+      brandFillStrong: Color.lerp(brandFillStrong, other.brandFillStrong, t)!,
       rail: Color.lerp(rail, other.rail, t)!,
       rail2: Color.lerp(rail2, other.rail2, t)!,
       railInk: Color.lerp(railInk, other.railInk, t)!,

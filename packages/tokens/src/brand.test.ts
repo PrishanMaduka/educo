@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { contrastRatio, deriveBrand, mix } from './brand';
+import { colors } from './colors';
 
 describe('contrastRatio', () => {
   it('matches known WCAG values', () => {
@@ -22,6 +23,8 @@ describe('deriveBrand (light)', () => {
     const d = deriveBrand('#2F4FD0', 'light');
     expect(contrastRatio('#FFFFFF', '#2F4FD0')).toBeGreaterThanOrEqual(4.5);
     expect(d.brand).toBe('#2F4FD0');
+    expect(d.brandFill).toBe('#2F4FD0');
+    expect(d.brandFillStrong).toBe(mix('#2F4FD0', 0.8, '#000000'));
     expect(d.brandStrong).toBe(mix('#2F4FD0', 0.8, '#000000'));
     expect(d.brandSoft).toBe(mix('#2F4FD0', 0.13, '#FFFFFF'));
     expect(d.rail).toBe(mix('#2F4FD0', 0.06, '#1F2559'));
@@ -33,14 +36,15 @@ describe('deriveBrand (light)', () => {
   it('darkens a low contrast brand for buttons until white text passes', () => {
     const d = deriveBrand('#DD4A42', 'light');
     expect(contrastRatio('#FFFFFF', '#DD4A42')).toBeLessThan(4.5);
-    expect(contrastRatio('#FFFFFF', d.brand)).toBeGreaterThanOrEqual(4.5);
-    expect(d.brand).not.toBe('#DD4A42');
+    expect(contrastRatio('#FFFFFF', d.brandFill)).toBeGreaterThanOrEqual(4.5);
+    expect(d.brandFill).not.toBe('#DD4A42');
+    expect(d.brand).toBe('#DD4A42');
     expect(d.decoration).toBe('#DD4A42');
   });
 
   it('darkens a very light brand', () => {
     const d = deriveBrand('#F2A93B', 'light');
-    expect(contrastRatio('#FFFFFF', d.brand)).toBeGreaterThanOrEqual(4.5);
+    expect(contrastRatio('#FFFFFF', d.brandFill)).toBeGreaterThanOrEqual(4.5);
   });
 
   it('maps legacy prototype colours to the default brand', () => {
@@ -58,6 +62,32 @@ describe('deriveBrand (light)', () => {
   });
 });
 
+describe('brand-fill accessibility', () => {
+  const samples = ['#DD4A42', '#2BB0A0', '#F2A93B', '#3B4AA8'];
+  it.each(samples)('passes 4.5:1 with its ink for %s in both modes', (hex) => {
+    for (const mode of ['light', 'dark'] as const) {
+      const d = deriveBrand(hex, mode);
+      expect(contrastRatio(d.brandFill, d.brandInk)).toBeGreaterThanOrEqual(4.5);
+      expect(contrastRatio(d.brandFillStrong, d.brandInk)).toBeGreaterThanOrEqual(4.5);
+      expect(d.brand).toBe(hex);
+    }
+  });
+
+  it('is a static token that passes for the default brand', () => {
+    for (const t of ['light', 'dark'] as const) {
+      const c = colors[t];
+      expect(contrastRatio(c['brand-fill'], c['brand-ink'])).toBeGreaterThanOrEqual(4.5);
+      expect(contrastRatio(c['brand-fill-strong'], c['brand-ink'])).toBeGreaterThanOrEqual(4.5);
+    }
+    expect(colors.light.brand).toBe('#DD4A42');
+    expect(colors.light['brand-fill']).toBe(deriveBrand('#DD4A42', 'light').brandFill);
+  });
+
+  it('keeps white text readable on the console active nav', () => {
+    expect(contrastRatio(colors.console['rail-active'], '#FFFFFF')).toBeGreaterThanOrEqual(4.5);
+  });
+});
+
 describe('deriveBrand (dark)', () => {
   it('uses dark ink and the dark surface', () => {
     const d = deriveBrand('#FF7A6E', 'dark');
@@ -69,6 +99,7 @@ describe('deriveBrand (dark)', () => {
 
   it('lightens a dark brand until the ink passes 4.5:1', () => {
     const d = deriveBrand('#1F2559', 'dark');
-    expect(contrastRatio('#1B1D3A', d.brand)).toBeGreaterThanOrEqual(4.5);
+    expect(contrastRatio('#1B1D3A', d.brandFill)).toBeGreaterThanOrEqual(4.5);
+    expect(contrastRatio('#1B1D3A', d.brandFillStrong)).toBeGreaterThanOrEqual(4.5);
   });
 });

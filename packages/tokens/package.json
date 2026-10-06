@@ -8,6 +8,10 @@
       "types": "./src/index.ts",
       "default": "./src/index.ts"
     },
+    "./logo": {
+      "types": "./src/logo/index.ts",
+      "default": "./src/logo/index.ts"
+    },
     "./theme.css": "./dist/theme.css",
     "./tokens.css": "./dist/tokens.css"
   },

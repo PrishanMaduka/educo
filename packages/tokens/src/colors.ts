@@ -1,3 +1,6 @@
+import { contrastRatio } from './color';
+import { MIN_CONTRAST, fillFor, fillStrongFor } from './fill';
+
 /** Colour tokens from docs/spec/03-design-system.md. Values are copied exactly. */
 export const colorNames = [
   'canvas',
@@ -12,6 +15,8 @@ export const colorNames = [
   'brand-strong',
   'brand-soft',
   'brand-ink',
+  'brand-fill',
+  'brand-fill-strong',
   'rail',
   'rail-2',
   'rail-ink',
@@ -38,6 +43,11 @@ export type TokenName = (typeof colorNames)[number];
 export type ColorSet = Record<TokenName, string>;
 export type RailOverrides = Pick<ColorSet, 'rail' | 'rail-2' | 'rail-active'>;
 
+// `brand-fill` carries `brand-ink` text (primary buttons, active nav pill, badges). `brand` keeps the
+// spec value for decoration, icons, outlines and tints. White on #DD4A42 is only 4.09:1, so the
+// light fill is darkened until it reaches 4.5:1 (spec 03 "School brand colour"). Dark: see below.
+const lightFill = fillFor('#DD4A42', '#FFFFFF', 'darken');
+
 const light: ColorSet = {
   canvas: '#FAF8F5',
   surface: '#FFFFFF',
@@ -51,6 +61,8 @@ const light: ColorSet = {
   'brand-strong': '#C23B34',
   'brand-soft': '#FDE7E5',
   'brand-ink': '#FFFFFF',
+  'brand-fill': lightFill,
+  'brand-fill-strong': fillStrongFor(lightFill, 'darken'),
   rail: '#1F2559',
   'rail-2': '#2C3370',
   'rail-ink': '#E6E7F5',
@@ -75,6 +87,14 @@ const light: ColorSet = {
 
 // The spec gives no dark values for rail-2, rail-ink and rail-ink-2: the rail is dark in both
 // themes, so the light values are kept.
+// Dark: #FF7A6E on #1B1D3A already passes 4.5:1, so brand-fill = brand and hover = brand-strong
+// (#FF978C, lighter, so it passes too). If a future value fails, it is lightened until it passes.
+const darkFill = fillFor('#FF7A6E', '#1B1D3A', 'lighten');
+const darkFillStrong =
+  contrastRatio('#FF978C', '#1B1D3A') >= MIN_CONTRAST
+    ? '#FF978C'
+    : fillStrongFor(darkFill, 'lighten');
+
 const dark: ColorSet = {
   canvas: '#13142A',
   surface: '#1B1D3A',
@@ -88,6 +108,8 @@ const dark: ColorSet = {
   'brand-strong': '#FF978C',
   'brand-soft': '#3D1F2A',
   'brand-ink': '#1B1D3A',
+  'brand-fill': darkFill,
+  'brand-fill-strong': darkFillStrong,
   rail: '#0E0F22',
   'rail-2': light['rail-2'],
   'rail-ink': light['rail-ink'],
