@@ -28,4 +28,10 @@ describe('@quad/config', () => {
     expect(tsconfig.compilerOptions.strict).toBe(true);
     expect(tsconfig.compilerOptions.noUncheckedIndexedAccess).toBe(true);
   });
+
+  it.each(['react', 'next'])('%s ESLint config loads as a non-empty array', async (name) => {
+    const mod = (await import(`../eslint/${name}.mjs`)) as { default: unknown };
+    expect(Array.isArray(mod.default)).toBe(true);
+    expect((mod.default as unknown[]).length).toBeGreaterThan(0);
+  });
 });

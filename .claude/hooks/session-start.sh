@@ -35,14 +35,16 @@ if [ -f pnpm-lock.yaml ]; then
   pnpm install --frozen-lockfile >&2 || log "pnpm install failed"
 fi
 
-# 3. Environment for later commands.
-if [ -n "${CLAUDE_ENV_FILE:-}" ]; then
-  if [ -d /opt/sdk/flutter/bin ]; then
-    echo 'export PATH="/opt/sdk/flutter/bin:$PATH"' >>"$CLAUDE_ENV_FILE"
-  fi
-  # Docker Hub is rate-limited in the cloud container; pull through the mirror.
-  echo 'export QUAD_IMAGE_REGISTRY=mirror.gcr.io/' >>"$CLAUDE_ENV_FILE"
+# 3. Environment for later commands (append each line once; this hook also runs on resume).
+add_env() {
+  [ -n "${CLAUDE_ENV_FILE:-}" ] || return 0
+  grep -qxF "$1" "$CLAUDE_ENV_FILE" 2>/dev/null || echo "$1" >>"$CLAUDE_ENV_FILE"
+}
+if [ -d /opt/sdk/flutter/bin ]; then
+  add_env 'export PATH="/opt/sdk/flutter/bin:$PATH"'
 fi
+# Docker Hub is rate-limited in the cloud container; pull through the mirror.
+add_env 'export QUAD_IMAGE_REGISTRY=mirror.gcr.io/'
 export QUAD_IMAGE_REGISTRY=mirror.gcr.io/
 
 # 4. Local services (only what the cloud container needs).
