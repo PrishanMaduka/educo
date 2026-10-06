@@ -30,5 +30,12 @@
   "search.placeholder": "Search students, staff and pages",
   "askQuad.label": "Ask Quad",
   "auth.signOut": "Sign out",
+  "ui.filter.clear": "Clear {label}",
+  "ui.filter.search": "Search {label}",
+  "ui.filter.empty": "No results",
+  "ui.select.placeholder": "Choose one",
+  "ui.table.selectAll": "Select all rows",
+  "ui.table.selectRow": "Select {label}",
+  "ui.toast.region": "Notifications",
   "students.count": "{count, plural, one {# student} other {# students}}"
 }

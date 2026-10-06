@@ -31,6 +31,34 @@
   "searchPlaceholder": "Search students, staff and pages",
   "askQuadLabel": "Ask Quad",
   "authSignOut": "Sign out",
+  "uiFilterClear": "Clear {label}",
+  "@uiFilterClear": {
+    "placeholders": {
+      "label": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiFilterSearch": "Search {label}",
+  "@uiFilterSearch": {
+    "placeholders": {
+      "label": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiFilterEmpty": "No results",
+  "uiSelectPlaceholder": "Choose one",
+  "uiTableSelectAll": "Select all rows",
+  "uiTableSelectRow": "Select {label}",
+  "@uiTableSelectRow": {
+    "placeholders": {
+      "label": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiToastRegion": "Notifications",
   "studentsCount": "{count, plural, one {# student} other {# students}}",
   "@studentsCount": {
     "placeholders": {
