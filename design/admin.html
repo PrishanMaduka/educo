@@ -932,6 +932,10 @@ body:has(.savebar,.uk-bar,.bulkbar) .askq-fab{bottom:92px}
 @keyframes msRise{from{transform:translateY(40px);opacity:0}}
 @media (max-width:860px){.mscene{top:auto;height:130px}}
 @media (prefers-reduced-motion:reduce){.ms-sun{animation:none}}
+
+/* tabs that end a card: the card's own edge is the divider, so no extra line over the rounded corners */
+.card > .tabs:last-child{border-bottom:0}
+.card > .tabs:last-child button{margin-bottom:0}
 </style>
 </head>
 <body>
