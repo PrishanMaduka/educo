@@ -1,6 +1,12 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalDependencies": [".env.example", ".nvmrc", ".fvmrc", "packages/config/eslint/**", "eslint.config.mjs"],
+  "globalDependencies": [
+    ".env.example",
+    ".nvmrc",
+    ".fvmrc",
+    "packages/config/eslint/**",
+    "eslint.config.mjs"
+  ],
   "agentGuidance": false,
   "globalEnv": ["APP_ENV", "NODE_ENV"],
   "tasks": {
@@ -19,7 +25,13 @@
     "test:api": {
       "dependsOn": ["^build"],
       "cache": false,
-      "env": ["DATABASE_URL", "DATABASE_PLATFORM_URL", "DATABASE_OWNER_URL", "DATABASE_POOL_MAX"]
+      "env": [
+        "DATABASE_URL",
+        "DATABASE_PLATFORM_URL",
+        "DATABASE_OWNER_URL",
+        "DATABASE_POOL_MAX",
+        "REDIS_URL"
+      ]
     },
     "e2e": { "dependsOn": ["build"], "cache": false, "outputs": ["playwright-report/**"] },
     "tokens:build": {
