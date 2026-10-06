@@ -23,6 +23,11 @@ Load the matching skill before you start, and run `quad-review` on your diff bef
 
 The Superpowers plugin (brainstorming, writing and executing plans, TDD, systematic debugging, verification before completion, code review) complements these. The Quad skills add the project's own rules on top.
 
+`.claude/settings.json` does three things:
+- It enables Superpowers.
+- It allow-lists the routine `pnpm`, `docker compose`, `fvm` and read-only `git` commands, and denies reading `.env` and force pushes.
+- It runs two hooks. One blocks hand edits to generated files (regenerate them instead). The other formats each edited file with ESLint and Prettier (or `dart format`) once they are installed.
+
 ## Stack (details in docs/spec/02-architecture.md)
 pnpm + Turborepo, TypeScript strict, NestJS (Fastify) API, PostgreSQL 16 with Drizzle and row-level security, Redis + BullMQ, Socket.IO, Next.js 15 with **Tailwind CSS v4** for `apps/staff` and `apps/console`, **Flutter** (Dart 3, Riverpod, go_router) for `apps/parent`, Zod contracts in `packages/contracts`, pure business logic in `packages/domain`, tokens in `packages/tokens`, web components in `packages/ui`.
 
