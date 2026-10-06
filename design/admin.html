@@ -978,6 +978,18 @@ body:has(.savebar,.uk-bar,.bulkbar) .askq-fab{bottom:92px}
 /* tabs that end a card: the card's own edge is the divider, so no extra line over the rounded corners */
 .card > .tabs:last-child{border-bottom:0}
 .card > .tabs:last-child button{margin-bottom:0}
+.dc-list{display:flex;flex-direction:column;gap:8px}
+.dc-row{display:grid;grid-template-columns:auto 170px minmax(0,1fr) 120px auto;grid-template-areas:"sw name name pct del" ". base who who amt";gap:10px 12px;align-items:end;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.dc-row > .uk-sw{grid-area:sw;align-self:center;margin-top:18px}
+.dc-row .f-name{grid-area:name}.dc-row .f-pct{grid-area:pct}.dc-row .f-base{grid-area:base}.dc-row .f-who{grid-area:who}.dc-row .f-amt,.dc-row .dc-amt{grid-area:amt}
+.dc-row .iconbtn{grid-area:del;justify-self:end;align-self:center;margin-top:18px}
+.dc-row .field{margin:0}.dc-row .field label{font-size:11.5px}
+.dc-row.off{background:var(--surface-2)}.dc-row.off .field,.dc-row.off .dc-amt{opacity:.55}
+.dc-row .dc-amt{display:flex;flex-direction:column;align-items:flex-end;justify-content:center;min-width:120px;padding-bottom:4px;white-space:nowrap}.dc-row .dc-amt small{color:var(--ink-3);font-size:11.5px}
+.dc-row .f-amt{min-width:120px}
+@media (max-width:900px){.dc-row{grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"sw name del" "pct pct pct" "base base base" "who who who" "amt amt amt"}.dc-row .dc-amt{flex-direction:row;justify-content:space-between;align-items:baseline;padding:0;min-width:0}}
+.in-unit.suf .input{padding-left:10px;padding-right:26px}.in-unit.suf::before{left:auto;right:10px}
+@media (max-width:900px){.dc-row{grid-template-columns:auto minmax(0,1fr) auto}.dc-row .field:nth-of-type(1){grid-column:2/3}.dc-row .field:nth-of-type(n+2),.dc-row .dc-amt{grid-column:1/-1}.dc-row .dc-amt{flex-direction:row;justify-content:space-between;align-items:baseline;padding:0}.dc-row .iconbtn{grid-row:1;grid-column:3}}
 </style>
 </head>
 <body>
@@ -1413,7 +1425,7 @@ V.fees = () => {
     ${[...STG.map((x, i) => [`Tuition – ${x.name}`, ylRange(x.from, x.to), 'Per term', 185000 + i * 50000, '4100 Tuition income']),
        ['Development levy','All','Per term',25000,'4300 Levies'],['Transport – Zone A/B/C','Opt-in','Per term','32,000–52,000','4200 Transport income'],['Admission fee','New students','One-off',150000,'4400 Admission fees'],['Refundable deposit','New students','One-off',100000,'2300 Deposits held']]
        .map(([n,a,fq,amt,l]) => `<tr><td><b>${n}</b></td><td>${a}</td><td>${fq}</td><td class="r num">${typeof amt==='number'?money(amt):'Rs '+amt}</td><td class="muted">${l}</td></tr>`).join('')}</tbody></table></div>
-    <div class="tbl-foot"><span>Sibling discount: 10% for the 2nd child, 15% for the 3rd. Scholarships are applied as credit notes.</span></div>`;
+    <div class="tbl-foot"><span>Discounts: ${discDefaults().filter(d => d.on).map(d => `${esc(d.name)} ${d.pct}% off ${d.base === 'all' ? 'the whole invoice' : 'tuition'}`).join(' · ') || 'none'}. Edit them in a billing run.</span></div>`;
   } else {
     body = `<div class="tbl-wrap"><table><thead><tr><th>Receipt</th><th>Payer</th><th>Method</th><th>Date</th><th class="r">Amount</th></tr></thead><tbody>
     ${invoices.filter(v=>v.paid).slice(0, 10).map((v, i) => `<tr><td class="num">RCP-${8800 + i}</td><td>${v.student.guardian}</td><td>${['Card · iParent','Bank transfer','Cash','Card · iParent','Cheque'][i%5]}</td><td class="num">2026-10-0${1 + i%4}</td><td class="r num">${money(v.paid)}</td></tr>`).join('')}</tbody></table></div>`;
@@ -2361,6 +2373,11 @@ function paperDrawer(p, isNew) {
 const PAY = lsGet('quad-payments', null) || {gw: {payhere: true, stripe: false, bank: true}, fee: 'school', plans: true, partial: true};
 const BILL = {runs: []};
 function billLines() { return STG.map((x, i) => ({stage: x.name, tuition: 185000 + i * 50000, count: LV.slice(x.from - 1, x.to).reduce((a, _, j) => a + ttSecs(x.from + j).reduce((b, s2) => b + classRoster(clsName(x.from + j, s2)).length, 0), 0)})); }
+/* Discounts: named, percentage-based, editable per run and saved as the school's defaults (quad-discounts) */
+const DISC_WHO = {sib2: ['Second child in a family', 96], sib3: ['Third child and more', 14], staff: ['Children of staff', 22], schol: ['Scholarship holders', 18], early: ['Families who pay early', 140], chosen: ['Students I choose', 0]};
+const discDefaults = () => { const x = lsGet('quad-discounts', null); return (Array.isArray(x) && x.length ? x : [{id: 'sib2', name: 'Sibling (2nd child)', pct: 10, base: 'tuition', who: 'sib2', on: true}, {id: 'sib3', name: 'Sibling (3rd child +)', pct: 15, base: 'tuition', who: 'sib3', on: true}, {id: 'staff', name: 'Staff children', pct: 50, base: 'tuition', who: 'staff', on: true}, {id: 'schol', name: 'Scholarship', pct: 25, base: 'tuition', who: 'schol', on: true}]).map(d => ({...d})); };
+const discCount = d => d.who === 'chosen' ? (d.count || 0) : (DISC_WHO[d.who] || ['', 0])[1];
+const discAmt = (w, d) => { const n = w.lines.reduce((a, l) => a + l.count, 0) || 1, avgT = w.lines.reduce((a, l) => a + l.tuition * l.count, 0) / n; return Math.round(discCount(d) * (d.base === 'all' ? avgT + w.levy : avgT) * d.pct / 100); };
 function billDrawer() {
   const w = S.bill, st = w.step, lines = w.lines, levy = w.levy, tot = billTotals(w);
   let body = '';
@@ -2368,7 +2385,18 @@ function billDrawer() {
     <div class="setting"><div class="meta"><b>Offer a 3-instalment plan</b><small>Parents can choose to pay in three parts in the app.</small></div>${ukSw(w.plan, 'data-act="billOpt" data-k="plan" aria-label="Instalments"')}</div>`;
   else if (st === 1) body = `<div class="field"><label>Tuition per stage</label><div class="bl-lines">${lines.map((l, i) => `<div class="bl-line"><b>${esc(l.stage)}</b><span class="muted">${l.count} students</span><div class="in-unit" data-u="Rs"><input class="input num" type="number" step="1000" min="0" data-bl="${i}" value="${l.tuition}" aria-label="Tuition for ${esc(l.stage)}"></div></div>`).join('')}</div></div>
     <div class="form-grid"><div class="field"><label for="bl_lv">Development levy (everyone)</label><input class="input num" id="bl_lv" type="number" step="500" value="${levy}"></div><div class="field"><label for="bl_tr">Transport (opted in)</label><input class="input num" id="bl_tr" type="number" step="500" value="${w.transport}"><small class="muted">${w.trCount} students on bus routes</small></div></div>`;
-  else if (st === 2) body = [['sib2', 'Second child', '10% off tuition', w.sib2], ['sib3', 'Third child and more', '15% off tuition', w.sib3], ['staff', 'Children of staff', '50% off tuition', w.staff], ['schol', 'Scholarships', 'Applied as credit notes', w.schol]].map(([k, l, d, n]) => `<div class="setting"><div class="meta"><b>${l}</b><small>${d} · ${n} students</small></div>${ukSw(w.disc[k], `data-act="billDisc" data-k="${k}" aria-label="${l}"`)}</div>`).join('');
+  else if (st === 2) { const on = w.discs.filter(d => d.on);
+    body = `<p class="muted small" id="dc_sum" style="margin:0 0 10px">${on.length ? `${on.length} discount${on.length > 1 ? 's' : ''} will take <b>${money(tot.disc)}</b> off this run.` : 'No discounts will be applied to this run.'} Change the name, percentage or who gets each one.</p>
+    <div class="dc-list">${w.discs.map((d, i) => `<div class="dc-row ${d.on ? '' : 'off'}">
+      ${ukSw(d.on, `data-act="billDisc" data-i="${i}" aria-label="Apply ${esc(d.name || 'discount')}"`)}
+      <div class="field f-name"><label for="dc_n${i}">Discount name</label><input class="input" id="dc_n${i}" data-dc="${i}" data-k="name" value="${esc(d.name)}" maxlength="40" placeholder="e.g. Early payment"></div>
+      <div class="field f-pct"><label for="dc_p${i}">Percentage</label><div class="in-unit suf" data-u="%"><input class="input num" id="dc_p${i}" type="number" min="1" max="100" step="0.5" data-dc="${i}" data-k="pct" value="${d.pct}"></div></div>
+      <div class="field f-base"><label for="dc_a${i}">Off</label><select class="input" id="dc_a${i}" data-dc="${i}" data-k="on_">${[['tuition', 'Tuition'], ['all', 'Whole invoice']].map(([v, l]) => `<option value="${v}" ${d.base === v ? 'selected' : ''}>${l}</option>`).join('')}</select></div>
+      <div class="field f-who"><label for="dc_w${i}">Who gets it</label><select class="input" id="dc_w${i}" data-dc="${i}" data-k="who">${Object.entries(DISC_WHO).map(([v, x]) => `<option value="${v}" ${d.who === v ? 'selected' : ''}>${x[0]}</option>`).join('')}</select></div>
+      ${d.who === 'chosen' ? `<div class="field f-amt"><label for="dc_c${i}">Students</label><input class="input num" id="dc_c${i}" type="number" min="1" data-dc="${i}" data-k="count" value="${d.count || 1}"></div>` : `<div class="dc-amt"><b class="num" id="dc_amt${i}">${money(discAmt(w, d))}</b><small>${discCount(d)} students</small></div>`}
+      <button class="iconbtn" data-act="billDiscDel" data-i="${i}" aria-label="Remove ${esc(d.name || 'discount')}" title="Remove">${ic('trash', 16)}</button></div>`).join('')}</div>
+    <button class="btn ghost" data-act="billDiscAdd" style="margin-top:10px">${ic('plus', 16)}Add a discount</button>
+    <label class="checkrow" style="margin-top:12px"><input type="checkbox" id="dc_save" ${w.saveDisc ? 'checked' : ''}> Save these discounts for future billing runs</label>`; }
   else body = `<div class="rl-sum">${[[tot.count, 'invoices'], [money(tot.gross), 'before discounts'], [money(tot.disc), 'discounts'], [money(tot.net), 'to collect']].map(([n, l]) => `<div><b class="num" style="font-size:20px">${n}</b><span>${l}</span></div>`).join('')}</div>
     <div class="tbl-wrap"><table><thead><tr><th>Stage</th><th class="r">Students</th><th class="r">Per student</th><th class="r">Total</th></tr></thead><tbody>${tot.rows.map(r => `<tr><td>${esc(r.stage)}</td><td class="r num">${r.count}</td><td class="r num">${money(r.per)}</td><td class="r num"><b>${money(r.sum)}</b></td></tr>`).join('')}</tbody></table></div>
     <p class="muted small" style="margin:0">Invoices are created as drafts. Review them, then send to parents. Families pay online with ${[PAY.gw.payhere && 'PayHere', PAY.gw.stripe && 'Stripe', PAY.gw.bank && 'bank transfer'].filter(Boolean).join(', ')}.</p>`;
@@ -2376,12 +2404,18 @@ function billDrawer() {
     <div class="drawer-b">${body}<div class="err-msg" id="blrErr"></div></div>
     <div class="drawer-f">${st ? '<button class="btn" data-act="billBack">Back</button>' : '<button class="btn" data-act="closeAll">Cancel</button>'}<button class="btn primary" data-act="billNext">${st < 3 ? 'Continue' : `Create ${tot.count} draft invoices`}</button></div>`, 'wide');
 }
+/* Live discount amounts: typing updates the row and the summary; changing a select re-renders the step */
+document.addEventListener('input', e => { const el = e.target; if (!el.dataset || el.dataset.dc === undefined || !S.bill) return; billSync(); const w = S.bill, i = +el.dataset.dc, a = document.getElementById('dc_amt' + i), sm = document.getElementById('dc_sum'), on = w.discs.filter(d => d.on);
+  if (a) a.textContent = money(discAmt(w, w.discs[i])); if (sm) sm.innerHTML = `${on.length ? `${on.length} discount${on.length > 1 ? 's' : ''} will take <b>${money(billTotals(w).disc)}</b> off this run.` : 'No discounts will be applied to this run.'} Change the name, percentage or who gets each one.`; });
+document.addEventListener('change', e => { const el = e.target; if (el.tagName === 'SELECT' && el.dataset && el.dataset.dc !== undefined && S.bill) { billSync(); keepScroll(billDrawer); } });
 function billSync() { const w = S.bill, v = id => { const e = document.getElementById(id); return e ? e.value : null; };
   if (v('bl_t') !== null) { w.term = v('bl_t'); w.due = v('bl_due'); }
   drawer.querySelectorAll('[data-bl]').forEach(el => w.lines[+el.dataset.bl].tuition = Math.max(0, +el.value || 0));
-  if (v('bl_lv') !== null) { w.levy = Math.max(0, +v('bl_lv') || 0); w.transport = Math.max(0, +v('bl_tr') || 0); } }
+  if (v('bl_lv') !== null) { w.levy = Math.max(0, +v('bl_lv') || 0); w.transport = Math.max(0, +v('bl_tr') || 0); }
+  drawer.querySelectorAll('[data-dc]').forEach(el => { const d = w.discs[+el.dataset.dc], k = el.dataset.k; if (k === 'name') d.name = el.value; else if (k === 'pct') d.pct = Math.round((+el.value || 0) * 2) / 2; else if (k === 'on_') d.base = el.value; else if (k === 'who') d.who = el.value; else if (k === 'count') d.count = Math.max(1, Math.round(+el.value || 1)); });
+  const sv = document.getElementById('dc_save'); if (sv) w.saveDisc = sv.checked; }
 function billTotals(w) { const rows = w.lines.map(l => ({stage: l.stage, count: l.count, per: l.tuition + w.levy, sum: l.count * (l.tuition + w.levy)})), count = rows.reduce((a, r) => a + r.count, 0), avgT = w.lines.reduce((a, l) => a + l.tuition * l.count, 0) / Math.max(1, count);
-  const gross = rows.reduce((a, r) => a + r.sum, 0) + w.trCount * w.transport, disc = Math.round((w.disc.sib2 ? w.sib2 * avgT * .10 : 0) + (w.disc.sib3 ? w.sib3 * avgT * .15 : 0) + (w.disc.staff ? w.staff * avgT * .5 : 0) + (w.disc.schol ? w.schol * avgT * .25 : 0));
+  const gross = rows.reduce((a, r) => a + r.sum, 0) + w.trCount * w.transport, disc = w.discs.filter(d => d.on).reduce((a, d) => a + discAmt(w, d), 0);
   return {rows, count, gross, disc, net: gross - disc}; }
 
 /* ========== Shared: class rosters and a teacher's lessons ========== */
@@ -2967,15 +3001,18 @@ const ACT = {
   paperDel: el => { const se = EXAMS.series.find(x => x.id === S.exSel) || EXAMS.series[0]; se.papers = se.papers.filter(p => p.id !== el.dataset.id); closeAll(); route(); toast('Paper removed'); },
   exPublish: () => { const se = EXAMS.series.find(x => x.id === S.exSel) || EXAMS.series[0]; se.published = true;
     lsSet('quad-exams', EXAMS.series.filter(x => x.published).map(x => ({name: x.name, papers: x.papers.map(p => ({year: yl(p.g), subj: p.subj, paper: p.paper, date: p.date, sess: p.sess, dur: p.dur, room: p.room}))}))); route(); toast(`${se.name} published. Families see it in the app.`); },
-  billStart: () => { const ls = billLines(); S.bill = {step: 0, term: 'Term 2 · 2026/27', due: '2027-01-15', plan: true, lines: ls, levy: 25000, transport: 42000, trCount: Math.round(ls.reduce((a, l) => a + l.count, 0) * .38), sib2: 96, sib3: 14, staff: 22, schol: 18, disc: {sib2: true, sib3: true, staff: true, schol: true}}; billDrawer(); },
+  billStart: () => { const ls = billLines(); S.bill = {step: 0, term: 'Term 2 · 2026/27', due: '2027-01-15', plan: true, lines: ls, levy: 25000, transport: 42000, trCount: Math.round(ls.reduce((a, l) => a + l.count, 0) * .38), discs: discDefaults(), saveDisc: true}; billDrawer(); },
   billBack: () => { billSync(); S.bill.step--; billDrawer(); },
   billNext: () => { billSync(); const w = S.bill, err = document.getElementById('blrErr');
     if (w.step === 0 && !w.due) { err.textContent = 'Choose a due date.'; return; } if (w.step === 1 && w.lines.some(l => !l.tuition)) { err.textContent = 'Every stage needs a tuition fee.'; return; }
+    if (w.step === 2) { const bad = w.discs.find(d => !d.name.trim() || !(d.pct > 0 && d.pct <= 100)); if (bad) { err.textContent = !bad.name.trim() ? 'Give every discount a name.' : `${bad.name}: the percentage must be between 1 and 100.`; return; } if (w.saveDisc) lsSet('quad-discounts', w.discs); }
     if (w.step < 3) { w.step++; billDrawer(); return; }
     const tot = billTotals(w); let n = 0; students.filter(x => x.status === 'Active').forEach(st => { const line = w.lines.find(l => l.stage === bandOf(st.grade)) || w.lines[0]; invoices.unshift({no: 'INV-27-' + String(100 + n++).padStart(5, '0'), student: st, amt: line.tuition + w.levy, paid: 0, status: 'Draft', due: w.due}); });
     BILL.runs.push({term: w.term, count: tot.count, net: tot.net}); S.tab.fees = 'invoices'; S.filter.inv = 'Draft'; closeAll(); route(); toast(`Created ${tot.count} draft invoices for ${w.term} (${money(tot.net)}). ${n} are shown in this sample.`); },
   billOpt: el => { const w = S.bill; w[el.dataset.k] = !w[el.dataset.k]; el.classList.toggle('on', w[el.dataset.k]); el.setAttribute('aria-checked', w[el.dataset.k]); },
-  billDisc: el => { const d = S.bill.disc, k = el.dataset.k; d[k] = !d[k]; el.classList.toggle('on', d[k]); el.setAttribute('aria-checked', d[k]); },
+  billDisc: el => { billSync(); const d = S.bill.discs[+el.dataset.i]; d.on = !d.on; keepScroll(billDrawer); },
+  billDiscAdd: () => { billSync(); S.bill.discs.push({id: 'd' + Date.now().toString(36), name: '', pct: 5, base: 'tuition', who: 'chosen', count: 10, on: true}); keepScroll(billDrawer); const ins = drawer.querySelectorAll('[data-k=name]'); ins[ins.length - 1].focus(); },
+  billDiscDel: el => { billSync(); const d = S.bill.discs.splice(+el.dataset.i, 1)[0]; keepScroll(billDrawer); toast(`Removed ${d.name || 'the discount'} from this run`); },
   sendDrafts: () => { let n = 0; invoices.forEach(v => { if (v.status === 'Draft') { v.status = 'Sent'; n++; } }); S.filter.inv = 'Sent'; route(); toast(`Sent ${n} invoices. Parents can pay in the app.`); },
   gwToggle: el => { const k = el.dataset.k; PAY.gw[k] = !PAY.gw[k]; if (!Object.values(PAY.gw).some(Boolean)) { PAY.gw[k] = true; toast('Keep at least one way to pay'); return; } lsSet('quad-payments', PAY); route(); toast(`${({payhere: 'PayHere', stripe: 'Stripe', bank: 'Bank transfer'})[k]} ${PAY.gw[k] ? 'is on in the parent app' : 'turned off'}`); },
   payFee: el => { PAY.fee = el.dataset.k; lsSet('quad-payments', PAY); route(); },

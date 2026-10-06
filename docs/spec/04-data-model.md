@@ -182,7 +182,8 @@ Postgres 16, defined in Drizzle in `packages/db/schema/*.ts`. This document list
 |---|---|
 | `fee_items` | id, name, kind enum(`tuition`,`levy`,`transport`,`activity`,`materials`,`other`), default_amount_minor |
 | `fee_structures` | id, academic_year_id, stage_id, term_id, items jsonb (`[{fee_item_id, amount_minor}]`) |
-| `discount_rules` | id, kind enum(`sibling_2`,`sibling_3`,`staff_child`,`scholarship`,`custom`), percent, applies_to enum(`tuition`,`all`) |
+| `discount_rules` | id, name (≤40), kind enum(`sibling_2`,`sibling_3`,`staff_child`,`scholarship`,`early_payment`,`chosen`), percent numeric(5,2) (0.5–100), applies_to enum(`tuition`,`all`), active bool, sort_order |
+| `billing_run_discounts` | billing_run_id, rule_id (nullable for run-only rules), name, kind, percent, applies_to, active |
 | `student_discounts` | student_id, rule_id, percent_override, reason |
 | `billing_runs` | id, term_id, due_on, instalments bool, options jsonb, status enum(`draft`,`created`,`sent`), totals jsonb, created_by |
 | `invoices` **[S]** | id, number ('INV-26-01040'), student_id, billing_run_id, title, issued_on, due_on, status enum(`draft`,`sent`,`partially_paid`,`paid`,`overdue`,`void`), subtotal_minor, discount_minor, total_minor, paid_minor, currency, instalment_plan jsonb |

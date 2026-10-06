@@ -7,7 +7,7 @@ All fee maths lives in `packages/domain/fees` and is unit-tested: line totals, d
 ## Fee setup
 - **Fee items:** for example "Tuition fee – Term 1" (285,000), "Development levy" (25,000), "Transport (Route 4)" (42,000), "Swimming programme" (12,500), "Lab & materials" (9,500).
 - **Fee structures:** per academic year, per term and per stage, as a list of items with amounts. Stages come from the school's curriculum.
-- **Discount rules:** second child 10% off tuition, third child and more 15%, children of staff 50%, scholarships (a percentage per student), and custom rules. Siblings are detected through shared guardians.
+- **Discount rules:** each rule has a name the school chooses (shown on the invoice line), a percentage (0.5 to 100, in steps of 0.5), what it comes off (tuition, or the whole invoice), who gets it (second child in a family, third child and more, children of staff, scholarship holders, families who pay early, or students chosen by hand), and an on/off state. Seeded defaults: Sibling (2nd child) 10%, Sibling (3rd child +) 15%, Staff children 50%, Scholarship 25%, all off tuition. Siblings are detected through shared guardians. When several rules apply to one student, each is applied to the original amount and the total discount is capped at the amount it comes off.
 
 ## Fees & invoicing page (tabs)
 - **Invoices:**
@@ -26,7 +26,12 @@ All fee maths lives in `packages/domain/fees` and is unit-tested: line totals, d
 Replaces "Generate invoices".
 1. **Term and timing:** term, due date, and "Offer a 3-instalment plan".
 2. **Fees:** tuition per stage (from the structure; editable for this run), the development levy, and transport (only for students on a route).
-3. **Discounts:** switches for siblings, staff children and scholarships, each showing how many students it affects.
+3. **Discounts:** a sentence with the total ("4 discounts will take Rs 6,352,113 off this run"), then one card per rule:
+   - top line: on/off switch, **Discount name**, **Percentage** (with a % unit) and a remove button;
+   - second line: **Off** (Tuition or Whole invoice), **Who gets it**, and the amount and number of students it affects (or a **Students** count for "Students I choose", picked in the review step);
+   - amounts update as you type; **Add a discount** adds a blank rule;
+   - validation: every rule needs a name, and the percentage must be between 1 and 100;
+   - **Save these discounts for future billing runs** (on by default) writes the rules back to `discount_rules`; otherwise the edits apply to this run only (stored on the billing run). Fee structures shows the saved rules in its footnote.
 4. **Review:**
    - totals: number of invoices, gross, discounts, net, and the totals by stage;
    - exceptions: students with no guardian set as fee payer, and students on leave (excluded).
