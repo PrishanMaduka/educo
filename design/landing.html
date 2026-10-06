@@ -230,6 +230,42 @@ footer{padding-block:40px 56px;color:var(--ink-3);font-size:13.5px}
 footer .wrap{display:flex;flex-wrap:wrap;gap:12px 28px;align-items:center}
 footer a{text-decoration:none;font-weight:700;color:var(--ink-2)}
 
+
+/* Showcase: theme-matched screenshots */
+:root{--show-lt:block;--show-dk:none}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--show-lt:none;--show-dk:block}}
+:root[data-theme="dark"]{--show-lt:none;--show-dk:block}
+img.lt{display:var(--show-lt)}img.dk{display:var(--show-dk)}
+.show{display:flex;flex-direction:column;gap:18px;margin-top:8px}
+.show + .show{margin-top:64px}
+.show-h{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+.show-h h3{font-size:26px}
+.who{font-size:12.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.show .go{color:var(--coral);font-weight:800;font-size:15px;text-decoration:none;align-self:flex-start}
+.show-g{display:grid;grid-template-columns:260px minmax(0,1fr);gap:24px;align-items:start}
+.st-tabs{display:flex;flex-direction:column;gap:6px}
+.st-tabs button{all:unset;cursor:pointer;display:flex;flex-direction:column;gap:2px;padding:14px 16px;border-radius:16px;border:1px solid transparent;color:var(--ink-2);transition:background .2s,border-color .2s}
+.st-tabs button b{font:800 16px var(--f-display);color:var(--ink)}
+.st-tabs button span{font-size:13.5px;line-height:1.45}
+.st-tabs button:hover{background:var(--surface)}
+.st-tabs button.on{background:var(--surface);border-color:var(--line);box-shadow:var(--shadow)}
+.st-tabs button.on b{color:var(--coral)}
+.st-tabs button:focus-visible{outline:2.5px solid var(--coral);outline-offset:2px}
+.browser{border-radius:16px;overflow:hidden;border:1px solid var(--line);background:var(--surface);box-shadow:0 40px 80px -40px rgba(31,37,89,.55);min-width:0}
+.browser .bar{display:flex;align-items:center;gap:7px;height:38px;padding:0 14px;background:var(--surface-2);border-bottom:1px solid var(--line)}
+.browser .bar i{width:11px;height:11px;border-radius:50%;background:var(--line)}
+.browser .bar span{margin-left:12px;font-size:12.5px;color:var(--ink-3);background:var(--surface);border-radius:999px;padding:3px 14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.browser .shots img{width:100%;height:auto;max-width:100%;aspect-ratio:1440/900}
+.phones{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:22px}
+.ph{margin:0;display:flex;flex-direction:column;gap:14px;min-width:0}
+.pf{border-radius:38px;padding:8px;background:var(--indigo);box-shadow:0 30px 60px -30px rgba(31,37,89,.6)}
+.pf img{width:100%;height:auto;max-width:100%;border-radius:31px;aspect-ratio:366/820;object-fit:cover}
+:root[data-theme="dark"] .pf{background:#2B2F5C}
+.ph figcaption{display:flex;flex-direction:column;gap:2px;padding-inline:4px}
+.ph figcaption b{font:800 16px var(--f-display)}
+.ph figcaption span{font-size:13.5px;color:var(--ink-2)}
+@media (max-width:900px){.show-g{grid-template-columns:1fr}.st-tabs{flex-direction:row;overflow-x:auto;scrollbar-width:none;margin-inline:-20px;padding-inline:20px}.st-tabs button{flex:none;width:200px}
+  .phones{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;margin-inline:-20px;padding:4px 20px 12px;scrollbar-width:none}.ph{flex:none;width:64vw;max-width:260px;scroll-snap-align:center}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}html{scroll-behavior:auto}}
 </style>
 </head>
@@ -410,13 +446,24 @@ footer a{text-decoration:none;font-weight:700;color:var(--ink-2)}
     </div>
   </section>
 
-  <!-- Apps -->
+  <!-- Inside Quad: real screens from the staff portal and the parent app -->
   <section class="sec" id="apps" aria-labelledby="appsH" style="padding-top:0">
     <div class="wrap">
-      <div class="sec-h"><div><div class="eyebrow">Two apps, one school</div><h2 id="appsH" style="margin-top:12px">Made for the people <span class="serif">who use them</span></h2></div><p>Both carry your school’s name, logo and colour. Change the colour once and every screen updates.</p></div>
-      <div class="apps">
-        <a class="app" href="admin.html"><span class="who">For staff · web</span><h3 style="font-size:26px">Staff portal</h3><p>The school today on one page, My teaching for every teacher, early warning with support plans, sharing moments, and every module behind it.</p><span class="go">Open the staff portal →</span></a>
-        <a class="app" href="parent.html" style="background:linear-gradient(160deg,var(--coral-soft),var(--surface) 60%)"><span class="who">For families · iOS and Android</span><h3 style="font-size:26px">Parent app</h3><p>One login for every child: the day ring, the Circle tab, payments, messages, the bus, bookings and forms. Face ID, dark mode and offline.</p><span class="go">Open the parent app →</span></a>
+      <div class="sec-h"><div><div class="eyebrow">Inside Quad</div><h2 id="appsH" style="margin-top:12px">Two apps, <span class="serif">one school</span></h2></div><p>The staff portal runs the school on the web. The parent app keeps families close on iOS and Android. Both carry your school’s name, logo and colour. These are real screens from the prototypes.</p></div>
+
+      <div class="show">
+        <div class="show-h"><span class="who">For staff · web</span><h3>Staff portal</h3></div>
+        <div class="show-g">
+          <div class="st-tabs" role="tablist" aria-label="Staff portal screens"><button type="button" role="tab" id="st-0" aria-selected="true" aria-controls="stp" data-i="0" class="on"><b>The school today</b><span>A morning summary in sentences, then what needs you and the good news.</span></button><button type="button" role="tab" id="st-1" aria-selected="false" aria-controls="stp" data-i="1" class=""><b>Early warning</b><span>Students who have started slipping, why, and the suggested next step.</span></button><button type="button" role="tab" id="st-2" aria-selected="false" aria-controls="stp" data-i="2" class=""><b>My teaching</b><span>A teacher’s day, family pulse and this week’s learning.</span></button><button type="button" role="tab" id="st-3" aria-selected="false" aria-controls="stp" data-i="3" class=""><b>Fees & invoicing</b><span>Billing runs, discounts and online payments in rupees.</span></button></div>
+          <div class="browser" id="stp" role="tabpanel" aria-labelledby="st-0"><div class="bar" aria-hidden="true"><i></i><i></i><i></i><span>colombo-intl.quad.school</span></div><div class="shots"><div class="shot" data-i="0" ><img class="lt " src="landing/staff-today-light.jpg" alt="Staff portal dashboard: Good morning, Prishan. 1,181 of 1,248 students are in school today, with five things that need attention and good news." loading="lazy" decoding="async"><img class="dk " src="landing/staff-today-dark.jpg" alt="" aria-hidden="true" loading="lazy" decoding="async"></div><div class="shot" data-i="1" hidden><img class="lt " src="landing/staff-warning-light.jpg" alt="Early warning page: 11 students need a conversation, each card showing attendance, behaviour, homework and fee signals with a suggested next step." loading="lazy" decoding="async"><img class="dk " src="landing/staff-warning-dark.jpg" alt="" aria-hidden="true" loading="lazy" decoding="async"></div><div class="shot" data-i="2" hidden><img class="lt " src="landing/staff-teach-light.jpg" alt="My teaching: a teacher’s timetable for today, the family pulse for their class and this week in class." loading="lazy" decoding="async"><img class="dk " src="landing/staff-teach-dark.jpg" alt="" aria-hidden="true" loading="lazy" decoding="async"></div><div class="shot" data-i="3" hidden><img class="lt " src="landing/staff-fees-light.jpg" alt="Fees and invoicing: invoices, collection progress and the billing run." loading="lazy" decoding="async"><img class="dk " src="landing/staff-fees-dark.jpg" alt="" aria-hidden="true" loading="lazy" decoding="async"></div></div></div>
+        </div>
+        <a class="go" href="admin.html">Open the staff portal →</a>
+      </div>
+
+      <div class="show">
+        <div class="show-h"><span class="who">For families · iOS and Android</span><h3>Parent app</h3></div>
+        <div class="phones"><figure class="ph"><div class="pf"><img class="lt " src="landing/parent-home-light.jpg" alt="Parent app home: Good morning, Dilhani, with Amaya’s live day ring and what needs doing." loading="lazy" decoding="async"><img class="dk " src="landing/parent-home-dark.jpg" alt="" aria-hidden="true" loading="lazy" decoding="async"></div><figcaption><b>Home</b><span>The child’s day, live, then what needs you.</span></figcaption></figure><figure class="ph"><div class="pf"><img class="lt " src="landing/parent-moments-light.jpg" alt="Circle tab, Moments: photos and praise shared by Amaya’s and Kavindu’s teachers." loading="lazy" decoding="async"><img class="dk " src="landing/parent-moments-dark.jpg" alt="" aria-hidden="true" loading="lazy" decoding="async"></div><figcaption><b>Moments</b><span>Photos and praise from teachers, with Love and Say thanks.</span></figcaption></figure><figure class="ph"><div class="pf"><img class="lt " src="landing/parent-people-light.jpg" alt="Circle tab, People: seven people look after Amaya at school and three at home, shown as an orbit." loading="lazy" decoding="async"><img class="dk " src="landing/parent-people-dark.jpg" alt="" aria-hidden="true" loading="lazy" decoding="async"></div><figcaption><b>People</b><span>Everyone who looks after the child, at school and at home.</span></figcaption></figure><figure class="ph"><div class="pf"><img class="lt " src="landing/parent-learning-light.jpg" alt="Circle tab, Learning: this week Amaya’s class is learning to write a postcard, with ideas to try at home." loading="lazy" decoding="async"><img class="dk " src="landing/parent-learning-dark.jpg" alt="" aria-hidden="true" loading="lazy" decoding="async"></div><figcaption><b>Learning</b><span>This week in class and one thing to try at home.</span></figcaption></figure></div>
+        <a class="go" href="parent.html">Open the parent app →</a>
       </div>
     </div>
   </section>
@@ -499,6 +546,13 @@ footer a{text-decoration:none;font-weight:700;color:var(--ink-2)}
   fly(FEED[0]);
   setInterval(() => { i = (i + 1) % FEED.length; tx.style.opacity = 0; setTimeout(() => { show(FEED[i]); tx.style.opacity = 1; }, 300); fly(FEED[i]); }, 3200);
 })();
+
+// Staff portal screens: tabs
+(() => { const tabs = [...document.querySelectorAll('.st-tabs [role=tab]')], panel = document.getElementById('stp');
+  const pick = i => { tabs.forEach((t, j) => { t.classList.toggle('on', j === i); t.setAttribute('aria-selected', j === i); t.tabIndex = j === i ? 0 : -1; });
+    panel.querySelectorAll('.shot').forEach(sh => sh.hidden = +sh.dataset.i !== i); panel.setAttribute('aria-labelledby', tabs[i].id); };
+  tabs.forEach((t, i) => { t.addEventListener('click', () => pick(i)); t.addEventListener('keydown', e => { if (e.key === 'ArrowDown' || e.key === 'ArrowRight') { e.preventDefault(); pick((i + 1) % tabs.length); tabs[(i + 1) % tabs.length].focus(); } if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') { e.preventDefault(); const k = (i - 1 + tabs.length) % tabs.length; pick(k); tabs[k].focus(); } }); });
+  pick(0); })();
 
 // Family connection heatmap (sample school)
 (() => { const rows = [['Year 1', 92, 88, 95], ['Year 2', 85, 90, 78], ['Year 3', 81, 64, 87], ['Year 4', 96, 83, 90], ['Year 5', 72, 86, 58], ['Year 6', 88, 91, 80]];
