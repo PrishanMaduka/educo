@@ -1,3 +1,5 @@
+'use client';
+
 import * as Popover from '@radix-ui/react-popover';
 import { Check, ChevronDown, Search, X, type LucideIcon } from 'lucide-react';
 import { useId, useMemo, useRef, useState, type KeyboardEvent } from 'react';
@@ -63,6 +65,7 @@ export function DropdownFilter({
   const [query, setQuery] = useState('');
   const listRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
   const listId = useId();
 
   const active = value === null ? undefined : options.find((o) => o.value === value);
@@ -110,8 +113,7 @@ export function DropdownFilter({
     >
       <div
         className={cn(
-          'inline-flex h-[38px] max-w-full items-center gap-1 rounded-[10px] border pr-2 pl-3 text-[13.5px]',
-          'focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand-soft',
+          'inline-flex h-[38px] max-w-full max-sm:h-11 items-center gap-1 rounded-[10px] border pr-2 pl-3 text-[13.5px]',
           transition,
           active
             ? 'border-brand/45 bg-brand-soft text-ink'
@@ -119,8 +121,11 @@ export function DropdownFilter({
         )}
       >
         <Popover.Trigger
-          aria-haspopup="listbox"
-          className="inline-flex min-w-0 cursor-pointer items-center gap-2 bg-transparent py-0 outline-none max-sm:min-h-11"
+          ref={triggerRef}
+          className={cn(
+            'inline-flex min-w-0 cursor-pointer items-center gap-2 rounded-lg bg-transparent py-0 max-sm:min-h-11',
+            focusRing,
+          )}
         >
           {Icon ? (
             <Icon
@@ -141,9 +146,12 @@ export function DropdownFilter({
           <button
             type="button"
             aria-label={clearLabel}
-            onClick={onClear}
+            onClick={() => {
+              onClear();
+              triggerRef.current?.focus();
+            }}
             className={cn(
-              '-mr-0.5 grid size-5 shrink-0 cursor-pointer place-items-center rounded-full text-ink hover:bg-ink/10 max-sm:size-8',
+              'relative -mr-0.5 grid size-5 shrink-0 cursor-pointer place-items-center rounded-full text-ink hover:bg-ink/10 after:absolute after:-inset-3 after:content-[""]',
               focusRing,
             )}
           >
@@ -153,6 +161,7 @@ export function DropdownFilter({
       </div>
       <Popover.Portal>
         <Popover.Content
+          aria-label={label}
           align="start"
           sideOffset={6}
           collisionPadding={12}
@@ -166,7 +175,7 @@ export function DropdownFilter({
           className="z-[200] flex max-w-[min(320px,calc(100vw-24px))] min-w-[220px] flex-col rounded-[14px] border border-line bg-surface p-1.5 shadow-lg outline-none"
         >
           {searchable ? (
-            <div className="mx-0.5 mt-0.5 mb-1.5 flex h-9 items-center gap-2 rounded-[9px] border border-line px-2.5 text-ink-3 focus-within:border-brand">
+            <div className="mx-0.5 mt-0.5 mb-1.5 flex h-9 items-center gap-2 rounded-[9px] border border-line px-2.5 text-ink-3">
               <Search aria-hidden="true" strokeWidth={ICON_STROKE} className="size-4 shrink-0" />
               <input
                 ref={searchRef}
@@ -177,7 +186,7 @@ export function DropdownFilter({
                 onChange={(event) => {
                   setQuery(event.target.value);
                 }}
-                className="min-w-0 flex-1 bg-transparent text-ink outline-none"
+                className={cn('min-w-0 flex-1 rounded-md bg-transparent text-ink', focusRing)}
               />
             </div>
           ) : null}
@@ -207,8 +216,10 @@ export function DropdownFilter({
                       }
                     }}
                     className={cn(
-                      'flex w-full cursor-pointer items-center gap-2.5 rounded-[9px] px-2.5 py-2 text-[13.5px] text-ink outline-none',
-                      'hover:bg-surface-2 focus:bg-surface-2 focus-visible:outline-2 focus-visible:outline-brand max-sm:min-h-11',
+                      'flex w-full cursor-pointer items-center gap-2.5 rounded-[9px] px-2.5 py-2 text-[13.5px] text-ink',
+                      'hover:bg-surface-2 focus:bg-surface-2 max-sm:min-h-11',
+                      focusRing,
+                      'focus-visible:-outline-offset-2',
                       selected && 'font-bold',
                       option.count === 0 && !selected && 'text-ink-2',
                     )}

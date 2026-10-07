@@ -9,9 +9,9 @@ export interface Money {
 const SYMBOLS: Record<string, string> = { LKR: 'Rs' };
 
 export function formatMoney({ amountMinor, currency }: Money, locale: string): string {
-  if (!Number.isInteger(amountMinor)) {
+  if (!Number.isSafeInteger(amountMinor)) {
     throw new RangeError(
-      `amountMinor must be an integer number of minor units, got ${amountMinor}`,
+      `amountMinor must be a safe integer number of minor units, got ${amountMinor}`,
     );
   }
   const reference = new Intl.NumberFormat(locale, { style: 'currency', currency });

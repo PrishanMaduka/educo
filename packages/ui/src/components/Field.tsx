@@ -1,6 +1,9 @@
+'use client';
+
 import { useId } from 'react';
 
 import { cn } from '../lib/cn';
+import { focusRing } from '../lib/motion';
 
 import type { ReactNode } from 'react';
 
@@ -45,5 +48,7 @@ export function Field({ label, hint, error, className, children, id: idProp }: F
 
 export const controlClasses =
   'w-full min-w-0 rounded-lg border border-line-strong bg-surface px-[11px] text-ink placeholder:text-ink-2 ' +
-  'focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand focus-visible:outline-solid ' +
+  'focus-visible:border-brand ' +
+  focusRing +
+  ' ' +
   'disabled:cursor-not-allowed disabled:opacity-50 max-sm:min-h-11';

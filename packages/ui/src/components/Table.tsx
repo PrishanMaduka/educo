@@ -1,3 +1,5 @@
+'use client';
+
 import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react';
 import { useMemo, useState, type KeyboardEvent, type MouseEvent, type ReactNode } from 'react';
 
@@ -142,7 +144,7 @@ export function Table<Row>({
         <table className="w-full border-collapse text-[13px] text-ink">
           <caption className="sr-only">{caption}</caption>
           <thead>
-            <tr>
+            <tr className="max-sm:h-11">
               {selectable ? (
                 <th
                   scope="col"
@@ -215,7 +217,6 @@ export function Table<Row>({
 
                 <tr
                   key={id}
-                  aria-selected={selectable ? isSelected : undefined}
                   tabIndex={onRowClick ? 0 : undefined}
                   onClick={
                     onRowClick
@@ -232,7 +233,7 @@ export function Table<Row>({
                       : undefined
                   }
                   className={cn(
-                    'group',
+                    'group max-sm:h-11',
                     onRowClick && [
                       'cursor-pointer hover:bg-surface-2',
                       focusRing,

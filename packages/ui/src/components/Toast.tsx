@@ -1,3 +1,5 @@
+'use client';
+
 import {
   createContext,
   useCallback,
@@ -39,6 +41,8 @@ export function ToastProvider({
   durationMs = DURATION_MS,
 }: ToastProviderProps) {
   const [toasts, setToasts] = useState<ToastItem[]>([]);
+  // The list lives in a ref as well, so state updates stay pure and timers can be cleared when a toast is evicted.
+  const current = useRef<ToastItem[]>([]);
   const nextId = useRef(0);
   const timers = useRef(new Map<number, ReturnType<typeof setTimeout>>());
 
@@ -54,21 +58,20 @@ export function ToastProvider({
     (message: string) => {
       nextId.current += 1;
       const id = nextId.current;
-      setToasts((current) => {
-        const next = [...current, { id, message }].slice(-MAX_VISIBLE);
-        for (const [timerId, timer] of timers.current) {
-          if (!next.some((t) => t.id === timerId)) {
-            clearTimeout(timer);
-            timers.current.delete(timerId);
-          }
-        }
-        return next;
-      });
+      const next = [...current.current, { id, message }];
+      const kept = next.slice(-MAX_VISIBLE);
+      for (const dropped of next.slice(0, next.length - kept.length)) {
+        clearTimeout(timers.current.get(dropped.id));
+        timers.current.delete(dropped.id);
+      }
+      current.current = kept;
+      setToasts(kept);
       timers.current.set(
         id,
         setTimeout(() => {
           timers.current.delete(id);
-          setToasts((current) => current.filter((t) => t.id !== id));
+          current.current = current.current.filter((t) => t.id !== id);
+          setToasts(current.current);
         }, durationMs),
       );
     },

@@ -29,10 +29,11 @@ function setup(props: Partial<React.ComponentProps<typeof DropdownFilter>> = {})
 }
 
 describe('DropdownFilter', () => {
-  it('is a listbox trigger showing only the label while inactive', () => {
+  it('is a popover trigger (not a listbox claim) showing only the label while inactive', () => {
     setup();
     const trigger = screen.getByRole('button', { name: /^Year group/ });
-    expect(trigger).toHaveAttribute('aria-haspopup', 'listbox');
+    expect(trigger).toHaveAttribute('aria-haspopup', 'dialog');
+    expect(trigger).toHaveAttribute('aria-expanded', 'false');
     expect(screen.queryByRole('button', { name: 'Clear Year group' })).not.toBeInTheDocument();
   });
 
@@ -41,12 +42,18 @@ describe('DropdownFilter', () => {
     expect(screen.getByRole('button', { name: /^Year group/ })).toHaveTextContent('Senior 1');
     await userEvent.click(screen.getByRole('button', { name: 'Clear Year group' }));
     expect(onClear).toHaveBeenCalledOnce();
+    expect(screen.getByRole('button', { name: /^Year group/ })).toHaveFocus();
   });
 
   it('lists options with counts and groups, marks the selected one and picks on click', async () => {
     const { onChange } = setup({ value: 'p1' });
     await userEvent.click(screen.getByRole('button', { name: /^Year group/ }));
-    const listbox = await screen.findByRole('listbox', { name: 'Year group' });
+    const dialog = await screen.findByRole('dialog', { name: 'Year group' });
+    expect(screen.getByRole('button', { name: /^Year group/ })).toHaveAttribute(
+      'aria-expanded',
+      'true',
+    );
+    const listbox = within(dialog).getByRole('listbox', { name: 'Year group' });
     expect(within(listbox).getByRole('group', { name: 'Primary' })).toBeInTheDocument();
     expect(within(listbox).getByRole('group', { name: 'Senior' })).toBeInTheDocument();
     const selected = within(listbox).getByRole('option', { name: /Primary 1/ });

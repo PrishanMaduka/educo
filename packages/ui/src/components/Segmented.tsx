@@ -1,3 +1,5 @@
+'use client';
+
 import { useRef, type KeyboardEvent } from 'react';
 
 import { cn } from '../lib/cn';

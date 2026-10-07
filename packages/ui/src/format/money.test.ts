@@ -18,6 +18,17 @@ describe('formatMoney', () => {
     expect(formatMoney({ amountMinor: 12345, currency: 'USD' }, 'en-US')).toBe('$123.45');
     expect(formatMoney({ amountMinor: 500, currency: 'JPY' }, 'en-US')).toBe('¥500');
   });
+  it("uses the currency's own number of decimals and signs negatives", () => {
+    expect(formatMoney({ amountMinor: 1234567, currency: 'KWD' }, 'en-US')).toBe(
+      'KWD\u00a01,234.567',
+    );
+    expect(formatMoney({ amountMinor: -12345, currency: 'USD' }, 'en-US')).toBe('-$123.45');
+  });
+  it('rejects unsafe integers', () => {
+    expect(() => formatMoney({ amountMinor: 2 ** 60, currency: 'LKR' }, 'en-LK')).toThrow(
+      RangeError,
+    );
+  });
   it('rejects non-integer minor units', () => {
     expect(() => formatMoney({ amountMinor: 10.5, currency: 'LKR' }, 'en-LK')).toThrow(RangeError);
   });
