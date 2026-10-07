@@ -4,6 +4,8 @@ import { ToastProvider } from '@quad/ui';
 import { useTranslation } from 'react-i18next';
 
 import { STYLE_GUIDE } from './samples';
+import { DESIGN_NS } from './strings';
+
 
 import type { ReactNode } from 'react';
 
@@ -15,7 +17,7 @@ const THEMES = ['light', 'dark'] as const;
  * theme, because they render at the end of <body>.
  */
 export function ThemePair({ name, children }: { name: string; children: () => ReactNode }) {
-  const { t } = useTranslation();
+  const { t } = useTranslation(DESIGN_NS);
   return (
     <div className="grid gap-3 lg:grid-cols-2">
       {THEMES.map((theme) => (
@@ -23,11 +25,11 @@ export function ThemePair({ name, children }: { name: string; children: () => Re
           key={theme}
           data-theme={theme}
           role="group"
-          aria-label={`${name}, ${t(`design.${theme}`)}`}
+          aria-label={`${name}, ${t(theme)}`}
           className="flex min-w-0 flex-col gap-3 rounded-card border border-line bg-canvas p-5 text-ink max-sm:p-4"
         >
           <p className="m-0 text-[11px] font-extrabold tracking-[0.1em] text-ink-2 uppercase">
-            {t(`design.${theme}`)}
+            {t(theme)}
           </p>
           <div className="min-w-0">{children()}</div>
         </div>

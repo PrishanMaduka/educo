@@ -51,6 +51,8 @@ import {
   SAMPLE_TREND,
   type SampleStudent,
 } from './sample-data';
+import { DESIGN_NS } from './strings';
+
 
 import type { GreetingPeriod } from '@quad/domain';
 
@@ -93,42 +95,42 @@ function AvatarSample() {
 }
 
 function ButtonSample() {
-  const { t } = useTranslation();
+  const { t } = useTranslation(DESIGN_NS);
   return (
     <Row>
-      <Button icon={UserPlus}>{t('design.sample.addStudent')}</Button>
-      <Button variant="secondary">{t('design.sample.save')}</Button>
-      <Button variant="ghost">{t('design.sample.cancel')}</Button>
+      <Button icon={UserPlus}>{t('sample.addStudent')}</Button>
+      <Button variant="secondary">{t('sample.save')}</Button>
+      <Button variant="ghost">{t('sample.cancel')}</Button>
       <Button variant="danger" icon={Trash2}>
-        {t('design.sample.remove')}
+        {t('sample.remove')}
       </Button>
       <Button size="sm" variant="secondary">
-        {t('design.sample.save')}
+        {t('sample.save')}
       </Button>
     </Row>
   );
 }
 
 function ButtonVariantsSample() {
-  const { t } = useTranslation();
+  const { t } = useTranslation(DESIGN_NS);
   return (
     <Row>
       <a href="#Button" className={buttonVariants({ variant: 'secondary' })}>
-        {t('design.sample.linkButton')}
+        {t('sample.linkButton')}
       </a>
     </Row>
   );
 }
 
 function CardSample() {
-  const { t } = useTranslation();
+  const { t } = useTranslation(DESIGN_NS);
   return (
     <Card
-      title={t('design.sample.cardTitle')}
-      actions={<IconButton icon={Pencil} label={t('design.sample.edit')} />}
+      title={t('sample.cardTitle')}
+      actions={<IconButton icon={Pencil} label={t('sample.edit')} />}
     >
       <p className="m-0 p-4 text-[13.5px] text-ink-2">
-        {t('design.sample.cardBody', {
+        {t('sample.cardBody', {
           collected: formatMoney(SAMPLE_COLLECTED, LOCALE),
           due: formatMoney(SAMPLE_OUTSTANDING, LOCALE),
         })}
@@ -138,12 +140,12 @@ function CardSample() {
 }
 
 function CheckboxSample() {
-  const { t } = useTranslation();
-  return <Checkbox label={t('design.sample.consent')} defaultChecked />;
+  const { t } = useTranslation(DESIGN_NS);
+  return <Checkbox label={t('sample.consent')} defaultChecked />;
 }
 
 function ChipSample() {
-  const { t } = useTranslation();
+  const { t } = useTranslation(DESIGN_NS);
   const [selected, setSelected] = useState<'all' | 'overdue'>('all');
   return (
     <Row>
@@ -154,7 +156,7 @@ function ChipSample() {
           setSelected('all');
         }}
       >
-        {t('design.sample.chipAll')}
+        {t('sample.chipAll')}
       </Chip>
       <Chip
         selected={selected === 'overdue'}
@@ -163,18 +165,18 @@ function ChipSample() {
           setSelected('overdue');
         }}
       >
-        {t('design.sample.chipOverdue')}
+        {t('sample.chipOverdue')}
       </Chip>
     </Row>
   );
 }
 
 function DropdownFilterSample() {
-  const { t } = useTranslation();
+  const { t } = useTranslation(DESIGN_NS);
   const [value, setValue] = useState<string | null>('7B');
   return (
     <DropdownFilter
-      label={t('design.sample.class')}
+      label={t('sample.class')}
       icon={CalendarCheck}
       value={value}
       options={SAMPLE_CLASSES.map((c) => ({ value: c, label: c }))}
@@ -188,7 +190,8 @@ function DropdownFilterSample() {
 }
 
 function CommandPaletteSample() {
-  const { t } = useTranslation();
+  const { t } = useTranslation(DESIGN_NS);
+  const { t: tApp } = useTranslation();
   const [open, setOpen] = useState(false);
   return (
     <>
@@ -199,7 +202,7 @@ function CommandPaletteSample() {
           setOpen(true);
         }}
       >
-        {t('design.sample.openSearch')}
+        {t('sample.openSearch')}
       </Button>
       {/* Mounted only while open: every palette listens for Ctrl K, and this page shows two. */}
       {open ? (
@@ -208,7 +211,7 @@ function CommandPaletteSample() {
           onOpenChange={setOpen}
           groups={[
             {
-              label: t('search.group.pages'),
+              label: tApp('search.group.pages'),
               items: SAMPLE_STUDENTS.map((s) => ({
                 id: s.id,
                 label: s.name,
@@ -219,25 +222,23 @@ function CommandPaletteSample() {
               })),
             },
           ]}
-          placeholder={t('search.placeholder')}
-          label={t('ui.palette.label')}
-          emptyLabel={t('ui.filter.empty')}
+          placeholder={tApp('search.placeholder')}
+          label={tApp('ui.palette.label')}
+          emptyLabel={tApp('ui.filter.empty')}
         />
       ) : null}
     </>
   );
 }
 
-function stepLabels(t: ReturnType<typeof useTranslation>['t']): string[] {
-  return [
-    t('design.sample.stepDetails'),
-    t('design.sample.stepGuardians'),
-    t('design.sample.stepReview'),
-  ];
+function useStepLabels(): string[] {
+  const { t } = useTranslation(DESIGN_NS);
+  return [t('sample.stepDetails'), t('sample.stepGuardians'), t('sample.stepReview')];
 }
 
 function DrawerSample() {
-  const { t } = useTranslation();
+  const { t } = useTranslation(DESIGN_NS);
+  const stepLabels = useStepLabels();
   const [open, setOpen] = useState(false);
   return (
     <>
@@ -247,15 +248,15 @@ function DrawerSample() {
           setOpen(true);
         }}
       >
-        {t('design.sample.openDrawer')}
+        {t('sample.openDrawer')}
       </Button>
       <Drawer
         open={open}
         onOpenChange={setOpen}
-        eyebrow={t('design.sample.drawerEyebrow')}
-        title={t('design.sample.addStudent')}
+        eyebrow={t('sample.drawerEyebrow')}
+        title={t('sample.addStudent')}
         icon={UserPlus}
-        steps={stepLabels(t)}
+        steps={stepLabels}
         step={0}
         footer={
           <>
@@ -265,21 +266,21 @@ function DrawerSample() {
                 setOpen(false);
               }}
             >
-              {t('design.sample.cancel')}
+              {t('sample.cancel')}
             </Button>
             <Button
               onClick={() => {
                 setOpen(false);
               }}
             >
-              {t('design.sample.save')}
+              {t('sample.save')}
             </Button>
           </>
         }
       >
         <Stack>
-          <p className="m-0 text-ink-2">{t('design.sample.drawerBody')}</p>
-          <Input label={t('design.sample.studentName')} />
+          <p className="m-0 text-ink-2">{t('sample.drawerBody')}</p>
+          <Input label={t('sample.studentName')} />
         </Stack>
       </Drawer>
     </>
@@ -287,18 +288,17 @@ function DrawerSample() {
 }
 
 function StepperSample() {
-  const { t } = useTranslation();
-  return <Stepper steps={stepLabels(t)} current={1} />;
+  return <Stepper steps={useStepLabels()} current={1} />;
 }
 
 function EmptyStateSample() {
-  const { t } = useTranslation();
+  const { t } = useTranslation(DESIGN_NS);
   return (
     <EmptyState
       icon={Receipt}
-      title={t('design.sample.emptyTitle')}
-      description={t('design.sample.emptyBody')}
-      action={<Button icon={Plus}>{t('design.sample.emptyAction')}</Button>}
+      title={t('sample.emptyTitle')}
+      description={t('sample.emptyBody')}
+      action={<Button icon={Plus}>{t('sample.emptyAction')}</Button>}
     />
   );
 }
@@ -321,32 +321,32 @@ function GreetingSceneSample() {
 }
 
 function IconButtonSample() {
-  const { t } = useTranslation();
+  const { t } = useTranslation(DESIGN_NS);
   return (
     <Row>
-      <IconButton icon={Pencil} label={t('design.sample.edit')} />
-      <IconButton icon={Trash2} label={t('design.sample.remove')} />
+      <IconButton icon={Pencil} label={t('sample.edit')} />
+      <IconButton icon={Trash2} label={t('sample.remove')} />
     </Row>
   );
 }
 
 function InputSample() {
-  const { t } = useTranslation();
+  const { t } = useTranslation(DESIGN_NS);
   return (
     <Stack>
-      <Input label={t('design.sample.studentName')} hint={t('design.sample.studentNameHint')} />
-      <Input label={t('design.sample.studentName')} error={t('design.sample.studentNameError')} />
+      <Input label={t('sample.studentName')} hint={t('sample.studentNameHint')} />
+      <Input label={t('sample.studentName')} error={t('sample.studentNameError')} />
     </Stack>
   );
 }
 
 function KpiSample() {
-  const { t } = useTranslation();
+  const { t } = useTranslation(DESIGN_NS);
   return (
     <Kpi
-      label={t('design.sample.attendanceToday')}
+      label={t('sample.attendanceToday')}
       value={SAMPLE_KPI_VALUE}
-      delta={t('design.sample.attendanceDelta')}
+      delta={t('sample.attendanceDelta')}
       icon={CalendarCheck}
       tone="good"
     />
@@ -354,7 +354,7 @@ function KpiSample() {
 }
 
 function CelebrateButton() {
-  const { t } = useTranslation();
+  const { t } = useTranslation(DESIGN_NS);
   const { burst } = usePetalBurst();
   return (
     <Button
@@ -364,7 +364,7 @@ function CelebrateButton() {
         burst({ x: box.left + box.width / 2, y: box.top + box.height / 2 });
       }}
     >
-      {t('design.sample.celebrate')}
+      {t('sample.celebrate')}
     </Button>
   );
 }
@@ -378,40 +378,40 @@ function PetalBurstSample() {
 }
 
 function PillSample() {
-  const { t } = useTranslation();
+  const { t } = useTranslation(DESIGN_NS);
   return (
     <Row>
-      <Pill tone="good">{t('design.sample.paid')}</Pill>
-      <Pill tone="warn">{t('design.sample.dueSoon')}</Pill>
-      <Pill tone="bad">{t('design.sample.overdue')}</Pill>
-      <Pill tone="brand">{t('design.sample.students')}</Pill>
+      <Pill tone="good">{t('sample.paid')}</Pill>
+      <Pill tone="warn">{t('sample.dueSoon')}</Pill>
+      <Pill tone="bad">{t('sample.overdue')}</Pill>
+      <Pill tone="brand">{t('sample.students')}</Pill>
     </Row>
   );
 }
 
 function SegmentedSample() {
-  const { t } = useTranslation();
+  const { t } = useTranslation(DESIGN_NS);
   const [value, setValue] = useState('present');
   return (
     <Segmented
-      label={t('design.sample.attendance')}
+      label={t('sample.attendance')}
       value={value}
       onChange={setValue}
       options={[
-        { value: 'present', label: t('design.sample.present'), tone: 'good' },
-        { value: 'late', label: t('design.sample.late'), tone: 'warn' },
-        { value: 'absent', label: t('design.sample.absent'), tone: 'bad' },
+        { value: 'present', label: t('sample.present'), tone: 'good' },
+        { value: 'late', label: t('sample.late'), tone: 'warn' },
+        { value: 'absent', label: t('sample.absent'), tone: 'bad' },
       ]}
     />
   );
 }
 
 function SelectSample() {
-  const { t } = useTranslation();
+  const { t } = useTranslation(DESIGN_NS);
   const [value, setValue] = useState<string>(SAMPLE_CLASSES[1]);
   return (
     <Select
-      label={t('design.sample.class')}
+      label={t('sample.class')}
       value={value}
       onValueChange={setValue}
       options={SAMPLE_CLASSES.map((c) => ({ value: c, label: c }))}
@@ -420,29 +420,29 @@ function SelectSample() {
 }
 
 function SparklineSample() {
-  const { t } = useTranslation();
+  const { t } = useTranslation(DESIGN_NS);
   return (
     <Sparkline
       values={SAMPLE_TREND}
       trend="up"
-      label={t('design.sample.attendanceTrend')}
+      label={t('sample.attendanceTrend')}
       className="h-10 w-40"
     />
   );
 }
 
 function SwitchSample() {
-  const { t } = useTranslation();
-  return <Switch label={t('design.sample.feeReminders')} defaultChecked />;
+  const { t } = useTranslation(DESIGN_NS);
+  return <Switch label={t('sample.feeReminders')} defaultChecked />;
 }
 
 function TableSample() {
-  const { t } = useTranslation();
+  const { t } = useTranslation(DESIGN_NS);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const columns: TableColumn<SampleStudent>[] = [
     {
       key: 'name',
-      header: t('design.sample.name'),
+      header: t('sample.name'),
       sortable: true,
       sortValue: (s) => s.name,
       cell: (s) => (
@@ -452,10 +452,10 @@ function TableSample() {
         </span>
       ),
     },
-    { key: 'class', header: t('design.sample.class'), cell: (s) => s.className, hideBelow: 'sm' },
+    { key: 'class', header: t('sample.class'), cell: (s) => s.className, hideBelow: 'sm' },
     {
       key: 'due',
-      header: t('design.sample.feesDue'),
+      header: t('sample.feesDue'),
       align: 'right',
       sortable: true,
       sortValue: (s) => s.due.amountMinor,
@@ -464,7 +464,7 @@ function TableSample() {
   ];
   return (
     <Table
-      caption={t('design.sample.students')}
+      caption={t('sample.students')}
       columns={columns}
       rows={SAMPLE_STUDENTS}
       getRowId={(s) => s.id}
@@ -477,51 +477,49 @@ function TableSample() {
 }
 
 function TabsSample() {
-  const { t } = useTranslation();
+  const { t } = useTranslation(DESIGN_NS);
   const tabs = [
-    { value: 'overview', label: t('design.sample.overview') },
-    { value: 'fees', label: t('design.sample.fees'), count: 2 },
-    { value: 'attendance', label: t('design.sample.attendance') },
+    { value: 'overview', label: t('sample.overview') },
+    { value: 'fees', label: t('sample.fees'), count: 2 },
+    { value: 'attendance', label: t('sample.attendance') },
   ];
   return (
     <Tabs
-      label={t('design.sample.students')}
+      label={t('sample.students')}
       tabs={tabs.map((tab) => ({
         ...tab,
-        panel: (
-          <p className="m-0 pt-3 text-ink-2">{t('design.sample.tabPanel', { tab: tab.label })}</p>
-        ),
+        panel: <p className="m-0 pt-3 text-ink-2">{t('sample.tabPanel', { tab: tab.label })}</p>,
       }))}
     />
   );
 }
 
 function TextareaSample() {
-  const { t } = useTranslation();
-  return <Textarea label={t('design.sample.notes')} rows={3} />;
+  const { t } = useTranslation(DESIGN_NS);
+  return <Textarea label={t('sample.notes')} rows={3} />;
 }
 
 /** The page wraps everything in one `ToastProvider`, so there is a single "Notifications" region. */
 function ToastButton() {
-  const { t } = useTranslation();
+  const { t } = useTranslation(DESIGN_NS);
   const toast = useToast();
   return (
     <Button
       variant="secondary"
       onClick={() => {
-        toast.show(t('design.sample.toast'));
+        toast.show(t('sample.toast'));
       }}
     >
-      {t('design.sample.showToast')}
+      {t('sample.showToast')}
     </Button>
   );
 }
 
 function TooltipSample() {
-  const { t } = useTranslation();
+  const { t } = useTranslation(DESIGN_NS);
   return (
-    <Tooltip content={t('design.sample.tooltip')}>
-      <IconButton icon={Info} label={t('design.sample.moreInfo')} />
+    <Tooltip content={t('sample.tooltip')}>
+      <IconButton icon={Info} label={t('sample.moreInfo')} />
     </Tooltip>
   );
 }

@@ -9,6 +9,7 @@
       "default": "./src/index.ts"
     },
     "./i18n/en.json": "./i18n/en.json",
+    "./i18n/design.en.json": "./i18n/design.en.json",
     "./web-env": {
       "types": "./src/web-env.ts",
       "default": "./src/web-env.ts"

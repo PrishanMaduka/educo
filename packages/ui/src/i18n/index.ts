@@ -1,4 +1,6 @@
 import en from '@quad/contracts/i18n/en.json';
+
+import type design from '@quad/contracts/i18n/design.en.json';
 import i18next, { type i18n as I18n } from 'i18next';
 import ICU from 'i18next-icu';
 
@@ -8,7 +10,8 @@ export type MessageKey = keyof typeof en;
 declare module 'i18next' {
   interface CustomTypeOptions {
     defaultNS: 'translation';
-    resources: { translation: typeof en };
+    /** `design` is the staff style guide's own namespace, loaded only by /design (never in the ARB). */
+    resources: { translation: typeof en; design: typeof design };
     keySeparator: false;
     nsSeparator: false;
   }
