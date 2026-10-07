@@ -13,6 +13,7 @@ import { routeBodyLimits } from './openapi/registry';
 
 import type { AppOverrides } from './app.module';
 import type { Config } from './config';
+import type { ErrorReporter } from './observability/sentry';
 import type { NestFastifyApplication } from '@nestjs/platform-fastify';
 import type { FastifyInstance } from 'fastify';
 import type { Logger } from 'pino';
@@ -27,6 +28,8 @@ export interface CreateAppOptions {
   readonly beforeInit?: (fastify: FastifyInstance) => void;
   /** A fixed clock and replacements for outbound calls (tests only). */
   readonly overrides?: AppOverrides;
+  /** Where unexpected (500) errors are reported; defaults to nowhere (`main.ts` passes Sentry's). */
+  readonly reporter?: ErrorReporter;
 }
 
 /**
@@ -65,7 +68,7 @@ export async function createApp(
   app.setGlobalPrefix('api/v1');
   // Also receives Fastify's own errors (malformed JSON, body too large): Nest installs a Fastify
   // error handler that rethrows them as HttpExceptions through the global filters.
-  app.useGlobalFilters(new AppErrorFilter(logger));
+  app.useGlobalFilters(new AppErrorFilter(logger, options.reporter));
 
   const fastify = app.getHttpAdapter().getInstance();
   // Routes are registered during init, so this sees each one and applies its declared limit.

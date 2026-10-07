@@ -2,10 +2,12 @@ import { Catch, HttpException } from '@nestjs/common';
 import { ZodError } from 'zod';
 
 import { errorForLog } from '../observability/logger';
+import { NO_OP_REPORTER } from '../observability/sentry';
 
 import { AppError, DEFAULT_MESSAGES } from './errors';
 import { fieldsFromZodError } from './zod.pipe';
 
+import type { ErrorReporter } from '../observability/sentry';
 import type { ArgumentsHost, ExceptionFilter } from '@nestjs/common';
 import type { ErrorBody } from '@quad/contracts';
 import type { FastifyReply } from 'fastify';
@@ -86,11 +88,20 @@ export function toErrorResponse(error: unknown): ErrorResponse {
   return { status, body: { code, message: DEFAULT_MESSAGES[code] } };
 }
 
-/** Writes the mapped error; unexpected (5xx) errors are logged with their cause. */
-export function sendError(error: unknown, reply: FastifyReply, logger: Logger): void {
+/**
+ * Writes the mapped error. Unexpected (5xx) errors are logged with their cause and sent to the
+ * error reporter (Sentry); expected ones (4xx) are neither.
+ */
+export function sendError(
+  error: unknown,
+  reply: FastifyReply,
+  logger: Logger,
+  reporter: ErrorReporter = NO_OP_REPORTER,
+): void {
   const response = toErrorResponse(error);
   if (response.status >= 500) {
     logger.error({ error: errorForLog(error) }, 'Request failed with an unexpected error');
+    reporter.capture(error);
   }
   void reply.status(response.status).send(response.body);
 }
@@ -98,9 +109,12 @@ export function sendError(error: unknown, reply: FastifyReply, logger: Logger): 
 /** Global Nest filter: every error thrown in a controller, guard, pipe or service. */
 @Catch()
 export class AppErrorFilter implements ExceptionFilter {
-  constructor(private readonly logger: Logger) {}
+  constructor(
+    private readonly logger: Logger,
+    private readonly reporter: ErrorReporter = NO_OP_REPORTER,
+  ) {}
 
   catch(error: unknown, host: ArgumentsHost): void {
-    sendError(error, host.switchToHttp().getResponse<FastifyReply>(), this.logger);
+    sendError(error, host.switchToHttp().getResponse<FastifyReply>(), this.logger, this.reporter);
   }
 }

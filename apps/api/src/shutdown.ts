@@ -1,24 +1,29 @@
 import { errorForLog } from './observability/logger';
 
+import type { ErrorReporter } from './observability/sentry';
 import type { Tracing } from './observability/tracing';
 import type { Logger } from 'pino';
 
 /** ECS sends SIGKILL 30 s after SIGTERM; leave time to exit on our own terms. */
 const FORCE_EXIT_AFTER_MS = 25_000;
+/** How long queued error reports may take to send on the way out. */
+const ERROR_FLUSH_MS = 2_000;
 
 export interface ShutdownDeps {
   readonly logger: Logger;
   /** Stops accepting work and closes connections (the Nest app, BullMQ workers, Redis). */
   readonly close: () => Promise<void>;
   readonly tracing: Tracing;
+  /** Error reports still queued are sent before exit (Sentry); none when reporting is off. */
+  readonly reporter?: ErrorReporter;
   /** Defaults to `process.exit`; injectable for tests. */
   readonly exit?: (code: number) => void;
 }
 
 /**
- * Returns a signal handler that closes once: `close()`, then always flushes tracing, then exits
- * 0 (or 1 if closing failed). A timer forces exit 1 if closing hangs; it is unref'd so it never
- * keeps the process alive by itself.
+ * Returns a signal handler that closes once: `close()`, then always flushes error reports and
+ * tracing, then exits 0 (or 1 if closing failed). A timer forces exit 1 if closing hangs; it is
+ * unref'd so it never keeps the process alive by itself.
  */
 export function createShutdown(
   name: string,
@@ -42,6 +47,7 @@ export function createShutdown(
       code = 1;
       deps.logger.error({ error: errorForLog(error) }, `${name} failed to close cleanly`);
     } finally {
+      await deps.reporter?.flush(ERROR_FLUSH_MS).catch(() => false);
       await deps.tracing.shutdown().catch(() => undefined);
     }
     clearTimeout(force);

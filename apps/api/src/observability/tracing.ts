@@ -1,3 +1,7 @@
+import { ScrubSpanProcessor } from '@quad/contracts/observability';
+
+import { TenantSpanProcessor } from './tenant-span-processor';
+
 import type { Config } from '../config';
 
 export interface Tracing {
@@ -25,6 +29,8 @@ type TracingConfig = Partial<
 
 /**
  * Starts OpenTelemetry tracing (spec 15 → Observability) for HTTP, Fastify, Postgres and Redis.
+ * Spans carry `tenant_id` from the request context, and their attributes are scrubbed of
+ * personal data, credentials and query values before export.
  * Call it before anything imports those libraries: `main.ts` and `worker.ts` load the rest of the
  * app with a dynamic `import()` afterwards, because the instrumentations patch modules as they
  * are first required. Does nothing, and loads nothing, when no endpoint is configured.
@@ -37,8 +43,9 @@ export async function startTracing(
   if (endpoint === undefined) {
     return DISABLED;
   }
-  const [sdkNode, exporter, http, pg, ioredis, fastify] = await Promise.all([
+  const [sdkNode, traceBase, exporter, http, pg, ioredis, fastify] = await Promise.all([
     import('@opentelemetry/sdk-node'),
+    import('@opentelemetry/sdk-trace-base'),
     import('@opentelemetry/exporter-trace-otlp-http'),
     import('@opentelemetry/instrumentation-http'),
     import('@opentelemetry/instrumentation-pg'),
@@ -47,10 +54,18 @@ export async function startTracing(
   ]);
   const sdk = new sdkNode.NodeSDK({
     serviceName: config.OTEL_SERVICE_NAME ?? `quad-${service}`,
-    traceExporter: new exporter.OTLPTraceExporter({
-      url: `${endpoint.replace(/\/+$/, '')}/v1/traces`,
-      headers: parseOtlpHeaders(config.OTEL_EXPORTER_OTLP_HEADERS),
-    }),
+    // Every span is kept (staging volume); tail sampling (10%, errors, slow) arrives with
+    // production in M12. Tagging and scrubbing run before the batch exporter sees a span.
+    spanProcessors: [
+      new TenantSpanProcessor(),
+      new ScrubSpanProcessor(),
+      new traceBase.BatchSpanProcessor(
+        new exporter.OTLPTraceExporter({
+          url: `${endpoint.replace(/\/+$/, '')}/v1/traces`,
+          headers: parseOtlpHeaders(config.OTEL_EXPORTER_OTLP_HEADERS),
+        }),
+      ),
+    ],
     instrumentations: [
       new http.HttpInstrumentation(),
       new fastify.FastifyOtelInstrumentation({ registerOnInitialization: true }),

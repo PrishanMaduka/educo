@@ -21,6 +21,7 @@ export default defineConfig({
     seed: 'src/cli/seed.ts',
     'db-bootstrap': 'src/cli/db-bootstrap.ts',
     'worker-health': 'src/cli/worker-health.ts',
+    'sentry-test': 'src/cli/sentry-test.ts',
   },
   format: ['cjs'],
   platform: 'node',

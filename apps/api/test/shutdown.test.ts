@@ -47,6 +47,31 @@ describe('createShutdown', () => {
     expect(exit).toHaveBeenCalledWith(1);
   });
 
+  it('flushes error reports for up to 2 s before tracing, even when closing fails', async () => {
+    const order: string[] = [];
+    const flush = vi.fn((timeoutMs: number) => {
+      order.push(`flush ${timeoutMs}`);
+      return Promise.resolve(true);
+    });
+    const exit = vi.fn<(code: number) => void>();
+    const stop = createShutdown('Worker', {
+      logger: pino({ level: 'silent' }),
+      close: () => Promise.reject(new Error('close failed')),
+      tracing: {
+        enabled: true,
+        shutdown: () => {
+          order.push('tracing');
+          return Promise.resolve();
+        },
+      },
+      reporter: { capture: () => undefined, flush },
+      exit,
+    });
+    await stop('SIGTERM');
+    expect(order).toEqual(['flush 2000', 'tracing']);
+    expect(exit).toHaveBeenCalledWith(1);
+  });
+
   it('runs once even if a second signal arrives', async () => {
     const close = vi.fn(() => Promise.resolve());
     const { stop } = setup(close);

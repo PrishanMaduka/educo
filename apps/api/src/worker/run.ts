@@ -9,6 +9,7 @@ import { createShutdown, onShutdownSignals } from '../shutdown';
 import { startWorkerHeartbeat } from './heartbeat';
 
 import type { Config } from '../config';
+import type { ErrorReporter } from '../observability/sentry';
 import type { Tracing } from '../observability/tracing';
 import type { Processor } from 'bullmq';
 
@@ -35,8 +36,15 @@ async function waitForRedis(connection: Redis): Promise<void> {
   }
 }
 
-/** Connects to Redis, starts one BullMQ worker per queue and stops cleanly on SIGTERM/SIGINT. */
-export async function runWorkers(config: Config, tracing: Tracing): Promise<void> {
+/**
+ * Connects to Redis, starts one BullMQ worker per queue and stops cleanly on SIGTERM/SIGINT. A job
+ * that throws is logged and reported (Sentry) by queue and job name, never with its data.
+ */
+export async function runWorkers(
+  config: Config,
+  tracing: Tracing,
+  reporter: ErrorReporter,
+): Promise<void> {
   const logger = createLogger(config, 'worker');
   // BullMQ needs `maxRetriesPerRequest: null` so blocking commands wait through reconnects.
   const connection = new Redis(config.REDIS_URL, { maxRetriesPerRequest: null });
@@ -45,9 +53,14 @@ export async function runWorkers(config: Config, tracing: Tracing): Promise<void
   });
   await waitForRedis(connection);
 
-  const workers = Object.entries(PROCESSORS).map(
-    ([queue, processor]) => new Worker(queue, processor, { connection }),
-  );
+  const workers = Object.entries(PROCESSORS).map(([queue, processor]) => {
+    const worker = new Worker(queue, processor, { connection });
+    worker.on('failed', (job, error) => {
+      logger.error({ error: errorForLog(error), queue, job: job?.name }, 'Job failed');
+      reporter.capture(error);
+    });
+    return worker;
+  });
   // `dist/worker-health.js` (the container health check) looks for this key.
   const stopHeartbeat = await startWorkerHeartbeat(config.REDIS_URL, hostname(), (error) => {
     logger.warn({ error: errorForLog(error) }, 'Worker heartbeat write failed');
@@ -58,6 +71,7 @@ export async function runWorkers(config: Config, tracing: Tracing): Promise<void
     createShutdown('Worker', {
       logger,
       tracing,
+      reporter,
       close: async () => {
         await Promise.all(workers.map((worker) => worker.close()));
         await stopHeartbeat();
