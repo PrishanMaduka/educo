@@ -29,6 +29,9 @@ const REDACT_PATHS = [
   '*.name',
   'headers.authorization',
   'headers.cookie',
+  // CloudFront's origin secret (D28). The ALB checks it and forwards it to the task.
+  'headers["x-quad-origin-secret"]',
+  '*.headers["x-quad-origin-secret"]',
 ];
 
 /**

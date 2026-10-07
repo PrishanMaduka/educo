@@ -33,6 +33,16 @@ describe('logger', () => {
     expect(lines[0]).toMatchObject({ password: '[redacted]' });
   });
 
+  it('redacts the CloudFront origin secret header if request headers are ever logged', () => {
+    const { lines, logger } = captureLogs();
+    logger.info({ headers: { 'x-quad-origin-secret': 'origin-secret-1' } }, 'top level');
+    logger.info({ req: { headers: { 'x-quad-origin-secret': 'origin-secret-2' } } }, 'nested');
+    const text = JSON.stringify(lines);
+    expect(text).not.toContain('origin-secret-1');
+    expect(text).not.toContain('origin-secret-2');
+    expect(lines[0]).toMatchObject({ headers: { 'x-quad-origin-secret': '[redacted]' } });
+  });
+
   it('logs each request with its id and route template, not the raw URL', async () => {
     const { lines, logger } = captureLogs();
     const app = await createApp(loadConfig(localEnv(CLOSED_PORTS)), { logger });
