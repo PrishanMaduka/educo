@@ -62,15 +62,16 @@ TextTheme _textTheme(QuadColors c) => TextTheme(
     color: c.ink2,
   ),
   bodyMedium: TextStyle(fontSize: 14, height: 1.45, color: c.ink2),
-  // The date line above the greeting: 12 px, 700.
+  // The date line above the greeting: 12 px, 700; ink-2, as small text
+  // needs 4.5:1 (R17).
   labelMedium: TextStyle(
     fontSize: 12,
     height: 1.3,
     fontWeight: FontWeight.w700,
     letterSpacing: 0.12,
-    color: c.ink3,
+    color: c.ink2,
   ),
-  // Tab bar labels: 10.5 px, 700; ink-2 because small text needs 4.5:1 (R17).
+  // Tab bar labels: 10.5 px, 700; ink-2, as small text needs 4.5:1 (R17).
   labelSmall: TextStyle(
     fontSize: 10.5,
     height: 1.2,
