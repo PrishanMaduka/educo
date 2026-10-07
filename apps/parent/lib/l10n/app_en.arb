@@ -127,5 +127,75 @@
   "designTitle": "Style guide",
   "designIntro": "Every shared component from the Quad UI kit, in light and dark side by side.",
   "designCrumb": "Quad UI",
-  "designTokens": "Colour tokens"
+  "designTokens": "Colour tokens",
+  "designLight": "Light",
+  "designDark": "Dark",
+  "designSampleSave": "Save changes",
+  "designSampleCancel": "Cancel",
+  "designSampleAddStudent": "Add a student",
+  "designSampleRemove": "Remove student",
+  "designSampleEdit": "Edit details",
+  "designSampleLinkButton": "Go to students",
+  "designSampleCardTitle": "Fees this term",
+  "designSampleCardBody": "{collected} collected so far, {due} still to come.",
+  "@designSampleCardBody": {
+    "placeholders": {
+      "collected": {
+        "type": "Object"
+      },
+      "due": {
+        "type": "Object"
+      }
+    }
+  },
+  "designSampleConsent": "Photo consent given",
+  "designSampleFeeReminders": "Email parents when fees are due",
+  "designSampleChipAll": "All",
+  "designSampleChipOverdue": "Overdue",
+  "designSampleClass": "Class",
+  "designSampleClasses": "Classes",
+  "designSampleStatus": "Status",
+  "designSamplePaid": "Paid",
+  "designSampleDueSoon": "Due soon",
+  "designSampleOverdue": "Overdue",
+  "designSamplePresent": "Present",
+  "designSampleLate": "Late",
+  "designSampleAbsent": "Absent",
+  "designSampleAttendance": "Attendance",
+  "designSampleAttendanceToday": "Attendance today",
+  "designSampleAttendanceDelta": "Up 2% on last week",
+  "designSampleAttendanceTrend": "Attendance over the last eight weeks, rising",
+  "designSampleStudentName": "Student name",
+  "designSampleStudentNameHint": "As it appears on the birth certificate",
+  "designSampleStudentNameError": "Enter the student's name",
+  "designSampleNotes": "Notes for the class teacher",
+  "designSampleEmptyTitle": "No invoices yet",
+  "designSampleEmptyBody": "Invoices you create for this term will show here.",
+  "designSampleEmptyAction": "Create an invoice",
+  "designSampleStudents": "Students",
+  "designSampleName": "Name",
+  "designSampleFeesDue": "Fees due",
+  "designSampleOverview": "Overview",
+  "designSampleFees": "Fees",
+  "designSampleTabPanel": "Details for the {tab} tab show here.",
+  "@designSampleTabPanel": {
+    "placeholders": {
+      "tab": {
+        "type": "Object"
+      }
+    }
+  },
+  "designSampleTooltip": "Tooltips name an icon in a few words.",
+  "designSampleMoreInfo": "More information",
+  "designSampleOpenDrawer": "Open the sample form",
+  "designSampleDrawerEyebrow": "New student",
+  "designSampleDrawerBody": "Forms open in a drawer on the right, one step at a time.",
+  "designSampleStepDetails": "Details",
+  "designSampleStepGuardians": "Guardians",
+  "designSampleStepReview": "Review",
+  "designSampleOpenSearch": "Open search",
+  "designSampleCelebrate": "Celebrate",
+  "designSampleShowToast": "Show a sample message",
+  "designSampleToast": "Changes saved",
+  "designSampleResult": "Result"
 }
