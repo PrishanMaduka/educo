@@ -1,4 +1,4 @@
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -7,7 +7,9 @@ import { afterEach, describe, expect, it } from 'vitest';
 import {
   checkSteps,
   declaresProviderAliases,
+  findPlainSecretStrings,
   INFRA_MODULES,
+  PLAIN_SECRET_SCAN_DIRS,
   INFRA_ROOTS,
   infraEnv,
   scannerPolicy,
@@ -188,5 +190,53 @@ describe('selectDirs', () => {
 
   it.each(['infra', 'infra/modules/nope', '../elsewhere', ''])('refuses --only %j', (dir) => {
     expect(() => selectDirs(dir)).toThrow(/not an infra root or module/);
+  });
+});
+
+describe('findPlainSecretStrings', () => {
+  const roots: string[] = [];
+  const tree = (files: Record<string, string>) => {
+    const root = mkdtempSync(join(tmpdir(), 'infra-secrets-'));
+    roots.push(root);
+    for (const [path, text] of Object.entries(files)) {
+      mkdirSync(join(root, path, '..'), { recursive: true });
+      writeFileSync(join(root, path), text);
+    }
+    return root;
+  };
+  afterEach(() => {
+    for (const root of roots.splice(0)) rmSync(root, { recursive: true, force: true });
+  });
+
+  it('scans the modules and environment roots', () => {
+    expect(PLAIN_SECRET_SCAN_DIRS).toEqual(['infra/modules', 'infra/envs']);
+  });
+
+  it('finds secret_string set in a .tf file, with its file and line', () => {
+    const root = tree({
+      'infra/modules/app/secrets.tf': 'resource "x" "y" {\n  secret_string = "a"\n}\n',
+      'infra/envs/staging/main.tf': 'resource "x" "z" {\n\n  secret_string= var.v\n}\n',
+    });
+    expect(findPlainSecretStrings(['infra/modules', 'infra/envs'], root)).toEqual([
+      'infra/modules/app/secrets.tf:2',
+      'infra/envs/staging/main.tf:3',
+    ]);
+  });
+
+  it('allows secret_string_wo, comments, other files and provider caches', () => {
+    const root = tree({
+      'infra/modules/app/secrets.tf': [
+        'secret_string_wo         = ephemeral.random_password.app.result',
+        'secret_string_wo_version = 1',
+        '# never secret_string = "x"',
+        '// secret_string = "x"',
+        '/* secret_string = "x" */',
+        'condition = v.secret_string == null',
+      ].join('\n'),
+      'infra/modules/app/tests/app.tftest.hcl': 'secret_string = "x"',
+      'infra/modules/app/.terraform/modules/m/main.tf': 'secret_string = "x"',
+      'infra/modules/app/README.md': 'secret_string = "x"',
+    });
+    expect(findPlainSecretStrings(['infra/modules', 'infra/envs'], root)).toEqual([]);
   });
 });

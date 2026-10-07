@@ -6,7 +6,7 @@
 // AWS_* variables removed and the instance metadata lookup off, so nothing can reach an account.
 // A missing scanner is a warning, or a failure with QUAD_REQUIRE_INFRA_TOOLS=1 (CI).
 import { spawnSync } from 'node:child_process';
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
@@ -79,6 +79,48 @@ export function declaresProviderAliases(dir) {
         .replace(/(#|\/\/).*$/gm, '');
       return /configuration_aliases\s*=/.test(code);
     });
+}
+
+/** Where a Terraform resource must never set a plain `secret_string` (Task 8 review, D28). */
+export const PLAIN_SECRET_SCAN_DIRS = ['infra/modules', 'infra/envs'];
+
+/**
+ * Every `.tf` file under `dir`, skipping `.terraform` caches.
+ * @param {string} dir
+ * @returns {string[]}
+ */
+function terraformFiles(dir) {
+  if (!existsSync(dir) || !statSync(dir).isDirectory()) return [];
+  return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+    if (entry.name === '.terraform') return [];
+    const path = join(dir, entry.name);
+    if (entry.isDirectory()) return terraformFiles(path);
+    return entry.name.endsWith('.tf') ? [path] : [];
+  });
+}
+
+/**
+ * Every `file:line` under `dirs` (relative to `base`) that sets `secret_string`, which would put
+ * the value in Terraform state; secrets are written through `secret_string_wo`. Comments are
+ * ignored, and so are comparisons (`==`).
+ * @param {string[]} dirs
+ * @param {string} [base]
+ * @returns {string[]}
+ */
+export function findPlainSecretStrings(dirs, base = root) {
+  return dirs.flatMap((dir) =>
+    terraformFiles(join(base, dir)).flatMap((file) => {
+      const code = readFileSync(file, 'utf8')
+        .replace(/\/\*[\s\S]*?\*\//g, (comment) => comment.replace(/[^\n]/g, ' '))
+        .replace(/(#|\/\/).*$/gm, '');
+      const relativePath = file.slice(base.length + 1);
+      return code
+        .split('\n')
+        .flatMap((line, index) =>
+          /\bsecret_string\s*=(?!=)/.test(line) ? [`${relativePath}:${index + 1}`] : [],
+        );
+    }),
+  );
 }
 
 /**
@@ -172,6 +214,14 @@ if (isMain) {
       process.exit(1);
     }
     process.stdout.write(`\n*** infra-check: ${which} not on PATH, so it is SKIPPED. ***\n`);
+  }
+
+  const plainSecrets = findPlainSecretStrings(PLAIN_SECRET_SCAN_DIRS);
+  if (plainSecrets.length > 0) {
+    process.stderr.write(
+      `secret_string puts the value in Terraform state; use secret_string_wo:\n  ${plainSecrets.join('\n  ')}\n`,
+    );
+    process.exit(1);
   }
 
   // Roots and modules that do not exist yet are skipped, so the check passes as infra/ grows.
