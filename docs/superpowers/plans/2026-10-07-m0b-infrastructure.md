@@ -77,7 +77,7 @@
 - Ports: API `4000`, staff `3000`, console `3001`.
 - GitHub repository `prishanmaduka/educo`. The workflows reference role ARNs only as `vars.*`, never `secrets.*`. Variable names:
   - AWS roles: `AWS_STAGING_DEPLOY_ROLE_ARN`, `AWS_STAGING_PLAN_ROLE_ARN`, `AWS_STAGING_APPLY_ROLE_ARN`, `AWS_TOOLING_PLAN_ROLE_ARN`;
-  - Terraform state: `TF_STATE_BUCKET`, `TF_STATE_ROLE_ARN`, `TF_LOCK_TABLE`, `TF_DNS_ROLE_ARN`;
+  - Terraform state and DNS (Task 8 fix round 1): `TF_STATE_BUCKET`, `TF_LOCK_TABLE`, `TF_STATE_KMS_KEY_ARN`, `TF_GLOBAL_STATE_READ_ROLE_ARN`, `TF_STAGING_STATE_READ_ROLE_ARN`, `TF_STAGING_STATE_RW_ROLE_ARN`, `TF_DNS_READ_ROLE_ARN`, `TF_STAGING_DNS_WRITE_ROLE_ARN`;
   - Sentry (public DSNs): `SENTRY_DSN_STAFF`, `SENTRY_DSN_CONSOLE`;
   - store uploads: `IOS_UPLOAD_ENABLED`, `PLAY_UPLOAD_ENABLED`.
 
@@ -602,6 +602,10 @@ Steps:
     - role `quad-dns-records`, trusted by `var.dns_writer_account_ids`, with `route53:ChangeResourceRecordSets`/`ListResourceRecordSets`/`GetChange`/`ListHostedZonesByName` scoped to the zone;
     - the tooling account's GitHub OIDC provider and role `quad-tooling-plan`, trusted by the subject `repo:prishanmaduka/educo:pull_request:ref:refs/pull/*` (`StringLike`, with `aud` = `sts.amazonaws.com`) and given `ReadOnlyAccess`.
   - global outputs: `zone_id`, `name_servers` (to paste at the registrar), `dns_role_arn`, `tooling_plan_role_arn`.
+  - **Changed in fix round 1 (review of 519daec..0e32c20; D28 has the result):**
+    - bootstrap: `trusted_account_ids` and the single `quad-terraform-state` role are replaced by `state_environments` (per environment: `plan_principal_arns`, `apply_principal_arns`) and `break_glass_principal_arns`. They create `quad-terraform-state-read-<env>` and `quad-terraform-state-rw-<env>`, each trusting the principals' account roots narrowed by `ArnEquals aws:PrincipalArn`. The bucket policy refuses uploads not encrypted with the state key, and refuses object access to everyone but the state roles and break-glass roles. Outputs: `state_bucket`, `lock_table`, `state_kms_key_arn`, `state_read_role_arns`, `state_rw_role_arns`.
+    - every backend passes `-backend-config kms_key_id=<state_kms_key_arn>`; plans use the read role with `-lock=false`; applies use the rw role.
+    - global: `dns_writer_account_ids` and the role `quad-dns-records` are replaced by `dns_writer_names` (per-environment name patterns; default staging `staging.quad-edu.com`, `*.staging.quad-edu.com`, `*._domainkey.mail.quad-edu.com`), `dns_writer_principal_arns` (per environment, the apply roles) and `dns_reader_principal_arns` (the plan roles). They create `quad-dns-records-<env>` (CREATE/UPSERT/DELETE of A/AAAA/CNAME within its names) and `quad-dns-read`. `quad-tooling-plan` keeps `ReadOnlyAccess` with explicit denies on state-object reads, `ssm:GetParameter*`, `secretsmanager:GetSecretValue` and `kms:Decrypt`. The mail SPF records end `-all`, and the apex has DMARC `p=none`. Outputs: `zone_id`, `name_servers`, `dns_write_role_arns`, `dns_read_role_arn`, `tooling_plan_role_arn`.
   - **Shared mocks:** `mock_resource`/`mock_data` defaults with valid formats for every attribute that feeds an ARN- or format-validated argument. Start with:
     - `aws_iam_role.arn`, `aws_iam_policy.arn`, `aws_kms_key.arn`;
     - `aws_s3_bucket.arn`, `aws_secretsmanager_secret.arn`, `aws_sns_topic.arn`, `aws_lb.arn`, `aws_lb_target_group.arn`, `aws_acm_certificate.arn`, `aws_ecs_cluster.arn`, `aws_ecr_repository.{arn,repository_url}`;
@@ -663,9 +667,10 @@ Steps:
       - `publicly_accessible = false`, `deletion_protection` from the variable;
       - Performance Insights on with the data key, `copy_tags_to_snapshot`, `auto_minor_version_upgrade`;
       - parameter group `rds.force_ssl=1`, `log_min_duration_statement=500` and `log_statement=none` (defence in depth: db-bootstrap already sends only SCRAM verifiers, Task 2);
-      - master user `quad_admin` with a `random_password` (48 characters, no `/@" `).
+      - master user `quad_admin` with `manage_master_user_password = true` (Task 8 review): RDS keeps the master password in its own Secrets Manager secret, so it is never in Terraform state. `DATABASE_ADMIN_URL` can then no longer be a whole URL built by Terraform: `db-bootstrap` must read the RDS-managed secret (or the URL secret is assembled outside Terraform). Decide which, and record it in D28.
     - **RDS Proxy:** `engine_family POSTGRESQL`, `require_tls = true`, `iam_auth = "DISABLED"` (D28), and auth entries for the `quad_app` and `quad_platform` secrets.
     - **Role secrets:** `random_password` for `quad_owner`, `quad_app` and `quad_platform`. Each gets a Secrets Manager secret `quad-staging/db/<role>` holding `{"username","password"}`.
+    - **No secret in state (Task 8 review):** generate these passwords (and the URL secrets built from them) with `ephemeral "random_password"`, and write them with `aws_secretsmanager_secret_version.secret_string_wo` plus `secret_string_wo_version` (bump the version to rotate), never `secret_string`. Add a test that no `aws_secretsmanager_secret_version` sets `secret_string`. For the ElastiCache `auth_token`, prefer IAM authentication if the API's Redis client can use it; otherwise the token stays in state, and that gap is recorded in D28 and `infra/README.md`.
     - **URL secrets:** `quad-staging/env/<NAME>`, each holding one URL:
       - `DATABASE_URL` (quad_app at the proxy, `?sslmode=verify-full`);
       - `DATABASE_PLATFORM_URL` (quad_platform at the proxy);
@@ -888,8 +893,10 @@ Steps:
     | Role | Trusted `sub` | Permissions |
     |---|---|---|
     | `${name}-deploy` | `repo:prishanmaduka/educo:environment:staging:ref:refs/heads/main` | ECR push to the four repositories, `ecr:GetAuthorizationToken`, `ecs:RegisterTaskDefinition`/`DescribeTaskDefinition`/`UpdateService`/`DescribeServices`/`RunTask`/`DescribeTasks`, `iam:PassRole` on the four task and execution roles only, `ssm:GetParameter(s)` under `/quad/staging/deploy/*` |
-    | `${name}-plan` | `repo:prishanmaduka/educo:pull_request:ref:refs/pull/*` (`StringLike`) | `ReadOnlyAccess` and `sts:AssumeRole` on the state and DNS roles |
-    | `${name}-apply` | `repo:prishanmaduka/educo:environment:infra-staging:ref:refs/heads/main` | `AdministratorAccess` |
+    | `${name}-plan` | `repo:prishanmaduka/educo:pull_request:ref:refs/pull/*` (`StringLike`) | `ReadOnlyAccess` with explicit denies on `secretsmanager:GetSecretValue`, `ssm:GetParameter*` and `kms:Decrypt` (state is decrypted only through the state-read role), plus `sts:AssumeRole` on `quad-terraform-state-read-staging` and `quad-dns-read` only |
+    | `${name}-apply` | `repo:prishanmaduka/educo:environment:infra-staging:ref:refs/heads/main` | `AdministratorAccess`; it assumes `quad-terraform-state-rw-staging` and `quad-dns-records-staging` (Task 8 fix round 1) |
+
+    The plan and apply role ARNs are the `plan_principal_arns`/`apply_principal_arns` of `state_environments.staging` in bootstrap, and the `dns_reader_principal_arns`/`dns_writer_principal_arns.staging` in global. Add a test that every `aws_secretsmanager_secret_version` in the module uses `secret_string_wo`, never `secret_string` (Task 8 review). The app secrets above come from `ephemeral "random_password"`.
 
   - **Outputs:** `cluster_name`, `service_names` (map), `task_families` (map), `ecr_repository_urls` (map), `deploy_role_arn`, `plan_role_arn`, `apply_role_arn`, `tasks_security_group_id`, `ecs_service_names_for_dashboard`.
 
@@ -923,13 +930,13 @@ Steps:
 **Interfaces:**
 - Consumes: every module's outputs (Tasks 9–12).
 - Produces:
-  - **Backend:** `backend "s3" { key = "staging/terraform.tfstate", region = "ap-south-1", encrypt = true, use_lockfile = true }`. `bucket`, `dynamodb_table` and `assume_role.role_arn` come from `-backend-config` (CI passes `vars.TF_STATE_BUCKET`, `vars.TF_LOCK_TABLE` and `vars.TF_STATE_ROLE_ARN`).
+  - **Backend:** `backend "s3" { key = "staging/terraform.tfstate", region = "ap-south-1", encrypt = true, use_lockfile = true }`. `bucket`, `dynamodb_table`, `kms_key_id` and `assume_role.role_arn` come from `-backend-config`. CI passes `vars.TF_STATE_BUCKET`, `vars.TF_LOCK_TABLE` and `vars.TF_STATE_KMS_KEY_ARN`, plus `vars.TF_STAGING_STATE_READ_ROLE_ARN` for plans (`-lock=false`) or `vars.TF_STAGING_STATE_RW_ROLE_ARN` for applies. Without `kms_key_id` the backend sends AES256, and the state bucket refuses the upload (Task 8).
   - **Providers:**
     - `aws` (`ap-south-1`, `default_tags { env = "staging", owner = "platform", cost-centre = "quad-staging" }`);
     - `aws.us_east_1`;
     - `aws.dns` (`assume_role { role_arn = var.dns_role_arn }`, region `ap-south-1`);
     - `random`.
-  - **Variables:** `dns_role_arn` (required, no default) and `otel_exporter_endpoint` (default `""`). Every other staging value is a module argument in `main.tf`.
+  - **Variables:** `dns_role_arn` (required, no default: `vars.TF_DNS_READ_ROLE_ARN` for plans, `vars.TF_STAGING_DNS_WRITE_ROLE_ARN` for applies) and `otel_exporter_endpoint` (default `""`). Every other staging value is a module argument in `main.tf`.
   - `data "aws_route53_zone" "root" { provider = aws.dns, name = "quad-edu.com" }`.
   - **Module wiring:** `network` → `data` → `edge` → `dns` → `app`, with `name = "quad-staging"`.
   - **Dashboard:** `aws_cloudwatch_dashboard.overview` (`quad-staging-overview`), rendered with `templatefile` from `infra/observability/cloudwatch/overview.json.tftpl`. Its widgets:
@@ -1061,8 +1068,8 @@ Steps:
       - `terraform-linters/setup-tflint@v4` (pinned version, `GITHUB_TOKEN`);
       - `pip install checkov==3.3.25`;
       - `QUAD_REQUIRE_INFRA_TOOLS=1 node scripts/infra-check.mjs`;
-    - job `plan`: `if: github.event_name == 'pull_request' && vars.AWS_STAGING_PLAN_ROLE_ARN != ''`. It runs OIDC, `init` with `-backend-config` from vars, `terraform plan -lock=false -var dns_role_arn=${{ vars.TF_DNS_ROLE_ARN }}`, and posts the plan as a PR comment;
-    - job `apply`: `if: github.event_name == 'push' && github.ref == 'refs/heads/main' && vars.AWS_STAGING_APPLY_ROLE_ARN != ''`, `environment: infra-staging` (required reviewers), `terraform apply` from a fresh plan.
+    - job `plan`: `if: github.event_name == 'pull_request' && vars.AWS_STAGING_PLAN_ROLE_ARN != ''`. It runs OIDC, `init` with `-backend-config` from vars (`bucket`, `dynamodb_table`, `kms_key_id` = `vars.TF_STATE_KMS_KEY_ARN`, `assume_role` = `vars.TF_STAGING_STATE_READ_ROLE_ARN`), `terraform plan -lock=false -var dns_role_arn=${{ vars.TF_DNS_READ_ROLE_ARN }}`, and posts the plan as a PR comment. The trigger is `pull_request`, never `pull_request_target`;
+    - job `apply`: `if: github.event_name == 'push' && github.ref == 'refs/heads/main' && vars.AWS_STAGING_APPLY_ROLE_ARN != ''`, `environment: infra-staging` (required reviewers), `terraform apply` from a fresh plan, with `assume_role` = `vars.TF_STAGING_STATE_RW_ROLE_ARN` and `-var dns_role_arn=${{ vars.TF_STAGING_DNS_WRITE_ROLE_ARN }}`.
 
 Steps:
 - [ ] **Step 1: Write failing tests.**
@@ -1112,18 +1119,19 @@ Steps:
   1. **Layout and the validation commands:** `pnpm infra:tools`, `eval "$(node scripts/terraform-mirror.mjs --print-env)"`, `pnpm infra:check`.
   2. **First deploy checklist** (ordered, each with the exact command or console path):
      1. Create the AWS Organization with the `tooling` and `staging` accounts; turn on IAM Identity Center; set up the budget alarm.
-     2. Bootstrap in tooling: `terraform -chdir=infra/bootstrap init && apply -var 'trusted_account_ids=["<staging>"]'`, then `init -migrate-state` with the backend block the README gives.
-     3. Apply `infra/envs/global` in tooling. Copy the four `name_servers` to the registrar for `quad-edu.com` and wait for `dig NS quad-edu.com` to show them.
-     4. Set the repository OIDC subject template (`scripts/github-oidc-subject.sh`). Create the GitHub environments `staging` (deployment branch `main` only) and `infra-staging` (required reviewers, `main` only).
-     5. Apply `infra/envs/staging` with `-var dns_role_arn=…` and `app.desired_count=0`.
-     6. Put the Sentry DSN and Grafana OTLP headers into `quad-staging/env/SENTRY_DSN` and `…/OTEL_EXPORTER_OTLP_HEADERS` with `aws secretsmanager put-secret-value`.
-     7. Set the GitHub variables named in Global Constraints from the Terraform outputs.
-     8. Run `deploy-staging.yml` by hand, then apply staging again with `desired_count = 1`.
-     9. Re-confirm the SES SNS subscription once the API is up (`aws sns list-subscriptions-by-topic`, then re-subscribe if it is pending).
-     10. Send a test email to a mail-tester address and check that SPF, DKIM and DMARC pass.
-     11. Run `node dist/sentry-test.js` as a one-off task and check Sentry.
-     12. Check traces with `tenant_id` in Grafana (from M1, when requests carry a tenant).
-     13. Ask AWS for SES production access before M12.
+     2. Prerequisite: set the repository OIDC subject customisation (`include_claim_keys: ["repo","context","ref"]`, `scripts/github-oidc-subject.sh`) before any role is used, because the trust policies match that subject shape. Keep "Send write tokens to workflows from fork pull requests" off, and never run plans from `pull_request_target`.
+     3. Bootstrap in tooling, as a break-glass administrator role: `terraform -chdir=infra/bootstrap init && apply -var 'break_glass_principal_arns=["<tooling admin role>"]' -var 'state_environments={global={plan_principal_arns=["arn:aws:iam::<tooling>:role/quad-tooling-plan"],apply_principal_arns=["<tooling admin role>"]},staging={plan_principal_arns=["arn:aws:iam::<staging>:role/quad-staging-plan"],apply_principal_arns=["arn:aws:iam::<staging>:role/quad-staging-apply"]}}'`. This covers both the tooling AND the staging accounts. Then run `init -migrate-state` with the backend block the README gives (key `bootstrap/terraform.tfstate`, `kms_key_id` = the `state_kms_key_arn` output).
+     4. Apply `infra/envs/global` in tooling with `-var 'dns_writer_principal_arns={staging=["arn:aws:iam::<staging>:role/quad-staging-apply"]}' -var 'dns_reader_principal_arns=["arn:aws:iam::<staging>:role/quad-staging-plan"]'` and `-backend-config kms_key_id=…`. Copy the four `name_servers` to the registrar for `quad-edu.com` and wait for `dig NS quad-edu.com` to show them.
+     5. Create the GitHub environments `staging` (deployment branch `main` only) and `infra-staging` (required reviewers, `main` only).
+     6. Apply `infra/envs/staging` with `-var dns_role_arn=…` and `app.desired_count=0`.
+     7. Put the Sentry DSN and Grafana OTLP headers into `quad-staging/env/SENTRY_DSN` and `…/OTEL_EXPORTER_OTLP_HEADERS` with `aws secretsmanager put-secret-value`.
+     8. Set the GitHub variables named in Global Constraints from the Terraform outputs.
+     9. Run `deploy-staging.yml` by hand, then apply staging again with `desired_count = 1`.
+     10. Re-confirm the SES SNS subscription once the API is up (`aws sns list-subscriptions-by-topic`, then re-subscribe if it is pending).
+     11. Send a test email to a mail-tester address and check that SPF, DKIM and DMARC pass.
+     12. Run `node dist/sentry-test.js` as a one-off task and check Sentry.
+     13. Check traces with `tenant_id` in Grafana (from M1, when requests carry a tenant).
+     14. Ask AWS for SES production access before M12.
   3. **Accounts and keys to create:**
      - Firebase projects `quad-dev` and `quad-staging`, with the APNs `.p8` key uploaded to each;
      - Sentry projects `quad-api`, `quad-staff`, `quad-console` and `quad-parent`;
