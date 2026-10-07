@@ -32,6 +32,23 @@ export interface ApiRoute {
   readonly responses: Readonly<Record<number, { description: string; schema?: z.ZodTypeAny }>>;
   /** Error statuses this route can return; each is documented with the `ErrorBody` schema. */
   readonly errors?: readonly number[];
+  /** A body limit in bytes for this route, replacing Fastify's 1 MB default (`createApp`). */
+  readonly bodyLimit?: number;
+}
+
+/**
+ * The body limits routes declare, keyed by `METHOD /api/v1/path` with Fastify-style params, for
+ * the `onRoute` hook in `createApp`.
+ */
+export function routeBodyLimits(routes: readonly ApiRoute[]): ReadonlyMap<string, number> {
+  const limits = new Map<string, number>();
+  for (const route of routes) {
+    if (route.bodyLimit !== undefined) {
+      const path = route.path.replace(/\{(\w+)\}/g, ':$1');
+      limits.set(`${route.method.toUpperCase()} ${API_PREFIX}${path}`, route.bodyLimit);
+    }
+  }
+  return limits;
 }
 
 /** Names a schema so it becomes a reusable `components.schemas` entry. */

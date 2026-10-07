@@ -4,8 +4,10 @@ import { CLOSED_PORTS, useTestApp } from '../app';
 
 import { confirmation, makeSigningKey, signEnvelope } from './sns-fixtures';
 
+import type { KeyObject } from 'node:crypto';
+
 const keys = makeSigningKey();
-const fetchKey = vi.fn<(certUrl: string) => Promise<string>>(() => Promise.resolve(keys.publicKey));
+const fetchKey = vi.fn<(certUrl: string) => Promise<KeyObject | null>>(() => Promise.resolve(null));
 const subscribe = vi.fn<(url: string) => Promise<void>>(() => Promise.resolve());
 const app = useTestApp(
   { ...CLOSED_PORTS, SES_SNS_TOPIC_ARN: undefined },

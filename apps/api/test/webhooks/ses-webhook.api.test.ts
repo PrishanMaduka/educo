@@ -1,22 +1,35 @@
+import { randomBytes } from 'node:crypto';
+
 import { createTestDatabase } from '@quad/db/testing';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { parseSnsCertificate } from '../../src/webhooks/ses/sns-signature';
 import { useTestApp } from '../app';
 
 import {
   TEST_TOPIC_ARN,
   confirmation,
   envelope,
+  makeSigningCert,
   makeSigningKey,
   signEnvelope,
 } from './sns-fixtures';
 
 import type { SnsEnvelope } from '@quad/contracts';
 import type { TestDatabase } from '@quad/db/testing';
+import type { KeyObject } from 'node:crypto';
 
-const keys = makeSigningKey();
-// Never the network: the signing key and the SubscribeURL GET are injected.
-const fetchKey = vi.fn<(certUrl: string) => Promise<string>>(() => Promise.resolve(keys.publicKey));
+const keys = makeSigningCert();
+/**
+ * The app's injected clock: fixed, so the replay window is tested against a known now. Taken
+ * after the certificate exists: its notBefore is the creation second, which can be later than
+ * a clock read just before it.
+ */
+const NOW = Date.now();
+// Never the network: the certificate's key and the SubscribeURL GET are injected.
+const fetchKey = vi.fn<(certUrl: string) => Promise<KeyObject | null>>(() =>
+  Promise.resolve(parseSnsCertificate(keys.certPem, NOW)),
+);
 const subscribe = vi.fn<(url: string) => Promise<void>>(() => Promise.resolve());
 
 let db: TestDatabase | undefined;
@@ -38,7 +51,7 @@ const app = useTestApp(
     DATABASE_PLATFORM_URL: testDb().platformUrl,
     SES_SNS_TOPIC_ARN: TEST_TOPIC_ARN,
   }),
-  { overrides: { snsFetchers: { key: fetchKey, subscribe } } },
+  { overrides: { now: () => NOW, snsFetchers: { key: fetchKey, subscribe } } },
 );
 
 beforeEach(async () => {
@@ -62,7 +75,13 @@ async function post(body: string, contentType = 'text/plain; charset=UTF-8') {
 const postSigned = (message: SnsEnvelope, contentType?: string) =>
   post(JSON.stringify(signEnvelope(message, keys.privateKey)), contentType);
 
-const sesEvent = (event: unknown): SnsEnvelope => envelope({ Message: JSON.stringify(event) });
+const at = (offsetMs: number): string => new Date(NOW + offsetMs).toISOString();
+const sesEvent = (event: unknown): SnsEnvelope =>
+  envelope({ Message: JSON.stringify(event), Timestamp: at(0) });
+
+/** A certificate URL no earlier test used, so the key cache cannot answer for it. */
+const uncachedCertUrl = (): string =>
+  `https://sns.ap-south-1.amazonaws.com/SimpleNotificationService-${randomBytes(16).toString('hex')}.pem`;
 
 const permanentBounce = (address: string) =>
   sesEvent({
@@ -148,6 +167,16 @@ describe('POST /webhooks/ses: subscription', () => {
     expect(subscribe).not.toHaveBeenCalled();
   });
 
+  it('refuses a signed confirmation whose SubscribeURL is in another region', async () => {
+    const response = await postSigned(
+      confirmation({
+        SubscribeURL: 'https://sns.us-east-1.amazonaws.com/?Action=ConfirmSubscription&Token=t',
+      }),
+    );
+    expect(response.statusCode).toBe(403);
+    expect(subscribe).not.toHaveBeenCalled();
+  });
+
   it('acknowledges an unsubscribe confirmation without fetching anything', async () => {
     const response = await postSigned(confirmation({ Type: 'UnsubscribeConfirmation' }));
     expect(response.statusCode).toBe(200);
@@ -181,9 +210,18 @@ describe('POST /webhooks/ses: refusals (403, nothing fetched, nothing written)',
     ],
     [
       'a message older than an hour (replay)',
+      { ...permanentBounce('a@example.com'), Timestamp: at(-3_600_001) },
+    ],
+    [
+      'a message more than five minutes in the future',
+      { ...permanentBounce('a@example.com'), Timestamp: at(300_001) },
+    ],
+    [
+      'a SigningCertURL with a query string',
       {
         ...permanentBounce('a@example.com'),
-        Timestamp: new Date(Date.now() - 2 * 3_600_000).toISOString(),
+        SigningCertURL:
+          'https://sns.ap-south-1.amazonaws.com/SimpleNotificationService-0123456789abcdef0123456789abcdef.pem?x=1',
       },
     ],
   ])('%s', async (_name, message) => {
@@ -211,6 +249,34 @@ describe('POST /webhooks/ses: refusals (403, nothing fetched, nothing written)',
     );
     expect(response.statusCode).toBe(403);
     expect(subscribe).not.toHaveBeenCalled();
+  });
+
+  it('refuses when AWS has no usable certificate at the URL (4xx or invalid), writing nothing', async () => {
+    fetchKey.mockResolvedValueOnce(null);
+    const response = await postSigned({
+      ...permanentBounce('a@example.com'),
+      SigningCertURL: uncachedCertUrl(),
+    });
+    expect(fetchKey).toHaveBeenCalledTimes(1);
+    expect(response.statusCode).toBe(403);
+    expect(await suppressions()).toEqual([]);
+  });
+
+  it('answers 500 when the certificate download fails, so SNS retries', async () => {
+    fetchKey.mockRejectedValueOnce(new Error('SNS answered 503'));
+    const response = await postSigned({
+      ...permanentBounce('a@example.com'),
+      SigningCertURL: uncachedCertUrl(),
+    });
+    expect(fetchKey).toHaveBeenCalledTimes(1);
+    expect(response.statusCode).toBe(500);
+    expect(await suppressions()).toEqual([]);
+  });
+
+  it('refuses a body over 300 KB with 413 before parsing it', async () => {
+    const response = await post('x'.repeat(301 * 1024));
+    expect(response.statusCode).toBe(413);
+    expect(fetchKey).not.toHaveBeenCalled();
   });
 
   it('refuses a message without a signature', async () => {

@@ -8,12 +8,14 @@ import { RealtimeModule } from './realtime/realtime.module';
 import { SesWebhookModule } from './webhooks/ses/ses-webhook.module';
 
 import type { Config } from './config';
+import type { Clock } from './tokens';
 import type { SnsFetchers } from './webhooks/ses/ses-webhook.module';
 import type { DynamicModule } from '@nestjs/common';
 import type { Logger } from 'pino';
 
-/** Replacements for the API's outbound calls, so tests never reach the network. */
+/** Test replacements: a fixed clock, and outbound calls that never reach the network. */
 export interface AppOverrides {
+  readonly now?: Clock;
   readonly snsFetchers?: Partial<SnsFetchers>;
 }
 
@@ -24,7 +26,7 @@ export class AppModule {
     return {
       module: AppModule,
       imports: [
-        CoreModule.forRoot(config, logger),
+        CoreModule.forRoot(config, logger, overrides.now),
         DatabaseModule,
         HealthModule,
         RealtimeModule,

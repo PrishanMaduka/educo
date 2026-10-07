@@ -3,19 +3,27 @@ import { SesEventSchema, SnsEnvelopeSchema } from '@quad/contracts';
 import { suppressionsFromSesEvent } from '@quad/domain';
 
 import { ForbiddenError } from '../../common/errors';
-import { CONFIG, LOGGER, SNS_KEY_FETCHER, SNS_SUBSCRIBE_FETCHER, TENANT_DB } from '../../tokens';
+import {
+  CLOCK,
+  CONFIG,
+  LOGGER,
+  SNS_KEY_FETCHER,
+  SNS_SUBSCRIBE_FETCHER,
+  TENANT_DB,
+} from '../../tokens';
 
 import {
   cachedKeyGetter,
-  isAwsSnsUrl,
   isFreshSnsTimestamp,
   isSigningCertForTopic,
+  isSnsUrlForTopic,
   verifySnsSignature,
 } from './sns-signature';
 
 import type { SnsFetchers } from './ses-webhook.module';
 import type { SnsKeyGetter } from './sns-signature';
 import type { Config } from '../../config';
+import type { Clock } from '../../tokens';
 import type { SesEvent, SesWebhookAck, SnsEnvelope } from '@quad/contracts';
 import type { QuadTenantDb } from '@quad/db';
 import type { Logger } from 'pino';
@@ -40,8 +48,9 @@ export class SesWebhookService {
     @Inject(TENANT_DB) private readonly db: QuadTenantDb,
     @Inject(SNS_KEY_FETCHER) fetchKey: SnsFetchers['key'],
     @Inject(SNS_SUBSCRIBE_FETCHER) private readonly subscribe: SnsFetchers['subscribe'],
+    @Inject(CLOCK) private readonly now: Clock,
   ) {
-    this.getKey = cachedKeyGetter(fetchKey);
+    this.getKey = cachedKeyGetter(fetchKey, now);
     this.logger = logger.child({ module: 'ses-webhook' });
   }
 
@@ -79,13 +88,14 @@ export class SesWebhookService {
     if (topic === undefined || message.TopicArn !== topic) return 'topic';
     if (!isSigningCertForTopic(message.SigningCertURL, topic)) return 'cert_url';
     if (message.SignatureVersion !== '2') return 'version';
-    if (!isFreshSnsTimestamp(message.Timestamp, Date.now())) return 'stale';
+    if (!isFreshSnsTimestamp(message.Timestamp, this.now())) return 'stale';
     return null;
   }
 
   private async confirm(message: SnsEnvelope): Promise<SesWebhookAck> {
     const url = message.SubscribeURL;
-    if (url === undefined || !isAwsSnsUrl(url)) {
+    // The topic was checked in precheck; the link must be on that topic's regional SNS host.
+    if (url === undefined || !isSnsUrlForTopic(url, message.TopicArn)) {
       return this.refuse('subscribe_url', message);
     }
     await this.subscribe(url);

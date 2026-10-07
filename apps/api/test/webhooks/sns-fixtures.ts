@@ -1,4 +1,8 @@
+import { execFileSync } from 'node:child_process';
 import { createSign, generateKeyPairSync, randomUUID } from 'node:crypto';
+import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 
 import { canonicalSnsString } from '../../src/webhooks/ses/sns-signature';
 
@@ -7,7 +11,42 @@ import type { SnsEnvelope } from '@quad/contracts';
 /** The topic the test app is configured with (`SES_SNS_TOPIC_ARN`). */
 export const TEST_TOPIC_ARN = 'arn:aws:sns:ap-south-1:123456789012:quad-test-ses-events';
 export const TEST_CERT_URL =
-  'https://sns.ap-south-1.amazonaws.com/SimpleNotificationService-test.pem';
+  'https://sns.ap-south-1.amazonaws.com/SimpleNotificationService-0123456789abcdef0123456789abcdef.pem';
+
+/**
+ * A throwaway self-signed certificate (valid for 30 days from now) and its private key, made at
+ * runtime with the openssl CLI because Node cannot create X.509 certificates. Nothing is fetched
+ * from AWS in tests.
+ */
+export function makeSigningCert(): { privateKey: string; certPem: string } {
+  const dir = mkdtempSync(join(tmpdir(), 'quad-sns-'));
+  try {
+    const keyPath = join(dir, 'key.pem');
+    const certPath = join(dir, 'cert.pem');
+    execFileSync(
+      'openssl',
+      [
+        'req',
+        '-x509',
+        '-newkey',
+        'rsa:2048',
+        '-nodes',
+        '-days',
+        '30',
+        '-subj',
+        '/CN=sns.amazonaws.com',
+        '-keyout',
+        keyPath,
+        '-out',
+        certPath,
+      ],
+      { stdio: 'ignore', input: '' },
+    );
+    return { privateKey: readFileSync(keyPath, 'utf8'), certPem: readFileSync(certPath, 'utf8') };
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+}
 
 /** A throwaway RSA key pair made at runtime; nothing is fetched from AWS in tests. */
 export function makeSigningKey(): { privateKey: string; publicKey: string } {

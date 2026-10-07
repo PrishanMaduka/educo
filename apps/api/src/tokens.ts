@@ -7,6 +7,10 @@
 export const CONFIG = Symbol('CONFIG');
 /** The pino root logger: `@Inject(LOGGER) logger: Logger`. */
 export const LOGGER = Symbol('LOGGER');
+/** The current time in epoch milliseconds: `@Inject(CLOCK) now: Clock`. Tests fix it. */
+export const CLOCK = Symbol('CLOCK');
+/** What `CLOCK` provides. */
+export type Clock = () => number;
 /** The `quad_app` database handle (`QuadTenantDb`): `@Inject(TENANT_DB) db: QuadTenantDb`. */
 export const TENANT_DB = Symbol('TENANT_DB');
 /** Fetches an SNS signing certificate: `(certUrl) => Promise<string>` (tests inject a key). */

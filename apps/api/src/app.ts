@@ -8,6 +8,8 @@ import { AppModule } from './app.module';
 import { AppErrorFilter } from './common/error.filter';
 import { requestIdFrom, runWithRequestContext } from './common/request-context';
 import { PinoNestLogger, createLogger } from './observability/logger';
+import { API_ROUTES } from './openapi/document';
+import { routeBodyLimits } from './openapi/registry';
 
 import type { AppOverrides } from './app.module';
 import type { Config } from './config';
@@ -23,7 +25,7 @@ export interface CreateAppOptions {
    * (route listing, test-only routes); app behaviour belongs in modules.
    */
   readonly beforeInit?: (fastify: FastifyInstance) => void;
-  /** Replacements for outbound calls (tests only). */
+  /** A fixed clock and replacements for outbound calls (tests only). */
   readonly overrides?: AppOverrides;
 }
 
@@ -66,6 +68,15 @@ export async function createApp(
   app.useGlobalFilters(new AppErrorFilter(logger));
 
   const fastify = app.getHttpAdapter().getInstance();
+  // Routes are registered during init, so this sees each one and applies its declared limit.
+  const bodyLimits = routeBodyLimits(API_ROUTES);
+  fastify.addHook('onRoute', (route) => {
+    const methods = Array.isArray(route.method) ? route.method : [route.method];
+    for (const method of methods) {
+      const limit = bodyLimits.get(`${method} ${route.url}`);
+      if (limit !== undefined) route.bodyLimit = limit;
+    }
+  });
   fastify.addHook('onRequest', (request, reply, done) => {
     void reply.header('x-request-id', request.id);
     runWithRequestContext(request.id, done);

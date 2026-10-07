@@ -100,38 +100,48 @@
           },
           "MessageId": {
             "type": "string",
-            "minLength": 1
+            "minLength": 1,
+            "maxLength": 128
           },
           "TopicArn": {
             "type": "string",
-            "minLength": 1
+            "minLength": 1,
+            "maxLength": 512
           },
           "Message": {
-            "type": "string"
+            "type": "string",
+            "maxLength": 262144
           },
           "Timestamp": {
             "type": "string",
+            "maxLength": 64,
             "format": "date-time"
           },
           "SignatureVersion": {
-            "type": "string"
+            "type": "string",
+            "maxLength": 8
           },
           "Signature": {
             "type": "string",
-            "minLength": 1
+            "minLength": 1,
+            "maxLength": 1024
           },
           "SigningCertURL": {
             "type": "string",
-            "minLength": 1
+            "minLength": 1,
+            "maxLength": 2048
           },
           "Subject": {
-            "type": "string"
+            "type": "string",
+            "maxLength": 512
           },
           "SubscribeURL": {
-            "type": "string"
+            "type": "string",
+            "maxLength": 2048
           },
           "Token": {
-            "type": "string"
+            "type": "string",
+            "maxLength": 2048
           }
         },
         "required": [
@@ -258,6 +268,16 @@
             }
           },
           "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "413": {
             "description": "Error",
             "content": {
               "application/json": {
