@@ -40,7 +40,8 @@
   },
   "pnpm": {
     "overrides": {
-      "@nestjs/platform-fastify>fastify": "5.12.5"
+      "@nestjs/platform-fastify>fastify": "5.12.5",
+      "next>postcss": "8.5.29"
     }
   }
 }
