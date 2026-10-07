@@ -3,6 +3,7 @@
  *
  * dark: matches the token CSS. An explicit data-theme="dark" wins, except inside a light container placed in
  * it (the /design style guide does that); with no explicit light theme, the device's dark setting applies.
+ * Nesting limit: one level only; a dark container inside that light one (dark → light → dark) stays light.
  */
 @custom-variant dark {
   &:where([data-theme='dark'], [data-theme='dark'] *):not(
