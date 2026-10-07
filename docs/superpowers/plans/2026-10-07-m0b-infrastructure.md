@@ -48,6 +48,7 @@
 - Commit no secrets: no keys, passwords or real DSNs. Placeholders are empty values. The spec 20 public CA bundle and test public keys generated at runtime are fine.
 - Never edit `design/`. Regenerate generated files (`pnpm api:client`); never hand-edit them.
 - Migrations are append-only from M0b (ruling R12). The new migration is `0001_*`.
+- Ruling R-db-admin (Task 8 review): on AWS the RDS master password is RDS-managed and never a Terraform-built `DATABASE_ADMIN_URL`. db-bootstrap gets `DATABASE_ADMIN_USER`/`DATABASE_ADMIN_PASSWORD` from the RDS-managed secret's JSON keys plus plain `DATABASE_ADMIN_HOST`/`DATABASE_ADMIN_PORT` (direct to RDS), and keeps `DATABASE_ADMIN_URL` for local runs and CI. Tasks 9 and 12 carry the details; D28 records it.
 
 **Toolchain in this container**
 - Flutter is at `/opt/sdk/flutter/bin` (put it on `PATH`). `fvm` is absent; `scripts/flutter.mjs` falls back to `flutter`. There is no Android SDK and no Xcode, so mobile builds run only in CI.
@@ -667,15 +668,15 @@ Steps:
       - `publicly_accessible = false`, `deletion_protection` from the variable;
       - Performance Insights on with the data key, `copy_tags_to_snapshot`, `auto_minor_version_upgrade`;
       - parameter group `rds.force_ssl=1`, `log_min_duration_statement=500` and `log_statement=none` (defence in depth: db-bootstrap already sends only SCRAM verifiers, Task 2);
-      - master user `quad_admin` with `manage_master_user_password = true` (Task 8 review): RDS keeps the master password in its own Secrets Manager secret, so it is never in Terraform state. `DATABASE_ADMIN_URL` can then no longer be a whole URL built by Terraform: `db-bootstrap` must read the RDS-managed secret (or the URL secret is assembled outside Terraform). Decide which, and record it in D28.
+      - master user `quad_admin` with `manage_master_user_password = true` (Task 8 review): RDS keeps the master password in its own Secrets Manager secret, encrypted with the data key (`master_user_secret_kms_key_id`), so it is never in Terraform state. Per ruling R-db-admin there is no `DATABASE_ADMIN_URL` secret: Task 12's db-bootstrap task reads that secret's `username` and `password` keys directly.
     - **RDS Proxy:** `engine_family POSTGRESQL`, `require_tls = true`, `iam_auth = "DISABLED"` (D28), and auth entries for the `quad_app` and `quad_platform` secrets.
     - **Role secrets:** `random_password` for `quad_owner`, `quad_app` and `quad_platform`. Each gets a Secrets Manager secret `quad-staging/db/<role>` holding `{"username","password"}`.
-    - **No secret in state (Task 8 review):** generate these passwords (and the URL secrets built from them) with `ephemeral "random_password"`, and write them with `aws_secretsmanager_secret_version.secret_string_wo` plus `secret_string_wo_version` (bump the version to rotate), never `secret_string`. Add a test that no `aws_secretsmanager_secret_version` sets `secret_string`. For the ElastiCache `auth_token`, prefer IAM authentication if the API's Redis client can use it; otherwise the token stays in state, and that gap is recorded in D28 and `infra/README.md`.
+    - **No secret in state (Task 8 review):** generate these passwords (and the URL secrets built from them) with `ephemeral "random_password"`, and write them with `aws_secretsmanager_secret_version.secret_string_wo` plus `secret_string_wo_version` (bump the version to rotate), never `secret_string`. Each role's password, every URL secret built from it, and the RDS Proxy auth secret for that role must be written from the same ephemeral value in the same apply, under one shared `*_wo_version` variable or local per role. Otherwise a rotation can leave the role secret, its URL and the proxy holding different passwords. Add a test that no `aws_secretsmanager_secret_version` sets `secret_string`. For the ElastiCache `auth_token`, prefer IAM authentication if the API's Redis client can use it; otherwise the token stays in state, and that gap is recorded in D28 and `infra/README.md`.
     - **URL secrets:** `quad-staging/env/<NAME>`, each holding one URL:
       - `DATABASE_URL` (quad_app at the proxy, `?sslmode=verify-full`);
       - `DATABASE_PLATFORM_URL` (quad_platform at the proxy);
-      - `DATABASE_OWNER_URL` (quad_owner direct to RDS);
-      - `DATABASE_ADMIN_URL` (the master user direct to RDS).
+      - `DATABASE_OWNER_URL` (quad_owner direct to RDS).
+      - No `DATABASE_ADMIN_URL` (ruling R-db-admin).
     - **Redis:** an ElastiCache replication group (`engine redis`, `engine_version 7.1`), with `transit_encryption_enabled`, `at_rest_encryption_enabled` (data key), an `auth_token` from `random_password` (no special characters) and parameter `maxmemory-policy=noeviction`. Its URL goes in secret `quad-staging/env/REDIS_URL` as `rediss://:<token>@<primary endpoint>:6379`.
     - **Security groups:** `client` (no ingress; attached to the tasks that use data) and `db`/`proxy`/`redis`, with ingress only from `client` (and proxy → db).
     - **S3:**
@@ -684,7 +685,8 @@ Steps:
       - the private bucket policy is TLS only. The public bucket policy belongs to edge (Task 10).
     - Outputs:
       - `client_security_group_id`, `db_proxy_endpoint`, `db_instance_address`;
-      - `env_secret_arns` (map with keys `DATABASE_URL`, `DATABASE_PLATFORM_URL`, `DATABASE_OWNER_URL`, `DATABASE_ADMIN_URL`, `REDIS_URL`);
+      - `env_secret_arns` (map with keys `DATABASE_URL`, `DATABASE_PLATFORM_URL`, `DATABASE_OWNER_URL`, `REDIS_URL`);
+      - `db_master_secret_arn` (`aws_db_instance.master_user_secret[0].secret_arn`, for the db-bootstrap task in Task 12, ruling R-db-admin);
       - `private_bucket_name`, `private_bucket_arn`, `public_bucket_name`, `public_bucket_arn`, `public_bucket_id`, `public_bucket_regional_domain_name`;
       - `data_kms_key_arn`, `field_kms_key_arn`;
       - `rds_instance_id`, `redis_replication_group_id` (for the dashboard).
@@ -704,7 +706,8 @@ Steps:
     - every `aws_s3_bucket_public_access_block` has all four flags true;
     - the private lifecycle has the `tmp/` 1-day and `exports/` 7-day rules;
     - Redis has both encryptions and `maxmemory-policy = noeviction`;
-    - the `env_secret_arns` keys equal the five names;
+    - the `env_secret_arns` keys equal the four names, and none is `DATABASE_ADMIN_URL`;
+    - the RDS instance has `manage_master_user_password = true` and no `password`;
     - the `db` security group ingress references only the `client` and proxy groups (no CIDR).
 - [ ] **Step 2: Run them to see them fail.** Run `node scripts/infra-check.mjs --only infra/modules/network` (and data). Expected: FAIL.
 - [ ] **Step 3: Implement.**
@@ -871,15 +874,16 @@ Steps:
     - staff and console get only `APP_ENV`, `PORT`, `SENTRY_DSN`†, `SENTRY_ENVIRONMENT`, `OTEL_*`.
   - **One-off tasks:**
     - `migrate` and `seed`: `DATABASE_OWNER_URL`† and `NODE_EXTRA_CA_CERTS=/app/certs/rds-global-bundle.pem`;
-    - `db-bootstrap`: `DATABASE_ADMIN_URL`† + `DATABASE_OWNER_URL`† + `DATABASE_URL`† + `DATABASE_PLATFORM_URL`†.
+    - `db-bootstrap` (ruling R-db-admin): `DATABASE_ADMIN_USER`† and `DATABASE_ADMIN_PASSWORD`† from the RDS-managed master secret's JSON keys (`valueFrom` = `<db_master_secret_arn>:username::` and `:password::`); plain `DATABASE_ADMIN_HOST` (the RDS instance address, not the proxy) and `DATABASE_ADMIN_PORT` (`5432`); `NODE_EXTRA_CA_CERTS=/app/certs/rds-global-bundle.pem`; and `DATABASE_OWNER_URL`† + `DATABASE_URL`† + `DATABASE_PLATFORM_URL`†.
+    - **Code change, owned by this task:** `apps/api/src/cli/db-bootstrap.ts` keeps accepting `DATABASE_ADMIN_URL` (local runs and CI). When it is absent, it requires all four `DATABASE_ADMIN_*` parts and builds the `pg` client config object from them (`host`, `port`, `user`, `password`, `database`), with `ssl: { rejectUnauthorized: true, ca: <the RDS bundle> }`. It never builds a URL string, so a password with URL-special characters is safe. Test first: URL wins when set; parts give a TLS config with `rejectUnauthorized: true`; a missing part names it and exits non-zero; the password never appears in an error. The four variables go into the spec 02 Environment variables table, `.env.example` (empty, same order) and `NOT_READ_BY_THE_API` in the same commit, so the parity tests pass; only `src/cli/db-bootstrap.ts` reads them.
   - **App secrets** (`quad-staging/env/<NAME>`): `SESSION_SECRET` and `LINK_SIGNING_SECRET` from `random_password` (64 characters, different values). `SENTRY_DSN` and `OTEL_EXPORTER_OTLP_HEADERS` start with an empty-string version and `lifecycle { ignore_changes = [secret_string] }`; they are set by hand per the README.
   - **IAM:**
     - execution role `runtime-exec`: may read only the runtime secrets plus decrypt with the data key;
-    - execution role `migrate-exec`: may read the owner, admin, app and platform URL secrets;
+    - execution role `migrate-exec`: may read the owner, app and platform URL secrets and the RDS-managed master secret (`db_master_secret_arn`), and `kms:Decrypt` on the data key that encrypts it. The execution role, not a task role, reads it (ruling R-db-admin);
     - task roles:
       - `api` and `worker`: private bucket read/write, field-key encrypt/decrypt, and `ses:SendEmail`/`SendRawEmail` on the identity and configuration set;
       - `staff`, `console` and `clamav`: none.
-    - No task role has any `rds:*` or `rds-db:connect` action. No runtime role can read `DATABASE_OWNER_URL` or `DATABASE_ADMIN_URL`. This is the "no BYPASSRLS-equivalent" guarantee for `quad_app`: the runtime can never act as the schema owner or the master user.
+    - No task role has any `rds:*` or `rds-db:connect` action. No runtime role can read `DATABASE_OWNER_URL` or the RDS-managed master secret. This is the "no BYPASSRLS-equivalent" guarantee for `quad_app`: the runtime can never act as the schema owner or the master user.
   - **Services:**
     - private subnets, `assign_public_ip = false`, `desired_count`;
     - `deployment_circuit_breaker { enable = true, rollback = true }`;
@@ -904,8 +908,9 @@ Steps:
 - [ ] **Step 1: Write failing tests** (`app.tftest.hcl`, mocked inputs):
   - `run "oidc_trust_is_this_repo_main_and_staging_only"`: `jsondecode(aws_iam_role.deploy.assume_role_policy)` has exactly one statement; its `StringEquals` `sub` equals `repo:prishanmaduka/educo:environment:staging:ref:refs/heads/main` and its `aud` equals `sts.amazonaws.com`; the plan and apply subjects match the table.
   - `run "runtime_cannot_act_as_owner_or_master"`:
-    - `runtime-exec`'s policy resources include `DATABASE_URL` and exclude the `DATABASE_OWNER_URL` and `DATABASE_ADMIN_URL` ARNs;
-    - the decoded `container_definitions` of `api` and `worker` have no secret named `DATABASE_OWNER_URL` or `DATABASE_ADMIN_URL`;
+    - `runtime-exec`'s policy resources include `DATABASE_URL` and exclude the `DATABASE_OWNER_URL` ARN and `db_master_secret_arn` (ruling R-db-admin);
+    - the decoded `container_definitions` of `api` and `worker` have no secret named `DATABASE_OWNER_URL`, `DATABASE_ADMIN_URL`, `DATABASE_ADMIN_USER` or `DATABASE_ADMIN_PASSWORD`;
+    - `run "db_bootstrap_reads_the_rds_managed_master_secret"`: db-bootstrap's secrets map `DATABASE_ADMIN_USER` and `DATABASE_ADMIN_PASSWORD` to `<db_master_secret_arn>:username::` and `:password::`, `DATABASE_ADMIN_HOST` equals the instance address (not the proxy endpoint), and only `migrate-exec` names `db_master_secret_arn`;
     - no task role policy mentions `rds`.
   - `run "api_runs_behind_two_proxies"`: the api container environment has `TRUST_PROXY_HOPS = "2"` and `APP_ENV = "staging"`.
   - `run "services_roll_back"`: every service has the circuit breaker with rollback; `api` has two `load_balancer` blocks (`api`, `api_socket`).
@@ -1120,10 +1125,16 @@ Steps:
   2. **First deploy checklist** (ordered, each with the exact command or console path):
      1. Create the AWS Organization with the `tooling` and `staging` accounts; turn on IAM Identity Center; set up the budget alarm.
      2. Prerequisite: set the repository OIDC subject customisation (`include_claim_keys: ["repo","context","ref"]`, `scripts/github-oidc-subject.sh`) before any role is used, because the trust policies match that subject shape. Keep "Send write tokens to workflows from fork pull requests" off, and never run plans from `pull_request_target`.
-     3. Bootstrap in tooling, as a break-glass administrator role: `terraform -chdir=infra/bootstrap init && apply -var 'break_glass_principal_arns=["<tooling admin role>"]' -var 'state_environments={global={plan_principal_arns=["arn:aws:iam::<tooling>:role/quad-tooling-plan"],apply_principal_arns=["<tooling admin role>"]},staging={plan_principal_arns=["arn:aws:iam::<staging>:role/quad-staging-plan"],apply_principal_arns=["arn:aws:iam::<staging>:role/quad-staging-apply"]}}'`. This covers both the tooling AND the staging accounts. Then run `init -migrate-state` with the backend block the README gives (key `bootstrap/terraform.tfstate`, `kms_key_id` = the `state_kms_key_arn` output).
-     4. Apply `infra/envs/global` in tooling with `-var 'dns_writer_principal_arns={staging=["arn:aws:iam::<staging>:role/quad-staging-apply"]}' -var 'dns_reader_principal_arns=["arn:aws:iam::<staging>:role/quad-staging-plan"]'` and `-backend-config kms_key_id=…`. Copy the four `name_servers` to the registrar for `quad-edu.com` and wait for `dig NS quad-edu.com` to show them.
+     3. Bootstrap in tooling, as a break-glass administrator role.
+        - Copy each break-glass ARN, path included (`arn:aws:iam::<tooling>:role/aws-reserved/sso.amazonaws.com/<region>/AWSReservedSSO_<set>_<hash>`), from `aws iam get-role --role-name <name> --query Role.Arn`. Do not take it from `aws sts get-caller-identity`, which returns the assumed-role session ARN without the path, so the bucket policy would not match it. If the policy ever locks everyone out of the state objects, the tooling account's root user can still rewrite the bucket policy.
+        - The bootstrap root commits a partial S3 backend (`infra/bootstrap/backend.tf`: key `bootstrap/terraform.tfstate`, `encrypt`, `use_lockfile`). The bucket does not exist for the first apply, so create the git-ignored `infra/bootstrap/local_override.tf` with `terraform { backend "local" {} }` first, then: `terraform -chdir=infra/bootstrap init && apply -var 'break_glass_principal_arns=["<tooling admin role>"]' -var 'state_environments={global={plan_principal_arns=["arn:aws:iam::<tooling>:role/quad-tooling-plan"],apply_principal_arns=["<tooling admin role>"]},staging={plan_principal_arns=["arn:aws:iam::<staging>:role/quad-staging-plan"],apply_principal_arns=["arn:aws:iam::<staging>:role/quad-staging-apply"]}}'`. This covers both the tooling AND the staging accounts.
+        - Delete `local_override.tf`, then move the local state into the bucket: `terraform -chdir=infra/bootstrap init -migrate-state -backend-config bucket=<state_bucket> -backend-config dynamodb_table=<lock_table> -backend-config kms_key_id=<state_kms_key_arn>`. No `assume_role`: only break-glass roles can reach `bootstrap/terraform.tfstate`. Then delete the local `terraform.tfstate*` files.
+     4. Apply `infra/envs/global` in tooling with `-var 'dns_writer_principal_arns={staging=["arn:aws:iam::<staging>:role/quad-staging-apply"]}' -var 'dns_reader_principal_arns=["arn:aws:iam::<staging>:role/quad-staging-plan"]'` and `init -backend-config bucket=<state_bucket> -backend-config dynamodb_table=<lock_table> -backend-config kms_key_id=<state_kms_key_arn> -backend-config 'assume_role={role_arn="<state_rw_role_arns.global>"}'`, run as the break-glass role listed in `state_environments.global.apply_principal_arns`. Copy the four `name_servers` to the registrar for `quad-edu.com` and wait for `dig NS quad-edu.com` to show them.
      5. Create the GitHub environments `staging` (deployment branch `main` only) and `infra-staging` (required reviewers, `main` only).
-     6. Apply `infra/envs/staging` with `-var dns_role_arn=…` and `app.desired_count=0`.
+     6. The first staging apply, before the CI roles exist (they are created by this apply):
+        - Add the staging administrator's exact Identity Center role ARN (copied as in step 3) to `state_environments.staging.apply_principal_arns` in bootstrap and to `dns_writer_principal_arns.staging` in global, and apply both roots.
+        - As that role: `terraform -chdir=infra/envs/staging init -backend-config bucket=<state_bucket> -backend-config dynamodb_table=<lock_table> -backend-config kms_key_id=<state_kms_key_arn> -backend-config 'assume_role={role_arn="<state_rw_role_arns.staging>"}'`, then `apply -var dns_role_arn=<dns_write_role_arns.staging>` with `app.desired_count=0`.
+        - Once `quad-staging-plan` and `quad-staging-apply` exist and CI applies cleanly, remove the administrator ARN from both lists and apply bootstrap and global again.
      7. Put the Sentry DSN and Grafana OTLP headers into `quad-staging/env/SENTRY_DSN` and `…/OTEL_EXPORTER_OTLP_HEADERS` with `aws secretsmanager put-secret-value`.
      8. Set the GitHub variables named in Global Constraints from the Terraform outputs.
      9. Run `deploy-staging.yml` by hand, then apply staging again with `desired_count = 1`.
