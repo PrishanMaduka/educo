@@ -18,6 +18,22 @@ variable "private_subnet_ids" {
   }
 }
 
+variable "endpoints_security_group_id" {
+  type        = string
+  description = "The network module's interface endpoint security group; the RDS Proxy reaches Secrets Manager through it."
+}
+
+variable "cloudfront_distribution_arns" {
+  type        = list(string)
+  description = "CloudFront distributions that may decrypt the public bucket's objects with the data key (origin access control). The environment root passes module.edge.cloudfront_distribution_arn; empty omits the statement."
+  default     = []
+
+  validation {
+    condition     = alltrue([for arn in var.cloudfront_distribution_arns : can(regex("^arn:aws[a-z-]*:cloudfront::[0-9]{12}:distribution/[A-Z0-9]+$", arn))])
+    error_message = "cloudfront_distribution_arns must be exact distribution ARNs, without wildcards."
+  }
+}
+
 variable "db_instance_class" {
   type        = string
   description = "RDS instance class. Staging uses db.t4g.medium; production sizes are M12."

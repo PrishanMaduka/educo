@@ -69,6 +69,17 @@ resource "aws_db_parameter_group" "this" {
     value = "500"
   }
 
+  # Slow-query and error log lines never carry bind values, which can be personal data.
+  parameter {
+    name  = "log_parameter_max_length"
+    value = "0"
+  }
+
+  parameter {
+    name  = "log_parameter_max_length_on_error"
+    value = "0"
+  }
+
   # Defence in depth: db-bootstrap sends only SCRAM verifiers (Task 2), but no statement text,
   # and so no ALTER ROLE ... PASSWORD, is logged.
   parameter {

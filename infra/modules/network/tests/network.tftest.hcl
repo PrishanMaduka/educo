@@ -140,8 +140,9 @@ run "endpoints_stay_inside_the_vpc" {
   }
 
   assert {
-    condition     = toset(keys(aws_vpc_endpoint.interface)) == toset(["ecr.api", "ecr.dkr", "secretsmanager", "logs", "ssm"])
-    error_message = "The interface endpoints must be ECR (api and dkr), Secrets Manager, Logs and SSM."
+    # Ruling R-endpoints: no ssm endpoint (nothing in a task reads SSM; the deploy workflow does).
+    condition     = toset(keys(aws_vpc_endpoint.interface)) == toset(["ecr.api", "ecr.dkr", "secretsmanager", "logs"])
+    error_message = "The interface endpoints must be ECR (api and dkr), Secrets Manager and Logs."
   }
 
   assert {
@@ -166,14 +167,48 @@ run "endpoints_stay_inside_the_vpc" {
     condition     = length(aws_security_group.endpoints.ingress) == 0 && length(aws_security_group.endpoints.egress) == 0
     error_message = "The endpoint security group must have no inline rules (and so no default egress)."
   }
+
+  assert {
+    condition     = output.endpoints_security_group_id == aws_security_group.endpoints.id
+    error_message = "endpoints_security_group_id must be the endpoint security group (the data module's proxy egress uses it)."
+  }
+}
+
+# Ruling R-endpoints: staging puts the interface endpoints in one zone (about USD 32 a month).
+run "endpoints_can_sit_in_fewer_zones" {
+  command = apply
+
+  variables {
+    endpoint_subnet_count = 1
+  }
+
+  assert {
+    condition     = alltrue([for e in aws_vpc_endpoint.interface : toset(e.subnet_ids) == toset([aws_subnet.private[0].id])])
+    error_message = "endpoint_subnet_count = 1 must put every interface endpoint in the first private subnet only."
+  }
+
+  assert {
+    condition     = toset(aws_vpc_endpoint.s3.route_table_ids) == toset(aws_route_table.private[*].id)
+    error_message = "The S3 gateway endpoint must still serve every private route table."
+  }
+}
+
+run "endpoint_subnet_count_must_fit_the_zones" {
+  command = plan
+
+  variables {
+    endpoint_subnet_count = 4
+  }
+
+  expect_failures = [var.endpoint_subnet_count]
 }
 
 run "flow_logs_go_to_an_encrypted_log_group" {
   command = apply
 
   assert {
-    condition     = aws_flow_log.this.vpc_id == aws_vpc.this.id && aws_flow_log.this.traffic_type == "ALL"
-    error_message = "The VPC must log all flows."
+    condition     = aws_flow_log.this.vpc_id == aws_vpc.this.id && aws_flow_log.this.traffic_type == "ALL" && aws_flow_log.this.max_aggregation_interval == 600
+    error_message = "The VPC must log all flows, aggregated every 600 s by default."
   }
 
   assert {
@@ -202,6 +237,16 @@ run "flow_logs_go_to_an_encrypted_log_group" {
     alltrue([for r in flatten([s.Resource]) : startswith(r, "${aws_cloudwatch_log_group.flow_logs.arn}")])])
     error_message = "The flow log role may write only to its own log group."
   }
+}
+
+run "flow_log_aggregation_is_60_or_600_seconds" {
+  command = plan
+
+  variables {
+    flow_log_aggregation_interval = 120
+  }
+
+  expect_failures = [var.flow_log_aggregation_interval]
 }
 
 run "every_resource_names_its_service" {

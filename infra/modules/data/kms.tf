@@ -27,7 +27,7 @@ locals {
 
   data_key_policy = jsonencode({
     Version = "2012-10-17"
-    Statement = [
+    Statement = concat([
       local.account_administers_the_key,
       {
         Sid       = "LogsEncryptTheDatabaseLogGroupsOnly"
@@ -39,21 +39,24 @@ locals {
           ArnLike = { "kms:EncryptionContext:aws:logs:arn" = "arn:${local.partition}:logs:${local.region}:${local.account_id}:log-group:/aws/rds/instance/${local.db_identifier}/*" }
         }
       },
-      # CloudFront reads the SSE-KMS public bucket through origin access control (edge module).
-      # Distributions are created after this key, so the condition names this account's
-      # distributions rather than one ARN.
-      {
-        Sid       = "CloudFrontReadsThePublicBucket"
-        Effect    = "Allow"
-        Principal = { Service = "cloudfront.amazonaws.com" }
-        Action    = "kms:Decrypt"
-        Resource  = "*"
-        Condition = {
-          ArnLike = { "aws:SourceArn" = "arn:${local.partition}:cloudfront::${local.account_id}:distribution/*" }
-        }
-      },
-    ]
+    ], local.cloudfront_statements)
   })
+
+  # CloudFront reads the SSE-KMS public bucket through origin access control (edge module). The
+  # environment root passes the distribution ARN back in (module.edge.cloudfront_distribution_arn);
+  # with none, there is no statement. With the S3 bucket key on, the encryption context is the
+  # bucket ARN, so the key opens only the public bucket's objects.
+  cloudfront_statements = length(var.cloudfront_distribution_arns) == 0 ? [] : [{
+    Sid       = "CloudFrontReadsThePublicBucket"
+    Effect    = "Allow"
+    Principal = { Service = "cloudfront.amazonaws.com" }
+    Action    = "kms:Decrypt"
+    Resource  = "*"
+    Condition = {
+      ArnEquals    = { "aws:SourceArn" = var.cloudfront_distribution_arns }
+      StringEquals = { "kms:EncryptionContext:aws:s3:arn" = "arn:${local.partition}:s3:::${var.public_bucket_name}" }
+    }
+  }]
 
   field_key_policy = jsonencode({
     Version   = "2012-10-17"

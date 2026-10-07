@@ -206,13 +206,6 @@ mock_data "aws_route53_zone" {
   }
 }
 
-mock_data "aws_vpc" {
-  defaults = {
-    arn        = "arn:aws:ec2:ap-south-1:123456789012:vpc/vpc-0123456789abcdef0"
-    cidr_block = "10.40.0.0/16"
-  }
-}
-
 mock_data "aws_ec2_managed_prefix_list" {
   defaults = {
     id  = "pl-0123456789abcdef0"

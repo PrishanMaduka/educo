@@ -2,10 +2,6 @@
 # database, proxy and Redis groups admit only `client` (and the database also the proxy), never a
 # CIDR. Every group's rules are separate resources, so none keeps the default allow-all egress.
 
-data "aws_vpc" "this" {
-  id = var.vpc_id
-}
-
 resource "aws_security_group" "client" {
   #checkov:skip=CKV2_AWS_5:Attached to the ECS tasks by the app module (Task 12), not in this module.
   name        = "${var.name}-data-client"
@@ -99,12 +95,12 @@ resource "aws_vpc_security_group_egress_rule" "proxy_to_db" {
 
 # The proxy fetches its auth secrets from Secrets Manager through the VPC's interface endpoint.
 resource "aws_vpc_security_group_egress_rule" "proxy_to_endpoints" {
-  security_group_id = aws_security_group.proxy.id
-  description       = "HTTPS to the VPC interface endpoints (Secrets Manager)"
-  cidr_ipv4         = data.aws_vpc.this.cidr_block
-  ip_protocol       = "tcp"
-  from_port         = 443
-  to_port           = 443
+  security_group_id            = aws_security_group.proxy.id
+  description                  = "HTTPS to the VPC interface endpoints (Secrets Manager)"
+  referenced_security_group_id = var.endpoints_security_group_id
+  ip_protocol                  = "tcp"
+  from_port                    = 443
+  to_port                      = 443
 
   tags = local.tags
 }

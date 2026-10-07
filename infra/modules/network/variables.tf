@@ -38,12 +38,34 @@ variable "nat_gateway_count" {
 
 variable "interface_endpoints" {
   type        = list(string)
-  description = "AWS services reached through interface endpoints (com.amazonaws.<region>.<service>) instead of the NAT gateway."
-  default     = ["ecr.api", "ecr.dkr", "secretsmanager", "logs", "ssm"]
+  description = "AWS services reached through interface endpoints (com.amazonaws.<region>.<service>) instead of the NAT gateway. Ruling R-endpoints: no ssm (no task reads SSM; the deploy workflow does, from GitHub)."
+  default     = ["ecr.api", "ecr.dkr", "secretsmanager", "logs"]
+}
+
+variable "endpoint_subnet_count" {
+  type        = number
+  description = "How many private subnets (from the first) hold the interface endpoints. null means every zone; staging sets 1 (ruling R-endpoints: each endpoint costs about USD 8 a month per zone)."
+  default     = null
+
+  validation {
+    condition     = var.endpoint_subnet_count == null || try(var.endpoint_subnet_count >= 1 && var.endpoint_subnet_count <= length(var.azs) && floor(var.endpoint_subnet_count) == var.endpoint_subnet_count, false)
+    error_message = "endpoint_subnet_count must be null or a whole number from 1 to the number of zones."
+  }
 }
 
 variable "flow_log_retention_days" {
   type        = number
   description = "Days to keep VPC flow logs."
   default     = 30
+}
+
+variable "flow_log_aggregation_interval" {
+  type        = number
+  description = "Seconds over which flow records are aggregated: 600 in staging (fewer, cheaper records) or 60."
+  default     = 600
+
+  validation {
+    condition     = contains([60, 600], var.flow_log_aggregation_interval)
+    error_message = "flow_log_aggregation_interval must be 60 or 600."
+  }
 }

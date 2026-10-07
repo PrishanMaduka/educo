@@ -109,8 +109,9 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "public" {
   }
 }
 
-# Spec 20: noncurrent versions go after 30 days, tmp/ after 1 day and exports/ after 7 days
-# (their noncurrent versions too, so a deleted export does not linger for 30 days).
+# Spec 20: noncurrent versions go after 30 days, tmp/ after 1 day, exports/ after 7 days and
+# offboarding/ exports after 30 days (their noncurrent versions after 1 day, so a deleted export
+# does not linger).
 resource "aws_s3_bucket_lifecycle_configuration" "private" {
   bucket = aws_s3_bucket.private.id
 
@@ -160,6 +161,24 @@ resource "aws_s3_bucket_lifecycle_configuration" "private" {
 
     expiration {
       days = 7
+    }
+
+    noncurrent_version_expiration {
+      noncurrent_days = 1
+    }
+  }
+
+  # Offboarding exports (tenant deletion, spec 20) stay 30 days for the school admin to download.
+  rule {
+    id     = "offboarding"
+    status = "Enabled"
+
+    filter {
+      prefix = "offboarding/"
+    }
+
+    expiration {
+      days = 30
     }
 
     noncurrent_version_expiration {

@@ -1,7 +1,9 @@
 # Three public and three private subnets. Private subnets reach the internet only through the NAT
 # gateways, which the API needs for sns.<region>.amazonaws.com (the SES webhook's signing
-# certificate and SubscribeURL, Task 4) and other public endpoints. ECR, Secrets Manager, Logs and
-# SSM use interface endpoints and S3 a gateway endpoint, so image pulls and secrets stay private.
+# certificate and SubscribeURL, Task 4) and other public endpoints. ECR, Secrets Manager and Logs
+# use interface endpoints and S3 a gateway endpoint, so image pulls and secrets stay private.
+# Ruling R-endpoints: no ssm endpoint, and staging places the interface endpoints in one zone
+# (endpoint_subnet_count = 1); tasks in the other zones reach them across zones.
 
 data "aws_region" "current" {}
 
@@ -156,7 +158,7 @@ resource "aws_vpc_endpoint" "interface" {
   service_name        = "com.amazonaws.${data.aws_region.current.region}.${each.key}"
   vpc_endpoint_type   = "Interface"
   private_dns_enabled = true
-  subnet_ids          = aws_subnet.private[*].id
+  subnet_ids          = slice(aws_subnet.private[*].id, 0, coalesce(var.endpoint_subnet_count, length(var.azs)))
   security_group_ids  = [aws_security_group.endpoints.id]
 
   tags = merge(local.tags, { Name = "${var.name}-${each.key}" })

@@ -98,7 +98,7 @@ resource "aws_flow_log" "this" {
   log_destination_type     = "cloud-watch-logs"
   log_destination          = aws_cloudwatch_log_group.flow_logs.arn
   iam_role_arn             = aws_iam_role.flow_logs.arn
-  max_aggregation_interval = 60
+  max_aggregation_interval = var.flow_log_aggregation_interval
 
   tags = merge(local.tags, { Name = var.name })
 }

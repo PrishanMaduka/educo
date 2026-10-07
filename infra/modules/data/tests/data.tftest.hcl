@@ -27,6 +27,8 @@ variables {
   name               = "quad-staging"
   vpc_id             = "vpc-0123456789abcdef0"
   private_subnet_ids = ["subnet-0aaaaaaaaaaaaaaa1", "subnet-0bbbbbbbbbbbbbbb2", "subnet-0ccccccccccccccc3"]
+
+  endpoints_security_group_id = "sg-0e0e0e0e0e0e0e0e0"
 }
 
 run "database_is_private_encrypted_and_protected" {
@@ -119,6 +121,15 @@ run "parameter_group_forces_tls_and_keeps_statements_out_of_logs" {
   assert {
     condition     = { for p in aws_db_parameter_group.this.parameter : p.name => p.value }["log_statement"] == "none"
     error_message = "log_statement must be none, so no ALTER ROLE ... PASSWORD reaches the logs."
+  }
+
+  # Slow-query and error logs must never carry bind values (personal data).
+  assert {
+    condition = (
+      { for p in aws_db_parameter_group.this.parameter : p.name => p.value }["log_parameter_max_length"] == "0" &&
+      { for p in aws_db_parameter_group.this.parameter : p.name => p.value }["log_parameter_max_length_on_error"] == "0"
+    )
+    error_message = "log_parameter_max_length and log_parameter_max_length_on_error must be 0."
   }
 
   assert {
@@ -215,6 +226,23 @@ run "database_reachable_only_from_client_and_proxy_groups" {
     condition = alltrue([for g in [aws_security_group.client, aws_security_group.db, aws_security_group.proxy, aws_security_group.redis] :
     length(g.ingress) == 0 && length(g.egress) == 0])
     error_message = "The data security groups must have no inline rules (and so no default egress)."
+  }
+
+  assert {
+    condition = alltrue([for r in aws_vpc_security_group_egress_rule.client :
+    r.cidr_ipv4 == null && r.cidr_ipv6 == null && r.prefix_list_id == null && r.referenced_security_group_id != null])
+    error_message = "The client group may send only to the data groups, never to a CIDR."
+  }
+
+  # The proxy reaches Secrets Manager through the network module's interface endpoints.
+  assert {
+    condition = (
+      aws_vpc_security_group_egress_rule.proxy_to_endpoints.referenced_security_group_id == "sg-0e0e0e0e0e0e0e0e0" &&
+      aws_vpc_security_group_egress_rule.proxy_to_endpoints.cidr_ipv4 == null &&
+      aws_vpc_security_group_egress_rule.proxy_to_endpoints.from_port == 443 &&
+      aws_vpc_security_group_egress_rule.proxy_to_endpoints.to_port == 443
+    )
+    error_message = "The proxy's HTTPS egress must go to the endpoint security group only."
   }
 
   assert {
@@ -325,7 +353,10 @@ run "rotating_one_role_moves_its_secret_and_url_together" {
     condition = (
       aws_secretsmanager_secret_version.role["quad_app"].secret_string_wo_version == 2 &&
       aws_secretsmanager_secret_version.database_url["DATABASE_URL"].secret_string_wo_version == 2 &&
-      aws_secretsmanager_secret_version.role["quad_platform"].secret_string_wo_version == 1
+      aws_secretsmanager_secret_version.role["quad_platform"].secret_string_wo_version == 1 &&
+      aws_secretsmanager_secret_version.role["quad_owner"].secret_string_wo_version == 1 &&
+      aws_secretsmanager_secret_version.database_url["DATABASE_PLATFORM_URL"].secret_string_wo_version == 1 &&
+      aws_secretsmanager_secret_version.database_url["DATABASE_OWNER_URL"].secret_string_wo_version == 1
     )
     error_message = "Bumping quad_app's version must rewrite its role secret and DATABASE_URL, and nothing else."
   }
@@ -410,6 +441,13 @@ run "private_bucket_lifecycle_and_tls_only_policy" {
     error_message = "Objects under exports/ must expire after 7 days."
   }
 
+  # Offboarding exports (tenant deletion, spec 20) are kept 30 days for the school admin.
+  assert {
+    condition = one([for r in aws_s3_bucket_lifecycle_configuration.private.rule :
+    one(r.expiration).days if r.status == "Enabled" && one(r.filter).prefix == "offboarding/"]) == 30
+    error_message = "Objects under offboarding/ must expire after 30 days."
+  }
+
   assert {
     condition = anytrue([for r in aws_s3_bucket_lifecycle_configuration.private.rule :
     r.status == "Enabled" && length(r.noncurrent_version_expiration) == 1 && one(r.noncurrent_version_expiration).noncurrent_days == 30])
@@ -451,11 +489,10 @@ run "keys_rotate_and_are_administered_by_this_account" {
     error_message = "Only this account's root may administer the keys."
   }
 
+  # Without distribution ARNs, CloudFront gets no statement at all.
   assert {
-    condition = toset([for s in jsondecode(aws_kms_key.data.policy).Statement : s.Principal.Service if can(s.Principal.Service)]) == toset([
-      "logs.ap-south-1.amazonaws.com", "cloudfront.amazonaws.com",
-    ])
-    error_message = "Only CloudWatch Logs and CloudFront may use the data key as services."
+    condition     = toset([for s in jsondecode(aws_kms_key.data.policy).Statement : s.Principal.Service if can(s.Principal.Service)]) == toset(["logs.ap-south-1.amazonaws.com"])
+    error_message = "Only CloudWatch Logs may use the data key as a service when no distribution is named."
   }
 
   # CloudWatch Logs may use the data key only for this database's log groups.
@@ -466,19 +503,43 @@ run "keys_rotate_and_are_administered_by_this_account" {
     error_message = "CloudWatch Logs may use the data key only for the database's log groups."
   }
 
-  # CloudFront (origin access control, edge module) may only decrypt, for this account's
-  # distributions.
-  assert {
-    condition = alltrue([for s in jsondecode(aws_kms_key.data.policy).Statement :
-      s.Action == "kms:Decrypt" && s.Condition.ArnLike["aws:SourceArn"] == "arn:aws:cloudfront::123456789012:distribution/*"
-    if try(s.Principal.Service, "") == "cloudfront.amazonaws.com"])
-    error_message = "CloudFront may only decrypt with the data key, for this account's distributions."
-  }
 
   assert {
     condition     = length([for s in jsondecode(aws_kms_key.field.policy).Statement : s if can(s.Principal.Service)]) == 0
     error_message = "No AWS service principal may use the field key directly."
   }
+}
+
+run "cloudfront_decrypts_only_the_public_bucket_for_named_distributions" {
+  command = apply
+
+  variables {
+    cloudfront_distribution_arns = ["arn:aws:cloudfront::123456789012:distribution/EMOCKDISTRIBUTION"]
+  }
+
+  assert {
+    condition     = length([for s in jsondecode(aws_kms_key.data.policy).Statement : s if try(s.Principal.Service, "") == "cloudfront.amazonaws.com"]) == 1
+    error_message = "A named distribution must get exactly one CloudFront statement."
+  }
+
+  assert {
+    condition = alltrue([for s in jsondecode(aws_kms_key.data.policy).Statement :
+      s.Action == "kms:Decrypt" &&
+      s.Condition.ArnEquals["aws:SourceArn"] == ["arn:aws:cloudfront::123456789012:distribution/EMOCKDISTRIBUTION"] &&
+      s.Condition.StringEquals["kms:EncryptionContext:aws:s3:arn"] == "arn:aws:s3:::quad-staging-public"
+    if try(s.Principal.Service, "") == "cloudfront.amazonaws.com"])
+    error_message = "CloudFront may only decrypt objects of the public bucket, for the named distributions."
+  }
+}
+
+run "cloudfront_distribution_arns_must_be_exact" {
+  command = plan
+
+  variables {
+    cloudfront_distribution_arns = ["arn:aws:cloudfront::123456789012:distribution/*"]
+  }
+
+  expect_failures = [var.cloudfront_distribution_arns]
 }
 
 run "outputs_for_the_app_edge_and_dashboard" {

@@ -17,3 +17,8 @@ output "private_subnet_ids" {
   description = "Private subnet ids, one per zone, in var.azs order (tasks, RDS, Redis, endpoints)."
   value       = aws_subnet.private[*].id
 }
+
+output "endpoints_security_group_id" {
+  description = "The interface endpoints' security group, for egress rules that must reach them (the RDS Proxy's Secrets Manager calls)."
+  value       = aws_security_group.endpoints.id
+}
