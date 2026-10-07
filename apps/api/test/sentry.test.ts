@@ -11,6 +11,9 @@ import { localEnv, productionEnv } from './env';
 
 import type { ErrorReporter } from '../src/observability/sentry';
 import type { ArgumentsHost } from '@nestjs/common';
+import type { NodeOptions } from '@sentry/node';
+
+type Transport = NonNullable<NodeOptions['transport']>;
 
 function fakeReporter(eventId = 'evt-1'): ErrorReporter & {
   captured: unknown[];
@@ -133,7 +136,23 @@ describe('runSentryTest', () => {
       productionEnv({ APP_ENV: 'staging', SENTRY_DSN: 'https://public@o1.ingest.sentry.io/1' }),
     );
 
-    const result = await runSentryTest(config, () => reporter);
+    // The fake flush sends one envelope through the transport runSentryTest hands over, which
+    // Sentry answers with 200.
+    const accepted: Transport = () => ({
+      send: () => Promise.resolve({ statusCode: 200 }),
+      flush: () => Promise.resolve(true),
+    });
+    const result = await runSentryTest(
+      config,
+      (_config, _service, { transport }) => ({
+        ...reporter,
+        flush: async (timeoutMs) => {
+          await transport?.({ url: '', recordDroppedEvent: () => undefined }).send([{}, []]);
+          return reporter.flush(timeoutMs);
+        },
+      }),
+      accepted,
+    );
 
     expect(reporter.captured).toHaveLength(1);
     expect(String(reporter.captured[0])).toBe('Error: Quad Sentry test error (api, staging)');
