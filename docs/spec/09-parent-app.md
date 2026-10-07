@@ -202,8 +202,10 @@ Values come from `--dart-define-from-file=env/{flavor}.json` (checked in, no sec
 | Flavor | Bundle id / application id | API_URL | SOCKET_URL | Firebase project |
 |---|---|---|---|---|
 | `dev` | `com.quadedu.parent.dev` | `http://localhost:4000/api/v1` (`10.0.2.2` on the Android emulator; LAN address on devices) | `ws://localhost:4000` | `quad-dev` |
-| `staging` | `com.quadedu.parent.staging` | `https://staging.quad-edu.com/api/v1` | `wss://staging.quad-edu.com/socket.io` | `quad-staging` |
-| `prod` | `com.quadedu.parent` | `https://quad-edu.com/api/v1` | `wss://quad-edu.com/socket.io` | `quad-prod` |
+| `staging` | `com.quadedu.parent.staging` | `https://staging.quad-edu.com/api/v1` | `wss://staging.quad-edu.com` | `quad-staging` |
+| `prod` | `com.quadedu.parent` | `https://quad-edu.com/api/v1` | `wss://quad-edu.com` | `quad-prod` |
+
+`SOCKET_URL` is a bare origin in every flavor; the realtime client sets the `/socket.io` path itself ([D15, D27](02-architecture.md#decision-log)), and the app refuses a `SOCKET_URL` with a path at launch.
 
 Each flavor has its own app name suffix ("Quad Dev", "Quad Staging"), icon badge, `google-services.json` / `GoogleService-Info.plist`, associated domains (`applinks:staging.quad-edu.com` for staging) and PayHere/Stripe sandbox or live mode (the mode follows the school's gateway account, not the flavor).
 
