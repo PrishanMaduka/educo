@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "build": "tsup && node scripts/check-dist.mjs",
+    "build": "tsup && node scripts/copy-migrations.mjs && node scripts/check-dist.mjs",
     "dev": "tsup --watch src --watch ../../packages/contracts/src --watch ../../packages/db/src --onSuccess \"node --enable-source-maps dist/main.js & node --enable-source-maps dist/worker.js\"",
     "start": "node --enable-source-maps dist/main.js",
     "start:worker": "node --enable-source-maps dist/worker.js",

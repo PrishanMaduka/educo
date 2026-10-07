@@ -1,8 +1,12 @@
+import { hostname } from 'node:os';
+
 import { Worker } from 'bullmq';
 import { Redis } from 'ioredis';
 
 import { createLogger, errorForLog } from '../observability/logger';
 import { createShutdown, onShutdownSignals } from '../shutdown';
+
+import { heartbeatKey, startHeartbeat } from './heartbeat';
 
 import type { Config } from '../config';
 import type { Tracing } from '../observability/tracing';
@@ -44,6 +48,12 @@ export async function runWorkers(config: Config, tracing: Tracing): Promise<void
   const workers = Object.entries(PROCESSORS).map(
     ([queue, processor]) => new Worker(queue, processor, { connection }),
   );
+  // `dist/worker-health.js` (the container health check) looks for this key.
+  const stopHeartbeat = startHeartbeat(connection, heartbeatKey(hostname()), {
+    onError: (error) => {
+      logger.warn({ error: errorForLog(error) }, 'Worker heartbeat write failed');
+    },
+  });
   logger.info({ queues: Object.keys(PROCESSORS) }, 'Worker ready');
 
   onShutdownSignals(
@@ -51,6 +61,7 @@ export async function runWorkers(config: Config, tracing: Tracing): Promise<void
       logger,
       tracing,
       close: async () => {
+        stopHeartbeat();
         await Promise.all(workers.map((worker) => worker.close()));
         await connection.quit();
       },

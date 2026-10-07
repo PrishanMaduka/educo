@@ -54,6 +54,7 @@ jobs:
       DATABASE_URL: postgres://quad_app:quad_app@localhost:5432/quad
       DATABASE_PLATFORM_URL: postgres://quad_platform:quad_platform@localhost:5432/quad
       DATABASE_OWNER_URL: postgres://quad_owner:quad_owner@localhost:5432/quad
+      DATABASE_ADMIN_URL: postgres://postgres:postgres@localhost:5432/quad
       REDIS_URL: redis://localhost:6379
       TURBO_TELEMETRY_DISABLED: '1'
 

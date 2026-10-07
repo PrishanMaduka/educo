@@ -31,6 +31,7 @@
         "DATABASE_URL",
         "DATABASE_PLATFORM_URL",
         "DATABASE_OWNER_URL",
+        "DATABASE_ADMIN_URL",
         "DATABASE_POOL_MAX",
         "REDIS_URL"
       ]
