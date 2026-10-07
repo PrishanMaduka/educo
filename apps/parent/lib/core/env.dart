@@ -9,7 +9,7 @@ enum AppEnv { local, staging, production }
 /// Build-time configuration from `--dart-define-from-file=env/<flavor>.json`.
 @immutable
 class Env {
-  const Env({
+  const new({
     required this.appEnv,
     required this.apiUrl,
     required this.socketUrl,
@@ -17,7 +17,7 @@ class Env {
   });
 
   /// Parses and checks one flavor file's values; throws [FormatException].
-  factory Env.fromJson(Map<String, dynamic> values) {
+  factory fromJson(Map<String, dynamic> values) {
     String read(String key) {
       final value = values[key];
       if (value is! String) {
@@ -48,7 +48,7 @@ class Env {
   /// release build must be given its flavor file: [isRelease] defaults
   /// to [kReleaseMode] and makes a missing APP_ENV an error, so a store build
   /// can never point at localhost by accident.
-  factory Env.fromDefines({bool isRelease = kReleaseMode}) {
+  factory fromDefines({bool isRelease = kReleaseMode}) {
     if (isRelease && !const bool.hasEnvironment('APP_ENV')) {
       throw StateError(
         'APP_ENV is not set. Build with '

@@ -5,7 +5,7 @@ import 'package:quad_parent/ui/tab_page.dart';
 /// Messages tab (shell): threads with teachers and the
 /// office arrive in M6.
 class MessagesScreen extends StatelessWidget {
-  const MessagesScreen({super.key});
+  const new({super.key});
 
   @override
   Widget build(BuildContext context) {

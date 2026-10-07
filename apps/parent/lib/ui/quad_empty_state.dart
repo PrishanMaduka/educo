@@ -5,7 +5,7 @@ import 'package:quad_parent/theme/tokens.g.dart';
 
 /// A friendly card for a screen with nothing to show yet.
 class QuadEmptyState extends StatelessWidget {
-  const QuadEmptyState({required this.message, super.key});
+  const new({required this.message, super.key});
 
   final String message;
 

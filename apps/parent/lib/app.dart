@@ -6,7 +6,7 @@ import 'package:quad_parent/theme/theme.dart';
 
 /// The Quad parent app: Quad-branded theme, strings and the tab router.
 class QuadApp extends ConsumerWidget {
-  const QuadApp({super.key});
+  const new({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

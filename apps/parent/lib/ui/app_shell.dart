@@ -6,7 +6,7 @@ import 'package:quad_parent/ui/quad_tab_bar.dart';
 
 /// The five tabs around the current tab's navigator (spec 09, Navigation).
 class AppShell extends StatelessWidget {
-  const AppShell({required this.navigationShell, super.key});
+  const new({required this.navigationShell, super.key});
 
   final StatefulNavigationShell navigationShell;
 

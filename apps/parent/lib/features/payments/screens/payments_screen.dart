@@ -5,7 +5,7 @@ import 'package:quad_parent/ui/tab_page.dart';
 /// Payments tab (shell): invoices and the pay sheet
 /// arrive in M7.
 class PaymentsScreen extends StatelessWidget {
-  const PaymentsScreen({super.key});
+  const new({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -8,7 +8,7 @@ import 'package:quad_parent/ui/greeting_icon.dart';
 /// word (spec 09, Home 1). The parent's first name joins it with parent
 /// sign-in (M6).
 class GreetingHeader extends StatelessWidget {
-  const GreetingHeader({required this.now, super.key});
+  const new({required this.now, super.key});
 
   final DateTime now;
 

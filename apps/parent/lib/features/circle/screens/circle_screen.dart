@@ -5,7 +5,7 @@ import 'package:quad_parent/ui/tab_page.dart';
 /// Circle tab (shell): moments, people and learning
 /// arrive in M9b.
 class CircleScreen extends StatelessWidget {
-  const CircleScreen({super.key});
+  const new({super.key});
 
   @override
   Widget build(BuildContext context) {

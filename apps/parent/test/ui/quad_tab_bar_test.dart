@@ -3,8 +3,8 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:quad_parent/theme/tokens.g.dart';
 import 'package:quad_parent/theme/theme.dart';
+import 'package:quad_parent/theme/tokens.g.dart';
 import 'package:quad_parent/ui/quad_tab_bar.dart';
 
 Widget _bar({

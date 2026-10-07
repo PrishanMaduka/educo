@@ -5,7 +5,7 @@ import 'package:quad_parent/theme/theme.dart';
 
 /// Shown for a link the app does not know, with a way back to Home.
 class NotFoundScreen extends StatelessWidget {
-  const NotFoundScreen({super.key});
+  const new({super.key});
 
   @override
   Widget build(BuildContext context) {

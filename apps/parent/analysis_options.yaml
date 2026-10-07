@@ -15,6 +15,3 @@ linter:
   rules:
     # An app, not a published library: widget names say enough.
     public_member_api_docs: false
-    # Flutter's templates and docs still name constructors after the class
-    # (`const HomeScreen({super.key})`); follow them rather than `new(...)`.
-    unnecessary_type_name_in_constructor: false

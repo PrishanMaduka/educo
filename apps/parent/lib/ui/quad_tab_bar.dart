@@ -10,7 +10,7 @@ typedef QuadTab = ({String label, String icon});
 /// brand-fill, not brand, so white icons on the pill and the label on the
 /// surface both reach 4.5:1 (ruling R16).
 class QuadTabBar extends StatelessWidget {
-  const QuadTabBar({
+  const new({
     required this.tabs,
     required this.currentIndex,
     required this.onSelect,
@@ -77,11 +77,7 @@ class QuadTabBar extends StatelessWidget {
 }
 
 class _TabButton extends StatelessWidget {
-  const _TabButton({
-    required this.tab,
-    required this.active,
-    required this.onTap,
-  });
+  const new({required this.tab, required this.active, required this.onTap});
 
   final QuadTab tab;
   final bool active;

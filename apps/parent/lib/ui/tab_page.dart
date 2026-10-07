@@ -3,7 +3,7 @@ import 'package:quad_parent/ui/quad_empty_state.dart';
 
 /// A tab's page: a header, then a scrolling body (story first).
 class TabPage extends StatelessWidget {
-  const TabPage({required this.header, required this.children, super.key});
+  const new({required this.header, required this.children, super.key});
 
   final Widget header;
   final List<Widget> children;
@@ -28,7 +28,7 @@ class TabPage extends StatelessWidget {
 
 /// A placeholder tab: its title and one sentence on what will appear.
 class PlaceholderTab extends StatelessWidget {
-  const PlaceholderTab({required this.title, required this.message, super.key});
+  const new({required this.title, required this.message, super.key});
 
   final String title;
   final String message;

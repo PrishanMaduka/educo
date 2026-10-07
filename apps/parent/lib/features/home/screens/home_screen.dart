@@ -8,7 +8,7 @@ import 'package:quad_parent/ui/tab_page.dart';
 
 /// Home (shell): the greeting header and what will appear here.
 class HomeScreen extends ConsumerWidget {
-  const HomeScreen({super.key});
+  const new({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

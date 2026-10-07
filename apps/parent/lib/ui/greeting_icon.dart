@@ -8,7 +8,7 @@ import 'package:quad_parent/theme/tokens.g.dart';
 /// amber for morning and afternoon, coral for evening, lilac for night
 /// (spec 03).
 class GreetingIcon extends StatelessWidget {
-  const GreetingIcon({required this.period, this.size = 20, super.key});
+  const new({required this.period, this.size = 20, super.key});
 
   final GreetingPeriod period;
 
