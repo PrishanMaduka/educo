@@ -26,7 +26,7 @@
     "e2e": "turbo run e2e",
     "e2e:mobile": "pnpm --filter @quad/parent e2e:mobile",
     "eval:assistant": "echo \"Ask Quad evaluation arrives in M10\"",
-    "verify": "pnpm typecheck && pnpm lint && pnpm test && pnpm codegen:check && pnpm test:api && pnpm e2e && pnpm audit --prod"
+    "verify": "node scripts/verify.mjs"
   },
   "devDependencies": {
     "@openapitools/openapi-generator-cli": "2.41.0",

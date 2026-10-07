@@ -1,0 +1,109 @@
+# The quality gate (`pnpm verify`) and a production build, on every pull request and on main.
+# The database credentials below are the throwaway local ones from .env.example and
+# docker/postgres/init/01-roles.sql; they only exist inside this job's service containers.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Verify and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    services:
+      postgres:
+        image: postgres:16.4
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: quad
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d quad"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+      redis:
+        image: redis:7.4-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 12
+
+    env:
+      # Flutter checks fail instead of skipping (scripts/flutter.mjs).
+      QUAD_REQUIRE_FLUTTER: '1'
+      DATABASE_URL: postgres://quad_app:quad_app@localhost:5432/quad
+      DATABASE_PLATFORM_URL: postgres://quad_platform:quad_platform@localhost:5432/quad
+      DATABASE_OWNER_URL: postgres://quad_owner:quad_owner@localhost:5432/quad
+      REDIS_URL: redis://localhost:6379
+      TURBO_TELEMETRY_DISABLED: '1'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Service containers start before checkout, so the init script cannot be mounted;
+      # apply it the way docker-entrypoint-initdb.d would on a fresh volume.
+      - name: Create the database roles
+        env:
+          PGPASSWORD: postgres
+        run: psql -h localhost -U postgres -d quad -v ON_ERROR_STOP=1 -f docker/postgres/init/01-roles.sql
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version-file: .fvmrc
+          cache: true
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # openapi-generator-cli downloads its jar (version in openapitools.json) into its package folder.
+      - name: Cache the openapi-generator jar
+        uses: actions/cache@v4
+        with:
+          path: node_modules/.pnpm/@openapitools+openapi-generator-cli@*/node_modules/@openapitools/openapi-generator-cli/versions
+          key: openapi-generator-${{ runner.os }}-${{ hashFiles('openapitools.json', 'pnpm-lock.yaml') }}
+
+      - name: Install the Playwright browser
+        run: pnpm --filter @quad/staff exec playwright install --with-deps chromium
+
+      - name: Verify
+        run: pnpm verify
+
+      - name: Build
+        run: pnpm build
+
+      - name: Upload the Playwright reports
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-reports
+          path: apps/*/playwright-report/
+          if-no-files-found: ignore
