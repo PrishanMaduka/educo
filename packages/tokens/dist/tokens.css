@@ -2,7 +2,8 @@
 /* A school brand colour is set on <html> as --quad-brand, --quad-brand-fill, --quad-brand-fill-strong,
    --quad-brand-strong, --quad-brand-soft, --quad-rail and --quad-rail-2 (from deriveBrand). */
 
-:root {
+:root,
+[data-theme="light"] {
   color-scheme: light;
   --quad-canvas: #FAF8F5;
   --quad-surface: #FFFFFF;

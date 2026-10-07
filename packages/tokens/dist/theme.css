@@ -64,7 +64,8 @@
   --font-accent: "Fraunces", Georgia, "Times New Roman", serif;
 }
 
-:root {
+:root,
+[data-theme="light"] {
   color-scheme: light;
   --quad-canvas: #FAF8F5;
   --quad-surface: #FFFFFF;
