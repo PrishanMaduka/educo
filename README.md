@@ -175,14 +175,14 @@ Prerequisites (pinned in the repo):
 corepack enable && pnpm install
 cp .env.example .env              # safe local defaults
 docker compose up -d              # Postgres, Redis, MinIO, Mailpit, ClamAV on 127.0.0.1
-pnpm db:migrate && pnpm db:seed   # schema, then the sample schools and accounts
+pnpm db:migrate && pnpm db:seed   # schema, then the two sample schools (accounts arrive with M1)
 pnpm dev                          # API :4000 (/api/v1), staff portal :3000, console :3001
 pnpm parent:run                   # parent app (flutter run --flavor dev) on a simulator or device
 pnpm verify                       # the full quality gate, the same one CI runs
 ```
 
-`pnpm verify` runs, stopping at the first failure: typecheck, lint and unit tests (`turbo run typecheck lint test`), `pnpm codegen:check`, the API integration tests (`pnpm test:api`, needs Docker), the Playwright smoke tests (`pnpm e2e`) and `pnpm audit --prod --audit-level high`. Without Flutter the parent app's checks are skipped with a warning; CI and `QUAD_REQUIRE_FLUTTER=1` make them fail instead. Turborepo caches a skipped result, so after you install Flutter run the gate once with `QUAD_REQUIRE_FLUTTER=1 pnpm verify` (or `pnpm exec turbo run typecheck lint test --force`) to clear it.
+`pnpm verify` runs, stopping at the first failure: typecheck, lint and unit tests (`turbo run typecheck lint test`), `pnpm codegen:check`, a wait for Postgres and Redis, the API integration tests (`pnpm test:api`, needs Docker), the Playwright smoke tests (`pnpm e2e`) and `pnpm audit --prod --audit-level high`. Without Flutter the parent app's checks are skipped with a warning; CI and `QUAD_REQUIRE_FLUTTER=1` make them fail instead. Turborepo caches a skipped result, so after you install Flutter run the gate once with `QUAD_REQUIRE_FLUTTER=1 pnpm verify` (or `pnpm exec turbo run typecheck lint test --force`) to clear it.
 
 If Docker Hub rate-limits image pulls, prefix the images with a registry mirror: `QUAD_IMAGE_REGISTRY=mirror.gcr.io/ docker compose up -d` (keep the trailing slash). The Postgres init script (`docker/postgres/init`) only runs on a fresh volume; `docker compose down -v` deletes the local database so it runs again.
 
-Seeded sign-ins and the rest of the local setup are in [docs/spec/02-architecture.md → Local development](docs/spec/02-architecture.md#local-development).
+The seeded sign-ins (they arrive with M1; M0 seeds only the two schools) and the rest of the local setup are in [docs/spec/02-architecture.md → Local development](docs/spec/02-architecture.md#local-development).
