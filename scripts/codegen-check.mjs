@@ -5,6 +5,8 @@ import { existsSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { runTool } from './flutter.mjs';
+
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const run = (cmd, args) => execFileSync(cmd, args, { cwd: root, stdio: 'inherit' });
 const out = (args) => execFileSync('git', args, { cwd: root, encoding: 'utf8' }).trim();
@@ -16,11 +18,16 @@ const GENERATED = [
   'packages/tokens/dist',
   'apps/parent/lib/theme/tokens.g.dart',
   'apps/parent/lib/l10n/*.arb',
+  // riverpod_generator parts (git pathspec * also matches subfolders).
+  'apps/parent/lib/*.g.dart',
 ];
 
 run('pnpm', ['api:client']);
 if (existsSync(resolve(root, 'packages/tokens/package.json'))) run('pnpm', ['tokens:build']);
 run('pnpm', ['i18n:build']);
+const parentApp = resolve(root, 'apps/parent');
+runTool('flutter', ['pub', 'get'], parentApp);
+runTool('dart', ['run', 'build_runner', 'build'], parentApp);
 
 // Porcelain status covers staged, unstaged, deleted and untracked files.
 const stale = out(['status', '--porcelain', '--untracked-files=all', '--', ...GENERATED])
