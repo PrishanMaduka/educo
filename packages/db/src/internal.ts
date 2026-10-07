@@ -3,6 +3,8 @@
  * from an app: use `withTenant` / `withPlatform` from `@quad/db`.
  */
 export * from './index';
+export type { BootstrapRoles, RoleCredentials } from './bootstrap';
+export { bootstrapRoles } from './bootstrap';
 export type { PoolOptions, QuadDatabase, QuadTransaction } from './client';
 export { createPool, runInTransaction } from './client';
 export type { DatabaseUrls } from './env';

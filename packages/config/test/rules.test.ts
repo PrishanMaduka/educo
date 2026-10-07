@@ -20,6 +20,7 @@ const rawRule = quad.rules['no-raw-db-client'];
 const platformRule = quad.rules['no-with-platform-outside-platform'];
 
 const raw = [{ messageId: 'raw' as const }];
+const admin = [{ messageId: 'admin' as const }];
 const platform = [{ messageId: 'platform' as const }];
 
 tester.run('quad/no-raw-db-client', rawRule, {
@@ -33,6 +34,14 @@ tester.run('quad/no-raw-db-client', rawRule, {
     { code: "import type { Pool } from 'pg';", filename: repo('apps/api/src/x.ts') },
     { code: "import { type Pool } from 'pg';", filename: repo('apps/api/src/x.ts') },
     { code: "import { Pool } from 'pg-extra';", filename: repo('apps/api/src/x.ts') },
+    {
+      code: "import { runMigrations } from '@quad/db/admin';",
+      filename: repo('apps/api/src/cli/migrate.ts'),
+    },
+    {
+      code: "import { bootstrapRoles } from '@quad/db/admin';",
+      filename: repo('packages/db/test/bootstrap.api.test.ts'),
+    },
   ],
   invalid: [
     { code: "import { Pool } from 'pg';", filename: repo('apps/api/src/x.ts'), errors: raw },
@@ -56,6 +65,21 @@ tester.run('quad/no-raw-db-client', rawRule, {
     {
       code: "import { raw } from '@quad/db/src/client';",
       filename: repo('apps/api/src/x.ts'),
+      errors: raw,
+    },
+    {
+      code: "import { runMigrations } from '@quad/db/admin';",
+      filename: repo('apps/api/src/modules/x.ts'),
+      errors: admin,
+    },
+    {
+      code: "const m = import('@quad/db/admin');",
+      filename: repo('apps/api/src/worker/run.ts'),
+      errors: admin,
+    },
+    {
+      code: "import { Pool } from 'pg';",
+      filename: repo('apps/api/src/cli/migrate.ts'),
       errors: raw,
     },
     { code: "export * from 'pg';", filename: repo('apps/api/src/x.ts'), errors: raw },
@@ -266,7 +290,10 @@ jsxTester.run('quad/no-arbitrary-colour', colourRule, {
     { code: "const c = 'hover:dark:border-[rgb(0,0,0)]';", errors: classColour },
     { code: "const c = 'ring-[rgba(0,0,0,0.1)]';", errors: classColour },
     { code: "const c = 'fill-[hsl(0_0%_0%)] stroke-[hsla(0,0%,0%,1)]';", errors: classColour },
-    { code: "const c = 'from-[oklch(0.7_0.1_20)] via-[oklab(0.5_0_0)] to-[lab(50%_0_0)]';", errors: classColour },
+    {
+      code: "const c = 'from-[oklch(0.7_0.1_20)] via-[oklab(0.5_0_0)] to-[lab(50%_0_0)]';",
+      errors: classColour,
+    },
     { code: "const c = 'outline-[lch(50%_0_0)]';", errors: classColour },
     { code: "const c = 'decoration-[color(display-p3_1_0_0)]';", errors: classColour },
     { code: "const c = 'accent-[color:#fff]';", errors: classColour },
@@ -282,8 +309,22 @@ jsxTester.run('quad/no-arbitrary-colour', colourRule, {
       errors: classColour,
     })),
     ...[
-      'bg', 'text', 'border', 'ring', 'fill', 'stroke', 'from', 'via', 'to', 'outline',
-      'decoration', 'accent', 'caret', 'shadow', 'divide', 'placeholder',
+      'bg',
+      'text',
+      'border',
+      'ring',
+      'fill',
+      'stroke',
+      'from',
+      'via',
+      'to',
+      'outline',
+      'decoration',
+      'accent',
+      'caret',
+      'shadow',
+      'divide',
+      'placeholder',
     ].map((prefix) => ({ code: `const c = '${prefix}-[#123456]';`, errors: classColour })),
     { code: "const c = 'border-t-[#fff]';", errors: classColour },
     { code: "const c = '!bg-[#fff]';", errors: classColour },
@@ -294,18 +335,30 @@ jsxTester.run('quad/no-arbitrary-colour', colourRule, {
     { code: "<div style={{ backgroundColor: 'rgb(0 0 0)' }} />;", errors: styleColour },
     { code: "<div style={{ 'borderColor': 'hsl(0 0% 0%)' }} />;", errors: styleColour },
     { code: '<div style={{ fill: `#fff` }} />;', errors: styleColour },
-    { code: "<div style={{ stroke: 'var(--quad-x, #fff)', outlineColor: 'blue' }} />;", errors: [...styleColour, ...styleColour] },
+    {
+      code: "<div style={{ stroke: 'var(--quad-x, #fff)', outlineColor: 'blue' }} />;",
+      errors: [...styleColour, ...styleColour],
+    },
     // Any *Color key, and background*, border*, outline*, boxShadow and textShadow.
     { code: "<div style={{ borderTopColor: '#fff' }} />;", errors: styleColour },
     { code: "<div style={{ caretColor: 'red' }} />;", errors: styleColour },
-    { code: "<div style={{ backgroundImage: 'linear-gradient(#fff, #000)' }} />;", errors: styleColour },
+    {
+      code: "<div style={{ backgroundImage: 'linear-gradient(#fff, #000)' }} />;",
+      errors: styleColour,
+    },
     { code: "<div style={{ border: '1px solid red' }} />;", errors: styleColour },
     { code: "<div style={{ outline: '2px solid #fff' }} />;", errors: styleColour },
     { code: "<div style={{ boxShadow: '0 1px 2px #000' }} />;", errors: styleColour },
     { code: "<div style={{ textShadow: '0 1px rgba(0,0,0,.2)' }} />;", errors: styleColour },
     // Both branches of a conditional or logical expression, and template literal quasis.
-    { code: "<div style={{ color: active ? '#fff' : 'var(--quad-ink)' }} />;", errors: styleColour },
-    { code: "<div style={{ color: active ? 'var(--quad-ink)' : 'black' }} />;", errors: styleColour },
+    {
+      code: "<div style={{ color: active ? '#fff' : 'var(--quad-ink)' }} />;",
+      errors: styleColour,
+    },
+    {
+      code: "<div style={{ color: active ? 'var(--quad-ink)' : 'black' }} />;",
+      errors: styleColour,
+    },
     { code: "<div style={{ color: tone ?? '#000' }} />;", errors: styleColour },
     { code: "<div style={{ color: tone || 'red' }} />;", errors: styleColour },
     { code: '<div style={{ color: `rgb(${r} 0 0)` }} />;', errors: styleColour },
