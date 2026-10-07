@@ -9,7 +9,7 @@ export default function NotFound() {
       title={t('notFound.title')}
       body={t('notFound.body')}
       actionLabel={t('notFound.action')}
-      homeHref="/app"
+      homeHref="/"
       linkComponent={Link}
     />
   );

@@ -8,8 +8,6 @@ import type { Metadata } from 'next';
 import { t, type MessageKey } from '@/i18n';
 import { PLACEHOLDER_SCHOOL, PLACEHOLDER_USER } from '@/lib/placeholders';
 
-
-
 // The greeting follows the time of day, so the page renders on each request, never at build time.
 export const dynamic = 'force-dynamic';
 

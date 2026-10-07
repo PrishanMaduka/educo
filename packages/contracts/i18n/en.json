@@ -69,6 +69,7 @@
   "shell.notifications.open": "Show notifications",
   "shell.profile.open": "Open your profile menu",
   "shell.console.badge": "Console",
+  "shell.console.title": "Quad",
   "shell.console.subtitle": "Platform owner, all schools",
   "landing.placeholder.title": "Quad: the landing page arrives in M1b",
   "landing.placeholder.body": "Staff can open the portal now. Sign-in arrives in M1.",

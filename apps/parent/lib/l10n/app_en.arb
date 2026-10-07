@@ -105,6 +105,7 @@
   "shellNotificationsOpen": "Show notifications",
   "shellProfileOpen": "Open your profile menu",
   "shellConsoleBadge": "Console",
+  "shellConsoleTitle": "Quad",
   "shellConsoleSubtitle": "Platform owner, all schools",
   "landingPlaceholderTitle": "Quad: the landing page arrives in M1b",
   "landingPlaceholderBody": "Staff can open the portal now. Sign-in arrives in M1.",

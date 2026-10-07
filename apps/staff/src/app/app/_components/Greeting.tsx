@@ -4,7 +4,6 @@ import type { GreetingPeriod } from '@quad/domain';
 
 import { SLOT_MARKER, splitAround, t } from '@/i18n';
 
-
 export interface GreetingProps {
   period: GreetingPeriod;
   /** "Good morning", already translated. */

@@ -16,7 +16,8 @@ const figtree = Figtree({
 });
 
 export const metadata: Metadata = {
-  title: { default: t('app.name.staff'), template: `%s · ${t('app.name.staff')}` },
+  title: { default: t('app.name.console'), template: `%s · ${t('app.name.console')}` },
+  robots: { index: false, follow: false },
 };
 
 export const viewport: Viewport = {
@@ -27,8 +28,9 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
+    // switches the tokens to the console's darker rail and lilac active item.
     // The inline script sets data-theme before paint, so React must not complain that <html> differs.
-    <html lang="en" className={figtree.variable} suppressHydrationWarning>
+    <html lang="en" data-app="console" className={figtree.variable} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeBootstrapScript }} />
       </head>
