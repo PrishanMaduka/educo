@@ -1,6 +1,7 @@
 import pg from 'pg';
 
 import { withDatabaseName } from './env';
+import { scramSha256Verifier } from './scram';
 
 /** A database role's login name and password. */
 export interface RoleCredentials {
@@ -25,30 +26,65 @@ async function ensureRole(
   if (exists.rowCount === 0) {
     await client.query(`create role ${name} login ${bypassRls ? 'bypassrls' : 'nobypassrls'}`);
   }
-  // Always set, so a rotated secret takes effect on the next run.
-  await client.query(
-    `alter role ${name} with login password ${client.escapeLiteral(role.password)}`,
-  );
+  // Always set, so a rotated secret takes effect on the next run. Only the SCRAM verifier is
+  // sent, so the plaintext never reaches the server or its statement log.
+  const verifier = scramSha256Verifier(role.password);
+  await client.query(`alter role ${name} with login password ${client.escapeLiteral(verifier)}`);
 }
 
-async function assertRlsAttributes(client: pg.Client, roles: BootstrapRoles): Promise<void> {
-  const { rows } = await client.query<{ rolname: string; rolbypassrls: boolean }>(
-    'select rolname, rolbypassrls from pg_roles where rolname = any($1)',
+interface RoleRow {
+  readonly rolname: string;
+  readonly rolsuper: boolean;
+  readonly rolbypassrls: boolean;
+}
+
+/**
+ * Fails unless the roles keep the D17 separation: nobody is a superuser, only the platform role
+ * bypasses RLS, and the app role cannot reach the owner or platform role through membership.
+ */
+async function assertRoleSeparation(client: pg.Client, roles: BootstrapRoles): Promise<void> {
+  const { rows } = await client.query<RoleRow>(
+    'select rolname, rolsuper, rolbypassrls from pg_roles where rolname = any($1)',
     [[roles.owner.name, roles.app.name, roles.platform.name]],
   );
-  const bypass = new Map(rows.map((row) => [row.rolname, row.rolbypassrls]));
-  if (bypass.get(roles.platform.name) !== true) {
+  const byName = new Map(rows.map((row) => [row.rolname, row]));
+  const labelled = [
+    ['quad_owner', roles.owner],
+    ['quad_app', roles.app],
+    ['quad_platform', roles.platform],
+  ] as const;
+
+  for (const [label, role] of labelled) {
+    if (byName.get(role.name)?.rolsuper !== false) {
+      throw new Error(`${label} must not be a superuser (role ${role.name}).`);
+    }
+  }
+  if (byName.get(roles.platform.name)?.rolbypassrls !== true) {
     throw new Error(
       `quad_platform must have BYPASSRLS (role ${roles.platform.name}); withPlatform() depends on it.`,
     );
   }
-  for (const [label, role] of [
-    ['quad_app', roles.app],
-    ['quad_owner', roles.owner],
-  ] as const) {
-    if (bypass.get(role.name) !== false) {
+  for (const [label, role] of [labelled[1], labelled[0]] as const) {
+    if (byName.get(role.name)?.rolbypassrls !== false) {
       throw new Error(
         `${label} must not have BYPASSRLS (role ${role.name}); row-level security would not apply.`,
+      );
+    }
+  }
+
+  // pg_has_role(…, 'MEMBER') follows memberships transitively.
+  const membership = await client.query<{ owner: boolean; platform: boolean }>(
+    `select pg_has_role($1, $2, 'MEMBER') as owner, pg_has_role($1, $3, 'MEMBER') as platform`,
+    [roles.app.name, roles.owner.name, roles.platform.name],
+  );
+  const reach = membership.rows[0];
+  for (const [label, member] of [
+    [`quad_owner (role ${roles.owner.name})`, reach?.owner],
+    [`quad_platform (role ${roles.platform.name})`, reach?.platform],
+  ] as const) {
+    if (member !== false) {
+      throw new Error(
+        `quad_app must not be a member of ${label}; it would escape row-level security.`,
       );
     }
   }
@@ -102,7 +138,7 @@ export async function bootstrapRoles(
         `grant usage, select on sequences to ${platform}`,
     );
 
-    await assertRlsAttributes(client, roles);
+    await assertRoleSeparation(client, roles);
   } finally {
     await client.end();
   }

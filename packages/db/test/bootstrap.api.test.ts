@@ -1,7 +1,7 @@
 import { randomBytes } from 'node:crypto';
 
 import pg from 'pg';
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 
 import { bootstrapRoles, withDatabaseName } from '../src/admin';
 
@@ -13,14 +13,28 @@ const ADMIN_URL =
     ? process.env.DATABASE_ADMIN_URL
     : 'postgres://postgres:postgres@localhost:5432/quad';
 
-const suffix = randomBytes(5).toString('hex');
-const database = `qbt_${suffix}`;
 const secret = (): string => randomBytes(12).toString('hex');
-const roles = {
-  owner: { name: `qbt_owner_${suffix}`, password: secret() },
-  app: { name: `qbt_app_${suffix}`, password: secret() },
-  platform: { name: `qbt_platform_${suffix}`, password: secret() },
-};
+
+/**
+ * A database name and three role names that share a 10-hex-digit suffix. migration.test.ts
+ * ignores `qbt_platform_<suffix>` when it checks that only quad_platform has BYPASSRLS.
+ */
+function scenario(): {
+  database: string;
+  roles: Record<'owner' | 'app' | 'platform', RoleCredentials>;
+} {
+  const suffix = randomBytes(5).toString('hex');
+  return {
+    database: `qbt_${suffix}`,
+    roles: {
+      owner: { name: `qbt_owner_${suffix}`, password: secret() },
+      app: { name: `qbt_app_${suffix}`, password: secret() },
+      platform: { name: `qbt_platform_${suffix}`, password: secret() },
+    },
+  };
+}
+
+const { database, roles } = scenario();
 
 async function asAdmin<T>(url: string, run: (client: pg.Client) => Promise<T>): Promise<T> {
   const client = new pg.Client({ connectionString: url });
@@ -32,8 +46,8 @@ async function asAdmin<T>(url: string, run: (client: pg.Client) => Promise<T>): 
   }
 }
 
-function urlFor(role: RoleCredentials): string {
-  const url = new URL(withDatabaseName(ADMIN_URL, database));
+function urlFor(role: RoleCredentials, db: string = database): string {
+  const url = new URL(withDatabaseName(ADMIN_URL, db));
   url.username = role.name;
   url.password = role.password;
   return url.toString();
@@ -48,6 +62,15 @@ async function canConnect(role: RoleCredentials): Promise<boolean> {
   }
 }
 
+async function dropScenario(s: ReturnType<typeof scenario>): Promise<void> {
+  await asAdmin(ADMIN_URL, async (client) => {
+    await client.query(`drop database if exists ${s.database} with (force)`);
+    for (const role of Object.values(s.roles)) {
+      await client.query(`drop role if exists ${role.name}`);
+    }
+  });
+}
+
 describe('bootstrapRoles', () => {
   beforeAll(async () => {
     await asAdmin(ADMIN_URL, async (client) => client.query(`create database ${database}`));
@@ -56,12 +79,7 @@ describe('bootstrapRoles', () => {
   });
 
   afterAll(async () => {
-    await asAdmin(ADMIN_URL, async (client) => {
-      await client.query(`drop database if exists ${database} with (force)`);
-      for (const role of Object.values(roles)) {
-        await client.query(`drop role if exists ${role.name}`);
-      }
-    });
+    await dropScenario({ database, roles });
   });
 
   it('gives only the platform role BYPASSRLS, after running twice', async () => {
@@ -117,5 +135,55 @@ describe('bootstrapRoles', () => {
     await bootstrapRoles(ADMIN_URL, { ...roles, app }, database);
     expect(await canConnect(app)).toBe(true);
     expect(await canConnect(roles.app)).toBe(false);
+  });
+
+  it('sends the passwords only as SCRAM verifiers, never as plaintext', async () => {
+    const app = { ...roles.app, password: secret() };
+    const query = vi.spyOn(pg.Client.prototype, 'query');
+    try {
+      await bootstrapRoles(ADMIN_URL, { ...roles, app }, database);
+      const sent = query.mock.calls.map((call) => JSON.stringify(call));
+      expect(sent.some((text) => text.includes('SCRAM-SHA-256$4096:'))).toBe(true);
+      for (const role of [roles.owner, app, roles.platform]) {
+        expect(sent.filter((text) => text.includes(role.password))).toEqual([]);
+      }
+    } finally {
+      query.mockRestore();
+    }
+    expect(await canConnect(app)).toBe(true);
+  });
+});
+
+describe('bootstrapRoles refuses unsafe existing roles', () => {
+  const superApp = scenario();
+  const memberApp = scenario();
+
+  beforeAll(async () => {
+    await asAdmin(ADMIN_URL, async (client) => {
+      for (const s of [superApp, memberApp]) {
+        await client.query(`create database ${s.database}`);
+      }
+      await client.query(`create role ${superApp.roles.app.name} login superuser`);
+      await client.query(`create role ${memberApp.roles.owner.name} login nobypassrls`);
+      await client.query(`create role ${memberApp.roles.app.name} login nobypassrls`);
+      await client.query(`grant ${memberApp.roles.owner.name} to ${memberApp.roles.app.name}`);
+    });
+  });
+
+  afterAll(async () => {
+    await dropScenario(superApp);
+    await dropScenario(memberApp);
+  });
+
+  it('throws when the app role is a superuser', async () => {
+    await expect(bootstrapRoles(ADMIN_URL, superApp.roles, superApp.database)).rejects.toThrow(
+      /must not be a superuser/,
+    );
+  });
+
+  it('throws when the app role is a member of the owner role', async () => {
+    await expect(bootstrapRoles(ADMIN_URL, memberApp.roles, memberApp.database)).rejects.toThrow(
+      /quad_app must not be a member of/,
+    );
   });
 });

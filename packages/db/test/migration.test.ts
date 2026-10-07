@@ -211,11 +211,11 @@ describe('database roles (D17)', () => {
   });
 
   it('only quad_platform has BYPASSRLS among non-superuser roles', async () => {
-    // Roles are cluster-wide: bootstrap.api.test.ts creates its own `qbt_*` roles in parallel
-    // and checks their attributes itself.
+    // Roles are cluster-wide: bootstrap.api.test.ts creates `qbt_platform_<10 hex digits>`
+    // (randomBytes(5)) in parallel and checks its attributes itself.
     const { rows } = await testDb().owner.query<{ rolname: string }>(
       `select rolname from pg_roles
-       where rolbypassrls and not rolsuper and rolname not like 'qbt\\_%'
+       where rolbypassrls and not rolsuper and rolname !~ '^qbt_platform_[0-9a-f]{10}$'
        order by rolname`,
     );
     expect(rows.map((row) => row.rolname)).toEqual(['quad_platform']);
