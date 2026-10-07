@@ -15,10 +15,35 @@ export function runCommand(name: string, command: () => Promise<string>): void {
   );
 }
 
-/** The error's message with anything that looks like a connection URL removed. */
+const URL_PATTERN = /[a-z][a-z0-9+.-]*:\/\/\S+/gi;
+const CREDENTIALS_PATTERN = /\S+:\S+@\S+/g;
+
+/** The error's own message, or its code, or its first inner error's (AggregateError). */
+function messageOf(error: unknown): string {
+  if (!(error instanceof Error)) {
+    return String(error);
+  }
+  if (error.message !== '') {
+    return error.message;
+  }
+  if ('code' in error && typeof error.code === 'string' && error.code !== '') {
+    return error.code;
+  }
+  if (error instanceof AggregateError) {
+    const inner: readonly unknown[] = error.errors as readonly unknown[];
+    const first = inner[0];
+    if (first !== undefined) {
+      return messageOf(first);
+    }
+  }
+  return 'unknown error';
+}
+
+/** The error's message with connection URLs and `user:password@host` removed. */
 export function redact(error: unknown): string {
-  const message = error instanceof Error ? error.message : String(error);
-  return message.replace(/[a-z][a-z0-9+.-]*:\/\/\S+/gi, '<url>');
+  return messageOf(error)
+    .replace(URL_PATTERN, '<url>')
+    .replace(CREDENTIALS_PATTERN, '<credentials>');
 }
 
 /** A required environment variable, or an error naming it. */

@@ -1,16 +1,22 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { heartbeatKey, startHeartbeat } from '../src/worker/heartbeat';
+import { createHeartbeatConnection, heartbeatKey, startHeartbeat } from '../src/worker/heartbeat';
 
 import type { HeartbeatStore } from '../src/worker/heartbeat';
 
-function fakeRedis(): HeartbeatStore & { calls: unknown[][] } {
+function fakeRedis(): HeartbeatStore & { calls: unknown[][]; deleted: string[] } {
   const calls: unknown[][] = [];
+  const deleted: string[] = [];
   return {
     calls,
+    deleted,
     set: (...args: unknown[]) => {
       calls.push(args);
       return Promise.resolve('OK');
+    },
+    del: (key: string) => {
+      deleted.push(key);
+      return Promise.resolve(1);
     },
   };
 }
@@ -44,17 +50,40 @@ describe('worker heartbeat', () => {
       60,
     ]);
 
-    stop();
+    await stop();
     await vi.advanceTimersByTimeAsync(60_000);
     expect(redis.calls).toHaveLength(2);
+  });
+
+  it('deletes the key when stopped, after the last write', async () => {
+    const order: string[] = [];
+    let release: () => void = () => undefined;
+    const slow: HeartbeatStore = {
+      set: () =>
+        new Promise((resolve) => {
+          release = () => {
+            order.push('set');
+            resolve('OK');
+          };
+        }),
+      del: (key) => {
+        order.push(`del ${key}`);
+        return Promise.resolve(1);
+      },
+    };
+    const stopping = startHeartbeat(slow, 'quad:worker:heartbeat:host-a')();
+    release();
+    await stopping;
+    expect(order).toEqual(['set', 'del quad:worker:heartbeat:host-a']);
   });
 
   it('takes a custom interval and expiry', async () => {
     const redis = fakeRedis();
     const stop = startHeartbeat(redis, 'k', { intervalMs: 1_000, ttlSeconds: 5 });
     await vi.advanceTimersByTimeAsync(3_000);
-    stop();
+    await stop();
     expect(redis.calls).toHaveLength(4);
+    expect(redis.deleted).toEqual(['k']);
     expect(redis.calls[3]?.slice(2)).toEqual(['EX', 5]);
   });
 
@@ -62,10 +91,24 @@ describe('worker heartbeat', () => {
     const onError = vi.fn();
     const failing: HeartbeatStore = {
       set: () => Promise.reject(new Error('down')),
+      del: () => Promise.reject(new Error('still down')),
     };
     const stop = startHeartbeat(failing, 'k', { onError });
     await vi.advanceTimersByTimeAsync(0);
-    stop();
+    await stop();
     expect(onError).toHaveBeenCalledWith(expect.objectContaining({ message: 'down' }));
+  });
+});
+
+describe('createHeartbeatConnection', () => {
+  it('fails a write at once while Redis is unreachable, so onError fires', async () => {
+    const redis = createHeartbeatConnection('redis://127.0.0.1:1');
+    const onError = vi.fn();
+    const stop = startHeartbeat(redis, 'k', { onError });
+    await vi.waitFor(() => {
+      expect(onError).toHaveBeenCalled();
+    });
+    await stop();
+    redis.disconnect();
   });
 });

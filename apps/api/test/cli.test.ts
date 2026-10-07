@@ -6,6 +6,7 @@ import { join, resolve } from 'node:path';
 import { afterAll, describe, expect, it } from 'vitest';
 
 import { parseRoleFromUrl } from '../src/cli/db-bootstrap';
+import { redact } from '../src/cli/run-command';
 import { seedRefusal } from '../src/cli/seed';
 
 describe('parseRoleFromUrl', () => {
@@ -28,12 +29,43 @@ describe('parseRoleFromUrl', () => {
 });
 
 describe('seedRefusal', () => {
-  it('refuses production', () => {
-    expect(seedRefusal('production')).toMatch(/production/);
+  it.each([['production'], ['Production'], ['prod'], [undefined], [''], ['Local']])(
+    'refuses APP_ENV=%j',
+    (appEnv) => {
+      expect(seedRefusal(appEnv)).toMatch(/only runs when APP_ENV is local or staging/);
+    },
+  );
+
+  it.each([['local'], ['staging']])('allows %s', (appEnv) => {
+    expect(seedRefusal(appEnv)).toBeNull();
+  });
+});
+
+describe('redact', () => {
+  it('removes connection URLs', () => {
+    expect(redact(new Error('cannot reach postgres://u:p@db.internal:5432/quad now'))).toBe(
+      'cannot reach <url> now',
+    );
   });
 
-  it.each([['local'], ['staging'], [undefined]])('allows %s', (appEnv) => {
-    expect(seedRefusal(appEnv)).toBeNull();
+  it('removes user:password@host without a scheme', () => {
+    const text = redact(new Error('bad target quad_app:hunter2@db.internal:5432/quad'));
+    expect(text).not.toContain('hunter2');
+    expect(text).toBe('bad target <credentials>');
+  });
+
+  it('falls back to the error code when the message is empty', () => {
+    const error = Object.assign(new Error(''), { code: 'ECONNREFUSED' });
+    expect(redact(error)).toBe('ECONNREFUSED');
+  });
+
+  it('falls back to the first inner error of an AggregateError', () => {
+    const error = new AggregateError([new Error('connect ECONNREFUSED 127.0.0.1:5432')], '');
+    expect(redact(error)).toBe('connect ECONNREFUSED 127.0.0.1:5432');
+  });
+
+  it('says the error was empty when nothing else is known', () => {
+    expect(redact(new Error(''))).toBe('unknown error');
   });
 });
 
