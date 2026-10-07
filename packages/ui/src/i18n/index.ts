@@ -1,8 +1,8 @@
 import en from '@quad/contracts/i18n/en.json';
-
-import type design from '@quad/contracts/i18n/design.en.json';
 import i18next, { type i18n as I18n } from 'i18next';
 import ICU from 'i18next-icu';
+
+import type design from '@quad/contracts/i18n/design.en.json';
 
 /** Every key in packages/contracts/i18n/en.json. */
 export type MessageKey = keyof typeof en;
