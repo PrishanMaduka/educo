@@ -1,7 +1,12 @@
-import { describe, expect, it } from 'vitest';
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+
+import { afterEach, describe, expect, it } from 'vitest';
 
 import {
   checkSteps,
+  declaresProviderAliases,
   INFRA_MODULES,
   INFRA_ROOTS,
   infraEnv,
@@ -103,6 +108,44 @@ describe('checkSteps', () => {
     expect(commands(checkSteps([], { tflint: true, checkov: true }, none)).at(-1)).toBe(
       'checkov -d infra --config-file infra/.checkov.yaml',
     );
+  });
+});
+
+describe('declaresProviderAliases', () => {
+  const dirs: string[] = [];
+  const moduleWith = (files: Record<string, string>) => {
+    const dir = mkdtempSync(join(tmpdir(), 'infra-check-'));
+    dirs.push(dir);
+    for (const [name, text] of Object.entries(files)) writeFileSync(join(dir, name), text);
+    return dir;
+  };
+  afterEach(() => {
+    for (const dir of dirs.splice(0)) rmSync(dir, { recursive: true, force: true });
+  });
+
+  it('finds a configuration_aliases argument', () => {
+    const dir = moduleWith({
+      'versions.tf':
+        'terraform {\n  required_providers {\n    aws = {\n      configuration_aliases = [aws.dns]\n    }\n  }\n}\n',
+    });
+    expect(declaresProviderAliases(dir)).toBe(true);
+  });
+
+  it('ignores the word in comments, other files and other names', () => {
+    const dir = moduleWith({
+      'main.tf': [
+        '# configuration_aliases = [aws.dns]',
+        '// configuration_aliases = [aws.dns]',
+        '/* configuration_aliases = [aws.dns] */',
+        'locals { note = "configuration_aliases" }',
+      ].join('\n'),
+      'README.md': 'configuration_aliases = [aws.dns]',
+    });
+    expect(declaresProviderAliases(dir)).toBe(false);
+  });
+
+  it('is false for a directory that does not exist', () => {
+    expect(declaresProviderAliases(join(tmpdir(), 'infra-check-missing-dir'))).toBe(false);
   });
 });
 

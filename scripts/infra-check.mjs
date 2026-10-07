@@ -63,16 +63,22 @@ export function infraEnv(env) {
 /**
  * Whether a module declares `configuration_aliases` (edge's aws.us_east_1 and aws.dns, for
  * example). `terraform validate` cannot check such a module on its own, because nothing configures
- * the aliases; `terraform test` validates it with the test file's mocked aliases instead.
- * @param {string} dir repository-relative
+ * the aliases; `terraform test` validates it with the test file's mocked aliases instead. Only an
+ * argument outside comments counts.
+ * @param {string} dir repository-relative, or absolute
  * @returns {boolean}
  */
 export function declaresProviderAliases(dir) {
-  const path = join(root, dir);
+  const path = resolve(root, dir);
   if (!existsSync(path)) return false;
   return readdirSync(path)
     .filter((file) => file.endsWith('.tf'))
-    .some((file) => readFileSync(join(path, file), 'utf8').includes('configuration_aliases'));
+    .some((file) => {
+      const code = readFileSync(join(path, file), 'utf8')
+        .replace(/\/\*[\s\S]*?\*\//g, '')
+        .replace(/(#|\/\/).*$/gm, '');
+      return /configuration_aliases\s*=/.test(code);
+    });
 }
 
 /**
