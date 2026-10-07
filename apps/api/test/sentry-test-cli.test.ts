@@ -1,7 +1,7 @@
 import { createServer } from 'node:net';
 
-import { createTransport } from '@sentry/node';
-import { describe, expect, it } from 'vitest';
+import { close, createTransport } from '@sentry/node';
+import { afterEach, describe, expect, it } from 'vitest';
 
 import { runSentryTest } from '../src/cli/sentry-test';
 import { loadConfig } from '../src/config';
@@ -40,6 +40,11 @@ async function closedPort(): Promise<number> {
 }
 
 describe('runSentryTest delivery (real SDK)', () => {
+  // Each test starts its own client; closing it keeps state from mixing between tests.
+  afterEach(async () => {
+    await close();
+  });
+
   it('prints the event id when Sentry accepts the test error', async () => {
     const bodies: string[] = [];
     const result = await runSentryTest(
