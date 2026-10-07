@@ -67,6 +67,9 @@ COPY --from=build /repo/apps/${APP}/.next/standalone ./
 COPY --from=build /repo/apps/${APP}/.next/static ./apps/${APP}/.next/static
 COPY --from=build /repo/apps/${APP}/public ./apps/${APP}/public
 RUN mkdir -p "apps/${APP}/.next/cache" && chown node:node "apps/${APP}/.next/cache"
+# ECS runs the root file system read-only; Fargate fills an ephemeral volume from the image (with
+# its ownership) only at a path the image declares as a VOLUME (D28). Nothing may write here later.
+VOLUME ["/app/apps/${APP}/.next/cache", "/tmp"]
 # The exec-form CMD cannot expand APP, so the working directory is the app's folder and the
 # command is that folder's server.js (`apps/<app>/server.js`).
 WORKDIR /app/apps/${APP}

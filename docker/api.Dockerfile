@@ -62,6 +62,9 @@ ADD --checksum=sha256:fe45bbebf92ad3e27a583bbb2ddd1553c521ed4d49af5514dc0a40372e
 COPY --from=build /out/package.json ./package.json
 COPY --from=build /out/node_modules ./node_modules
 COPY --from=build /repo/apps/api/dist ./dist
+# ECS runs the root file system read-only; Fargate fills an ephemeral volume from the image only
+# at a path the image declares as a VOLUME (D28). Nothing may write here after this line.
+VOLUME ["/tmp"]
 USER node
 EXPOSE 4000
 # The API's liveness probe. The worker service overrides it with `node dist/worker-health.js`.

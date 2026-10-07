@@ -12,6 +12,9 @@ COPY --chmod=0644 docker/clamav/freshclam.conf /etc/clamav/freshclam.conf
 # The signature database and the log and run folders belong to clamav, so nothing needs root.
 RUN install -d -o clamav -g clamav /run/clamav \
     && chown -R clamav:clamav /var/lib/clamav /var/log/clamav
+# ECS runs the root file system read-only; Fargate fills an ephemeral volume from the image (the
+# bundled signatures and the clamav ownership) only at a path the image declares as a VOLUME (D28).
+VOLUME ["/var/lib/clamav", "/run/clamav", "/tmp"]
 # /init-unprivileged starts freshclam with `--checks=${FRESHCLAM_CHECKS:-1}`, which overrides
 # `Checks` in freshclam.conf, so the same value is set here.
 ENV FRESHCLAM_CHECKS=12
