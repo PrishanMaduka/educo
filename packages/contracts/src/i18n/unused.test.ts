@@ -42,4 +42,29 @@ describe('findUnusedKeys', () => {
     );
     expect(result).toEqual({ unused: [], stale: ['nav.home', 'gone.key'] });
   });
+
+  it('counts only AppLocalizations getters, not any member with the same name', () => {
+    const dart = ['Text(title, style: textTheme.title)', 'widget.navHome'];
+    expect(findUnusedKeys(['title', 'nav.home'], { web: [], dart }, {}).unused).toEqual([
+      'title',
+      'nav.home',
+    ]);
+  });
+
+  it('counts AppLocalizations.of(context) with or without !', () => {
+    const dart = ['AppLocalizations.of(context)!.title', 'AppLocalizations.of(ctx) .navHome'];
+    expect(findUnusedKeys(['title', 'nav.home'], { web: [], dart }, {}).unused).toEqual([]);
+  });
+
+  it('ignores keys that only appear in comments', () => {
+    const web = ["// t('nav.home')", "/* t('theme.light')\n */ const x = 1;", '/** `theme.${x}` */'];
+    const dart = ['// l10n.studentsCount', '/* l10n.appNameParent */'];
+    expect(findUnusedKeys(keys, { web, dart }, {}).unused).toEqual(keys);
+  });
+
+  it('keeps code after a // inside a string', () => {
+    const web = ["const url = 'https://quad-edu.com'; t('nav.home');"];
+    const dart = ["final u = 'https://x'; l10n.themeDark;"];
+    expect(findUnusedKeys(['nav.home', 'theme.dark'], { web, dart }, {}).unused).toEqual([]);
+  });
 });

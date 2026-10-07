@@ -18,12 +18,46 @@ export interface UnusedKeysResult {
 const QUOTED = /(['"`])([\w.-]+)\1/g;
 // The static start of a template key: t(`theme.${choice}`) uses every `theme.*` key.
 const TEMPLATE_PREFIX = /`([\w-]+(?:\.[\w-]+)*\.)\$\{/g;
-const DART_GETTER = /\.([A-Za-z_]\w*)\b/g;
+// The app reads strings as `l10n.x` (`final l10n = AppLocalizations.of(context)`) or directly as
+// `AppLocalizations.of(context).x`; any other `.x` (textTheme.title) is not a string lookup.
+const DART_GETTER = /(?:\bl10n|\bAppLocalizations\.of\([^)]*\)!?)\s*\??\.\s*([A-Za-z_]\w*)/g;
+
+/**
+ * Removes `//` and `/* *\/` comments (TypeScript and Dart) so commented-out code does not count.
+ * Quoted strings are skipped, so a `//` inside a URL is kept.
+ */
+export function stripComments(source: string): string {
+  let out = '';
+  let quote: string | undefined;
+  for (let i = 0; i < source.length; i += 1) {
+    const char = source[i] ?? '';
+    if (quote !== undefined) {
+      out += char;
+      if (char === '\\') {
+        out += source[i + 1] ?? '';
+        i += 1;
+      } else if (char === quote) {
+        quote = undefined;
+      }
+    } else if (char === '/' && source[i + 1] === '/') {
+      const end = source.indexOf('\n', i);
+      i = end === -1 ? source.length : end - 1;
+    } else if (char === '/' && source[i + 1] === '*') {
+      const end = source.indexOf('*/', i + 2);
+      i = end === -1 ? source.length : end + 1;
+      out += ' ';
+    } else {
+      if (char === "'" || char === '"' || char === '`') quote = char;
+      out += char;
+    }
+  }
+  return out;
+}
 
 const matches = (sources: string[], pattern: RegExp, group: number): Set<string> => {
   const found = new Set<string>();
   for (const source of sources) {
-    for (const match of source.matchAll(pattern)) {
+    for (const match of stripComments(source).matchAll(pattern)) {
       const value = match[group];
       if (value !== undefined) found.add(value);
     }
