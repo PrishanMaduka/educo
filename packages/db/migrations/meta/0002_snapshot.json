@@ -1,0 +1,273 @@
+{
+  "id": "e1509956-431f-46b5-aa2e-b42b246f8a7b",
+  "prevId": "cd7b1d32-707e-4f87-88f9-470bfcc3e24c",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.email_suppressions": {
+      "name": "email_suppressions",
+      "schema": "",
+      "columns": {
+        "address": {
+          "name": "address",
+          "type": "citext",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "reason": {
+          "name": "reason",
+          "type": "email_suppression_reason",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "source": {
+          "name": "source",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "at": {
+          "name": "at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "email_suppressions_address_length": {
+          "name": "email_suppressions_address_length",
+          "value": "char_length(\"email_suppressions\".\"address\") <= 320"
+        },
+        "email_suppressions_address_shape": {
+          "name": "email_suppressions_address_shape",
+          "value": "\"email_suppressions\".\"address\"::text ~ '^[^@\\s]+@[^@\\s]+$'"
+        },
+        "email_suppressions_source_length": {
+          "name": "email_suppressions_source_length",
+          "value": "char_length(\"email_suppressions\".\"source\") BETWEEN 1 AND 64"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.tenants": {
+      "name": "tenants",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "short_name": {
+          "name": "short_name",
+          "type": "varchar(4)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "slug": {
+          "name": "slug",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "country": {
+          "name": "country",
+          "type": "char(2)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "region": {
+          "name": "region",
+          "type": "tenant_region",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'ap-south'"
+        },
+        "time_zone": {
+          "name": "time_zone",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "currency": {
+          "name": "currency",
+          "type": "char(3)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "locale": {
+          "name": "locale",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "tenant_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'trial'"
+        },
+        "plan_id": {
+          "name": "plan_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "seat_limit": {
+          "name": "seat_limit",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "trial_ends_at": {
+          "name": "trial_ends_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "curriculum_template_id": {
+          "name": "curriculum_template_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "since": {
+          "name": "since",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "health_override": {
+          "name": "health_override",
+          "type": "school_health_level",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "suspended_at": {
+          "name": "suspended_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "suspend_reason": {
+          "name": "suspend_reason",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "deletion_scheduled_for": {
+          "name": "deletion_scheduled_for",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "tenants_slug_unique": {
+          "name": "tenants_slug_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "slug"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {
+    "public.email_suppression_reason": {
+      "name": "email_suppression_reason",
+      "schema": "public",
+      "values": [
+        "bounce",
+        "complaint",
+        "manual"
+      ]
+    },
+    "public.school_health_level": {
+      "name": "school_health_level",
+      "schema": "public",
+      "values": [
+        "thriving",
+        "watch",
+        "at_risk",
+        "paused"
+      ]
+    },
+    "public.tenant_region": {
+      "name": "tenant_region",
+      "schema": "public",
+      "values": [
+        "ap-south",
+        "me-central",
+        "ap-southeast"
+      ]
+    },
+    "public.tenant_status": {
+      "name": "tenant_status",
+      "schema": "public",
+      "values": [
+        "trial",
+        "onboarding",
+        "active",
+        "past_due",
+        "suspended",
+        "deleted"
+      ]
+    }
+  },
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

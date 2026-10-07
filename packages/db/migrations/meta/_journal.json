@@ -15,6 +15,13 @@
       "when": 1791369990795,
       "tag": "0001_email_suppressions",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791371106775,
+      "tag": "0002_email_suppression_checks",
+      "breakpoints": true
     }
   ]
 }

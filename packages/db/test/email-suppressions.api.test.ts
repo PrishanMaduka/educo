@@ -101,3 +101,53 @@ describe('record_email_suppression (security definer, D16)', () => {
     ).rejects.toThrow(/invalid input value for enum/);
   });
 });
+
+describe('email_suppressions checks and manual entries (migration 0002)', () => {
+  const record = (address: string, reason: 'bounce' | 'complaint' | 'manual', source = 'ses') =>
+    createDefinerCalls(testDb().app).recordEmailSuppression({ address, reason, source });
+
+  it.each([
+    ['an address over 320 characters', `${'a'.repeat(310)}@example.com`, 'ses'],
+    ['an address without @', 'no-at-sign.example.com', 'ses'],
+    ['an address with two @', 'a@b@example.com', 'ses'],
+    ['an address with a space', 'a b@example.com', 'ses'],
+    ['an empty source', 'ok@example.com', ''],
+    ['a source over 64 characters', 'ok@example.com', 's'.repeat(65)],
+  ])('refuses %s', async (_name, address, source) => {
+    await expect(record(address, 'bounce', source)).rejects.toThrow(/check constraint/);
+  });
+
+  it('accepts an address of exactly 320 characters and a 64-character source', async () => {
+    const address = `${'a'.repeat(308)}@example.com`;
+    expect(address).toHaveLength(320);
+    await expect(record(address, 'bounce', 's'.repeat(64))).resolves.toBeUndefined();
+  });
+
+  it('never overwrites a manual suppression', async () => {
+    await record('manual@example.com', 'manual', 'console');
+    await record('manual@example.com', 'bounce', 'ses');
+    await record('MANUAL@example.com', 'complaint', 'ses');
+    const { rows: found } = await testDb().owner.query<SuppressionRow>(
+      `select address::text, reason::text, source from email_suppressions where address = 'manual@example.com'`,
+    );
+    expect(found).toEqual([{ address: 'manual@example.com', reason: 'manual', source: 'console' }]);
+  });
+
+  it('lets a manual suppression replace an automatic one', async () => {
+    await record('auto@example.com', 'bounce', 'ses');
+    await record('auto@example.com', 'manual', 'console');
+    const { rows: found } = await testDb().owner.query<SuppressionRow>(
+      `select address::text, reason::text, source from email_suppressions where address = 'auto@example.com'`,
+    );
+    expect(found).toEqual([{ address: 'auto@example.com', reason: 'manual', source: 'console' }]);
+  });
+
+  it('keeps EXECUTE for quad_app only after the function is redefined', async () => {
+    const { rows: grants } = await testDb().owner.query<{ app: boolean; platform: boolean }>(
+      `select has_function_privilege('quad_app', p.oid, 'EXECUTE') as app,
+              has_function_privilege('quad_platform', p.oid, 'EXECUTE') as platform
+       from pg_proc p where p.proname = 'record_email_suppression'`,
+    );
+    expect(grants).toEqual([{ app: true, platform: false }]);
+  });
+});
