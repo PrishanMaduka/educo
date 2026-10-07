@@ -197,7 +197,7 @@ Every link exists in two forms: the custom scheme `quad://…` (used in push pay
 With biometrics on, the app shows the lock screen at launch and after more than **5 minutes in the background** (measured from `AppLifecycleState.paused`). Payments always ask again, whatever the timer.
 
 ### Flavors and configuration
-Values come from `--dart-define-from-file=config/{flavor}.json` (checked in, no secrets) and the Firebase files per flavor.
+Values come from `--dart-define-from-file=env/{flavor}.json` (checked in, no secrets; keys `APP_ENV` (`local`, `staging`, `production`), `API_URL`, `SOCKET_URL`, `SENTRY_DSN`) and the Firebase files per flavor.
 
 | Flavor | Bundle id / application id | API_URL | SOCKET_URL | Firebase project |
 |---|---|---|---|---|
@@ -205,7 +205,7 @@ Values come from `--dart-define-from-file=config/{flavor}.json` (checked in, no 
 | `staging` | `com.quadedu.parent.staging` | `https://staging.quad-edu.com/api/v1` | `wss://staging.quad-edu.com/socket.io` | `quad-staging` |
 | `prod` | `com.quadedu.parent` | `https://quad-edu.com/api/v1` | `wss://quad-edu.com/socket.io` | `quad-prod` |
 
-Each flavor has its own app name suffix ("Quad Dev", "Quad Staging"), icon badge, `google-services.json` / `GoogleService-Info.plist`, associated domains (`applinks:staging.quad-edu.com` for staging) and PayHere/Stripe sandbox or live mode (the mode follows the school's gateway account, not the flavor).
+Each flavor has its own launcher name ("Quad DEV", "Quad STG", and "Quad – School & Family" for `prod`), icon badge, `google-services.json` / `GoogleService-Info.plist`, associated domains (`applinks:staging.quad-edu.com` for staging) and PayHere/Stripe sandbox or live mode (the mode follows the school's gateway account, not the flavor).
 
 ### Payments handshake
 The app never sees gateway secrets and never decides that a payment succeeded.
