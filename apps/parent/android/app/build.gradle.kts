@@ -30,22 +30,21 @@ android {
 
     // One Quad app for every school (D13). Build with --flavor <name> and the
     // matching --dart-define-from-file=env/<name>.json (spec 09, Flavors).
-    // resValue escapes XML itself, so the ampersand stays literal here.
     flavorDimensions += "env"
     productFlavors {
         create("dev") {
             dimension = "env"
             applicationIdSuffix = ".dev"
-            resValue("string", "app_name", "Quad DEV")
+            resValue("string", "app_name", "Quad Dev")
         }
         create("staging") {
             dimension = "env"
             applicationIdSuffix = ".staging"
-            resValue("string", "app_name", "Quad STG")
+            resValue("string", "app_name", "Quad Staging")
         }
         create("prod") {
             dimension = "env"
-            resValue("string", "app_name", "Quad – School & Family")
+            resValue("string", "app_name", "Quad")
         }
     }
 

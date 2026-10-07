@@ -6,9 +6,9 @@ import 'package:flutter_test/flutter_test.dart';
 /// checks keep the Gradle and Xcode files in line with spec 09 and env/.
 void main() {
   const flavors = {
-    'dev': ('com.quadedu.parent.dev', 'Quad DEV'),
-    'staging': ('com.quadedu.parent.staging', 'Quad STG'),
-    'prod': ('com.quadedu.parent', 'Quad – School & Family'),
+    'dev': ('com.quadedu.parent.dev', 'Quad Dev'),
+    'staging': ('com.quadedu.parent.staging', 'Quad Staging'),
+    'prod': ('com.quadedu.parent', 'Quad'),
   };
   final gradle = File('android/app/build.gradle.kts').readAsStringSync();
 
