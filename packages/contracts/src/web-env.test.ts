@@ -36,4 +36,35 @@ describe('parseWebPublicEnv', () => {
       parseWebPublicEnv({ NEXT_PUBLIC_APP_ENV: 'prod', NEXT_PUBLIC_API_URL: 'not a url' }),
     ).toThrow(/NEXT_PUBLIC_APP_ENV[\s\S]*NEXT_PUBLIC_API_URL/);
   });
+
+  it('accepts only an http(s) origin for the API, without a path', () => {
+    expect(parseWebPublicEnv({ NEXT_PUBLIC_API_URL: 'http://localhost:4000/' })).toMatchObject({
+      NEXT_PUBLIC_API_URL: 'http://localhost:4000',
+    });
+    for (const bad of [
+      'ftp://quad-edu.com',
+      'https://quad-edu.com/api/v1',
+      'https://quad-edu.com?x=1',
+      'https://quad-edu.com/#top',
+      'https://user:pass@quad-edu.com',
+    ]) {
+      expect(() => parseWebPublicEnv({ NEXT_PUBLIC_API_URL: bad }), bad).toThrow(
+        /NEXT_PUBLIC_API_URL/,
+      );
+    }
+  });
+
+  it('requires the API origin in staging and production (no localhost default)', () => {
+    for (const env of ['staging', 'production']) {
+      expect(() => parseWebPublicEnv({ NEXT_PUBLIC_APP_ENV: env }), env).toThrow(
+        /NEXT_PUBLIC_API_URL/,
+      );
+    }
+    expect(
+      parseWebPublicEnv({
+        NEXT_PUBLIC_APP_ENV: 'production',
+        NEXT_PUBLIC_API_URL: 'https://quad-edu.com',
+      }).NEXT_PUBLIC_API_URL,
+    ).toBe('https://quad-edu.com');
+  });
 });

@@ -4,22 +4,58 @@ import { z } from 'zod';
 const optional = <T extends z.ZodTypeAny>(schema: T) =>
   z.preprocess((value) => (value === '' ? undefined : value), schema.optional());
 
+/** An http(s) origin such as `https://quad-edu.com`: no path, query, fragment or credentials. A trailing `/` is dropped. */
+const origin = z
+  .string()
+  .url()
+  .refine(
+    (value) => {
+      // Zod still runs this after .url() has failed, so a bad string must not throw here.
+      if (!URL.canParse(value)) return true;
+      const url = new URL(value);
+      return (
+        (url.protocol === 'http:' || url.protocol === 'https:') &&
+        url.pathname === '/' &&
+        !url.search &&
+        !url.hash &&
+        !url.username &&
+        !url.password &&
+        !value.includes('?') &&
+        !value.includes('#')
+      );
+    },
+    { message: 'Must be an http(s) origin with no path, for example https://quad-edu.com' },
+  )
+  .transform((value) => (URL.canParse(value) ? new URL(value).origin : value));
+
 /**
- * Public variables the web apps read at build time (spec 02 "Web public (build time)"). All optional for now,
- * with local defaults; staging and production set them in CI.
+ * Public variables the web apps read at build time (spec 02 "Web public (build time)"). Locally they are all
+ * optional with defaults; staging and production must name the API origin (no localhost fallback).
  */
-export const WebPublicEnvSchema = z.object({
-  NEXT_PUBLIC_APP_ENV: optional(z.enum(['local', 'staging', 'production'])).transform(
-    (value) => value ?? 'local',
-  ),
-  /** Origin of the API that `/api/v1/*` is proxied to. */
-  NEXT_PUBLIC_API_URL: optional(z.string().url()).transform(
-    (value) => value ?? 'http://localhost:4000',
-  ),
-  NEXT_PUBLIC_SENTRY_DSN: optional(z.string().url()),
-  NEXT_PUBLIC_TURNSTILE_SITE_KEY: optional(z.string()),
-  NEXT_PUBLIC_PLAUSIBLE_DOMAIN: optional(z.string()),
-});
+export const WebPublicEnvSchema = z
+  .object({
+    NEXT_PUBLIC_APP_ENV: optional(z.enum(['local', 'staging', 'production'])).transform(
+      (value) => value ?? 'local',
+    ),
+    /** Origin of the API that `/api/v1/*` is proxied to. */
+    NEXT_PUBLIC_API_URL: optional(origin),
+    NEXT_PUBLIC_SENTRY_DSN: optional(z.string().url()),
+    NEXT_PUBLIC_TURNSTILE_SITE_KEY: optional(z.string()),
+    NEXT_PUBLIC_PLAUSIBLE_DOMAIN: optional(z.string()),
+  })
+  .superRefine((env, ctx) => {
+    if (env.NEXT_PUBLIC_APP_ENV !== 'local' && env.NEXT_PUBLIC_API_URL === undefined) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['NEXT_PUBLIC_API_URL'],
+        message: `Required when NEXT_PUBLIC_APP_ENV is ${env.NEXT_PUBLIC_APP_ENV}`,
+      });
+    }
+  })
+  .transform((env) => ({
+    ...env,
+    NEXT_PUBLIC_API_URL: env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000',
+  }));
 
 export type WebPublicEnv = z.infer<typeof WebPublicEnvSchema>;
 
