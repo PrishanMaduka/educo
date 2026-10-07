@@ -112,6 +112,9 @@ importers:
       '@quad/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@quad/domain':
+        specifier: workspace:*
+        version: link:../../packages/domain
       '@swc/core':
         specifier: 1.16.13
         version: 1.16.13
@@ -394,6 +397,10 @@ importers:
         version: 3.2.7(@types/node@22.20.5)(jiti@2.7.0)(jsdom@27.0.0)(lightningcss@1.30.1)(tsx@4.23.15)(yaml@2.9.1)
 
   packages/domain:
+    dependencies:
+      '@quad/contracts':
+        specifier: workspace:*
+        version: link:../contracts
     devDependencies:
       '@quad/config':
         specifier: workspace:*

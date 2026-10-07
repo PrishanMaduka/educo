@@ -23,3 +23,7 @@ export type TenantStatus = z.infer<typeof TenantStatus>;
 /** School health level (spec 04 `school_health_snapshots.level`, also `tenants.health_override`). */
 export const SchoolHealthLevel = z.enum(['thriving', 'watch', 'at_risk', 'paused']);
 export type SchoolHealthLevel = z.infer<typeof SchoolHealthLevel>;
+
+/** Why an address is suppressed (spec 04 `email_suppressions.reason`). */
+export const EmailSuppressionReason = z.enum(['bounce', 'complaint', 'manual']);
+export type EmailSuppressionReason = z.infer<typeof EmailSuppressionReason>;
