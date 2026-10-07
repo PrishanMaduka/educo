@@ -9,6 +9,7 @@
   ],
   "agentGuidance": false,
   "globalEnv": ["APP_ENV", "NODE_ENV"],
+  "globalPassThroughEnv": ["QUAD_REQUIRE_FLUTTER"],
   "tasks": {
     "build": {
       "dependsOn": ["^build", "tokens:build"],

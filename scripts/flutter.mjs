@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 // Runs `flutter` or `dart` through FVM when it is installed, otherwise from PATH (ruling R7).
 //   node scripts/flutter.mjs <flutter|dart> [args...]
-// With neither installed it prints a skip message and exits 0, except in CI, where it fails.
+// With neither installed it skips (exit 0, loudly) only on a developer machine: in CI, or with
+// QUAD_REQUIRE_FLUTTER=1, it fails.
 import { spawnSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { delimiter, join } from 'node:path';
@@ -20,6 +21,13 @@ export function resolveTool(tool) {
   if (onPath('fvm')) return { cmd: 'fvm', args: [tool] };
   if (onPath(tool)) return { cmd: tool, args: [] };
   return null;
+}
+
+/** What to do when Flutter is missing: 'fail' in CI or with QUAD_REQUIRE_FLUTTER=1, else 'skip'. */
+export function missingToolchainAction(env) {
+  const ci = env.CI ?? '';
+  const inCi = ci !== '' && ci !== 'false' && ci !== '0';
+  return inCi || env.QUAD_REQUIRE_FLUTTER === '1' ? 'fail' : 'skip';
 }
 
 /** Runs `tool` with `args` in `cwd`; throws when the toolchain is missing or the command fails. */
@@ -45,14 +53,14 @@ if (isMain) {
   }
   const resolved = resolveTool(tool);
   if (!resolved) {
-    if (process.env.CI) {
+    if (missingToolchainAction(process.env) === 'fail') {
       process.stderr.write(
-        `Neither fvm nor ${tool} is on PATH; CI must install Flutter (.fvmrc).\n`,
+        `Neither fvm nor ${tool} is on PATH. Install Flutter (version in .fvmrc); CI and QUAD_REQUIRE_FLUTTER=1 need it.\n`,
       );
       process.exit(1);
     }
     process.stdout.write(
-      `Skipping "${tool} ${args.join(' ')}": neither fvm nor ${tool} is on PATH. Install Flutter (.fvmrc) to run it.\n`,
+      `\n*** Flutter checks SKIPPED (no Flutter on PATH): "${tool} ${args.join(' ')}" did not run. Install Flutter (.fvmrc) to run them. ***\n\n`,
     );
     process.exit(0);
   }

@@ -7,11 +7,19 @@ import { rmSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { runTool } from './flutter.mjs';
+import { resolveTool, runTool } from './flutter.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const spec = resolve(root, 'packages/contracts/openapi.json');
 const run = (cmd, args, cwd = root) => execFileSync(cmd, args, { cwd, stdio: 'inherit' });
+
+// Check the toolchain before anything is regenerated or deleted.
+if (!resolveTool('dart')) {
+  process.stderr.write(
+    'Install Flutter (version in .fvmrc) to run pnpm api:client — it also generates the Dart client.\n',
+  );
+  process.exit(1);
+}
 
 run('pnpm', ['--filter', '@quad/api', 'openapi:export', spec]);
 run('pnpm', [
