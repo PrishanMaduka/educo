@@ -3,12 +3,15 @@
 import { execFileSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
+import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 
 import { runTool } from './flutter.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+/** @type {(cmd: string, args: string[]) => unknown} */
 const run = (cmd, args) => execFileSync(cmd, args, { cwd: root, stdio: 'inherit' });
+/** @type {(args: string[]) => string} */
 const out = (args) => execFileSync('git', args, { cwd: root, encoding: 'utf8' }).trim();
 
 const GENERATED = [

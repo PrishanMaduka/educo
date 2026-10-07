@@ -1,16 +1,10 @@
 import { defineConfig } from 'vitest/config';
 
-/** Root projects: repo-level checks plus every package or app with its own Vitest config. */
+/** Root projects: every package or app with its own Vitest config, including the repo scripts. */
 export default defineConfig({
   test: {
     projects: [
-      {
-        test: {
-          name: 'repo',
-          environment: 'node',
-          include: ['scripts/test/**/*.test.ts'],
-        },
-      },
+      'scripts/vitest.config.ts',
       'packages/*/vitest.config.ts',
       'apps/*/vitest.config.ts',
     ],

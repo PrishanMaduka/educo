@@ -6,8 +6,10 @@
 import { spawnSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { delimiter, join } from 'node:path';
+import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 
+/** @type {(name: string) => boolean} */
 const onPath = (name) => {
   const exts = process.platform === 'win32' ? ['.exe', '.bat', '.cmd', ''] : [''];
   return (process.env.PATH ?? '')
@@ -16,21 +18,34 @@ const onPath = (name) => {
     .some((dir) => exts.some((ext) => existsSync(join(dir, name + ext))));
 };
 
-/** The command and leading arguments for `tool` ('flutter' or 'dart'), or null without a toolchain. */
+/**
+ * The command and leading arguments for `tool` ('flutter' or 'dart'), or null without a toolchain.
+ * @param {'flutter' | 'dart'} tool
+ * @returns {{ cmd: string, args: string[] } | null}
+ */
 export function resolveTool(tool) {
   if (onPath('fvm')) return { cmd: 'fvm', args: [tool] };
   if (onPath(tool)) return { cmd: tool, args: [] };
   return null;
 }
 
-/** What to do when Flutter is missing: 'fail' in CI or with QUAD_REQUIRE_FLUTTER=1, else 'skip'. */
+/**
+ * What to do when Flutter is missing: 'fail' in CI or with QUAD_REQUIRE_FLUTTER=1, else 'skip'.
+ * @param {Record<string, string | undefined>} env
+ * @returns {'fail' | 'skip'}
+ */
 export function missingToolchainAction(env) {
   const ci = env.CI ?? '';
   const inCi = ci !== '' && ci !== 'false' && ci !== '0';
   return inCi || env.QUAD_REQUIRE_FLUTTER === '1' ? 'fail' : 'skip';
 }
 
-/** Runs `tool` with `args` in `cwd`; throws when the toolchain is missing or the command fails. */
+/**
+ * Runs `tool` with `args` in `cwd`; throws when the toolchain is missing or the command fails.
+ * @param {'flutter' | 'dart'} tool
+ * @param {string[]} args
+ * @param {string} cwd
+ */
 export function runTool(tool, args, cwd) {
   const resolved = resolveTool(tool);
   if (!resolved) throw new Error(`${tool} is not installed (neither fvm nor ${tool} is on PATH).`);

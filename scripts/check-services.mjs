@@ -1,6 +1,9 @@
 #!/usr/bin/env node
 // Waits until Postgres and Redis accept connections; gives up after 60 seconds.
+import console from 'node:console';
 import net from 'node:net';
+import process from 'node:process';
+import { setTimeout } from 'node:timers';
 
 const TIMEOUT_MS = 60_000;
 const RETRY_MS = 1_000;
@@ -10,9 +13,11 @@ const targets = [
   { name: 'Redis', host: 'localhost', port: 6379 },
 ];
 
+/** @type {(target: { host: string, port: number }) => Promise<boolean>} */
 const canConnect = ({ host, port }) =>
   new Promise((resolve) => {
     const socket = net.connect({ host, port });
+    /** @param {boolean} ok */
     const done = (ok) => {
       socket.destroy();
       resolve(ok);
@@ -22,6 +27,7 @@ const canConnect = ({ host, port }) =>
     socket.once('error', () => done(false));
   });
 
+/** @type {(ms: number) => Promise<void>} */
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const deadline = Date.now() + TIMEOUT_MS;

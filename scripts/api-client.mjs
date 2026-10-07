@@ -5,12 +5,14 @@
 import { execFileSync } from 'node:child_process';
 import { rmSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
+import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 
 import { resolveTool, runTool } from './flutter.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const spec = resolve(root, 'packages/contracts/openapi.json');
+/** @type {(cmd: string, args: string[], cwd?: string) => unknown} */
 const run = (cmd, args, cwd = root) => execFileSync(cmd, args, { cwd, stdio: 'inherit' });
 
 // Check the toolchain before anything is regenerated or deleted.

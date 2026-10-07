@@ -11,6 +11,7 @@ import {
 } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
+
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { missingToolchainAction } from '../flutter.mjs';
@@ -56,7 +57,9 @@ describe('scripts/flutter.mjs without Flutter', () => {
 
 describe('scripts/api-client.mjs without Dart', () => {
   let sandbox = '';
-  afterEach(() => rmSync(sandbox, { recursive: true, force: true }));
+  afterEach(() => {
+    rmSync(sandbox, { recursive: true, force: true });
+  });
 
   it('fails before touching any file', () => {
     // A copy of the scripts in a scratch repo, with a pnpm stub that logs calls.
