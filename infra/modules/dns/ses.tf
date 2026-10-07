@@ -114,8 +114,11 @@ resource "aws_sesv2_email_identity_mail_from_attributes" "mail" {
 resource "aws_sesv2_configuration_set" "this" {
   configuration_set_name = var.name
 
+  # OPTIONAL, not REQUIRE: a recipient server without STARTTLS would otherwise give a transient
+  # failure that never reaches the webhook, and a sign-in code would be lost silently. Revisited in
+  # M12 (D28).
   delivery_options {
-    tls_policy = "REQUIRE"
+    tls_policy = "OPTIONAL"
   }
 
   reputation_options {

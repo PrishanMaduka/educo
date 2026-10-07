@@ -101,6 +101,14 @@ run "mail_domain_signs_with_2048_bit_easy_dkim" {
   }
 
   assert {
+    condition = length(aws_route53_record.dkim) == 3 && alltrue([
+      for record in aws_route53_record.dkim :
+      can(regex("^[^.]+\\._domainkey\\.mail\\.quad-edu\\.com$", record.name))
+    ])
+    error_message = "Each DKIM name must have exactly one label before ._domainkey.mail.quad-edu.com."
+  }
+
+  assert {
     condition = (
       aws_sesv2_email_identity_mail_from_attributes.mail.email_identity == "mail.quad-edu.com" &&
       aws_sesv2_email_identity_mail_from_attributes.mail.mail_from_domain == "bounce.mail.quad-edu.com" &&
@@ -119,8 +127,8 @@ run "bounces_and_complaints_go_to_the_signed_sns_topic" {
   }
 
   assert {
-    condition     = one(aws_sesv2_configuration_set.this.delivery_options).tls_policy == "REQUIRE"
-    error_message = "SES must deliver over TLS only."
+    condition     = one(aws_sesv2_configuration_set.this.delivery_options).tls_policy == "OPTIONAL"
+    error_message = "SES must use TLS when the recipient offers it but still deliver when it does not, so no code is lost silently (REQUIRE is revisited in M12)."
   }
 
   assert {

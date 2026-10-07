@@ -1156,6 +1156,10 @@ Steps:
      - ElastiCache token rotation uses the provider default `ROTATE`, which keeps the old token valid; retire it with a later apply that sets `auth_token_update_strategy = "SET"`.
      - Partial-apply divergence: if an apply fails between writing a role secret and its URL secret (or the Redis token and `REDIS_URL`), raise that version and apply again.
      - First-plan check: a plan that changes only tags must replace no `aws_secretsmanager_secret_version`.
+  2b. **Runbook: SES events subscription** (Task 11 review):
+     - The webhook confirms the SNS subscription itself and Terraform does not wait for it (`endpoint_auto_confirms = false`). If the confirmation is missed (for example, the API was not up yet), the subscription stays pending for 3 days, until SNS deletes it.
+     - Recover with `terraform -chdir=infra/envs/staging apply -replace=module.dns.aws_sns_topic_subscription.webhook` once the API is up, then check `aws sns list-subscriptions-by-topic` (checklist step 10).
+     - M12: an SNS delivery retry policy or a dead-letter queue for the subscription (D28).
   3. **Accounts and keys to create:**
      - Firebase projects `quad-dev` and `quad-staging`, with the APNs `.p8` key uploaded to each;
      - Sentry projects `quad-api`, `quad-staff`, `quad-console` and `quad-parent`;
