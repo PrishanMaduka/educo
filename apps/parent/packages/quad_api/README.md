@@ -68,6 +68,7 @@ Class | Method | HTTP request | Description
 [*HealthApi*](doc/HealthApi.md) | [**apiV1HealthLiveGet**](doc/HealthApi.md#apiv1healthliveget) | **GET** /api/v1/health/live | The process is up
 [*HealthApi*](doc/HealthApi.md) | [**apiV1HealthReadyGet**](doc/HealthApi.md#apiv1healthreadyget) | **GET** /api/v1/health/ready | Postgres and Redis answer
 [*MetaApi*](doc/MetaApi.md) | [**apiV1OpenapiJsonGet**](doc/MetaApi.md#apiv1openapijsonget) | **GET** /api/v1/openapi.json | This OpenAPI document
+[*WebhooksApi*](doc/WebhooksApi.md) | [**apiV1WebhooksSesPost**](doc/WebhooksApi.md#apiv1webhookssespost) | **POST** /api/v1/webhooks/ses | SES bounce and complaint events from SNS (signature version 2, pinned topic)
 
 
 ## Documentation For Models
@@ -75,6 +76,8 @@ Class | Method | HTTP request | Description
  - [ErrorBody](doc/ErrorBody.md)
  - [HealthLive](doc/HealthLive.md)
  - [HealthReady](doc/HealthReady.md)
+ - [SesWebhookAck](doc/SesWebhookAck.md)
+ - [SnsEnvelope](doc/SnsEnvelope.md)
 
 
 ## Documentation For Authorization

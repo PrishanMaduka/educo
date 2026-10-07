@@ -41,6 +41,9 @@ const boolean = z
   .transform((value) => value === 'true');
 const text = z.string();
 const version = z.string().regex(/^\d+\.\d+\.\d+$/, { message: 'must look like 1.2.3' });
+const snsTopicArn = z.string().regex(/^arn:aws:sns:[a-z0-9-]+:\d{12}:[A-Za-z0-9_-]{1,256}$/, {
+  message: 'must be an SNS topic ARN (arn:aws:sns:<region>:<account>:<name>)',
+});
 
 /** Wraps a schema so a blank value is treated as unset. */
 const req = <T extends z.ZodTypeAny>(schema: T) => z.preprocess(blank, schema);
@@ -129,6 +132,8 @@ const ConfigSchema = z.object({
   SMTP_URL: opt(smtpUrl),
   SES_REGION: opt(text),
   SES_CONFIGURATION_SET: opt(text),
+  // The only topic whose SES bounce and complaint events the webhook accepts; unset refuses all.
+  SES_SNS_TOPIC_ARN: opt(snsTopicArn),
   EMAIL_FROM_DOMAIN: opt(text),
   SUPPORT_INBOX: opt(z.string().email({ message: 'must be an email address' })),
   SALES_INBOX: opt(z.string().email({ message: 'must be an email address' })),

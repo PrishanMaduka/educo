@@ -123,6 +123,64 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/webhooks/ses": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** SES bounce and complaint events from SNS (signature version 2, pinned topic) */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["SnsEnvelope"];
+                };
+            };
+            responses: {
+                /** @description Accepted */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SesWebhookAck"];
+                    };
+                };
+                /** @description Error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -145,6 +203,25 @@ export interface components {
             db: "ok" | "down";
             /** @enum {string} */
             redis: "ok" | "down";
+        };
+        SesWebhookAck: {
+            /** @enum {string} */
+            status: "ok";
+        };
+        SnsEnvelope: {
+            /** @enum {string} */
+            Type: "Notification" | "SubscriptionConfirmation" | "UnsubscribeConfirmation";
+            MessageId: string;
+            TopicArn: string;
+            Message: string;
+            /** Format: date-time */
+            Timestamp: string;
+            SignatureVersion: string;
+            Signature: string;
+            SigningCertURL: string;
+            Subject?: string;
+            SubscribeURL?: string;
+            Token?: string;
         };
     };
     responses: never;

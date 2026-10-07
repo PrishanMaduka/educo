@@ -9,6 +9,7 @@ import 'package:quad_api/src/auth/bearer_auth.dart';
 import 'package:quad_api/src/auth/oauth.dart';
 import 'package:quad_api/src/api/health_api.dart';
 import 'package:quad_api/src/api/meta_api.dart';
+import 'package:quad_api/src/api/webhooks_api.dart';
 
 class QuadApi {
   static const String basePath = r'http://localhost';
@@ -71,5 +72,11 @@ class QuadApi {
   /// by doing that all interceptors will not be executed
   MetaApi getMetaApi() {
     return MetaApi(dio);
+  }
+
+  /// Get WebhooksApi instance, base route and serializer can be overridden by a given but be careful,
+  /// by doing that all interceptors will not be executed
+  WebhooksApi getWebhooksApi() {
+    return WebhooksApi(dio);
   }
 }

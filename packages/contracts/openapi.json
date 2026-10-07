@@ -72,6 +72,78 @@
           "db",
           "redis"
         ]
+      },
+      "SesWebhookAck": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ok"
+            ]
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "SnsEnvelope": {
+        "type": "object",
+        "properties": {
+          "Type": {
+            "type": "string",
+            "enum": [
+              "Notification",
+              "SubscriptionConfirmation",
+              "UnsubscribeConfirmation"
+            ]
+          },
+          "MessageId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "TopicArn": {
+            "type": "string",
+            "minLength": 1
+          },
+          "Message": {
+            "type": "string"
+          },
+          "Timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "SignatureVersion": {
+            "type": "string"
+          },
+          "Signature": {
+            "type": "string",
+            "minLength": 1
+          },
+          "SigningCertURL": {
+            "type": "string",
+            "minLength": 1
+          },
+          "Subject": {
+            "type": "string"
+          },
+          "SubscribeURL": {
+            "type": "string"
+          },
+          "Token": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "Type",
+          "MessageId",
+          "TopicArn",
+          "Message",
+          "Timestamp",
+          "SignatureVersion",
+          "Signature",
+          "SigningCertURL"
+        ]
       }
     },
     "parameters": {}
@@ -141,6 +213,56 @@
                 "schema": {
                   "type": "object",
                   "additionalProperties": {}
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/webhooks/ses": {
+      "post": {
+        "summary": "SES bounce and complaint events from SNS (signature version 2, pinned topic)",
+        "tags": [
+          "webhooks"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SnsEnvelope"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SesWebhookAck"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
                 }
               }
             }

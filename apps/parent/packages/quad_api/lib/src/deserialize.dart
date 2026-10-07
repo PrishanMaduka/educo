@@ -1,6 +1,8 @@
 import 'package:quad_api/src/model/error_body.dart';
 import 'package:quad_api/src/model/health_live.dart';
 import 'package:quad_api/src/model/health_ready.dart';
+import 'package:quad_api/src/model/ses_webhook_ack.dart';
+import 'package:quad_api/src/model/sns_envelope.dart';
 
 final _regList = RegExp(r'^List<(.*)>$');
 final _regSet = RegExp(r'^Set<(.*)>$');
@@ -26,6 +28,10 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return HealthLive.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'HealthReady':
           return HealthReady.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'SesWebhookAck':
+          return SesWebhookAck.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'SnsEnvelope':
+          return SnsEnvelope.fromJson(value as Map<String, dynamic>) as ReturnType;
         default:
           RegExpMatch? match;
 

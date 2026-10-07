@@ -111,6 +111,27 @@ describe('loadConfig', () => {
     );
   });
 
+  it('accepts an SNS topic ARN for SES_SNS_TOPIC_ARN and leaves it unset when blank', () => {
+    const arn = 'arn:aws:sns:ap-south-1:123456789012:quad-staging-ses-events';
+    expect(loadConfig(localEnv({ SES_SNS_TOPIC_ARN: arn })).SES_SNS_TOPIC_ARN).toBe(arn);
+    expect(loadConfig(localEnv({ SES_SNS_TOPIC_ARN: '' })).SES_SNS_TOPIC_ARN).toBeUndefined();
+  });
+
+  it.each([
+    ['arn:aws:sqs:ap-south-1:123456789012:q'],
+    ['arn:aws:sns:ap-south-1:12345:quad'],
+    ['arn:aws:sns:ap-south-1:123456789012:'],
+    ['arn:aws:sns::123456789012:quad'],
+    ['quad-staging-ses-events'],
+  ])('refuses SES_SNS_TOPIC_ARN=%s', (arn) => {
+    expect(configErrorOf(localEnv({ SES_SNS_TOPIC_ARN: arn })).problems).toEqual([
+      {
+        variable: 'SES_SNS_TOPIC_ARN',
+        problem: 'must be an SNS topic ARN (arn:aws:sns:<region>:<account>:<name>)',
+      },
+    ]);
+  });
+
   it('parses booleans and numbers', () => {
     const config = loadConfig(
       localEnv({ CONSOLE_PASSWORD_LOGIN: 'true', PAYMENTS_SANDBOX: 'false', API_PORT: '4100' }),

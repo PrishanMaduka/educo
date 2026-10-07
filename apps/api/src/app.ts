@@ -9,6 +9,7 @@ import { AppErrorFilter } from './common/error.filter';
 import { requestIdFrom, runWithRequestContext } from './common/request-context';
 import { PinoNestLogger, createLogger } from './observability/logger';
 
+import type { AppOverrides } from './app.module';
 import type { Config } from './config';
 import type { NestFastifyApplication } from '@nestjs/platform-fastify';
 import type { FastifyInstance } from 'fastify';
@@ -22,6 +23,8 @@ export interface CreateAppOptions {
    * (route listing, test-only routes); app behaviour belongs in modules.
    */
   readonly beforeInit?: (fastify: FastifyInstance) => void;
+  /** Replacements for outbound calls (tests only). */
+  readonly overrides?: AppOverrides;
 }
 
 /**
@@ -53,7 +56,7 @@ export async function createApp(
     trustProxy: trustHops(config.TRUST_PROXY_HOPS),
   });
   const app = await NestFactory.create<NestFastifyApplication>(
-    AppModule.forRoot(config, logger),
+    AppModule.forRoot(config, logger, options.overrides),
     adapter,
     { logger: new PinoNestLogger(logger), abortOnError: false },
   );

@@ -7,3 +7,9 @@
 export const CONFIG = Symbol('CONFIG');
 /** The pino root logger: `@Inject(LOGGER) logger: Logger`. */
 export const LOGGER = Symbol('LOGGER');
+/** The `quad_app` database handle (`QuadTenantDb`): `@Inject(TENANT_DB) db: QuadTenantDb`. */
+export const TENANT_DB = Symbol('TENANT_DB');
+/** Fetches an SNS signing certificate: `(certUrl) => Promise<string>` (tests inject a key). */
+export const SNS_KEY_FETCHER = Symbol('SNS_KEY_FETCHER');
+/** Confirms an SNS subscription with a GET of its SubscribeURL: `(url) => Promise<void>`. */
+export const SNS_SUBSCRIBE_FETCHER = Symbol('SNS_SUBSCRIBE_FETCHER');

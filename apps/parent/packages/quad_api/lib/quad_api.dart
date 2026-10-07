@@ -11,8 +11,11 @@ export 'package:quad_api/src/auth/oauth.dart';
 
 export 'package:quad_api/src/api/health_api.dart';
 export 'package:quad_api/src/api/meta_api.dart';
+export 'package:quad_api/src/api/webhooks_api.dart';
 
 export 'package:quad_api/src/model/error_body.dart';
 export 'package:quad_api/src/model/health_live.dart';
 export 'package:quad_api/src/model/health_ready.dart';
+export 'package:quad_api/src/model/ses_webhook_ack.dart';
+export 'package:quad_api/src/model/sns_envelope.dart';
 

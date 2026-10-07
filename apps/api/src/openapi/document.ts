@@ -2,6 +2,7 @@ import { OpenApiGeneratorV31 } from '@asteasolutions/zod-to-openapi';
 
 import { version } from '../../package.json';
 import { healthRoutes } from '../health/health.routes';
+import { sesWebhookRoutes } from '../webhooks/ses/ses-webhook.routes';
 
 import { openApiRoutes } from './openapi.routes';
 import { createRegistry } from './registry';
@@ -12,7 +13,11 @@ import type { ApiRoute } from './registry';
  * Every documented route. Listed explicitly (not collected as modules load) so the document is
  * the same whether or not the server has started. Add each new area's routes here.
  */
-export const API_ROUTES: readonly ApiRoute[] = [...healthRoutes, ...openApiRoutes];
+export const API_ROUTES: readonly ApiRoute[] = [
+  ...healthRoutes,
+  ...openApiRoutes,
+  ...sesWebhookRoutes,
+];
 
 export type OpenApiDocument = ReturnType<OpenApiGeneratorV31['generateDocument']>;
 

@@ -18,18 +18,22 @@ export interface TestAppOptions extends CreateAppOptions {
   readonly listen?: boolean;
 }
 
+type EnvOverrides = Record<string, string | undefined>;
+
 /**
  * Builds the real app once per test file and closes it afterwards. Requests go through
- * Fastify's `inject`, so no port is opened unless `listen` is set.
+ * Fastify's `inject`, so no port is opened unless `listen` is set. `overrides` may be a function
+ * when the values only exist once an earlier `beforeAll` has run (a fresh test database).
  */
 export function useTestApp(
-  overrides: Record<string, string | undefined> = {},
+  overrides: EnvOverrides | (() => EnvOverrides) = {},
   { listen = false, ...options }: TestAppOptions = {},
 ): () => NestFastifyApplication {
   let app: NestFastifyApplication | undefined;
 
   beforeAll(async () => {
-    app = await createApp(loadConfig(localEnv(overrides)), {
+    const env = typeof overrides === 'function' ? overrides() : overrides;
+    app = await createApp(loadConfig(localEnv(env)), {
       logger: pino({ level: 'silent' }),
       ...options,
     });
