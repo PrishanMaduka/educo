@@ -15,6 +15,10 @@
     "./admin": {
       "types": "./src/admin.ts",
       "default": "./src/admin.ts"
+    },
+    "./testing": {
+      "types": "./src/testing.ts",
+      "default": "./src/testing.ts"
     }
   },
   "scripts": {

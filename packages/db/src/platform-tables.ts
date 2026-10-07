@@ -5,6 +5,8 @@
  */
 export const PLATFORM_TABLES: readonly string[] = Object.freeze([
   'tenants',
+  // Written only through record_email_suppression (D16).
+  'email_suppressions',
   // Drizzle's migration bookkeeping.
   'drizzle.__drizzle_migrations',
 ]);

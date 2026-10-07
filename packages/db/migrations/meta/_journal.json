@@ -8,6 +8,13 @@
       "when": 1791300972307,
       "tag": "0000_tenants",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791369990795,
+      "tag": "0001_email_suppressions",
+      "breakpoints": true
     }
   ]
 }

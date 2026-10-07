@@ -3,6 +3,7 @@ export { closeDb, createPlatformDb, createTenantDb, withPlatform, withTenant } f
 export type { PlatformRunner, PlatformTx } from './platform';
 export { PLATFORM_TABLES } from './platform-tables';
 export { TransactionClosedError } from './client';
+export type { DefinerCalls } from './definers';
 export { pingDatabase } from './ping';
 export type { SqlQueryable } from './rls';
 export { findTenancyViolations, tenantRlsSql } from './rls';

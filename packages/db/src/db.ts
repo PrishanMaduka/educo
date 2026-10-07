@@ -1,8 +1,10 @@
 import { createPool } from './client';
+import { createDefinerCalls } from './definers';
 import { databaseUrls } from './env';
 import { createPlatformRunner } from './platform';
 import { assertTenantId, createTenantRunner } from './tenant';
 
+import type { DefinerCalls } from './definers';
 import type { PlatformRunner, PlatformTx } from './platform';
 import type { TenantRunner, TenantTx } from './tenant';
 
@@ -23,9 +25,11 @@ export interface PlatformDbConfig extends PoolConfig {
   readonly platformUrl: string;
 }
 
-/** A `quad_app` handle: `withTenant` on its own pool. */
+/** A `quad_app` handle: `withTenant` and the named security-definer calls on its own pool. */
 export interface QuadTenantDb {
   readonly withTenant: TenantRunner;
+  /** Tenant-less security-definer calls (spec 02, D16), on the same `quad_app` pool. */
+  readonly definers: DefinerCalls;
   /** Ends the pool. */
   close(): Promise<void>;
 }
@@ -46,6 +50,7 @@ export function createTenantDb(config: TenantDbConfig): QuadTenantDb {
   });
   return {
     withTenant: createTenantRunner(pool),
+    definers: createDefinerCalls(pool),
     close: async () => {
       await pool.end();
     },

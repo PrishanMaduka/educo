@@ -22,6 +22,7 @@ const cliRule = quad.rules['no-cli-import'];
 
 const raw = [{ messageId: 'raw' as const }];
 const admin = [{ messageId: 'admin' as const }];
+const testing = [{ messageId: 'testing' as const }];
 const platform = [{ messageId: 'platform' as const }];
 
 tester.run('quad/no-raw-db-client', rawRule, {
@@ -43,8 +44,31 @@ tester.run('quad/no-raw-db-client', rawRule, {
       code: "import { bootstrapRoles } from '@quad/db/admin';",
       filename: repo('packages/db/test/bootstrap.api.test.ts'),
     },
+    {
+      code: "import { createTestDatabase } from '@quad/db/testing';",
+      filename: repo('apps/api/test/webhooks/ses-webhook.api.test.ts'),
+    },
+    {
+      code: "import { createTestDatabase } from '@quad/db/testing';",
+      filename: repo('packages/db/test/setup.ts'),
+    },
   ],
   invalid: [
+    {
+      code: "import { createTestDatabase } from '@quad/db/testing';",
+      filename: repo('apps/api/src/webhooks/ses/ses-webhook.service.ts'),
+      errors: testing,
+    },
+    {
+      code: "const m = import('@quad/db/testing');",
+      filename: repo('apps/api/src/test/x.ts'),
+      errors: testing,
+    },
+    {
+      code: "import { createTestDatabase } from '@quad/db/testing';",
+      filename: repo('apps/staff/test/x.ts'),
+      errors: testing,
+    },
     { code: "import { Pool } from 'pg';", filename: repo('apps/api/src/x.ts'), errors: raw },
     { code: "import pg from 'pg-pool';", filename: repo('apps/api/src/x.ts'), errors: raw },
     { code: "import postgres from 'postgres';", filename: repo('apps/api/src/x.ts'), errors: raw },

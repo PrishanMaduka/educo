@@ -7,6 +7,7 @@ export type { BootstrapRoles, RoleCredentials } from './bootstrap';
 export { bootstrapRoles } from './bootstrap';
 export type { PoolOptions, QuadDatabase, QuadTransaction } from './client';
 export { createPool, runInTransaction } from './client';
+export { createDefinerCalls } from './definers';
 export type { DatabaseUrls } from './env';
 export {
   LOCAL_DATABASE_URLS,
