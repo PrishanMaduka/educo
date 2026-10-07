@@ -9,6 +9,7 @@ import { focusRing } from '../lib/motion';
 import { MobileNav } from './MobileNav';
 import { Sidebar } from './Sidebar';
 import { useStoredValue, writeStored } from './stored';
+import { applyRail, RAIL_STORAGE_KEY } from './theme';
 import { Topbar } from './Topbar';
 
 import type {
@@ -19,9 +20,6 @@ import type {
   ShellUser,
   ShellVariant,
 } from './types';
-
-/** localStorage key for the collapsed side bar ("collapsed" or "expanded"). */
-export const RAIL_STORAGE_KEY = 'quad-rail';
 
 export interface AppShellProps {
   variant: ShellVariant;
@@ -83,14 +81,10 @@ export function AppShell({
   };
 
   return (
+    // The grid width comes from <html data-rail> (set before paint), so a collapsed rail never jumps.
     <div
-      data-rail={collapsed ? 'collapsed' : 'expanded'}
-      className={cn(
-        'min-h-dvh min-[900px]:grid',
-        collapsed
-          ? 'min-[900px]:grid-cols-[72px_minmax(0,1fr)]'
-          : 'min-[900px]:grid-cols-[248px_minmax(0,1fr)]',
-      )}
+      data-rail-scope=""
+      className="min-h-dvh min-[900px]:grid min-[900px]:grid-cols-[248px_minmax(0,1fr)] min-[900px]:rail-collapsed:grid-cols-[72px_minmax(0,1fr)]"
     >
       <a
         href="#main"
@@ -105,7 +99,7 @@ export function AppShell({
         aria-label={labels.sidebar}
         className="sticky top-0 z-30 hidden h-dvh overflow-hidden bg-rail text-rail-ink min-[900px]:block"
       >
-        <Sidebar {...rail} collapsed={collapsed} />
+        <Sidebar {...rail} collapsible collapsed={collapsed} />
       </aside>
       <div className="flex min-w-0 flex-col">
         <Topbar
@@ -113,6 +107,7 @@ export function AppShell({
           user={user}
           collapsed={collapsed}
           onToggleCollapsed={() => {
+            applyRail(!collapsed);
             writeStored(RAIL_STORAGE_KEY, collapsed ? 'expanded' : 'collapsed');
           }}
           onOpenMenu={() => {

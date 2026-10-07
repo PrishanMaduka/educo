@@ -25,7 +25,12 @@ export interface SidebarProps {
   user: ShellUser;
   groups: ShellNavGroup[];
   currentHref: string;
-  /** Icons only (72 px). Labels stay available to screen readers. */
+  /**
+   * The desktop side bar: it narrows to icons (72 px) when <html data-rail="collapsed">, through the
+   * `rail-collapsed:` variant, so the first paint is right before React knows the stored choice.
+   */
+  collapsible?: boolean;
+  /** The stored choice, once known: collapsed links get tooltips. Layout does not depend on it. */
   collapsed?: boolean;
   navLabel: string;
   signOutLabel: string;
@@ -57,6 +62,7 @@ const logoTile: Record<ShellVariant, string> = {
 function NavLink({
   item,
   active,
+  collapsible,
   collapsed,
   variant,
   linkComponent: Link = 'a',
@@ -64,6 +70,7 @@ function NavLink({
 }: {
   item: ShellNavItem;
   active: boolean;
+  collapsible: boolean;
   collapsed: boolean;
   variant: ShellVariant;
   linkComponent?: ShellLinkComponent | 'a';
@@ -79,34 +86,38 @@ function NavLink({
         'relative flex min-h-10 items-center gap-3 rounded-full px-3 py-[9px] font-semibold whitespace-nowrap text-rail-ink hover:bg-rail-2 max-[899px]:min-h-11',
         transition,
         focusRing,
-        collapsed && 'justify-center px-0',
+        collapsible && 'rail-collapsed:justify-center rail-collapsed:px-0',
         active && activeItem[variant],
       )}
     >
       <Icon aria-hidden="true" strokeWidth={ICON_STROKE} className="size-[18px] shrink-0" />
-      <span className={cn('min-w-0 truncate', collapsed && 'sr-only')}>{item.label}</span>
-      {item.count !== undefined && !collapsed ? (
+      <span className={cn('min-w-0 truncate', collapsible && 'rail-collapsed:sr-only')}>
+        {item.label}
+      </span>
+      {item.count !== undefined ? (
         <span
           className={cn(
             'ml-auto shrink-0 rounded-full bg-rail-ink/12 px-[7px] py-px text-[11px] font-bold tabular-nums',
             active && 'mr-3.5 bg-current/20',
+            collapsible && 'rail-collapsed:hidden',
           )}
         >
           {item.count}
         </span>
       ) : null}
-      {active && !collapsed ? (
+      {active ? (
         <span
           aria-hidden="true"
           className={cn(
             'absolute top-1/2 right-3 -mt-[3px] size-1.5 rounded-full',
             activeDot[variant],
+            collapsible && 'rail-collapsed:hidden',
           )}
         />
       ) : null}
     </Link>
   );
-  return collapsed ? (
+  return collapsible && collapsed ? (
     <Tooltip content={item.label} side="right">
       {link}
     </Tooltip>
@@ -118,11 +129,11 @@ function NavLink({
 function Group({
   group,
   children,
-  collapsed,
+  collapsible,
 }: {
   group: ShellNavGroup;
   children: ReactNode;
-  collapsed: boolean;
+  collapsible: boolean;
 }) {
   const id = useId();
   return (
@@ -131,7 +142,7 @@ function Group({
         id={id}
         className={cn(
           'px-3 pb-1.5 text-[11px] font-extrabold tracking-[0.12em] whitespace-nowrap text-rail-ink-2 uppercase',
-          collapsed && 'sr-only',
+          collapsible && 'rail-collapsed:sr-only',
         )}
       >
         {group.label}
@@ -150,6 +161,7 @@ export function Sidebar({
   user,
   groups,
   currentHref,
+  collapsible = false,
   collapsed = false,
   navLabel,
   signOutLabel,
@@ -161,7 +173,7 @@ export function Sidebar({
       <div
         className={cn(
           'flex min-h-16 items-center gap-2.5 px-[18px] pt-[18px] pb-3.5',
-          collapsed && 'justify-center px-0',
+          collapsible && 'rail-collapsed:justify-center rail-collapsed:px-0',
         )}
       >
         <span
@@ -172,7 +184,7 @@ export function Sidebar({
         >
           <QuadMark variant="white" size={25} aria-hidden="true" />
         </span>
-        <div className={cn('min-w-0', collapsed && 'sr-only')}>
+        <div className={cn('min-w-0', collapsible && 'rail-collapsed:sr-only')}>
           <p
             className={cn(
               'm-0 font-extrabold tracking-[-0.01em] text-rail-ink',
@@ -195,16 +207,17 @@ export function Sidebar({
         aria-label={navLabel}
         className={cn(
           'min-h-0 flex-1 overflow-y-auto px-2.5 pt-1.5 pb-4 [scrollbar-width:thin]',
-          collapsed && 'px-3',
+          collapsible && 'rail-collapsed:px-3',
         )}
       >
         {groups.map((group) => (
-          <Group key={group.id} group={group} collapsed={collapsed}>
+          <Group key={group.id} group={group} collapsible={collapsible}>
             {group.items.map((item) => (
               <li key={item.href}>
                 <NavLink
                   item={item}
                   active={isActiveHref(item, currentHref)}
+                  collapsible={collapsible}
                   collapsed={collapsed}
                   variant={variant}
                   linkComponent={linkComponent}
@@ -218,11 +231,11 @@ export function Sidebar({
       <div
         className={cn(
           'mx-3 flex items-center gap-2.5 border-t border-dashed border-rail-ink/20 px-1.5 py-3.5',
-          collapsed && 'mx-2 flex-col px-0',
+          collapsible && 'rail-collapsed:mx-2 rail-collapsed:flex-col rail-collapsed:px-0',
         )}
       >
         <Avatar name={user.name} size="sm" decorative />
-        <div className={cn('min-w-0 flex-1 text-xs', collapsed && 'sr-only')}>
+        <div className={cn('min-w-0 flex-1 text-xs', collapsible && 'rail-collapsed:sr-only')}>
           <p className="m-0 truncate font-bold text-rail-ink">{user.name}</p>
           <p className="m-0 truncate text-rail-ink-2">{user.role}</p>
         </div>

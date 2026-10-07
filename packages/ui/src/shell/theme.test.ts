@@ -4,6 +4,7 @@ import {
   applyTheme,
   nextTheme,
   parseTheme,
+  RAIL_STORAGE_KEY,
   themeBootstrapScript,
   THEME_STORAGE_KEY,
 } from './theme';
@@ -33,6 +34,7 @@ describe('theme', () => {
   describe('bootstrap script', () => {
     const run = (): void => {
       document.documentElement.removeAttribute('data-theme');
+      document.documentElement.removeAttribute('data-rail');
       // eslint-disable-next-line @typescript-eslint/no-implied-eval -- runs the exact inline script the layout ships
       const script = new Function(themeBootstrapScript) as () => void;
       script();
@@ -51,6 +53,15 @@ describe('theme', () => {
       localStorage.setItem(THEME_STORAGE_KEY, '<script>');
       run();
       expect(document.documentElement.hasAttribute('data-theme')).toBe(false);
+    });
+
+    it('marks a collapsed side bar on <html> before paint', () => {
+      localStorage.setItem(RAIL_STORAGE_KEY, 'collapsed');
+      run();
+      expect(document.documentElement.getAttribute('data-rail')).toBe('collapsed');
+      localStorage.setItem(RAIL_STORAGE_KEY, 'expanded');
+      run();
+      expect(document.documentElement.hasAttribute('data-rail')).toBe(false);
     });
 
     it('only sets the attribute (no styles)', () => {

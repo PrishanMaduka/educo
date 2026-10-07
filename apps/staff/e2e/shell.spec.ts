@@ -95,6 +95,28 @@ test.describe('staff shell', () => {
     await expect(rail).toHaveJSProperty('offsetWidth', 248);
   });
 
+  test('a collapsed side bar is already 72 px before the page hydrates', async ({ page }) => {
+    test.skip((page.viewportSize()?.width ?? 0) < 900, 'Phones use the slide-over menu');
+    await page.addInitScript(() => {
+      window.localStorage.setItem('quad-rail', 'collapsed');
+      // Measured when the HTML is parsed, before React has re-rendered anything.
+      document.addEventListener('DOMContentLoaded', () => {
+        const rail = document.querySelector('aside');
+        document.documentElement.dataset.railAtLoad = String(rail?.getBoundingClientRect().width);
+      });
+    });
+    await page.goto('/app');
+    const html = page.locator('html');
+    await expect(html).toHaveAttribute('data-rail', 'collapsed');
+    await expect(html).toHaveAttribute('data-rail-at-load', '72');
+    await page.getByRole('button', { name: 'Expand side bar' }).click();
+    await expect(html).not.toHaveAttribute('data-rail', /.*/);
+    await expect(page.getByRole('complementary', { name: 'Side bar' })).toHaveJSProperty(
+      'offsetWidth',
+      248,
+    );
+  });
+
   test('/ is the landing placeholder with a link to the portal', async ({ page }) => {
     await page.goto('/');
     await expect(page.getByText('Quad: the landing page arrives in M1b')).toBeVisible();

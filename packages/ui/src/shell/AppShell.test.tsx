@@ -3,7 +3,8 @@ import userEvent from '@testing-library/user-event';
 import { Home, Users } from 'lucide-react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { AppShell, RAIL_STORAGE_KEY } from './AppShell';
+import { AppShell } from './AppShell';
+import { RAIL_STORAGE_KEY } from './theme';
 import { isActiveHref, type ShellLabels } from './types';
 
 const labels: ShellLabels = {
@@ -80,11 +81,13 @@ describe('AppShell', () => {
     renderShell();
     await userEvent.click(screen.getByRole('button', { name: 'Collapse side bar' }));
     expect(localStorage.getItem(RAIL_STORAGE_KEY)).toBe('collapsed');
+    expect(document.documentElement.getAttribute('data-rail')).toBe('collapsed');
     const rail = screen.getByRole('complementary', { name: 'Side bar' });
     expect(within(rail).getByRole('link', { name: 'Home' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Expand side bar' })).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: 'Expand side bar' }));
     expect(localStorage.getItem(RAIL_STORAGE_KEY)).toBe('expanded');
+    expect(document.documentElement.hasAttribute('data-rail')).toBe(false);
   });
 
   it('opens the phone menu as a dialog that closes when a link is followed', async () => {
