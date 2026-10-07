@@ -1,6 +1,6 @@
 {
   "APP_ENV": "staging",
   "API_URL": "https://staging.quad-edu.com/api/v1",
-  "SOCKET_URL": "wss://staging.quad-edu.com/socket.io",
+  "SOCKET_URL": "wss://staging.quad-edu.com",
   "SENTRY_DSN": ""
 }

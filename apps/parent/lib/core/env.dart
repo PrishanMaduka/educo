@@ -36,7 +36,10 @@ class Env {
     return Env(
       appEnv: appEnv,
       apiUrl: _url(read('API_URL'), 'API_URL', secure ? {'https'} : _http),
-      socketUrl: _url(read('SOCKET_URL'), 'SOCKET_URL', secure ? {'wss'} : _ws),
+      socketUrl: _origin(
+        _url(read('SOCKET_URL'), 'SOCKET_URL', secure ? {'wss'} : _ws),
+        'SOCKET_URL',
+      ),
       sentryDsn: read('SENTRY_DSN'),
     );
   }
@@ -76,6 +79,15 @@ class Env {
     final uri = Uri.tryParse(value);
     if (uri == null || !schemes.contains(uri.scheme) || uri.host.isEmpty) {
       throw FormatException('$key must be a ${schemes.join(' or ')} URL');
+    }
+    return uri;
+  }
+
+  /// Every flavor gives the realtime server as a bare origin; the client sets
+  /// the Socket.IO path (`/socket.io`, D15) itself.
+  static Uri _origin(Uri uri, String key) {
+    if (uri.path.isNotEmpty || uri.hasQuery || uri.hasFragment) {
+      throw FormatException('$key must be an origin with no path');
     }
     return uri;
   }

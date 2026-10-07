@@ -1,6 +1,6 @@
 {
   "APP_ENV": "production",
   "API_URL": "https://quad-edu.com/api/v1",
-  "SOCKET_URL": "wss://quad-edu.com/socket.io",
+  "SOCKET_URL": "wss://quad-edu.com",
   "SENTRY_DSN": ""
 }

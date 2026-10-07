@@ -21,12 +21,12 @@ void main() {
       'staging': (
         AppEnv.staging,
         'https://staging.quad-edu.com/api/v1',
-        'wss://staging.quad-edu.com/socket.io',
+        'wss://staging.quad-edu.com',
       ),
       'prod': (
         AppEnv.production,
         'https://quad-edu.com/api/v1',
-        'wss://quad-edu.com/socket.io',
+        'wss://quad-edu.com',
       ),
     };
 
@@ -114,6 +114,16 @@ void main() {
     test('a SOCKET_URL that is not ws(s)', () {
       expect(
         () => Env.fromJson(devWith('SOCKET_URL', 'http://localhost:4000')),
+        throwsA(isA<FormatException>()),
+      );
+    });
+
+    // The Socket.IO path (/socket.io, D15) is set on the client, so every flavor gives an origin.
+    test('a SOCKET_URL with a path', () {
+      expect(
+        () => Env.fromJson(
+          devWith('SOCKET_URL', 'ws://localhost:4000/socket.io'),
+        ),
         throwsA(isA<FormatException>()),
       );
     });
