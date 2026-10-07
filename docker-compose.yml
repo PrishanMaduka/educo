@@ -1,5 +1,8 @@
 # Local development services. Versions are pinned to minor tags.
 # QUAD_IMAGE_REGISTRY is an optional registry host prefix with a trailing slash (for example a mirror).
+# Ports are published on 127.0.0.1 only, so the local credentials below are not reachable from the network.
+# docker/postgres/init runs only when the postgres-data volume is created; after changing it,
+# run `docker compose down -v` (this deletes the local database) and `docker compose up -d` again.
 name: quad
 
 services:
@@ -10,7 +13,7 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: quad
     ports:
-      - '5432:5432'
+      - '127.0.0.1:5432:5432'
     volumes:
       - postgres-data:/var/lib/postgresql/data
       - ./docker/postgres/init:/docker-entrypoint-initdb.d:ro
@@ -23,7 +26,7 @@ services:
   redis:
     image: ${QUAD_IMAGE_REGISTRY:-}library/redis:7.4-alpine
     ports:
-      - '6379:6379'
+      - '127.0.0.1:6379:6379'
     healthcheck:
       test: ['CMD', 'redis-cli', 'ping']
       interval: 5s
@@ -37,10 +40,11 @@ services:
       MINIO_ROOT_USER: quadminio
       MINIO_ROOT_PASSWORD: quadminio123
     ports:
-      - '9000:9000'
-      - '9001:9001'
+      - '127.0.0.1:9000:9000'
+      - '127.0.0.1:9001:9001'
     volumes:
       - minio-data:/data
+    # Not exercised in the cloud dev container (ruling R5); check `mc ready local` on first use.
     healthcheck:
       test: ['CMD', 'mc', 'ready', 'local']
       interval: 5s
@@ -64,13 +68,13 @@ services:
   mailpit:
     image: ${QUAD_IMAGE_REGISTRY:-}axllent/mailpit:v1.20
     ports:
-      - '1025:1025'
-      - '8025:8025'
+      - '127.0.0.1:1025:1025'
+      - '127.0.0.1:8025:8025'
 
   clamav:
     image: ${QUAD_IMAGE_REGISTRY:-}clamav/clamav:1.4
     ports:
-      - '3310:3310'
+      - '127.0.0.1:3310:3310'
     volumes:
       - clamav-data:/var/lib/clamav
 
