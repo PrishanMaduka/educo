@@ -68,7 +68,14 @@ const replacePounds = (message: string, ast: MessageFormatElement[]): string => 
     .reduce((text, p) => `${text.slice(0, p.start)}{${p.arg}}${text.slice(p.end)}`, message);
 };
 
-/** Validates each message as ICU and returns a Flutter ARB map (camelCase keys). */
+/**
+ * Validates each message as ICU and returns a Flutter ARB map (camelCase keys).
+ *
+ * The ARB is not a copy of en.json: Flutter gen-l10n has no ICU `#`, so every
+ * plural `#` is written as `{arg}`, e.g. `{count, plural, one {# student} …}`
+ * becomes `{count, plural, one {{count} student} …}`. Web reads en.json and
+ * keeps `#`.
+ */
 export function buildArb(messages: Record<string, string>): Record<string, ArbEntry> {
   const arb: Record<string, ArbEntry> = { '@@locale': 'en' };
   for (const [key, message] of Object.entries(messages)) {
@@ -80,6 +87,7 @@ export function buildArb(messages: Record<string, string>): Record<string, ArbEn
       throw new Error(`Invalid ICU message for key "${key}": ${reason}`);
     }
     const name = camelCase(key);
+    // `#` → `{arg}` for Flutter (see above); everything else is copied as is.
     arb[name] = replacePounds(message, ast);
     const args = new Map<string, string>();
     collect(ast, args);
