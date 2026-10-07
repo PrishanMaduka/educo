@@ -1,10 +1,13 @@
 #!/usr/bin/env node
 // Regenerates every API client from the NestJS OpenAPI document:
 //   packages/contracts/openapi.json, packages/client/src/generated/schema.d.ts, apps/parent/packages/quad_api.
+// The Dart client needs build_runner for its json_serializable parts, so this needs Flutter (fvm or PATH).
 import { execFileSync } from 'node:child_process';
 import { rmSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+
+import { runTool } from './flutter.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const spec = resolve(root, 'packages/contracts/openapi.json');
@@ -19,5 +22,9 @@ run('pnpm', [
   resolve(root, 'packages/client/src/generated/schema.d.ts'),
 ]);
 // Start clean so removed endpoints do not leave stale files behind.
-rmSync(resolve(root, 'apps/parent/packages/quad_api'), { recursive: true, force: true });
+const dartClient = resolve(root, 'apps/parent/packages/quad_api');
+rmSync(dartClient, { recursive: true, force: true });
 run('pnpm', ['exec', 'openapi-generator-cli', 'generate']);
+// Commit the *.g.dart parts with the client so it compiles straight from git.
+runTool('dart', ['pub', 'get'], dartClient);
+runTool('dart', ['run', 'build_runner', 'build'], dartClient);

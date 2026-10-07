@@ -8,6 +8,7 @@
         "generatorName": "dart-dio",
         "inputSpec": "packages/contracts/openapi.json",
         "output": "apps/parent/packages/quad_api",
+        "templateDir": "scripts/openapi-templates/dart-dio",
         "additionalProperties": {
           "pubName": "quad_api",
           "pubDescription": "Generated Quad API client",
