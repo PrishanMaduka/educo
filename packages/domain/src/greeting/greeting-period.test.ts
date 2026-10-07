@@ -2,6 +2,8 @@ import { describe, it, expect } from 'vitest';
 
 import { greetingPeriod } from './greeting-period';
 
+// Keep the bands in sync with the parent app's offline fallback,
+// apps/parent/lib/core/greeting.dart (cases in apps/parent/test/core/greeting_test.dart).
 describe('greetingPeriod', () => {
   const timeZone = 'Asia/Colombo';
 

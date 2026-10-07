@@ -7,8 +7,12 @@ enum GreetingWord { goodMorning, goodAfternoon, goodEvening, hello }
 /// The greeting for a device-local time.
 ///
 /// The API's `GET /family/home` computes this from M6 on; until then, and
-/// offline later, the app falls back to the device clock (spec 03). The bands
-/// mirror `greetingPeriod` in packages/domain and must stay identical to it.
+/// offline later, the app falls back to the device clock (spec 03).
+///
+/// Keep the bands in sync with `greetingPeriod` in
+/// packages/domain/src/greeting/greeting-period.ts; its test
+/// (greeting-period.test.ts) and test/core/greeting_test.dart share the same
+/// boundary cases.
 ({GreetingPeriod period, GreetingWord word}) greetingAt(DateTime local) {
   final hour = local.hour;
   if (hour >= 5 && hour < 12) {
