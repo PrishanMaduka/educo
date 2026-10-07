@@ -1,11 +1,23 @@
 # Security properties of the Terraform state root, checked offline with a mocked AWS provider.
+# The mocked account (infra/tests/mocks/aws) is 123456789012; the example principals below are in
+# the example accounts 111111111111 (tooling) and 222222222222 (staging).
 
 mock_provider "aws" {
   source = "../tests/mocks/aws"
 }
 
 variables {
-  trusted_account_ids = ["111111111111", "222222222222"]
+  break_glass_principal_arns = ["arn:aws:iam::111111111111:role/quad-break-glass"]
+  state_environments = {
+    global = {
+      plan_principal_arns  = ["arn:aws:iam::111111111111:role/quad-tooling-plan"]
+      apply_principal_arns = ["arn:aws:iam::111111111111:role/quad-break-glass"]
+    }
+    staging = {
+      plan_principal_arns  = ["arn:aws:iam::222222222222:role/quad-staging-plan"]
+      apply_principal_arns = ["arn:aws:iam::222222222222:role/quad-staging-apply"]
+    }
+  }
 }
 
 run "state_bucket_is_private" {
@@ -54,6 +66,30 @@ run "state_bucket_is_versioned_and_encrypted_with_kms" {
     condition     = aws_kms_key.state.enable_key_rotation
     error_message = "The state KMS key must rotate."
   }
+
+  # Every root passes this to the backend as kms_key_id; without it `encrypt = true` sends AES256.
+  assert {
+    condition     = output.state_kms_key_arn == aws_kms_key.state.arn
+    error_message = "The state key ARN must be an output for -backend-config kms_key_id."
+  }
+}
+
+run "state_key_is_administered_only_through_this_account" {
+  command = apply
+
+  assert {
+    condition = toset(flatten([
+      for statement in jsondecode(aws_kms_key.state.policy).Statement : statement.Principal.AWS
+    ])) == toset(["arn:aws:iam::123456789012:root"])
+    error_message = "The key policy may name only this account's root (so IAM decides), never * or another account."
+  }
+
+  assert {
+    condition = alltrue([
+      for statement in jsondecode(aws_kms_key.state.policy).Statement : statement.Effect == "Allow"
+    ])
+    error_message = "The key policy has only the account statement."
+  }
 }
 
 run "state_bucket_refuses_plain_http" {
@@ -66,10 +102,60 @@ run "state_bucket_refuses_plain_http" {
       && statement.Principal == "*"
       && statement.Action == "s3:*"
       && try(statement.Condition.Bool["aws:SecureTransport"], "") == "false"
-      && contains(statement.Resource, aws_s3_bucket.state.arn)
-      && contains(statement.Resource, "${aws_s3_bucket.state.arn}/*")
+      && contains(statement.Resource, "arn:aws:s3:::quad-tfstate-tooling")
+      && contains(statement.Resource, "arn:aws:s3:::quad-tfstate-tooling/*")
     ])
     error_message = "The state bucket policy must deny every request with aws:SecureTransport = false."
+  }
+}
+
+run "state_bucket_refuses_uploads_not_encrypted_with_the_state_key" {
+  command = apply
+
+  assert {
+    condition = anytrue([
+      for statement in jsondecode(aws_s3_bucket_policy.state.policy).Statement :
+      statement.Effect == "Deny"
+      && statement.Principal == "*"
+      && toset(flatten([statement.Action])) == toset(["s3:PutObject"])
+      && toset(flatten([statement.Resource])) == toset(["arn:aws:s3:::quad-tfstate-tooling/*"])
+      && try(statement.Condition.StringNotEqualsIfExists["s3:x-amz-server-side-encryption"], "") == "aws:kms"
+    ])
+    error_message = "The bucket policy must deny uploads that ask for anything but aws:kms."
+  }
+
+  assert {
+    condition = anytrue([
+      for statement in jsondecode(aws_s3_bucket_policy.state.policy).Statement :
+      statement.Effect == "Deny"
+      && statement.Principal == "*"
+      && toset(flatten([statement.Action])) == toset(["s3:PutObject"])
+      && toset(flatten([statement.Resource])) == toset(["arn:aws:s3:::quad-tfstate-tooling/*"])
+      && try(statement.Condition.StringNotEqualsIfExists["s3:x-amz-server-side-encryption-aws-kms-key-id"], "") == aws_kms_key.state.arn
+    ])
+    error_message = "The bucket policy must deny uploads that name a KMS key other than the state key."
+  }
+}
+
+run "only_state_roles_and_break_glass_touch_state_objects" {
+  command = apply
+
+  assert {
+    condition = anytrue([
+      for statement in jsondecode(aws_s3_bucket_policy.state.policy).Statement :
+      statement.Effect == "Deny"
+      && statement.Principal == "*"
+      && length(setsubtract(["s3:GetObject", "s3:GetObjectVersion", "s3:PutObject", "s3:DeleteObject", "s3:DeleteObjectVersion"], flatten([statement.Action]))) == 0
+      && toset(flatten([statement.Resource])) == toset(["arn:aws:s3:::quad-tfstate-tooling/*"])
+      && toset(try(statement.Condition.ArnNotEquals["aws:PrincipalArn"], [])) == toset([
+        "arn:aws:iam::123456789012:role/quad-terraform-state-read-global",
+        "arn:aws:iam::123456789012:role/quad-terraform-state-read-staging",
+        "arn:aws:iam::123456789012:role/quad-terraform-state-rw-global",
+        "arn:aws:iam::123456789012:role/quad-terraform-state-rw-staging",
+        "arn:aws:iam::111111111111:role/quad-break-glass",
+      ])
+    ])
+    error_message = "Object reads and writes must be denied to every principal except the state roles and the break-glass roles."
   }
 }
 
@@ -105,75 +191,156 @@ run "lock_table_is_encrypted_with_pitr" {
   }
 }
 
-run "state_role_trusts_only_the_named_accounts" {
+run "read_role_trusts_only_the_plan_principals" {
   command = apply
 
   assert {
-    condition     = aws_iam_role.state.name == "quad-terraform-state"
-    error_message = "The state role must be named quad-terraform-state."
+    condition     = aws_iam_role.state_read["staging"].name == "quad-terraform-state-read-staging"
+    error_message = "The staging read role must be quad-terraform-state-read-staging."
+  }
+
+  assert {
+    condition = (
+      length(jsondecode(aws_iam_role.state_read["staging"].assume_role_policy).Statement) == 1
+      && one(jsondecode(aws_iam_role.state_read["staging"].assume_role_policy).Statement).Action == "sts:AssumeRole"
+      && toset(flatten([one(jsondecode(aws_iam_role.state_read["staging"].assume_role_policy).Statement).Principal.AWS])) == toset(["arn:aws:iam::222222222222:root"])
+      && toset(one(jsondecode(aws_iam_role.state_read["staging"].assume_role_policy).Statement).Condition.ArnEquals["aws:PrincipalArn"]) == toset(["arn:aws:iam::222222222222:role/quad-staging-plan"])
+    )
+    error_message = "The staging read role must trust only the staging plan role (its account root plus ArnEquals aws:PrincipalArn)."
+  }
+}
+
+run "read_role_only_reads_its_own_state" {
+  command = apply
+
+  # Plans run with -lock=false, so the read role needs no lock writes; the S3 backend still reads
+  # the state digest item (<bucket>/<key>-md5) from the lock table.
+  assert {
+    condition = length(setsubtract(flatten([
+      for statement in jsondecode(aws_iam_role_policy.state_read["staging"].policy).Statement : statement.Action
+    ]), ["s3:GetObject", "s3:ListBucket", "kms:Decrypt", "dynamodb:GetItem"])) == 0
+    error_message = "The read role may only GetObject, ListBucket, kms:Decrypt and dynamodb:GetItem."
+  }
+
+  assert {
+    condition = toset(flatten([
+      for statement in jsondecode(aws_iam_role_policy.state_read["staging"].policy).Statement :
+      statement.Resource if contains(statement.Action, "s3:GetObject")
+    ])) == toset(["arn:aws:s3:::quad-tfstate-tooling/staging/terraform.tfstate"])
+    error_message = "The staging read role may read only staging/terraform.tfstate."
   }
 
   assert {
     condition = alltrue([
-      for statement in jsondecode(aws_iam_role.state.assume_role_policy).Statement :
-      statement.Action == "sts:AssumeRole" && statement.Effect == "Allow"
+      for statement in jsondecode(aws_iam_role_policy.state_read["staging"].policy).Statement :
+      length(setsubtract(statement.Condition.StringLike["s3:prefix"], ["staging/terraform.tfstate", "env:/"])) == 0
+      if contains(statement.Action, "s3:ListBucket")
     ])
-    error_message = "The state role trust may only allow sts:AssumeRole."
+    error_message = "ListBucket must be limited to the role's own prefix."
   }
 
   assert {
-    condition = sort(flatten([
-      for statement in jsondecode(aws_iam_role.state.assume_role_policy).Statement :
-      statement.Principal.AWS
-    ])) == tolist(["arn:aws:iam::111111111111:root", "arn:aws:iam::222222222222:root"])
-    error_message = "The state role must trust exactly the given accounts, and never *."
+    condition = alltrue([
+      for statement in jsondecode(aws_iam_role_policy.state_read["staging"].policy).Statement :
+      length(setsubtract(statement.Condition.StringEquals["kms:ViaService"], ["s3.ap-south-1.amazonaws.com", "dynamodb.ap-south-1.amazonaws.com"])) == 0
+      && toset(statement.Resource) == toset([aws_kms_key.state.arn])
+      if contains(statement.Action, "kms:Decrypt")
+    ])
+    error_message = "kms:Decrypt must be on the state key and only through S3 or DynamoDB."
+  }
+
+  assert {
+    condition = alltrue([
+      for statement in jsondecode(aws_iam_role_policy.state_read["staging"].policy).Statement :
+      toset(statement.Condition["ForAllValues:StringEquals"]["dynamodb:LeadingKeys"]) == toset(["quad-tfstate-tooling/staging/terraform.tfstate-md5"])
+      if contains(statement.Action, "dynamodb:GetItem")
+    ])
+    error_message = "The read role may read only its own state digest item."
   }
 }
 
-run "state_role_reaches_only_state_objects_and_lock_items" {
+run "rw_role_trusts_only_the_apply_principals" {
   command = apply
 
   assert {
-    condition = sort(distinct(flatten([
-      for statement in jsondecode(aws_iam_role_policy.state.policy).Statement :
-      statement.Resource if anytrue([for action in statement.Action : startswith(action, "s3:") && action != "s3:ListBucket"])
-    ]))) == tolist(["${aws_s3_bucket.state.arn}/*/terraform.tfstate*"])
-    error_message = "State object access must be limited to */terraform.tfstate*."
+    condition     = aws_iam_role.state_rw["staging"].name == "quad-terraform-state-rw-staging"
+    error_message = "The staging read-write role must be quad-terraform-state-rw-staging."
   }
 
   assert {
-    condition = sort(distinct(flatten([
-      for statement in jsondecode(aws_iam_role_policy.state.policy).Statement :
-      statement.Resource if anytrue([for action in statement.Action : startswith(action, "dynamodb:")])
-    ]))) == tolist([aws_dynamodb_table.locks.arn])
-    error_message = "Lock access must be limited to the lock table."
+    condition = (
+      length(jsondecode(aws_iam_role.state_rw["staging"].assume_role_policy).Statement) == 1
+      && toset(flatten([one(jsondecode(aws_iam_role.state_rw["staging"].assume_role_policy).Statement).Principal.AWS])) == toset(["arn:aws:iam::222222222222:root"])
+      && toset(one(jsondecode(aws_iam_role.state_rw["staging"].assume_role_policy).Statement).Condition.ArnEquals["aws:PrincipalArn"]) == toset(["arn:aws:iam::222222222222:role/quad-staging-apply"])
+    )
+    error_message = "The staging read-write role must trust only the staging apply role."
+  }
+}
+
+run "rw_role_writes_only_its_own_state_and_locks" {
+  command = apply
+
+  assert {
+    condition = toset(flatten([
+      for statement in jsondecode(aws_iam_role_policy.state_rw["staging"].policy).Statement :
+      statement.Resource if anytrue([for action in statement.Action : startswith(action, "s3:") && action != "s3:ListBucket"])
+    ])) == toset(["arn:aws:s3:::quad-tfstate-tooling/staging/terraform.tfstate*"])
+    error_message = "Object access must be limited to staging/terraform.tfstate* (state and .tflock)."
+  }
+
+  assert {
+    condition = alltrue([
+      for statement in jsondecode(aws_iam_role_policy.state_rw["staging"].policy).Statement :
+      toset(statement.Resource) == toset([aws_dynamodb_table.locks.arn])
+      && toset(statement.Condition["ForAllValues:StringEquals"]["dynamodb:LeadingKeys"]) == toset([
+        "quad-tfstate-tooling/staging/terraform.tfstate",
+        "quad-tfstate-tooling/staging/terraform.tfstate-md5",
+      ])
+      if anytrue([for action in statement.Action : startswith(action, "dynamodb:")])
+    ])
+    error_message = "Lock access must be limited to the staging lock and digest items."
   }
 
   assert {
     condition = alltrue(flatten([
-      for statement in jsondecode(aws_iam_role_policy.state.policy).Statement :
+      for statement in jsondecode(aws_iam_role_policy.state_rw["staging"].policy).Statement :
       [for resource in flatten([statement.Resource]) : resource != "*"]
     ]))
-    error_message = "No state role statement may use Resource *."
+    error_message = "No read-write role statement may use Resource *."
   }
 }
 
-run "refuses_a_wildcard_trusted_account" {
+run "refuses_a_wildcard_principal" {
   command = plan
 
   variables {
-    trusted_account_ids = ["*"]
+    break_glass_principal_arns = ["arn:aws:iam::111111111111:role/*"]
   }
 
-  expect_failures = [var.trusted_account_ids]
+  expect_failures = [var.break_glass_principal_arns]
 }
 
-run "refuses_an_empty_trusted_account_list" {
+run "refuses_an_account_root_as_a_principal" {
   command = plan
 
   variables {
-    trusted_account_ids = []
+    state_environments = {
+      staging = {
+        plan_principal_arns  = ["arn:aws:iam::222222222222:root"]
+        apply_principal_arns = ["arn:aws:iam::222222222222:role/quad-staging-apply"]
+      }
+    }
   }
 
-  expect_failures = [var.trusted_account_ids]
+  expect_failures = [var.state_environments]
+}
+
+run "refuses_no_break_glass_role" {
+  command = plan
+
+  variables {
+    break_glass_principal_arns = []
+  }
+
+  expect_failures = [var.break_glass_principal_arns]
 }

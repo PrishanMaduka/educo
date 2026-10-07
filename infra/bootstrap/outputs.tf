@@ -8,7 +8,17 @@ output "lock_table" {
   value       = aws_dynamodb_table.locks.name
 }
 
-output "state_role_arn" {
-  description = "Role the S3 backend assumes to reach state and locks (the TF_STATE_ROLE_ARN GitHub variable)."
-  value       = aws_iam_role.state.arn
+output "state_kms_key_arn" {
+  description = "Key every backend must pass as -backend-config kms_key_id (the TF_STATE_KMS_KEY_ARN GitHub variable); without it, encrypt = true sends AES256 and the bucket policy refuses the upload."
+  value       = aws_kms_key.state.arn
+}
+
+output "state_read_role_arns" {
+  description = "Per-environment roles plans assume to read state (TF_GLOBAL_STATE_READ_ROLE_ARN, TF_STAGING_STATE_READ_ROLE_ARN)."
+  value       = { for name, role in aws_iam_role.state_read : name => role.arn }
+}
+
+output "state_rw_role_arns" {
+  description = "Per-environment roles applies assume to read, write and lock state (TF_STAGING_STATE_RW_ROLE_ARN)."
+  value       = { for name, role in aws_iam_role.state_rw : name => role.arn }
 }

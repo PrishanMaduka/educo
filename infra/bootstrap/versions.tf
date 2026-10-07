@@ -1,5 +1,6 @@
 # The Terraform state root for the tooling account (spec 20, D28). The first apply keeps its state
-# locally; the state is then migrated into the bucket this root creates (infra/README.md).
+# locally; a break-glass administrator then migrates it into the bucket this root creates, at
+# bootstrap/terraform.tfstate, which no per-environment state role can reach (infra/README.md).
 terraform {
   required_version = "1.16.5"
 

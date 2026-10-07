@@ -1,16 +1,27 @@
 data "aws_caller_identity" "current" {}
 
-locals {
-  state_role_name = "quad-terraform-state"
+data "aws_region" "current" {}
 
-  # The key policy keeps the key manageable through IAM in this account; the state role's own
-  # policy grants it use of the key.
+locals {
+  account_id = data.aws_caller_identity.current.account_id
+  region     = data.aws_region.current.region
+  bucket_arn = "arn:aws:s3:::${var.state_bucket_name}"
+
+  # Role ARNs are built from their names so the bucket policy can name them before they exist.
+  read_role_arns = { for name, _ in var.state_environments : name => "arn:aws:iam::${local.account_id}:role/quad-terraform-state-read-${name}" }
+  rw_role_arns   = { for name, _ in var.state_environments : name => "arn:aws:iam::${local.account_id}:role/quad-terraform-state-rw-${name}" }
+
+  # The S3 backend keys: the state object, its .tflock object (use_lockfile), and in DynamoDB the
+  # lock item <bucket>/<key> and the digest item <bucket>/<key>-md5.
+  state_keys = { for name, _ in var.state_environments : name => "${name}/terraform.tfstate" }
+
+  # The key policy only hands the key to this account's IAM; the roles' policies grant its use.
   state_key_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
       Sid       = "AccountAdministersTheKey"
       Effect    = "Allow"
-      Principal = { AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root" }
+      Principal = { AWS = "arn:aws:iam::${local.account_id}:root" }
       Action    = "kms:*"
       Resource  = "*"
     }]
@@ -18,54 +29,44 @@ locals {
 
   state_bucket_policy = jsonencode({
     Version = "2012-10-17"
-    Statement = [{
-      Sid       = "DenyPlainHttp"
-      Effect    = "Deny"
-      Principal = "*"
-      Action    = "s3:*"
-      Resource  = [aws_s3_bucket.state.arn, "${aws_s3_bucket.state.arn}/*"]
-      Condition = { Bool = { "aws:SecureTransport" = "false" } }
-    }]
-  })
-
-  state_role_trust = jsonencode({
-    Version = "2012-10-17"
-    Statement = [{
-      Sid       = "NamedAccountsOnly"
-      Effect    = "Allow"
-      Principal = { AWS = [for id in var.trusted_account_ids : "arn:aws:iam::${id}:root"] }
-      Action    = "sts:AssumeRole"
-    }]
-  })
-
-  # What the S3 backend needs: list the bucket, read and write state objects and their
-  # `.tflock` files (use_lockfile), lock items in DynamoDB, and the key that encrypts both.
-  state_role_policy = jsonencode({
-    Version = "2012-10-17"
     Statement = [
       {
-        Sid      = "ListStateBucket"
-        Effect   = "Allow"
-        Action   = ["s3:ListBucket"]
-        Resource = [aws_s3_bucket.state.arn]
+        Sid       = "DenyPlainHttp"
+        Effect    = "Deny"
+        Principal = "*"
+        Action    = "s3:*"
+        Resource  = [local.bucket_arn, "${local.bucket_arn}/*"]
+        Condition = { Bool = { "aws:SecureTransport" = "false" } }
       },
       {
-        Sid      = "StateObjects"
-        Effect   = "Allow"
-        Action   = ["s3:GetObject", "s3:PutObject", "s3:DeleteObject"]
-        Resource = ["${aws_s3_bucket.state.arn}/*/terraform.tfstate*"]
+        # `encrypt = true` without kms_key_id sends AES256, which would override the bucket default.
+        Sid       = "DenyUploadsNotKms"
+        Effect    = "Deny"
+        Principal = "*"
+        Action    = ["s3:PutObject"]
+        Resource  = ["${local.bucket_arn}/*"]
+        Condition = { StringNotEqualsIfExists = { "s3:x-amz-server-side-encryption" = "aws:kms" } }
       },
       {
-        Sid      = "LockItems"
-        Effect   = "Allow"
-        Action   = ["dynamodb:DescribeTable", "dynamodb:GetItem", "dynamodb:PutItem", "dynamodb:DeleteItem"]
-        Resource = [aws_dynamodb_table.locks.arn]
+        Sid       = "DenyUploadsWithAnotherKey"
+        Effect    = "Deny"
+        Principal = "*"
+        Action    = ["s3:PutObject"]
+        Resource  = ["${local.bucket_arn}/*"]
+        Condition = { StringNotEqualsIfExists = { "s3:x-amz-server-side-encryption-aws-kms-key-id" = aws_kms_key.state.arn } }
       },
       {
-        Sid      = "StateKey"
-        Effect   = "Allow"
-        Action   = ["kms:Encrypt", "kms:Decrypt", "kms:GenerateDataKey", "kms:DescribeKey"]
-        Resource = [aws_kms_key.state.arn]
+        # Defence in depth: a broad read policy elsewhere (ReadOnlyAccess) still cannot reach state.
+        Sid       = "OnlyStateRolesTouchObjects"
+        Effect    = "Deny"
+        Principal = "*"
+        Action    = ["s3:GetObject", "s3:GetObjectVersion", "s3:PutObject", "s3:DeleteObject", "s3:DeleteObjectVersion"]
+        Resource  = ["${local.bucket_arn}/*"]
+        Condition = {
+          ArnNotEquals = {
+            "aws:PrincipalArn" = concat(values(local.read_role_arns), values(local.rw_role_arns), var.break_glass_principal_arns)
+          }
+        }
       },
     ]
   })
@@ -201,21 +202,4 @@ resource "aws_dynamodb_table" "locks" {
   lifecycle {
     prevent_destroy = true
   }
-}
-
-# --- State role ---
-
-resource "aws_iam_role" "state" {
-  name                 = local.state_role_name
-  description          = "Reads and writes Terraform state and locks; assumed from the trusted accounts."
-  assume_role_policy   = local.state_role_trust
-  max_session_duration = 3600
-
-  tags = { service = "terraform-state" }
-}
-
-resource "aws_iam_role_policy" "state" {
-  name   = "terraform-state"
-  role   = aws_iam_role.state.id
-  policy = local.state_role_policy
 }
