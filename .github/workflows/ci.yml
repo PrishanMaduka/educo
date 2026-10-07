@@ -1,4 +1,6 @@
-# The quality gate (`pnpm verify`) and a production build, on every pull request and on main.
+# The quality gate (`pnpm verify`) and a production build. Runs on pull requests, on pushes to
+# main, develop and the claude/** working branches (work there is pushed without a pull request),
+# and on demand.
 # The database credentials below are the throwaway local ones from .env.example and
 # docker/postgres/init/01-roles.sql; they only exist inside this job's service containers.
 name: CI
@@ -6,10 +8,11 @@ name: CI
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: [main, develop, 'claude/**']
+  workflow_dispatch:
 
 concurrency:
-  group: ci-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
