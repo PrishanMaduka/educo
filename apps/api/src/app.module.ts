@@ -3,6 +3,7 @@ import { Module } from '@nestjs/common';
 import { CoreModule } from './core.module';
 import { HealthModule } from './health/health.module';
 import { OpenApiController } from './openapi/openapi.controller';
+import { RealtimeModule } from './realtime/realtime.module';
 
 import type { Config } from './config';
 import type { DynamicModule } from '@nestjs/common';
@@ -14,7 +15,7 @@ export class AppModule {
   static forRoot(config: Config, logger: Logger): DynamicModule {
     return {
       module: AppModule,
-      imports: [CoreModule.forRoot(config, logger), HealthModule],
+      imports: [CoreModule.forRoot(config, logger), HealthModule, RealtimeModule],
       controllers: [OpenApiController],
     };
   }

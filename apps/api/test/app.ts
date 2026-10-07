@@ -13,13 +13,18 @@ import type { CreateAppOptions } from '../src/app';
 import type { NestFastifyApplication } from '@nestjs/platform-fastify';
 import type { Logger } from 'pino';
 
+export interface TestAppOptions extends CreateAppOptions {
+  /** Listen on a random port of 127.0.0.1, for clients that need a real socket (WebSocket). */
+  readonly listen?: boolean;
+}
+
 /**
  * Builds the real app once per test file and closes it afterwards. Requests go through
- * Fastify's `inject`, so no port is opened.
+ * Fastify's `inject`, so no port is opened unless `listen` is set.
  */
 export function useTestApp(
   overrides: Record<string, string | undefined> = {},
-  options: CreateAppOptions = {},
+  { listen = false, ...options }: TestAppOptions = {},
 ): () => NestFastifyApplication {
   let app: NestFastifyApplication | undefined;
 
@@ -28,7 +33,11 @@ export function useTestApp(
       logger: pino({ level: 'silent' }),
       ...options,
     });
-    await app.getHttpAdapter().getInstance().ready();
+    if (listen) {
+      await app.listen(0, '127.0.0.1');
+    } else {
+      await app.getHttpAdapter().getInstance().ready();
+    }
   });
 
   afterAll(async () => {
