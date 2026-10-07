@@ -5,6 +5,7 @@ import { Search } from 'lucide-react';
 import { useEffect, useId, useMemo, useState, type KeyboardEvent } from 'react';
 
 import { cn } from '../lib/cn';
+import { uiText } from '../lib/defaults';
 import { ICON_STROKE } from '../lib/motion';
 
 export interface CommandItem {
@@ -167,9 +168,9 @@ export function CommandPalette({
   open: openProp,
   onOpenChange,
   groups,
-  placeholder = 'Search students, staff and pages',
-  label = 'Search',
-  emptyLabel = 'No results',
+  placeholder = uiText['search.placeholder'],
+  label = uiText['ui.palette.label'],
+  emptyLabel = uiText['ui.filter.empty'],
 }: CommandPaletteProps) {
   const [inner, setInner] = useState(false);
   const open = openProp ?? inner;
@@ -184,6 +185,7 @@ export function CommandPalette({
 
   useEffect(() => {
     const onKey = (event: globalThis.KeyboardEvent): void => {
+      if (event.defaultPrevented || event.isComposing) return;
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
         event.preventDefault();
         request.current(true);

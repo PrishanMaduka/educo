@@ -4,6 +4,7 @@ import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react';
 import { useMemo, useState, type KeyboardEvent, type MouseEvent, type ReactNode } from 'react';
 
 import { cn } from '../lib/cn';
+import { fill, uiText } from '../lib/defaults';
 import { focusRing, ICON_STROKE, transition } from '../lib/motion';
 
 import { Checkbox } from './Checkbox';
@@ -85,8 +86,8 @@ export function Table<Row>({
   onRowClick,
   empty,
   footer,
-  selectAllLabel = 'Select all rows',
-  selectRowLabel = (label) => `Select ${label}`,
+  selectAllLabel = uiText['ui.table.selectAll'],
+  selectRowLabel = (label) => fill(uiText['ui.table.selectRow'], { label }),
   className,
 }: TableProps<Row>) {
   const [sort, setSort] = useState<{ key: string; dir: Direction } | null>(null);

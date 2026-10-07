@@ -5,6 +5,7 @@ import { Check, X, type LucideIcon } from 'lucide-react';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 
 import { cn } from '../lib/cn';
+import { uiText } from '../lib/defaults';
 import { ICON_STROKE, transition } from '../lib/motion';
 
 import { Button } from './Button';
@@ -19,7 +20,7 @@ export interface StepperProps {
 }
 
 /** Numbered steps for multi-step forms. The current one carries `aria-current="step"`. */
-export function Stepper({ steps, current, label = 'Progress' }: StepperProps) {
+export function Stepper({ steps, current, label = uiText['ui.drawer.steps'] }: StepperProps) {
   return (
     <ol aria-label={label} className="m-0 flex list-none items-center gap-2 p-0">
       {steps.map((name, i) => {
@@ -107,12 +108,12 @@ export function Drawer({
   dirty = false,
   footer,
   children,
-  closeLabel = 'Close',
-  stepsLabel = 'Progress',
-  discardTitle = 'Discard changes?',
-  discardBody = 'What you have entered has not been saved.',
-  keepLabel = 'Keep editing',
-  discardLabel = 'Discard',
+  closeLabel = uiText['ui.drawer.close'],
+  stepsLabel = uiText['ui.drawer.steps'],
+  discardTitle = uiText['ui.drawer.discard.title'],
+  discardBody = uiText['ui.drawer.discard.body'],
+  keepLabel = uiText['ui.drawer.discard.keep'],
+  discardLabel = uiText['ui.drawer.discard.confirm'],
 }: DrawerProps) {
   const [confirming, setConfirming] = useState(false);
   const bodyRef = useRef<HTMLDivElement>(null);

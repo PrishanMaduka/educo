@@ -5,6 +5,7 @@ import { Check, ChevronDown, Search, X, type LucideIcon } from 'lucide-react';
 import { useId, useMemo, useRef, useState, type KeyboardEvent } from 'react';
 
 import { cn } from '../lib/cn';
+import { fill, uiText } from '../lib/defaults';
 import { focusRing, ICON_STROKE, transition } from '../lib/motion';
 
 export interface DropdownFilterOption {
@@ -57,9 +58,9 @@ export function DropdownFilter({
   searchable = false,
   onChange,
   onClear,
-  clearLabel = `Clear ${label}`,
-  searchLabel = `Search ${label}`,
-  emptyLabel = 'No results',
+  clearLabel = fill(uiText['ui.filter.clear'], { label }),
+  searchLabel = fill(uiText['ui.filter.search'], { label }),
+  emptyLabel = uiText['ui.filter.empty'],
 }: DropdownFilterProps) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');

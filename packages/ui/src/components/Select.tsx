@@ -4,6 +4,7 @@ import * as RadixSelect from '@radix-ui/react-select';
 import { Check, ChevronDown } from 'lucide-react';
 
 import { cn } from '../lib/cn';
+import { uiText } from '../lib/defaults';
 import { ICON_STROKE, transition } from '../lib/motion';
 
 import { controlClasses, Field } from './Field';
@@ -40,7 +41,7 @@ export function Select({
   value,
   defaultValue,
   onValueChange,
-  placeholder = 'Choose one',
+  placeholder = uiText['ui.select.placeholder'],
   hint,
   error,
   disabled,

@@ -40,7 +40,6 @@
   "ui.drawer.discard.keep": "Keep editing",
   "ui.drawer.discard.confirm": "Discard",
   "ui.palette.label": "Search",
-  "ui.palette.empty": "No results",
   "ui.select.placeholder": "Choose one",
   "ui.table.selectAll": "Select all rows",
   "ui.table.selectRow": "Select {label}",

@@ -318,6 +318,9 @@ importers:
       '@quad/contracts':
         specifier: workspace:*
         version: link:../contracts
+      '@quad/domain':
+        specifier: workspace:*
+        version: link:../domain
       '@radix-ui/react-checkbox':
         specifier: 1.3.12
         version: 1.3.12(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
@@ -355,9 +358,6 @@ importers:
       '@quad/config':
         specifier: workspace:*
         version: link:../config
-      '@quad/domain':
-        specifier: workspace:*
-        version: link:../domain
       '@quad/tokens':
         specifier: workspace:*
         version: link:../tokens

@@ -55,7 +55,6 @@
   "uiDrawerDiscardKeep": "Keep editing",
   "uiDrawerDiscardConfirm": "Discard",
   "uiPaletteLabel": "Search",
-  "uiPaletteEmpty": "No results",
   "uiSelectPlaceholder": "Choose one",
   "uiTableSelectAll": "Select all rows",
   "uiTableSelectRow": "Select {label}",

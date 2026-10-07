@@ -11,6 +11,7 @@ import {
   type ReactNode,
 } from 'react';
 
+import { uiText } from '../lib/defaults';
 import { transition } from '../lib/motion';
 
 const MAX_VISIBLE = 2;
@@ -37,7 +38,7 @@ export interface ToastProviderProps {
 
 export function ToastProvider({
   children,
-  label = 'Notifications',
+  label = uiText['ui.toast.region'],
   durationMs = DURATION_MS,
 }: ToastProviderProps) {
   const [toasts, setToasts] = useState<ToastItem[]>([]);

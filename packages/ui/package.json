@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@quad/contracts": "workspace:*",
+    "@quad/domain": "workspace:*",
     "@radix-ui/react-checkbox": "1.3.12",
     "@radix-ui/react-dialog": "1.2.0",
     "@radix-ui/react-popover": "1.2.0",
@@ -35,7 +36,6 @@
   },
   "devDependencies": {
     "@quad/config": "workspace:*",
-    "@quad/domain": "workspace:*",
     "@quad/tokens": "workspace:*",
     "@testing-library/jest-dom": "7.0.1",
     "@testing-library/react": "16.3.3",

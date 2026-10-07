@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
@@ -123,6 +123,19 @@ describe('CommandPalette', () => {
     render(<Wrapper />);
     await user.click(screen.getByRole('option', { name: 'One' }));
     expect(picked).toHaveBeenCalledTimes(1);
+    expect(screen.queryByRole('combobox')).not.toBeInTheDocument();
+  });
+
+  it('ignores Ctrl K when another handler already took it or text is being composed', () => {
+    render(<CommandPalette groups={groups} />);
+    fireEvent.keyDown(document.body, { key: 'k', ctrlKey: true, isComposing: true });
+    expect(screen.queryByRole('combobox')).not.toBeInTheDocument();
+    const stop = (e: Event) => {
+      e.preventDefault();
+    };
+    document.addEventListener('keydown', stop, { capture: true });
+    fireEvent.keyDown(document.body, { key: 'k', ctrlKey: true });
+    document.removeEventListener('keydown', stop, { capture: true });
     expect(screen.queryByRole('combobox')).not.toBeInTheDocument();
   });
 });
