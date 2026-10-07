@@ -222,3 +222,60 @@ tester.run('quad/no-with-platform-outside-platform', platformRule, {
     },
   ],
 });
+
+const jsxTester = new RuleTester({
+  languageOptions: {
+    ecmaVersion: 2022,
+    sourceType: 'module',
+    parser: tseslint.parser,
+    parserOptions: { ecmaFeatures: { jsx: true } },
+  },
+});
+const colourRule = quad.rules['no-arbitrary-colour'];
+const classColour = [{ messageId: 'classColour' as const }];
+const styleColour = [{ messageId: 'styleColour' as const }];
+
+jsxTester.run('quad/no-arbitrary-colour', colourRule, {
+  valid: [
+    "const c = 'bg-brand text-ink-2 border-line';",
+    "const c = 'bg-[var(--quad-brand)] text-[var(--quad-ink)]';",
+    "const c = 'w-[390px] grid-cols-[1fr_2fr] shadow-[0_1px_2px_var(--quad-shadow)]';",
+    "const c = 'bg-[url(/hero.png)] text-[13px]';",
+    "const c = 'stroked-[#fff]';",
+    "const c = `p-4 ${active ? 'bg-brand' : 'bg-surface'}`;",
+    '<div className="bg-[var(--quad-x)]" />;',
+    "<div style={{ color: 'var(--quad-ink)' }} />;",
+    "<div style={{ backgroundColor: 'transparent', borderColor: 'currentColor' }} />;",
+    "<div style={{ background: 'linear-gradient(var(--quad-a), var(--quad-b))' }} />;",
+    "<div style={{ width: '#fff', '--quad-x': '#fff' }} />;",
+    '<div style={{ color: tone }} />;',
+    "<div style={{ ['color']: 'var(--quad-ink)' }} />;",
+    "<div data-style={{ color: '#fff' }} />;",
+  ],
+  invalid: [
+    { code: "const c = 'bg-[#fff]';", errors: classColour },
+    { code: "const c = 'p-2 text-[#DD4A42]';", errors: classColour },
+    { code: "const c = 'dark:bg-[#000]';", errors: classColour },
+    { code: "const c = 'hover:dark:border-[rgb(0,0,0)]';", errors: classColour },
+    { code: "const c = 'ring-[rgba(0,0,0,0.1)]';", errors: classColour },
+    { code: "const c = 'fill-[hsl(0_0%_0%)] stroke-[hsla(0,0%,0%,1)]';", errors: classColour },
+    { code: "const c = 'from-[oklch(0.7_0.1_20)] via-[oklab(0.5_0_0)] to-[lab(50%_0_0)]';", errors: classColour },
+    { code: "const c = 'outline-[lch(50%_0_0)]';", errors: classColour },
+    { code: "const c = 'decoration-[color(display-p3_1_0_0)]';", errors: classColour },
+    { code: "const c = 'accent-[color:var(--quad-x)]';", errors: classColour },
+    ...[
+      'bg', 'text', 'border', 'ring', 'fill', 'stroke', 'from', 'via', 'to', 'outline',
+      'decoration', 'accent', 'caret', 'shadow', 'divide', 'placeholder',
+    ].map((prefix) => ({ code: `const c = '${prefix}-[#123456]';`, errors: classColour })),
+    { code: "const c = 'border-t-[#fff]';", errors: classColour },
+    { code: "const c = '!bg-[#fff]';", errors: classColour },
+    { code: 'const c = `p-4 bg-[#fff] ${x}`;', errors: classColour },
+    { code: '<div className="md:hover:text-[#abc]" />;', errors: classColour },
+    { code: "<div style={{ color: '#fff' }} />;", errors: styleColour },
+    { code: "<div style={{ background: 'red' }} />;", errors: styleColour },
+    { code: "<div style={{ backgroundColor: 'rgb(0 0 0)' }} />;", errors: styleColour },
+    { code: "<div style={{ 'borderColor': 'hsl(0 0% 0%)' }} />;", errors: styleColour },
+    { code: '<div style={{ fill: `#fff` }} />;', errors: styleColour },
+    { code: "<div style={{ stroke: 'var(--quad-x, #fff)', outlineColor: 'blue' }} />;", errors: [...styleColour, ...styleColour] },
+  ],
+});

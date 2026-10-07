@@ -22,4 +22,9 @@ export default [
       'react-hooks/exhaustive-deps': 'error',
     },
   },
+  {
+    // Class strings live in .ts files too (cva variants), so this covers every source file.
+    files: ['**/*.{js,jsx,mjs,ts,tsx}'],
+    rules: { 'quad/no-arbitrary-colour': 'error' },
+  },
 ];

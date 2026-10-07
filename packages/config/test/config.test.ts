@@ -37,6 +37,16 @@ describe('@quad/config', () => {
     expect((mod.default as unknown[]).length).toBeGreaterThan(0);
   });
 
+  it('react ESLint config reports arbitrary colours in .ts and .tsx files', async () => {
+    const react = ((await import('../eslint/react.mjs')) as { default: Linter.Config[] }).default;
+    const linter = new Linter({ configType: 'flat' });
+    const config = [...react, tseslint.configs.disableTypeChecked] as Linter.Config[];
+    for (const filename of ['variants.ts', 'Card.tsx']) {
+      const messages = linter.verify("export const c = 'dark:bg-[#000]';\n", config, { filename });
+      expect(messages.map((m) => m.ruleId)).toContain('quad/no-arbitrary-colour');
+    }
+  });
+
   it('Vitest preset fails a run that contains .only', () => {
     expect(vitestPreset.test?.allowOnly).toBe(false);
   });
