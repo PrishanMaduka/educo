@@ -5,7 +5,7 @@ import { runSentryTest } from '../src/cli/sentry-test';
 import { AppErrorFilter } from '../src/common/error.filter';
 import { NotFoundError } from '../src/common/errors';
 import { loadConfig } from '../src/config';
-import { initErrorReporting } from '../src/observability/sentry';
+import { initErrorReporting, reportFatalError } from '../src/observability/sentry';
 
 import { localEnv, productionEnv } from './env';
 
@@ -53,6 +53,25 @@ describe('initErrorReporting', () => {
     const reporter = initErrorReporting({ APP_ENV: 'local' }, 'api');
     expect(reporter.capture(new Error('ignored'))).toBeUndefined();
     await expect(reporter.flush(10)).resolves.toBe(true);
+  });
+});
+
+describe('reportFatalError', () => {
+  it('captures the error and waits up to 2 s for it to be sent', async () => {
+    const reporter = fakeReporter();
+    const error = new Error('could not start');
+    await reportFatalError(reporter, error);
+    expect(reporter.captured).toEqual([error]);
+    expect(reporter.flushes).toEqual([2_000]);
+  });
+
+  it('does nothing before a reporter exists', async () => {
+    await expect(reportFatalError(undefined, new Error('bad config'))).resolves.toBeUndefined();
+  });
+
+  it('never throws, even when flushing fails', async () => {
+    const reporter = { ...fakeReporter(), flush: () => Promise.reject(new Error('offline')) };
+    await expect(reportFatalError(reporter, new Error('x'))).resolves.toBeUndefined();
   });
 });
 

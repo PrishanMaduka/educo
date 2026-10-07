@@ -40,11 +40,13 @@ const FRAMEWORK_INTEGRATIONS: ReadonlySet<string> = new Set([
  * (`enableOpenTelemetrySetup: false`, Sentry 11's form of `skipOpenTelemetrySetup`), adds none of
  * its tracing integrations, creates no HTTP spans and adds no trace headers to outgoing requests.
  * `tracesSampleRate: 0` also stops `SENTRY_TRACES_SAMPLE_RATE` from turning tracing on. Every
- * event passes through `scrubSentryEvent`.
+ * event passes through `scrubSentryEvent`. `overrides.transport` is for tests (an in-memory
+ * transport, so nothing is sent).
  */
 export function initErrorReporting(
   config: ErrorReportingConfig,
   service: 'api' | 'worker',
+  overrides: Pick<Sentry.NodeOptions, 'transport'> = {},
 ): ErrorReporter {
   if (config.SENTRY_DSN === undefined) {
     return NO_OP_REPORTER;
@@ -57,6 +59,8 @@ export function initErrorReporting(
     enableOpenTelemetrySetup: false,
     // No load-time module rewriting: OpenTelemetry's instrumentations own pg, ioredis and Fastify.
     enableRuntimeChannelInjection: false,
+    // Hostnames are added to fetch errors only in the report, never to the error the code sees.
+    enhanceFetchErrorMessages: 'report-only',
     tracesSampleRate: 0,
     tracePropagationTargets: [],
     defaultIntegrations: Sentry.getDefaultIntegrationsWithoutPerformance().filter(
@@ -69,9 +73,27 @@ export function initErrorReporting(
     includeLocalVariables: false,
     dataCollection: SENTRY_DATA_COLLECTION,
     beforeSend: scrubSentryEvent,
+    ...overrides,
   });
   return {
     capture: (error) => Sentry.captureException(error),
     flush: (timeoutMs) => Sentry.flush(timeoutMs),
   };
+}
+
+/** How long a process that failed to start waits for its error report to be sent. */
+const FATAL_FLUSH_MS = 2_000;
+
+/**
+ * Reports an error that stops the process (a startup failure) and waits briefly for it to be
+ * sent. Does nothing when the failure came before error reporting started; never throws, so the
+ * caller can always go on to print the error and exit.
+ */
+export async function reportFatalError(
+  reporter: ErrorReporter | undefined,
+  error: unknown,
+): Promise<void> {
+  if (reporter === undefined) return;
+  reporter.capture(error);
+  await reporter.flush(FATAL_FLUSH_MS).catch(() => false);
 }

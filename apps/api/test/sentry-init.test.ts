@@ -30,6 +30,8 @@ describe('initErrorReporting with a DSN', () => {
       environment: 'staging',
       release: '1.2.3',
       enableOpenTelemetrySetup: false,
+      enableRuntimeChannelInjection: false,
+      enhanceFetchErrorMessages: 'report-only',
       tracesSampleRate: 0,
       tracePropagationTargets: [],
       includeLocalVariables: false,

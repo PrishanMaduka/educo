@@ -7,6 +7,7 @@ import { createLogger, errorForLog } from '../observability/logger';
 import { createShutdown, onShutdownSignals } from '../shutdown';
 
 import { startWorkerHeartbeat } from './heartbeat';
+import { isFinalAttempt } from './job-failure';
 
 import type { Config } from '../config';
 import type { ErrorReporter } from '../observability/sentry';
@@ -38,7 +39,8 @@ async function waitForRedis(connection: Redis): Promise<void> {
 
 /**
  * Connects to Redis, starts one BullMQ worker per queue and stops cleanly on SIGTERM/SIGINT. A job
- * that throws is logged and reported (Sentry) by queue and job name, never with its data.
+ * that throws is logged by queue and job name, never with its data, and reported (Sentry) once it
+ * has used its last attempt.
  */
 export async function runWorkers(
   config: Config,
@@ -56,8 +58,10 @@ export async function runWorkers(
   const workers = Object.entries(PROCESSORS).map(([queue, processor]) => {
     const worker = new Worker(queue, processor, { connection });
     worker.on('failed', (job, error) => {
-      logger.error({ error: errorForLog(error), queue, job: job?.name }, 'Job failed');
-      reporter.capture(error);
+      const final = isFinalAttempt(job, error);
+      logger.error({ error: errorForLog(error), queue, job: job?.name, final }, 'Job failed');
+      // Retries are expected; only a job that has given up is reported.
+      if (final) reporter.capture(error);
     });
     return worker;
   });
