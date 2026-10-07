@@ -1,26 +1,33 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:quad_parent/theme/tokens.g.dart';
 import 'package:quad_parent/theme/theme.dart';
 import 'package:quad_parent/ui/quad_tab_bar.dart';
 
-Widget _bar({required bool reduceMotion, ValueChanged<int>? onSelect}) =>
-    MaterialApp(
-      theme: quadTheme(Brightness.light),
-      home: MediaQuery(
-        data: MediaQueryData(disableAnimations: reduceMotion),
-        child: Scaffold(
-          bottomNavigationBar: QuadTabBar(
-            tabs: const [
-              (label: 'One', icon: 'assets/icons/tab-home.svg'),
-              (label: 'Two', icon: 'assets/icons/tab-more.svg'),
-            ],
-            currentIndex: 0,
-            semanticLabel: 'Main',
-            onSelect: onSelect ?? (_) {},
-          ),
-        ),
+Widget _bar({
+  required bool reduceMotion,
+  ValueChanged<int>? onSelect,
+  Brightness brightness = Brightness.light,
+}) => MaterialApp(
+  theme: quadTheme(brightness),
+  home: MediaQuery(
+    data: MediaQueryData(disableAnimations: reduceMotion),
+    child: Scaffold(
+      bottomNavigationBar: QuadTabBar(
+        tabs: const [
+          (label: 'One', icon: 'assets/icons/tab-home.svg'),
+          (label: 'Two', icon: 'assets/icons/tab-more.svg'),
+        ],
+        currentIndex: 0,
+        semanticLabel: 'Main',
+        onSelect: onSelect ?? (_) {},
       ),
-    );
+    ),
+  ),
+);
 
 void main() {
   testWidgets('the active pill eases in over 250 ms', (tester) async {
@@ -58,4 +65,37 @@ void main() {
     );
     expect(size.height, greaterThanOrEqualTo(44));
   });
+
+  /// WCAG 2.x contrast ratio.
+  double contrast(Color a, Color b) {
+    final la = a.computeLuminance();
+    final lb = b.computeLuminance();
+    return (math.max(la, lb) + 0.05) / (math.min(la, lb) + 0.05);
+  }
+
+  for (final (brightness, colors) in [
+    (Brightness.light, QuadColors.light),
+    (Brightness.dark, QuadColors.dark),
+  ]) {
+    testWidgets('the active tab is a brand-fill pill with readable text and '
+        'icon (${brightness.name})', (tester) async {
+      await tester.pumpWidget(_bar(reduceMotion: true, brightness: brightness));
+      final pill = tester.widget<AnimatedContainer>(
+        find.byType(AnimatedContainer).first,
+      );
+      final fill = (pill.decoration! as BoxDecoration).color!;
+      // Ruling R16: filled brand surfaces use brand-fill, not brand.
+      expect(fill, colors.brandFill);
+
+      final icon = tester.widget<SvgPicture>(find.byType(SvgPicture).first);
+      expect(
+        icon.colorFilter,
+        ColorFilter.mode(colors.brandInk, BlendMode.srcIn),
+      );
+      expect(contrast(colors.brandInk, fill), greaterThanOrEqualTo(4.5));
+
+      final label = tester.widget<Text>(find.text('One')).style!.color!;
+      expect(contrast(label, colors.surface), greaterThanOrEqualTo(4.5));
+    });
+  }
 }

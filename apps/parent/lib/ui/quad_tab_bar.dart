@@ -6,7 +6,9 @@ import 'package:quad_parent/theme/theme.dart';
 typedef QuadTab = ({String label, String icon});
 
 /// The parent app's bottom tab bar: the active tab is a coral pill with a
-/// small dot (design/parent.html `.tabbar`).
+/// small dot (design/parent.html `.tabbar`). The pill and the active label use
+/// brand-fill, not brand, so white icons on the pill and the label on the
+/// surface both reach 4.5:1 (ruling R16).
 class QuadTabBar extends StatelessWidget {
   const QuadTabBar({
     required this.tabs,
@@ -112,12 +114,12 @@ class _TabButton extends StatelessWidget {
                 width: 54,
                 height: 30,
                 decoration: BoxDecoration(
-                  color: active ? c.brand : c.surface.withValues(alpha: 0),
+                  color: active ? c.brandFill : c.surface.withValues(alpha: 0),
                   borderRadius: BorderRadius.circular(999),
                   boxShadow: active
                       ? [
                           BoxShadow(
-                            color: c.brand,
+                            color: c.brandFill,
                             blurRadius: 14,
                             spreadRadius: -8,
                             offset: const Offset(0, 6),
@@ -147,7 +149,7 @@ class _TabButton extends StatelessWidget {
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             color: c.gold,
-                            border: Border.all(color: c.brand, width: 1.5),
+                            border: Border.all(color: c.brandFill, width: 1.5),
                           ),
                         ),
                       ),
@@ -163,7 +165,7 @@ class _TabButton extends StatelessWidget {
                     tab.label,
                     maxLines: 1,
                     style: labelStyle.copyWith(
-                      color: active ? c.brand : c.ink3,
+                      color: active ? c.brandFill : c.ink3,
                     ),
                   ),
                 ),
