@@ -28,3 +28,10 @@ apps/parent/**/build/
 **/.pub/
 .env.local
 !.env.example
+
+# Terraform (toolchain cache from `pnpm infra:tools`, working dirs, state and plans)
+.cache/
+**/.terraform/
+infra/modules/**/.terraform.lock.hcl
+*.tfstate*
+*.tfplan

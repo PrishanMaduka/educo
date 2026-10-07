@@ -20,6 +20,8 @@
     "tokens:build": "pnpm --filter @quad/tokens build",
     "i18n:build": "pnpm --filter @quad/contracts i18n:build",
     "codegen:check": "node scripts/codegen-check.mjs",
+    "infra:tools": "node scripts/terraform-mirror.mjs",
+    "infra:check": "node scripts/infra-check.mjs",
     "parent:run": "cd apps/parent && node ../../scripts/flutter.mjs flutter run --flavor dev --dart-define-from-file=env/dev.json",
     "test": "turbo run test",
     "test:api": "turbo run test:api",
