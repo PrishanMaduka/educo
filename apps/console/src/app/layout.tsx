@@ -28,7 +28,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    // switches the tokens to the console's darker rail and lilac active item.
+    // data-app="console" switches the tokens to the console's darker rail and lilac active item.
     // The inline script sets data-theme before paint, so React must not complain that <html> differs.
     <html lang="en" data-app="console" className={figtree.variable} suppressHydrationWarning>
       <head>

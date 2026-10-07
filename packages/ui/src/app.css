@@ -8,20 +8,9 @@
  */
 @import '@quad/tokens/theme.css';
 @import './styles.css';
+@import './variants.css';
 
 @source './';
-
-/* Spec 03 Tailwind: dark follows data-theme, or the device when no theme is chosen. */
-@custom-variant dark {
-  &:where([data-theme='dark'], [data-theme='dark'] *) {
-    @slot;
-  }
-  @media (prefers-color-scheme: dark) {
-    &:where(:root:not([data-theme]), :root:not([data-theme]) *) {
-      @slot;
-    }
-  }
-}
 
 /* next/font gives Figtree a generated family name, so the token stack points at its variable. */
 @theme inline {
