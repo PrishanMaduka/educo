@@ -81,8 +81,14 @@ describe('robotsTagFor', () => {
     ['production', 'api', null],
     ['local', 'staff', null],
     ['local', 'api', null],
-    [undefined, 'staff', null],
-    ['', 'api', null],
+    [undefined, 'staff', 'noindex, nofollow'],
+    [undefined, 'api', 'noindex, nofollow'],
+    ['', 'staff', 'noindex, nofollow'],
+    ['', 'api', 'noindex, nofollow'],
+    ['Staging', 'staff', 'noindex, nofollow'],
+    ['prod', 'api', 'noindex, nofollow'],
+    ['test', 'staff', 'noindex, nofollow'],
+    ['Production', 'staff', 'noindex, nofollow'],
   ] as const)('APP_ENV=%s on %s gives %s', (appEnv, surface, expected) => {
     expect(robotsTagFor(appEnv, surface)).toBe(expected);
   });

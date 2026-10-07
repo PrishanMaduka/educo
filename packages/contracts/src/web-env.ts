@@ -72,12 +72,16 @@ export function parseWebPublicEnv(source: Record<string, string | undefined>): W
 /** The surfaces that answer on the public internet (spec 20, edge). */
 export type RobotsSurface = 'staff' | 'api' | 'console';
 
+/** The environments whose staff app and API may be indexed: production, and local (never public). */
+const INDEXABLE_APP_ENVS: ReadonlySet<string> = new Set(['production', 'local']);
+
 /**
- * The `X-Robots-Tag` value for a surface, or `null` for none. The console is never indexed; staff
- * and the API are not indexed on staging. `appEnv` is the runtime `APP_ENV`, so one image serves
- * every environment.
+ * The `X-Robots-Tag` value for a surface, or `null` for none. The console is never indexed. Staff
+ * and the API are indexed only when `appEnv` is exactly `production` (or `local`): an allow-list,
+ * so a missing or mistyped `APP_ENV` fails closed. `appEnv` is the runtime `APP_ENV`, so one image
+ * serves every environment.
  */
 export function robotsTagFor(appEnv: string | undefined, surface: RobotsSurface): string | null {
-  if (surface === 'console' || appEnv === 'staging') return 'noindex, nofollow';
-  return null;
+  if (surface === 'console') return 'noindex, nofollow';
+  return appEnv !== undefined && INDEXABLE_APP_ENVS.has(appEnv) ? null : 'noindex, nofollow';
 }
