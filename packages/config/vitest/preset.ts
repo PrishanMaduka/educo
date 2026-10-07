@@ -6,6 +6,8 @@ export const vitestPreset = defineConfig({
     environment: 'node',
     include: ['src/**/*.test.{ts,tsx}', 'test/**/*.test.{ts,tsx}'],
     passWithNoTests: false,
+    // A committed `.only` would silently skip the rest of the suite.
+    allowOnly: false,
     coverage: {
       provider: 'v8',
       reportsDirectory: 'coverage',

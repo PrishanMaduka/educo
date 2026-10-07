@@ -6,6 +6,8 @@ import tseslint from 'typescript-eslint';
 import { describe, expect, it } from 'vitest';
 
 import baseConfig from '../eslint/base.mjs';
+import { defineWebAppConfig } from '../playwright/preset';
+import { vitestPreset } from '../vitest/preset';
 
 const read = (rel: string) => readFileSync(fileURLToPath(new URL(rel, import.meta.url)), 'utf8');
 
@@ -33,5 +35,21 @@ describe('@quad/config', () => {
     const mod = (await import(`../eslint/${name}.mjs`)) as { default: unknown };
     expect(Array.isArray(mod.default)).toBe(true);
     expect((mod.default as unknown[]).length).toBeGreaterThan(0);
+  });
+
+  it('Vitest preset fails a run that contains .only', () => {
+    expect(vitestPreset.test?.allowOnly).toBe(false);
+  });
+
+  it('Playwright preset fails on .only outside CI too', () => {
+    expect(defineWebAppConfig({ port: 3000 }).forbidOnly).toBe(true);
+  });
+
+  it('Playwright webServer starts the existing build and never reuses a running server', () => {
+    const { webServer } = defineWebAppConfig({ port: 3000 });
+    expect(webServer).toMatchObject({
+      command: 'pnpm exec next start --port 3000',
+      reuseExistingServer: false,
+    });
   });
 });

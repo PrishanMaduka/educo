@@ -10,7 +10,7 @@ const phone = { width: 390, height: 844 };
 
 /**
  * Shared Playwright settings for the web apps: Chromium at 1440×900 and 390×844, each in light and dark
- * (through the system colour scheme), against a production build started by `webServer`.
+ * (through the system colour scheme), against the production build (from turbo's `build`) started by `webServer`.
  */
 export function defineWebAppConfig({ port }: WebAppE2eOptions): PlaywrightTestConfig {
   const baseURL = `http://localhost:${port}`;
@@ -18,7 +18,7 @@ export function defineWebAppConfig({ port }: WebAppE2eOptions): PlaywrightTestCo
   return defineConfig({
     testDir: './e2e',
     fullyParallel: true,
-    forbidOnly: isCi,
+    forbidOnly: true,
     retries: isCi ? 1 : 0,
     reporter: isCi ? [['list'], ['html', { open: 'never' }]] : 'list',
     timeout: 30_000,
@@ -30,10 +30,12 @@ export function defineWebAppConfig({ port }: WebAppE2eOptions): PlaywrightTestCo
       { name: 'phone-dark', use: { viewport: phone, colorScheme: 'dark', hasTouch: true } },
     ],
     webServer: {
-      command: `pnpm exec next build && pnpm exec next start --port ${port}`,
+      // turbo's `e2e` depends on `build`, so the production build already exists.
+      command: `pnpm exec next start --port ${port}`,
       // A port check, not a URL: Playwright treats a 404 at the URL as "not ready".
       port,
-      reuseExistingServer: !isCi,
+      // Never reuse: a running `pnpm dev` on the same port would be tested instead of the build.
+      reuseExistingServer: false,
       timeout: 240_000,
       stdout: 'ignore',
       stderr: 'pipe',
