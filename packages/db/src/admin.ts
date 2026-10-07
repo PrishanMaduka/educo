@@ -3,7 +3,12 @@
  * role bootstrap, migrations and seed. ESLint (`quad/no-raw-db-client`) allows this entry only
  * there and inside packages/db; request handling and jobs use `@quad/db`.
  */
-export type { BootstrapRoles, RoleCredentials } from './bootstrap';
+export type {
+  AdminConnection,
+  AdminConnectionParts,
+  BootstrapRoles,
+  RoleCredentials,
+} from './bootstrap';
 export { bootstrapRoles } from './bootstrap';
 export type { DatabaseUrls } from './env';
 export { databaseUrls, withDatabaseName } from './env';

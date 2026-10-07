@@ -189,12 +189,16 @@ export const CONFIG_VARIABLES: readonly string[] = Object.keys(ConfigSchema.shap
 
 /**
  * Variables in spec 02's table that the API must not read: the owner URL is for migrations only
- * (D17), the admin URL for the db-bootstrap task only (D28), and `NEXT_PUBLIC_*` are build-time
- * settings for the web apps.
+ * (D17), the admin URL and its parts for the db-bootstrap task only (D28, ruling R-db-admin), and
+ * `NEXT_PUBLIC_*` are build-time settings for the web apps.
  */
 export const NOT_READ_BY_THE_API: readonly string[] = [
   'DATABASE_OWNER_URL',
   'DATABASE_ADMIN_URL',
+  'DATABASE_ADMIN_HOST',
+  'DATABASE_ADMIN_PORT',
+  'DATABASE_ADMIN_USER',
+  'DATABASE_ADMIN_PASSWORD',
   'NEXT_PUBLIC_APP_ENV',
   'NEXT_PUBLIC_API_URL',
   'NEXT_PUBLIC_SENTRY_DSN',

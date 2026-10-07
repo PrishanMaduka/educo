@@ -1,6 +1,6 @@
 import pg from 'pg';
 
-import { withDatabaseName } from './env';
+import { isSafeIdentifier, withDatabaseName } from './env';
 import { scramSha256Verifier } from './scram';
 
 /** A database role's login name and password. */
@@ -14,6 +14,46 @@ export interface BootstrapRoles {
   readonly owner: RoleCredentials;
   readonly app: RoleCredentials;
   readonly platform: RoleCredentials;
+}
+
+/**
+ * The RDS master user's connection parts (ruling R-db-admin, D28): on AWS the password is the
+ * RDS-managed secret's, so it is never put into a URL, where URL-special characters would break
+ * it. TLS is always verified, against the RDS CA bundle.
+ */
+export interface AdminConnectionParts {
+  readonly host: string;
+  readonly port: number;
+  readonly user: string;
+  readonly password: string;
+  readonly ssl: { readonly rejectUnauthorized: true; readonly ca: string };
+}
+
+/** `DATABASE_ADMIN_URL` (local runs and CI), or the parts (AWS). */
+export type AdminConnection = string | AdminConnectionParts;
+
+const APPLICATION_NAME = 'quad-db-bootstrap';
+
+/** The `pg` client config for the admin connection to `database`. */
+export function adminClientConfig(admin: AdminConnection, database: string): pg.ClientConfig {
+  if (typeof admin === 'string') {
+    return {
+      connectionString: withDatabaseName(admin, database),
+      application_name: APPLICATION_NAME,
+    };
+  }
+  if (!isSafeIdentifier(database)) {
+    throw new Error(`Unsafe database name: ${JSON.stringify(database)}.`);
+  }
+  return {
+    host: admin.host,
+    port: admin.port,
+    user: admin.user,
+    password: admin.password,
+    database,
+    ssl: { rejectUnauthorized: admin.ssl.rejectUnauthorized, ca: admin.ssl.ca },
+    application_name: APPLICATION_NAME,
+  };
 }
 
 async function ensureRole(
@@ -97,14 +137,11 @@ async function assertRoleSeparation(client: pg.Client, roles: BootstrapRoles): P
  * tenant table, so platform tables stay closed to it. Safe to run on every deploy.
  */
 export async function bootstrapRoles(
-  adminUrl: string,
+  admin: AdminConnection,
   roles: BootstrapRoles,
   database: string,
 ): Promise<void> {
-  const client = new pg.Client({
-    connectionString: withDatabaseName(adminUrl, database),
-    application_name: 'quad-db-bootstrap',
-  });
+  const client = new pg.Client(adminClientConfig(admin, database));
   await client.connect();
   try {
     await ensureRole(client, roles.owner, false);

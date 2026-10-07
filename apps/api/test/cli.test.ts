@@ -1,11 +1,11 @@
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { existsSync, mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 
 import { afterAll, describe, expect, it } from 'vitest';
 
-import { parseRoleFromUrl } from '../src/cli/db-bootstrap';
+import { adminConnectionFromEnv, parseRoleFromUrl } from '../src/cli/db-bootstrap';
 import { redact } from '../src/cli/run-command';
 import { seedRefusal } from '../src/cli/seed';
 
@@ -25,6 +25,89 @@ describe('parseRoleFromUrl', () => {
     } catch (error) {
       expect(String(error)).not.toContain('secret-host');
     }
+  });
+});
+
+describe('adminConnectionFromEnv', () => {
+  const parts = {
+    DATABASE_ADMIN_HOST: 'quad-staging.abc.ap-south-1.rds.amazonaws.com',
+    DATABASE_ADMIN_PORT: '5432',
+    DATABASE_ADMIN_USER: 'quad_admin',
+    DATABASE_ADMIN_PASSWORD: 'p@ss:/w?rd#%&x',
+  };
+  const readCa = (): string => 'RDS CA PEM';
+
+  it('uses DATABASE_ADMIN_URL when it is set, even beside the parts', () => {
+    expect(
+      adminConnectionFromEnv(
+        { ...parts, DATABASE_ADMIN_URL: 'postgres://postgres:postgres@localhost:5432/quad' },
+        readCa,
+      ),
+    ).toBe('postgres://postgres:postgres@localhost:5432/quad');
+  });
+
+  it('builds a client config from the parts, with TLS verified against the RDS bundle', () => {
+    expect(adminConnectionFromEnv({ ...parts, DATABASE_ADMIN_URL: '' }, readCa)).toEqual({
+      host: 'quad-staging.abc.ap-south-1.rds.amazonaws.com',
+      port: 5432,
+      user: 'quad_admin',
+      password: 'p@ss:/w?rd#%&x',
+      ssl: { rejectUnauthorized: true, ca: 'RDS CA PEM' },
+    });
+  });
+
+  it('names every missing part and never echoes the password', () => {
+    let message = '';
+    try {
+      adminConnectionFromEnv(
+        { ...parts, DATABASE_ADMIN_HOST: undefined, DATABASE_ADMIN_USER: '' },
+        readCa,
+      );
+    } catch (error) {
+      message = String(error);
+    }
+    expect(message).toMatch(/missing: DATABASE_ADMIN_HOST, DATABASE_ADMIN_USER\.$/);
+    expect(message).not.toContain(parts.DATABASE_ADMIN_PASSWORD);
+  });
+
+  it.each([['0'], ['65536'], ['54x'], ['-1']])('refuses DATABASE_ADMIN_PORT=%s', (port) => {
+    expect(() => adminConnectionFromEnv({ ...parts, DATABASE_ADMIN_PORT: port }, readCa)).toThrow(
+      /DATABASE_ADMIN_PORT must be a whole number from 1 to 65535/,
+    );
+  });
+
+  it('does not read the CA bundle when the URL is used', () => {
+    const failingRead = (): string => {
+      throw new Error('should not read');
+    };
+    expect(() =>
+      adminConnectionFromEnv({ DATABASE_ADMIN_URL: 'postgres://u:p@h/quad' }, failingRead),
+    ).not.toThrow();
+  });
+});
+
+describe('db-bootstrap command', () => {
+  it('exits 1 and names the missing part, without the password, when a part is missing', () => {
+    const password = 'Sup3r:s3cret@pass/word';
+    const result = spawnSync(
+      process.execPath,
+      ['--import', 'tsx', resolve(__dirname, '../src/cli/db-bootstrap.ts')],
+      {
+        encoding: 'utf8',
+        env: {
+          PATH: process.env.PATH,
+          DATABASE_OWNER_URL: 'postgres://quad_owner:o@db.internal:5432/quad',
+          DATABASE_URL: 'postgres://quad_app:a@proxy.internal:5432/quad',
+          DATABASE_PLATFORM_URL: 'postgres://quad_platform:p@proxy.internal:5432/quad',
+          DATABASE_ADMIN_PORT: '5432',
+          DATABASE_ADMIN_USER: 'quad_admin',
+          DATABASE_ADMIN_PASSWORD: password,
+        },
+      },
+    );
+    expect(result.status).toBe(1);
+    expect(result.stderr).toMatch(/db-bootstrap failed: .*DATABASE_ADMIN_HOST/);
+    expect(result.stderr + result.stdout).not.toContain(password);
   });
 });
 
