@@ -21,6 +21,10 @@ output "alb_arn_suffix" {
 output "target_group_arns" {
   description = "Target group ARNs by name: api, api_socket, staff and console."
   value       = { for key, group in aws_lb_target_group.this : key => group.arn }
+
+  # ECS refuses to register a service with a target group that no listener uses yet, so the app
+  # module's services must wait for the listener and its rules (Task 12 review).
+  depends_on = [aws_lb_listener.https, aws_lb_listener_rule.route]
 }
 
 output "target_group_arn_suffixes" {

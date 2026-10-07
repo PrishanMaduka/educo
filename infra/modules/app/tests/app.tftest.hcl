@@ -9,12 +9,22 @@ mock_provider "aws" {
 # The shared mock gives every role and secret the same ARN; distinct ARNs let the IAM tests tell
 # them apart.
 override_resource {
-  target = aws_iam_role.runtime_exec
+  target = aws_iam_role.execution["runtime"]
   values = { arn = "arn:aws:iam::123456789012:role/quad-staging-runtime-exec", name = "quad-staging-runtime-exec" }
 }
 
 override_resource {
-  target = aws_iam_role.migrate_exec
+  target = aws_iam_role.execution["web"]
+  values = { arn = "arn:aws:iam::123456789012:role/quad-staging-web-exec", name = "quad-staging-web-exec" }
+}
+
+override_resource {
+  target = aws_iam_role.execution["clamav"]
+  values = { arn = "arn:aws:iam::123456789012:role/quad-staging-clamav-exec", name = "quad-staging-clamav-exec" }
+}
+
+override_resource {
+  target = aws_iam_role.execution["migrate"]
   values = { arn = "arn:aws:iam::123456789012:role/quad-staging-migrate-exec", name = "quad-staging-migrate-exec" }
 }
 
@@ -144,9 +154,9 @@ run "runtime_cannot_act_as_owner_or_master" {
 
   assert {
     condition = (
-      contains(flatten([for s in jsondecode(aws_iam_role_policy.runtime_exec.policy).Statement : s.Resource]), var.env_secret_arns["DATABASE_URL"]) &&
-      !contains(flatten([for s in jsondecode(aws_iam_role_policy.runtime_exec.policy).Statement : s.Resource]), var.env_secret_arns["DATABASE_OWNER_URL"]) &&
-      !strcontains(aws_iam_role_policy.runtime_exec.policy, var.db_master_secret_arn)
+      contains(flatten([for s in jsondecode(aws_iam_role_policy.execution["runtime"].policy).Statement : s.Resource]), var.env_secret_arns["DATABASE_URL"]) &&
+      !contains(flatten([for s in jsondecode(aws_iam_role_policy.execution["runtime"].policy).Statement : s.Resource]), var.env_secret_arns["DATABASE_OWNER_URL"]) &&
+      !strcontains(aws_iam_role_policy.execution["runtime"].policy, var.db_master_secret_arn)
     )
     error_message = "runtime-exec reads DATABASE_URL but never DATABASE_OWNER_URL or the RDS-managed master secret (ruling R-db-admin)."
   }
@@ -164,11 +174,33 @@ run "runtime_cannot_act_as_owner_or_master" {
   }
 
   assert {
-    condition = alltrue([
-      for service in ["api", "worker", "staff", "console", "clamav"] :
-      aws_ecs_task_definition.this[service].execution_role_arn == aws_iam_role.runtime_exec.arn
-    ])
-    error_message = "Every runtime service uses runtime-exec as its execution role."
+    condition = (
+      aws_ecs_task_definition.this["api"].execution_role_arn == aws_iam_role.execution["runtime"].arn &&
+      aws_ecs_task_definition.this["worker"].execution_role_arn == aws_iam_role.execution["runtime"].arn &&
+      aws_ecs_task_definition.this["staff"].execution_role_arn == aws_iam_role.execution["web"].arn &&
+      aws_ecs_task_definition.this["console"].execution_role_arn == aws_iam_role.execution["web"].arn &&
+      aws_ecs_task_definition.this["clamav"].execution_role_arn == aws_iam_role.execution["clamav"].arn
+    )
+    error_message = "api and worker use runtime-exec, staff and console web-exec, clamav clamav-exec."
+  }
+
+  assert {
+    condition = (
+      jsonencode(sort(flatten([for s in jsondecode(aws_iam_role_policy.execution["web"].policy).Statement : s.Resource if contains(flatten([s.Action]), "secretsmanager:GetSecretValue")]))) ==
+      jsonencode(sort([aws_secretsmanager_secret.app["SENTRY_DSN"].arn, aws_secretsmanager_secret.app["OTEL_EXPORTER_OTLP_HEADERS"].arn])) &&
+      !strcontains(aws_iam_role_policy.execution["clamav"].policy, "secretsmanager") &&
+      !strcontains(aws_iam_role_policy.execution["clamav"].policy, "kms:")
+    )
+    error_message = "web-exec reads only SENTRY_DSN and the OTLP headers; clamav-exec reads no secret."
+  }
+
+  assert {
+    condition = (
+      jsonencode(flatten([for s in jsondecode(aws_iam_role_policy.execution["runtime"].policy).Statement : s.Resource if contains(flatten([s.Action]), "ecr:BatchGetImage")])) == jsonencode([aws_ecr_repository.this["api"].arn]) &&
+      jsonencode(sort(flatten([for s in jsondecode(aws_iam_role_policy.execution["web"].policy).Statement : s.Resource if contains(flatten([s.Action]), "ecr:BatchGetImage")]))) == jsonencode(sort([aws_ecr_repository.this["staff"].arn, aws_ecr_repository.this["console"].arn])) &&
+      jsonencode(sort(flatten([for s in jsondecode(aws_iam_role_policy.execution["web"].policy).Statement : s.Resource if contains(flatten([s.Action]), "logs:PutLogEvents")]))) == jsonencode(sort(["${aws_cloudwatch_log_group.this["staff"].arn}:*", "${aws_cloudwatch_log_group.this["console"].arn}:*"]))
+    )
+    error_message = "Each execution role pulls only its images and writes only its log groups."
   }
 
   assert {
@@ -225,8 +257,8 @@ run "db_bootstrap_reads_the_rds_managed_master_secret" {
 
   assert {
     condition = (
-      strcontains(aws_iam_role_policy.migrate_exec.policy, var.db_master_secret_arn) &&
-      !strcontains(aws_iam_role_policy.runtime_exec.policy, var.db_master_secret_arn) &&
+      strcontains(aws_iam_role_policy.execution["migrate"].policy, var.db_master_secret_arn) &&
+      alltrue([for role, policy in aws_iam_role_policy.execution : !strcontains(policy.policy, var.db_master_secret_arn) if role != "migrate"]) &&
       alltrue([for policy in aws_iam_role_policy.task : !strcontains(policy.policy, var.db_master_secret_arn)]) &&
       !strcontains(aws_iam_role_policy.deploy.policy, var.db_master_secret_arn)
     )
@@ -235,7 +267,7 @@ run "db_bootstrap_reads_the_rds_managed_master_secret" {
 
   assert {
     condition = anytrue([
-      for s in jsondecode(aws_iam_role_policy.migrate_exec.policy).Statement :
+      for s in jsondecode(aws_iam_role_policy.execution["migrate"].policy).Statement :
       s.Effect == "Allow" && contains(flatten([s.Action]), "kms:Decrypt") && contains(flatten([s.Resource]), var.data_kms_key_arn)
     ])
     error_message = "migrate-exec may decrypt with the data key that encrypts the master secret."
@@ -244,7 +276,7 @@ run "db_bootstrap_reads_the_rds_managed_master_secret" {
   assert {
     condition = alltrue([
       for task in ["migrate", "seed", "db-bootstrap"] :
-      aws_ecs_task_definition.this[task].execution_role_arn == aws_iam_role.migrate_exec.arn && aws_ecs_task_definition.this[task].task_role_arn == null
+      aws_ecs_task_definition.this[task].execution_role_arn == aws_iam_role.execution["migrate"].arn && aws_ecs_task_definition.this[task].task_role_arn == null
     ])
     error_message = "The one-off tasks use migrate-exec and have no task role."
   }
@@ -270,7 +302,7 @@ run "api_runs_behind_two_proxies" {
         "APP_ENV", "NODE_ENV", "TRUST_PROXY_HOPS", "PUBLIC_WEB_URL", "CONSOLE_URL", "API_PORT",
         "S3_REGION", "S3_BUCKET_PRIVATE", "S3_BUCKET_PUBLIC", "CDN_URL", "CLAMAV_HOST", "CLAMAV_PORT",
         "EMAIL_PROVIDER", "SES_REGION", "SES_CONFIGURATION_SET", "SES_SNS_TOPIC_ARN", "EMAIL_FROM_DOMAIN",
-        "OTEL_SERVICE_NAME", "SENTRY_ENVIRONMENT",
+        "OTEL_SERVICE_NAME", "SENTRY_ENVIRONMENT", "KMS_KEY_ID",
       ])) &&
       jsonencode(sort([for s in jsondecode(aws_ecs_task_definition.this["api"].container_definitions)[0].secrets : s.name])) ==
       jsonencode(sort([
@@ -282,14 +314,23 @@ run "api_runs_behind_two_proxies" {
   }
 
   assert {
+    condition = alltrue([
+      for service in ["api", "worker"] :
+      { for e in jsondecode(aws_ecs_task_definition.this[service].container_definitions)[0].environment : e.name => e.value }["KMS_KEY_ID"] == var.field_kms_key_arn
+    ])
+    error_message = "The api and worker encrypt fields with the field key (KMS_KEY_ID)."
+  }
+
+  assert {
     condition = (
       jsonencode(sort([for e in jsondecode(aws_ecs_task_definition.this["staff"].container_definitions)[0].environment : e.name])) ==
-      jsonencode(["APP_ENV", "OTEL_SERVICE_NAME", "PORT", "SENTRY_ENVIRONMENT"]) &&
+      jsonencode(["APP_ENV", "HOSTNAME", "OTEL_SERVICE_NAME", "PORT", "SENTRY_ENVIRONMENT"]) &&
+      { for e in jsondecode(aws_ecs_task_definition.this["staff"].container_definitions)[0].environment : e.name => e.value }["HOSTNAME"] == "0.0.0.0" &&
       jsonencode(sort([for s in jsondecode(aws_ecs_task_definition.this["console"].container_definitions)[0].secrets : s.name])) ==
       jsonencode(["OTEL_EXPORTER_OTLP_HEADERS", "SENTRY_DSN"]) &&
       { for e in jsondecode(aws_ecs_task_definition.this["console"].container_definitions)[0].environment : e.name => e.value }["PORT"] == "3001"
     )
-    error_message = "staff and console get only APP_ENV, PORT, SENTRY_DSN, SENTRY_ENVIRONMENT and OTEL_*."
+    error_message = "staff and console get only APP_ENV, HOSTNAME (0.0.0.0), PORT, SENTRY_DSN, SENTRY_ENVIRONMENT and OTEL_*."
   }
 
   assert {
@@ -439,12 +480,14 @@ run "services_roll_back" {
 
   assert {
     condition = (
-      jsonencode(sort(one(aws_ecs_service.this["api"].network_configuration).security_groups)) == jsonencode(sort([aws_security_group.tasks.id, var.data_client_security_group_id])) &&
-      jsonencode(sort(one(aws_ecs_service.this["worker"].network_configuration).security_groups)) == jsonencode(sort([aws_security_group.tasks.id, var.data_client_security_group_id])) &&
+      jsonencode(sort(one(aws_ecs_service.this["api"].network_configuration).security_groups)) == jsonencode(sort([aws_security_group.tasks.id, var.data_client_security_group_id, aws_security_group.clamav_clients.id])) &&
+      jsonencode(sort(one(aws_ecs_service.this["worker"].network_configuration).security_groups)) == jsonencode(sort([aws_security_group.tasks.id, var.data_client_security_group_id, aws_security_group.clamav_clients.id])) &&
       jsonencode(one(aws_ecs_service.this["staff"].network_configuration).security_groups) == jsonencode([aws_security_group.tasks.id]) &&
-      jsonencode(one(aws_ecs_service.this["clamav"].network_configuration).security_groups) == jsonencode([aws_security_group.tasks.id])
+      jsonencode(one(aws_ecs_service.this["console"].network_configuration).security_groups) == jsonencode([aws_security_group.tasks.id]) &&
+      jsonencode(one(aws_ecs_service.this["clamav"].network_configuration).security_groups) == jsonencode([aws_security_group.clamav.id]) &&
+      jsonencode(split(",", aws_ssm_parameter.deploy["security_groups"].value)) == jsonencode([aws_security_group.tasks.id, var.data_client_security_group_id])
     )
-    error_message = "The api image's services attach the data client group; the others only the tasks group."
+    error_message = "api and worker attach the tasks, data client and clamav client groups; staff and console only tasks; clamav only its own; the one-off tasks tasks and data client."
   }
 
   assert {
@@ -453,28 +496,32 @@ run "services_roll_back" {
   }
 }
 
-run "tasks_group_admits_the_alb_and_itself" {
+run "only_the_alb_reaches_the_tasks_and_only_scanners_reach_clamav" {
   command = apply
 
   assert {
     condition = (
-      jsonencode(sort([for rule in aws_vpc_security_group_ingress_rule.tasks : "${rule.referenced_security_group_id}:${rule.from_port}-${rule.to_port}"])) ==
+      jsonencode(sort([for rule in aws_vpc_security_group_ingress_rule.tasks : "${rule.security_group_id}<-${rule.referenced_security_group_id}:${rule.from_port}-${rule.to_port}"])) ==
       jsonencode(sort([
-        "${var.alb_security_group_id}:4000-4000",
-        "${var.alb_security_group_id}:3000-3000",
-        "${var.alb_security_group_id}:3001-3001",
-        "${aws_security_group.tasks.id}:3310-3310",
+        "${aws_security_group.tasks.id}<-${var.alb_security_group_id}:4000-4000",
+        "${aws_security_group.tasks.id}<-${var.alb_security_group_id}:3000-3000",
+        "${aws_security_group.tasks.id}<-${var.alb_security_group_id}:3001-3001",
+        "${aws_security_group.clamav.id}<-${aws_security_group.clamav_clients.id}:3310-3310",
       ]))
     )
-    error_message = "The tasks group admits the ALB on 4000, 3000 and 3001, and itself on 3310 (clamd)."
+    error_message = "The tasks group admits only the ALB on 4000, 3000 and 3001; clamav admits only the clamav clients on 3310."
   }
 
   assert {
     condition = (
-      jsonencode(sort([for rule in aws_vpc_security_group_egress_rule.tasks : "${coalesce(rule.cidr_ipv4, rule.referenced_security_group_id)}:${rule.from_port}"])) ==
-      jsonencode(sort(["0.0.0.0/0:443", "${aws_security_group.tasks.id}:3310"]))
+      jsonencode(sort([for rule in aws_vpc_security_group_egress_rule.tasks : "${rule.security_group_id}->${coalesce(rule.cidr_ipv4, rule.referenced_security_group_id)}:${rule.from_port}"])) ==
+      jsonencode(sort([
+        "${aws_security_group.tasks.id}->0.0.0.0/0:443",
+        "${aws_security_group.clamav.id}->0.0.0.0/0:443",
+        "${aws_security_group.clamav_clients.id}->${aws_security_group.clamav.id}:3310",
+      ]))
     )
-    error_message = "Tasks send only HTTPS out (endpoints, NAT) and clamd traffic to the group."
+    error_message = "Tasks and clamav send only HTTPS out; the clamav clients reach only clamd."
   }
 
   assert {
@@ -489,9 +536,10 @@ run "deploy_role_passes_only_its_roles" {
   assert {
     condition = (
       jsonencode(sort(flatten([for s in jsondecode(aws_iam_role_policy.deploy.policy).Statement : s.Resource if contains(flatten([s.Action]), "iam:PassRole")]))) ==
-      jsonencode(sort([aws_iam_role.runtime_exec.arn, aws_iam_role.migrate_exec.arn, aws_iam_role.task["api"].arn, aws_iam_role.task["worker"].arn]))
+      jsonencode(sort(concat([for role in aws_iam_role.execution : role.arn], [aws_iam_role.task["api"].arn, aws_iam_role.task["worker"].arn]))) &&
+      length(distinct(flatten([for s in jsondecode(aws_iam_role_policy.deploy.policy).Statement : s.Resource if contains(flatten([s.Action]), "iam:PassRole")]))) == 6
     )
-    error_message = "iam:PassRole is on the two execution roles and the two task roles only."
+    error_message = "iam:PassRole is on the four execution roles and the two task roles only."
   }
 
   assert {
@@ -538,19 +586,23 @@ run "plan_and_apply_roles_reach_state_through_the_tooling_roles" {
 
   assert {
     condition = alltrue([
-      for action in ["secretsmanager:GetSecretValue", "ssm:GetParameter*", "kms:Decrypt"] : anytrue([
-        for s in jsondecode(aws_iam_role_policy.plan.policy).Statement : s.Effect == "Deny" && contains(flatten([s.Action]), action)
+      for action in [
+        "secretsmanager:GetSecretValue", "ssm:GetParameter*", "kms:Decrypt",
+        "logs:GetLogEvents", "logs:FilterLogEvents", "logs:StartQuery", "logs:StartLiveTail", "logs:Unmask",
+        "rds:DownloadDBLogFilePortion", "rds:DownloadCompleteDBLogFile",
+        ] : anytrue([
+          for s in jsondecode(aws_iam_role_policy.plan.policy).Statement : s.Effect == "Deny" && contains(flatten([s.Action]), action)
       ])
     ])
-    error_message = "The plan role explicitly denies secret values, parameter values and decryption."
+    error_message = "The plan role explicitly denies secret and parameter values, decryption, log events and database log files."
   }
 
   assert {
     condition = alltrue([
       for s in jsondecode(aws_iam_role_policy.plan.policy).Statement :
-      s.Effect == "Deny" ? (can(s.Resource) ? jsonencode(s.Resource) == jsonencode(["*"]) : jsonencode(s.NotResource) == jsonencode(["arn:aws:ssm:ap-south-1:123456789012:parameter/quad/staging/deploy/*"])) : true
+      s.Effect == "Deny" ? (jsonencode(s.Resource) == jsonencode(["*"]) && !can(s.NotResource)) : true
     ])
-    error_message = "The denies cover every resource; only the plain deploy settings stay readable as parameters."
+    error_message = "Every plan role deny covers every resource (ruling R-pr-plan: no carve-out)."
   }
 }
 
@@ -559,8 +611,8 @@ run "secrets_are_write_only" {
 
   assert {
     condition = alltrue(flatten([
-      [for v in aws_secretsmanager_secret_version.generated : v.secret_string == null && v.secret_binary == null && v.secret_string_wo_version != null],
-      [for v in aws_secretsmanager_secret_version.placeholder : v.secret_string == null && v.secret_binary == null && v.secret_string_wo_version != null],
+      [for v in aws_secretsmanager_secret_version.generated : nonsensitive(v.secret_string == null && v.secret_binary == null) && v.secret_string_wo_version != null],
+      [for v in aws_secretsmanager_secret_version.placeholder : nonsensitive(v.secret_string == null && v.secret_binary == null) && v.secret_string_wo_version != null],
     ]))
     error_message = "No secret version may set secret_string or secret_binary: secrets are written only through secret_string_wo."
   }
@@ -614,7 +666,7 @@ run "migrate_task_uses_owner_url" {
 
   assert {
     condition = (
-      jsonencode(sort(flatten([for s in jsondecode(aws_iam_role_policy.migrate_exec.policy).Statement : s.Resource if contains(flatten([s.Action]), "secretsmanager:GetSecretValue")]))) ==
+      jsonencode(sort(flatten([for s in jsondecode(aws_iam_role_policy.execution["migrate"].policy).Statement : s.Resource if contains(flatten([s.Action]), "secretsmanager:GetSecretValue")]))) ==
       jsonencode(sort([var.env_secret_arns["DATABASE_OWNER_URL"], var.env_secret_arns["DATABASE_URL"], var.env_secret_arns["DATABASE_PLATFORM_URL"], var.db_master_secret_arn]))
     )
     error_message = "migrate-exec reads only the three role URLs and the master secret."
@@ -696,4 +748,16 @@ run "log_groups_are_per_task_and_encrypted" {
     )
     error_message = "The cluster has Container Insights."
   }
+}
+
+run "github_names_cannot_widen_the_trust" {
+  command = plan
+
+  variables {
+    github_repository        = "prishanmaduka/*"
+    github_environment       = "staging:ref:refs/heads/*"
+    github_infra_environment = "*"
+  }
+
+  expect_failures = [var.github_repository, var.github_environment, var.github_infra_environment]
 }

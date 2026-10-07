@@ -16,7 +16,7 @@ locals {
 }
 
 resource "aws_ssm_parameter" "deploy" {
-  #checkov:skip=CKV2_AWS_34:Deploy settings (names, ids and a registry host) are not secrets; String keeps them readable to the plan role, which may not decrypt.
+  #checkov:skip=CKV2_AWS_34:Deploy settings (names, ids and a registry host) are not secrets, so they need no KMS key.
   for_each = local.deploy_parameters
 
   name        = "${local.deploy_parameter_prefix}/${each.key}"

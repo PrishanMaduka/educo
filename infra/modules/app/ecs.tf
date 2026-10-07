@@ -15,13 +15,20 @@ locals {
     clamav  = []
   }
 
-  # Tasks of the api image use the database and Redis, so they also attach the data client group.
-  api_image_tasks = toset(["api", "worker", "migrate", "seed", "db-bootstrap"])
-
+  # Security groups per task:
+  #   - tasks: the ALB's way in to api, staff and console, and HTTPS out;
+  #   - the data client group: the api image's tasks, which use the database and Redis;
+  #   - clamav_clients: the api and worker, which scan uploads; clamav admits only this group;
+  #   - clamav: clamav alone (3310 in, HTTPS out for signature updates).
   security_groups = {
-    for key in local.task_names : key => (
-      contains(local.api_image_tasks, key) ? [aws_security_group.tasks.id, var.data_client_security_group_id] : [aws_security_group.tasks.id]
-    )
+    api            = [aws_security_group.tasks.id, var.data_client_security_group_id, aws_security_group.clamav_clients.id]
+    worker         = [aws_security_group.tasks.id, var.data_client_security_group_id, aws_security_group.clamav_clients.id]
+    migrate        = [aws_security_group.tasks.id, var.data_client_security_group_id]
+    seed           = [aws_security_group.tasks.id, var.data_client_security_group_id]
+    "db-bootstrap" = [aws_security_group.tasks.id, var.data_client_security_group_id]
+    staff          = [aws_security_group.tasks.id]
+    console        = [aws_security_group.tasks.id]
+    clamav         = [aws_security_group.clamav.id]
   }
 
   log_group_prefix = "/quad/${var.environment}"
@@ -114,25 +121,41 @@ resource "aws_cloudwatch_log_group" "this" {
   tags = { service = each.key }
 }
 
-# --- Tasks security group ---
+# --- Security groups ---
 
 resource "aws_security_group" "tasks" {
   name        = "${var.name}-tasks"
-  description = "ECS tasks: the task ports from the ALB, clamd from the group"
+  description = "ECS tasks: the task ports from the ALB, HTTPS out"
   vpc_id      = var.vpc_id
 
   tags = { service = "app", Name = "${var.name}-tasks" }
 }
 
+resource "aws_security_group" "clamav_clients" {
+  name        = "${var.name}-clamav-clients"
+  description = "Tasks that scan uploads with clamd (api, worker)"
+  vpc_id      = var.vpc_id
+
+  tags = { service = "app", Name = "${var.name}-clamav-clients" }
+}
+
+resource "aws_security_group" "clamav" {
+  name        = "${var.name}-clamav"
+  description = "clamd: 3310 from the clamav clients only, HTTPS out for signature updates"
+  vpc_id      = var.vpc_id
+
+  tags = { service = "clamav", Name = "${var.name}-clamav" }
+}
+
 resource "aws_vpc_security_group_ingress_rule" "tasks" {
   for_each = {
-    api_from_alb     = { from = var.alb_security_group_id, port = 4000 }
-    staff_from_alb   = { from = var.alb_security_group_id, port = 3000 }
-    console_from_alb = { from = var.alb_security_group_id, port = 3001 }
-    clamd_from_tasks = { from = aws_security_group.tasks.id, port = 3310 }
+    api_from_alb       = { group = aws_security_group.tasks.id, from = var.alb_security_group_id, port = 4000 }
+    staff_from_alb     = { group = aws_security_group.tasks.id, from = var.alb_security_group_id, port = 3000 }
+    console_from_alb   = { group = aws_security_group.tasks.id, from = var.alb_security_group_id, port = 3001 }
+    clamd_from_clients = { group = aws_security_group.clamav.id, from = aws_security_group.clamav_clients.id, port = 3310 }
   }
 
-  security_group_id            = aws_security_group.tasks.id
+  security_group_id            = each.value.group
   description                  = replace(each.key, "_", " ")
   referenced_security_group_id = each.value.from
   ip_protocol                  = "tcp"
@@ -147,14 +170,15 @@ resource "aws_vpc_security_group_ingress_rule" "tasks" {
 # database and Redis rules are on the data client group.
 resource "aws_vpc_security_group_egress_rule" "tasks" {
   for_each = {
-    https = { cidr = "0.0.0.0/0", group = null, port = 443, description = "HTTPS to AWS endpoints and the internet" }
-    clamd = { cidr = null, group = aws_security_group.tasks.id, port = 3310, description = "clamd inside the group" }
+    https             = { group = aws_security_group.tasks.id, cidr = "0.0.0.0/0", to = null, port = 443, description = "HTTPS to AWS endpoints and the internet" }
+    clamav_https      = { group = aws_security_group.clamav.id, cidr = "0.0.0.0/0", to = null, port = 443, description = "HTTPS to AWS endpoints and the signature mirror" }
+    clients_to_clamav = { group = aws_security_group.clamav_clients.id, cidr = null, to = aws_security_group.clamav.id, port = 3310, description = "clamd" }
   }
 
-  security_group_id            = aws_security_group.tasks.id
+  security_group_id            = each.value.group
   description                  = each.value.description
   cidr_ipv4                    = each.value.cidr
-  referenced_security_group_id = each.value.group
+  referenced_security_group_id = each.value.to
   ip_protocol                  = "tcp"
   from_port                    = each.value.port
   to_port                      = each.value.port
@@ -210,6 +234,15 @@ resource "aws_ecs_service" "this" {
   }
 
   tags = { service = each.key }
+
+  # A new service's first tasks must find their roles' permissions and their network rules in
+  # place; IAM and the rules are otherwise created in parallel with the service.
+  depends_on = [
+    aws_iam_role_policy.execution,
+    aws_iam_role_policy.task,
+    aws_vpc_security_group_ingress_rule.tasks,
+    aws_vpc_security_group_egress_rule.tasks,
+  ]
 
   lifecycle {
     ignore_changes = [task_definition, desired_count]

@@ -211,16 +211,33 @@ variable "github_repository" {
   type        = string
   description = "GitHub repository (owner/name) whose workflows may assume the deploy, plan and apply roles."
   default     = "prishanmaduka/educo"
+
+  # The value lands in OIDC subjects matched with StringEquals and StringLike, so a wildcard or a
+  # stray separator would widen who may assume the roles.
+  validation {
+    condition     = can(regex("^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})/[A-Za-z0-9._-]{1,100}$", var.github_repository))
+    error_message = "github_repository must be owner/name: letters, digits, '.', '_' and '-' only, no wildcard."
+  }
 }
 
 variable "github_environment" {
   type        = string
   description = "GitHub environment of the deploy job."
   default     = "staging"
+
+  validation {
+    condition     = can(regex("^[A-Za-z0-9._-]{1,255}$", var.github_environment))
+    error_message = "github_environment must be a GitHub environment name: letters, digits, '.', '_' and '-' only, no wildcard or ':'."
+  }
 }
 
 variable "github_infra_environment" {
   type        = string
   description = "GitHub environment of the Terraform apply job."
   default     = "infra-staging"
+
+  validation {
+    condition     = can(regex("^[A-Za-z0-9._-]{1,255}$", var.github_infra_environment))
+    error_message = "github_infra_environment must be a GitHub environment name: letters, digits, '.', '_' and '-' only, no wildcard or ':'."
+  }
 }

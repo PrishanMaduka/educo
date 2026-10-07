@@ -33,6 +33,8 @@ locals {
     SES_SNS_TOPIC_ARN     = var.ses_events_topic_arn
     EMAIL_FROM_DOMAIN     = var.email_from_domain
     SENTRY_ENVIRONMENT    = var.environment
+    # Field-level encryption on AWS (spec 02: KMS_KEY_ID; FIELD_ENCRYPTION_KEY is local only).
+    KMS_KEY_ID = var.field_kms_key_arn
   }, local.otel_endpoint)
 
   sentry_dsn_arn = aws_secretsmanager_secret.app["SENTRY_DSN"].arn
@@ -108,7 +110,7 @@ locals {
       user        = local.node_user
       command     = null
       ports       = [3000]
-      environment = merge({ APP_ENV = var.environment, PORT = "3000", SENTRY_ENVIRONMENT = var.environment, OTEL_SERVICE_NAME = "quad-staff" }, local.otel_endpoint)
+      environment = merge({ APP_ENV = var.environment, HOSTNAME = "0.0.0.0", PORT = "3000", SENTRY_ENVIRONMENT = var.environment, OTEL_SERVICE_NAME = "quad-staff" }, local.otel_endpoint)
       secrets     = merge({ SENTRY_DSN = "${local.sentry_dsn_arn}:staff::" }, local.otel_headers)
       volumes     = { tmp = "/tmp", next-cache = "/app/apps/staff/.next/cache" }
       health      = local.web_health
@@ -120,7 +122,7 @@ locals {
       user        = local.node_user
       command     = null
       ports       = [3001]
-      environment = merge({ APP_ENV = var.environment, PORT = "3001", SENTRY_ENVIRONMENT = var.environment, OTEL_SERVICE_NAME = "quad-console" }, local.otel_endpoint)
+      environment = merge({ APP_ENV = var.environment, HOSTNAME = "0.0.0.0", PORT = "3001", SENTRY_ENVIRONMENT = var.environment, OTEL_SERVICE_NAME = "quad-console" }, local.otel_endpoint)
       secrets     = merge({ SENTRY_DSN = "${local.sentry_dsn_arn}:console::" }, local.otel_headers)
       volumes     = { tmp = "/tmp", next-cache = "/app/apps/console/.next/cache" }
       health      = local.web_health
@@ -207,7 +209,7 @@ resource "aws_ecs_task_definition" "this" {
   network_mode             = "awsvpc"
   cpu                      = each.value.cpu
   memory                   = each.value.memory
-  execution_role_arn       = contains(local.one_off_tasks, each.key) ? aws_iam_role.migrate_exec.arn : aws_iam_role.runtime_exec.arn
+  execution_role_arn       = aws_iam_role.execution[local.execution_role_of[each.key]].arn
   task_role_arn            = contains(local.task_roles, each.key) ? aws_iam_role.task[each.key].arn : null
   # The deploy workflow registers later revisions; keep the old ones when Terraform replaces this.
   skip_destroy = true

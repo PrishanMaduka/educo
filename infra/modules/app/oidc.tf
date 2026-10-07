@@ -98,12 +98,10 @@ locals {
         Sid    = "PassTaskRoles"
         Effect = "Allow"
         Action = ["iam:PassRole"]
-        Resource = [
-          aws_iam_role.runtime_exec.arn,
-          aws_iam_role.migrate_exec.arn,
-          aws_iam_role.task["api"].arn,
-          aws_iam_role.task["worker"].arn,
-        ]
+        Resource = concat(
+          [for role in sort(keys(local.execution_roles)) : aws_iam_role.execution[role].arn],
+          [for role in sort(local.task_roles) : aws_iam_role.task[role].arn],
+        )
         Condition = { StringEquals = { "iam:PassedToService" = "ecs-tasks.amazonaws.com" } }
       },
       {
@@ -116,8 +114,9 @@ locals {
   })
 
   # ReadOnlyAccess plus explicit denies, as quad-tooling-plan does (Task 8): a deny always wins.
-  # The deploy settings are plain String parameters, not secrets, so the parameter deny leaves
-  # them readable and a plan can refresh them.
+  # Ruling R-pr-plan: PR plans run with -refresh=false -lock=false, so nothing has to be carved out
+  # for a refresh. ReadOnlyAccess would also show log events and database log files, which can
+  # hold personal data, so those are denied too.
   plan_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -131,16 +130,19 @@ locals {
         ]
       },
       {
-        Sid      = "NoSecretValuesOrDecryption"
+        Sid      = "NoSecretOrParameterValuesOrDecryption"
         Effect   = "Deny"
-        Action   = ["secretsmanager:GetSecretValue", "kms:Decrypt"]
+        Action   = ["secretsmanager:GetSecretValue", "ssm:GetParameter*", "kms:Decrypt"]
         Resource = ["*"]
       },
       {
-        Sid         = "NoParameterValues"
-        Effect      = "Deny"
-        Action      = ["ssm:GetParameter*"]
-        NotResource = [local.deploy_parameters_arn]
+        Sid    = "NoLogContents"
+        Effect = "Deny"
+        Action = [
+          "logs:GetLogEvents", "logs:FilterLogEvents", "logs:StartQuery", "logs:StartLiveTail",
+          "logs:Unmask", "rds:DownloadDBLogFilePortion", "rds:DownloadCompleteDBLogFile",
+        ]
+        Resource = ["*"]
       },
     ]
   })
