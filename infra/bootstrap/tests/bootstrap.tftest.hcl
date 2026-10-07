@@ -145,7 +145,7 @@ run "only_state_roles_and_break_glass_touch_state_objects" {
       for statement in jsondecode(aws_s3_bucket_policy.state.policy).Statement :
       statement.Effect == "Deny"
       && statement.Principal == "*"
-      && length(setsubtract(["s3:GetObject", "s3:GetObjectVersion", "s3:PutObject", "s3:DeleteObject", "s3:DeleteObjectVersion"], flatten([statement.Action]))) == 0
+      && toset(flatten([statement.Action])) == toset(["s3:GetObject*", "s3:PutObject*", "s3:DeleteObject*", "s3:RestoreObject"])
       && toset(flatten([statement.Resource])) == toset(["arn:aws:s3:::quad-tfstate-tooling/*"])
       && toset(try(statement.Condition.ArnNotEquals["aws:PrincipalArn"], [])) == toset([
         "arn:aws:iam::123456789012:role/quad-terraform-state-read-global",
@@ -155,7 +155,7 @@ run "only_state_roles_and_break_glass_touch_state_objects" {
         "arn:aws:iam::111111111111:role/quad-break-glass",
       ])
     ])
-    error_message = "Object reads and writes must be denied to every principal except the state roles and the break-glass roles."
+    error_message = "Every object read, write, delete and restore (all versions, tags and ACLs) must be denied to every principal except the state roles and the break-glass roles."
   }
 }
 
@@ -230,13 +230,20 @@ run "read_role_only_reads_its_own_state" {
     error_message = "The staging read role may read only staging/terraform.tfstate."
   }
 
+  # Unconditional ListBucket on the bucket, so a missing state object is a 404 (first plan or
+  # apply) rather than a 403. It reveals key names only, and objects stay denied by the bucket policy.
   assert {
-    condition = alltrue([
-      for statement in jsondecode(aws_iam_role_policy.state_read["staging"].policy).Statement :
-      length(setsubtract(statement.Condition.StringLike["s3:prefix"], ["staging/terraform.tfstate", "env:/"])) == 0
-      if contains(statement.Action, "s3:ListBucket")
-    ])
-    error_message = "ListBucket must be limited to the role's own prefix."
+    condition = (
+      length([for statement in jsondecode(aws_iam_role_policy.state_read["staging"].policy).Statement : statement if contains(statement.Action, "s3:ListBucket")]) == 1
+      && alltrue([
+        for statement in jsondecode(aws_iam_role_policy.state_read["staging"].policy).Statement :
+        toset(statement.Action) == toset(["s3:ListBucket"])
+        && toset(statement.Resource) == toset(["arn:aws:s3:::quad-tfstate-tooling"])
+        && try(statement.Condition, null) == null
+        if contains(statement.Action, "s3:ListBucket")
+      ])
+    )
+    error_message = "ListBucket must be one unconditional statement on the state bucket alone."
   }
 
   assert {
@@ -253,9 +260,10 @@ run "read_role_only_reads_its_own_state" {
     condition = alltrue([
       for statement in jsondecode(aws_iam_role_policy.state_read["staging"].policy).Statement :
       toset(statement.Condition["ForAllValues:StringEquals"]["dynamodb:LeadingKeys"]) == toset(["quad-tfstate-tooling/staging/terraform.tfstate-md5"])
+      && statement.Condition.Null["dynamodb:LeadingKeys"] == "false"
       if contains(statement.Action, "dynamodb:GetItem")
     ])
-    error_message = "The read role may read only its own state digest item."
+    error_message = "The read role may read only its own state digest item, with a Null guard on LeadingKeys."
   }
 }
 
@@ -296,9 +304,26 @@ run "rw_role_writes_only_its_own_state_and_locks" {
         "quad-tfstate-tooling/staging/terraform.tfstate",
         "quad-tfstate-tooling/staging/terraform.tfstate-md5",
       ])
+      && statement.Condition.Null["dynamodb:LeadingKeys"] == "false"
       if anytrue([for action in statement.Action : startswith(action, "dynamodb:")])
     ])
-    error_message = "Lock access must be limited to the staging lock and digest items."
+    error_message = "Lock access must be limited to the staging lock and digest items, with a Null guard on LeadingKeys."
+  }
+
+  # Unconditional ListBucket on the bucket, so a missing state object is a 404 (first plan or
+  # apply) rather than a 403. It reveals key names only, and objects stay denied by the bucket policy.
+  assert {
+    condition = (
+      length([for statement in jsondecode(aws_iam_role_policy.state_rw["staging"].policy).Statement : statement if contains(statement.Action, "s3:ListBucket")]) == 1
+      && alltrue([
+        for statement in jsondecode(aws_iam_role_policy.state_rw["staging"].policy).Statement :
+        toset(statement.Action) == toset(["s3:ListBucket"])
+        && toset(statement.Resource) == toset(["arn:aws:s3:::quad-tfstate-tooling"])
+        && try(statement.Condition, null) == null
+        if contains(statement.Action, "s3:ListBucket")
+      ])
+    )
+    error_message = "ListBucket must be one unconditional statement on the state bucket alone."
   }
 
   assert {

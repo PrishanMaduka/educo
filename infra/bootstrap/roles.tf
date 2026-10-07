@@ -31,18 +31,19 @@ locals {
     })
   }
 
-  # The S3 backend lists workspaces under env:/ during init (there are none), so that prefix is
-  # listable too. The digest item <bucket>/<key>-md5 is read even with -lock=false.
+  # ListBucket is unconditional: without it a missing state object (the first plan or apply) is a
+  # 403 instead of a 404, and init lists workspaces under env:/. It reveals key names only; objects
+  # stay limited by these policies and the bucket policy. The digest item <bucket>/<key>-md5 is
+  # read even with -lock=false. ForAllValues passes when a key is missing, hence the Null guards.
   state_read_policy = {
     for name, key in local.state_keys : name => jsonencode({
       Version = "2012-10-17"
       Statement = [
         {
-          Sid       = "ListOwnPrefix"
-          Effect    = "Allow"
-          Action    = ["s3:ListBucket"]
-          Resource  = [local.bucket_arn]
-          Condition = { StringLike = { "s3:prefix" = [key, "env:/"] } }
+          Sid      = "ListBucket"
+          Effect   = "Allow"
+          Action   = ["s3:ListBucket"]
+          Resource = [local.bucket_arn]
         },
         {
           Sid      = "ReadOwnState"
@@ -51,11 +52,14 @@ locals {
           Resource = ["${local.bucket_arn}/${key}"]
         },
         {
-          Sid       = "ReadOwnDigest"
-          Effect    = "Allow"
-          Action    = ["dynamodb:GetItem"]
-          Resource  = [aws_dynamodb_table.locks.arn]
-          Condition = { "ForAllValues:StringEquals" = { "dynamodb:LeadingKeys" = ["${var.state_bucket_name}/${key}-md5"] } }
+          Sid      = "ReadOwnDigest"
+          Effect   = "Allow"
+          Action   = ["dynamodb:GetItem"]
+          Resource = [aws_dynamodb_table.locks.arn]
+          Condition = {
+            "ForAllValues:StringEquals" = { "dynamodb:LeadingKeys" = ["${var.state_bucket_name}/${key}-md5"] }
+            Null                        = { "dynamodb:LeadingKeys" = "false" }
+          }
         },
         {
           Sid       = "DecryptThroughStorageOnly"
@@ -73,11 +77,10 @@ locals {
       Version = "2012-10-17"
       Statement = [
         {
-          Sid       = "ListOwnPrefix"
-          Effect    = "Allow"
-          Action    = ["s3:ListBucket"]
-          Resource  = [local.bucket_arn]
-          Condition = { StringLike = { "s3:prefix" = ["${key}*", "env:/"] } }
+          Sid      = "ListBucket"
+          Effect   = "Allow"
+          Action   = ["s3:ListBucket"]
+          Resource = [local.bucket_arn]
         },
         {
           Sid      = "OwnStateAndLockFile"
@@ -94,6 +97,7 @@ locals {
             "ForAllValues:StringEquals" = {
               "dynamodb:LeadingKeys" = ["${var.state_bucket_name}/${key}", "${var.state_bucket_name}/${key}-md5"]
             }
+            Null = { "dynamodb:LeadingKeys" = "false" }
           }
         },
         {

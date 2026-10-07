@@ -35,3 +35,5 @@ apps/parent/**/build/
 infra/modules/**/.terraform.lock.hcl
 *.tfstate*
 *.tfplan
+# Local-only backend overrides (the bootstrap root's first apply, infra/README.md)
+infra/**/*_override.tf

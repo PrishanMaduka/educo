@@ -56,11 +56,12 @@ locals {
         Condition = { StringNotEqualsIfExists = { "s3:x-amz-server-side-encryption-aws-kms-key-id" = aws_kms_key.state.arn } }
       },
       {
-        # Defence in depth: a broad read policy elsewhere (ReadOnlyAccess) still cannot reach state.
+        # Defence in depth: a broad read policy elsewhere (ReadOnlyAccess) still cannot reach state,
+        # any version of it, its tags or ACL, or restore it.
         Sid       = "OnlyStateRolesTouchObjects"
         Effect    = "Deny"
         Principal = "*"
-        Action    = ["s3:GetObject", "s3:GetObjectVersion", "s3:PutObject", "s3:DeleteObject", "s3:DeleteObjectVersion"]
+        Action    = ["s3:GetObject*", "s3:PutObject*", "s3:DeleteObject*", "s3:RestoreObject"]
         Resource  = ["${local.bucket_arn}/*"]
         Condition = {
           ArnNotEquals = {
