@@ -8,6 +8,7 @@
     "typecheck": "pnpm pub:get && node ../../scripts/flutter.mjs flutter analyze",
     "test": "pnpm pub:get && node ../../scripts/flutter.mjs flutter test",
     "format": "node ../../scripts/flutter.mjs dart format lib test",
-    "build:runner": "node ../../scripts/flutter.mjs dart run build_runner build"
+    "build:runner": "node ../../scripts/flutter.mjs dart run build_runner build",
+    "e2e:mobile": "echo \"integration_test and Maestro flows for the parent app arrive in M6\""
   }
 }
