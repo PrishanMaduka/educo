@@ -1,4 +1,5 @@
 import { parseWebPublicEnv } from '@quad/contracts/web-env';
+import { withSentryConfig } from '@sentry/nextjs/config';
 
 import type { NextConfig } from 'next';
 
@@ -23,4 +24,11 @@ const config: NextConfig = {
   },
 };
 
-export default config;
+// Sentry's build plugin, with nothing sent from the build: no telemetry, no release and no
+// source map upload (deferred, D28). Error reporting itself is set up in src/instrumentation*.ts.
+export default withSentryConfig(config, {
+  silent: true,
+  telemetry: false,
+  sourcemaps: { disable: true },
+  release: { create: false, finalize: false },
+});
