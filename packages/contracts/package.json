@@ -8,7 +8,11 @@
       "types": "./src/index.ts",
       "default": "./src/index.ts"
     },
-    "./i18n/en.json": "./i18n/en.json"
+    "./i18n/en.json": "./i18n/en.json",
+    "./web-env": {
+      "types": "./src/web-env.ts",
+      "default": "./src/web-env.ts"
+    }
   },
   "scripts": {
     "test": "vitest run",

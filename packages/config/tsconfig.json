@@ -6,7 +6,8 @@
     "moduleResolution": "Bundler",
     "allowJs": true,
     "declaration": false,
+    "lib": ["ES2023", "DOM"],
     "types": ["node"]
   },
-  "include": ["test/**/*.ts", "vitest/**/*.ts", "vitest.config.ts"]
+  "include": ["test/**/*.ts", "vitest/**/*.ts", "vitest.config.ts", "playwright/**/*.ts"]
 }

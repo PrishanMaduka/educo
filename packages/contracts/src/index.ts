@@ -6,3 +6,4 @@ export * from './enums';
 export * from './health';
 export * from './permissions';
 export { buildArb } from './i18n/build';
+export * from './web-env';

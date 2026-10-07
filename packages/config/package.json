@@ -9,7 +9,9 @@
     "./eslint/react": "./eslint/react.mjs",
     "./eslint/next": "./eslint/next.mjs",
     "./vitest": "./vitest/preset.ts",
-    "./prettier": "./prettier.cjs"
+    "./prettier": "./prettier.cjs",
+    "./playwright": "./playwright/preset.ts",
+    "./playwright/checks": "./playwright/checks.ts"
   },
   "scripts": {
     "test": "vitest run",
@@ -17,8 +19,10 @@
     "lint": "eslint ."
   },
   "devDependencies": {
+    "@axe-core/playwright": "4.11.3",
     "@eslint/js": "9.39.5",
     "@next/eslint-plugin-next": "15.5.27",
+    "@playwright/test": "1.56.1",
     "@types/node": "22.20.5",
     "eslint": "9.39.5",
     "eslint-plugin-import-x": "4.17.1",
