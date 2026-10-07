@@ -251,6 +251,13 @@ jsxTester.run('quad/no-arbitrary-colour', colourRule, {
     '<div style={{ color: tone }} />;',
     "<div style={{ ['color']: 'var(--quad-ink)' }} />;",
     "<div data-style={{ color: '#fff' }} />;",
+    "const c = 'text-[color:var(--quad-ink)] accent-[color:_var(--quad-x)]';",
+    "const c = 'bg-[url(#abc)] shadow-[0_1px_2px_color-mix(in_srgb,var(--quad-a),transparent)]';",
+    "<div style={{ fill: 'url(#abc)', background: 'url(#fade) no-repeat' }} />;",
+    "<div style={{ borderRadius: '4px', borderStyle: 'solid', textShadow: 'none' }} />;",
+    "<div style={{ boxShadow: '0 1px 2px var(--quad-shadow)', outline: '2px solid var(--quad-ring)' }} />;",
+    "<div style={{ color: active ? 'var(--quad-ink)' : 'currentColor' }} />;",
+    '<div style={{ background: `linear-gradient(${from}, var(--quad-b))` }} />;',
   ],
   invalid: [
     { code: "const c = 'bg-[#fff]';", errors: classColour },
@@ -262,7 +269,18 @@ jsxTester.run('quad/no-arbitrary-colour', colourRule, {
     { code: "const c = 'from-[oklch(0.7_0.1_20)] via-[oklab(0.5_0_0)] to-[lab(50%_0_0)]';", errors: classColour },
     { code: "const c = 'outline-[lch(50%_0_0)]';", errors: classColour },
     { code: "const c = 'decoration-[color(display-p3_1_0_0)]';", errors: classColour },
-    { code: "const c = 'accent-[color:var(--quad-x)]';", errors: classColour },
+    { code: "const c = 'accent-[color:#fff]';", errors: classColour },
+    // A colour anywhere inside the brackets, not only first.
+    { code: "const c = 'shadow-[0_1px_2px_rgba(0,0,0,.2)]';", errors: classColour },
+    { code: "const c = 'shadow-[0_1px_2px_#000]';", errors: classColour },
+    { code: "const c = 'bg-[linear-gradient(#fff,#000)]';", errors: classColour },
+    { code: "const c = 'border-[1px_solid_#fff]';", errors: classColour },
+    { code: "const c = 'text-[red]';", errors: classColour },
+    // Tailwind v4 shadow and ring utilities.
+    ...['drop-shadow', 'inset-shadow', 'inset-ring', 'text-shadow'].map((prefix) => ({
+      code: `const c = 'dark:${prefix}-[#000]';`,
+      errors: classColour,
+    })),
     ...[
       'bg', 'text', 'border', 'ring', 'fill', 'stroke', 'from', 'via', 'to', 'outline',
       'decoration', 'accent', 'caret', 'shadow', 'divide', 'placeholder',
@@ -277,5 +295,20 @@ jsxTester.run('quad/no-arbitrary-colour', colourRule, {
     { code: "<div style={{ 'borderColor': 'hsl(0 0% 0%)' }} />;", errors: styleColour },
     { code: '<div style={{ fill: `#fff` }} />;', errors: styleColour },
     { code: "<div style={{ stroke: 'var(--quad-x, #fff)', outlineColor: 'blue' }} />;", errors: [...styleColour, ...styleColour] },
+    // Any *Color key, and background*, border*, outline*, boxShadow and textShadow.
+    { code: "<div style={{ borderTopColor: '#fff' }} />;", errors: styleColour },
+    { code: "<div style={{ caretColor: 'red' }} />;", errors: styleColour },
+    { code: "<div style={{ backgroundImage: 'linear-gradient(#fff, #000)' }} />;", errors: styleColour },
+    { code: "<div style={{ border: '1px solid red' }} />;", errors: styleColour },
+    { code: "<div style={{ outline: '2px solid #fff' }} />;", errors: styleColour },
+    { code: "<div style={{ boxShadow: '0 1px 2px #000' }} />;", errors: styleColour },
+    { code: "<div style={{ textShadow: '0 1px rgba(0,0,0,.2)' }} />;", errors: styleColour },
+    // Both branches of a conditional or logical expression, and template literal quasis.
+    { code: "<div style={{ color: active ? '#fff' : 'var(--quad-ink)' }} />;", errors: styleColour },
+    { code: "<div style={{ color: active ? 'var(--quad-ink)' : 'black' }} />;", errors: styleColour },
+    { code: "<div style={{ color: tone ?? '#000' }} />;", errors: styleColour },
+    { code: "<div style={{ color: tone || 'red' }} />;", errors: styleColour },
+    { code: '<div style={{ color: `rgb(${r} 0 0)` }} />;', errors: styleColour },
+    { code: '<div style={{ background: `linear-gradient(${a}, #fff)` }} />;', errors: styleColour },
   ],
 });
