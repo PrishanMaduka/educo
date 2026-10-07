@@ -51,6 +51,26 @@ describe('SNS envelope (POST /webhooks/ses)', () => {
   });
 });
 
+describe('SNS envelope size limits', () => {
+  it.each([
+    ['MessageId', 128],
+    ['TopicArn', 512],
+    ['Message', 262_144],
+    ['SignatureVersion', 8],
+    ['Signature', 1024],
+    ['SigningCertURL', 2048],
+    ['Subject', 512],
+    ['SubscribeURL', 2048],
+    ['Token', 2048],
+  ] as const)('accepts %s at %i characters and refuses one more', (field, max) => {
+    expect(SnsEnvelopeSchema.safeParse({ ...notification, [field]: 'x'.repeat(max) }).success).toBe(
+      true,
+    );
+    const result = SnsEnvelopeSchema.safeParse({ ...notification, [field]: 'x'.repeat(max + 1) });
+    expect(result.error?.issues[0]?.path).toEqual([field]);
+  });
+});
+
 describe('SES event inside the SNS Message', () => {
   it('reads a permanent bounce from an event publishing message (eventType)', () => {
     const parsed = SesEventSchema.parse({
@@ -69,16 +89,24 @@ describe('SES event inside the SNS Message', () => {
     expect(parsed.notificationType).toBe('Complaint');
   });
 
-  it('rejects a recipient that is not an email address at its path', () => {
-    const result = SesEventSchema.safeParse({
+  it('keeps the other recipients when one is malformed (the domain filters it out)', () => {
+    const parsed = SesEventSchema.parse({
       eventType: 'Bounce',
-      bounce: { bounceType: 'Permanent', bouncedRecipients: [{ emailAddress: 'nope' }] },
+      bounce: {
+        bounceType: 'Permanent',
+        bouncedRecipients: [
+          { emailAddress: 'nope' },
+          { emailAddress: 42 },
+          'not an object',
+          { emailAddress: 'ok@example.com' },
+        ],
+      },
     });
-    expect(result.error?.issues[0]?.path).toEqual([
-      'bounce',
-      'bouncedRecipients',
-      0,
-      'emailAddress',
+    expect(parsed.bounce?.bouncedRecipients.map((r) => r.emailAddress)).toEqual([
+      'nope',
+      '',
+      '',
+      'ok@example.com',
     ]);
   });
 

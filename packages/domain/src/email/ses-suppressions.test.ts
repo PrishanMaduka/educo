@@ -71,6 +71,32 @@ describe('suppressionsFromSesEvent', () => {
         expected: [{ address: 'c@x.io', reason: 'complaint' }],
       },
       {
+        name: 'invalid recipients are skipped one by one, keeping the valid ones',
+        event: {
+          eventType: 'Bounce',
+          bounce: {
+            bounceType: 'Permanent',
+            bouncedRecipients: recipients(
+              '',
+              'no-at-sign',
+              'two@at@x.io',
+              'with space@x.io',
+              `${'a'.repeat(310)}@example.com`,
+              'ok@x.io',
+            ),
+          },
+        },
+        expected: [{ address: 'ok@x.io', reason: 'bounce' }],
+      },
+      {
+        name: 'an address of exactly 320 characters is kept',
+        event: {
+          eventType: 'Complaint',
+          complaint: { complainedRecipients: recipients(`${'a'.repeat(308)}@example.com`) },
+        },
+        expected: [{ address: `${'a'.repeat(308)}@example.com`, reason: 'complaint' }],
+      },
+      {
         name: 'an event with no type suppresses nobody',
         event: { bounce: { bounceType: 'Permanent', bouncedRecipients: recipients('a@x.io') } },
         expected: [],
