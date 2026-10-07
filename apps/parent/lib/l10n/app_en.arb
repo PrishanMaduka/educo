@@ -86,7 +86,7 @@
     }
   },
   "uiToastRegion": "Notifications",
-  "studentsCount": "{count, plural, one {# student} other {# students}}",
+  "studentsCount": "{count, plural, one {{count} student} other {{count} students}}",
   "@studentsCount": {
     "placeholders": {
       "count": {
@@ -129,5 +129,11 @@
   "homeConsoleSummaryPlaceholder": "Once schools join Quad, this page will show how each one is doing and which need your attention first.",
   "roleSchoolAdmin": "School admin",
   "rolePlatformOwner": "Platform owner",
-  "shellConsolePlaceholderName": "Quad owner"
+  "shellConsolePlaceholderName": "Quad owner",
+  "appNameParent": "Quad",
+  "parentHomePlaceholder": "Once your school invites you, this is where you'll see your children's day, what needs you and what's coming up.",
+  "parentCirclePlaceholder": "Moments that your children's teachers and family share will appear here.",
+  "parentPaymentsPlaceholder": "When your school sends an invoice, you'll see it here and can pay it in a few taps.",
+  "parentMessagesPlaceholder": "Messages from teachers and the school office will appear here.",
+  "parentMorePlaceholder": "Your children's profiles, school life and settings will appear here."
 }

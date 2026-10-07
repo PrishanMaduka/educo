@@ -39,19 +39,48 @@ const collect = (elements: MessageFormatElement[], out: Map<string, string>): vo
   }
 };
 
+/** Offsets of every `#`, with the argument of the plural it belongs to. */
+const collectPounds = (
+  elements: MessageFormatElement[],
+  arg: string | undefined,
+  out: { start: number; end: number; arg: string }[],
+): void => {
+  for (const el of elements) {
+    if (el.type === TYPE.pound && arg !== undefined && el.location) {
+      out.push({ start: el.location.start.offset, end: el.location.end.offset, arg });
+    } else if (el.type === TYPE.plural) {
+      for (const opt of Object.values(el.options)) collectPounds(opt.value, el.value, out);
+    } else if (el.type === TYPE.select) {
+      for (const opt of Object.values(el.options)) collectPounds(opt.value, arg, out);
+    } else if (el.type === TYPE.tag) {
+      collectPounds(el.children, arg, out);
+    }
+  }
+};
+
+// Flutter gen-l10n prints a plural's `#` literally, so the ARB names the argument instead.
+// Splicing by offset keeps the rest of the message (apostrophes included) exactly as written.
+const replacePounds = (message: string, ast: MessageFormatElement[]): string => {
+  const pounds: { start: number; end: number; arg: string }[] = [];
+  collectPounds(ast, undefined, pounds);
+  return pounds
+    .sort((a, b) => b.start - a.start)
+    .reduce((text, p) => `${text.slice(0, p.start)}{${p.arg}}${text.slice(p.end)}`, message);
+};
+
 /** Validates each message as ICU and returns a Flutter ARB map (camelCase keys). */
 export function buildArb(messages: Record<string, string>): Record<string, ArbEntry> {
   const arb: Record<string, ArbEntry> = { '@@locale': 'en' };
   for (const [key, message] of Object.entries(messages)) {
     let ast: MessageFormatElement[];
     try {
-      ast = parse(message);
+      ast = parse(message, { captureLocation: true });
     } catch (error) {
       const reason = error instanceof Error ? error.message : String(error);
       throw new Error(`Invalid ICU message for key "${key}": ${reason}`);
     }
     const name = camelCase(key);
-    arb[name] = message;
+    arb[name] = replacePounds(message, ast);
     const args = new Map<string, string>();
     collect(ast, args);
     if (args.size > 0) {

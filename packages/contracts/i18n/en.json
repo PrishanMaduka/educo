@@ -83,5 +83,11 @@
   "home.console.summaryPlaceholder": "Once schools join Quad, this page will show how each one is doing and which need your attention first.",
   "role.schoolAdmin": "School admin",
   "role.platformOwner": "Platform owner",
-  "shell.console.placeholderName": "Quad owner"
+  "shell.console.placeholderName": "Quad owner",
+  "appName.parent": "Quad",
+  "parent.home.placeholder": "Once your school invites you, this is where you'll see your children's day, what needs you and what's coming up.",
+  "parent.circle.placeholder": "Moments that your children's teachers and family share will appear here.",
+  "parent.payments.placeholder": "When your school sends an invoice, you'll see it here and can pay it in a few taps.",
+  "parent.messages.placeholder": "Messages from teachers and the school office will appear here.",
+  "parent.more.placeholder": "Your children's profiles, school life and settings will appear here."
 }
