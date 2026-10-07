@@ -156,6 +156,35 @@ mock_resource "aws_ecs_cluster" {
   }
 }
 
+mock_resource "aws_ecs_task_definition" {
+  defaults = {
+    arn                  = "arn:aws:ecs:ap-south-1:123456789012:task-definition/mock-task:1"
+    arn_without_revision = "arn:aws:ecs:ap-south-1:123456789012:task-definition/mock-task"
+    revision             = 1
+  }
+}
+
+mock_resource "aws_ecs_service" {
+  defaults = {
+    arn = "arn:aws:ecs:ap-south-1:123456789012:service/mock-cluster/mock-service"
+  }
+}
+
+mock_resource "aws_service_discovery_private_dns_namespace" {
+  defaults = {
+    arn         = "arn:aws:servicediscovery:ap-south-1:123456789012:namespace/ns-0123456789abcdef"
+    id          = "ns-0123456789abcdef"
+    hosted_zone = "Z0123456789MOCKNS"
+  }
+}
+
+mock_resource "aws_service_discovery_service" {
+  defaults = {
+    arn = "arn:aws:servicediscovery:ap-south-1:123456789012:service/srv-0123456789abcdef"
+    id  = "srv-0123456789abcdef"
+  }
+}
+
 mock_resource "aws_ecr_repository" {
   defaults = {
     arn            = "arn:aws:ecr:ap-south-1:123456789012:repository/mock/repository"
