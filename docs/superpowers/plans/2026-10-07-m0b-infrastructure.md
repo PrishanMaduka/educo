@@ -691,6 +691,10 @@ Steps:
       - `data_kms_key_arn`, `field_kms_key_arn`;
       - `rds_instance_id`, `redis_replication_group_id` (for the dashboard).
 
+- **Changed in Task 9 fix round 1 (review):**
+  - network: `interface_endpoints` defaults to `["ecr.api","ecr.dkr","secretsmanager","logs"]` (ruling R-endpoints: no `ssm`); new `endpoint_subnet_count` (null = every zone; staging passes 1); new `flow_log_aggregation_interval` (60 or 600, default 600); new output `endpoints_security_group_id`.
+  - data: new required `endpoints_security_group_id` (the proxy's 443 egress references it, not the VPC CIDR) and `cloudfront_distribution_arns` (default `[]`; the data key's CloudFront decrypt statement exists only when it is set, limited to those ARNs and to `kms:EncryptionContext:aws:s3:arn` = the public bucket); `db_password_versions`, `redis_auth_token_version` and `log_retention_days`; parameter group adds `log_parameter_max_length=0` and `log_parameter_max_length_on_error=0`; private lifecycle adds `offboarding/` after 30 days.
+
 Steps:
 - [ ] **Step 1: Write failing tests.**
   - `network.tftest.hcl`:
@@ -762,7 +766,7 @@ Steps:
       - `/assets/*` → `assets` with `CachingOptimized`;
       - default → `alb` with `CachingDisabled` + `AllViewer`, all methods;
     - a response headers policy with HSTS (`max-age=63072000; includeSubDomains; preload`) and, when `noindex`, a custom `X-Robots-Tag: noindex, nofollow` (override false).
-  - **Public bucket policy:** allows `s3:GetObject` for `cloudfront.amazonaws.com` with `AWS:SourceArn` = the distribution, and denies non-TLS requests.
+  - **Public bucket policy:** allows `s3:GetObject` for `cloudfront.amazonaws.com` with `AWS:SourceArn` = the distribution, and, in the same policy, denies every request with `aws:SecureTransport = false` on the bucket and `/*` (Task 9 review). Test both statements.
   - **WAF** (`CLOUDFRONT` scope, provider `aws.us_east_1`):
     - managed groups `AWSManagedRulesCommonRuleSet`, `KnownBadInputsRuleSet`, `SQLiRuleSet`, `AmazonIpReputationList`, and `AnonymousIpList` scoped down to the console host;
     - rate rule `all` at 2000 per 5 minutes per IP;
@@ -772,7 +776,8 @@ Steps:
   - **Outputs:**
     - `alb_security_group_id`, `alb_dns_name`, `alb_zone_id`, `alb_arn_suffix`;
     - `target_group_arns` (map with keys `api`, `api_socket`, `staff`, `console`), `target_group_arn_suffixes`;
-    - `cloudfront_domain_name`, `cloudfront_hosted_zone_id`, `cloudfront_distribution_id`.
+    - `cloudfront_domain_name`, `cloudfront_hosted_zone_id`, `cloudfront_distribution_id`;
+    - `cloudfront_distribution_arn` (Task 9 review): the environment root passes it to the data module's `cloudfront_distribution_arns`, which adds the data key's decrypt statement for origin access control. The public bucket is SSE-KMS with the data key, so CloudFront cannot read it without that statement.
 
 Steps:
 - [ ] **Step 1: Write failing tests** (`edge.tftest.hcl`, mocks for `aws`, `aws.us_east_1`, `aws.dns` and `random`):
@@ -943,7 +948,9 @@ Steps:
     - `random`.
   - **Variables:** `dns_role_arn` (required, no default: `vars.TF_DNS_READ_ROLE_ARN` for plans, `vars.TF_STAGING_DNS_WRITE_ROLE_ARN` for applies) and `otel_exporter_endpoint` (default `""`). Every other staging value is a module argument in `main.tf`.
   - `data "aws_route53_zone" "root" { provider = aws.dns, name = "quad-edu.com" }`.
-  - **Module wiring:** `network` → `data` → `edge` → `dns` → `app`, with `name = "quad-staging"`.
+  - **Module wiring:** `network` → `data` → `edge` → `dns` → `app`, with `name = "quad-staging"`. From the Task 9 review:
+    - `module.network`: `endpoint_subnet_count = 1` (ruling R-endpoints);
+    - `module.data`: `endpoints_security_group_id = module.network.endpoints_security_group_id` and `cloudfront_distribution_arns = [module.edge.cloudfront_distribution_arn]`. The data key policy then depends on the distribution, which depends only on the bucket (not the key), so there is no cycle; add a test that the data key policy names the distribution ARN.
   - **Dashboard:** `aws_cloudwatch_dashboard.overview` (`quad-staging-overview`), rendered with `templatefile` from `infra/observability/cloudwatch/overview.json.tftpl`. Its widgets:
     - ALB `RequestCount`, `HTTPCode_Target_5XX_Count` and `TargetResponseTime` p95 per target group;
     - ECS `CPUUtilization`/`MemoryUtilization` per service;
@@ -1143,6 +1150,12 @@ Steps:
      12. Run `node dist/sentry-test.js` as a one-off task and check Sentry.
      13. Check traces with `tenant_id` in Grafana (from M1, when requests carry a tenant).
      14. Ask AWS for SES production access before M12.
+  2a. **Runbook: database and Redis secrets** (Task 9 review):
+     - Rotation order: raise the role's entry in `db_password_versions` (or `redis_auth_token_version`), apply, run the `db-bootstrap` one-off task, then force a new deployment of `api` and `worker` (`aws ecs update-service --force-new-deployment`).
+     - `replace_triggered_by` edge cases: replacing the RDS instance or the proxy rewrites all three database secrets with new passwords (run db-bootstrap afterwards); an in-place RDS or proxy update that leaves the address or endpoint unknown in the plan does the same; replacing only the `REDIS_URL` secret version (for example after a taint) needs a `redis_auth_token_version` bump, because the token is otherwise not resent to ElastiCache.
+     - ElastiCache token rotation uses the provider default `ROTATE`, which keeps the old token valid; retire it with a later apply that sets `auth_token_update_strategy = "SET"`.
+     - Partial-apply divergence: if an apply fails between writing a role secret and its URL secret (or the Redis token and `REDIS_URL`), raise that version and apply again.
+     - First-plan check: a plan that changes only tags must replace no `aws_secretsmanager_secret_version`.
   3. **Accounts and keys to create:**
      - Firebase projects `quad-dev` and `quad-staging`, with the APNs `.p8` key uploaded to each;
      - Sentry projects `quad-api`, `quad-staff`, `quad-console` and `quad-parent`;
