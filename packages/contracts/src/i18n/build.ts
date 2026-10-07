@@ -1,8 +1,10 @@
 import { TYPE, parse, type MessageFormatElement } from '@formatjs/icu-messageformat-parser';
+import { z } from 'zod';
 
 type ArbEntry = string | { placeholders: Record<string, { type: string }> };
 
-const camelCase = (key: string): string =>
+/** The ARB (and Dart getter) name for a catalogue key: `nav.parent.home` → `navParentHome`. */
+export const camelCase = (key: string): string =>
   key
     .split(/[.\-_]+/)
     .filter(Boolean)
@@ -76,8 +78,20 @@ const replacePounds = (message: string, ast: MessageFormatElement[]): string => 
  * becomes `{count, plural, one {{count} student} …}`. Web reads en.json and
  * keeps `#`.
  */
+const CatalogueSchema = z.record(z.string(), z.string());
+
+/** Parses a string catalogue (en.json): a flat map whose every value is a string. */
+export function parseCatalogue(json: unknown, file: string): Record<string, string> {
+  const result = CatalogueSchema.safeParse(json);
+  if (result.success) return result.data;
+  const issue = result.error.issues[0];
+  const where = issue?.path.length ? `"${issue.path.join('.')}" must be a string` : issue?.message;
+  throw new Error(`${file}: ${where ?? 'invalid catalogue'}`);
+}
+
 export function buildArb(messages: Record<string, string>): Record<string, ArbEntry> {
   const arb: Record<string, ArbEntry> = { '@@locale': 'en' };
+  const sourceKey = new Map<string, string>();
   for (const [key, message] of Object.entries(messages)) {
     let ast: MessageFormatElement[];
     try {
@@ -87,6 +101,11 @@ export function buildArb(messages: Record<string, string>): Record<string, ArbEn
       throw new Error(`Invalid ICU message for key "${key}": ${reason}`);
     }
     const name = camelCase(key);
+    const clash = sourceKey.get(name);
+    if (clash !== undefined) {
+      throw new Error(`Keys "${clash}" and "${key}" both become the ARB key "${name}"; rename one`);
+    }
+    sourceKey.set(name, key);
     // `#` → `{arg}` for Flutter (see above); everything else is copied as is.
     arb[name] = replacePounds(message, ast);
     const args = new Map<string, string>();

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { buildArb } from './build';
+import { buildArb, parseCatalogue } from './build';
 
 describe('buildArb', () => {
   it('camel-cases keys and sets the locale', () => {
@@ -40,5 +40,25 @@ describe('buildArb', () => {
 
   it('names the key when a message is invalid', () => {
     expect(() => buildArb({ bad: '{count, plural, one {x}' })).toThrow(/bad/);
+  });
+
+  it('refuses two keys that camel-case to the same ARB name', () => {
+    expect(() => buildArb({ 'a.b': 'One', 'a-b': 'Two' })).toThrow(
+      /"a\.b" and "a-b" both become the ARB key "aB"/,
+    );
+  });
+});
+
+describe('parseCatalogue', () => {
+  it('accepts a flat map of strings', () => {
+    expect(parseCatalogue({ 'a.b': 'Hello' }, 'en.json')).toEqual({ 'a.b': 'Hello' });
+  });
+
+  it.each([
+    ['a nested object', { a: { b: 'Hello' } }, /en\.json: "a" must be a string/],
+    ['a number', { a: 1 }, /en\.json: "a" must be a string/],
+    ['an array', ['Hello'], /en\.json/],
+  ])('refuses %s', (_name, catalogue, error) => {
+    expect(() => parseCatalogue(catalogue, 'en.json')).toThrow(error);
   });
 });
