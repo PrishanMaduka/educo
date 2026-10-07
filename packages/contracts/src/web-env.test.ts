@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { parseWebPublicEnv } from './web-env';
+import { parseWebPublicEnv, robotsTagFor } from './web-env';
 
 describe('parseWebPublicEnv', () => {
   it('uses local defaults when nothing is set', () => {
@@ -66,5 +66,24 @@ describe('parseWebPublicEnv', () => {
         NEXT_PUBLIC_API_URL: 'https://quad-edu.com',
       }).NEXT_PUBLIC_API_URL,
     ).toBe('https://quad-edu.com');
+  });
+});
+
+describe('robotsTagFor', () => {
+  it.each([
+    ['local', 'console', 'noindex, nofollow'],
+    ['staging', 'console', 'noindex, nofollow'],
+    ['production', 'console', 'noindex, nofollow'],
+    [undefined, 'console', 'noindex, nofollow'],
+    ['staging', 'staff', 'noindex, nofollow'],
+    ['staging', 'api', 'noindex, nofollow'],
+    ['production', 'staff', null],
+    ['production', 'api', null],
+    ['local', 'staff', null],
+    ['local', 'api', null],
+    [undefined, 'staff', null],
+    ['', 'api', null],
+  ] as const)('APP_ENV=%s on %s gives %s', (appEnv, surface, expected) => {
+    expect(robotsTagFor(appEnv, surface)).toBe(expected);
   });
 });

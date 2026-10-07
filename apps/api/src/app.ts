@@ -2,6 +2,7 @@ import 'reflect-metadata';
 
 import { NestFactory } from '@nestjs/core';
 import { FastifyAdapter } from '@nestjs/platform-fastify';
+import { robotsTagFor } from '@quad/contracts/web-env';
 
 import { AppModule } from './app.module';
 import { AppErrorFilter } from './common/error.filter';
@@ -66,6 +67,14 @@ export async function createApp(
     void reply.header('x-request-id', request.id);
     runWithRequestContext(request.id, done);
   });
+  // Staging must not be indexed (spec 20); onSend also covers error and 404 responses.
+  const robotsTag = robotsTagFor(config.APP_ENV, 'api');
+  if (robotsTag !== null) {
+    fastify.addHook('onSend', (_request, reply, payload, done) => {
+      void reply.header('x-robots-tag', robotsTag);
+      done(null, payload);
+    });
+  }
   fastify.addHook('onResponse', (request, reply, done) => {
     // The route template, never the raw URL: paths can carry signed-link tokens.
     logger.info(
