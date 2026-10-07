@@ -662,7 +662,7 @@ Steps:
       - PostgreSQL `16`, `storage_type gp3`, 20 GB growing to 100 GB, `storage_encrypted` with the data key;
       - `publicly_accessible = false`, `deletion_protection` from the variable;
       - Performance Insights on with the data key, `copy_tags_to_snapshot`, `auto_minor_version_upgrade`;
-      - parameter group `rds.force_ssl=1` and `log_min_duration_statement=500`;
+      - parameter group `rds.force_ssl=1`, `log_min_duration_statement=500` and `log_statement=none` (defence in depth: db-bootstrap already sends only SCRAM verifiers, Task 2);
       - master user `quad_admin` with a `random_password` (48 characters, no `/@" `).
     - **RDS Proxy:** `engine_family POSTGRESQL`, `require_tls = true`, `iam_auth = "DISABLED"` (D28), and auth entries for the `quad_app` and `quad_platform` secrets.
     - **Role secrets:** `random_password` for `quad_owner`, `quad_app` and `quad_platform`. Each gets a Secrets Manager secret `quad-staging/db/<role>` holding `{"username","password"}`.

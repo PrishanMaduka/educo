@@ -18,6 +18,7 @@ const tester = new RuleTester({
 const repo = (rel: string) => fileURLToPath(new URL(`../../../${rel}`, import.meta.url));
 const rawRule = quad.rules['no-raw-db-client'];
 const platformRule = quad.rules['no-with-platform-outside-platform'];
+const cliRule = quad.rules['no-cli-import'];
 
 const raw = [{ messageId: 'raw' as const }];
 const admin = [{ messageId: 'admin' as const }];
@@ -363,5 +364,44 @@ jsxTester.run('quad/no-arbitrary-colour', colourRule, {
     { code: "<div style={{ color: tone || 'red' }} />;", errors: styleColour },
     { code: '<div style={{ color: `rgb(${r} 0 0)` }} />;', errors: styleColour },
     { code: '<div style={{ background: `linear-gradient(${a}, #fff)` }} />;', errors: styleColour },
+  ],
+});
+
+const cli = [{ messageId: 'cli' as const }];
+
+tester.run('quad/no-cli-import', cliRule, {
+  valid: [
+    {
+      code: "import { requireEnv } from './run-command';",
+      filename: repo('apps/api/src/cli/seed.ts'),
+    },
+    {
+      code: "import { seedRefusal } from '../src/cli/seed';",
+      filename: repo('apps/api/test/cli.test.ts'),
+    },
+    { code: "import { x } from './client';", filename: repo('apps/api/src/worker/run.ts') },
+    { code: "import { x } from '../climate';", filename: repo('apps/api/src/modules/a.ts') },
+  ],
+  invalid: [
+    {
+      code: "import { seedRefusal } from '../cli/seed';",
+      filename: repo('apps/api/src/worker/run.ts'),
+      errors: cli,
+    },
+    {
+      code: "const m = import('../../cli/migrate');",
+      filename: repo('apps/api/src/modules/x/x.service.ts'),
+      errors: cli,
+    },
+    {
+      code: "export { parseRoleFromUrl } from './cli/db-bootstrap';",
+      filename: repo('apps/api/src/main.ts'),
+      errors: cli,
+    },
+    {
+      code: "import { x } from '@quad/api/src/cli/seed';",
+      filename: repo('apps/staff/src/x.ts'),
+      errors: cli,
+    },
   ],
 });
