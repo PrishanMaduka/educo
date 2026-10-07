@@ -65,6 +65,21 @@ describe('checkSteps', () => {
     expect(steps).not.toContain('terraform -chdir=infra/modules/data test');
   });
 
+  it('leaves validation to terraform test for a tested module that declares provider aliases', () => {
+    const steps = commands(
+      checkSteps(
+        ['infra/modules/edge', 'infra/modules/dns'],
+        { tflint: false, checkov: false },
+        (p) => p === 'infra/modules/edge/tests',
+        () => true,
+      ),
+    );
+    expect(steps).not.toContain('terraform -chdir=infra/modules/edge validate');
+    expect(steps).toContain('terraform -chdir=infra/modules/edge test');
+    // Without tests nothing else would validate it, so it is still validated (and fails).
+    expect(steps).toContain('terraform -chdir=infra/modules/dns validate');
+  });
+
   it('adds tflint only when it is available, with an absolute config path', () => {
     expect(
       commands(checkSteps([], { tflint: false, checkov: false }, none)).join('\n'),

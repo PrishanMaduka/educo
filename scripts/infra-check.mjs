@@ -6,7 +6,7 @@
 // AWS_* variables removed and the instance metadata lookup off, so nothing can reach an account.
 // A missing scanner is a warning, or a failure with QUAD_REQUIRE_INFRA_TOOLS=1 (CI).
 import { spawnSync } from 'node:child_process';
-import { existsSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
@@ -61,25 +61,48 @@ export function infraEnv(env) {
 }
 
 /**
+ * Whether a module declares `configuration_aliases` (edge's aws.us_east_1 and aws.dns, for
+ * example). `terraform validate` cannot check such a module on its own, because nothing configures
+ * the aliases; `terraform test` validates it with the test file's mocked aliases instead.
+ * @param {string} dir repository-relative
+ * @returns {boolean}
+ */
+export function declaresProviderAliases(dir) {
+  const path = join(root, dir);
+  if (!existsSync(path)) return false;
+  return readdirSync(path)
+    .filter((file) => file.endsWith('.tf'))
+    .some((file) => readFileSync(join(path, file), 'utf8').includes('configuration_aliases'));
+}
+
+/**
  * The check steps, in order, for `dirs` (repository-relative). `exists` is relative to the
- * repository root and decides whether a directory has `tests/` for `terraform test`.
+ * repository root and decides whether a directory has `tests/` for `terraform test`. A tested
+ * directory that declares provider aliases (`hasAliases`) is validated by `terraform test` alone.
  * @param {string[]} dirs
  * @param {Scanners} tools which scanners are on PATH
  * @param {(path: string) => boolean} [exists]
+ * @param {(dir: string) => boolean} [hasAliases]
  * @returns {Step[]}
  */
-export function checkSteps(dirs, tools, exists = (path) => existsSync(join(root, path))) {
+export function checkSteps(
+  dirs,
+  tools,
+  exists = (path) => existsSync(join(root, path)),
+  hasAliases = declaresProviderAliases,
+) {
   /** @type {Step[]} */
   const steps = [
     { name: 'Format', command: ['terraform', 'fmt', '-check', '-recursive', 'infra'] },
   ];
   for (const dir of dirs) {
     const tf = ['terraform', `-chdir=${dir}`];
-    steps.push(
-      { name: `Init ${dir}`, command: [...tf, 'init', '-backend=false', '-input=false'] },
-      { name: `Validate ${dir}`, command: [...tf, 'validate'] },
-    );
-    if (exists(`${dir}/tests`)) steps.push({ name: `Test ${dir}`, command: [...tf, 'test'] });
+    const tested = exists(`${dir}/tests`);
+    steps.push({ name: `Init ${dir}`, command: [...tf, 'init', '-backend=false', '-input=false'] });
+    if (!(tested && hasAliases(dir))) {
+      steps.push({ name: `Validate ${dir}`, command: [...tf, 'validate'] });
+    }
+    if (tested) steps.push({ name: `Test ${dir}`, command: [...tf, 'test'] });
   }
   if (tools.tflint) {
     // tflint walks the working directory with --recursive (it cannot be combined with --chdir),
