@@ -14,7 +14,7 @@ import { PLACEHOLDER_OWNER } from '@/lib/placeholders';
 /** The console's side bar, top bar and search around every page. */
 export function ConsoleShell({ children }: { children: ReactNode }) {
   const { t } = useTranslation();
-  const labels = useShellLabels();
+  const labels = useShellLabels('console');
   const pathname = usePathname();
   const router = useRouter();
 

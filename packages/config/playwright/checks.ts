@@ -33,3 +33,25 @@ export async function expectNoSeriousA11yViolations(page: Page): Promise<void> {
     .map((v) => ({ id: v.id, help: v.help, targets: v.nodes.map((n) => n.target.join(' ')) }));
   expect(serious).toEqual([]);
 }
+
+/** Whether this run should write the review screenshots (`QUAD_SCREENSHOTS=1 pnpm e2e`). */
+export const takeScreenshots = process.env.QUAD_SCREENSHOTS === '1';
+
+/**
+ * Saves a full-page screenshot to docs/screenshots/<milestone>/<name>-<width>-<scheme>.png at the repo root,
+ * for comparing with the prototypes. Waits for fonts so the text is in Figtree.
+ */
+export async function saveScreenshot(
+  page: Page,
+  testInfo: TestInfo,
+  milestone: string,
+  name: string,
+): Promise<void> {
+  await page.evaluate(() => document.fonts.ready);
+  const width = page.viewportSize()?.width ?? 0;
+  const file = new URL(
+    `../../../docs/screenshots/${milestone}/${name}-${width}-${schemeOf(testInfo)}.png`,
+    import.meta.url,
+  );
+  await page.screenshot({ path: file.pathname, fullPage: true, animations: 'disabled' });
+}

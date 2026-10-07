@@ -44,6 +44,11 @@ const activeItem: Record<ShellVariant, string> = {
   console: 'bg-gold font-extrabold text-rail shadow-md hover:bg-gold',
 };
 const activeDot: Record<ShellVariant, string> = { staff: 'bg-gold', console: 'bg-rail' };
+/* Prototype `.brand b`: the school's name wraps to two lines; the console's short "Quad" title sits on one. */
+const brandTitle: Record<ShellVariant, string> = {
+  staff: 'line-clamp-2 text-[14.5px] leading-[1.25]',
+  console: 'flex items-center text-lg leading-tight whitespace-nowrap',
+};
 const logoTile: Record<ShellVariant, string> = {
   staff: 'bg-brand',
   console: 'bg-rail-2 ring-1 ring-rail-ink/25 ring-inset',
@@ -168,7 +173,12 @@ export function Sidebar({
           <QuadMark variant="white" size={25} aria-hidden="true" />
         </span>
         <div className={cn('min-w-0', collapsed && 'sr-only')}>
-          <p className="m-0 flex items-center text-lg leading-tight font-extrabold tracking-[-0.01em] whitespace-nowrap text-rail-ink">
+          <p
+            className={cn(
+              'm-0 font-extrabold tracking-[-0.01em] text-rail-ink',
+              brandTitle[variant],
+            )}
+          >
             {brand.title}
             {brand.badge ? (
               <span className="ml-2 rounded-full border border-gold/65 px-[7px] text-[9px] leading-[1.4] font-extrabold tracking-[0.14em] text-gold uppercase">
@@ -176,7 +186,9 @@ export function Sidebar({
               </span>
             ) : null}
           </p>
-          <p className="m-0 truncate text-[11px] font-semibold text-rail-ink-2">{brand.subtitle}</p>
+          <p className="m-0 line-clamp-2 text-[11px] leading-[1.35] font-semibold text-rail-ink-2">
+            {brand.subtitle}
+          </p>
         </div>
       </div>
       <nav

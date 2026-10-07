@@ -34,7 +34,12 @@
         "REDIS_URL"
       ]
     },
-    "e2e": { "dependsOn": ["build"], "cache": false, "outputs": ["playwright-report/**"] },
+    "e2e": {
+      "dependsOn": ["build"],
+      "cache": false,
+      "passThroughEnv": ["CI", "PLAYWRIGHT_BROWSERS_PATH", "QUAD_SCREENSHOTS"],
+      "outputs": ["playwright-report/**"]
+    },
     "tokens:build": {
       "outputs": ["packages/tokens/dist/**", "apps/parent/lib/theme/tokens.g.dart"]
     },

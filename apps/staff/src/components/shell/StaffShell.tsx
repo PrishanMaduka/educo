@@ -22,7 +22,7 @@ import { PLACEHOLDER_SCHOOL, PLACEHOLDER_USER } from '@/lib/placeholders';
 /** The staff portal's side bar, top bar and search around every /app page. */
 export function StaffShell({ children }: { children: ReactNode }) {
   const { t } = useTranslation();
-  const labels = useShellLabels();
+  const labels = useShellLabels('staff');
   const pathname = usePathname();
   const router = useRouter();
 
@@ -66,7 +66,7 @@ export function StaffShell({ children }: { children: ReactNode }) {
   return (
     <AppShell
       variant="staff"
-      brand={{ title: t('app.name.staff'), subtitle: PLACEHOLDER_SCHOOL.name }}
+      brand={{ title: PLACEHOLDER_SCHOOL.name, subtitle: t('shell.staff.subtitle') }}
       user={{ name: PLACEHOLDER_USER.name, role: PLACEHOLDER_USER.role }}
       groups={groups}
       currentHref={pathname}
