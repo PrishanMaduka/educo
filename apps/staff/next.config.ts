@@ -15,6 +15,15 @@ const config: NextConfig = {
   // root so the workspace packages and the pnpm store links are copied in with the server.
   output: 'standalone',
   outputFileTracingRoot: fileURLToPath(new URL('../../', import.meta.url)),
+  // The images run on Alpine (musl), so the glibc sharp builds are dead weight; TypeScript is
+  // only needed to build.
+  outputFileTracingExcludes: {
+    '*': [
+      '**/@img/sharp-libvips-linux-x64/**',
+      '**/@img/sharp-linux-x64/**',
+      '**/node_modules/typescript/**',
+    ],
+  },
   // The workspace packages ship TypeScript source.
   transpilePackages: ['@quad/contracts', '@quad/domain', '@quad/tokens', '@quad/ui'],
   // `pnpm lint` runs ESLint for every package; the build only type-checks.
