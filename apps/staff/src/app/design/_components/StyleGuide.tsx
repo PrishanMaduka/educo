@@ -6,7 +6,6 @@ import { useTranslation } from 'react-i18next';
 import { STYLE_GUIDE } from './samples';
 import { DESIGN_NS } from './strings';
 
-
 import type { ReactNode } from 'react';
 
 const THEMES = ['light', 'dark'] as const;

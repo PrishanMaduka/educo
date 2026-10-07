@@ -53,7 +53,6 @@ import {
 } from './sample-data';
 import { DESIGN_NS } from './strings';
 
-
 import type { GreetingPeriod } from '@quad/domain';
 
 const LOCALE = 'en-LK';

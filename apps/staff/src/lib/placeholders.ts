@@ -8,8 +8,9 @@ export const PLACEHOLDER_SCHOOL = {
   timeZone: 'Asia/Colombo',
 } as const;
 
+/** The seeded school admin. The role is a key in en.json, so its label is translated like any copy. */
 export const PLACEHOLDER_USER = {
   name: 'Prishan Maduka',
   firstName: 'Prishan',
-  role: 'Administrator',
+  roleKey: 'role.schoolAdmin',
 } as const;

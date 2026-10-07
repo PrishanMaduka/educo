@@ -80,5 +80,8 @@
   "home.staff.summaryPlaceholder": "Once your school is set up, this is where you'll see who is in school today, how fees are going and what needs you first.",
   "home.console.crumb": "Platform",
   "home.console.title": "Overview",
-  "home.console.summaryPlaceholder": "Once schools join Quad, this page will show how each one is doing and which need your attention first."
+  "home.console.summaryPlaceholder": "Once schools join Quad, this page will show how each one is doing and which need your attention first.",
+  "role.schoolAdmin": "School admin",
+  "role.platformOwner": "Platform owner",
+  "shell.console.placeholderName": "Quad owner"
 }

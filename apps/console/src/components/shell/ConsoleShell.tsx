@@ -44,7 +44,7 @@ export function ConsoleShell({ children }: { children: ReactNode }) {
         subtitle: t('shell.console.subtitle'),
         badge: t('shell.console.badge'),
       }}
-      user={{ name: PLACEHOLDER_OWNER.name, role: PLACEHOLDER_OWNER.role }}
+      user={{ name: t(PLACEHOLDER_OWNER.nameKey), role: t(PLACEHOLDER_OWNER.roleKey) }}
       groups={groups}
       currentHref={pathname}
       labels={labels}

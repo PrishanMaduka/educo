@@ -67,7 +67,7 @@ export function StaffShell({ children }: { children: ReactNode }) {
     <AppShell
       variant="staff"
       brand={{ title: PLACEHOLDER_SCHOOL.name, subtitle: t('shell.staff.subtitle') }}
-      user={{ name: PLACEHOLDER_USER.name, role: PLACEHOLDER_USER.role }}
+      user={{ name: PLACEHOLDER_USER.name, role: t(PLACEHOLDER_USER.roleKey) }}
       groups={groups}
       currentHref={pathname}
       labels={labels}

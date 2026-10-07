@@ -6,10 +6,10 @@ import { TokenSwatches } from './_components/TokenSwatches';
 
 import type { Metadata } from 'next';
 
+import { t as translate } from '@/i18n';
+
 const t = (key: 'title' | 'intro' | 'crumb' | 'tokens'): string =>
   translate(key, { ns: DESIGN_NS });
-
-import { t as translate } from '@/i18n';
 
 export const metadata: Metadata = { title: t('title') };
 
