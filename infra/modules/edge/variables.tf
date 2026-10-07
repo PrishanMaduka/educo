@@ -95,3 +95,35 @@ variable "alb_idle_timeout" {
   description = "ALB idle timeout in seconds; WebSockets need it above the Socket.IO ping interval (spec 20)."
   default     = 120
 }
+
+variable "alb_deletion_protection" {
+  type        = bool
+  description = "Deletion protection on the ALB. Turn it off only to tear an environment down."
+  default     = true
+}
+
+variable "origin_secret_slots" {
+  type        = list(string)
+  description = "Origin secret slots. The ALB accepts every slot's value; CloudFront sends only origin_secret_active's. Rotation adds a slot, switches the active slot, then removes the old one (D28)."
+  default     = ["a"]
+
+  validation {
+    condition = (
+      length(var.origin_secret_slots) >= 1 && length(var.origin_secret_slots) <= 3 &&
+      length(distinct(var.origin_secret_slots)) == length(var.origin_secret_slots) &&
+      alltrue([for slot in var.origin_secret_slots : can(regex("^[a-z]$", slot))])
+    )
+    error_message = "origin_secret_slots needs one to three distinct single-letter slots (a listener rule allows five condition values: a host, a path and up to three secrets)."
+  }
+}
+
+variable "origin_secret_active" {
+  type        = string
+  description = "The slot whose value CloudFront sends as X-Quad-Origin-Secret."
+  default     = "a"
+
+  validation {
+    condition     = contains(var.origin_secret_slots, var.origin_secret_active)
+    error_message = "origin_secret_active must be one of origin_secret_slots."
+  }
+}

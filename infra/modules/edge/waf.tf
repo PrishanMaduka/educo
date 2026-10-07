@@ -1,19 +1,33 @@
-# WAF on CloudFront (spec 20 → Edge): AWS managed rules, two rate rules and an optional geo block.
-# The API's own Redis rate limits stay in place behind it (spec 16). CLOUDFRONT-scoped ACLs live
-# in us-east-1.
+# WAF on CloudFront (spec 20 → Edge): AWS managed rules, two rate rules, a body-size rule and an
+# optional geo block. The API's own Redis rate limits stay in place behind it (spec 16).
+# CLOUDFRONT-scoped ACLs live in us-east-1. Every path or host match decodes, then lower-cases,
+# so %2F or upper-case tricks cannot step around it.
 
 locals {
-  # The AWS rule groups that apply to every request. The anonymous IP list (priority 40) and the
-  # known bad inputs (priority 60) are written out below: the first is limited to the console,
-  # and Checkov looks for both by name (CKV_AWS_192, CKV2_AWS_47), which it cannot do inside a
-  # dynamic block.
+  # The AWS rule groups that apply to every request, with the rules that only count. The anonymous
+  # IP list (priority 40) and the known bad inputs (priority 60) are written out below: the first
+  # is limited to the console, and Checkov looks for both by name (CKV_AWS_192, CKV2_AWS_47), which
+  # it cannot do inside a dynamic block.
+  #
+  # The common rule set's SizeRestrictions_BODY (8 KB) only counts. The API sets its own body
+  # limits, and body-size (priority 55) blocks it everywhere else.
   managed_rule_groups = {
-    ip-reputation = { priority = 30, group = "AWSManagedRulesAmazonIpReputationList" }
-    common        = { priority = 50, group = "AWSManagedRulesCommonRuleSet" }
-    sqli          = { priority = 70, group = "AWSManagedRulesSQLiRuleSet" }
+    ip-reputation = { priority = 30, group = "AWSManagedRulesAmazonIpReputationList", count = [] }
+    common        = { priority = 50, group = "AWSManagedRulesCommonRuleSet", count = ["SizeRestrictions_BODY"] }
+    sqli          = { priority = 70, group = "AWSManagedRulesSQLiRuleSet", count = [] }
   }
 
-  sensitive_path_prefixes = ["/api/v1/auth/", "/api/v1/public/"]
+  # Sign-in, OTP and the tenant-less public endpoints (D16), and console sign-in (ruling
+  # R-console-realtime).
+  sensitive_path_prefixes = ["/api/v1/auth/", "/api/v1/platform/auth/", "/api/v1/public/"]
+
+  # Cached at the edge and fetched many at a time by each page load.
+  static_path_prefixes = ["/_next/static/", "/assets/"]
+
+  match_transformations = [
+    { priority = 0, type = "URL_DECODE" },
+    { priority = 1, type = "LOWERCASE" },
+  ]
 }
 
 resource "aws_wafv2_web_acl" "this" {
@@ -66,6 +80,38 @@ resource "aws_wafv2_web_acl" "this" {
         limit                 = var.waf_rate_limit
         aggregate_key_type    = "IP"
         evaluation_window_sec = 300
+
+        scope_down_statement {
+          not_statement {
+            statement {
+              or_statement {
+                dynamic "statement" {
+                  for_each = local.static_path_prefixes
+
+                  content {
+                    byte_match_statement {
+                      search_string         = statement.value
+                      positional_constraint = "STARTS_WITH"
+
+                      field_to_match {
+                        uri_path {}
+                      }
+
+                      dynamic "text_transformation" {
+                        for_each = local.match_transformations
+
+                        content {
+                          priority = text_transformation.value.priority
+                          type     = text_transformation.value.type
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     }
 
@@ -76,7 +122,6 @@ resource "aws_wafv2_web_acl" "this" {
     }
   }
 
-  # Sign-in, OTP and the tenant-less public endpoints (D16).
   rule {
     name     = "rate-sensitive"
     priority = 20
@@ -105,9 +150,13 @@ resource "aws_wafv2_web_acl" "this" {
                     uri_path {}
                   }
 
-                  text_transformation {
-                    priority = 0
-                    type     = "LOWERCASE"
+                  dynamic "text_transformation" {
+                    for_each = local.match_transformations
+
+                    content {
+                      priority = text_transformation.value.priority
+                      type     = text_transformation.value.type
+                    }
                   }
                 }
               }
@@ -139,6 +188,18 @@ resource "aws_wafv2_web_acl" "this" {
         managed_rule_group_statement {
           vendor_name = "AWS"
           name        = rule.value.group
+
+          dynamic "rule_action_override" {
+            for_each = rule.value.count
+
+            content {
+              name = rule_action_override.value
+
+              action_to_use {
+                count {}
+              }
+            }
+          }
         }
       }
 
@@ -151,7 +212,8 @@ resource "aws_wafv2_web_acl" "this" {
   }
 
   # Spec 20: the anonymous IP list applies only to the console host. Parents and staff may use
-  # VPNs and privacy relays.
+  # VPNs and privacy relays. HostingProviderIPList only counts: GitHub's hosted runners (Azure)
+  # reach the console.
   rule {
     name     = "anonymous-ip"
     priority = 40
@@ -165,6 +227,14 @@ resource "aws_wafv2_web_acl" "this" {
         vendor_name = "AWS"
         name        = "AWSManagedRulesAnonymousIpList"
 
+        rule_action_override {
+          name = "HostingProviderIPList"
+
+          action_to_use {
+            count {}
+          }
+        }
+
         scope_down_statement {
           byte_match_statement {
             search_string         = var.console_domain
@@ -176,9 +246,13 @@ resource "aws_wafv2_web_acl" "this" {
               }
             }
 
-            text_transformation {
-              priority = 0
-              type     = "LOWERCASE"
+            dynamic "text_transformation" {
+              for_each = local.match_transformations
+
+              content {
+                priority = text_transformation.value.priority
+                type     = text_transformation.value.type
+              }
             }
           }
         }
@@ -188,6 +262,59 @@ resource "aws_wafv2_web_acl" "this" {
     visibility_config {
       cloudwatch_metrics_enabled = true
       metric_name                = "${var.name}-anonymous-ip"
+      sampled_requests_enabled   = true
+    }
+  }
+
+  # The common rule set labels bodies over 8 KB (its SizeRestrictions_BODY only counts, above).
+  # Outside /api/v1/ nothing takes a large body, so those are blocked here; the API applies its own
+  # body limits (spec 06).
+  rule {
+    name     = "body-size"
+    priority = 55
+
+    action {
+      block {}
+    }
+
+    statement {
+      and_statement {
+        statement {
+          label_match_statement {
+            scope = "LABEL"
+            key   = "awswaf:managed:aws:core-rule-set:SizeRestrictions_Body"
+          }
+        }
+
+        statement {
+          not_statement {
+            statement {
+              byte_match_statement {
+                search_string         = "/api/v1/"
+                positional_constraint = "STARTS_WITH"
+
+                field_to_match {
+                  uri_path {}
+                }
+
+                dynamic "text_transformation" {
+                  for_each = local.match_transformations
+
+                  content {
+                    priority = text_transformation.value.priority
+                    type     = text_transformation.value.type
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    visibility_config {
+      cloudwatch_metrics_enabled = true
+      metric_name                = "${var.name}-body-size"
       sampled_requests_enabled   = true
     }
   }

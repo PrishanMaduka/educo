@@ -1,6 +1,7 @@
 # CloudFront is the only public entry (spec 20 → Edge, D14). One distribution serves both hosts:
-#   /api/v1/* and /socket.io/*  → ALB, uncached, every viewer header (Host and the WebSocket
-#                                 upgrade headers included), cookie and query string, all methods;
+#   /api/v1/* and /socket.io/*  → ALB, HTTPS only, uncached, every viewer header (Host and the
+#                                 WebSocket upgrade headers included), cookie and query string,
+#                                 all methods;
 #   /_next/static/*             → ALB, cached per host (hashed file names);
 #   /assets/*                   → the public bucket through origin access control, cached;
 #   everything else             → ALB, uncached, as for the API.
@@ -20,12 +21,13 @@ locals {
   all_methods    = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
   cached_methods = ["GET", "HEAD"]
 
-  # In CloudFront's precedence order. cache = null means uncached with every viewer value.
+  # In CloudFront's precedence order. cache = null means uncached with every viewer value. API and
+  # Socket.IO clients get HTTPS only: a redirect would drop a POST body or a WebSocket upgrade.
   ordered_behaviours = [
-    { path = "/api/v1/*", origin = "alb", cache = null },
-    { path = "/socket.io/*", origin = "alb", cache = null },
-    { path = "/_next/static/*", origin = "alb", cache = aws_cloudfront_cache_policy.static.id },
-    { path = "/assets/*", origin = "assets", cache = local.managed_cache_policy_caching_optimized },
+    { path = "/api/v1/*", origin = "alb", cache = null, viewer = "https-only" },
+    { path = "/socket.io/*", origin = "alb", cache = null, viewer = "https-only" },
+    { path = "/_next/static/*", origin = "alb", cache = aws_cloudfront_cache_policy.static.id, viewer = "redirect-to-https" },
+    { path = "/assets/*", origin = "assets", cache = local.managed_cache_policy_caching_optimized, viewer = "redirect-to-https" },
   ]
 
   public_bucket_policy = jsonencode({
@@ -148,7 +150,7 @@ resource "aws_cloudfront_distribution" "this" {
 
     custom_header {
       name  = local.origin_secret_header
-      value = random_password.origin_secret.result
+      value = local.origin_secret_sent
     }
   }
 
@@ -164,7 +166,7 @@ resource "aws_cloudfront_distribution" "this" {
     content {
       path_pattern               = ordered_cache_behavior.value.path
       target_origin_id           = ordered_cache_behavior.value.origin
-      viewer_protocol_policy     = "redirect-to-https"
+      viewer_protocol_policy     = ordered_cache_behavior.value.viewer
       compress                   = true
       allowed_methods            = ordered_cache_behavior.value.cache == null ? local.all_methods : local.cached_methods
       cached_methods             = local.cached_methods

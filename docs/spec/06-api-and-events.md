@@ -2,7 +2,7 @@
 
 ## Conventions
 
-- Base URLs: `https://quad-edu.com/api/v1` (school, parent and public routes, same origin as the web app) and `https://console.quad-edu.com/api/v1/platform` (console routes, proxied to the same API service and accepted only with a console session). Every route below is written **relative to `/api/v1`**; console routes start with `/platform`.
+- Base URLs: `https://quad-edu.com/api/v1` (school, parent and public routes, same origin as the web app) and `https://console.quad-edu.com/api/v1/platform` (console routes, proxied to the same API service and accepted only with a console session; console sign-in is under `/platform/auth/*`, never `/auth/*`). Every route below is written **relative to `/api/v1`**; console routes start with `/platform`.
 - JSON with `camelCase` keys. Every request and response body has a Zod schema in `packages/contracts`, and OpenAPI is generated from them at `/api/v1/openapi.json`. `packages/client` (TypeScript) and `quad_api` (Dart) are regenerated from it with `pnpm api:client`.
 - Auth: a session cookie (web) or `Authorization: Bearer` (mobile). The tenant always comes from the session or token, except on the tenant-less entry points in [05](05-auth-tenancy-rbac.md#tenant-less-entry-points).
 - Guards: each route carries `@Can('<module>.<action>')` (shown in brackets below where it is not obvious from the module) and `@Module(...)` when it belongs to a plan module. `/family` routes check the guardian–student link. `/platform` routes check the platform role.
@@ -166,7 +166,7 @@ All routes are served from `https://quad-edu.com/api/v1` (the same origin as the
 
 ## Realtime (Socket.IO)
 
-Clients connect to `wss://quad-edu.com/socket.io` with their session or token and join `tenant:{id}` and `user:{id}`. Teachers also join `class:{id}`; console users join `platform`.
+Clients connect to `wss://quad-edu.com/socket.io` with their session or token and join `tenant:{id}` and `user:{id}`. Teachers also join `class:{id}`; console users connect to `wss://console.quad-edu.com/socket.io` (same API service, console session) and join `platform`. The parent app's client uses `transports: ['websocket']` (M6); the web apps may fall back to long polling, which the ALB keeps on one task with its own cookie ([20](20-infrastructure-operations.md)).
 
 | Event | Room | Payload | Used by |
 |---|---|---|---|

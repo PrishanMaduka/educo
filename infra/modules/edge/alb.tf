@@ -12,6 +12,10 @@ locals {
 
   origin_secret_header = "X-Quad-Origin-Secret"
 
+  # The values every listener rule accepts (all slots) and the one CloudFront sends.
+  origin_secret_values = [for slot in sort(var.origin_secret_slots) : random_password.origin_secret[slot].result]
+  origin_secret_sent   = random_password.origin_secret[var.origin_secret_active].result
+
   target_groups = {
     api        = { port = 4000, health = "/api/v1/health/ready", sticky = false }
     api_socket = { port = 4000, health = "/api/v1/health/ready", sticky = true }
@@ -19,10 +23,13 @@ locals {
     console    = { port = 3001, health = "/healthz", sticky = false }
   }
 
-  # D14 and spec 20: the console host goes to the console (its platform API to the api); then
-  # /api/v1/* and /socket.io/* go to the api, and everything else to staff.
+  # D14 and spec 20: the console host goes to the console, except its platform API (sign-in
+  # included, under /api/v1/platform/auth/) and its realtime connection (ruling
+  # R-console-realtime); then /api/v1/* and /socket.io/* go to the api, and everything else to
+  # staff.
   routes = {
     console-platform-api = { priority = 10, hosts = [var.console_domain], paths = ["/api/v1/platform/*"], target = "api" }
+    console-socket-io    = { priority = 15, hosts = [var.console_domain], paths = ["/socket.io/*"], target = "api_socket" }
     console              = { priority = 20, hosts = [var.console_domain], paths = [], target = "console" }
     api                  = { priority = 30, hosts = [], paths = ["/api/v1/*"], target = "api" }
     socket-io            = { priority = 40, hosts = [], paths = ["/socket.io/*"], target = "api_socket" }
@@ -30,11 +37,15 @@ locals {
   }
 }
 
-# Alphanumeric only: listener rule header values treat * and ? as wildcards. It is in Terraform
-# state, because CloudFront's custom header and the listener rule condition have no write-only
-# form (D28). Rotate it with `terraform apply -replace=module.edge.random_password.origin_secret`;
-# requests fail with 403 for the minutes CloudFront takes to deploy the new value.
+# One secret per slot (origin_secret_slots). Alphanumeric only: listener rule header values treat
+# * and ? as wildcards. The ALB compares header values case-insensitively, so 48 characters from
+# an effective 36-character alphabet give about 248 bits, far beyond guessing. The secrets are in
+# Terraform state, because CloudFront's custom header and the listener rule condition have no
+# write-only form (D28). Rotation without downtime takes three applies (D28): add a slot, make it
+# active once CloudFront has deployed, then remove the old slot.
 resource "random_password" "origin_secret" {
+  for_each = toset(var.origin_secret_slots)
+
   length  = 48
   special = false
 }
@@ -86,7 +97,7 @@ resource "aws_lb" "this" {
 
   idle_timeout               = var.alb_idle_timeout
   drop_invalid_header_fields = true
-  enable_deletion_protection = true
+  enable_deletion_protection = var.alb_deletion_protection
   xff_header_processing_mode = "append"
 
   tags = merge(local.tags, { Name = var.name })
@@ -114,14 +125,13 @@ resource "aws_lb_target_group" "this" {
   }
 
   # Spec 20: the Socket.IO long-polling fallback needs every request of a session on one task.
-  # The ALB follows Socket.IO's own "io" cookie for one day.
+  # Ruling R-sticky: the ALB's own cookie (AWSALB), for one day, so the app sets no cookie.
   dynamic "stickiness" {
     for_each = each.value.sticky ? [1] : []
 
     content {
       enabled         = true
-      type            = "app_cookie"
-      cookie_name     = "io"
+      type            = "lb_cookie"
       cookie_duration = 86400
     }
   }
@@ -163,7 +173,7 @@ resource "aws_lb_listener_rule" "route" {
   condition {
     http_header {
       http_header_name = local.origin_secret_header
-      values           = [random_password.origin_secret.result]
+      values           = local.origin_secret_values
     }
   }
 

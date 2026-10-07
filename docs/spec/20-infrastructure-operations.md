@@ -35,7 +35,7 @@ flowchart LR
 |---|---|---|
 | `quad-edu.com` | CloudFront (production) | Landing, sign-in, staff portal, API, realtime, legal, app links |
 | `www.quad-edu.com` | CloudFront | 301 to `quad-edu.com` |
-| `console.quad-edu.com` | CloudFront → ALB (console + `/api/v1/platform/*`) | Separate cookie; WAF rule allows only Quad office and VPN ranges plus Google SSO callbacks (optional, off at launch) |
+| `console.quad-edu.com` | CloudFront → ALB (console; `/api/v1/platform/*`, sign-in under `/api/v1/platform/auth/*` included, and `/socket.io/*` go to the API) | Separate cookie; WAF rule allows only Quad office and VPN ranges plus Google SSO callbacks (optional, off at launch) |
 | `staging.quad-edu.com`, `console.staging.quad-edu.com` | Staging CloudFront | `noindex` header; basic WAF rules |
 | `mail.quad-edu.com` | SES (MAIL FROM, DKIM CNAMEs) | Sending domain for all Quad email (D19) |
 | `status.quad-edu.com` | Hosted status page provider | Outside AWS so it stays up when AWS is down |
@@ -47,8 +47,8 @@ flowchart LR
 ## Edge and routing
 
 - **CloudFront** is the only public entry. Behaviours (D14): `/api/v1/*` and `/socket.io/*` go to the ALB with caching off and every header, cookie and query string forwarded; `/_next/static/*` and `/assets/*` cache for a year (hashed names); everything else goes to the ALB with caching off. CloudFront adds a secret origin header that the ALB requires, so the ALB cannot be reached directly.
-- **ALB** listener rules: host `console.*` → console target group (and `/api/v1/platform/*` → api); `/api/v1/*` and `/socket.io/*` → api; everything else → staff. Stickiness (application cookie, 1 day) on the `/socket.io` rule for the long-polling fallback. Idle timeout 120 s for WebSockets.
-- **AWS WAF** on CloudFront: AWS managed rules (common, known bad inputs, SQL injection, IP reputation, anonymous IP for the console), rate rules (2,000 requests per 5 minutes per IP overall; 100 per 5 minutes per IP on `/api/v1/auth/*` and `/api/v1/public/*`), and a geo block list kept empty by default. Application rate limits in Redis stay in place behind it ([16](16-security-privacy.md)).
+- **ALB** listener rules, each also requiring the origin header: host `console.*` with `/api/v1/platform/*` → api and with `/socket.io/*` → the api's realtime target group, the rest of `console.*` → console; `/api/v1/*` → api; `/socket.io/*` → the realtime target group; everything else → staff. The realtime target group is sticky on the ALB's own cookie (`lb_cookie`, 1 day) for the long-polling fallback, so the app sets no cookie for it; the Flutter client connects with `transports: ['websocket']` and needs no stickiness (M6). Idle timeout 120 s for WebSockets.
+- **AWS WAF** on CloudFront: AWS managed rules (common, known bad inputs, SQL injection, IP reputation, anonymous IP for the console), rate rules (2,000 requests per 5 minutes per IP overall, not counting `/_next/static/*` and `/assets/*`; 100 per 5 minutes per IP on `/api/v1/auth/*`, `/api/v1/platform/auth/*` and `/api/v1/public/*`), and a geo block list kept empty by default. The common rule set's 8 KB body limit only counts and is enforced outside `/api/v1/*`, where the API's own body limits apply; the anonymous IP list's hosting-provider rule only counts, so CI runners reach the console. Application rate limits in Redis stay in place behind it ([16](16-security-privacy.md)).
 
 ## Compute (ECS Fargate)
 

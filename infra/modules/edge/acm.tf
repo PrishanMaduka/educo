@@ -55,6 +55,10 @@ resource "aws_route53_record" "validation" {
   type    = one([for option in aws_acm_certificate.origin.domain_validation_options : option.resource_record_type if option.domain_name == each.key])
   records = [one([for option in aws_acm_certificate.origin.domain_validation_options : option.resource_record_value if option.domain_name == each.key])]
   ttl     = 300
+
+  # The record can already exist, for example from an earlier certificate for the same name; it
+  # has the same value, so taking it over is safe.
+  allow_overwrite = true
 }
 
 resource "aws_acm_certificate_validation" "origin" {

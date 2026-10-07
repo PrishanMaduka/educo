@@ -102,7 +102,7 @@ run "alb_refuses_requests_without_the_origin_header" {
   # Review Focus #1: every forwarding rule needs the header CloudFront sends, so a request without
   # it (or with another value) falls through to the listener default.
   assert {
-    condition = length(aws_lb_listener_rule.route) == 5 && alltrue([
+    condition = length(aws_lb_listener_rule.route) == 6 && alltrue([
       for rule in aws_lb_listener_rule.route : anytrue([
         for condition in rule.condition : jsonencode([
           for header in condition.http_header : [header.http_header_name, header.values]
@@ -123,7 +123,7 @@ run "alb_refuses_requests_without_the_origin_header" {
       for origin in aws_cloudfront_distribution.this.origin : [
         for header in origin.custom_header : header.value if header.name == "X-Quad-Origin-Secret"
       ] if origin.origin_id == "alb"
-    ])) == random_password.origin_secret.result
+    ])) == random_password.origin_secret["a"].result
     error_message = "CloudFront's alb origin must send the origin secret."
   }
 
@@ -146,9 +146,91 @@ run "alb_refuses_requests_without_the_origin_header" {
   # Listener rule header values treat * and ? as wildcards, so the secret has no special
   # characters.
   assert {
-    condition     = random_password.origin_secret.length == 48 && !random_password.origin_secret.special
-    error_message = "The origin secret is 48 characters with no special characters."
+    condition     = keys(random_password.origin_secret) == ["a"] && random_password.origin_secret["a"].length == 48 && !random_password.origin_secret["a"].special
+    error_message = "By default there is one origin secret slot, a, of 48 characters with no special characters."
   }
+}
+
+# M-2: zero-downtime rotation. With two slots the ALB accepts both values while CloudFront sends
+# only the active one.
+run "rotation_accepts_both_slots_and_sends_only_the_active_one" {
+  command = apply
+
+  # A fresh state, so the overridden passwords below are created.
+  state_key = "two_origin_secret_slots"
+
+  variables {
+    origin_secret_slots  = ["a", "b"]
+    origin_secret_active = "b"
+  }
+
+  override_resource {
+    target = random_password.origin_secret["a"]
+    values = { result = "SlotAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" }
+  }
+
+  override_resource {
+    target = random_password.origin_secret["b"]
+    values = { result = "SlotBbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" }
+  }
+
+  assert {
+    condition = length(aws_lb_listener_rule.route) == 6 && alltrue([
+      for rule in aws_lb_listener_rule.route : anytrue([
+        for condition in rule.condition : jsonencode([
+          for header in condition.http_header : [header.http_header_name, sort(header.values)]
+          ]) == jsonencode([["X-Quad-Origin-Secret", [
+            "SlotAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "SlotBbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        ]]])
+      ])
+    ])
+    error_message = "During a rotation every listener rule accepts both slots' values."
+  }
+
+  assert {
+    condition = jsonencode(nonsensitive(flatten([
+      for origin in aws_cloudfront_distribution.this.origin : [
+        for header in origin.custom_header : [header.name, header.value]
+      ] if origin.origin_id == "alb"
+    ]))) == jsonencode(["X-Quad-Origin-Secret", "SlotBbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"])
+    error_message = "CloudFront sends only the active slot's value."
+  }
+
+  # The ALB allows five condition values per rule: the busiest rule has a host, a path and every
+  # slot's value.
+  assert {
+    condition = alltrue([
+      for rule in aws_lb_listener_rule.route : sum(concat([0], [
+        for condition in rule.condition : length(concat(
+          flatten([for host in condition.host_header : tolist(host.values)]),
+          flatten([for path in condition.path_pattern : tolist(path.values)]),
+          flatten([for header in condition.http_header : tolist(header.values)]),
+        ))
+      ])) <= 5
+    ])
+    error_message = "No listener rule may have more than five condition values."
+  }
+}
+
+run "active_slot_must_be_one_of_the_slots" {
+  command = plan
+
+  variables {
+    origin_secret_slots  = ["a"]
+    origin_secret_active = "b"
+  }
+
+  expect_failures = [var.origin_secret_active]
+}
+
+run "at_most_three_slots" {
+  command = plan
+
+  variables {
+    origin_secret_slots = ["a", "b", "c", "d"]
+  }
+
+  expect_failures = [var.origin_secret_slots]
 }
 
 run "socket_io_is_sticky" {
@@ -157,11 +239,10 @@ run "socket_io_is_sticky" {
   assert {
     condition = (
       aws_lb_target_group.this["api_socket"].stickiness[0].enabled &&
-      aws_lb_target_group.this["api_socket"].stickiness[0].type == "app_cookie" &&
-      aws_lb_target_group.this["api_socket"].stickiness[0].cookie_name == "io" &&
+      aws_lb_target_group.this["api_socket"].stickiness[0].type == "lb_cookie" &&
       aws_lb_target_group.this["api_socket"].stickiness[0].cookie_duration == 86400
     )
-    error_message = "The api_socket target group must be sticky on the io application cookie for one day."
+    error_message = "The api_socket target group must be sticky on the ALB's own cookie for one day (ruling R-sticky)."
   }
 
   assert {
@@ -169,9 +250,12 @@ run "socket_io_is_sticky" {
       for rule in aws_lb_listener_rule.route : [
         flatten([for condition in rule.condition : [for path in condition.path_pattern : path.values]]),
         rule.action[0].target_group_arn,
-      ] if rule.priority == 40
-    ]) == jsonencode([[["/socket.io/*"], aws_lb_target_group.this["api_socket"].arn]])
-    error_message = "Rule 40 must send /socket.io/* to api_socket."
+      ] if contains([15, 40], rule.priority)
+      ]) == jsonencode([
+      [["/socket.io/*"], aws_lb_target_group.this["api_socket"].arn],
+      [["/socket.io/*"], aws_lb_target_group.this["api_socket"].arn],
+    ])
+    error_message = "Rules 15 (console host) and 40 must send /socket.io/* to api_socket."
   }
 
   assert {
@@ -193,6 +277,7 @@ run "routes_match_d14" {
       }
       }) == jsonencode({
       "10" = { host = ["console.staging.quad-edu.com"], path = ["/api/v1/platform/*"], target = aws_lb_target_group.this["api"].arn, type = "forward" }
+      "15" = { host = ["console.staging.quad-edu.com"], path = ["/socket.io/*"], target = aws_lb_target_group.this["api_socket"].arn, type = "forward" }
       "20" = { host = ["console.staging.quad-edu.com"], path = [], target = aws_lb_target_group.this["console"].arn, type = "forward" }
       "30" = { host = [], path = ["/api/v1/*"], target = aws_lb_target_group.this["api"].arn, type = "forward" }
       "40" = { host = [], path = ["/socket.io/*"], target = aws_lb_target_group.this["api_socket"].arn, type = "forward" }
@@ -326,9 +411,25 @@ run "api_and_socket_pass_through_uncached" {
   assert {
     condition = alltrue([
       for behaviour in concat(aws_cloudfront_distribution.this.ordered_cache_behavior, aws_cloudfront_distribution.this.default_cache_behavior) :
-      behaviour.viewer_protocol_policy == "redirect-to-https" && length(behaviour.forwarded_values) == 0
+      length(behaviour.forwarded_values) == 0
     ])
-    error_message = "Every behaviour redirects to HTTPS and uses policies, not legacy forwarded values."
+    error_message = "Every behaviour uses policies, not legacy forwarded values."
+  }
+
+  # API clients and Socket.IO must not be redirected (a redirect drops a POST body and an upgrade);
+  # they get HTTPS only. Pages and files redirect.
+  assert {
+    condition = jsonencode(merge(
+      { for behaviour in aws_cloudfront_distribution.this.ordered_cache_behavior : behaviour.path_pattern => behaviour.viewer_protocol_policy },
+      { for behaviour in aws_cloudfront_distribution.this.default_cache_behavior : "default" => behaviour.viewer_protocol_policy },
+      )) == jsonencode({
+      "/_next/static/*" = "redirect-to-https"
+      "/api/v1/*"       = "https-only"
+      "/assets/*"       = "redirect-to-https"
+      "/socket.io/*"    = "https-only"
+      "default"         = "redirect-to-https"
+    })
+    error_message = "/api/v1/* and /socket.io/* are HTTPS only; everything else redirects to HTTPS."
   }
 }
 
@@ -410,7 +511,8 @@ run "certificates_cover_every_name_tls_is_checked_against" {
     condition = (
       aws_route53_record.validation["staging.quad-edu.com"].name == "_w1.staging.quad-edu.com." &&
       jsonencode(aws_route53_record.validation["staging.quad-edu.com"].records) == jsonencode(["_v2.acm-validations.aws."]) &&
-      aws_route53_record.validation["staging.quad-edu.com"].zone_id == "Z0123456789MOCKZONE"
+      aws_route53_record.validation["staging.quad-edu.com"].zone_id == "Z0123456789MOCKZONE" &&
+      alltrue([for record in aws_route53_record.validation : record.allow_overwrite])
     )
     error_message = "Validation records carry ACM's name and value, in the zone."
   }
@@ -507,11 +609,34 @@ run "waf_limits" {
       for rule in aws_wafv2_web_acl.this.rule : [
         for statement in rule.statement[0].rate_based_statement[0].scope_down_statement[0].or_statement[0].statement : [
           for match in statement.byte_match_statement :
-          "${match.positional_constraint} ${match.search_string}" if length(match.field_to_match[0].uri_path) == 1
+          "${match.positional_constraint} ${match.search_string} ${join(",", sort([for t in match.text_transformation : "${t.priority}:${t.type}"]))}"
+          if length(match.field_to_match[0].uri_path) == 1
         ]
       ] if rule.name == "rate-sensitive"
-    ]))) == jsonencode(["STARTS_WITH /api/v1/auth/", "STARTS_WITH /api/v1/public/"])
-    error_message = "The sensitive rate rule covers paths starting /api/v1/auth/ and /api/v1/public/."
+      ]))) == jsonencode([
+      "STARTS_WITH /api/v1/auth/ 0:URL_DECODE,1:LOWERCASE",
+      "STARTS_WITH /api/v1/platform/auth/ 0:URL_DECODE,1:LOWERCASE",
+      "STARTS_WITH /api/v1/public/ 0:URL_DECODE,1:LOWERCASE",
+    ])
+    error_message = "The sensitive rate rule covers decoded, lower-cased paths starting /api/v1/auth/, /api/v1/platform/auth/ and /api/v1/public/."
+  }
+
+  # Static files are cached at the edge and a page load fetches many, so they do not count
+  # against the overall limit.
+  assert {
+    condition = jsonencode(sort(flatten([
+      for rule in aws_wafv2_web_acl.this.rule : [
+        for statement in rule.statement[0].rate_based_statement[0].scope_down_statement[0].not_statement[0].statement[0].or_statement[0].statement : [
+          for match in statement.byte_match_statement :
+          "${match.positional_constraint} ${match.search_string} ${join(",", sort([for t in match.text_transformation : "${t.priority}:${t.type}"]))}"
+          if length(match.field_to_match[0].uri_path) == 1
+        ]
+      ] if rule.name == "rate-all"
+      ]))) == jsonencode([
+      "STARTS_WITH /_next/static/ 0:URL_DECODE,1:LOWERCASE",
+      "STARTS_WITH /assets/ 0:URL_DECODE,1:LOWERCASE",
+    ])
+    error_message = "The overall rate rule leaves out /_next/static/ and /assets/."
   }
 
   assert {
@@ -530,10 +655,58 @@ run "waf_limits" {
     condition = jsonencode(flatten([
       for rule in aws_wafv2_web_acl.this.rule : [
         for match in rule.statement[0].managed_rule_group_statement[0].scope_down_statement[0].byte_match_statement :
-        [match.search_string, match.positional_constraint, match.field_to_match[0].single_header[0].name]
+        [
+          match.search_string, match.positional_constraint, match.field_to_match[0].single_header[0].name,
+          join(",", sort([for t in match.text_transformation : "${t.priority}:${t.type}"])),
+        ]
       ] if rule.name == "anonymous-ip"
-    ])) == jsonencode(["console.staging.quad-edu.com", "EXACTLY", "host"])
-    error_message = "The anonymous IP list applies only to the console host."
+    ])) == jsonencode(["console.staging.quad-edu.com", "EXACTLY", "host", "0:URL_DECODE,1:LOWERCASE"])
+    error_message = "The anonymous IP list applies only to the console host (decoded, lower-cased)."
+  }
+
+  # I-1: GitHub's hosted runners (Azure) reach the console; the hosting-provider list only counts.
+  assert {
+    condition = jsonencode(flatten([
+      for rule in aws_wafv2_web_acl.this.rule : [
+        for override in rule.statement[0].managed_rule_group_statement[0].rule_action_override :
+        [override.name, length(override.action_to_use[0].count)]
+      ] if rule.name == "anonymous-ip"
+    ])) == jsonencode(["HostingProviderIPList", 1])
+    error_message = "HostingProviderIPList must count, not block, in the anonymous IP group."
+  }
+
+  # I-2: the common rule set's 8 KB body limit only counts, and body-size blocks it outside the
+  # API (whose own body limits apply, spec 06).
+  assert {
+    condition = jsonencode(flatten([
+      for rule in aws_wafv2_web_acl.this.rule : [
+        for override in rule.statement[0].managed_rule_group_statement[0].rule_action_override :
+        [override.name, length(override.action_to_use[0].count)]
+      ] if rule.name == "common"
+    ])) == jsonencode(["SizeRestrictions_BODY", 1])
+    error_message = "SizeRestrictions_BODY must count, not block, in the common rule set."
+  }
+
+  assert {
+    condition = jsonencode([
+      for rule in aws_wafv2_web_acl.this.rule : {
+        priority = rule.priority
+        block    = length(rule.action[0].block)
+        label    = rule.statement[0].and_statement[0].statement[0].label_match_statement[0].key
+        scope    = rule.statement[0].and_statement[0].statement[0].label_match_statement[0].scope
+        not_api = [
+          for match in rule.statement[0].and_statement[0].statement[1].not_statement[0].statement[0].byte_match_statement :
+          "${match.positional_constraint} ${match.search_string} ${length(match.field_to_match[0].uri_path)} ${join(",", sort([for t in match.text_transformation : "${t.priority}:${t.type}"]))}"
+        ]
+      } if rule.name == "body-size"
+      ]) == jsonencode([{
+        priority = 55
+        block    = 1
+        label    = "awswaf:managed:aws:core-rule-set:SizeRestrictions_Body"
+        scope    = "LABEL"
+        not_api  = ["STARTS_WITH /api/v1/ 1 0:URL_DECODE,1:LOWERCASE"]
+    }])
+    error_message = "body-size (priority 55) blocks the SizeRestrictions_Body label unless the path starts /api/v1/."
   }
 
   assert {
@@ -547,6 +720,19 @@ run "waf_limits" {
       flatten([for rule in aws_wafv2_web_acl.this.rule : [for config in rule.visibility_config : config.cloudwatch_metrics_enabled]]),
     ))
     error_message = "CloudWatch metrics are on for the ACL and every rule."
+  }
+}
+
+run "alb_deletion_protection_can_be_turned_off" {
+  command = apply
+
+  variables {
+    alb_deletion_protection = false
+  }
+
+  assert {
+    condition     = !aws_lb.this.enable_deletion_protection
+    error_message = "alb_deletion_protection = false turns deletion protection off."
   }
 }
 

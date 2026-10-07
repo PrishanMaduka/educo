@@ -192,7 +192,7 @@ To run a milestone in Claude Code, type `/build-milestone M3` (ids with a letter
   - Messages (with mark read, archive and mute), More, staff directory, contact-details change (with the staff review queue), notification settings (seven categories and the SMS backup flag), Help;
   - offline cache encrypted and wiped on sign-out and school switch; `GET /app/config` with force update; the full deep-link table on `quad://` and `https://quad-edu.com/p/…`.
 - Staff side: the Inbox (with reply templates, `message_templates`), Broadcasts (preview, SMS cost estimate, urgent flag), and the "Changes from parents" queue (contact changes now; pickup approvals join it in M11).
-- FCM push with deep links (`go_router`) and the in-app notification list. Realtime connection in all apps.
+- FCM push with deep links (`go_router`) and the in-app notification list. Realtime connection in all apps; the Flutter Socket.IO client uses `transports: ['websocket']` (ruling R-sticky, D28).
 
 **Accept:**
 - Journeys 4 (push), 30, 31, 32 and 45.
