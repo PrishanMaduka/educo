@@ -117,6 +117,58 @@ test.describe('staff shell', () => {
     );
   });
 
+  test('closing the menu or the search returns focus to where it was', async ({ page }) => {
+    await page.goto('/app');
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+    const isPhone = (page.viewportSize()?.width ?? 0) < 900;
+    if (isPhone) {
+      const menuButton = page.getByRole('button', { name: 'Open menu' });
+      await menuButton.click();
+      await expect(page.getByRole('dialog', { name: 'Menu' })).toBeVisible();
+      await page.keyboard.press('Escape');
+      await expect(menuButton).toBeFocused();
+    }
+    const search = page.getByRole('button', { name: /Search students, staff and pages/ });
+    await search.click();
+    await expect(page.getByRole('dialog', { name: 'Search' })).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(search).toBeFocused();
+
+    const theme = page.getByRole('button', { name: 'Change theme' });
+    await theme.focus();
+    await page.keyboard.press('Control+k');
+    await expect(page.getByRole('dialog', { name: 'Search' })).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(theme).toBeFocused();
+  });
+
+  test('the phone menu closes when the screen grows past 900 px', async ({ page }) => {
+    test.skip((page.viewportSize()?.width ?? 0) >= 900, 'The menu exists only on narrow screens');
+    await page.goto('/app');
+    await page.getByRole('button', { name: 'Open menu' }).click();
+    await expect(page.getByRole('dialog', { name: 'Menu' })).toBeVisible();
+    await page.setViewportSize({ width: 1024, height: 844 });
+    await page.setViewportSize({ width: 390, height: 844 });
+    await expect(page.getByRole('dialog', { name: 'Menu' })).toBeHidden();
+  });
+
+  test('top bar buttons are at least 44 px on narrow screens', async ({ page }) => {
+    test.skip((page.viewportSize()?.width ?? 0) >= 900, 'Touch targets apply below 900 px');
+    await page.goto('/app');
+    // A phone, and a small tablet that still gets the phone shell.
+    for (const width of [390, 800]) {
+      await page.setViewportSize({ width, height: 844 });
+      const buttons = page.getByRole('banner').getByRole('button');
+      const count = await buttons.count();
+      expect(count).toBeGreaterThan(4);
+      for (let i = 0; i < count; i += 1) {
+        const box = await buttons.nth(i).boundingBox();
+        expect(box?.width ?? 0, `button ${i} at ${width}px`).toBeGreaterThanOrEqual(44);
+        expect(box?.height ?? 0, `button ${i} at ${width}px`).toBeGreaterThanOrEqual(44);
+      }
+    }
+  });
+
   test('/ is the landing placeholder with a link to the portal', async ({ page }) => {
     await page.goto('/');
     await expect(page.getByText('Quad: the landing page arrives in M1b')).toBeVisible();

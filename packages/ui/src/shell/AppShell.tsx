@@ -101,42 +101,44 @@ export function AppShell({
       >
         <Sidebar {...rail} collapsible collapsed={collapsed} />
       </aside>
-      <div className="flex min-w-0 flex-col">
-        <Topbar
-          labels={labels}
-          user={user}
-          collapsed={collapsed}
-          onToggleCollapsed={() => {
-            applyRail(!collapsed);
-            writeStored(RAIL_STORAGE_KEY, collapsed ? 'expanded' : 'collapsed');
-          }}
-          onOpenMenu={() => {
-            setMenuOpen(true);
-          }}
-          onOpenSearch={() => {
-            setSearchOpen(true);
-          }}
-        />
-        <main
-          id="main"
-          tabIndex={-1}
-          className="flex w-full max-w-[1480px] flex-col gap-5 p-6 outline-none max-[899px]:p-4"
-        >
-          {children}
-        </main>
-      </div>
       <MobileNav
         open={menuOpen}
         onOpenChange={setMenuOpen}
         title={labels.menuTitle}
         closeLabel={labels.close}
+        menu={
+          <Sidebar
+            {...rail}
+            onNavigate={() => {
+              setMenuOpen(false);
+            }}
+          />
+        }
       >
-        <Sidebar
-          {...rail}
-          onNavigate={() => {
-            setMenuOpen(false);
-          }}
-        />
+        <div className="flex min-w-0 flex-col">
+          <Topbar
+            labels={labels}
+            user={user}
+            collapsed={collapsed}
+            onToggleCollapsed={() => {
+              applyRail(!collapsed);
+              writeStored(RAIL_STORAGE_KEY, collapsed ? 'expanded' : 'collapsed');
+            }}
+            onOpenSearch={() => {
+              setSearchOpen(true);
+            }}
+            onOpenAskQuad={() => {
+              // TODO(M10): open the Ask Quad panel.
+            }}
+          />
+          <main
+            id="main"
+            tabIndex={-1}
+            className="flex w-full max-w-[1480px] flex-col gap-5 p-6 outline-none max-[899px]:p-4"
+          >
+            {children}
+          </main>
+        </div>
       </MobileNav>
       <CommandPalette
         open={searchOpen}

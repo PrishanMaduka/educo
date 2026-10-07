@@ -2,7 +2,7 @@
 
 import * as Dialog from '@radix-ui/react-dialog';
 import { Search } from 'lucide-react';
-import { useEffect, useId, useMemo, useState, type KeyboardEvent } from 'react';
+import { useEffect, useId, useMemo, useRef, useState, type KeyboardEvent } from 'react';
 
 import { cn } from '../lib/cn';
 import { uiText } from '../lib/defaults';
@@ -179,6 +179,9 @@ export function CommandPalette({
     onOpenChange?.(next);
   };
 
+  // Where focus was when the palette opened (a button, or anywhere for Ctrl K), to return it on close.
+  const returnFocus = useRef<HTMLElement | null>(null);
+
   // Always the latest closure, so the one global listener never goes stale.
   const [request] = useState(() => ({ current: setOpen }));
   request.current = setOpen;
@@ -203,6 +206,20 @@ export function CommandPalette({
         <Dialog.Overlay className="fixed inset-0 z-[90] bg-ink/40" />
         <Dialog.Content
           aria-describedby={undefined}
+          onOpenAutoFocus={() => {
+            // Runs before focus moves into the palette, so this is still the element that opened it.
+            returnFocus.current =
+              document.activeElement instanceof HTMLElement ? document.activeElement : null;
+          }}
+          onCloseAutoFocus={(event) => {
+            // There is no Dialog.Trigger, so Radix would send focus to <body>.
+            const target = returnFocus.current;
+            returnFocus.current = null;
+            if (target?.isConnected) {
+              event.preventDefault();
+              target.focus();
+            }
+          }}
           className="fixed top-[12vh] left-1/2 z-[91] w-[min(560px,calc(100vw-24px))] -translate-x-1/2 overflow-hidden rounded-[14px] border border-line bg-surface shadow-lg outline-none max-sm:top-3"
         >
           <Dialog.Title className="sr-only">{label}</Dialog.Title>
