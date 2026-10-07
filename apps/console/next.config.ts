@@ -1,5 +1,5 @@
 import { parseWebPublicEnv } from '@quad/contracts/web-env';
-import { withSentryConfig } from '@sentry/nextjs/config';
+import { PHASE_PRODUCTION_SERVER } from 'next/constants';
 
 import type { NextConfig } from 'next';
 
@@ -24,11 +24,34 @@ const config: NextConfig = {
   },
 };
 
-// Sentry's build plugin, with nothing sent from the build: no telemetry, no release and no
-// source map upload (deferred, D28). Error reporting itself is set up in src/instrumentation*.ts.
-export default withSentryConfig(config, {
-  silent: true,
-  telemetry: false,
-  sourcemaps: { disable: true },
-  release: { create: false, finalize: false },
-});
+/**
+ * Sentry's build plugin, with nothing sent from the build: no telemetry, no release and no source
+ * map upload (deferred, D28). No build-time rewriting or wrapping of server code: errors are
+ * reported through `onRequestError` in src/instrumentation.ts. The browser bundle drops Sentry's
+ * tracing, debug logging and replay code. `next start` only reads this file for runtime options,
+ * so there the plugin is not loaded at all (nothing from Sentry loads unless SENTRY_DSN is set).
+ */
+export default async function nextConfig(phase: string): Promise<NextConfig> {
+  if (phase === PHASE_PRODUCTION_SERVER) return config;
+  const { withSentryConfig } = await import('@sentry/nextjs/config');
+  return withSentryConfig(config, {
+    silent: true,
+    telemetry: false,
+    sourcemaps: { disable: true },
+    release: { create: false, finalize: false },
+    // No build-time rewriting of server dependencies, and no Sentry runtime in the server bundle.
+    buildTimeInstrumentation: false,
+    webpack: {
+      autoInstrumentServerFunctions: false,
+      autoInstrumentMiddleware: false,
+      autoInstrumentAppDirectory: false,
+      treeshake: {
+        removeTracing: true,
+        removeDebugLogging: true,
+        excludeReplayIframe: true,
+        excludeReplayShadowDOM: true,
+        excludeReplayCompressionWorker: true,
+      },
+    },
+  });
+}
