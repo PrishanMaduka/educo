@@ -47,8 +47,22 @@ void main() {
     }
   });
 
-  test('without --dart-define-from-file the app uses the dev flavor', () {
+  test('a debug build without --dart-define-from-file uses dev', () {
     expect(Env.fromDefines(), Env.fromJson(_flavor('dev')));
+  });
+
+  test('a release build without --dart-define-from-file refuses to start', () {
+    // Tests run without dart-defines, so APP_ENV is undefined here.
+    expect(
+      () => Env.fromDefines(isRelease: true),
+      throwsA(
+        isA<StateError>().having(
+          (e) => e.message,
+          'message',
+          contains('--dart-define-from-file=env/<flavor>.json'),
+        ),
+      ),
+    );
   });
 
   group('Env.fromJson refuses bad values', () {
@@ -67,6 +81,24 @@ void main() {
     test('an API_URL that is not http(s)', () {
       expect(
         () => Env.fromJson(devWith('API_URL', 'localhost:4000')),
+        throwsA(isA<FormatException>()),
+      );
+    });
+
+    test('plain http or ws in staging', () {
+      final staging = _flavor('staging');
+      expect(
+        () => Env.fromJson({
+          ...staging,
+          'API_URL': 'http://staging.quad-edu.com',
+        }),
+        throwsA(isA<FormatException>()),
+      );
+      expect(
+        () => Env.fromJson({
+          ...staging,
+          'SOCKET_URL': 'ws://staging.quad-edu.com',
+        }),
         throwsA(isA<FormatException>()),
       );
     });

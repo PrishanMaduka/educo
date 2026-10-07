@@ -41,20 +41,33 @@ class Env {
     );
   }
 
-  /// The values compiled into this build. Without dart-defines (tests,
-  /// a plain `flutter run`) these are the dev flavor's, as in env/dev.json.
-  factory Env.fromDefines() => Env.fromJson(const {
-    'APP_ENV': String.fromEnvironment('APP_ENV', defaultValue: 'local'),
-    'API_URL': String.fromEnvironment(
-      'API_URL',
-      defaultValue: 'http://localhost:4000/api/v1',
-    ),
-    'SOCKET_URL': String.fromEnvironment(
-      'SOCKET_URL',
-      defaultValue: 'ws://localhost:4000',
-    ),
-    'SENTRY_DSN': String.fromEnvironment('SENTRY_DSN'),
-  });
+  /// The values compiled into this build.
+  ///
+  /// A debug or profile build without dart-defines (tests, a plain
+  /// `flutter run`) gets the dev flavor's values, as in env/dev.json. A
+  /// release build must be given its flavor file: [isRelease] defaults
+  /// to [kReleaseMode] and makes a missing APP_ENV an error, so a store build
+  /// can never point at localhost by accident.
+  factory Env.fromDefines({bool isRelease = kReleaseMode}) {
+    if (isRelease && !const bool.hasEnvironment('APP_ENV')) {
+      throw StateError(
+        'APP_ENV is not set. Build with '
+        '--dart-define-from-file=env/<flavor>.json.',
+      );
+    }
+    return Env.fromJson(const {
+      'APP_ENV': String.fromEnvironment('APP_ENV', defaultValue: 'local'),
+      'API_URL': String.fromEnvironment(
+        'API_URL',
+        defaultValue: 'http://localhost:4000/api/v1',
+      ),
+      'SOCKET_URL': String.fromEnvironment(
+        'SOCKET_URL',
+        defaultValue: 'ws://localhost:4000',
+      ),
+      'SENTRY_DSN': String.fromEnvironment('SENTRY_DSN'),
+    });
+  }
 
   static const _http = {'http', 'https'};
   static const _ws = {'ws', 'wss'};
