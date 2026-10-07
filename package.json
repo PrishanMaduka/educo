@@ -22,6 +22,7 @@
     "codegen:check": "node scripts/codegen-check.mjs",
     "infra:tools": "node scripts/terraform-mirror.mjs",
     "infra:check": "node scripts/infra-check.mjs",
+    "images:build": "node scripts/docker-build.mjs all",
     "smoke": "node scripts/smoke.mjs",
     "parent:run": "cd apps/parent && node ../../scripts/flutter.mjs flutter run --flavor dev --dart-define-from-file=env/dev.json",
     "test": "turbo run test",
