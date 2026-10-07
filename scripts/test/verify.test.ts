@@ -9,6 +9,7 @@ describe('STEPS', () => {
     expect(STEPS.map((s) => s.command.join(' '))).toEqual([
       'pnpm exec turbo run typecheck lint test',
       'pnpm codegen:check',
+      'node scripts/check-services.mjs',
       'pnpm test:api',
       'pnpm e2e',
       'pnpm audit --prod --audit-level high',

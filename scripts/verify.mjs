@@ -16,6 +16,8 @@ export const STEPS = [
     command: ['pnpm', 'exec', 'turbo', 'run', 'typecheck', 'lint', 'test'],
   },
   { name: 'Generated files are up to date', command: ['pnpm', 'codegen:check'] },
+  // Fails in 60 s with "run docker compose up -d" instead of a connection error deep in a test.
+  { name: 'Postgres and Redis are reachable', command: ['node', 'scripts/check-services.mjs'] },
   { name: 'API integration tests', command: ['pnpm', 'test:api'] },
   { name: 'End-to-end smoke tests', command: ['pnpm', 'e2e'] },
   {
