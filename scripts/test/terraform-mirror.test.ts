@@ -1,18 +1,32 @@
-import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 
 import {
   cliConfig,
+  download,
+  ensureVerified,
+  fetchReleaseFile,
   hostPlatform,
   mirrorZipPath,
+  nextPin,
   parseSha256Sums,
   parseToolchain,
   providerZipName,
   sumsUrl,
+  unzipTerraform,
 } from '../terraform-mirror.mjs';
 
 const repo = (rel: string) => fileURLToPath(new URL(`../../${rel}`, import.meta.url));
@@ -155,5 +169,157 @@ describe('infra/**/versions.tf', () => {
         .sort(),
     ).toEqual(['modules/app/versions.tf', 'versions.tf']);
     rmSync(dir, { recursive: true });
+  });
+});
+
+const sha256 = (text: string) => createHash('sha256').update(text).digest('hex');
+
+describe('verified downloads', () => {
+  const dirs: string[] = [];
+  const scratch = () => {
+    const dir = mkdtempSync(join(tmpdir(), 'quad-mirror-'));
+    dirs.push(dir);
+    return dir;
+  };
+  afterEach(() => {
+    for (const dir of dirs.splice(0)) rmSync(dir, { recursive: true, force: true });
+  });
+  /** A downloader that writes `body` and records each URL it was asked for. */
+  const fakeDownload = (body: string) => {
+    const urls: string[] = [];
+    const fetch = (url: string, path: string) => {
+      urls.push(url);
+      writeFileSync(path, body);
+    };
+    return { urls, fetch };
+  };
+
+  it('does not download a cached file that already matches', () => {
+    const dest = join(scratch(), 'terraform.zip');
+    writeFileSync(dest, 'good');
+    const { urls, fetch } = fakeDownload('good');
+    ensureVerified('https://x/terraform.zip', dest, sha256('good'), fetch);
+    expect(urls).toEqual([]);
+  });
+
+  it('downloads a missing file and keeps it when it matches', () => {
+    const dest = join(scratch(), 'sub/terraform.zip');
+    const { urls, fetch } = fakeDownload('good');
+    ensureVerified('https://x/terraform.zip', dest, sha256('good'), fetch);
+    expect(urls).toEqual(['https://x/terraform.zip']);
+    expect(readFileSync(dest, 'utf8')).toBe('good');
+  });
+
+  it('refuses a tampered download and leaves nothing behind', () => {
+    const dir = scratch();
+    const dest = join(dir, 'terraform.zip');
+    writeFileSync(dest, 'stale');
+    const { fetch } = fakeDownload('tampered');
+    expect(() => {
+      ensureVerified('https://x/terraform.zip', dest, sha256('good'), fetch);
+    }).toThrow(/Checksum mismatch/);
+    expect(existsSync(dest)).toBe(false);
+    expect(readdirSync(dir)).toEqual([]);
+  });
+
+  it.each(['', 'not-a-hash', 'A'.repeat(64), 'a'.repeat(63)])(
+    'refuses the pin %j before downloading',
+    (pin) => {
+      const { urls, fetch } = fakeDownload('good');
+      expect(() => {
+        ensureVerified('https://x/f', join(scratch(), 'f'), pin, fetch);
+      }).toThrow(/64 lowercase hex/);
+      expect(urls).toEqual([]);
+    },
+  );
+
+  it('refuses a file that its SHA256SUMS does not list', () => {
+    const { urls, fetch } = fakeDownload('good');
+    const sums = new Map([['other.zip', sha256('good')]]);
+    expect(() => {
+      fetchReleaseFile(
+        'terraform',
+        '1.16.5',
+        sums,
+        'terraform_1.16.5_linux_amd64.zip',
+        join(scratch(), 'z'),
+        fetch,
+      );
+    }).toThrow(/terraform_1\.16\.5_linux_amd64\.zip is not listed/);
+    expect(urls).toEqual([]);
+  });
+
+  it('fetches a listed file from its release URL', () => {
+    const { urls, fetch } = fakeDownload('good');
+    const sums = new Map([['terraform_1.16.5_linux_amd64.zip', sha256('good')]]);
+    fetchReleaseFile(
+      'terraform',
+      '1.16.5',
+      sums,
+      'terraform_1.16.5_linux_amd64.zip',
+      join(scratch(), 'z'),
+      fetch,
+    );
+    expect(urls).toEqual([
+      'https://releases.hashicorp.com/terraform/1.16.5/terraform_1.16.5_linux_amd64.zip',
+    ]);
+  });
+
+  it('downloads with curl over HTTPS only, with retries', () => {
+    const calls: string[][] = [];
+    download('https://x/f', join(scratch(), 'f'), (cmd, args) => {
+      calls.push([cmd, ...args]);
+      return { status: 0 };
+    });
+    expect(calls[0]?.slice(0, 6)).toEqual(['curl', '-fsSL', '--proto', '=https', '--retry', '3']);
+  });
+
+  it('removes a partial file when curl fails', () => {
+    const path = join(scratch(), 'f');
+    expect(() => {
+      download('https://x/f', path, () => {
+        writeFileSync(path, 'half');
+        return { status: 22 };
+      });
+    }).toThrow(/curl exit 22/);
+    expect(existsSync(path)).toBe(false);
+  });
+});
+
+describe('nextPin', () => {
+  const oldPin = 'a'.repeat(64);
+  const newPin = 'b'.repeat(64);
+
+  it.each(['', 'not-recorded'])('records a hash where the pin is %j', (current) => {
+    expect(nextPin('terraform 1.16.5', current, newPin, false)).toBe(newPin);
+  });
+
+  it('keeps an unchanged pin', () => {
+    expect(nextPin('terraform 1.16.5', oldPin, oldPin, false)).toBe(oldPin);
+  });
+
+  it('refuses to replace a different pin without --force, naming both values', () => {
+    expect(() => nextPin('terraform 1.16.5', oldPin, newPin, false)).toThrow(
+      new RegExp(`terraform 1\\.16\\.5.*${oldPin}.*${newPin}.*--force`),
+    );
+  });
+
+  it('replaces a different pin with --force', () => {
+    expect(nextPin('terraform 1.16.5', oldPin, newPin, true)).toBe(newPin);
+  });
+});
+
+describe('unzipTerraform', () => {
+  it('says unzip is required when it cannot be started', () => {
+    const missing = () => ({ status: null, error: new Error('spawnSync unzip ENOENT') });
+    expect(() => {
+      unzipTerraform('/z.zip', join(tmpdir(), 'quad-unzip-bin'), missing);
+    }).toThrow(/unzip is required/);
+  });
+
+  it('reports a failed extraction', () => {
+    expect(() => {
+      unzipTerraform('/z.zip', join(tmpdir(), 'quad-unzip-bin'), () => ({ status: 9 }));
+    }).toThrow(/unzip \/z\.zip failed/);
   });
 });

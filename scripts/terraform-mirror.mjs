@@ -3,7 +3,8 @@
 // (registry.terraform.io is not reachable everywhere we run Terraform, D28):
 //   node scripts/terraform-mirror.mjs              download what is missing and verify everything
 //   node scripts/terraform-mirror.mjs --print-env  print the PATH and TF_CLI_CONFIG_FILE exports
-//   node scripts/terraform-mirror.mjs --record     re-pin the SHA256SUMS hashes in infra/toolchain.json
+//   node scripts/terraform-mirror.mjs --record     pin the SHA256SUMS hashes in infra/toolchain.json
+//                                                  (add --force to replace a pin that changed)
 // Each SHA256SUMS file must match the hash pinned in `infra/toolchain.json`, and each zip must
 // match its line in that SHA256SUMS file, so a tampered download fails before it is used.
 import { spawnSync } from 'node:child_process';
@@ -139,39 +140,74 @@ export function parseToolchain(json) {
 const sha256File = (path) => createHash('sha256').update(readFileSync(path)).digest('hex');
 
 /**
- * Downloads `url` to `dest` with curl (which honours the proxy), through a temporary file so an
- * interrupted download never looks complete.
- * @param {string} url
- * @param {string} dest
+ * Runs a command synchronously; `spawnSync` by default, injected in tests.
+ * @typedef {(cmd: string, args: string[], options: import('node:child_process').SpawnSyncOptions)
+ *   => { status: number | null, error?: Error }} Runner
  */
-function download(url, dest) {
-  mkdirSync(dirname(dest), { recursive: true });
-  const partial = `${dest}.partial`;
-  const result = spawnSync('curl', ['-fsSL', '--retry', '3', '-o', partial, url], {
+/** Writes the file at `url` to `path`, or throws. @typedef {(url: string, path: string) => void} Downloader */
+
+const SHA256_HEX = /^[0-9a-f]{64}$/;
+
+/**
+ * Downloads `url` to `path` with curl (which honours the proxy), HTTPS only, removing whatever it
+ * wrote when the download fails.
+ * @param {string} url
+ * @param {string} path
+ * @param {Runner} [run]
+ */
+export function download(url, path, run = spawnSync) {
+  mkdirSync(dirname(path), { recursive: true });
+  const result = run('curl', ['-fsSL', '--proto', '=https', '--retry', '3', '-o', path, url], {
     stdio: 'inherit',
   });
   if (result.status !== 0) {
-    rmSync(partial, { force: true });
+    rmSync(path, { force: true });
     throw new Error(`Download failed (curl exit ${String(result.status)}): ${url}`);
   }
-  renameSync(partial, dest);
-  process.stdout.write(`downloaded ${url}\n`);
 }
 
 /**
- * Makes sure `dest` exists with SHA-256 `expected`, downloading it when it is missing or wrong.
+ * Makes sure `dest` exists with SHA-256 `expected`. A missing or different file is downloaded to
+ * `<dest>.partial`, checked there and only then moved into place, so `dest` never holds a file
+ * that failed its check.
  * @param {string} url
  * @param {string} dest
  * @param {string} expected
+ * @param {Downloader} [fetch]
  */
-function ensureVerified(url, dest, expected) {
+export function ensureVerified(url, dest, expected, fetch = download) {
+  if (!SHA256_HEX.test(expected)) {
+    throw new Error(`The SHA-256 pinned for ${url} is not 64 lowercase hex characters.`);
+  }
   if (existsSync(dest) && sha256File(dest) === expected) return;
-  download(url, dest);
-  const actual = sha256File(dest);
+  rmSync(dest, { force: true });
+  const partial = `${dest}.partial`;
+  mkdirSync(dirname(dest), { recursive: true });
+  fetch(url, partial);
+  const actual = sha256File(partial);
   if (actual !== expected) {
-    rmSync(dest, { force: true });
+    rmSync(partial, { force: true });
     throw new Error(`Checksum mismatch for ${url}: expected ${expected}, got ${actual}.`);
   }
+  renameSync(partial, dest);
+  process.stdout.write(`downloaded and verified ${url}\n`);
+}
+
+/**
+ * The pin to record for `label` when its SHA256SUMS now hashes to `observed`. A recorded pin that
+ * differs is a changed release file or a tampered download, so it is replaced only with `--force`.
+ * @param {string} label
+ * @param {string} current
+ * @param {string} observed
+ * @param {boolean} force
+ * @returns {string}
+ */
+export function nextPin(label, current, observed, force) {
+  if (!SHA256_HEX.test(current) || current === observed || force) return observed;
+  throw new Error(
+    `${label}: the pinned SHA256SUMS hash is ${current}, but the download hashes to ${observed}. ` +
+      'Check why it changed, then re-run with --record --force to replace the pin.',
+  );
 }
 
 /**
@@ -182,7 +218,7 @@ function ensureVerified(url, dest, expected) {
  * @returns {Map<string, string>}
  */
 function verifiedSums(product, pin, cacheDir) {
-  if (!/^[0-9a-f]{64}$/.test(pin.sumsSha256)) {
+  if (!SHA256_HEX.test(pin.sumsSha256)) {
     throw new Error(
       `${product} ${pin.version} has no recorded sumsSha256; run with --record once.`,
     );
@@ -199,28 +235,41 @@ function verifiedSums(product, pin, cacheDir) {
  * @param {Map<string, string>} sums
  * @param {string} name
  * @param {string} dest
+ * @param {Downloader} [fetch]
  */
-function fetchReleaseFile(product, version, sums, name, dest) {
+export function fetchReleaseFile(product, version, sums, name, dest, fetch = download) {
   const expected = sums.get(name);
   if (!expected) throw new Error(`${name} is not listed in the ${product} ${version} SHA256SUMS.`);
-  ensureVerified(`${RELEASES}/${product}/${version}/${name}`, dest, expected);
+  ensureVerified(`${RELEASES}/${product}/${version}/${name}`, dest, expected, fetch);
 }
 
 /**
- * Downloads every SHA256SUMS file again and writes their hashes into the toolchain file.
+ * Downloads every SHA256SUMS file again and writes their hashes into the toolchain file. A pin that
+ * would change is refused (and nothing is written) unless `force` is set.
  * @param {Toolchain} toolchain
  * @param {string} toolchainPath
  * @param {string} cacheDir
+ * @param {boolean} force
  */
-function record(toolchain, toolchainPath, cacheDir) {
+function record(toolchain, toolchainPath, cacheDir, force) {
+  let changed = false;
   for (const { product, pin } of [
     { product: 'terraform', pin: toolchain.terraform },
     ...toolchain.providers.map((p) => ({ product: providerProduct(p.source), pin: p })),
   ]) {
     const dest = join(cacheDir, 'sums', `${product}_${pin.version}_SHA256SUMS`);
+    rmSync(dest, { force: true });
     download(sumsUrl(product, pin.version), dest);
-    pin.sumsSha256 = sha256File(dest);
+    const observed = sha256File(dest);
+    const next = nextPin(`${product} ${pin.version}`, pin.sumsSha256, observed, force);
+    changed ||= next !== pin.sumsSha256;
+    pin.sumsSha256 = next;
   }
+  if (!changed) {
+    process.stdout.write(`every SHA256SUMS hash already matches ${toolchainPath}\n`);
+    return;
+  }
+  // Prettier (the edit hook or `pnpm format`) restores the repository's JSON layout afterwards.
   writeFileSync(toolchainPath, `${JSON.stringify(toolchain, null, 2)}\n`);
   process.stdout.write(`recorded SHA256SUMS hashes in ${toolchainPath}\n`);
 }
@@ -264,12 +313,16 @@ function build(toolchain, cacheDir) {
  * Extracts the verified zip's `terraform` binary into `binDir`.
  * @param {string} zip
  * @param {string} binDir
+ * @param {Runner} [run]
  */
-function unzipTerraform(zip, binDir) {
+export function unzipTerraform(zip, binDir, run = spawnSync) {
   mkdirSync(binDir, { recursive: true });
-  const result = spawnSync('unzip', ['-o', '-q', zip, 'terraform', '-d', binDir], {
-    stdio: 'inherit',
-  });
+  const result = run('unzip', ['-o', '-q', zip, 'terraform', '-d', binDir], { stdio: 'inherit' });
+  if (result.error || result.status === null) {
+    throw new Error(
+      `unzip is required to extract Terraform (${result.error?.message ?? 'it was killed'}).`,
+    );
+  }
   if (result.status !== 0) throw new Error(`unzip ${zip} failed.`);
 }
 
@@ -286,8 +339,9 @@ if (isMain) {
       process.stdout.write(`export PATH="${bin}:$PATH"\nexport TF_CLI_CONFIG_FILE="${rc}"\n`);
     } else {
       const toolchain = parseToolchain(JSON.parse(readFileSync(toolchainPath, 'utf8')));
-      if (args.includes('--record')) record(toolchain, toolchainPath, cacheDir);
-      else build(toolchain, cacheDir);
+      if (args.includes('--record')) {
+        record(toolchain, toolchainPath, cacheDir, args.includes('--force'));
+      } else build(toolchain, cacheDir);
     }
   } catch (error) {
     process.stderr.write(`${error instanceof Error ? error.message : String(error)}\n`);
