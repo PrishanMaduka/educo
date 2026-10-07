@@ -70,12 +70,12 @@ TextTheme _textTheme(QuadColors c) => TextTheme(
     letterSpacing: 0.12,
     color: c.ink3,
   ),
-  // Tab bar labels: 10.5 px, 700.
+  // Tab bar labels: 10.5 px, 700; ink-2 because small text needs 4.5:1 (R17).
   labelSmall: TextStyle(
     fontSize: 10.5,
     height: 1.2,
     fontWeight: FontWeight.w700,
-    color: c.ink3,
+    color: c.ink2,
   ),
 );
 

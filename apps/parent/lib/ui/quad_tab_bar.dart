@@ -8,7 +8,8 @@ typedef QuadTab = ({String label, String icon});
 /// The parent app's bottom tab bar: the active tab is a coral pill with a
 /// small dot (design/parent.html `.tabbar`). The pill and the active label use
 /// brand-fill, not brand, so white icons on the pill and the label on the
-/// surface both reach 4.5:1 (ruling R16).
+/// surface both reach 4.5:1 (ruling R16). Inactive labels use ink-2, because
+/// ink-3 is only for icons and large text (ruling R17).
 class QuadTabBar extends StatelessWidget {
   const new({
     required this.tabs,
@@ -161,7 +162,7 @@ class _TabButton extends StatelessWidget {
                     tab.label,
                     maxLines: 1,
                     style: labelStyle.copyWith(
-                      color: active ? c.brandFill : c.ink3,
+                      color: active ? c.brandFill : c.ink2,
                     ),
                   ),
                 ),

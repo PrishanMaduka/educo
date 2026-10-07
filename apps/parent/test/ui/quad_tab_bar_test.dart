@@ -97,6 +97,14 @@ void main() {
       final label = tester.widget<Text>(find.text('One')).style!.color!;
       expect(contrast(label, colors.surface), greaterThanOrEqualTo(4.5));
     });
+
+    testWidgets('an inactive tab label reads at 4.5:1 on the bar '
+        '(${brightness.name})', (tester) async {
+      await tester.pumpWidget(_bar(reduceMotion: true, brightness: brightness));
+      // Ruling R17: ink-3 is for icons and large text only; labels are small.
+      final label = tester.widget<Text>(find.text('Two')).style!.color!;
+      expect(contrast(label, colors.surface), greaterThanOrEqualTo(4.5));
+    });
   }
 
   testWidgets('at text size 2.0 the five labels stay apart', (tester) async {
