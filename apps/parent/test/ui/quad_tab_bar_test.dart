@@ -98,4 +98,49 @@ void main() {
       expect(contrast(label, colors.surface), greaterThanOrEqualTo(4.5));
     });
   }
+
+  testWidgets('at text size 2.0 the five labels stay apart', (tester) async {
+    tester.view
+      ..physicalSize = const Size(390, 844) * 2
+      ..devicePixelRatio = 2;
+    addTearDown(tester.view.reset);
+    const labels = ['Home', 'Circle', 'Payments', 'Messages', 'More'];
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: quadTheme(Brightness.light),
+        home: MediaQuery(
+          data: const MediaQueryData(
+            size: Size(390, 844),
+            textScaler: TextScaler.linear(2),
+          ),
+          child: Scaffold(
+            bottomNavigationBar: QuadTabBar(
+              tabs: [
+                for (final label in labels)
+                  (label: label, icon: 'assets/icons/tab-home.svg'),
+              ],
+              currentIndex: 0,
+              semanticLabel: 'Main',
+              onSelect: (_) {},
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Labels still grow, but no further than 1.3x.
+    final scaler = MediaQuery.textScalerOf(
+      tester.element(find.text('Payments')),
+    );
+    expect(scaler.scale(10), closeTo(13, 0.01));
+
+    final rects = [for (final l in labels) tester.getRect(find.text(l))];
+    for (var i = 0; i < rects.length - 1; i++) {
+      expect(
+        rects[i + 1].left - rects[i].right,
+        greaterThanOrEqualTo(6),
+        reason: '${labels[i]} and ${labels[i + 1]} need a visible gap',
+      );
+    }
+  });
 }

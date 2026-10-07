@@ -51,10 +51,10 @@ class QuadTabBar extends StatelessWidget {
           minimum: const EdgeInsets.only(bottom: 8),
           child: Padding(
             padding: const EdgeInsets.fromLTRB(6, 8, 6, 0),
-            // Labels grow with the text size up to 1.5x; beyond that they
-            // would no longer fit five across.
+            // Labels grow with the text size up to 1.3x; beyond that the
+            // longer labels ("Payments", "Messages") run into each other.
             child: MediaQuery.withClampedTextScaling(
-              maxScaleFactor: 1.5,
+              maxScaleFactor: 1.3,
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
