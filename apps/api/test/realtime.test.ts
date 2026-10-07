@@ -25,7 +25,8 @@ describe('realtime handshake', () => {
 
   function origin(): string {
     const address = app().getHttpServer().address();
-    if (address === null || typeof address === 'string') throw new Error('The app is not listening');
+    if (address === null || typeof address === 'string')
+      throw new Error('The app is not listening');
     return `127.0.0.1:${String(address.port)}`;
   }
 
