@@ -12,10 +12,13 @@ const workspaces = ['apps', 'packages']
   .filter((rel) => existsSync(repo(rel)))
   .map(readJson);
 
-const delegated = Object.entries(readJson('package.json').scripts ?? {}).flatMap(([name, command]) => {
-  const match = /^pnpm --filter (\S+) (\S+)$/.exec(command);
-  return match ? [{ name, pkg: match[1]!, script: match[2]! }] : [];
-});
+// Every `pnpm --filter <pkg> <script>` segment, including those inside `a && b` scripts.
+const delegated = Object.entries(readJson('package.json').scripts ?? {}).flatMap(([name, command]) =>
+  command.split('&&').flatMap((segment) => {
+    const match = /^pnpm --filter (\S+) (\S+)$/.exec(segment.trim());
+    return match ? [{ name, pkg: match[1]!, script: match[2]! }] : [];
+  }),
+);
 
 describe('root package scripts', () => {
   it('delegates to at least one workspace script', () => {

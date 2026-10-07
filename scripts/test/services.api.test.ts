@@ -31,15 +31,17 @@ describe('local services', () => {
   });
 
   // 01-roles.sql: quad_owner owns the database and schema (it runs migrations, so it has CREATE on
-  // public) but is neither a superuser nor exempt from RLS; quad_app only uses what it is granted.
-  it('no app role is a superuser, quad_owner cannot bypass RLS and quad_app cannot create', async () => {
+  // public) but is neither a superuser nor exempt from RLS; quad_platform bypasses RLS by design (D24)
+  // but is not a superuser; quad_app only uses what it is granted.
+  it('no app role is a superuser, only quad_platform bypasses RLS and quad_app cannot create', async () => {
     const rows = await query<RoleRow>(
       `select rolname, rolsuper, rolbypassrls, has_schema_privilege(rolname, 'public', 'CREATE') as can_create
-         from pg_roles where rolname in ('quad_app', 'quad_owner') order by rolname`,
+         from pg_roles where rolname in ('quad_app', 'quad_owner', 'quad_platform') order by rolname`,
     );
     expect(rows).toEqual([
       { rolname: 'quad_app', rolsuper: false, rolbypassrls: false, can_create: false },
       { rolname: 'quad_owner', rolsuper: false, rolbypassrls: false, can_create: true },
+      { rolname: 'quad_platform', rolsuper: false, rolbypassrls: true, can_create: false },
     ]);
   });
 });
