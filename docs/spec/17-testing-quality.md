@@ -4,7 +4,7 @@
 | Level | Tool | What | Where |
 |---|---|---|---|
 | Unit | Vitest | `packages/domain` algorithms (timetable, cover order, exam clashes, early-warning scores, fee maths, grading), Zod contracts, UI component logic | `*.test.ts` next to the code |
-| API integration | Vitest + Supertest + Testcontainers (Postgres 16, Redis 7) | Every endpoint: happy path, validation, permission denied, cross-tenant denied, parent-not-linked denied | `apps/api/test/**` |
+| API integration | Vitest + Supertest against Postgres 16 and Redis 7 (Docker Compose locally, service containers in CI), a freshly migrated database per test file | Every endpoint: happy path, validation, permission denied, cross-tenant denied, parent-not-linked denied | `apps/api/test/**` |
 | Web end-to-end | Playwright (Chromium, WebKit) at 1440×900 and 390×844, light and dark | Key journeys per milestone, plus an axe check per page | `apps/staff/e2e`, `apps/console/e2e` |
 | Mobile unit and widget | `flutter_test` with Riverpod overrides and a mocked `quad_api` | Providers, formatting, every screen's states (loading, empty, error, data) | `apps/parent/test` |
 | Mobile golden | Golden image tests at 390×844, light and dark, text scale 1.0 and 2.0 | Home, Circle tab (Moments, People, Learning), pay sheet, child screens | `apps/parent/test/goldens` |

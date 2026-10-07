@@ -181,7 +181,7 @@ pnpm parent:run                   # parent app (flutter run --flavor dev) on a s
 pnpm verify                       # the full quality gate, the same one CI runs
 ```
 
-`pnpm verify` runs, stopping at the first failure: typecheck, lint and unit tests (`turbo run typecheck lint test`), `pnpm codegen:check`, the API integration tests (`pnpm test:api`, needs Docker), the Playwright smoke tests (`pnpm e2e`) and `pnpm audit --prod --audit-level high`. Without Flutter the parent app's checks are skipped with a warning; CI and `QUAD_REQUIRE_FLUTTER=1` make them fail instead.
+`pnpm verify` runs, stopping at the first failure: typecheck, lint and unit tests (`turbo run typecheck lint test`), `pnpm codegen:check`, the API integration tests (`pnpm test:api`, needs Docker), the Playwright smoke tests (`pnpm e2e`) and `pnpm audit --prod --audit-level high`. Without Flutter the parent app's checks are skipped with a warning; CI and `QUAD_REQUIRE_FLUTTER=1` make them fail instead. Turborepo caches a skipped result, so after you install Flutter run the gate once with `QUAD_REQUIRE_FLUTTER=1 pnpm verify` (or `pnpm exec turbo run typecheck lint test --force`) to clear it.
 
 If Docker Hub rate-limits image pulls, prefix the images with a registry mirror: `QUAD_IMAGE_REGISTRY=mirror.gcr.io/ docker compose up -d` (keep the trailing slash). The Postgres init script (`docker/postgres/init`) only runs on a fresh volume; `docker compose down -v` deletes the local database so it runs again.
 
