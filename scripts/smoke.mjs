@@ -29,6 +29,10 @@ const { AbortSignal, WebSocket } = globalThis;
 const DEFAULT_TIMEOUT_MS = 10_000;
 const URL_FLAGS = ['--web', '--console', '--api', '--origin'];
 const SIGN_IN_REDIRECTS = [302, 303, 307];
+const HTML_ELEMENT = /<html[\s>]/i;
+// The body of the ALB listener's default fixed-response 403 (plan Task 10). A 403 from the WAF or
+// CloudFront has another body, so it does not prove the ALB itself refused the request.
+const ALB_FORBIDDEN_BODY = 'Forbidden';
 
 /**
  * An http(s) base URL without a trailing slash.
@@ -138,13 +142,21 @@ async function checkReady(res) {
     : { ok: false, detail: `status ${JSON.stringify(status)}, expected "ok"` };
 }
 
-/** @param {Response} res */
+/**
+ * A 200 HTML page whose body has an `<html` element, so an error page served as `text/html` by a
+ * proxy in front of the app does not pass.
+ * @param {Response} res
+ */
 async function checkHtml(res) {
-  await drain(res);
-  if (res.status !== 200) return { ok: false, detail: `status ${res.status}, expected 200` };
+  if (res.status !== 200) {
+    await drain(res);
+    return { ok: false, detail: `status ${res.status}, expected 200` };
+  }
   if (!isHtml(res)) {
+    await drain(res);
     return { ok: false, detail: `content-type ${res.headers.get('content-type') ?? 'missing'}` };
   }
+  if (!HTML_ELEMENT.test(await res.text())) return { ok: false, detail: 'no <html> element' };
   return { ok: true, detail: '200 text/html' };
 }
 
@@ -198,7 +210,9 @@ function checkRobots(mode, pages) {
   const wrong = pages.flatMap(({ name, tag }) => {
     if (tag === undefined) return [`${name} (no response)`];
     if (wantsNoindex(mode, name)) {
-      return tag?.includes('noindex') ? [] : [`${name} (expected noindex, got ${tag ?? 'none'})`];
+      return tag?.toLowerCase().includes('noindex')
+        ? []
+        : [`${name} (expected noindex, got ${tag ?? 'none'})`];
     }
     return tag === null ? [] : [`${name} (expected none, got ${tag})`];
   });
@@ -236,14 +250,20 @@ export async function runSmoke(options, deps) {
    * @param {(res: Response, url: string) => Promise<{ ok: boolean, detail: string }>} check
    */
   const page = async (name, url, check) => {
+    /** @type {string | null | undefined} undefined until a response arrives */
+    let tag;
+    /** @type {{ ok: boolean, detail: string }} */
+    let outcome;
     try {
       const res = await get(deps, options, url);
-      pages.push({ name, tag: res.headers.get('x-robots-tag') });
-      results.push({ name, ...(await check(res, url)) });
+      tag = res.headers.get('x-robots-tag');
+      outcome = await check(res, url);
     } catch (error) {
-      pages.push({ name, tag: undefined });
-      results.push({ name, ok: false, detail: `GET ${url}: ${reason(error)}` });
+      outcome = { ok: false, detail: `GET ${url}: ${reason(error)}` };
     }
+    // One entry per page, whether the request, the body or the check failed.
+    pages.push({ name, tag });
+    results.push({ name, ...outcome });
   };
 
   await page('ready', `${options.api}/api/v1/health/ready`, checkReady);
@@ -269,14 +289,15 @@ export async function runSmoke(options, deps) {
     const url = `${options.origin}/api/v1/health/live`;
     try {
       const res = await get(deps, options, url);
-      await drain(res);
+      const body = await res.text();
+      const refused = res.status === 403 && body === ALB_FORBIDDEN_BODY;
       results.push({
         name: 'origin-refused',
-        ok: res.status === 403,
-        detail:
-          res.status === 403
-            ? '403 without the origin header'
-            : `status ${res.status} without the origin header, expected 403`,
+        ok: refused,
+        detail: refused
+          ? '403 Forbidden from the load balancer without the origin header'
+          : `${res.status} ${JSON.stringify(body.slice(0, 40))} without the origin header, ` +
+            `expected 403 ${JSON.stringify(ALB_FORBIDDEN_BODY)}`,
       });
     } catch (error) {
       results.push({ name: 'origin-refused', ok: false, detail: `GET ${url}: ${reason(error)}` });

@@ -2,7 +2,20 @@ import { describe, expect, it } from 'vitest';
 
 import { parseSmokeArgs, runSmoke, type SmokeOptions } from '../smoke.mjs';
 
-type FakeResponse = { status: number; headers?: Record<string, string>; body?: string };
+type FakeResponse = {
+  status: number;
+  headers?: Record<string, string>;
+  body?: string;
+  /** The body stream fails part-way, as on a connection reset. */
+  broken?: true;
+};
+
+const brokenBody = () =>
+  new ReadableStream<Uint8Array>({
+    start(controller) {
+      controller.error(new Error('connection reset'));
+    },
+  });
 
 const html = { 'content-type': 'text/html; charset=utf-8', 'x-robots-tag': 'noindex, nofollow' };
 const json = { 'content-type': 'application/json', 'x-robots-tag': 'noindex, nofollow' };
@@ -21,7 +34,8 @@ const fakeFetch = (table: Record<string, FakeResponse>) =>
     const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
     const entry = table[url];
     if (!entry) return Promise.reject(new TypeError(`fetch failed: ${url}`));
-    const body = entry.status === 307 || entry.status === 302 ? null : (entry.body ?? '');
+    const redirect = entry.status === 307 || entry.status === 302;
+    const body = redirect ? null : entry.broken ? brokenBody() : (entry.body ?? '');
     return Promise.resolve(
       new Response(body, { status: entry.status, headers: entry.headers ?? {} }),
     );
@@ -312,6 +326,79 @@ describe('runSmoke', () => {
     },
   );
 
+  it('records each page once when its check throws after the response arrived', async () => {
+    const table = green();
+    table['https://web.test/'] = { status: 200, headers: html, broken: true };
+    const results = await runSmoke(
+      { ...base, robots: 'noindex' },
+      { fetch: fakeFetch(table), openWebSocket: okSocket },
+    );
+    expect(results.map((r) => r.name)).toEqual([
+      'ready',
+      'landing',
+      'portal',
+      'console',
+      'robots',
+      'websocket',
+    ]);
+    expect(byName(results, 'landing')).toMatchObject({ ok: false });
+    expect(byName(results, 'landing')?.detail).toContain('connection reset');
+    expect(byName(results, 'robots')).toEqual({
+      name: 'robots',
+      ok: true,
+      detail: 'x-robots-tag as expected on ready, landing, portal, console',
+    });
+  });
+
+  it('accepts noindex in any letter case', async () => {
+    const table = green();
+    const shouting = { ...html, 'x-robots-tag': 'NoIndex, NoFollow' };
+    table['https://web.test/'] = { status: 200, headers: shouting, body: '<html></html>' };
+    table['https://console.test/'] = { status: 200, headers: shouting, body: '<html></html>' };
+    const results = await runSmoke(
+      { ...base, robots: 'noindex' },
+      { fetch: fakeFetch(table), openWebSocket: okSocket },
+    );
+    expect(byName(results, 'robots')?.ok).toBe(true);
+  });
+
+  it.each(['https://web.test/', 'https://console.test/'])(
+    'fails when %s is HTML by header but has no <html element',
+    async (url) => {
+      const table = green();
+      table[url] = { status: 200, headers: html, body: 'Service Unavailable' };
+      const results = await runSmoke(base, { fetch: fakeFetch(table), openWebSocket: okSocket });
+      const name = url.includes('console') ? 'console' : 'landing';
+      expect(byName(results, name)).toMatchObject({ ok: false });
+    },
+  );
+
+  it('accepts a doctype and attributes before and on the html element', async () => {
+    const table = green();
+    table['https://web.test/'] = {
+      status: 200,
+      headers: html,
+      body: '<!DOCTYPE html><HTML lang="en"><body></body></HTML>',
+    };
+    const results = await runSmoke(base, { fetch: fakeFetch(table), openWebSocket: okSocket });
+    expect(byName(results, 'landing')?.ok).toBe(true);
+  });
+
+  // The ALB listener default is a fixed-response 403 "Forbidden" (plan Task 10). A 403 from the WAF
+  // or CloudFront has another body, and would not prove the ALB itself refused.
+  it.each(['', 'Request blocked.', '{"code":"forbidden"}', 'forbidden'])(
+    'fails origin-refused on a 403 whose body is %j',
+    async (body) => {
+      const table = green();
+      table['https://origin.test/api/v1/health/live'] = { status: 403, body };
+      const results = await runSmoke(
+        { ...base, origin: 'https://origin.test' },
+        { fetch: fakeFetch(table), openWebSocket: okSocket },
+      );
+      expect(byName(results, 'origin-refused')).toMatchObject({ ok: false });
+    },
+  );
+
   it('does not follow redirects or send the origin header', async () => {
     const seen: { url: string; init?: RequestInit }[] = [];
     const inner = fakeFetch(green());
@@ -323,11 +410,19 @@ describe('runSmoke', () => {
       { ...base, origin: 'https://origin.test' },
       { fetch: spy, openWebSocket: okSocket },
     );
-    expect(seen).toHaveLength(5);
+    expect(seen.map((s) => s.url)).toEqual([
+      'https://api.test/api/v1/health/ready',
+      'https://web.test/',
+      'https://web.test/app',
+      'https://console.test/',
+      'https://origin.test/api/v1/health/live',
+    ]);
     for (const { init } of seen) {
+      // Only these two options: no headers, credentials or body can carry the origin secret.
+      expect(Object.keys(init ?? {}).sort()).toEqual(['redirect', 'signal']);
       expect(init?.redirect).toBe('manual');
       expect(init?.signal).toBeInstanceOf(AbortSignal);
-      expect(JSON.stringify(init?.headers ?? {}).toLowerCase()).not.toContain('x-quad-origin');
+      expect(new Headers(init?.headers).has('x-quad-origin-secret')).toBe(false);
     }
   });
 });
