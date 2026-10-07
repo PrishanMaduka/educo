@@ -1,3 +1,5 @@
+import { fileURLToPath } from 'node:url';
+
 import { parseWebPublicEnv } from '@quad/contracts/web-env';
 import { PHASE_PRODUCTION_SERVER } from 'next/constants';
 
@@ -9,6 +11,10 @@ const env = parseWebPublicEnv(process.env);
 const config: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  // The images run `.next/standalone` (docker/web.Dockerfile). Tracing starts at the repository
+  // root so the workspace packages and the pnpm store links are copied in with the server.
+  output: 'standalone',
+  outputFileTracingRoot: fileURLToPath(new URL('../../', import.meta.url)),
   // The workspace packages ship TypeScript source.
   transpilePackages: ['@quad/contracts', '@quad/domain', '@quad/tokens', '@quad/ui'],
   // `pnpm lint` runs ESLint for every package; the build only type-checks.
