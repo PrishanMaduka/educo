@@ -32,7 +32,7 @@ mock_resource "aws_kms_key" {
   }
 }
 
-# --- Storage, messaging and secrets ---
+# --- Storage, logs and secrets ---
 
 mock_resource "aws_s3_bucket" {
   defaults = {
@@ -59,6 +59,43 @@ mock_resource "aws_cloudwatch_log_group" {
     arn = "arn:aws:logs:ap-south-1:123456789012:log-group:mock-log-group"
   }
 }
+
+# --- Databases and caches ---
+
+mock_resource "aws_db_instance" {
+  defaults = {
+    arn     = "arn:aws:rds:ap-south-1:123456789012:db:mock-db"
+    address = "mock-db.c0mockmockmo.ap-south-1.rds.amazonaws.com"
+    master_user_secret = [{
+      kms_key_id    = "arn:aws:kms:ap-south-1:123456789012:key/00000000-0000-4000-8000-000000000000"
+      secret_arn    = "arn:aws:secretsmanager:ap-south-1:123456789012:secret:rds!db-00000000-0000-4000-8000-000000000000-AbCdEf"
+      secret_status = "active"
+    }]
+  }
+}
+
+mock_resource "aws_db_proxy" {
+  defaults = {
+    arn      = "arn:aws:rds:ap-south-1:123456789012:db-proxy:prx-0123456789abcdef0"
+    endpoint = "mock-db.proxy-c0mockmockmo.ap-south-1.rds.amazonaws.com"
+  }
+}
+
+# RDS requires the target group name to start with a letter; the real value is always "default".
+mock_resource "aws_db_proxy_default_target_group" {
+  defaults = {
+    name = "default"
+  }
+}
+
+mock_resource "aws_elasticache_replication_group" {
+  defaults = {
+    arn                      = "arn:aws:elasticache:ap-south-1:123456789012:replicationgroup:mock-redis"
+    primary_endpoint_address = "master.mock-redis.abcdef.aps1.cache.amazonaws.com"
+  }
+}
+
+# --- Messaging ---
 
 mock_resource "aws_sns_topic" {
   defaults = {
@@ -166,6 +203,13 @@ mock_data "aws_route53_zone" {
     zone_id = "Z0123456789MOCKZONE"
     arn     = "arn:aws:route53:::hostedzone/Z0123456789MOCKZONE"
     name    = "quad-edu.com"
+  }
+}
+
+mock_data "aws_vpc" {
+  defaults = {
+    arn        = "arn:aws:ec2:ap-south-1:123456789012:vpc/vpc-0123456789abcdef0"
+    cidr_block = "10.40.0.0/16"
   }
 }
 
