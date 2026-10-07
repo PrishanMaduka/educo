@@ -21,6 +21,8 @@ dependencies:
   riverpod_annotation: 4.0.7
 
 dev_dependencies:
+  # analyzer 14.5 removed a setter build_runner 2.16.1 still uses; drop with the next build_runner.
+  analyzer: 14.4.0
   build_runner: 2.16.1
   flutter_test:
     sdk: flutter
