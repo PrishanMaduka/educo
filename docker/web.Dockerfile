@@ -9,9 +9,10 @@
 # in any image layer.
 
 # Empty means Docker Hub; set a mirror host with a trailing slash (for example `mirror.gcr.io/`).
+# Base images are pinned by digest (the multi-platform index); the tag is only for people.
 ARG QUAD_IMAGE_REGISTRY=
 
-FROM ${QUAD_IMAGE_REGISTRY}library/node:22.23-alpine3.24 AS base
+FROM ${QUAD_IMAGE_REGISTRY}library/node:22.23.3-alpine3.24@sha256:0a7108bf6c7bf5de370ffb1a3ed6be93d405b43ff159f681a8d18c0e2bc2e402 AS base
 ENV PNPM_HOME=/pnpm \
     COREPACK_HOME=/corepack \
     npm_config_store_dir=/pnpm/store \
@@ -33,27 +34,25 @@ RUN --mount=type=secret,id=proxy_ca,required=false \
 
 FROM deps AS build
 ARG APP
+COPY . .
+RUN test "${APP}" = staff || test "${APP}" = console
+RUN pnpm install --offline --frozen-lockfile --filter "@quad/${APP}..."
+# Declared just before the build, so different public values reuse the install layers above.
 ARG NEXT_PUBLIC_APP_ENV=
 ARG NEXT_PUBLIC_API_URL=
 ARG NEXT_PUBLIC_SENTRY_DSN=
 ENV NEXT_PUBLIC_APP_ENV=${NEXT_PUBLIC_APP_ENV} \
     NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL} \
     NEXT_PUBLIC_SENTRY_DSN=${NEXT_PUBLIC_SENTRY_DSN}
-COPY . .
-RUN test "${APP}" = staff || test "${APP}" = console
-RUN pnpm install --offline --frozen-lockfile --filter "@quad/${APP}..."
 # next/font downloads the Google font files during the build. `public/` is optional, so an empty
 # one is created for the COPY below.
 RUN --mount=type=secret,id=proxy_ca,required=false \
     NODE_EXTRA_CA_CERTS=/run/secrets/proxy_ca pnpm --filter "@quad/${APP}" build \
     && mkdir -p "apps/${APP}/public"
 
-FROM ${QUAD_IMAGE_REGISTRY}library/node:22.23-alpine3.24 AS runtime
+FROM ${QUAD_IMAGE_REGISTRY}library/node:22.23.3-alpine3.24@sha256:0a7108bf6c7bf5de370ffb1a3ed6be93d405b43ff159f681a8d18c0e2bc2e402 AS runtime
 ARG APP
 ARG PORT=3000
-ARG GIT_SHA=
-LABEL org.opencontainers.image.title="quad-${APP}" \
-      org.opencontainers.image.revision="${GIT_SHA}"
 ENV NODE_ENV=production \
     NEXT_TELEMETRY_DISABLED=1 \
     HOSTNAME=0.0.0.0 \
@@ -76,3 +75,7 @@ EXPOSE ${PORT}
 HEALTHCHECK --interval=15s --timeout=5s --start-period=20s --retries=3 \
     CMD ["node", "-e", "fetch('http://127.0.0.1:' + process.env.PORT + '/healthz').then((r) => process.exit(r.ok ? 0 : 1), () => process.exit(1))"]
 CMD ["node", "server.js"]
+# Last, so a new commit does not invalidate the layers above.
+ARG GIT_SHA=
+LABEL org.opencontainers.image.title="quad-${APP}" \
+      org.opencontainers.image.revision="${GIT_SHA}"

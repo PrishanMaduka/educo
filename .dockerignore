@@ -1,6 +1,8 @@
 # Build context for docker/*.Dockerfile (scripts/docker-build.mjs builds from the repository root).
 # Keep every package.json that pnpm-lock.yaml names, so `pnpm install --frozen-lockfile` matches.
 .git
+.github
+.claude
 **/node_modules
 **/.next
 **/dist
