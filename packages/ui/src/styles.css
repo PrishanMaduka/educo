@@ -1,0 +1,38 @@
+/*
+ * Keyframes and animation classes for @quad/ui. No colours live here.
+ * Import once in an app's global stylesheet:  @import '@quad/ui/styles.css';
+ * Every animation is switched on only when the person has not asked for reduced motion.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  /* The sun or moon rises once on load (1.4 s). */
+  @keyframes quad-rise {
+    from {
+      transform: translateY(46px);
+      opacity: 0;
+    }
+  }
+  /* Stars twinkle slowly. */
+  @keyframes quad-twinkle {
+    50% {
+      opacity: 0.25;
+    }
+  }
+  /* Petals drift down and sideways, spinning, then fade. --dx and --r are set per petal. */
+  @keyframes quad-petal {
+    to {
+      transform: translate(var(--dx), 105vh) rotate(var(--r));
+      opacity: 0.2;
+    }
+  }
+
+  .gs-body {
+    animation: quad-rise 1.4s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+  .gs-star {
+    animation: quad-twinkle 4.8s ease-in-out infinite;
+    animation-delay: var(--gs-delay, 0s);
+  }
+  .quad-petal {
+    animation: quad-petal 1.9s cubic-bezier(0.2, 0.6, 0.4, 1) forwards;
+  }
+}

@@ -8,10 +8,25 @@ export {
   type DropdownFilterOption,
   type DropdownFilterProps,
 } from './components/DropdownFilter';
+export {
+  CommandPalette,
+  type CommandGroup,
+  type CommandItem,
+  type CommandPaletteProps,
+} from './components/CommandPalette';
+export { Drawer, Stepper, type DrawerProps, type StepperProps } from './components/Drawer';
 export { EmptyState, type EmptyStateProps } from './components/EmptyState';
+export { GreetingScene, type GreetingSceneProps } from './components/GreetingScene';
 export { IconButton, type IconButtonProps } from './components/IconButton';
 export { Input, type InputProps } from './components/Input';
 export { Kpi, type KpiProps, type KpiTone } from './components/Kpi';
+export {
+  PetalBurstProvider,
+  usePetalBurst,
+  type PetalBurstApi,
+  type PetalBurstProviderProps,
+  type PetalOrigin,
+} from './components/PetalBurst';
 export { Pill, type PillProps } from './components/Pill';
 export {
   Segmented,
@@ -20,6 +35,7 @@ export {
   type SegmentedTone,
 } from './components/Segmented';
 export { Select, type SelectOption, type SelectProps } from './components/Select';
+export { Sparkline, type SparklineProps } from './components/Sparkline';
 export { Switch, type SwitchProps } from './components/Switch';
 export { Table, type TableBreakpoint, type TableColumn, type TableProps } from './components/Table';
 export { Tabs, type TabItem, type TabsProps } from './components/Tabs';
