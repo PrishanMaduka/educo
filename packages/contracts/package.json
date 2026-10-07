@@ -13,6 +13,10 @@
     "./web-env": {
       "types": "./src/web-env.ts",
       "default": "./src/web-env.ts"
+    },
+    "./observability": {
+      "types": "./src/observability/index.ts",
+      "default": "./src/observability/index.ts"
     }
   },
   "scripts": {
