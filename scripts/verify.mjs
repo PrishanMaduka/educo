@@ -7,7 +7,6 @@ import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 
 /** @typedef {{ name: string, command: string[] }} Step */
-/** @typedef {{ ok: true } | { ok: false, failed: Step, status: number | null }} VerifyResult */
 
 /** @type {Step[]} */
 export const STEPS = [
@@ -28,25 +27,29 @@ export const STEPS = [
 
 /**
  * Runs `steps` in order through `exec`, which returns the exit status (null when killed by a
- * signal), and stops at the first step that does not exit 0.
- * @param {Step[]} steps
- * @param {(command: string[]) => number | null} exec
+ * signal), and stops at the first step that does not exit 0. `exec` also gets the whole step, for
+ * runners whose steps carry more than a command (`scripts/infra-check.mjs` adds a `cwd`); `label`
+ * prefixes every log line.
+ * @template {Step} S
+ * @param {S[]} steps
+ * @param {(command: string[], step: S) => number | null} exec
  * @param {(line: string) => void} log
- * @returns {VerifyResult}
+ * @param {string} [label]
+ * @returns {{ ok: true } | { ok: false, failed: S, status: number | null }}
  */
-export function runSteps(steps, exec, log) {
+export function runSteps(steps, exec, log, label = 'verify') {
   for (const [index, step] of steps.entries()) {
     const position = `${String(index + 1)}/${String(steps.length)}`;
     const commandLine = step.command.join(' ');
-    log(`verify [${position}] ${step.name}: ${commandLine}`);
-    const status = exec(step.command);
+    log(`${label} [${position}] ${step.name}: ${commandLine}`);
+    const status = exec(step.command, step);
     if (status !== 0) {
       const how = status === null ? 'was killed by a signal' : `exited with code ${String(status)}`;
-      log(`verify FAILED at step ${position} (${step.name}): "${commandLine}" ${how}.`);
+      log(`${label} FAILED at step ${position} (${step.name}): "${commandLine}" ${how}.`);
       return { ok: false, failed: step, status };
     }
   }
-  log(`verify passed: all ${String(steps.length)} steps succeeded.`);
+  log(`${label} passed: all ${String(steps.length)} steps succeeded.`);
   return { ok: true };
 }
 

@@ -54,6 +54,28 @@ describe('runSteps', () => {
     expect(log.at(-1)).toBe('verify FAILED at step 2/3 (b): "pnpm b" exited with code 2.');
   });
 
+  it('passes each step to exec and prefixes log lines with the label', () => {
+    const seen: string[] = [];
+    const log: string[] = [];
+    const steps = [{ ...step('a'), cwd: 'infra' }];
+    const result = runSteps(
+      steps,
+      (_command, s) => {
+        seen.push(s.cwd);
+        return 0;
+      },
+      (line) => log.push(line),
+      'infra-check',
+    );
+
+    expect(result).toEqual({ ok: true });
+    expect(seen).toEqual(['infra']);
+    expect(log).toEqual([
+      'infra-check [1/1] a: pnpm a',
+      'infra-check passed: all 1 steps succeeded.',
+    ]);
+  });
+
   it('treats a command killed by a signal as a failure', () => {
     const result = runSteps(
       [step('a')],

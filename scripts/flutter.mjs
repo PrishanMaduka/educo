@@ -9,8 +9,11 @@ import { delimiter, join } from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 
-/** @type {(name: string) => boolean} */
-const onPath = (name) => {
+/**
+ * Whether an executable called `name` is on PATH (also used by `scripts/infra-check.mjs`).
+ * @type {(name: string) => boolean}
+ */
+export const onPath = (name) => {
   const exts = process.platform === 'win32' ? ['.exe', '.bat', '.cmd', ''] : [''];
   return (process.env.PATH ?? '')
     .split(delimiter)
