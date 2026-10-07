@@ -1,1 +1,5 @@
 #include "Generated.xcconfig"
+
+// Without --flavor the app builds as dev; the <mode>-<flavor>.xcconfig files override these.
+PRODUCT_BUNDLE_IDENTIFIER = com.quadedu.parent.dev
+APP_DISPLAY_NAME = Quad DEV

@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.quadedu.quad_parent"
+    namespace = "com.quadedu.parent"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -15,8 +15,7 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.quadedu.quad_parent"
+        applicationId = "com.quadedu.parent"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
@@ -29,10 +28,31 @@ android {
         versionName = flutter.versionName
     }
 
+    // One Quad app for every school (D13). Build with --flavor <name> and the
+    // matching --dart-define-from-file=env/<name>.json (spec 09, Flavors).
+    // resValue escapes XML itself, so the ampersand stays literal here.
+    flavorDimensions += "env"
+    productFlavors {
+        create("dev") {
+            dimension = "env"
+            applicationIdSuffix = ".dev"
+            resValue("string", "app_name", "Quad DEV")
+        }
+        create("staging") {
+            dimension = "env"
+            applicationIdSuffix = ".staging"
+            resValue("string", "app_name", "Quad STG")
+        }
+        create("prod") {
+            dimension = "env"
+            resValue("string", "app_name", "Quad – School & Family")
+        }
+    }
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
+            // Release signing arrives with the fastlane lanes (M0b); until then the
+            // debug keys let `flutter run --release` work locally.
             signingConfig = signingConfigs.getByName("debug")
         }
     }

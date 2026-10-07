@@ -1,0 +1,5 @@
+// dev flavor, Profile build (spec 09, Flavors and configuration).
+#include "Release.xcconfig"
+
+PRODUCT_BUNDLE_IDENTIFIER = com.quadedu.parent.dev
+APP_DISPLAY_NAME = Quad DEV
