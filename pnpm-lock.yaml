@@ -631,6 +631,9 @@ importers:
       pg:
         specifier: 8.13.1
         version: 8.13.1
+      socket.io:
+        specifier: 4.8.4
+        version: 4.8.4
       typescript:
         specifier: 5.9.3
         version: 5.9.3
