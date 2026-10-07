@@ -29,6 +29,19 @@ const RECIPES = {
   clamav: { file: 'docker/clamav/Dockerfile', args: {} },
 };
 
+/** Build args the recipe sets per image; overriding them would build the wrong app or port. */
+const RECIPE_ARGS = ['APP', 'PORT'];
+
+/** @param {Record<string, string>} buildArgs */
+function refuseRecipeArgs(buildArgs) {
+  const clash = RECIPE_ARGS.filter((name) => Object.hasOwn(buildArgs, name));
+  if (clash.length > 0) {
+    throw new Error(
+      `--build-arg ${clash.join(', ')} is set by the image recipe and cannot be passed.`,
+    );
+  }
+}
+
 /** @param {Record<string, string>} args */
 const buildArgFlags = (args) =>
   Object.entries(args).flatMap(([key, value]) => ['--build-arg', `${key}=${value}`]);
@@ -45,6 +58,7 @@ const isFile = (path) =>
  * @returns {string[]}
  */
 export function dockerBuildCommand(image, env, options) {
+  refuseRecipeArgs(options.buildArgs ?? {});
   const recipe = RECIPES[image];
   const command = ['docker', 'build', '-f', recipe.file, '-t', options.tag];
   command.push(
@@ -88,19 +102,37 @@ export function parseBuildArgs(argv) {
   let push = false;
   /** @type {Record<string, string>} */
   const buildArgs = {};
+  /** @param {number} i */
+  const valueAt = (i) => {
+    const value = argv[i + 1];
+    if (value === undefined || value === '' || value.startsWith('--')) {
+      throw new Error(`${argv[i] ?? ''} needs a value.`);
+    }
+    return value;
+  };
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i] ?? '';
     if (arg === '--push') push = true;
     else if (arg === '--tag') {
-      tag = argv[i + 1];
+      tag = valueAt(i);
       i += 1;
     } else if (arg === '--build-arg') {
-      const pair = argv[i + 1] ?? '';
+      const pair = valueAt(i);
       const eq = pair.indexOf('=');
       if (eq <= 0) throw new Error(`--build-arg ${JSON.stringify(pair)} is not K=V.`);
       buildArgs[pair.slice(0, eq)] = pair.slice(eq + 1);
       i += 1;
+    } else if (arg.startsWith('-')) {
+      throw new Error(`Unknown option ${JSON.stringify(arg)}.`);
+    } else if (target !== undefined) {
+      throw new Error(
+        `Build one image or all, not ${JSON.stringify(target)} and ${JSON.stringify(arg)}.`,
+      );
     } else target = arg;
+  }
+  refuseRecipeArgs(buildArgs);
+  if (push && tag === undefined) {
+    throw new Error('--push needs --tag <registry/repository:tag>; local tags are never pushed.');
   }
 
   if (target === undefined) throw new Error('Name an image: api, staff, console, clamav or all.');
@@ -130,6 +162,32 @@ function gitSha() {
   }
 }
 
+/**
+ * Builds each image in turn and stops at the first failure.
+ * @param {ReturnType<typeof parseBuildArgs>} parsed
+ * @param {NodeJS.ProcessEnv} env
+ * @param {(cmd: string, args: string[]) => { status: number | null, error?: Error }} spawn
+ * @param {(line: string) => void} write
+ * @returns {number} the exit code
+ */
+export function runBuilds(parsed, env, spawn, write) {
+  for (const image of parsed.images) {
+    const [cmd = 'docker', ...args] = dockerBuildCommand(image, env, {
+      tag: parsed.tag ?? `quad/${image}:local`,
+      push: parsed.push,
+      buildArgs: parsed.buildArgs,
+    });
+    write(`\n=== Building ${image}\n\n`);
+    const { status, error } = spawn(cmd, args);
+    if (error !== undefined) {
+      write(`docker-build: could not run ${cmd}: ${error.message}\n`);
+      return 1;
+    }
+    if (status !== 0) return status ?? 1;
+  }
+  return 0;
+}
+
 const isMain = process.argv[1] === fileURLToPath(import.meta.url);
 if (isMain) {
   /** @type {ReturnType<typeof parseBuildArgs>} */
@@ -144,14 +202,14 @@ if (isMain) {
     process.exit(2);
   }
   const env = { ...process.env, GIT_SHA: process.env.GIT_SHA ?? gitSha() };
-  for (const image of parsed.images) {
-    const [cmd = 'docker', ...args] = dockerBuildCommand(image, env, {
-      tag: parsed.tag ?? `quad/${image}:local`,
-      push: parsed.push,
-      buildArgs: parsed.buildArgs,
-    });
-    process.stdout.write(`\n=== Building ${image}\n\n`);
-    const { status } = spawnSync(cmd, args, { cwd: root, stdio: 'inherit' });
-    if (status !== 0) process.exit(status ?? 1);
-  }
+  process.exit(
+    runBuilds(
+      parsed,
+      env,
+      (cmd, args) => spawnSync(cmd, args, { cwd: root, stdio: 'inherit' }),
+      (line) => {
+        process.stdout.write(line);
+      },
+    ),
+  );
 }

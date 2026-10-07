@@ -4,7 +4,7 @@ import { join } from 'node:path';
 
 import { afterAll, describe, expect, it } from 'vitest';
 
-import { dockerBuildCommand, IMAGES, parseBuildArgs } from '../docker-build.mjs';
+import { dockerBuildCommand, IMAGES, parseBuildArgs, runBuilds } from '../docker-build.mjs';
 
 const dir = mkdtempSync(join(tmpdir(), 'docker-build-'));
 const caFile = join(dir, 'ca.crt');
@@ -106,6 +106,12 @@ describe('dockerBuildCommand', () => {
     expect(command).toContain('--push');
   });
 
+  it.each(['APP', 'PORT'])('refuses a %s build arg, which would override the recipe', (name) => {
+    expect(() =>
+      dockerBuildCommand('staff', {}, { tag: 'x', buildArgs: { [name]: 'console' } }),
+    ).toThrow(name);
+  });
+
   it('knows the four images', () => {
     expect(IMAGES).toEqual(['api', 'staff', 'console', 'clamav']);
   });
@@ -137,7 +143,74 @@ describe('parseBuildArgs', () => {
     expect(() => parseBuildArgs(['api', '--build-arg', 'NOVALUE'])).toThrow(/NOVALUE/);
   });
 
+  it('refuses --tag or --build-arg without a value, or with another flag as the value', () => {
+    expect(() => parseBuildArgs(['api', '--tag'])).toThrow(/--tag needs a value/);
+    expect(() => parseBuildArgs(['api', '--tag', '--push'])).toThrow(/--tag needs a value/);
+    expect(() => parseBuildArgs(['api', '--build-arg'])).toThrow(/--build-arg needs a value/);
+    expect(() => parseBuildArgs(['api', '--build-arg', '--push'])).toThrow(
+      /--build-arg needs a value/,
+    );
+  });
+
+  it('refuses unknown flags and a second image', () => {
+    expect(() => parseBuildArgs(['api', '--no-cache'])).toThrow(/--no-cache/);
+    expect(() => parseBuildArgs(['api', 'staff'])).toThrow(/staff/);
+  });
+
+  it('refuses --push without --tag, so a local tag is never pushed', () => {
+    expect(() => parseBuildArgs(['api', '--push'])).toThrow(/--push needs --tag/);
+    expect(parseBuildArgs(['api', '--push', '--tag', 'r/api:1']).push).toBe(true);
+  });
+
+  it.each(['APP', 'PORT'])('refuses --build-arg %s, which the image recipe sets', (name) => {
+    expect(() => parseBuildArgs(['staff', '--build-arg', `${name}=x`])).toThrow(name);
+  });
+
   it('refuses --tag with all, since each image needs its own tag', () => {
     expect(() => parseBuildArgs(['all', '--tag', 'x'])).toThrow(/--tag/);
+  });
+});
+
+describe('runBuilds', () => {
+  const parsed = { images: ['api', 'staff'] as const, tag: undefined, push: false, buildArgs: {} };
+
+  it('builds each image with its default tag and stops at the first failure', () => {
+    const calls: string[][] = [];
+    const lines: string[] = [];
+    const code = runBuilds(
+      { ...parsed, images: [...parsed.images] },
+      {},
+      (cmd, args) => {
+        calls.push([cmd, ...args]);
+        return { status: 3 };
+      },
+      (line) => lines.push(line),
+    );
+    expect(code).toBe(3);
+    expect(calls).toHaveLength(1);
+    expect(calls[0]?.join(' ')).toContain('-t quad/api:local');
+  });
+
+  it('prints why docker could not be started and exits 1', () => {
+    const lines: string[] = [];
+    const code = runBuilds(
+      { ...parsed, images: ['api'] },
+      {},
+      () => ({ status: null, error: new Error('spawnSync docker ENOENT') }),
+      (line) => lines.push(line),
+    );
+    expect(code).toBe(1);
+    expect(lines.join('')).toContain('spawnSync docker ENOENT');
+  });
+
+  it('returns 0 when every build succeeds', () => {
+    expect(
+      runBuilds(
+        { ...parsed, images: [...parsed.images] },
+        {},
+        () => ({ status: 0 }),
+        () => undefined,
+      ),
+    ).toBe(0);
   });
 });
