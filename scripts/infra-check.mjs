@@ -29,6 +29,24 @@ export const INFRA_MODULES = [
 ];
 
 /**
+ * The directories to check: every module, then every root, or just `only` (`--only`), which must be
+ * one of them so a typo cannot pass as "nothing to check".
+ * @param {string | undefined} only
+ * @returns {string[]}
+ */
+export function selectDirs(only) {
+  const all = [...INFRA_MODULES, ...INFRA_ROOTS];
+  if (only === undefined) return all;
+  const dir = only.replace(/\/+$/, '');
+  if (!all.includes(dir)) {
+    throw new Error(
+      `--only ${JSON.stringify(only)} is not an infra root or module (${all.join(', ')}).`,
+    );
+  }
+  return [dir];
+}
+
+/**
  * The environment for every infra command: no AWS_* variable (so no credentials, profile or
  * region from the shell), no EC2 instance metadata lookup, and Terraform's automation mode.
  * @param {NodeJS.ProcessEnv} env
@@ -100,8 +118,12 @@ const isMain = process.argv[1] === fileURLToPath(import.meta.url);
 if (isMain) {
   const args = process.argv.slice(2);
   const onlyIndex = args.indexOf('--only');
-  const only = onlyIndex === -1 ? undefined : args[onlyIndex + 1];
-  if (onlyIndex !== -1 && !only) {
+  /** @type {string[]} */
+  let selected;
+  try {
+    selected = selectDirs(onlyIndex === -1 ? undefined : (args[onlyIndex + 1] ?? ''));
+  } catch (error) {
+    process.stderr.write(`${error instanceof Error ? error.message : String(error)}\n`);
     process.stderr.write('Usage: node scripts/infra-check.mjs [--only <dir>]\n');
     process.exit(2);
   }
@@ -124,9 +146,7 @@ if (isMain) {
   }
 
   // Roots and modules that do not exist yet are skipped, so the check passes as infra/ grows.
-  const dirs = (only ? [only] : [...INFRA_MODULES, ...INFRA_ROOTS]).filter((dir) =>
-    existsSync(join(root, dir)),
-  );
+  const dirs = selected.filter((dir) => existsSync(join(root, dir)));
   const env = infraEnv(process.env);
   const result = runSteps(
     checkSteps(dirs, tools),

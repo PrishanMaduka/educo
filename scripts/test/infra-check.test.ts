@@ -6,6 +6,7 @@ import {
   INFRA_ROOTS,
   infraEnv,
   scannerPolicy,
+  selectDirs,
 } from '../infra-check.mjs';
 
 const commands = (steps: { command: string[] }[]) => steps.map((s) => s.command.join(' '));
@@ -114,5 +115,20 @@ describe('scannerPolicy', () => {
       missing: [],
       action: 'ok',
     });
+  });
+});
+
+describe('selectDirs', () => {
+  it('checks every module, then every root, by default', () => {
+    expect(selectDirs(undefined)).toEqual([...INFRA_MODULES, ...INFRA_ROOTS]);
+  });
+
+  it('checks one known root or module with --only', () => {
+    expect(selectDirs('infra/envs/staging')).toEqual(['infra/envs/staging']);
+    expect(selectDirs('infra/modules/edge/')).toEqual(['infra/modules/edge']);
+  });
+
+  it.each(['infra', 'infra/modules/nope', '../elsewhere', ''])('refuses --only %j', (dir) => {
+    expect(() => selectDirs(dir)).toThrow(/not an infra root or module/);
   });
 });
