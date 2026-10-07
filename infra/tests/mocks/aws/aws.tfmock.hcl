@@ -54,6 +54,12 @@ mock_resource "aws_secretsmanager_secret" {
   }
 }
 
+mock_resource "aws_cloudwatch_log_group" {
+  defaults = {
+    arn = "arn:aws:logs:ap-south-1:123456789012:log-group:mock-log-group"
+  }
+}
+
 mock_resource "aws_sns_topic" {
   defaults = {
     arn = "arn:aws:sns:ap-south-1:123456789012:mock-topic"
