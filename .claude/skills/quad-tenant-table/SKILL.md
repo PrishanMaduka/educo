@@ -30,7 +30,7 @@ No `tenant_id`, no tenant policy, reachable only via `withPlatform()` from `apps
 - Run `pnpm db:reset` locally and the migration test before pushing.
 
 ## Security-definer functions
-Only the ones named in spec 02 (D16). Owned by `quad_owner`, `set search_path = pg_catalog, public`, return the minimum columns, and have a cross-tenant test. Adding a new one is a decision log entry.
+Only the ones named in spec 02 (D16). Owned by `quad_owner`, `set search_path = pg_catalog, public` (or, equally acceptable, `public, pg_temp`: `pg_catalog` is then searched first implicitly and `pg_temp` last), return the minimum columns, and have a cross-tenant test. Adding a new one is a decision log entry.
 
 ## Queries
 - Every tenant query inside `withTenant(tenantId, tx => …)`; the raw client is banned outside `packages/db`.

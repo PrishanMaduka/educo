@@ -57,6 +57,7 @@ The tenant comes from the session or token (the membership chosen at sign-in). T
 | Payment webhooks (PayHere, Stripe) | Verify the gateway signature first, then `tenant_by_gateway_account(provider, account_id)` |
 | Public admissions enquiry form | `tenant_by_embed_key(key)`; rate-limited and captcha-checked |
 | Demo requests from the landing page | Platform level, no tenant (`platform_leads`) |
+| SES bounce and complaint webhook | No tenant: the SNS topic, signing certificate URL, signature (version 2) and replay window are checked first, then `record_email_suppression` writes the platform table `email_suppressions` |
 
 Rules: every tenant-less route lives in `apps/api/src/public/**` or `apps/api/src/webhooks/**`, has an integration test for a forged or expired token, and opens `withTenant()` only after the check.
 
