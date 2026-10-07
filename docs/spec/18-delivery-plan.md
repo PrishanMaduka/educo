@@ -337,7 +337,7 @@ To run a milestone in Claude Code, type `/build-milestone M3` (ids with a letter
 ---
 
 ## Progress
-- [ ] M0 Foundations
+- [x] M0 Foundations
 - [ ] M0b Infrastructure and staging
 - [ ] M1 Auth, tenancy and permissions
 - [ ] M1b Public site

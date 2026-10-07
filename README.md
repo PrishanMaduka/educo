@@ -154,6 +154,7 @@ quad/
 │   ├── console/      # Platform console (Next.js + Tailwind CSS)
 │   └── parent/       # Parent mobile app (Flutter)
 ├── packages/         # tokens, ui, contracts, client, db, domain, config
+├── scripts/          # codegen, the verify gate and the Flutter wrapper (@quad/scripts)
 ├── design/           # Interactive HTML prototypes (reference)
 ├── docs/spec/        # Implementation specification (01–18, plus:)
 │   ├── 19-public-site.md                 # landing page, demo requests, legal pages
@@ -161,3 +162,27 @@ quad/
 │   └── 21-onboarding-import.md           # moving from Classe365 or spreadsheets
 └── infra/            # Terraform (staging in M0b, production in M12)
 ```
+
+## Getting started
+
+Prerequisites (pinned in the repo):
+- Node.js 22 (`.nvmrc`; `nvm use`) and pnpm 9.15.9 through Corepack (`corepack enable`).
+- Docker with Compose (Postgres 16.4, Redis 7.4, MinIO, Mailpit and ClamAV, pinned in `docker-compose.yml`).
+- Flutter 3.47.6 through FVM (`fvm install` reads `.fvmrc`), or that version on your `PATH`.
+- Java 17 (Temurin), only for `openapi-generator` in `pnpm api:client`.
+
+```
+corepack enable && pnpm install
+cp .env.example .env              # safe local defaults
+docker compose up -d              # Postgres, Redis, MinIO, Mailpit, ClamAV on 127.0.0.1
+pnpm db:migrate && pnpm db:seed   # schema, then the sample schools and accounts
+pnpm dev                          # API :4000 (/api/v1), staff portal :3000, console :3001
+pnpm parent:run                   # parent app (flutter run --flavor dev) on a simulator or device
+pnpm verify                       # the full quality gate, the same one CI runs
+```
+
+`pnpm verify` runs, stopping at the first failure: typecheck, lint and unit tests (`turbo run typecheck lint test`), `pnpm codegen:check`, the API integration tests (`pnpm test:api`, needs Docker), the Playwright smoke tests (`pnpm e2e`) and `pnpm audit --prod --audit-level high`. Without Flutter the parent app's checks are skipped with a warning; CI and `QUAD_REQUIRE_FLUTTER=1` make them fail instead.
+
+If Docker Hub rate-limits image pulls, prefix the images with a registry mirror: `QUAD_IMAGE_REGISTRY=mirror.gcr.io/ docker compose up -d` (keep the trailing slash). The Postgres init script (`docker/postgres/init`) only runs on a fresh volume; `docker compose down -v` deletes the local database so it runs again.
+
+Seeded sign-ins and the rest of the local setup are in [docs/spec/02-architecture.md → Local development](docs/spec/02-architecture.md#local-development).
