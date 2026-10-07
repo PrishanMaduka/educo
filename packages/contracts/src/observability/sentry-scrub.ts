@@ -6,15 +6,13 @@ import { scrubTelemetryText, scrubTelemetryUrl } from './telemetry-scrub';
  * depending on Sentry.
  */
 export interface ScrubbableEvent {
-  request?: {
-    url?: string;
-    data?: unknown;
-    cookies?: unknown;
-    query_string?: unknown;
-    headers?: Record<string, string>;
-  };
+  request?: { url?: string; method?: string; headers?: Record<string, string> };
   user?: { id?: string | number };
+  exception?: { values?: { stacktrace?: { frames?: { vars?: unknown }[] } }[] };
 }
+
+/** The request fields kept; the body, cookies, query string and `env` (client IP) go. */
+const KEPT_REQUEST_FIELDS: ReadonlySet<string> = new Set(['url', 'method', 'headers']);
 
 /** The only request header kept: it says which browser or app failed, not who. */
 const KEPT_HEADER = 'user-agent';
@@ -38,25 +36,15 @@ export const SENTRY_DATA_COLLECTION = {
   stackFrameVariables: false,
 };
 
-/**
- * Keys never rewritten: stack frames (file names and line numbers), the SDK's own metadata and
- * ids. Everything else is walked and its strings scrubbed.
- */
-const SKIPPED_KEYS: ReadonlySet<string> = new Set([
-  'stacktrace',
-  'debug_meta',
-  'sdk',
-  'modules',
-  'event_id',
-  'trace',
-]);
-
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
-/** Replaces, in place, every string under `value` with its scrubbed form. */
-function scrubStrings(value: unknown): void {
+/**
+ * Replaces, in place, every string under `value` with its scrubbed form, except under the keys
+ * `skip` names at this level.
+ */
+function scrubStrings(value: unknown, skip: (key: string) => boolean = () => false): void {
   if (Array.isArray(value)) {
     value.forEach((item: unknown, index) => {
       if (typeof item === 'string') value[index] = scrubTelemetryText(item);
@@ -66,7 +54,7 @@ function scrubStrings(value: unknown): void {
   }
   if (!isRecord(value)) return;
   for (const [key, item] of Object.entries(value)) {
-    if (SKIPPED_KEYS.has(key)) continue;
+    if (skip(key)) continue;
     if (typeof item === 'string') value[key] = scrubTelemetryText(item);
     else scrubStrings(item);
   }
@@ -80,18 +68,18 @@ function removeAllBut(record: object, kept: (key: string) => boolean): void {
 
 /**
  * Sentry's `beforeSend` for every Quad app (D21, spec 16). In place, it:
- * - deletes the request body, cookies and query string, and keeps only the `user-agent` header;
- * - drops the query and fragment from the request URL;
+ * - reduces the request to its URL (without query or fragment), method and `user-agent` header,
+ *   so the body, cookies, query string and client address go;
  * - reduces the user to `{ id }` (or removes it when there is no id);
+ * - deletes local variables from stack frames;
  * - scrubs emails, phone numbers, credentials, query values and path tokens from every other
- *   string (messages, exception values, breadcrumbs, extras, contexts, tags).
+ *   string (messages, exception values, stack frames, breadcrumbs, extras, contexts, tags),
+ *   except the trace ids in `contexts.trace`.
  */
 export function scrubSentryEvent<T extends ScrubbableEvent>(event: T): T {
-  const { request, user } = event;
+  const { request, user, exception } = event;
   if (request !== undefined) {
-    delete request.data;
-    delete request.cookies;
-    delete request.query_string;
+    removeAllBut(request, (key) => KEPT_REQUEST_FIELDS.has(key));
     if (request.headers !== undefined) {
       removeAllBut(request.headers, (name) => name.toLowerCase() === KEPT_HEADER);
     }
@@ -101,6 +89,11 @@ export function scrubSentryEvent<T extends ScrubbableEvent>(event: T): T {
     if (user.id === undefined) delete event.user;
     else removeAllBut(user, (key) => key === 'id');
   }
-  scrubStrings(event);
+  for (const value of exception?.values ?? []) {
+    for (const frame of value.stacktrace?.frames ?? []) delete frame.vars;
+  }
+  scrubStrings(event, (key) => key === 'contexts');
+  const contexts: unknown = Reflect.get(event, 'contexts');
+  scrubStrings(contexts, (key) => key === 'trace');
   return event;
 }
