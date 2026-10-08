@@ -156,6 +156,39 @@ input,select,textarea,button{font:inherit}
 .token{position:absolute;width:30px;height:30px;z-index:4;pointer-events:none;filter:drop-shadow(0 4px 8px rgba(0,0,0,.35))}
 @media (max-width:560px){.av{left:var(--xm,var(--x))}.av .an{font-size:11px;padding:2px 7px}}
 
+/* App badges (drawn here, not the stores' artwork) and the parent app's second phone */
+.badges{display:flex;gap:10px;flex-wrap:wrap}
+.badge{display:inline-flex;align-items:center;gap:10px;background:var(--navy-2);color:var(--on-navy);border:2px solid var(--navy-border);border-radius:14px;padding:8px 14px 8px 10px;font-weight:800;font-size:16px;line-height:1.05;letter-spacing:-.01em}
+.badge svg{width:24px;height:24px;flex:none}
+.badge small{display:block;font-size:11px;font-weight:600;color:var(--on-navy-2);letter-spacing:0}
+.demo .badge{background:var(--navy);border-color:var(--navy)}
+.getapp-note{font-size:15px;color:var(--on-navy-2);max-width:32em}
+.getapp-note:empty{display:none}
+.tabbar{position:relative;z-index:1;display:flex;justify-content:space-around;padding:8px 6px 12px;border-top:1px solid var(--sheet-line);background:var(--white);margin-top:auto}
+.tabbar span{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:9.5px;font-weight:700;color:var(--screen-ink-3)}
+.tabbar span i{width:18px;height:6px;border-radius:3px;background:var(--screen-track)}
+.tabbar span.on{color:var(--on-vivid)}.tabbar span.on i{background:var(--accent)}
+:root[data-view="parent"] .stage .av,:root[data-view="parent"] .orbit{display:none}
+:root[data-view="parent"] .phone.main{left:31%;top:48%;width:50%}
+.phone.two{left:75%;top:54%;width:42%;transform:translate(-50%,-50%) rotate(5deg);z-index:1}
+.screen:has(.tabbar)::after{bottom:46px;height:16%}
+.phone.two .screen::after{display:none}
+.app-card.tonight{position:relative;z-index:1;margin-top:6px;background:var(--chip-orange-bg)}.app-card.tonight small{color:var(--chip-orange-ink)}
+@media (max-width:560px){:root[data-view="parent"] .phone.main{left:31%;width:58%}.phone.two{left:75%;width:44%}}
+.phone.two .screen{padding-bottom:0}
+.app-card{margin:0 10px 8px;background:var(--white);border-radius:16px;padding:10px 12px;display:flex;flex-direction:column;gap:6px;box-shadow:0 2px 8px var(--feed-shadow);font-size:11.5px;line-height:1.35}
+.app-card small{font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--screen-ink-3)}
+.app-card .q{align-self:flex-end;background:var(--navy);color:var(--white);border-radius:12px 12px 3px 12px;padding:6px 9px}
+.app-card .a{align-self:flex-start;background:var(--chip-sky-bg);color:var(--on-vivid);border-radius:12px 12px 12px 3px;padding:6px 9px}
+.app-card .a em{display:block;font-style:normal;color:var(--screen-ink-3);font-size:10px;margin-top:2px}
+.app-card b{font-size:14px;letter-spacing:-.01em}
+.app-card .row{display:flex;justify-content:space-between;align-items:center}
+.app-card .paybtn{background:var(--lime);color:var(--on-vivid);border-radius:999px;padding:4px 10px;font-weight:800;font-size:11px}
+.hl{position:absolute;z-index:4;display:flex;align-items:center;gap:6px;background:var(--navy-2);color:var(--on-navy);border-radius:999px;padding:5px 11px 5px 6px;font-size:12.5px;font-weight:700;white-space:nowrap;box-shadow:0 8px 20px var(--phone-shadow)}
+.hl i{width:18px;height:18px;border-radius:50%;background:var(--c);flex:none}
+@media (max-width:560px){.hl{display:none!important}}
+@media (max-width:760px){#demoDoodles > :not(:first-child){display:none}}
+
 /* Ticker band */
 .ticker{background:var(--lime);color:var(--on-vivid);transform:rotate(-1.2deg);margin:0 -20px;padding:14px 0;position:relative;z-index:3;overflow:hidden}
 .marq{display:flex;width:max-content;animation:marquee 48s linear infinite}
@@ -229,7 +262,8 @@ input,select,textarea,button{font:inherit}
 .pday .top{display:flex;justify-content:space-between;align-items:center}
 .pday .top b{font-weight:800;font-size:30px;letter-spacing:-.03em}
 .pday .ic{width:50px;height:50px;border-radius:16px}.pday .ic svg{width:26px;height:26px}
-.pday small{font-size:13px;font-weight:700;color:var(--page-ink-3);margin-top:auto}
+.pday small{font-size:13px;font-weight:700;color:var(--page-ink-3);margin-top:10px}
+#pday{grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr))}
 .pday strong{margin-top:0;line-height:1.15}
 .feats{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:14px;margin-top:14px}
 .feat{background:var(--c);color:var(--on-vivid);border-radius:28px;padding:26px;display:flex;flex-direction:column;gap:14px;min-height:280px}
@@ -339,7 +373,7 @@ dialog.si::backdrop{background:var(--backdrop);backdrop-filter:blur(3px)}
 <header class="nav">
   <div class="wrap">
     <a class="logo" href="#top" aria-label="Quad home"><svg viewBox="0 0 101 30" aria-hidden="true"><use href="#qLogo"/></svg></a>
-    <nav aria-label="Sections"><a href="#circle">The circle</a><a href="#wellbeing">Wellbeing</a><a href="#more"><span class="only-school">Modules</span><span class="only-parent">In the app</span></a><button type="button" data-signin>Sign in</button></nav>
+    <nav aria-label="Sections"><a href="#circle">The circle</a><a href="#wellbeing">Wellbeing</a><a href="#more"><span class="only-school">Modules</span><span class="only-parent">In the app</span></a><button type="button" class="only-school" data-signin>Sign in</button><a class="only-parent" href="#getapp">Get the app</a></nav>
     <div class="views" role="group" aria-label="Choose your view">
       <button type="button" data-view="school" aria-pressed="true">I run a school</button>
       <button type="button" data-view="parent" aria-pressed="false">I’m a parent</button>
@@ -349,7 +383,7 @@ dialog.si::backdrop{background:var(--backdrop);backdrop-filter:blur(3px)}
     <a class="btn sm" href="#demo"><span class="only-school">Book a demo</span><span class="only-parent">Ask your school</span></a>
     <div class="menu" id="menu" hidden>
       <a href="#circle">The circle</a><a href="#wellbeing">Wellbeing</a><a href="#more"><span class="only-school">Modules</span><span class="only-parent">In the app</span></a>
-      <button type="button" data-signin>Sign in</button>
+      <button type="button" class="only-school" data-signin>Sign in</button><a class="only-parent" href="#getapp">Get the app</a>
       <button type="button" data-theme-toggle aria-label="Switch to dark mode">Dark mode</button>
     </div>
   </div>
@@ -360,27 +394,44 @@ dialog.si::backdrop{background:var(--backdrop);backdrop-filter:blur(3px)}
 <section class="hero" aria-labelledby="heroH">
   <div class="wrap">
     <div class="hero-copy">
-      <span class="kicker"><i aria-hidden="true">✦</i><span class="only-school">School management, built around the child</span><span class="only-parent">For parents, grandparents and everyone at home</span></span>
-      <h1 id="heroH"><span class="only-school">Every child has a <span class="nw"><span class="pill">circle</span>.</span></span><span class="only-parent">Hear the <span class="pill">good</span> stuff first.</span></h1>
+      <span class="kicker"><i aria-hidden="true">✦</i><span class="only-school">School management, built around the child</span><span class="only-parent">The Quad app for parents, on iPhone and Android</span></span>
+      <h1 id="heroH"><span class="only-school">Every child has a <span class="nw"><span class="pill">circle</span>.</span></span><span class="only-parent">Hear the <span class="pill">good</span> stuff first, in the app.</span></h1>
       <p class="lede only-school">The teacher who notices, the coach who cheers, the nurse who checks in, and the family at home, wherever home is. Quad runs your whole school, from admissions to fees, and keeps every one of them close to the child they share.</p>
-      <p class="lede only-parent">Not only when something goes wrong. Quad shows you your child’s day as it happens: the moment they arrive, what their teacher noticed, and one small thing to try together tonight.</p>
-      <div class="ctas"><a class="btn" href="#demo"><span class="only-school">Book a demo</span><span class="only-parent">Ask your school about Quad</span> <span aria-hidden="true">→</span></a><a class="btn line" href="#circle">How the circle works</a></div>
+      <p class="lede only-parent">Not only when something goes wrong. The Quad app shows your child’s day as it happens: the moment they arrive, what their teacher noticed, and one small thing to try together tonight.</p>
+      <div class="ctas only-school"><a class="btn" href="#demo">Book a demo <span aria-hidden="true">→</span></a><a class="btn line" href="#circle">How the circle works</a></div>
+      <div class="ctas only-parent" id="getapp"><button type="button" class="btn" id="getAppBtn" aria-controls="getAppNote" aria-expanded="false">Get the Quad app <span aria-hidden="true">↓</span></button><a class="btn line" href="#demo">Ask your school about Quad</a></div>
+      <div class="only-parent" style="display:flex;flex-direction:column;gap:12px"><span class="badges"><span class="badge" role="img" aria-label="App Store, coming soon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M10.5 18.5h3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span><small>Coming soon to the</small>App Store</span></span><span class="badge" role="img" aria-label="Google Play, coming soon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3.5v17l14-8.5Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><span><small>Coming soon on</small>Google Play</span></span></span><p class="getapp-note" id="getAppNote" role="status"></p></div>
       <p class="already only-school">Already on Quad? <button type="button" data-signin>Sign in to your school</button></p>
+      <p class="already only-parent">Already have the app? Open it on your phone.</p>
       <div class="stats">
-        <div><b>1 app</b><span>for every family</span></div>
-        <div><b>4 relatives</b><span>invited by parents</span></div>
-        <div><b>18:00–07:00</b><span>quiet hours for teachers</span></div>
+        <div><b>1 app</b><span class="only-school">for every family</span><span class="only-parent">for every child, at any Quad school</span></div>
+        <div><b>4 relatives</b><span class="only-school">invited by parents</span><span class="only-parent">you can invite, wherever they live</span></div>
+        <div><b>18:00–07:00</b><span class="only-school">quiet hours for teachers</span><span class="only-parent">calm evenings for everyone</span></div>
       </div>
     </div>
     <div class="stage-col">
       <div class="stage" id="stage" role="img" aria-label="A sample school day. Maya’s circle of people, Ms. Okafor, Coach Tanaka, Nurse Haddad, her mum Priya, Nani Asha and her dad Daniel, around a phone showing Maya’s day as moments arrive.">
         <div class="orbit"></div>
-        <div class="phone"><div class="screen" aria-hidden="true">
+        <div class="phone main"><div class="screen" aria-hidden="true">
           <div class="notch"><span></span></div>
           <div class="sch"><i>G</i><span>Greenfield<br>International</span></div>
           <div class="day"><div class="ringwrap" id="ring"></div><div><b>Maya’s day</b><small>Year 4 · in school since 07:42</small></div></div>
           <div class="feed" id="feed"></div>
+          <div class="app-card tonight only-parent"><small>Tonight</small><span>Ask Maya which colours she mixed for the mural sky.</span></div>
+          <div class="tabbar"><span class="on"><i></i>Today</span><span><i></i>Circle</span><span><i></i>Ask</span><span><i></i>Pay</span></div>
         </div></div>
+        <div class="phone two only-parent"><div class="screen" aria-hidden="true">
+          <div class="notch"><span></span></div>
+          <div class="sch"><i>G</i><span>Greenfield<br>International</span></div>
+          <div class="app-card"><small>Ask Quad</small><span class="q">When is the swimming gala?</span><span class="a">Friday at 10:00, at the town pool.<em>From: school calendar</em></span></div>
+          <div class="app-card"><small>Payments</small><b>Term 2 fees</b><div class="row"><span>Due 30 April</span><span class="paybtn">Pay now</span></div></div>
+          <div class="app-card"><small>Family</small><b>Nani Asha joined</b><span>Sees moments only</span></div>
+          <div class="tabbar"><span><i></i>Today</span><span><i></i>Circle</span><span class="on"><i></i>Ask</span><span><i></i>Pay</span></div>
+        </div></div>
+        <span class="hl only-parent" style="left:0;top:0;--c:var(--orange)"><i></i>Today, as a story</span>
+        <span class="hl only-parent" style="left:2%;top:93%;--c:var(--pink)"><i></i>Moments and thank-yous</span>
+        <span class="hl only-parent" style="right:0;top:9%;--c:var(--sky)"><i></i>Ask Quad</span>
+        <span class="hl only-parent" style="right:2%;top:90%;--c:var(--lime)"><i></i>Pay fees</span>
       </div>
       <p class="sr" role="status" aria-live="polite" id="feedLive"></p>
     </div>
@@ -420,7 +471,7 @@ dialog.si::backdrop{background:var(--backdrop);backdrop-filter:blur(3px)}
     <div class="copy">
       <span class="tagp" style="background:var(--lime)">Every Friday</span>
       <h2>Watch a week of good news grow.</h2>
-      <p>The weekly recap brings it together: the moments, the skills her teachers noticed, days in school, what you tried at home, and one idea for the weekend.</p>
+      <p>Every Friday the app brings it together: the moments, the skills her teachers noticed, days in school, what you tried at home, and one idea for the weekend.</p>
       <div class="recap"><span><strong>7</strong><small>moments</small></span><span><strong>5 of 5</strong><small>days in school</small></span><span><strong>2</strong><small>tried at home</small></span></div>
     </div>
     <div class="sheet">
@@ -444,7 +495,7 @@ dialog.si::backdrop{background:var(--backdrop);backdrop-filter:blur(3px)}
       </div>
     </div>
     <div class="only-parent">
-      <div class="head"><h2 class="h2">A school day, as your family sees it.</h2><p>One Quad app for every family, wearing your school’s name and colours. Every child in the family under one login.</p></div>
+      <div class="head"><h2 class="h2">Everything you need, in one app.</h2><p>The Quad app for iPhone and Android. It’s Quad’s app, and inside it wears your school’s name, logo and colours. Every child in the family is under one login.</p></div>
       <ul class="mods" id="pday" role="list" style="list-style:none;margin:0;padding:0"></ul>
     </div>
     <div class="safe">
@@ -467,6 +518,7 @@ dialog.si::backdrop{background:var(--backdrop);backdrop-filter:blur(3px)}
         <h2 id="demoH"><span class="only-school">See your school’s circle in 30 minutes.</span><span class="only-parent">Want this at your child’s school?</span></h2>
         <p class="only-school">We’ll set up a sample of your school, with your name, colours and curriculum, and walk your team through a full school day in Quad.</p>
         <p class="only-parent">Tell us where your child goes to school. We’ll send the school a short note from you and offer a walkthrough. We never contact other families.</p>
+        <div class="only-parent" style="display:flex;flex-direction:column;gap:10px"><p style="font-size:16px;font-weight:700">The Quad app for parents is coming soon to iPhone and Android.</p><span class="badges"><span class="badge" role="img" aria-label="App Store, coming soon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M10.5 18.5h3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span><small>Coming soon to the</small>App Store</span></span><span class="badge" role="img" aria-label="Google Play, coming soon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3.5v17l14-8.5Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><span><small>Coming soon on</small>Google Play</span></span></span></div>
         <div class="wavers" id="wavers" aria-hidden="true"></div>
       </div>
       <div class="formbox">
@@ -633,10 +685,11 @@ const FEED = [
   const tick = now => {
     const t = Math.max(0, now - t0), cyc = Math.floor(t / P), k = (cyc + 2) % FEED.length, ph = (t - cyc * P) / 1000, f = FEED[k], av = AV.find(a => a[0] === f[0]);
     if (cyc !== lastCyc) { lastCyc = cyc; tok.innerHTML = doodle(f[1], f[1] === 'heart' ? 'var(--pink)' : 'var(--lime)'); }
-    avs.forEach(a => a.classList.toggle('on', a.dataset.id === f[0] && ph < 1.6));
+    const school = document.documentElement.dataset.view !== 'parent';
+    avs.forEach(a => a.classList.toggle('on', school && a.dataset.id === f[0] && ph < 1.6));
     const xs = getComputedStyle(avs.find(a => a.dataset.id === f[0])).getPropertyValue('left');
     const sx = parseFloat(xs) / stage.clientWidth * 100, sy = av[2], ex = 50, ey = 44, qx = (sx + ex) / 2, qy = Math.min(sy, ey) - 20;
-    const flying = ph > .25 && ph < 1.5; tok.hidden = !flying;
+    const flying = school && ph > .25 && ph < 1.5; tok.hidden = !flying;
     if (flying) { const u = ease(Math.min(1, Math.max(0, (ph - .25) / 1.2))), w = 1 - u;
       tok.style.left = `calc(${w * w * sx + 2 * w * u * qx + u * u * ex}% - 15px)`; tok.style.top = `calc(${w * w * sy + 2 * w * u * qy + u * u * ey}% - 15px)`;
       tok.style.transform = `rotate(${u * 360}deg) scale(${1 + Math.sin(u * Math.PI) * .5})`; }
@@ -667,11 +720,11 @@ const scene = k => {
   return `<svg viewBox="0 0 200 140" width="100%" height="100%" aria-hidden="true" focusable="false">${kids}</svg>`;
 };
 $('steps').innerHTML = [
-  [1, 'At school', 'A moment at school', 'Ms. Okafor taps Maya’s name, adds a photo and the skill she noticed. Only Maya’s family sees it.', 'var(--sky)', 'moment'],
-  [2, 'At home', 'Home says thanks', 'Mum taps thank you and it reaches the teacher. Grandma, invited from Lisbon, loves it too.', 'var(--pink)', 'thanks'],
-  [3, 'Together', 'Try it at home', 'One small idea from class each week. Maya and her dad halve a pancake recipe and tap We tried it.', 'var(--orange)', 'tryit'],
-  [4, 'Back at school', 'The teacher sees it', 'At 07:00, after quiet hours. Her family pulse shows which families need good news next.', 'var(--lime)', 'sees']
-].map(([n, where, title, body, c, k]) => `<li style="--c:${c}"><div class="scene">${scene(k)}</div><div class="where"><i aria-hidden="true">${n}</i>${where}</div><strong>${title}</strong><span class="b">${body}</span></li>`).join('');
+  [1, 'At school', 'A moment at school', 'Ms. Okafor taps Maya’s name, adds a photo and the skill she noticed. Only Maya’s family sees it.', 'var(--sky)', 'moment', 'At school', 'A moment arrives', 'Ms. Okafor shares a photo of Maya’s mural and the skill she noticed. It arrives in your app, for your family only.'],
+  [2, 'At home', 'Home says thanks', 'Mum taps thank you and it reaches the teacher. Grandma, invited from Lisbon, loves it too.', 'var(--pink)', 'thanks', 'In the app', 'You say thanks', 'One tap sends thank you to the teacher. Grandma, invited from Lisbon, loves it too.'],
+  [3, 'Together', 'Try it at home', 'One small idea from class each week. Maya and her dad halve a pancake recipe and tap We tried it.', 'var(--orange)', 'tryit', 'Together', 'Try it at home', 'One small idea from class each week. Halve a pancake recipe with Maya, then tap We tried it.'],
+  [4, 'Back at school', 'The teacher sees it', 'At 07:00, after quiet hours. Her family pulse shows which families need good news next.', 'var(--lime)', 'sees', 'Back at school', 'The teacher sees it', 'At 07:00, after quiet hours, so evenings stay calm for everyone.']
+].map(([n, where, title, body, c, k, pw, pt, pb]) => `<li style="--c:${c}"><div class="scene">${scene(k)}</div><div class="where"><i aria-hidden="true">${n}</i><span class="only-school">${where}</span><span class="only-parent">${pw}</span></div><strong><span class="only-school">${title}</span><span class="only-parent">${pt}</span></strong><span class="b"><span class="only-school">${body}</span><span class="only-parent">${pb}</span></span></li>`).join('');
 
 /* Wellbeing: Leo's support plan, and the parent view's weekly plant */
 (() => {
@@ -709,12 +762,12 @@ $('mods').innerHTML = [
   ['Communication', 'Messages, news, parents’ evenings and consent forms', 'bubble', 'var(--pink)']
 ].map(([t, b, k, c]) => `<li class="mod"><div class="ic" style="--c:${c}">${doodle(k, INK)}</div><strong>${t.replace('&', '&amp;')}</strong><span>${b}</span></li>`).join('');
 $('pday').innerHTML = [
-  ['07:42', 'The day, as it happens', 'You see they’ve arrived', 'The gate scan starts a ring of the day on your phone. Nobody had to send a message.', 'sun', 'var(--orange)'],
-  ['08:55', 'Moments', 'A teacher shares a moment', 'A photo and a line about something your child did well. Only your family sees it.', 'star', 'var(--sky)'],
-  ['09:10', 'Family circle', 'Grandparents join in', 'Invite up to four relatives, wherever they live. They see moments only.', 'heart', 'var(--pink)'],
-  ['12:30', 'Everyone around your child', 'See who looks after them', 'Every teacher, the coach and the nurse, and when each usually replies.', 'kite', 'var(--lime)'],
-  ['18:20', 'This week in class', 'Try one thing at home', 'One small idea from class. Tap We tried it and the teacher sees it next morning.', 'pencil', 'var(--orange)'],
-  ['19:30', 'Quiet hours', 'Write any time, kindly', 'Your message reaches the teacher at 07:00. Urgent safety alerts always go through.', 'moon', 'var(--sky)']
+  ['Today', 'The day as a story', 'See their day unfold', 'A ring of the day fills in as it happens: arrived at 07:42, lessons, lunch and the bus home. Nobody has to send a message.', 'sun', 'var(--orange)'],
+  ['Circle', 'Moments and thank-yous', 'Hear the good stuff', 'Teachers share small good things, with a photo when you’ve agreed to photos. Say thank you in one tap, and it reaches them.', 'star', 'var(--sky)'],
+  ['Family', 'Invite grandparents', 'Bring family in', 'Invite up to four relatives, wherever they live. They see moments only, and you can remove them in one tap.', 'heart', 'var(--pink)'],
+  ['Quiet', 'Quiet notifications', 'Calm evenings', 'Choose what pings you. Teachers reply in school hours, and messages you send at night reach them at 07:00. Urgent safety alerts always come through.', 'moon', 'var(--sky)'],
+  ['Pay', 'Pay fees', 'Pay in the app', 'See what’s due and pay school fees and trips in a few taps, in your school’s currency, with receipts kept for you.', 'coin', 'var(--lime)'],
+  ['Kids', 'One app for every child', 'Every child, one login', 'Brothers and sisters at the same school or different Quad schools, all in one app. Each school’s name and colours come along.', 'kite', 'var(--orange)']
 ].map(([time, kick, t, b, k, c]) => `<li class="mod pday"><div class="top"><b>${time}</b><div class="ic" style="--c:${c}">${doodle(k, INK)}</div></div><small>${kick}</small><strong>${t}</strong><span>${b}</span></li>`).join('');
 
 /* Ask Quad types its answer (shown whole with reduced motion) */
@@ -742,10 +795,16 @@ $('cheerFace').innerHTML = face('maya', {mood: 'laugh'});
     $('sentLink').href = href; form.hidden = true; done.hidden = false; location.href = href; });
   $('demoAgain').addEventListener('click', () => { form.reset(); done.hidden = true; form.hidden = false; $('dmName').focus(); }); })();
 
+/* Get the Quad app: the apps aren't in the stores yet, so the button explains instead of linking */
+$('getAppBtn').addEventListener('click', e => { const b = e.currentTarget, open = b.getAttribute('aria-expanded') !== 'true'; b.setAttribute('aria-expanded', open);
+  $('getAppNote').textContent = open ? 'Coming soon. The Quad app isn’t in the App Store or Google Play yet. When your school joins Quad, it will send you an invite to download it.' : ''; });
+
 /* "I run a school / I'm a parent": switches the page's copy, sections and accent; remembered in localStorage */
 (() => { const root = document.documentElement, btns = document.querySelectorAll('.views [data-view]');
   const set = v => { root.dataset.view = v; btns.forEach(b => b.setAttribute('aria-pressed', b.dataset.view === v)); try { localStorage.setItem('quad_site_view', v); } catch (e) {}
-    $('demoDone').hidden = true; $('demoForm').hidden = false; $('dmErr').textContent = ''; };
+    $('demoDone').hidden = true; $('demoForm').hidden = false; $('dmErr').textContent = '';
+    $('stage').setAttribute('aria-label', v === 'parent' ? 'The Quad parent app on two phones: Today shows Maya’s day as moments arrive, and the second screen shows Ask Quad, a fee to pay and Nani Asha joining the family circle.' : STAGE_SCHOOL); };
+  const STAGE_SCHOOL = $('stage').getAttribute('aria-label');
   btns.forEach(b => b.addEventListener('click', () => set(b.dataset.view)));
   set(root.dataset.view === 'parent' ? 'parent' : 'school'); })();
 
