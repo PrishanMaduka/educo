@@ -44,7 +44,7 @@ To run a milestone in Claude Code, type `/build-milestone M3` (ids with a letter
 
 ## M0b Infrastructure and staging
 **Read:** 20, 02 (Environments, Paths, Environment variables), 16 (Operational security).
-**Status:** written and validated offline; pending first deploy (see [`infra/README.md`](../../infra/README.md)). No AWS, Firebase, Sentry, Apple or Google account exists yet, so nothing has been applied or deployed and the acceptance checks below are still open. Tick M0b in Progress only after the first deploy meets them.
+**Status:** written and validated offline; pending first deploy (see [`infra/README.md`](../../infra/README.md)). No AWS, Firebase, Sentry, Apple or Google account exists yet, so nothing has been applied or deployed and the acceptance checks below are still open. Tick M0b in Progress only after the first deploy meets them. Two Accept items are qualified: traces carry `tenant_id` only once requests have a tenant, so that part of the trace check completes in M1; and the fastlane signing and store credentials live in GitHub environment secrets (`staging-stores`, required reviewers), the accepted exception to "no secret … in GitHub except deploy role ARNs" (D28).
 **Scope:**
 - `infra/` Terraform with the modules `network`, `data`, `app`, `edge`, `dns` and the `staging` environment; remote state in S3 with a DynamoDB lock; separate AWS accounts for tooling and staging.
 - Route 53 zone for `quad-edu.com`, ACM certificates, CloudFront + WAF + ALB with the path routing from D14 (`/api/v1/*` and `/socket.io/*` to the API, sticky `/socket.io`, everything else to staff; `console.staging.quad-edu.com` to the console), the origin secret header.
