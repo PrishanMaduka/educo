@@ -3,143 +3,252 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Quad Brand</title>
+<title>Quad brand guide</title>
+<meta name="description" content="The Quad brand: the four-petal mark and wordmark, logo files, palette, type, the app icon, how schools' colours work, and the time-of-day scenes.">
 <link rel="icon" href="brand/quad-app-icon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Figtree:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="system/tokens.css">
+<script>try { const t = localStorage.getItem('quad-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
 <style>
-/* Layout: brand sheet. Big logo hero, then construction, colour, app icon and usage rules in a single column of panels. */
-:root{--bg:#FAF8F5;--surface:#FFFFFF;--line:#ECE8E3;--ink:#1C1B2E;--ink-2:#4E4C63;--ink-3:#7D7A90;--brand:#DD4A42;--night:#1F2559;
-  --f-display:"Figtree",system-ui,sans-serif;--f-body:"Figtree",system-ui,sans-serif;color-scheme:light}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#13142A;--surface:#1B1D3A;--line:#2E3260;--ink:#F1F1FA;--ink-2:#C4C5DD;--ink-3:#9395B5;--brand:#FF7A6E;--night:#0E0F22;color-scheme:dark}}
-:root[data-theme="dark"]{--bg:#13142A;--surface:#1B1D3A;--line:#2E3260;--ink:#F1F1FA;--ink-2:#C4C5DD;--ink-3:#9395B5;--brand:#FF7A6E;--night:#0E0F22;color-scheme:dark}
+/* Layout: a single column of panels. Logo hero, the mark, the wordmark, logo files, palette, type, app icon,
+   school colours, usage rules and the greeting scenes. Colours from system/tokens.css; logo art keeps its fixed colours. */
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 var(--f-body);padding-inline:16px}
-.wrap{max-width:1040px;margin:0 auto;padding-block:40px 64px;display:flex;flex-direction:column;gap:28px}
-a{color:var(--brand);font-weight:600;text-decoration:none}
-h1{font:800 clamp(28px,4.5vw,40px)/1.1 var(--f-display);letter-spacing:-.02em;margin:0;text-wrap:balance}
-h2{font:800 22px/1.2 var(--f-display);margin:0 0 6px}
-p{margin:0;color:var(--ink-2);max-width:62ch}
-.eyebrow{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
-.panel{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:28px;display:flex;flex-direction:column;gap:18px}
-.hero{display:grid;grid-template-columns:1fr 1fr;border-radius:20px;overflow:hidden;border:1px solid var(--line)}
-.hero div{display:grid;place-items:center;padding:56px 24px;min-height:240px}
-.hero .light{background:#FFFFFF}.hero .dark{background:#1F2559}
-.hero img{width:min(340px,100%)}
-.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:28px;align-items:center}
-.construct svg{width:100%;max-width:380px;height:auto;display:block;margin:0 auto}
-.construct text{font:600 4.6px var(--f-body);fill:var(--ink-2)}
-.construct .guide{stroke:var(--ink-3);stroke-dasharray:3 3;fill:none;stroke-width:.6}
-.legend{display:flex;flex-direction:column;gap:12px}
+body{margin:0;background:var(--canvas);color:var(--ink);font:15px/1.6 var(--f-body);padding-inline:16px;-webkit-font-smoothing:antialiased}
+:focus-visible{outline:2px solid var(--focus);outline-offset:3px}
+a{color:var(--brand-text);font-weight:700;text-underline-offset:3px}
+.wrap{max-width:1080px;margin:0 auto;padding-block:24px 64px;display:flex;flex-direction:column;gap:26px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.back{display:inline-flex;align-items:center;gap:8px;height:38px;padding:0 14px 0 10px;border-radius:999px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);text-decoration:none;font-weight:700;font-size:14px}
+.back svg{width:16px;height:16px}
+.iconbtn{width:42px;height:42px;border-radius:50%;border:1.5px solid var(--line);background:var(--surface);color:var(--ink-2);display:grid;place-items:center;cursor:pointer}
+.iconbtn svg{width:19px;height:19px}
+h1{font:800 clamp(36px,5.4vw,58px)/.98 var(--f-display);letter-spacing:-.045em;margin:8px 0 12px;text-wrap:balance}
+h1 em{font-style:normal;background:var(--lime);color:var(--navy);border-radius:999px;padding:0 .22em;display:inline-block;transform:rotate(-2deg)}
+h2{font:800 26px/1.1 var(--f-display);letter-spacing:-.025em;margin:0 0 6px}
+h3{font:800 17px/1.2 var(--f-display);letter-spacing:-.015em;margin:0}
+p{margin:0;color:var(--ink-2);max-width:66ch}
+.eyebrow{font-size:11.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.9em;background:var(--surface-2);border-radius:6px;padding:1px 5px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:28px;display:flex;flex-direction:column;gap:20px;box-shadow:var(--shadow-sm);min-width:0}
+.hero{display:grid;grid-template-columns:1fr 1fr;border-radius:var(--r-lg);overflow:hidden;border:1px solid var(--line)}
+.hero div{display:grid;place-items:center;padding:60px 28px;min-height:250px}
+.hero .light{background:#F7F5F0}.hero .dark{background:#101632}
+.hero img{width:min(320px,100%)}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:30px;align-items:center}
+.construct svg{width:100%;max-width:400px;height:auto;display:block;margin:0 auto}
+.construct text{font:700 1.6px var(--f-body);fill:var(--ink-2)}
+.construct .guide{stroke:var(--ink-3);stroke-dasharray:.6 .6;fill:none;stroke-width:.12}
+.construct .dim{stroke:var(--ink-3);stroke-width:.1;fill:none}
+.legend{display:flex;flex-direction:column;gap:14px}
 .legend>div{display:flex;gap:12px;align-items:flex-start}
-.legend i{width:14px;height:14px;border-radius:4px;flex:none;margin-top:4px}
+.legend i{width:16px;height:16px;border-radius:5px;flex:none;margin-top:4px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.12)}
 .legend b{display:block}
 .legend span{color:var(--ink-3);font-size:13.5px}
-.swatches{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
-.sw{border:1px solid var(--line);border-radius:14px;overflow:hidden}
-.sw .c{height:84px}
-.sw .t{padding:10px 12px;font-size:13px}
-.sw .t b{display:block;font-size:14px}
-.sw code{font-size:12.5px;color:var(--ink-3)}
+.files{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr));gap:14px}
+.file{border:1px solid var(--line);border-radius:var(--r-sm);overflow:hidden;display:flex;flex-direction:column}
+.file .art{height:120px;display:grid;place-items:center;padding:18px}
+.file .art img{max-width:100%;max-height:100%}
+.file .t{padding:10px 12px;font-size:13px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:2px}
+.file .t b{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;color:var(--ink)}
+.file .t span{color:var(--ink-3)}
+.swatches{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr));gap:12px}
+.sw{border:1px solid var(--line);border-radius:var(--r-sm);overflow:hidden}
+.sw .c{height:92px;display:flex;align-items:flex-end;padding:10px 12px;font:800 22px var(--f-display);letter-spacing:-.02em}
+.sw .t{padding:10px 12px;font-size:13px;display:flex;flex-direction:column;gap:2px}
+.sw .t b{font-size:14px;color:var(--ink)}
+.sw .t code{background:none;padding:0;color:var(--ink-3)}
+.sw .t span{color:var(--ink-3)}
+.types{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:16px}
+.type{border:1px solid var(--line);border-radius:var(--r-sm);padding:22px;display:flex;flex-direction:column;gap:10px}
+.type .big{font-size:64px;line-height:1;letter-spacing:-.045em}
 .icons{display:flex;gap:28px;align-items:flex-end;flex-wrap:wrap}
 .icons figure{margin:0;display:flex;flex-direction:column;align-items:center;gap:8px;font-size:12.5px;color:var(--ink-3)}
-.phone{width:200px;max-width:100%;border-radius:28px;background:linear-gradient(160deg,#C9C4F5,#FDE7E5);padding:22px 18px;display:grid;grid-template-columns:repeat(4,1fr);gap:14px 10px}
-.phone span{aspect-ratio:1;border-radius:22%;background:rgba(255,255,255,.55)}
+.phone{width:210px;max-width:100%;border-radius:30px;background:linear-gradient(160deg,#FFE3EF,#DCF1FF);padding:24px 18px;display:grid;grid-template-columns:repeat(4,1fr);gap:14px 10px}
+.phone span{aspect-ratio:1;border-radius:22%;background:rgba(255,255,255,.6)}
 .phone img{width:100%;border-radius:22%}
-.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
-.rule{border:1px solid var(--line);border-radius:14px;overflow:hidden}
-.rule .demo{height:120px;display:grid;place-items:center;background:#FFFFFF;position:relative}
+.swap{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:14px}
+.school{border:1px solid var(--line);border-radius:var(--r);overflow:hidden;display:flex;flex-direction:column;background:var(--canvas)}
+.school .h{display:flex;align-items:center;gap:10px;padding:14px 16px;background:var(--surface);border-bottom:1px solid var(--line)}
+.school .h i{width:28px;height:28px;border-radius:50%;flex:none;box-shadow:inset 0 0 0 1px rgba(0,0,0,.15)}
+.school .h b{display:block;font-size:14.5px}.school .h small{color:var(--ink-3);font-size:12.5px}
+.school .demo{display:grid;grid-template-columns:96px 1fr;min-height:150px}
+.school .bar{background:var(--rail);padding:12px 8px;display:flex;flex-direction:column;gap:6px}
+.school .bar span{height:24px;border-radius:999px;font:700 11px/24px var(--f-body);padding:0 9px;color:var(--rail-ink-2);white-space:nowrap;overflow:hidden}
+.school .bar span.on{font-weight:800}
+.school .body{padding:14px;display:flex;flex-direction:column;gap:10px;align-items:flex-start;min-width:0}
+.school .btn{height:34px;padding:0 15px;border-radius:999px;font-weight:800;font-size:13px;border:0;display:inline-flex;align-items:center}
+.school .lnk{font-weight:700;font-size:13.5px;text-decoration:underline;text-underline-offset:3px}
+.school .chip{font-size:12px;font-weight:800;border-radius:999px;padding:3px 10px}
+.school .ratio{font-size:12px;color:var(--ink-3)}
+.rules-list{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;color:var(--ink-2)}
+.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:14px}
+.rule{border:1px solid var(--line);border-radius:var(--r-sm);overflow:hidden}
+.rule .demo{height:124px;display:grid;place-items:center;background:#F7F5F0;position:relative;overflow:hidden}
 .rule .demo img{width:150px}
-.rule .t{padding:10px 14px;font-size:13.5px;display:flex;gap:8px;align-items:center}
-.rule .t i{width:18px;height:18px;border-radius:50%;display:grid;place-items:center;color:#fff;font-style:normal;font-size:11px;font-weight:700;flex:none}
-.ok{background:#1F8A5B}.no{background:#D13A3A}
-.clear{outline:1.5px dashed #8B7CF6;outline-offset:14px}
-@media (max-width:760px){.hero,.two{grid-template-columns:1fr}.panel{padding:20px}}
-.gs-grid{display:grid;grid-template-columns:200px minmax(0,1fr) minmax(0,1fr);gap:12px 14px;align-items:center}
-.gs-h{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.rule .t{padding:10px 14px;font-size:13.5px;display:flex;gap:9px;align-items:center;color:var(--ink-2)}
+.rule .t i{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-style:normal;flex:none}
+.rule .t i svg{width:12px;height:12px}
+.ok{background:var(--good-soft);color:var(--good)}.no{background:var(--bad-soft);color:var(--bad)}
+.clear{outline:1.5px dashed #FF6FAE;outline-offset:14px}
+.gs-grid{display:grid;grid-template-columns:190px minmax(0,1fr) minmax(0,1fr);gap:12px 14px;align-items:center}
+.gs-h{font-size:11.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
 .gs-l b{display:block;font-size:16px}.gs-l small{display:block;color:var(--ink-2);font-size:12.5px;line-height:1.45}
 .gs-f{margin:0;position:relative;border-radius:16px;overflow:hidden;aspect-ratio:1200/320;border:1px solid var(--line)}
-.gs-f img{width:100%;height:100%;display:block;object-fit:cover}
-.gs-f figcaption{position:absolute;left:4%;top:12%;font-weight:800;font-size:clamp(13px,1.6vw,20px)}
-.gs-f.lt figcaption{color:#1C1B2E}.gs-f.dk figcaption{color:#F1F1FA}
+.gs-f svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.gs-f figcaption{position:absolute;left:5%;top:14%;font:800 clamp(13px,1.7vw,21px)/1.1 var(--f-display);letter-spacing:-.02em}
+.gs-f.lt{--surface:#FFFFFF;--ink-3:#5A5F7B;--c1:#E0478A;--c2:#4048B8;--c3:#1F8ACF;--c4:#D9640B;--c5:#4E8A12;--rail:#101632}
+.gs-f.lt figcaption{color:#101632}
+.gs-f.dk{--surface:#101632;--ink-3:#A9ACC8;--c1:#FF6FAE;--c2:#8C93FF;--c3:#59C3FF;--c4:#FF9B45;--c5:#C8F169;--rail:#0A0D24;border-color:#2F3870}
+.gs-f.dk figcaption{color:#F7F5F0}
 .gs-icons{display:flex;flex-wrap:wrap;gap:18px}
 .gs-icons>div{display:grid;grid-template-columns:auto auto;column-gap:10px;align-items:center}
 .gs-icons small{grid-column:2;color:var(--ink-3);font-size:12px}
 .gi{grid-row:span 2;width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:var(--surface-2)}
 .gs-try{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:14px;color:var(--ink-2)}
-.gs-try button{font:700 13.5px inherit;font-family:inherit;padding:7px 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
-.gs-try button:hover{border-color:var(--ink-3)}
-@media (max-width:760px){.gs-grid{grid-template-columns:1fr}.gs-h{display:none}}
+.gs-try button{font:700 13.5px var(--f-body);height:36px;padding:0 14px;border-radius:999px;border:1.5px solid var(--line-strong);background:var(--surface);color:var(--ink);cursor:pointer}
+.gs-try button:hover{background:var(--surface-2)}
+.cta{display:flex;align-items:center;gap:16px;background:var(--navy);color:var(--on-navy);border-radius:var(--r-lg);padding:24px 28px;flex-wrap:wrap}
+:root[data-theme="dark"] .cta{background:var(--navy-2);box-shadow:inset 0 0 0 1px var(--navy-line)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .cta{background:var(--navy-2);box-shadow:inset 0 0 0 1px var(--navy-line)}}
+.cta div{flex:1;min-width:220px}
+.cta b{font:800 22px/1.15 var(--f-display);letter-spacing:-.02em;display:block}
+.cta p{color:var(--on-navy-2)}
+.cta a{display:inline-flex;align-items:center;gap:8px;height:42px;padding:0 18px;border-radius:999px;background:var(--lime);color:var(--navy);text-decoration:none;font-weight:800}
+@media (max-width:760px){.hero,.two{grid-template-columns:1fr}.panel{padding:20px}.gs-grid{grid-template-columns:1fr}.gs-h{display:none}.type .big{font-size:48px}}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <header style="display:flex;flex-direction:column;gap:10px"><a href="index.html">← All prototypes</a><div class="eyebrow">Brand guidelines · v2</div><h1>The Quad logo</h1>
-  <p>A quad is the courtyard at the heart of a campus, where everyone crosses paths. The mark is four soft tiles, one each for the school, teachers, parents and students, set close together around a shared centre. The last tile has a tail, which turns the square into a Q.</p></header>
+  <header style="display:flex;flex-direction:column;gap:8px">
+    <div class="top"><a class="back" href="index.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>All prototypes</a><button class="iconbtn" id="themeBtn" type="button" aria-label="Switch to dark mode"></button></div>
+    <p class="eyebrow" style="margin-top:14px">Brand guide · v3</p>
+    <h1>The Quad <em>brand</em></h1>
+    <p>A quad is the courtyard at the heart of a campus, where everyone crosses paths. The mark is four soft petals around a shared centre: the teachers, the family, the people who care for a child, and the child. Navy, cream and four bright accents, Bricolage Grotesque headings and flat, friendly people carry it from the public site into every app.</p>
+  </header>
 
-  <div class="hero"><div class="light"><img src="brand/quad-logo.svg" alt="Quad logo on white"></div><div class="dark"><img src="brand/quad-logo-white.svg" alt="Quad logo on indigo"></div></div>
+  <main style="display:flex;flex-direction:column;gap:26px">
+  <div class="hero"><div class="light"><img src="brand/quad-logo.svg" alt="Quad logo on cream"></div><div class="dark"><img src="brand/quad-logo-white.svg" alt="Quad logo on navy"></div></div>
 
-  <section class="panel two construct">
-    <svg viewBox="-22 -2 108 72" role="img" aria-label="Construction of the Quad mark">
-      <path class="guide" d="M9 4v58M30 4v58M34 4v58M55 4v58M4 9h58M4 30h58M4 34h58M4 55h58"/><rect x="9" y="9" width="21" height="21" rx="7" fill="#1F2559"/><rect x="34" y="9" width="21" height="21" rx="7" fill="#8B7CF6"/><rect x="9" y="34" width="21" height="21" rx="7" fill="#8B7CF6"/><rect x="34" y="34" width="21" height="21" rx="7" fill="#E5534B"/><path d="M49 49l9 9" stroke="#E5534B" stroke-width="7" stroke-linecap="round"/><text x="7" y="20.6" text-anchor="end">School</text><text x="58" y="20.6">Teachers</text><text x="7" y="45.6" text-anchor="end">Parents</text><text x="62" y="45.6">Students</text>
+  <section class="panel two construct" aria-labelledby="h-mark">
+    <svg viewBox="-12 -4 54 40" role="img" aria-label="How the Quad mark is built: four petals on a 30-unit grid with a 3-unit gap">
+      <path class="guide" d="M0 -2v34M13.5 -2v34M16.5 -2v34M30 -2v34M-2 0h34M-2 13.5h34M-2 16.5h34M-2 30h34"/>
+      <path d="M0 10A10 10 0 0 1 10 0A3.5 3.5 0 0 1 13.5 3.5V10A3.5 3.5 0 0 1 10 13.5H3.5A3.5 3.5 0 0 1 0 10Z" fill="#59C3FF"/><path d="M0 10A10 10 0 0 1 10 0A3.5 3.5 0 0 1 13.5 3.5V10A3.5 3.5 0 0 1 10 13.5H3.5A3.5 3.5 0 0 1 0 10Z" fill="#FF6FAE" transform="translate(30 0) scale(-1 1)"/><path d="M0 10A10 10 0 0 1 10 0A3.5 3.5 0 0 1 13.5 3.5V10A3.5 3.5 0 0 1 10 13.5H3.5A3.5 3.5 0 0 1 0 10Z" fill="#C8F169" transform="translate(0 30) scale(1 -1)"/><path d="M0 10A10 10 0 0 1 10 0A3.5 3.5 0 0 1 13.5 3.5V10A3.5 3.5 0 0 1 10 13.5H3.5A3.5 3.5 0 0 1 0 10Z" fill="#FF9B45" transform="translate(30 30) scale(-1 -1)"/>
+      <text x="-1.2" y="7.4" text-anchor="end">Teachers</text><text x="31.2" y="7.4">Family</text><text x="-1.2" y="24" text-anchor="end">Care</text><text x="31.2" y="24">The child</text>
+      <text x="15" y="35" text-anchor="middle">30 units · petals 13.5 · gap 3</text>
     </svg>
-    <div style="display:flex;flex-direction:column;gap:16px"><div><h2>How the mark is built</h2><p>Four squares, 21 units each with 7-unit rounded corners, on a 64-unit grid with a 4-unit gap.</p></div>
+    <div style="display:flex;flex-direction:column;gap:16px"><div><h2 id="h-mark">How the mark is built</h2><p>Four petals on a 30-unit grid. Each is a 13.5-unit square with a 10-unit round outer corner and 3.5-unit inner corners, mirrored into the four quarters with a 3-unit gap, so the centre stays open.</p></div>
     <div class="legend">
-      <div><i style="background:#1F2559"></i><div><b>The school</b><span>The indigo tile, top left, where reading starts.</span></div></div>
-      <div><i style="background:#8B7CF6"></i><div><b>Teachers and parents</b><span>Two lilac tiles, side by side with the school and the child.</span></div></div>
-      <div><i style="background:#E5534B"></i><div><b>Students, and the tail</b><span>The coral tile is the child, the reason for everything else. Its tail turns the square into a Q and points outward.</span></div></div>
+      <div><i style="background:#59C3FF"></i><div><b>Sky · teachers</b><span>Top left, where reading starts. Sky marks teaching across the product.</span></div></div>
+      <div><i style="background:#FF6FAE"></i><div><b>Pink · family</b><span>Top right. Pink is the parent side, from the landing page’s parent view to the Quad app’s welcome.</span></div></div>
+      <div><i style="background:#C8F169"></i><div><b>Lime · care</b><span>Bottom left: the coach, the nurse and everyone else who looks out for a child. Lime is also the schools’ accent and the highlight.</span></div></div>
+      <div><i style="background:#FF9B45"></i><div><b>Orange · the child</b><span>Bottom right, closest to the reader’s hand: the reason for everything else.</span></div></div>
     </div></div>
   </section>
 
-  <section class="panel"><div><h2>Wordmark</h2><p>Custom lowercase letters drawn with an even 9-unit stroke in Quad Indigo. The q, a and d share one bowl, so the word looks as calm and even as the four tiles. The letters are drawn as shapes, so they look the same everywhere with no font installed.</p></div></section>
+  <section class="panel" aria-labelledby="h-word"><div><h2 id="h-word">Wordmark</h2><p>Lowercase “quad” in Bricolage Grotesque ExtraBold, tightly spaced and outlined as shapes, so it looks the same everywhere with no font installed. Navy <code>#101632</code> on light backgrounds and cream <code>#F7F5F0</code> on dark ones. The petals keep their colours on both.</p></div></section>
 
-  <section class="panel"><div><h2>Colour</h2><p>The same tokens as the admin and parent apps.</p></div>
-    <div class="swatches">
-      <div class="sw"><div class="c" style="background:#1F2559"></div><div class="t"><b>Quad Indigo</b><code>#1F2559</code></div></div>
-      <div class="sw"><div class="c" style="background:#E5534B"></div><div class="t"><b>Coral</b><code>#E5534B</code></div></div>
-      <div class="sw"><div class="c" style="background:#8B7CF6"></div><div class="t"><b>Lilac</b><code>#8B7CF6</code></div></div>
-      <div class="sw"><div class="c" style="background:#FAF8F5"></div><div class="t"><b>Paper</b><code>#FAF8F5</code></div></div>
-      <div class="sw"><div class="c" style="background:#1C1B2E"></div><div class="t"><b>Ink</b><code>#1C1B2E</code></div></div>
+  <section class="panel" aria-labelledby="h-files"><div><h2 id="h-files">Logo files</h2><p>All in <code>design/brand/</code> as SVG, so they scale to any size.</p></div>
+    <div class="files">
+      <div class="file"><div class="art" style="background:#F7F5F0"><img src="brand/quad-logo.svg" alt="Full logo, colour"></div><div class="t"><b>quad-logo.svg</b><span>Full logo for light backgrounds</span></div></div>
+      <div class="file"><div class="art" style="background:#101632"><img src="brand/quad-logo-white.svg" alt="Full logo, for dark backgrounds"></div><div class="t"><b>quad-logo-white.svg</b><span>Full logo for navy and dark</span></div></div>
+      <div class="file"><div class="art" style="background:#F7F5F0"><img src="brand/quad-mark.svg" alt="The mark" style="height:72px"></div><div class="t"><b>quad-mark.svg</b><span>The mark alone, for avatars and tight spaces</span></div></div>
+      <div class="file"><div class="art" style="background:#FF6FAE"><img src="brand/quad-mark-white.svg" alt="The mark in white" style="height:72px"></div><div class="t"><b>quad-mark-white.svg</b><span>All white, for one-colour use</span></div></div>
+      <div class="file"><div class="art" style="background:var(--surface-2)"><img src="brand/quad-app-icon.svg" alt="App icon" style="height:84px"></div><div class="t"><b>quad-app-icon.svg</b><span>App icon and favicon</span></div></div>
     </div>
   </section>
 
-  <section class="panel two"><div><h2>App icon</h2><p>The light version of the mark on Quad Indigo, for the parent app, browser tabs and the home-screen shortcut for the staff portal. The tiles stay clear down to 16 px.</p></div>
-    <div class="icons"><figure><div class="phone"><span></span><span></span><img src="brand/quad-app-icon.svg" alt="Quad app icon"><span></span><span></span><span></span><span></span><span></span></div>Home screen</figure>
+  <section class="panel" aria-labelledby="h-colour"><div><h2 id="h-colour">Colour</h2><p>Navy and cream do most of the work. The four accents are for categories, people and illustrations, and lime and pink mark the two audiences: lime for schools, pink for parents. Status colours (green, orange, red, blue) and every other value are in the <a href="system.html#colour">app design system</a>.</p></div>
+    <div class="swatches">
+      <div class="sw"><div class="c" style="background:#101632;color:#F7F5F0">Aa</div><div class="t"><b>Navy</b><code>#101632</code><span>Text, side bars, hero cards</span></div></div>
+      <div class="sw"><div class="c" style="background:#F7F5F0;color:#101632">Aa</div><div class="t"><b>Cream</b><code>#F7F5F0</code><span>Pages; text on navy</span></div></div>
+      <div class="sw"><div class="c" style="background:#C8F169;color:#101632">Aa</div><div class="t"><b>Lime</b><code>#C8F169</code><span>Schools, care, highlights</span></div></div>
+      <div class="sw"><div class="c" style="background:#FF6FAE;color:#101632">Aa</div><div class="t"><b>Pink</b><code>#FF6FAE</code><span>Parents and family</span></div></div>
+      <div class="sw"><div class="c" style="background:#59C3FF;color:#101632">Aa</div><div class="t"><b>Sky</b><code>#59C3FF</code><span>Teaching</span></div></div>
+      <div class="sw"><div class="c" style="background:#FF9B45;color:#101632">Aa</div><div class="t"><b>Orange</b><code>#FF9B45</code><span>The child, students</span></div></div>
+    </div>
+    <p style="font-size:13.5px">The accents always carry navy text. As text on cream or white they are too light, so the apps use their deeper <code>-ink</code> versions.</p>
+  </section>
+
+  <section class="panel" aria-labelledby="h-type"><div><h2 id="h-type">Type</h2><p>Two families from Google Fonts, self-hosted in the apps.</p></div>
+    <div class="types">
+      <div class="type"><span class="eyebrow">Display and headings</span><span class="big" style="font-family:var(--f-display);font-weight:800">Bricolage</span><p><b style="color:var(--ink)">Bricolage Grotesque</b>, weights 600–800 with optical sizing. Greetings, page and card titles, big numbers and the wordmark. Tight tracking (−0.02 to −0.045em).</p></div>
+      <div class="type"><span class="eyebrow">Body and interface</span><span class="big" style="font-family:var(--f-body);font-weight:700;letter-spacing:-.02em">Figtree</span><p><b style="color:var(--ink)">Figtree</b>, weights 400–800. Everything people read and fill in: paragraphs, tables, forms, labels and buttons. Tabular figures in tables.</p></div>
+    </div>
+  </section>
+
+  <section class="panel two" aria-labelledby="h-icon"><div><h2 id="h-icon">App icon</h2><p>The colour mark on navy, for the parent app (one Quad app for every school), browser tabs and the staff portal’s home-screen shortcut. The petals stay clear down to 16 px. Development and staging builds add a small “DEV” or “STG” badge.</p></div>
+    <div class="icons"><figure><div class="phone"><span></span><span></span><img src="brand/quad-app-icon.svg" alt="Quad app icon on a home screen"><span></span><span></span><span></span><span></span><span></span></div>Home screen</figure>
     <figure><img src="brand/quad-app-icon.svg" width="64" alt="">64 px</figure><figure><img src="brand/quad-app-icon.svg" width="32" alt="">32 px</figure><figure><img src="brand/quad-app-icon.svg" width="16" alt="">16 px</figure></div>
   </section>
 
-  <section class="panel"><div><h2>Using the logo</h2></div>
+  <section class="panel" aria-labelledby="h-swap"><div><h2 id="h-swap">Schools’ own colours</h2><p>Each school picks one colour in the console. Inside its staff portal and in the Quad parent app after sign-in, that colour replaces Quad’s on buttons, the active item and selected things. Quad’s navy, the petals and the type stay. A school that hasn’t picked a colour gets Quad lime.</p></div>
+    <div class="swap" id="swap"></div>
+    <ol class="rules-list">
+      <li>Text on a school-coloured button is white when the colour can carry it, otherwise navy. The colour is then darkened or lightened only as far as needed for 4.5:1.</li>
+      <li>Links, icons and selected text use a deeper or lighter version of the colour that reads 4.5:1 on every surface.</li>
+      <li>In dark mode a deep colour is lifted so buttons still stand out from the card.</li>
+      <li>The side bar stays Quad navy for every school; its active item is the school’s colour, lifted to stand out from navy.</li>
+      <li>Focus rings are always blue, so they never disappear into a school’s colour.</li>
+      <li>Before a school is known (the parent app’s welcome and sign-in, the staff sign-in), screens are Quad-branded: navy, petals and pink for parents or lime for schools.</li>
+    </ol>
+  </section>
+
+  <section class="panel" aria-labelledby="h-use"><div><h2 id="h-use">Using the logo</h2></div>
     <div class="rules">
-      <div class="rule"><div class="demo"><img class="clear" src="brand/quad-logo.svg" alt=""></div><div class="t"><i class="ok">✓</i>Leave clear space around the logo at least the height of the letters</div></div>
-      <div class="rule"><div class="demo" style="background:#1F2559"><img src="brand/quad-logo-white.svg" alt=""></div><div class="t"><i class="ok">✓</i>Use the white version on indigo, dark colours or photos</div></div>
-      <div class="rule"><div class="demo"><img src="brand/quad-logo.svg" alt="" style="transform:scaleX(1.4)"></div><div class="t"><i class="no">✕</i>Don’t stretch or squash it</div></div>
-      <div class="rule"><div class="demo"><img src="brand/quad-logo.svg" alt="" style="filter:hue-rotate(140deg)"></div><div class="t"><i class="no">✕</i>Don’t recolour the tiles</div></div>
-      <div class="rule"><div class="demo"><img src="brand/quad-logo.svg" alt="" style="transform:rotate(-12deg)"></div><div class="t"><i class="no">✕</i>Don’t rotate it. The tail must stay at the bottom right</div></div>
-      <div class="rule"><div class="demo" style="background:#3B4AA8"><img src="brand/quad-logo.svg" alt=""></div><div class="t"><i class="no">✕</i>Don’t put the colour logo on indigo or blue</div></div>
+      <div class="rule"><div class="demo"><img class="clear" src="brand/quad-logo.svg" alt=""></div><div class="t"><i class="ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></i>Leave clear space at least the height of the petals</div></div>
+      <div class="rule"><div class="demo" style="background:#101632"><img src="brand/quad-logo-white.svg" alt=""></div><div class="t"><i class="ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></i>Use the white wordmark on navy, dark colours or photos</div></div>
+      <div class="rule"><div class="demo"><img src="brand/quad-logo.svg" alt="" style="transform:scaleX(1.4)"></div><div class="t"><i class="no"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></i>Don’t stretch or squash it</div></div>
+      <div class="rule"><div class="demo"><img src="brand/quad-logo.svg" alt="" style="filter:hue-rotate(140deg)"></div><div class="t"><i class="no"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></i>Don’t recolour the petals, even in a school’s colour</div></div>
+      <div class="rule"><div class="demo"><img src="brand/quad-logo.svg" alt="" style="transform:rotate(-12deg)"></div><div class="t"><i class="no"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></i>Don’t rotate it. Sky always sits top left</div></div>
+      <div class="rule"><div class="demo" style="background:#FF6FAE"><img src="brand/quad-logo.svg" alt=""></div><div class="t"><i class="no"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></i>Don’t put the colour logo on an accent colour; use the white mark</div></div>
     </div>
   </section>
 
-  <section class="panel" id="greeting"><div><h2>Greeting by time of day</h2><p>Home screens greet people with the right words and a scene for the time of day: the school’s time zone on the web, the phone’s time in the parent app. Each scene comes in light and dark. Text always sits on the calm left side.</p></div>
-    <div class="gs-grid">
-      <div class="gs-h"></div><b class="gs-h">Light</b><b class="gs-h">Dark</b>
-      <div class="gs-l"><b>Morning</b><small>05:00–11:59 · “Good morning”</small><small>The sun rises over the hills</small></div><figure class="gs-f lt"><img src="brand/greeting/morning-light.svg" alt="Morning scene, light"><figcaption>Good morning, Prishan</figcaption></figure><figure class="gs-f dk"><img src="brand/greeting/morning-dark.svg" alt="Morning scene, dark"><figcaption>Good morning, Prishan</figcaption></figure><div class="gs-l"><b>Afternoon</b><small>12:00–16:59 · “Good afternoon”</small><small>High sun and a few clouds</small></div><figure class="gs-f lt"><img src="brand/greeting/afternoon-light.svg" alt="Afternoon scene, light"><figcaption>Good afternoon, Prishan</figcaption></figure><figure class="gs-f dk"><img src="brand/greeting/afternoon-dark.svg" alt="Afternoon scene, dark"><figcaption>Good afternoon, Prishan</figcaption></figure><div class="gs-l"><b>Evening</b><small>17:00–19:59 · “Good evening”</small><small>The sun sets behind the hills</small></div><figure class="gs-f lt"><img src="brand/greeting/evening-light.svg" alt="Evening scene, light"><figcaption>Good evening, Prishan</figcaption></figure><figure class="gs-f dk"><img src="brand/greeting/evening-dark.svg" alt="Evening scene, dark"><figcaption>Good evening, Prishan</figcaption></figure><div class="gs-l"><b>Night</b><small>20:00–04:59 · “Good evening”, then “Hello” after midnight</small><small>Moon and stars</small></div><figure class="gs-f lt"><img src="brand/greeting/night-light.svg" alt="Night scene, light"><figcaption>Good evening, Prishan</figcaption></figure><figure class="gs-f dk"><img src="brand/greeting/night-dark.svg" alt="Night scene, dark"><figcaption>Good evening, Prishan</figcaption></figure>
-    </div>
-    <div class="gs-icons"><div><span class="gi gi-morning"><img src="brand/greeting/icon-morning.svg" alt="" width="22" height="22"></span><b>Morning</b><small>icon-morning.svg</small></div><div><span class="gi gi-afternoon"><img src="brand/greeting/icon-afternoon.svg" alt="" width="22" height="22"></span><b>Afternoon</b><small>icon-afternoon.svg</small></div><div><span class="gi gi-evening"><img src="brand/greeting/icon-evening.svg" alt="" width="22" height="22"></span><b>Evening</b><small>icon-evening.svg</small></div><div><span class="gi gi-night"><img src="brand/greeting/icon-night.svg" alt="" width="22" height="22"></span><b>Night</b><small>icon-night.svg</small></div></div>
-    <div class="gs-try"><span>See it in the apps:</span><button type="button" data-gs-try="morning">Morning</button><button type="button" data-gs-try="afternoon">Afternoon</button><button type="button" data-gs-try="evening">Evening</button><button type="button" data-gs-try="night">Night</button><button type="button" data-gs-try="">Use the real time</button></div>
+  <section class="panel" id="greeting" aria-labelledby="h-greet"><div><h2 id="h-greet">Greeting by time of day</h2><p>Home screens greet people with the right words and a scene for the time of day: the school’s time zone on the web, the phone’s time in the parent app. In the apps the scene sits on the navy story card. The scenes below are drawn live by <code>brand/greeting/scenes.js</code> in the new palette, on cream and on navy.</p></div>
+    <div class="gs-grid" id="gsGrid"><div class="gs-h"></div><b class="gs-h">On cream</b><b class="gs-h">On navy</b></div>
+    <div class="gs-icons"><div><span class="gi"><img src="brand/greeting/icon-morning.svg" alt="" width="22" height="22"></span><b>Morning</b><small>icon-morning.svg</small></div><div><span class="gi"><img src="brand/greeting/icon-afternoon.svg" alt="" width="22" height="22"></span><b>Afternoon</b><small>icon-afternoon.svg</small></div><div><span class="gi"><img src="brand/greeting/icon-evening.svg" alt="" width="22" height="22"></span><b>Evening</b><small>icon-evening.svg</small></div><div><span class="gi"><img src="brand/greeting/icon-night.svg" alt="" width="22" height="22"></span><b>Night</b><small>icon-night.svg</small></div></div>
+    <div class="gs-try"><span>See it in the staff portal:</span><button type="button" data-gs-try="morning">Morning</button><button type="button" data-gs-try="afternoon">Afternoon</button><button type="button" data-gs-try="evening">Evening</button><button type="button" data-gs-try="night">Night</button><button type="button" data-gs-try="">Use the real time</button></div>
   </section>
-  <section class="panel"><div><h2>Files</h2><p>All in <code>design/brand/</code> as SVG, so they scale to any size.</p></div>
-    <div class="legend">
-      <div><i style="background:#1F2559"></i><div><b>quad-logo.svg</b><span>Full logo for light backgrounds</span></div></div>
-      <div><i style="background:#8B7CF6"></i><div><b>quad-logo-white.svg</b><span>Full logo for dark backgrounds</span></div></div>
-      <div><i style="background:#E5534B"></i><div><b>quad-mark.svg · quad-mark-white.svg</b><span>The mark alone, for avatars and tight spaces</span></div></div>
-      <div><i style="background:#1F2559"></i><div><b>quad-app-icon.svg</b><span>1024 × 1024 app icon and favicon</span></div></div>
-      <div><i style="background:#F2A93B"></i><div><b>greeting/</b><span>Time-of-day scenes (morning, afternoon, evening, night × light, dark) as SVG and PNG (1200 × 320, @1x and @2x), 24 px icons, and scenes.js, the source the apps use</span></div></div>
-    </div>
-  </section>
+
+  <div class="cta"><div><b>Building a screen?</b><p>Tokens, components and the full rules for school colours are in the app design system.</p></div><a href="system.html">Open the design system <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+  </main>
 </div>
+<script src="system/brand.js"></script>
+<script src="brand/greeting/scenes.js"></script>
 <script>
-document.addEventListener('click', e => { const b = e.target.closest('[data-gs-try]'); if (!b) return; const k = b.dataset.gsTry;
-  try { if (k) sessionStorage.setItem('quad-greet-period', k); else sessionStorage.removeItem('quad-greet-period'); } catch (er) {}
-  location.href = 'admin.html#dashboard'; });
+(() => {
+  const $ = id => document.getElementById(id);
+  const dark = () => { const t = document.documentElement.dataset.theme; return t ? t === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches; };
+
+  /* Three sample schools through system/brand.js */
+  const SCHOOLS = [['Greenfield International', 'The demo school', '#1B7F53'], ['St. Clare’s Academy', 'A deep maroon', '#7A1F3D'], ['A school with no colour yet', 'Quad lime, the default', '#C8F169']];
+  function paintSwap() {
+    const m = dark() ? 'dark' : 'light';
+    $('swap').innerHTML = SCHOOLS.map(([n, sub, c]) => { const d = QuadBrand.deriveBrand(c, m);
+      return `<div class="school"><div class="h"><i style="background:${c}"></i><div><b>${n}</b><small>${sub} · <code>${c}</code></small></div></div>
+        <div class="demo" aria-hidden="true"><div class="bar"><span class="on" style="background:${d.railActive};color:${d.railInk}">Today</span><span>Students</span><span>Fees</span></div>
+        <div class="body"><span class="btn" style="background:${d.fill};color:${d.ink}">Take attendance</span><span class="lnk" style="color:${d.text}">See who needs you</span><span class="chip" style="background:${d.soft};color:${d.text}">Your class</span>
+        <span class="ratio">Button ${d.checks.ink}:1 · link ${d.checks.text}:1</span></div></div></div>`; }).join('');
+  }
+
+  /* Time-of-day scenes, live from scenes.js, coloured by the scoped tokens */
+  const ROWS = [['morning', '05:00–11:59 · “Good morning”', 'The sun rises over the hills', 'Good morning, Emma'], ['afternoon', '12:00–16:59 · “Good afternoon”', 'High sun and a few clouds', 'Good afternoon, Emma'], ['evening', '17:00–19:59 · “Good evening”', 'The sun sets behind the hills', 'Good evening, Emma'], ['night', '20:00–04:59 · “Good evening”, then “Hello” after midnight', 'Moon and stars', 'Good evening, Emma']];
+  $('gsGrid').insertAdjacentHTML('beforeend', ROWS.map(([k, when, what, say]) => `<div class="gs-l"><b>${k[0].toUpperCase() + k.slice(1)}</b><small>${when}</small><small>${what}</small></div>`
+    + ['lt', 'dk'].map(v => `<figure class="gs-f ${v}" role="img" aria-label="${k} scene ${v === 'lt' ? 'on cream' : 'on navy'}">${greetScene(k, 'gs-' + k + v)}<figcaption>${say}</figcaption></figure>`).join('')).join(''));
+  document.addEventListener('click', e => { const b = e.target.closest('[data-gs-try]'); if (!b) return; const k = b.dataset.gsTry;
+    try { if (k) sessionStorage.setItem('quad-greet-period', k); else sessionStorage.removeItem('quad-greet-period'); } catch (er) {}
+    location.href = 'admin.html#dashboard'; });
+
+  /* Theme */
+  const btn = $('themeBtn');
+  const paint = () => { const d = dark(); btn.setAttribute('aria-label', d ? 'Switch to light mode' : 'Switch to dark mode');
+    btn.innerHTML = d ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></svg>'
+      : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5Z"/></svg>'; paintSwap(); };
+  btn.onclick = () => { const t = dark() ? 'light' : 'dark'; document.documentElement.dataset.theme = t; try { localStorage.setItem('quad-theme', t); } catch (e) {} paint(); };
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', paint); paint();
+})();
 </script>
 </body>
 </html>
