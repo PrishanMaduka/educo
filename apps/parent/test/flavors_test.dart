@@ -37,6 +37,8 @@ void main() {
           expect(block, contains('applicationIdSuffix = "$suffix"'));
         }
         expect(block, contains('resValue("string", "app_name", "$name")'));
+        // AGP 9 disables custom resource values unless the feature is on.
+        expect(gradle, contains('resValues = true'));
       });
 
       for (final mode in ['Debug', 'Release', 'Profile']) {
