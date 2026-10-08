@@ -24,6 +24,9 @@ export function localEnv(overrides: Record<string, string | undefined> = {}): No
     SESSION_SECRET: 'test-session-secret-test-session-secret',
     LINK_SIGNING_SECRET: 'test-link-signing-secret-test-link-secret',
     FIELD_ENCRYPTION_KEY: 'test-field-encryption-key-test-field-key',
+    // Email must be chosen outside local; Mailpit's compose port, as in .env.example.
+    EMAIL_PROVIDER: 'smtp',
+    SMTP_URL: 'smtp://localhost:1025',
     ...TEST_JWT_KEYS,
     ...overrides,
   };

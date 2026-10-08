@@ -113,9 +113,7 @@ describe('the SES adapter (fake client; real sends are checked on staging, D19)'
 
 describe('choosing the email provider', () => {
   it('uses EMAIL_PROVIDER when set, SMTP when only SMTP_URL is set, and none otherwise', () => {
-    expect(emailProviderOf(loadConfig(localEnv({ SMTP_URL: 'smtp://localhost:1025' })))).toBe(
-      'smtp',
-    );
+    expect(emailProviderOf(loadConfig(localEnv({ EMAIL_PROVIDER: undefined })))).toBe('smtp');
     expect(
       emailProviderOf(
         loadConfig(
@@ -127,7 +125,9 @@ describe('choosing the email provider', () => {
         ),
       ),
     ).toBe('ses');
-    expect(emailProviderOf(loadConfig(localEnv()))).toBeNull();
+    expect(
+      emailProviderOf(loadConfig(localEnv({ EMAIL_PROVIDER: undefined, SMTP_URL: undefined }))),
+    ).toBeNull();
   });
 
   it('builds the adapter for the provider', async () => {
@@ -148,7 +148,9 @@ describe('choosing the email provider', () => {
   });
 
   it('refuses every send while email is off', async () => {
-    const transport = await createEmailTransport(loadConfig(localEnv()));
+    const transport = await createEmailTransport(
+      loadConfig(localEnv({ EMAIL_PROVIDER: undefined, SMTP_URL: undefined })),
+    );
     await expect(transport.send(buildEmailMessage(INVITE, SETTINGS))).rejects.toThrow(
       /EMAIL_PROVIDER/,
     );

@@ -31,7 +31,7 @@ describe('email and SMS settings at boot', () => {
   });
 
   it('refuses EMAIL_PROVIDER=smtp without SMTP_URL', () => {
-    expect(problemsOf(localEnv({ EMAIL_PROVIDER: 'smtp' }))).toEqual([
+    expect(problemsOf(localEnv({ EMAIL_PROVIDER: 'smtp', SMTP_URL: undefined }))).toEqual([
       'SMTP_URL is missing (EMAIL_PROVIDER=smtp needs it)',
     ]);
   });
@@ -42,6 +42,15 @@ describe('email and SMS settings at boot', () => {
       'EMAIL_FROM_DOMAIN is missing (EMAIL_PROVIDER=ses needs it)',
     ]);
   });
+
+  it.each(['staging', 'production'])(
+    'refuses an unset EMAIL_PROVIDER on %s, and allows it locally',
+    (appEnv) => {
+      const env = productionEnv({ APP_ENV: appEnv, EMAIL_PROVIDER: undefined });
+      expect(problemsOf(env)).toEqual(['EMAIL_PROVIDER must be set outside local (smtp or ses)']);
+      expect(problemsOf(localEnv({ EMAIL_PROVIDER: undefined }))).toEqual([]);
+    },
+  );
 
   it('refuses SMS_PROVIDER=live until live SMS ships in M6 (OQ12)', () => {
     expect(problemsOf(localEnv({ SMS_PROVIDER: 'live' }))).toEqual([

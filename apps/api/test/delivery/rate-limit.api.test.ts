@@ -93,6 +93,20 @@ describe('the global rate-limit interceptor', () => {
     },
   );
 
+  it('shares one per-IP bucket across every sign-in route (spec 06)', async () => {
+    clockMs = T0;
+    const ip = randomIp();
+    for (let call = 1; call <= 20; call += 1) {
+      const url = call % 2 === 0 ? '/api/v1/auth/probe' : '/api/v1/platform/auth/probe';
+      expect((await post(url, ip)).statusCode).toBe(201);
+    }
+    for (const url of ['/api/v1/auth/probe', '/api/v1/platform/auth/probe']) {
+      const refused = await post(url, ip);
+      expect(refused.statusCode).toBe(429);
+      expect(refused.json()).toMatchObject({ code: 'rate_limited' });
+    }
+  });
+
   it('does not limit other routes per IP', async () => {
     clockMs = T0;
     const ip = randomIp();

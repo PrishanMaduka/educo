@@ -19,12 +19,18 @@ export const JobIdSchema = z
   .refine((id) => !/^\d+$/.test(id), { message: 'must not be all digits' });
 
 /**
+ * How long a failed job stays in Redis to inspect. Its parameters can hold a secret (a signed
+ * link or a one-time code), so it is kept a day at most, not for the link's whole life.
+ */
+export const FAILED_JOB_KEEP_SECONDS = 24 * 60 * 60;
+
+/**
  * Five tries over about 15 minutes. A sent job is removed at once, so its address and content
- * leave Redis; a failed one is kept a week to inspect, then removed.
+ * leave Redis; a failed one is removed after `FAILED_JOB_KEEP_SECONDS`.
  */
 export const DELIVERY_JOB_OPTIONS: JobsOptions = {
   attempts: 5,
   backoff: { type: 'exponential', delay: 30_000 },
   removeOnComplete: true,
-  removeOnFail: { age: 7 * 24 * 60 * 60 },
+  removeOnFail: { age: FAILED_JOB_KEEP_SECONDS },
 };

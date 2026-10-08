@@ -372,8 +372,9 @@ function keyFormatRules(env: RawEnv): ConfigProblem[] {
 
 /**
  * In every environment: each chosen email provider has what it needs, and SMS stays on the log
- * provider until live SMS ships (M6, OQ12). An unset `EMAIL_PROVIDER` is allowed: email then
- * goes by SMTP when `SMTP_URL` is set and is otherwise off (`emailProviderOf`).
+ * provider until live SMS ships (M6, OQ12). Outside local `EMAIL_PROVIDER` must be set; locally
+ * it may be unset, and email then goes by SMTP when `SMTP_URL` is set and is otherwise off
+ * (`emailProviderOf`).
  */
 function deliveryRules(env: RawEnv): ConfigProblem[] {
   const problems: ConfigProblem[] = [];
@@ -388,6 +389,13 @@ function deliveryRules(env: RawEnv): ConfigProblem[] {
     }
   };
   const emailProvider = blank(env.EMAIL_PROVIDER);
+  const appEnv = blank(env.APP_ENV);
+  if (emailProvider === undefined && (appEnv === 'staging' || appEnv === 'production')) {
+    problems.push({
+      variable: 'EMAIL_PROVIDER',
+      problem: 'must be set outside local (smtp or ses)',
+    });
+  }
   if (emailProvider === 'smtp') needs('smtp', ['SMTP_URL']);
   if (emailProvider === 'ses') needs('ses', ['SES_REGION', 'EMAIL_FROM_DOMAIN']);
   if (blank(env.SMS_PROVIDER) === 'live') {

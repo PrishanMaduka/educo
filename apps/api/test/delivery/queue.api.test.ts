@@ -134,6 +134,21 @@ describe('queued email and SMS on the compose Redis', () => {
     expect(job?.data).toMatchObject({ to: '+94770000001', template: 'otp', tenantId: null });
   });
 
+  it('keeps a failed job (whose params hold a link or code) for a day at most', async () => {
+    const jobId = `password-reset.keep-${randomBytes(6).toString('hex')}`;
+    await inSchool(null, () =>
+      delivery.queueEmail({
+        jobId,
+        to: 'prishan.maduka@colombo-intl.local',
+        template: 'password_reset',
+        params: { link: 'http://localhost:3000/sign-in/reset/abc.def', minutes: 30 },
+      }),
+    );
+    const job = await emails.getJob(jobId);
+    expect(job?.opts.removeOnComplete).toBe(true);
+    expect(job?.opts.removeOnFail).toEqual({ age: 24 * 60 * 60 });
+  });
+
   it('sends a queued job once, even when the worker runs it twice (Redis marker)', async () => {
     const jobId = `password-reset.${prefix}`;
     await inSchool(null, () =>

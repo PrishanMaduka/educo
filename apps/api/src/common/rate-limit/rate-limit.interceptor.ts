@@ -28,8 +28,8 @@ interface Check {
 
 /**
  * Applies the global limits and each route's `@RateLimit` rules, in that order: the per-IP limit
- * of a sign-in route, the route's own rules (top first), then the per-user limit. Counters are
- * per route template, so one route's traffic never uses up another's.
+ * shared by every sign-in route (one bucket per IP for `/auth/*` and `/platform/auth/*`), the
+ * route's own rules (top first, counted per route template), then the per-user limit.
  *
  * If Redis cannot answer, the request goes on and the API logs the `rate_limit_unavailable`
  * metric (fail open, D32): sign-in stays available, and lockout and the edge's WAF limits still
@@ -75,7 +75,8 @@ export class RateLimitInterceptor implements NestInterceptor {
     const route = `${request.method} ${request.routeOptions.url ?? 'unmatched'}`;
     const checks: Check[] = [];
     if (AUTH_ROUTE.test(request.routeOptions.url ?? '')) {
-      checks.push({ key: `ip:${route}:${request.ip}`, ...AUTH_IP_LIMIT });
+      // One bucket per IP for the whole sign-in family (spec 06), not one per route.
+      checks.push({ key: `ip:auth:${request.ip}`, ...AUTH_IP_LIMIT });
     }
     rateLimitRulesOf(handler).forEach((rule, index) => {
       const subject = rule.key === undefined ? request.ip : rule.key(request);
