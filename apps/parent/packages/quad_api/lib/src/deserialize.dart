@@ -1,7 +1,19 @@
 import 'package:quad_api/src/model/error_body.dart';
 import 'package:quad_api/src/model/health_live.dart';
 import 'package:quad_api/src/model/health_ready.dart';
+import 'package:quad_api/src/model/me.dart';
+import 'package:quad_api/src/model/me_greeting.dart';
+import 'package:quad_api/src/model/me_memberships_inner.dart';
+import 'package:quad_api/src/model/me_person.dart';
+import 'package:quad_api/src/model/me_preview.dart';
+import 'package:quad_api/src/model/me_preview_sample_user.dart';
+import 'package:quad_api/src/model/me_school.dart';
+import 'package:quad_api/src/model/me_school_brand.dart';
+import 'package:quad_api/src/model/me_support.dart';
+import 'package:quad_api/src/model/me_update_input.dart';
 import 'package:quad_api/src/model/ses_webhook_ack.dart';
+import 'package:quad_api/src/model/session_summary_list.dart';
+import 'package:quad_api/src/model/session_summary_list_items_inner.dart';
 import 'package:quad_api/src/model/sns_envelope.dart';
 
 final _regList = RegExp(r'^List<(.*)>$');
@@ -28,8 +40,32 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return HealthLive.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'HealthReady':
           return HealthReady.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'Me':
+          return Me.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'MeGreeting':
+          return MeGreeting.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'MeMembershipsInner':
+          return MeMembershipsInner.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'MePerson':
+          return MePerson.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'MePreview':
+          return MePreview.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'MePreviewSampleUser':
+          return MePreviewSampleUser.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'MeSchool':
+          return MeSchool.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'MeSchoolBrand':
+          return MeSchoolBrand.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'MeSupport':
+          return MeSupport.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'MeUpdateInput':
+          return MeUpdateInput.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'SesWebhookAck':
           return SesWebhookAck.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'SessionSummaryList':
+          return SessionSummaryList.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'SessionSummaryListItemsInner':
+          return SessionSummaryListItemsInner.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'SnsEnvelope':
           return SnsEnvelope.fromJson(value as Map<String, dynamic>) as ReturnType;
         default:

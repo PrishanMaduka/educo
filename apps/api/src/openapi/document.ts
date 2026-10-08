@@ -2,6 +2,7 @@ import { OpenApiGeneratorV31 } from '@asteasolutions/zod-to-openapi';
 
 import { version } from '../../package.json';
 import { healthRoutes } from '../health/health.routes';
+import { meRoutes } from '../modules/me/me.routes';
 import { sesWebhookRoutes } from '../webhooks/ses/ses-webhook.routes';
 
 import { openApiRoutes } from './openapi.routes';
@@ -17,6 +18,7 @@ export const API_ROUTES: readonly ApiRoute[] = [
   ...healthRoutes,
   ...openApiRoutes,
   ...sesWebhookRoutes,
+  ...meRoutes,
 ];
 
 export type OpenApiDocument = ReturnType<OpenApiGeneratorV31['generateDocument']>;

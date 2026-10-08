@@ -67,6 +67,10 @@ Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
 [*HealthApi*](doc/HealthApi.md) | [**apiV1HealthLiveGet**](doc/HealthApi.md#apiv1healthliveget) | **GET** /api/v1/health/live | The process is up
 [*HealthApi*](doc/HealthApi.md) | [**apiV1HealthReadyGet**](doc/HealthApi.md#apiv1healthreadyget) | **GET** /api/v1/health/ready | Postgres and Redis answer
+[*MeApi*](doc/MeApi.md) | [**apiV1MeGet**](doc/MeApi.md#apiv1meget) | **GET** /api/v1/me | The signed-in person, their school and brand, other schools, banners and greeting
+[*MeApi*](doc/MeApi.md) | [**apiV1MePatch**](doc/MeApi.md#apiv1mepatch) | **PATCH** /api/v1/me | Change your name, theme or locale in this school (needs X-CSRF-Token)
+[*MeApi*](doc/MeApi.md) | [**apiV1MeSessionsGet**](doc/MeApi.md#apiv1mesessionsget) | **GET** /api/v1/me/sessions | Your signed-in devices, newest first
+[*MeApi*](doc/MeApi.md) | [**apiV1MeSessionsIdDelete**](doc/MeApi.md#apiv1mesessionsiddelete) | **DELETE** /api/v1/me/sessions/{id} | Sign one of your devices out (needs X-CSRF-Token)
 [*MetaApi*](doc/MetaApi.md) | [**apiV1OpenapiJsonGet**](doc/MetaApi.md#apiv1openapijsonget) | **GET** /api/v1/openapi.json | This OpenAPI document
 [*WebhooksApi*](doc/WebhooksApi.md) | [**apiV1WebhooksSesPost**](doc/WebhooksApi.md#apiv1webhookssespost) | **POST** /api/v1/webhooks/ses | SES bounce and complaint events from SNS (signature version 2, pinned topic)
 
@@ -76,7 +80,19 @@ Class | Method | HTTP request | Description
  - [ErrorBody](doc/ErrorBody.md)
  - [HealthLive](doc/HealthLive.md)
  - [HealthReady](doc/HealthReady.md)
+ - [Me](doc/Me.md)
+ - [MeGreeting](doc/MeGreeting.md)
+ - [MeMembershipsInner](doc/MeMembershipsInner.md)
+ - [MePerson](doc/MePerson.md)
+ - [MePreview](doc/MePreview.md)
+ - [MePreviewSampleUser](doc/MePreviewSampleUser.md)
+ - [MeSchool](doc/MeSchool.md)
+ - [MeSchoolBrand](doc/MeSchoolBrand.md)
+ - [MeSupport](doc/MeSupport.md)
+ - [MeUpdateInput](doc/MeUpdateInput.md)
  - [SesWebhookAck](doc/SesWebhookAck.md)
+ - [SessionSummaryList](doc/SessionSummaryList.md)
+ - [SessionSummaryListItemsInner](doc/SessionSummaryListItemsInner.md)
  - [SnsEnvelope](doc/SnsEnvelope.md)
 
 

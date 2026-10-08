@@ -44,3 +44,23 @@ export { SEED_TENANTS } from './seed-data';
 export type { TenantRunner, TenantTx } from './tenant';
 export { InvalidTenantIdError } from './tenant';
 export { uuidv7 } from './uuid';
+/**
+ * Drizzle's query operators, re-exported so the API builds queries with this package's own
+ * drizzle-orm instance (two installs of it have incompatible column types).
+ */
+export {
+  and,
+  asc,
+  desc,
+  eq,
+  gt,
+  gte,
+  inArray,
+  isNotNull,
+  isNull,
+  lt,
+  lte,
+  ne,
+  or,
+  sql,
+} from 'drizzle-orm';

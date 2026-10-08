@@ -1,15 +1,17 @@
 import 'reflect-metadata';
 
+import fastifyCookie from '@fastify/cookie';
 import { NestFactory } from '@nestjs/core';
 import { FastifyAdapter } from '@nestjs/platform-fastify';
 import { robotsTagFor } from '@quad/contracts/web-env';
 
 import { AppModule } from './app.module';
-import { AppErrorFilter } from './common/error.filter';
+import { AppErrorFilter, sendError } from './common/error.filter';
+import { UnsupportedMediaTypeError } from './common/errors';
 import { requestIdFrom, runWithRequestContext } from './common/request-context';
 import { PinoNestLogger, createLogger } from './observability/logger';
 import { API_ROUTES } from './openapi/document';
-import { routeBodyLimits } from './openapi/registry';
+import { API_PREFIX, routeBodyLimits } from './openapi/registry';
 
 import type { AppOverrides } from './app.module';
 import type { Config } from './config';
@@ -42,6 +44,10 @@ export interface CreateAppOptions {
 function trustHops(hops: number): false | ((address: string, hop: number) => boolean) {
   return hops > 0 ? (_address, hop) => hop < hops : false;
 }
+
+/** The one route that takes a `text/plain` body: SNS posts its JSON that way (D28 follow-up). */
+const TEXT_PLAIN_ROUTE = `POST ${API_PREFIX}/webhooks/ses`;
+const TEXT_PLAIN = /^\s*text\/plain\s*(?:;|$)/i;
 
 /**
  * Builds and initialises the API (Nest on Fastify) with the `/api/v1` prefix, the request
@@ -84,6 +90,17 @@ export async function createApp(
     void reply.header('x-request-id', request.id);
     runWithRequestContext(request.id, done);
   });
+  // A cross-site form can post `text/plain` without a CORS preflight, so with cookie sessions
+  // it is refused before the body is read, everywhere but the SES webhook (D28 follow-up).
+  fastify.addHook('onRequest', (request, reply, done) => {
+    const contentType = request.headers['content-type'];
+    const route = `${request.method} ${request.routeOptions.url ?? ''}`;
+    if (contentType !== undefined && TEXT_PLAIN.test(contentType) && route !== TEXT_PLAIN_ROUTE) {
+      sendError(new UnsupportedMediaTypeError(), reply, logger, options.reporter);
+      return;
+    }
+    done();
+  });
   // Staging must not be indexed (spec 20); onSend also covers error and 404 responses.
   const robotsTag = robotsTagFor(config.APP_ENV, 'api');
   if (robotsTag !== null) {
@@ -106,6 +123,8 @@ export async function createApp(
     done();
   });
 
+  // Session and CSRF cookies (spec 05, D32); none are signed: the session value is opaque.
+  await app.register(fastifyCookie);
   options.beforeInit?.(fastify);
   await app.init();
   return app;

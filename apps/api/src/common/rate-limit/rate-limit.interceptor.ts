@@ -20,6 +20,20 @@ export const USER_LIMIT = { limit: 600, windowSeconds: 60 } as const;
 /** Staff and parent sign-in (`/auth/*`) and console sign-in (`/platform/auth/*`), after `/api/v1`. */
 const AUTH_ROUTE = /^\/api\/v1\/(?:platform\/)?auth\//;
 
+/**
+ * Who the per-user limit counts, from the context `AuthGuard` filled in: the membership once a
+ * school is chosen, the account during the sign-in steps, the visit in a support session. None
+ * on public routes (the per-IP and route limits cover those).
+ */
+function userSubject(): string | null {
+  const context = currentRequestContext();
+  if (context === undefined) return null;
+  if (context.userId !== null) return `user:${context.userId}`;
+  if (context.accountId !== null) return `account:${context.accountId}`;
+  if (context.supportSessionId !== null) return `support:${context.supportSessionId}`;
+  return null;
+}
+
 interface Check {
   readonly key: string;
   readonly limit: number;
@@ -89,9 +103,9 @@ export class RateLimitInterceptor implements NestInterceptor {
         windowSeconds: rule.windowSeconds,
       });
     });
-    const userId = currentRequestContext()?.userId;
-    if (userId !== undefined && userId !== null) {
-      checks.push({ key: `user:${userId}`, ...USER_LIMIT });
+    const subject = userSubject();
+    if (subject !== null) {
+      checks.push({ key: subject, ...USER_LIMIT });
     }
     return checks;
   }

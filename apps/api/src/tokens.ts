@@ -27,3 +27,10 @@ export const JWT_KEYS = Symbol('JWT_KEYS');
 export const REDIS = Symbol('REDIS');
 /** Queues email and SMS (`DeliveryQueue`, BullMQ; tests may pass a recording fake). */
 export const DELIVERY = Symbol('DELIVERY');
+/**
+ * The `quad_platform` database handle (`QuadPlatformDb`): only `src/platform/**` may inject it,
+ * and every write through it is recorded with `PlatformAuditService`.
+ */
+export const PLATFORM_DB = Symbol('PLATFORM_DB');
+/** Resolves a console session cookie (`ConsoleSessionLookup`); Task 10 provides it. */
+export const CONSOLE_SESSIONS = Symbol('CONSOLE_SESSIONS');

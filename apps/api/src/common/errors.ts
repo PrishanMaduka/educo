@@ -41,6 +41,33 @@ export class ValidationError extends AppError {
   }
 }
 
+/**
+ * 401: no session or token, or one that has ended: revoked, expired, a deactivated membership
+ * or a deleted school (spec 05; a suspended school is a 403 instead).
+ */
+export class UnauthorizedError extends AppError {
+  constructor(message: string = DEFAULT_MESSAGES.unauthorized) {
+    super('unauthorized', message, 401);
+  }
+}
+
+/** 403 for a cookie-authenticated write without a valid `X-CSRF-Token` (double submit, D32). */
+export class CsrfError extends AppError {
+  constructor() {
+    super('forbidden', 'Your session needs refreshing. Reload the page and try again.', 403);
+  }
+}
+
+/**
+ * 415: a `text/plain` body (D28 follow-up): a cross-site form can send one without a preflight,
+ * so only the SES webhook, which SNS calls that way, accepts it.
+ */
+export class UnsupportedMediaTypeError extends AppError {
+  constructor() {
+    super('validation', 'Send the request body as JSON.', 415);
+  }
+}
+
 /** 404: the record does not exist, or belongs to another school (RLS hides it). */
 export class NotFoundError extends AppError {
   constructor(message: string = DEFAULT_MESSAGES.not_found) {

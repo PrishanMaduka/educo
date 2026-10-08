@@ -38,6 +38,19 @@ describe('realtime handshake', () => {
     expect(body).toContain('"sid"');
   });
 
+  it('also answers /socket.io without the trailing slash (the staff proxy path)', async () => {
+    const response = await fetch(`http://${origin()}/socket.io?EIO=4&transport=polling`);
+    expect(response.status).toBe(200);
+    expect((await response.text()).startsWith('0{')).toBe(true);
+  });
+
+  it('refuses the handshake from another site with 403 (D28 follow-up)', async () => {
+    const response = await fetch(`http://${origin()}/socket.io/?EIO=4&transport=polling`, {
+      headers: { origin: 'https://evil.example' },
+    });
+    expect(response.status).toBe(403);
+  });
+
   it('opens a WebSocket and sends the open packet first', async () => {
     const socket = new WebSocket(`ws://${origin()}/socket.io/?EIO=4&transport=websocket`);
     try {
