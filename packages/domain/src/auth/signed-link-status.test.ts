@@ -54,6 +54,13 @@ describe('SIGNED_LINK_RULES', () => {
     expect(SIGNED_LINK_RULES[purpose]).toEqual({ ttlSeconds, singleUse });
   });
 
+  it('gives every single-use purpose an expiry (consume_signed_token keeps the nonce until then)', () => {
+    for (const purpose of PURPOSES) {
+      const { ttlSeconds, singleUse } = SIGNED_LINK_RULES[purpose];
+      expect(singleUse && ttlSeconds === null, purpose).toBe(false);
+    }
+  });
+
   it('has a rule for every purpose and nothing else', () => {
     expect(Object.keys(SIGNED_LINK_RULES).sort()).toEqual([...PURPOSES].sort());
   });

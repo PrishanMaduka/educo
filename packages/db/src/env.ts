@@ -1,6 +1,8 @@
 import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
+import { LOCAL_SEED_PASSWORD } from '@quad/contracts';
+
 /** Connection URLs for the three database roles (spec 02, D17). */
 export interface DatabaseUrls {
   /** `quad_app`: all school work, through `withTenant`. */
@@ -42,6 +44,25 @@ export function databaseUrls(env: Env = process.env): DatabaseUrls {
     platformUrl: pick('DATABASE_PLATFORM_URL', LOCAL_DATABASE_URLS.platformUrl),
     ownerUrl: pick('DATABASE_OWNER_URL', LOCAL_DATABASE_URLS.ownerUrl),
   };
+}
+
+/**
+ * Why the seed must not run with this `SEED_PASSWORD`, or null when it may (D32). Outside local
+ * it must be set, and must not be the published local placeholder. The message never includes
+ * the value.
+ */
+export function seedPasswordRefusal(env: Env = process.env): string | null {
+  const appEnv = env.APP_ENV === undefined || env.APP_ENV === '' ? 'local' : env.APP_ENV;
+  if (appEnv === 'local') {
+    return null;
+  }
+  const password = env.SEED_PASSWORD;
+  if (password === undefined || password === '') {
+    return `SEED_PASSWORD is required when APP_ENV is ${appEnv}.`;
+  }
+  return password === LOCAL_SEED_PASSWORD
+    ? 'SEED_PASSWORD is the published local value; set a real one.'
+    : null;
 }
 
 /** Loads the repository's root `.env` into `process.env` if it exists; set variables win. */

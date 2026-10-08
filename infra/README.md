@@ -349,8 +349,9 @@ The worker, migrate, seed and db-bootstrap tasks run the api image.
 ### Step 8. Bootstrap the database roles, migrate and seed (staging administrator)
 
 First set the app secrets that Terraform leaves as placeholders (D32). The api and worker refuse to
-start without an Ed25519 key pair, and the seed refuses to run without a seed password. Make the
-pair on your own machine, store it, then delete the files:
+start without an Ed25519 key pair (their config check), and the seed task refuses to run while
+`SEED_PASSWORD` is empty (its own check, `seedPasswordRefusal`). Make the pair on your own machine,
+store it, then delete the files:
 ```bash
 openssl genpkey -algorithm ed25519 -out jwt-private.pem
 openssl pkey -in jwt-private.pem -pubout -out jwt-public.pem
@@ -363,7 +364,8 @@ read -rs SEED && aws secretsmanager put-secret-value --secret-id quad-staging/en
   --secret-string "$(jq -n --arg v "$SEED" '{value: $v}')"; unset SEED
 ```
 The seed password is the staging password of the seeded sample accounts: 10 characters or more,
-and never the local placeholder from `.env.example`, which the api refuses outside local.
+and never the local placeholder from `.env.example`. Outside local, the seed refuses that
+placeholder or an empty value, and the api refuses the placeholder if it is ever given one.
 `FIELD_ENCRYPTION_KEY` needs nothing: Terraform generates it. These secrets keep their hand-set
 values across applies, like `SENTRY_DSN` ([check](#placeholder-secrets-stay-untouched)).
 
@@ -632,7 +634,8 @@ role's version (or the Redis version) and apply again, then run db-bootstrap and
 ### App secrets and restarting after a rotation
 
 - `SESSION_SECRET` and `LINK_SIGNING_SECRET`: raise `app_secret_versions` (in the `module "app"`
-  call, for example `app_secret_versions = { SESSION_SECRET = 2, LINK_SIGNING_SECRET = 1 }`),
+  call, for example
+  `app_secret_versions = { SESSION_SECRET = 2, LINK_SIGNING_SECRET = 1, FIELD_ENCRYPTION_KEY = 1 }`),
   apply, then force a new deployment of `api` and `worker`. Everyone is signed out until the
   two-value rotation of spec 20 arrives (M12).
 - `FIELD_ENCRYPTION_KEY` is generated too, but must **not** be rotated before M12: a new key would

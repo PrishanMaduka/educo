@@ -1,5 +1,6 @@
 import { createPrivateKey, createPublicKey } from 'node:crypto';
 
+import { LOCAL_SEED_PASSWORD } from '@quad/contracts';
 import { z } from 'zod';
 
 import { jwtKeyProblems, publicKeyDer } from './common/crypto/jwt-keys';
@@ -241,7 +242,7 @@ export const LOCAL_DEV_SECRETS = {
     '-----END PUBLIC KEY-----',
   ].join('\n'),
   FIELD_ENCRYPTION_KEY: 'local-only-field-encryption-key-not-for-staging-or-production',
-  SEED_PASSWORD: 'local-only-seed-password',
+  SEED_PASSWORD: LOCAL_SEED_PASSWORD,
 } as const;
 
 /** The published pair's public key, to spot it however its PEM is written. */

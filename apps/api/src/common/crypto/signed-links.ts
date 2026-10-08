@@ -67,7 +67,12 @@ export class SignedLinks {
     if (payload === null || signedLinkStatus(payload, purpose, now) !== 'ok') {
       throw new InvalidLinkError();
     }
-    if (SIGNED_LINK_RULES[purpose].singleUse && payload.exp !== null) {
+    if (SIGNED_LINK_RULES[purpose].singleUse) {
+      if (payload.exp === null) {
+        // The nonce is kept until the link expires, so a single-use rule needs a lifetime. A
+        // rule change that breaks this fails here as a server error, never as a reusable link.
+        throw new Error(`A single-use ${purpose} link must expire; check SIGNED_LINK_RULES.`);
+      }
       const firstUse = await this.consumeSignedToken({
         nonce: payload.nonce,
         purpose,

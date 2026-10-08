@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { parseEnv } from 'node:util';
 
+import { LOCAL_SEED_PASSWORD } from '@quad/contracts';
 import { describe, expect, it } from 'vitest';
 
 import {
@@ -288,6 +289,10 @@ describe('loadConfig: field encryption, token keys and the seed password (M1, D3
       }
     },
   );
+
+  it('refuses the same seed password placeholder as the seed (one shared constant)', () => {
+    expect(LOCAL_DEV_SECRETS.SEED_PASSWORD).toBe(LOCAL_SEED_PASSWORD);
+  });
 
   it('accepts a real seed password in staging, and none at all', () => {
     expect(loadConfig(staging({ SEED_PASSWORD: 'staging-seed-password-1' })).SEED_PASSWORD).toBe(

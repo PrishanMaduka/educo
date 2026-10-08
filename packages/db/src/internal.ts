@@ -15,6 +15,7 @@ export {
   databaseUrls,
   isSafeIdentifier,
   loadRootEnv,
+  seedPasswordRefusal,
   withDatabaseName,
 } from './env';
 export { MIGRATIONS_FOLDER, runMigrations } from './migrate';
