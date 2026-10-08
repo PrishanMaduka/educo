@@ -27,15 +27,18 @@ SentryConfig? sentryOptionsFor(Env env) {
     dsn: env.sentryDsn,
     environment: env.appEnv.name,
     sendDefaultPii: false,
-    tracesSampleRate: 0.1,
+    // Mobile tracing is off for M0b, as on the web (D28).
+    tracesSampleRate: 0,
   );
 }
 
 /// Applies [config] and Quad's privacy rules (D21, spec 16; the same rules as
 /// the web apps' `SENTRY_DATA_COLLECTION` and `scrubSentryEvent`): no request
 /// bodies, screenshots, view hierarchies, logs, print, tap or native
-/// breadcrumbs, and no trace headers sent to other hosts. Every Dart event and
-/// breadcrumb is scrubbed before it leaves the device.
+/// breadcrumbs, no tap tracing, and no trace headers sent to other hosts.
+/// Every Dart event and breadcrumb is scrubbed before it leaves the device.
+/// Tracing is off for M0b (a sample rate of 0, as on the web); should it be
+/// turned on, transactions are scrubbed too, by [scrubSentryTransaction].
 void applySentryConfig(SentryFlutterOptions options, SentryConfig config) {
   options
     ..dsn = config.dsn
@@ -54,7 +57,10 @@ void applySentryConfig(SentryFlutterOptions options, SentryConfig config) {
     ..enableUserInteractionBreadcrumbs = false
     // Native breadcrumbs do not pass through beforeBreadcrumb.
     ..enableAutoNativeBreadcrumbs = false
+    // Tap transactions are named after widget labels too.
+    ..enableUserInteractionTracing = false
     ..beforeSend = scrubSentryEvent
+    ..beforeSendTransaction = scrubSentryTransaction
     ..beforeBreadcrumb = scrubBreadcrumb;
   options.tracePropagationTargets.clear();
 }
@@ -118,6 +124,26 @@ SentryEvent? scrubSentryEvent(SentryEvent event, Hint hint) {
     ];
   }
   return event;
+}
+
+/// Sentry's `beforeSendTransaction`, the backstop for when tracing is on: the
+/// event-level scrub of [scrubSentryEvent] (which also strips the query from
+/// the transaction name), plus every span's description and data.
+SentryTransaction? scrubSentryTransaction(
+  SentryTransaction transaction,
+  Hint hint,
+) {
+  scrubSentryEvent(transaction, hint);
+  for (final span in transaction.spans) {
+    final description = span.context.description;
+    if (description != null) {
+      span.context.description = scrubTelemetryText(description);
+    }
+    for (final MapEntry(:key, :value) in span.data.entries.toList()) {
+      span.data[key] = _scrubValue(value);
+    }
+  }
+  return transaction;
 }
 
 /// Sentry's `beforeBreadcrumb`: drops console breadcrumbs and scrubs the

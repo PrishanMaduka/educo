@@ -4,6 +4,9 @@
  * safeguarding details are never put into telemetry on purpose: request bodies, SQL bound values
  * and Redis keys are not recorded at all, so this is the second line of defence for text that
  * slips into messages, URLs and statements.
+ *
+ * The parent app has a Dart port of these patterns in `apps/parent/lib/core/sentry.dart`. Change
+ * both together: `telemetry-scrub.cases.json` holds the cases both test suites run.
  */
 
 const EMAIL = /[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}/g;

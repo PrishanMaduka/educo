@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:quad_parent/core/env.dart';
 import 'package:quad_parent/core/sentry.dart';
@@ -23,7 +26,8 @@ void main() {
       expect(config.dsn, _dsn);
       expect(config.environment, 'staging');
       expect(config.sendDefaultPii, isFalse);
-      expect(config.tracesSampleRate, 0.1);
+      // Mobile tracing is off for M0b, as on the web (D28).
+      expect(config.tracesSampleRate, 0);
     });
 
     test('names production as production', () {
@@ -39,7 +43,11 @@ void main() {
     test('sets the DSN, environment and sample rate', () {
       expect(options.dsn, _dsn);
       expect(options.environment, 'staging');
-      expect(options.tracesSampleRate, 0.1);
+      expect(options.tracesSampleRate, 0);
+    });
+
+    test('does not trace taps, whose labels can name a child', () {
+      expect(options.enableUserInteractionTracing, isFalse);
     });
 
     test('collects no personal data, bodies, screenshots or logs', () {
@@ -53,10 +61,81 @@ void main() {
       expect(options.tracePropagationTargets, isEmpty);
     });
 
-    test('scrubs every event and breadcrumb', () {
+    test('scrubs every event, transaction and breadcrumb', () {
       expect(options.beforeSend, isNotNull);
+      expect(options.beforeSendTransaction, isNotNull);
       expect(options.beforeBreadcrumb, isNotNull);
     });
+  });
+
+  group('the cases shared with packages/contracts', () {
+    final cases = jsonDecode(
+      File(
+        '../../packages/contracts/src/observability/'
+        'telemetry-scrub.cases.json',
+      ).readAsStringSync(),
+    ) as Map<String, dynamic>;
+
+    for (final pair in cases['scrubbed'] as List<dynamic>) {
+      final [input as String, expected as String] = pair as List<dynamic>;
+      test('scrubs ${jsonEncode(input)}', () {
+        expect(scrubTelemetryText(input), expected);
+      });
+    }
+    for (final input in (cases['unchanged'] as List<dynamic>).cast<String>()) {
+      test('leaves ${jsonEncode(input)} alone', () {
+        expect(scrubTelemetryText(input), input);
+      });
+    }
+    for (final pair in cases['urls'] as List<dynamic>) {
+      final [input as String, expected as String] = pair as List<dynamic>;
+      test('turns the URL ${jsonEncode(input)} into $expected', () {
+        expect(scrubTelemetryUrl(input), expected);
+      });
+    }
+  });
+
+  group('scrubSentryTransaction', () {
+    test(
+      'scrubs the name, span descriptions and data, and the event',
+      () async {
+        SentryTransaction? sent;
+        final options = SentryFlutterOptions(dsn: _dsn)
+          ..tracesSampleRate = 1
+          ..beforeSendTransaction = (transaction, hint) {
+            sent = scrubSentryTransaction(transaction, hint);
+            // Captured for the test; nothing is sent.
+            return null;
+          };
+        final hub = Hub(options)
+          ..configureScope(
+            (scope) => scope.setUser(SentryUser(id: 'u1', email: 'a@b.co')),
+          );
+        final transaction = hub.startTransaction(
+          '/p/pass/k8Jq2xYz09AbCdEfGhIjKlMnOpQrStUvWx1?phone=1',
+          'ui.load',
+          bindToScope: false,
+        );
+        final span = transaction.startChild(
+          'http.client',
+          description: 'GET https://staging.quad-edu.com/api/v1/x?phone=1',
+        )..setData('who', 'dilhani@example.com');
+        await span.finish();
+        await transaction.finish();
+
+        expect(sent, isNotNull);
+        expect(sent!.transaction, '/p/pass/:token');
+        final child = sent!.spans.singleWhere(
+          (s) => s.context.operation == 'http.client',
+        );
+        expect(
+          child.context.description,
+          'GET https://staging.quad-edu.com/api/v1/x?phone=[redacted]',
+        );
+        expect(child.data['who'], '[email]');
+        expect(sent!.user?.toJson(), {'id': 'u1'});
+      },
+    );
   });
 
   group('scrubTelemetryText', () {

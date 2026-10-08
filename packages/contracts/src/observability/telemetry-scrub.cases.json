@@ -1,0 +1,48 @@
+{
+  "$comment": "Shared by telemetry-scrub.test.ts and apps/parent/test/core/sentry_test.dart, so the TypeScript and Dart scrubbers stay in step.",
+  "scrubbed": [
+    ["No guardian for amaya.perera@example.com", "No guardian for [email]"],
+    ["Call +94 77 000 0001 now", "Call [phone] now"],
+    ["Call +94770000001", "Call [phone]"],
+    ["Local 077 000 0001 and 0770000001", "Local [phone] and [phone]"],
+    ["Authorization: Bearer abc.def-ghi", "Authorization: Bearer [redacted]"],
+    ["basic dXNlcjpwYXNz", "basic [redacted]"],
+    ["GET /sign-in?token=s3cret&next=%2Fhome", "GET /sign-in?token=[redacted]&next=[redacted]"],
+    [
+      "https://quad-edu.com/api/v1/x?code=123#top",
+      "https://quad-edu.com/api/v1/x?code=[redacted]#top"
+    ],
+    ["/api/v1/links/k8Jq2xYz09AbCdEfGhIjKlMnOpQrStUvWx1/open", "/api/v1/links/:token/open"],
+    ["token eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIn0.c2lnbmF0dXJl here", "token [jwt] here"],
+    ["/links/eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIn0.c2ln/open", "/links/[jwt]/open"],
+    [
+      "cookie: quad_session=abc123; theme=dark; csrf_token=xyz",
+      "cookie: quad_session=[redacted]; theme=dark; csrf_token=[redacted]"
+    ],
+    ["password=hunter2 user=amaya", "password=[redacted] user=amaya"],
+    ["api_key=AKIA123,secret=s3", "api_key=[redacted],secret=[redacted]"],
+    ["otp_code=000000", "otp_code=[redacted]"],
+    ["Authorization=xyz", "Authorization=[redacted]"],
+    ["Call 0094 77 000 0001", "Call [phone]"],
+    ["Call 0094770000001", "Call [phone]"],
+    ["Call 94770000001", "Call [phone]"],
+    ["Call 77 000 0001 or 71-234-5678", "Call [phone] or [phone]"]
+  ],
+  "unchanged": [
+    "SELECT id FROM students WHERE tenant_id = $1 AND id = $2",
+    "/api/v1/students/0192a6f4-1b2c-7d3e-8f40-123456789abc",
+    "Request took 1234 ms at 2026-10-07T08:30:00+05:30",
+    "/home/user/educo/node_modules/@opentelemetry/instrumentation-ioredis/build/index.js",
+    "0192a6f41b2c7d3e8f40123456789abc",
+    "theme=dark page=2 limit=200",
+    "Processed 770000001 bytes in 94 ms",
+    "Took 77 000 ms",
+    "Invoice 2026 00001 for 770 students"
+  ],
+  "urls": [
+    ["https://quad-edu.com/api/v1/sign-in?token=abc", "https://quad-edu.com/api/v1/sign-in"],
+    ["/api/v1/home#top", "/api/v1/home"],
+    ["/p/pass/k8Jq2xYz09AbCdEfGhIjKlMnOpQrStUvWx1?x=1", "/p/pass/:token"],
+    ["/family/guardians/amaya@example.com", "/family/guardians/[email]"]
+  ]
+}
