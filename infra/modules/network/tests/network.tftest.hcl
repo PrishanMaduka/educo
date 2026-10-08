@@ -188,6 +188,11 @@ run "endpoints_can_sit_in_fewer_zones" {
   }
 
   assert {
+    condition     = jsonencode(output.endpoint_subnet_ids) == jsonencode([aws_subnet.private[0].id])
+    error_message = "endpoint_subnet_ids must name the subnets that hold the interface endpoints."
+  }
+
+  assert {
     condition     = toset(aws_vpc_endpoint.s3.route_table_ids) == toset(aws_route_table.private[*].id)
     error_message = "The S3 gateway endpoint must still serve every private route table."
   }

@@ -12,3 +12,8 @@ output "ses_events_topic_arn" {
   description = "The SNS topic the SES webhook accepts events from (SES_SNS_TOPIC_ARN)."
   value       = aws_sns_topic.ses_events.arn
 }
+
+output "ses_webhook_endpoint" {
+  description = "Where the SNS subscription delivers SES bounce and complaint events (the API's webhook)."
+  value       = aws_sns_topic_subscription.webhook.endpoint
+}

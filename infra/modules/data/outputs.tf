@@ -72,3 +72,8 @@ output "redis_replication_group_id" {
   description = "ElastiCache replication group id, for the dashboard."
   value       = aws_elasticache_replication_group.this.id
 }
+
+output "data_kms_key_policy" {
+  description = "The data key's policy (JSON), so the environment root can check that it names the CloudFront distribution."
+  value       = aws_kms_key.data.policy
+}

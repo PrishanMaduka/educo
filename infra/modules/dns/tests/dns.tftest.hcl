@@ -166,6 +166,11 @@ run "bounces_and_complaints_go_to_the_signed_sns_topic" {
     condition     = output.ses_events_topic_arn == aws_sns_topic.ses_events.arn && output.ses_configuration_set_name == "quad-staging" && output.ses_identity_arn == aws_sesv2_email_identity.mail.arn
     error_message = "The outputs must name the topic (SES_SNS_TOPIC_ARN), the configuration set (SES_CONFIGURATION_SET) and the identity."
   }
+
+  assert {
+    condition     = output.ses_webhook_endpoint == aws_sns_topic_subscription.webhook.endpoint
+    error_message = "ses_webhook_endpoint must be where the subscription delivers."
+  }
 }
 
 run "only_ses_for_this_configuration_set_publishes_and_uses_the_key" {

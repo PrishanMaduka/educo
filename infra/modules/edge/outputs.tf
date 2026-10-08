@@ -51,3 +51,13 @@ output "cloudfront_distribution_arn" {
   description = "The distribution ARN; the environment root passes it to the data module's cloudfront_distribution_arns so CloudFront can decrypt the public bucket's objects."
   value       = aws_cloudfront_distribution.this.arn
 }
+
+output "waf_web_acl_name" {
+  description = "The WAF web ACL's name (us-east-1), for the dashboard's BlockedRequests widget."
+  value       = aws_wafv2_web_acl.this.name
+}
+
+output "cloudfront_aliases" {
+  description = "The hosts the distribution answers for (web_domain and console_domain)."
+  value       = aws_cloudfront_distribution.this.aliases
+}

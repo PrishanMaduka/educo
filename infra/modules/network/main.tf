@@ -9,6 +9,9 @@ data "aws_region" "current" {}
 
 locals {
   tags = { service = "network" }
+
+  # The private subnets that hold the interface endpoints (ruling R-endpoints).
+  endpoint_subnet_ids = slice(aws_subnet.private[*].id, 0, coalesce(var.endpoint_subnet_count, length(var.azs)))
 }
 
 resource "aws_vpc" "this" {
@@ -158,7 +161,7 @@ resource "aws_vpc_endpoint" "interface" {
   service_name        = "com.amazonaws.${data.aws_region.current.region}.${each.key}"
   vpc_endpoint_type   = "Interface"
   private_dns_enabled = true
-  subnet_ids          = slice(aws_subnet.private[*].id, 0, coalesce(var.endpoint_subnet_count, length(var.azs)))
+  subnet_ids          = local.endpoint_subnet_ids
   security_group_ids  = [aws_security_group.endpoints.id]
 
   tags = merge(local.tags, { Name = "${var.name}-${each.key}" })

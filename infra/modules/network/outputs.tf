@@ -22,3 +22,8 @@ output "endpoints_security_group_id" {
   description = "The interface endpoints' security group, for egress rules that must reach them (the RDS Proxy's Secrets Manager calls)."
   value       = aws_security_group.endpoints.id
 }
+
+output "endpoint_subnet_ids" {
+  description = "The private subnets that hold the interface endpoints (the first endpoint_subnet_count, ruling R-endpoints)."
+  value       = local.endpoint_subnet_ids
+}

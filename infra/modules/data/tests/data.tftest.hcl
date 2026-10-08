@@ -530,6 +530,11 @@ run "cloudfront_decrypts_only_the_public_bucket_for_named_distributions" {
     if try(s.Principal.Service, "") == "cloudfront.amazonaws.com"])
     error_message = "CloudFront may only decrypt objects of the public bucket, for the named distributions."
   }
+
+  assert {
+    condition     = output.data_kms_key_policy == aws_kms_key.data.policy
+    error_message = "data_kms_key_policy must be the data key's policy, so the environment root can check the CloudFront statement."
+  }
 }
 
 run "cloudfront_distribution_arns_must_be_exact" {

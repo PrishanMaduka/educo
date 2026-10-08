@@ -296,6 +296,11 @@ run "api_runs_behind_two_proxies" {
   }
 
   assert {
+    condition     = jsonencode(output.api_environment) == jsonencode({ for e in jsondecode(aws_ecs_task_definition.this["api"].container_definitions)[0].environment : e.name => e.value })
+    error_message = "api_environment must be the api task definition's plain environment."
+  }
+
+  assert {
     condition = (
       jsonencode(sort([for e in jsondecode(aws_ecs_task_definition.this["api"].container_definitions)[0].environment : e.name])) ==
       jsonencode(sort([

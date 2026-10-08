@@ -42,3 +42,8 @@ output "ecs_service_names_for_dashboard" {
   description = "ECS service names, in a stable order, for the dashboard's CPU and memory widgets."
   value       = [for key in sort(keys(aws_ecs_service.this)) : aws_ecs_service.this[key].name]
 }
+
+output "api_environment" {
+  description = "The plain (non-secret) environment of the api's first task definition, by name. Secrets are ARNs in the task definition and never appear here."
+  value       = { for variable in jsondecode(aws_ecs_task_definition.this["api"].container_definitions)[0].environment : variable.name => variable.value }
+}

@@ -479,6 +479,11 @@ run "distribution_serves_both_hosts_over_modern_tls" {
     condition     = output.cloudfront_distribution_arn == aws_cloudfront_distribution.this.arn
     error_message = "The module outputs the distribution ARN for the data key's decrypt statement."
   }
+
+  assert {
+    condition     = jsonencode(sort(tolist(output.cloudfront_aliases))) == jsonencode(sort(tolist(aws_cloudfront_distribution.this.aliases)))
+    error_message = "cloudfront_aliases must be the distribution's aliases."
+  }
 }
 
 run "certificates_cover_every_name_tls_is_checked_against" {
@@ -814,5 +819,11 @@ run "outputs_name_every_target_group" {
   assert {
     condition     = output.alb_security_group_id == aws_security_group.alb.id && output.alb_arn_suffix == aws_lb.this.arn_suffix
     error_message = "The ALB outputs come from the ALB and its group."
+  }
+
+  # The overview dashboard's WAF widget charts BlockedRequests by this name (envs/staging).
+  assert {
+    condition     = output.waf_web_acl_name == aws_wafv2_web_acl.this.name && output.waf_web_acl_name == "quad-staging"
+    error_message = "waf_web_acl_name must be the web ACL's name."
   }
 }
