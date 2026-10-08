@@ -94,4 +94,36 @@ describe('scrubSentryEvent', () => {
     });
     expect(event.event_id).toBe('0192a6f41b2c7d3e8f40123456789abc');
   });
+
+  it('keeps only the trace ids in contexts.trace and scrubs every other trace field', () => {
+    const ids = {
+      trace_id: '94770000001a4b5c6d7e8f9012345678',
+      span_id: '94770000001a4b5c',
+      parent_span_id: '0770000001abcdef',
+    };
+    const event = {
+      message: 'Trace for amaya@example.com',
+      user: { id: 7 },
+      contexts: {
+        trace: {
+          ...ids,
+          op: 'http.server',
+          description: 'GET /links/open?token=abc123',
+          data: { 'http.url': 'https://quad-edu.com/p?email=amaya@example.com' },
+          status: 'sent to amaya@example.com',
+        },
+      },
+    };
+
+    scrubSentryEvent(event);
+
+    expect(event.message).toBe('Trace for [email]');
+    expect(event.contexts.trace).toEqual({
+      ...ids,
+      op: 'http.server',
+      description: 'GET /links/open?token=[redacted]',
+      data: { 'http.url': 'https://quad-edu.com/p?email=[redacted]' },
+      status: 'sent to [email]',
+    });
+  });
 });

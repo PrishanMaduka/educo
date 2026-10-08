@@ -36,6 +36,9 @@ export const SENTRY_DATA_COLLECTION = {
   stackFrameVariables: false,
 };
 
+/** The `contexts.trace` keys that hold only hex ids and are sent unscrubbed. */
+const TRACE_ID_KEYS = new Set(['trace_id', 'span_id', 'parent_span_id']);
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
@@ -74,7 +77,7 @@ function removeAllBut(record: object, kept: (key: string) => boolean): void {
  * - deletes local variables from stack frames;
  * - scrubs emails, phone numbers, credentials, query values and path tokens from every other
  *   string (messages, exception values, stack frames, breadcrumbs, extras, contexts, tags),
- *   except the trace ids in `contexts.trace`.
+ *   except the ids in `contexts.trace` (`trace_id`, `span_id`, `parent_span_id`).
  */
 export function scrubSentryEvent<T extends ScrubbableEvent>(event: T): T {
   const { request, user, exception } = event;
@@ -95,5 +98,8 @@ export function scrubSentryEvent<T extends ScrubbableEvent>(event: T): T {
   scrubStrings(event, (key) => key === 'contexts');
   const contexts: unknown = Reflect.get(event, 'contexts');
   scrubStrings(contexts, (key) => key === 'trace');
+  // Only the ids are exempt (hex ids can look like phone numbers); the rest of the trace context
+  // (description, data, status) can carry URLs and text, so it is scrubbed like everything else.
+  if (isRecord(contexts)) scrubStrings(contexts.trace, (key) => TRACE_ID_KEYS.has(key));
   return event;
 }
