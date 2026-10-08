@@ -2,7 +2,8 @@ import { z } from 'zod';
 
 /**
  * Error codes from spec 06 (Conventions), plus `internal` for the 500 the API returns when
- * something unexpected fails (the cause is logged, never sent to the client).
+ * something unexpected fails (the cause is logged, never sent to the client), and
+ * `invalid_link` (400) for any signed link that is refused (spec 05; D32).
  */
 export const ErrorCode = z.enum([
   'validation',
@@ -18,6 +19,7 @@ export const ErrorCode = z.enum([
   'in_use',
   'business_rule',
   'app_update_required',
+  'invalid_link',
   'rate_limited',
   'internal',
 ]);

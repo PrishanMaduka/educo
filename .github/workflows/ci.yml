@@ -120,6 +120,17 @@ jobs:
           --health-interval 5s
           --health-timeout 3s
           --health-retries 12
+      # The SMTP adapter's delivery test (apps/api/test/delivery) reads what Mailpit received.
+      mailpit:
+        image: axllent/mailpit:v1.20
+        ports:
+          - 1025:1025
+          - 8025:8025
+        options: >-
+          --health-cmd "/mailpit readyz"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 12
     env:
       DATABASE_URL: postgres://quad_app:quad_app@localhost:5432/quad
       DATABASE_PLATFORM_URL: postgres://quad_platform:quad_platform@localhost:5432/quad
@@ -135,7 +146,7 @@ jobs:
           PGPASSWORD: postgres
         run: psql -h localhost -U postgres -d quad -v ON_ERROR_STOP=1 -f docker/postgres/init/01-roles.sql
       - uses: ./.github/actions/setup
-      - name: Postgres and Redis are reachable
+      - name: Postgres, Redis and Mailpit are reachable
         run: node scripts/check-services.mjs
       - name: API integration tests
         run: pnpm test:api

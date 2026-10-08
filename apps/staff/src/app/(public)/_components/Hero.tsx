@@ -1,49 +1,86 @@
 import { cn } from '@quad/ui';
-import { ArrowDown } from 'lucide-react';
 
-import { AMAYA_AT, HERO_VIEWBOX, heroScene, KITE_AT, kiteIcon } from '../_illustrations/hero';
-import { Painting } from '../_illustrations/Painting';
+import { Doodle, FloatingDoodle } from '../_art/Doodle';
+import { Face } from '../_art/Face';
+import { PEOPLE, ROLE_COLOUR, site, type PersonId } from '../_art/people';
 
-import { Accented } from './Accented';
-import { HeroLive, type HeroEvent } from './HeroLive';
+import { AppBadges } from './AppBadges';
+import { GetApp } from './GetApp';
+import { HeroStage, type StageAvatar, type StageMessage } from './HeroStage';
+import { Highlighted } from './Highlighted';
 import { SignInEntry, type ComingSoonLabels } from './SignInEntry';
-import { button, eyebrow, lede, wrap } from './styles';
-
-import type { CirclePerson } from '../_illustrations/people';
+import { button, display, onlyParent, onlySchool, wrap } from './styles';
 
 import { SLOT_MARKER, t } from '@/i18n';
 
-/** The six sample events the ticker cycles through: who sends, who receives, and the message key. */
-const FEED = [
-  ['jaya', 'dilhani', 'jayaMoment'],
-  ['dilhani', 'jaya', 'mumThanks'],
-  ['perera', 'ruwan', 'pereraLearning'],
-  ['kamala', 'jaya', 'grandmaLoves'],
-  ['herath', 'ruwan', 'coachMoment'],
-  ['dilhani', 'perera', 'triedAtHome'],
-] as const satisfies readonly (readonly [CirclePerson, CirclePerson, string])[];
+/** Maya's circle around the phone: position in percent of the stage, and nearer the phone below 560 px. */
+const AVATARS = [
+  { who: 'okafor', x: 6, y: 14, xPhone: 13 },
+  { who: 'tanaka', x: 3, y: 50, xPhone: 12 },
+  { who: 'haddad', x: 9, y: 86, xPhone: 14 },
+  { who: 'priya', x: 94, y: 14, xPhone: 87 },
+  { who: 'asha', x: 97, y: 50, xPhone: 88 },
+  { who: 'daniel', x: 91, y: 86, xPhone: 86 },
+] as const satisfies readonly { who: PersonId; x: number; y: number; xPhone: number }[];
 
-const VIEWBOX = `0 0 ${HERO_VIEWBOX.width} ${HERO_VIEWBOX.height}`;
+/** The six moments of Maya's day, in order: who, the message, and whether a star or a heart flies. */
+const MESSAGES = [
+  { key: 'okaforMoment', who: 'okafor', token: 'star', thanks: true },
+  { key: 'priyaThanks', who: 'priya', token: 'heart', thanks: false },
+  { key: 'ashaLoved', who: 'asha', token: 'heart', thanks: false },
+  { key: 'haddadCheck', who: 'haddad', token: 'star', thanks: false },
+  { key: 'tanakaMoment', who: 'tanaka', token: 'star', thanks: true },
+  { key: 'danielTried', who: 'daniel', token: 'heart', thanks: false },
+] as const;
 
-function heroEvents(): HeroEvent[] {
-  return FEED.map(([from, to, key]) => ({
-    from: KITE_AT[from] ?? AMAYA_AT,
-    to: KITE_AT[to] ?? AMAYA_AT,
-    title: t(`public.hero.feed.${key}.title`),
-    detail: t(`public.hero.feed.${key}.detail`),
-    icon: (
-      <svg
-        viewBox="-30 -40 60 84"
-        aria-hidden="true"
-        focusable="false"
-        className="-mt-2 block h-[58px] w-[42px]"
-        dangerouslySetInnerHTML={{ __html: kiteIcon(from) }}
-      />
-    ),
+/** The name a message shows: the first name for family ("Priya", not "Priya, Mum"). */
+const SHORT_NAME: Partial<
+  Record<PersonId, 'public.people.priya.short' | 'public.people.daniel.short'>
+> = {
+  priya: 'public.people.priya.short',
+  daniel: 'public.people.daniel.short',
+};
+
+function stageAvatars(): StageAvatar[] {
+  return AVATARS.map((avatar) => ({
+    ...avatar,
+    name: t(`public.people.${avatar.who}`),
+    colour: ROLE_COLOUR[PEOPLE[avatar.who].role],
+    face: <Face who={avatar.who} />,
   }));
 }
 
-/** Hero (spec 19 §2–3): the promise, the actions, and Amaya's circle as kites. */
+function stageMessages(): StageMessage[] {
+  return MESSAGES.map(({ key, who, token, thanks }) => {
+    const shortKey = SHORT_NAME[who];
+    const name = shortKey ? t(shortKey) : t(`public.people.${who}`);
+    const verb = t(`public.hero.feed.${key}.verb`);
+    const text = t(`public.hero.feed.${key}.text`);
+    return {
+      who,
+      name,
+      verb,
+      text,
+      time: t(`public.hero.feed.${key}.time`),
+      action: thanks ? t('public.hero.feed.thankYou') : undefined,
+      live: t('public.hero.feed.live', { name, verb, text }),
+      face: <Face who={who} />,
+      token: (
+        <Doodle
+          kind={token}
+          colour={site(token === 'heart' ? 'pink' : 'lime')}
+          className="size-full"
+        />
+      ),
+      colour: ROLE_COLOUR[PEOPLE[who].role],
+    };
+  });
+}
+
+/**
+ * Hero (spec 19 §2): the promise for each view and its actions. Schools see Maya's day on a phone
+ * with her circle around it; parents see the Quad app on two phones.
+ */
 export function Hero({
   prelaunch,
   comingSoon,
@@ -51,41 +88,76 @@ export function Hero({
   prelaunch: boolean;
   comingSoon: ComingSoonLabels;
 }) {
+  const stat = (key: 'app' | 'relatives' | 'quiet') => (
+    <div key={key}>
+      <b className="block text-[28px] leading-[1.2] font-extrabold tracking-[-.03em]">
+        {t(`public.hero.stats.${key}.value`)}
+      </b>
+      <span className={cn('text-sm text-site-on-navy-3', onlySchool)}>
+        {t(`public.hero.stats.${key}.label`)}
+      </span>
+      <span className={cn('text-sm text-site-on-navy-3', onlyParent)}>
+        {t(`public.hero.stats.${key}.parentLabel`)}
+      </span>
+    </div>
+  );
+  const lede =
+    'm-0 max-w-[30em] text-[clamp(18px,1.5vw,21px)] leading-[1.5] text-pretty text-site-on-navy-2';
   return (
-    <section
-      aria-labelledby="hero-title"
-      className="relative bg-[radial-gradient(640px_420px_at_6%_8%,var(--quad-wash-1),transparent_70%),radial-gradient(760px_560px_at_86%_42%,var(--quad-wash-2),transparent_70%)] pt-12 pb-10 max-[900px]:pt-2 max-[900px]:pb-4"
-    >
+    <section aria-labelledby="hero-title" className="relative">
       <div
         className={cn(
           wrap,
-          'grid grid-cols-[minmax(0,.92fr)_minmax(0,1.08fr)] items-center gap-8 max-[900px]:grid-cols-1',
+          'flex flex-wrap items-center gap-x-[clamp(32px,5vw,72px)] gap-y-14 pt-[clamp(28px,4vw,56px)] pb-[clamp(56px,7vw,96px)]',
         )}
       >
-        <div>
-          <p className={cn('m-0', eyebrow)}>{t('public.hero.eyebrow')}</p>
+        <div className="relative z-[2] flex min-w-0 flex-[1.15_1_440px] flex-col gap-7">
+          <p className="m-0 flex items-center gap-2 self-start rounded-full bg-site-navy-2 py-[7px] pr-3.5 pl-2 text-sm font-semibold text-site-lime">
+            <span
+              aria-hidden="true"
+              className="grid size-[22px] place-items-center rounded-full bg-site-lime text-xs font-extrabold text-site-on-vivid"
+            >
+              ✦
+            </span>
+            <span className={onlySchool}>{t('public.hero.school.kicker')}</span>
+            <span className={onlyParent}>{t('public.hero.parent.kicker')}</span>
+          </p>
           <h1
             id="hero-title"
-            className="m-0 mt-4 text-[clamp(44px,7vw,82px)] leading-[.98] font-black tracking-[-.04em] text-balance"
+            className={cn(display, 'text-[clamp(54px,7.6vw,118px)] leading-[.9]')}
           >
-            <Accented
-              template={t('public.hero.title', { accent: SLOT_MARKER })}
-              accent={t('public.hero.titleAccent')}
-              className="font-accent font-semibold tracking-[-.03em] text-coral-ink italic"
-            />
+            <span className={onlySchool}>
+              <Highlighted
+                template={t('public.hero.school.title', { accent: SLOT_MARKER })}
+                accent={t('public.hero.school.titleAccent')}
+              />
+            </span>
+            <span className={onlyParent}>
+              <Highlighted
+                template={t('public.hero.parent.title', { accent: SLOT_MARKER })}
+                accent={t('public.hero.parent.titleAccent')}
+              />
+            </span>
           </h1>
-          <p className={cn(lede, 'mt-[22px]')}>{t('public.hero.lede')}</p>
-          <div className="mt-[30px] flex flex-wrap gap-3">
+          <p className={cn(lede, onlySchool)}>{t('public.hero.school.lede')}</p>
+          <p className={cn(lede, onlyParent)}>{t('public.hero.parent.lede')}</p>
+          <div className={cn('flex flex-wrap gap-3', onlySchool)}>
             <a href="#demo" className={button()}>
-              {t('public.bookDemo')}
+              {t('public.cta.school')} <span aria-hidden="true">→</span>
             </a>
-            <a href="#day" className={button({ variant: 'ghost' })}>
-              {t('public.hero.seeDay')}
-              <ArrowDown aria-hidden="true" strokeWidth={2.4} className="size-[18px]" />
+            <a href="#circle" className={button({ variant: 'line' })}>
+              {t('public.hero.howItWorks')}
             </a>
           </div>
-          {/* A div: before launch the entry carries its note, a <dialog> with its own paragraphs. */}
-          <div className="mt-4 text-[14.5px] text-ink-2">
+          <GetApp
+            labels={{
+              getApp: t('public.hero.parent.getApp'),
+              askSchool: t('public.hero.parent.cta'),
+              note: t('public.hero.parent.getAppNote'),
+            }}
+            badges={<AppBadges />}
+          />
+          <div className={cn('text-[15px] text-site-on-navy-2', onlySchool)}>
             {t('public.hero.already')}{' '}
             <SignInEntry
               label={t('public.hero.signIn')}
@@ -94,30 +166,130 @@ export function Hero({
               comingSoon={comingSoon}
             />
           </div>
-          <ul className="m-0 mt-3.5 flex list-none flex-wrap gap-x-4 gap-y-1.5 p-0 text-[13.5px] text-ink-2">
-            {[t('public.hero.fine.curricula'), t('public.hero.fine.local')].map((point) => (
-              <li key={point} className="inline-flex items-center gap-1.5">
-                <span aria-hidden="true" className="inline-block size-[7px] rounded-full bg-c5" />
-                {point}
-              </li>
-            ))}
-          </ul>
+          <p className={cn('m-0 text-[15px] text-site-on-navy-2', onlyParent)}>
+            {t('public.hero.parent.already')}
+          </p>
+          <div className="flex flex-wrap gap-x-7 gap-y-4 pt-1.5">
+            {stat('app')}
+            {stat('relatives')}
+            {stat('quiet')}
+          </div>
         </div>
-        <div className="relative mx-auto flex w-full max-w-[680px] flex-col items-center gap-1.5 max-[900px]:order-first max-[900px]:-mx-4 max-[900px]:w-[calc(100%+32px)] max-[900px]:max-w-none">
-          <HeroLive
-            viewBox={VIEWBOX}
-            via={AMAYA_AT}
-            events={heroEvents()}
-            painting={
-              <Painting
-                viewBox={VIEWBOX}
-                paint={heroScene}
-                title={{ id: 'hero-scene-title', text: t('public.hero.scene') }}
+        <HeroStage
+          label={{ school: t('public.hero.stage'), parent: t('public.hero.parentStage') }}
+          phone={{
+            initial: t('public.hero.phone.schoolInitial'),
+            school: [t('public.hero.phone.schoolLine1'), t('public.hero.phone.schoolLine2')],
+            title: t('public.hero.phone.title'),
+            detail: t('public.hero.phone.detail'),
+            maya: <Face who="maya" mood="laugh" />,
+            tonight: {
+              kicker: t('public.hero.phone.tonight.kicker'),
+              text: t('public.hero.phone.tonight.text'),
+            },
+            tabs: [
+              t('public.hero.phone.tabs.today'),
+              t('public.hero.phone.tabs.circle'),
+              t('public.hero.phone.tabs.ask'),
+              t('public.hero.phone.tabs.pay'),
+            ],
+          }}
+          appPhone={{
+            ask: {
+              kicker: t('public.hero.phone.ask.kicker'),
+              question: t('public.hero.phone.ask.question'),
+              answer: t('public.hero.phone.ask.answer'),
+              source: t('public.hero.phone.ask.source'),
+            },
+            pay: {
+              kicker: t('public.hero.phone.pay.kicker'),
+              title: t('public.hero.phone.pay.title'),
+              due: t('public.hero.phone.pay.due'),
+              button: t('public.hero.phone.pay.button'),
+            },
+            family: {
+              kicker: t('public.hero.phone.family.kicker'),
+              title: t('public.hero.phone.family.title'),
+              body: t('public.hero.phone.family.body'),
+            },
+          }}
+          highlights={[
+            {
+              label: t('public.hero.highlights.today'),
+              colour: site('orange'),
+              place: 'top-0 left-0',
+            },
+            {
+              label: t('public.hero.highlights.moments'),
+              colour: site('pink'),
+              place: 'top-[93%] left-[2%]',
+            },
+            {
+              label: t('public.hero.highlights.ask'),
+              colour: site('sky'),
+              place: 'top-[9%] right-0',
+            },
+            {
+              label: t('public.hero.highlights.pay'),
+              colour: site('lime'),
+              place: 'top-[90%] right-[2%]',
+            },
+          ]}
+          avatars={stageAvatars()}
+          messages={stageMessages()}
+          decorations={
+            <>
+              <FloatingDoodle
+                kind="star"
+                colour={site('lime')}
+                left="22%"
+                top="-2%"
+                size={30}
+                motion="motion-safe:animate-twinkle"
               />
-            }
-          />
-          <p className="m-0 text-[12.5px] font-bold text-ink-2">{t('public.hero.sample')}</p>
-        </div>
+              <FloatingDoodle
+                kind="kite"
+                colour={site('orange')}
+                left="74%"
+                top="-6%"
+                size={46}
+                motion="motion-safe:animate-drift"
+              />
+              <FloatingDoodle
+                kind="cloud"
+                colour={site('navy-line')}
+                left="-8%"
+                top="30%"
+                size={54}
+                motion="motion-safe:animate-drift [animation-duration:11s]"
+              />
+              <FloatingDoodle
+                kind="heart"
+                colour={site('pink')}
+                left="96%"
+                top="32%"
+                size={24}
+                motion="motion-safe:animate-twinkle [animation-duration:2.6s] [animation-delay:.8s]"
+              />
+              <FloatingDoodle
+                kind="pencil"
+                colour={site('sky')}
+                left="78%"
+                top="93%"
+                size={38}
+                motion="motion-safe:animate-drift [animation-duration:8s] [animation-delay:1s]"
+              />
+              <FloatingDoodle
+                kind="star"
+                colour={site('orange')}
+                left="18%"
+                top="96%"
+                size={22}
+                motion="motion-safe:animate-twinkle [animation-duration:3.4s] [animation-delay:.4s]"
+              />
+            </>
+          }
+        />
       </div>
     </section>
   );

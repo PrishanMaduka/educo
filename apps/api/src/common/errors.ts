@@ -10,6 +10,7 @@ export const DEFAULT_MESSAGES = {
   business_rule: 'That cannot be done right now.',
   app_update_required: 'Please update the Quad app to continue.',
   rate_limited: 'Too many requests. Wait a moment and try again.',
+  invalid_link: 'This link has expired or has already been used. Ask for a new one.',
   internal: 'Something went wrong on our side. Please try again.',
 } as const satisfies Partial<Record<ErrorCode, string>>;
 
@@ -79,5 +80,22 @@ export class ConflictError extends AppError {
 export class BusinessRuleError extends AppError {
   constructor(code: ErrorCode, message: string, fields?: ErrorFields) {
     super(code, message, 422, fields);
+  }
+}
+
+/**
+ * 400: a signed link that cannot be used (spec 05). Every cause (a changed or forged token, the
+ * wrong purpose, expired, already used) gets this one message, which never names the school.
+ */
+export class InvalidLinkError extends AppError {
+  constructor() {
+    super('invalid_link', DEFAULT_MESSAGES.invalid_link, 400);
+  }
+}
+
+/** 429: too many requests (spec 06 → Rate limits). The filter sends `Retry-After`. */
+export class RateLimitedError extends AppError {
+  constructor(readonly retryAfterSeconds: number) {
+    super('rate_limited', DEFAULT_MESSAGES.rate_limited, 429);
   }
 }

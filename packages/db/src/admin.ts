@@ -11,6 +11,6 @@ export type {
 } from './bootstrap';
 export { bootstrapRoles } from './bootstrap';
 export type { DatabaseUrls } from './env';
-export { databaseUrls, withDatabaseName } from './env';
+export { databaseUrls, seedPasswordRefusal, withDatabaseName } from './env';
 export { MIGRATIONS_FOLDER, runMigrations } from './migrate';
 export { seedDatabase } from './seed';

@@ -1,4 +1,9 @@
+import { createPrivateKey, createPublicKey } from 'node:crypto';
+
+import { LOCAL_SEED_PASSWORD } from '@quad/contracts';
 import { z } from 'zod';
+
+import { jwtKeyProblems, publicKeyDer } from './common/crypto/jwt-keys';
 
 /**
  * The API's configuration: every environment variable in spec 02 (Repository bootstrap →
@@ -40,6 +45,9 @@ const boolean = z
   .enum(['true', 'false'], { message: 'must be true or false' })
   .transform((value) => value === 'true');
 const text = z.string();
+/** PEM text. A one-line value with literal backslash-n escapes gets real newlines. */
+const normalisePem = (value: string): string => value.replaceAll('\\n', '\n');
+const pem = z.string().transform(normalisePem);
 const version = z.string().regex(/^\d+\.\d+\.\d+$/, { message: 'must look like 1.2.3' });
 const snsTopicArn = z.string().regex(/^arn:aws:sns:[a-z0-9-]+:\d{12}:[A-Za-z0-9_-]{1,256}$/, {
   message: 'must be an SNS topic ARN (arn:aws:sns:<region>:<account>:<name>)',
@@ -52,9 +60,10 @@ const withDefault = <T extends z.ZodTypeAny>(schema: T, value: z.input<T>) =>
   z.preprocess(blank, schema.default(value));
 
 /**
- * Required in every environment from M0 on. Everything else is optional for now: each later
- * milestone that ships a feature (SSO, email, SMS, push, payments, Ask Quad…) makes its own
- * variables required when that feature is turned on, here and in this list.
+ * Required in every environment: from M0 on, plus the field and token keys from M1 (D32).
+ * Everything else is optional for now: each later milestone that ships a feature (SSO, email,
+ * SMS, push, payments, Ask Quad…) makes its own variables required when that feature is turned
+ * on, here and in this list.
  */
 export const M0_REQUIRED = [
   'APP_ENV',
@@ -65,6 +74,9 @@ export const M0_REQUIRED = [
   'LINK_SIGNING_SECRET',
   'PUBLIC_WEB_URL',
   'CONSOLE_URL',
+  'FIELD_ENCRYPTION_KEY',
+  'JWT_PRIVATE_KEY',
+  'JWT_PUBLIC_KEY',
 ] as const;
 
 const ConfigSchema = z.object({
@@ -87,12 +99,16 @@ const ConfigSchema = z.object({
   // Redis
   REDIS_URL: req(redisUrl),
 
-  // Sessions and tokens (length rules outside local are checked in `environmentRules`)
+  // Sessions and tokens (length rules outside local are checked in `environmentRules`, the
+  // Ed25519 pair in `keyFormatRules`). FIELD_ENCRYPTION_KEY is required everywhere until M12's
+  // KMS adapter reads KMS_KEY_ID (D32).
   SESSION_SECRET: req(text),
   LINK_SIGNING_SECRET: req(text),
-  JWT_PRIVATE_KEY: opt(text),
-  JWT_PUBLIC_KEY: opt(text),
-  FIELD_ENCRYPTION_KEY: opt(text),
+  JWT_PRIVATE_KEY: req(pem),
+  JWT_PUBLIC_KEY: req(pem),
+  // 32 is `FIELD_ENCRYPTION_KEY_MIN_LENGTH` in @quad/db, not imported: this file loads before
+  // tracing starts, and @quad/db would load pg too early.
+  FIELD_ENCRYPTION_KEY: req(z.string().min(32, { message: 'must be at least 32 characters' })),
   KMS_KEY_ID: opt(text),
 
   // Staff SSO
@@ -209,14 +225,45 @@ export const NOT_READ_BY_THE_API: readonly string[] = [
 
 /**
  * The placeholder secrets published in `.env.example` so `cp .env.example .env` boots locally.
- * Anyone can read them, so they are refused outside local.
+ * Anyone can read them, so they are refused outside local (D25, D32). The Ed25519 pair was made
+ * for this file only and signs nothing anywhere else.
  */
 export const LOCAL_DEV_SECRETS = {
   SESSION_SECRET: 'local-only-session-secret-not-for-staging-or-production',
   LINK_SIGNING_SECRET: 'local-only-link-signing-secret-not-for-staging-or-production',
+  JWT_PRIVATE_KEY: [
+    '-----BEGIN PRIVATE KEY-----',
+    'MC4CAQAwBQYDK2VwBCIEIMhuxgMS/JJRMDQFHcMKgWDyn4Z4Gjf+mjfpylS2/HqA',
+    '-----END PRIVATE KEY-----',
+  ].join('\n'),
+  JWT_PUBLIC_KEY: [
+    '-----BEGIN PUBLIC KEY-----',
+    'MCowBQYDK2VwAyEArNJauWv41E8zHDTWpKLHqXJh+9PgLT+L6zQvLlCwVnA=',
+    '-----END PUBLIC KEY-----',
+  ].join('\n'),
+  FIELD_ENCRYPTION_KEY: 'local-only-field-encryption-key-not-for-staging-or-production',
+  SEED_PASSWORD: LOCAL_SEED_PASSWORD,
 } as const;
 
+/** The published pair's public key, to spot it however its PEM is written. */
+const PUBLISHED_JWT_DER = publicKeyDer(createPublicKey(LOCAL_DEV_SECRETS.JWT_PUBLIC_KEY));
+
+/** Whether `value` is (a rewrite of) the published Ed25519 private or public key. */
+function isPublishedJwtKey(variable: 'JWT_PRIVATE_KEY' | 'JWT_PUBLIC_KEY', value: string): boolean {
+  try {
+    const key =
+      variable === 'JWT_PRIVATE_KEY'
+        ? createPrivateKey(normalisePem(value))
+        : createPublicKey(normalisePem(value));
+    return publicKeyDer(key).equals(PUBLISHED_JWT_DER);
+  } catch {
+    // Not a key at all: `keyFormatRules` reports that.
+    return false;
+  }
+}
+
 const MIN_SECRET_LENGTH = 32;
+const PUBLISHED = 'is the published local value; set a real secret';
 
 /** Credentials of the compose Postgres roles (docker/postgres/init); fine locally only. */
 const COMPOSE_CREDENTIALS = ['quad_app:quad_app@', 'quad_platform:quad_platform@'];
@@ -248,6 +295,7 @@ function describeIssue(issue: z.ZodIssue): string {
       return `must be one of: ${issue.options.join(', ')}`;
     case z.ZodIssueCode.custom:
     case z.ZodIssueCode.invalid_string:
+    case z.ZodIssueCode.too_small:
       return issue.message;
     default:
       return 'is not valid';
@@ -263,11 +311,22 @@ function environmentRules(env: RawEnv): ConfigProblem[] {
     return [];
   }
   const problems: ConfigProblem[] = [];
+  for (const name of ['FIELD_ENCRYPTION_KEY', 'SEED_PASSWORD'] as const) {
+    if (blank(env[name]) === LOCAL_DEV_SECRETS[name]) {
+      problems.push({ variable: name, problem: PUBLISHED });
+    }
+  }
+  for (const name of ['JWT_PRIVATE_KEY', 'JWT_PUBLIC_KEY'] as const) {
+    const value = blank(env[name]);
+    if (typeof value === 'string' && isPublishedJwtKey(name, value)) {
+      problems.push({ variable: name, problem: PUBLISHED });
+    }
+  }
   for (const name of ['SESSION_SECRET', 'LINK_SIGNING_SECRET'] as const) {
     const value = blank(env[name]);
     if (typeof value !== 'string') continue;
     if (value === LOCAL_DEV_SECRETS[name]) {
-      problems.push({ variable: name, problem: 'is the published local value; set a real secret' });
+      problems.push({ variable: name, problem: PUBLISHED });
     } else if (value.length < MIN_SECRET_LENGTH) {
       problems.push({
         variable: name,
@@ -299,6 +358,55 @@ function environmentRules(env: RawEnv): ConfigProblem[] {
   return problems;
 }
 
+/** In every environment: the JWT keys are an Ed25519 pair that belongs together (D32). */
+function keyFormatRules(env: RawEnv): ConfigProblem[] {
+  const privateKey = blank(env.JWT_PRIVATE_KEY);
+  const publicKey = blank(env.JWT_PUBLIC_KEY);
+  if (typeof privateKey !== 'string' || typeof publicKey !== 'string') {
+    return [];
+  }
+  return jwtKeyProblems(normalisePem(privateKey), normalisePem(publicKey)).map(
+    ({ variable, problem }) => ({ variable, problem }),
+  );
+}
+
+/**
+ * In every environment: each chosen email provider has what it needs, and SMS stays on the log
+ * provider until live SMS ships (M6, OQ12). Outside local `EMAIL_PROVIDER` must be set; locally
+ * it may be unset, and email then goes by SMTP when `SMTP_URL` is set and is otherwise off
+ * (`emailProviderOf`).
+ */
+function deliveryRules(env: RawEnv): ConfigProblem[] {
+  const problems: ConfigProblem[] = [];
+  const needs = (provider: string, names: readonly string[]): void => {
+    for (const name of names) {
+      if (blank(env[name]) === undefined) {
+        problems.push({
+          variable: name,
+          problem: `is missing (EMAIL_PROVIDER=${provider} needs it)`,
+        });
+      }
+    }
+  };
+  const emailProvider = blank(env.EMAIL_PROVIDER);
+  const appEnv = blank(env.APP_ENV);
+  if (emailProvider === undefined && (appEnv === 'staging' || appEnv === 'production')) {
+    problems.push({
+      variable: 'EMAIL_PROVIDER',
+      problem: 'must be set outside local (smtp or ses)',
+    });
+  }
+  if (emailProvider === 'smtp') needs('smtp', ['SMTP_URL']);
+  if (emailProvider === 'ses') needs('ses', ['SES_REGION', 'EMAIL_FROM_DOMAIN']);
+  if (blank(env.SMS_PROVIDER) === 'live') {
+    problems.push({
+      variable: 'SMS_PROVIDER',
+      problem: 'must be log until live SMS ships (M6, OQ12)',
+    });
+  }
+  return problems;
+}
+
 /**
  * Parses the environment. Throws `ConfigError` listing every missing or invalid variable at
  * once, plus the production refusals (`DEV_FIXED_OTP` set, `CONSOLE_PASSWORD_LOGIN=true`).
@@ -311,7 +419,7 @@ export function loadConfig(env: NodeJS.ProcessEnv): Config {
         variable: issue.path.join('.'),
         problem: describeIssue(issue),
       }));
-  problems.push(...environmentRules(env));
+  problems.push(...keyFormatRules(env), ...deliveryRules(env), ...environmentRules(env));
   if (problems.length > 0 || !parsed.success) {
     throw new ConfigError(problems);
   }

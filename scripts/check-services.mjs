@@ -1,6 +1,7 @@
 #!/usr/bin/env node
-// Waits until Postgres and Redis accept connections; gives up after 60 seconds. `pnpm verify` runs it
-// before the API integration tests. Hosts and ports come from DATABASE_URL and REDIS_URL when set.
+// Waits until Postgres, Redis and Mailpit accept connections; gives up after 60 seconds. `pnpm verify`
+// runs it before the API integration tests. Hosts and ports come from DATABASE_URL, REDIS_URL and
+// SMTP_URL when set.
 import console from 'node:console';
 import net from 'node:net';
 import process from 'node:process';
@@ -33,7 +34,11 @@ const target = (name, url, defaultPort) => {
  * @returns {Target[]}
  */
 export function serviceTargets(env) {
-  return [target('Postgres', env.DATABASE_URL, 5432), target('Redis', env.REDIS_URL, 6379)];
+  return [
+    target('Postgres', env.DATABASE_URL, 5432),
+    target('Redis', env.REDIS_URL, 6379),
+    target('Mailpit', env.SMTP_URL, 1025),
+  ];
 }
 
 /** @type {(target: Target) => Promise<boolean>} */

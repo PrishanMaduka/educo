@@ -17,3 +17,13 @@ export const TENANT_DB = Symbol('TENANT_DB');
 export const SNS_KEY_FETCHER = Symbol('SNS_KEY_FETCHER');
 /** Confirms an SNS subscription with a GET of its SubscribeURL: `(url) => Promise<void>`. */
 export const SNS_SUBSCRIBE_FETCHER = Symbol('SNS_SUBSCRIBE_FETCHER');
+/** The field cipher (`FieldCipher` from `@quad/db`, R-fieldcipher): `@Inject(FIELD_CIPHER)`. */
+export const FIELD_CIPHER = Symbol('FIELD_CIPHER');
+/** The breached-password check (`BreachCheck`); offline locally (OQ14). */
+export const BREACH_CHECK = Symbol('BREACH_CHECK');
+/** The parent access token keys (`JwtKeys`, EdDSA). */
+export const JWT_KEYS = Symbol('JWT_KEYS');
+/** The API's shared ioredis connection (`src/redis`): `@Inject(REDIS) redis: Redis`. */
+export const REDIS = Symbol('REDIS');
+/** Queues email and SMS (`DeliveryQueue`, BullMQ; tests may pass a recording fake). */
+export const DELIVERY = Symbol('DELIVERY');

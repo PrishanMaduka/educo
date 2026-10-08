@@ -348,6 +348,27 @@ The worker, migrate, seed and db-bootstrap tasks run the api image.
 
 ### Step 8. Bootstrap the database roles, migrate and seed (staging administrator)
 
+First set the app secrets that Terraform leaves as placeholders (D32). The api and worker refuse to
+start without an Ed25519 key pair (their config check), and the seed task refuses to run while
+`SEED_PASSWORD` is empty (its own check, `seedPasswordRefusal`). Make the pair on your own machine,
+store it, then delete the files:
+```bash
+openssl genpkey -algorithm ed25519 -out jwt-private.pem
+openssl pkey -in jwt-private.pem -pubout -out jwt-public.pem
+aws secretsmanager put-secret-value --secret-id quad-staging/env/JWT_PRIVATE_KEY \
+  --secret-string "$(jq -n --rawfile v jwt-private.pem '{value: $v}')"
+aws secretsmanager put-secret-value --secret-id quad-staging/env/JWT_PUBLIC_KEY \
+  --secret-string "$(jq -n --rawfile v jwt-public.pem '{value: $v}')"
+rm jwt-private.pem jwt-public.pem
+read -rs SEED && aws secretsmanager put-secret-value --secret-id quad-staging/env/SEED_PASSWORD \
+  --secret-string "$(jq -n --arg v "$SEED" '{value: $v}')"; unset SEED
+```
+The seed password is the staging password of the seeded sample accounts: 10 characters or more,
+and never the local placeholder from `.env.example`. Outside local, the seed refuses that
+placeholder or an empty value, and the api refuses the placeholder if it is ever given one.
+`FIELD_ENCRYPTION_KEY` needs nothing: Terraform generates it. These secrets keep their hand-set
+values across applies, like `SENTRY_DSN` ([check](#placeholder-secrets-stay-untouched)).
+
 `scripts/ecs-deploy.mjs` reads the cluster, subnets and security groups from SSM
 (`/quad/staging/deploy/*`) and fails unless the one-off task's container exits 0. Run the three
 Terraform-registered task definitions in order:
@@ -466,7 +487,8 @@ first deploy and record the result in the M0b pull request.
 - <a id="placeholder-secrets-stay-untouched"></a>**Placeholder secrets stay untouched.** The first
   `apply (staging)` after step 10 plans no change to
   `module.app.aws_secretsmanager_secret_version.placeholder["SENTRY_DSN"]` or
-  `…placeholder["OTEL_EXPORTER_OTLP_HEADERS"]` (the plan summary lists neither), and afterwards
+  `…placeholder["OTEL_EXPORTER_OTLP_HEADERS"]`, nor to the JWT keys or `SEED_PASSWORD` set in step 8
+  (the plan summary lists none of them), and afterwards
   `aws secretsmanager get-secret-value --secret-id quad-staging/env/SENTRY_DSN --query VersionStages`
   still shows the hand-set version as `AWSCURRENT`. If a refresh would move `AWSCURRENT` back to the
   placeholder version, stop and decide before applying (for example a `lifecycle` change in
@@ -612,9 +634,16 @@ role's version (or the Redis version) and apply again, then run db-bootstrap and
 ### App secrets and restarting after a rotation
 
 - `SESSION_SECRET` and `LINK_SIGNING_SECRET`: raise `app_secret_versions` (in the `module "app"`
-  call, for example `app_secret_versions = { SESSION_SECRET = 2, LINK_SIGNING_SECRET = 1 }`),
+  call, for example
+  `app_secret_versions = { SESSION_SECRET = 2, LINK_SIGNING_SECRET = 1, FIELD_ENCRYPTION_KEY = 1 }`),
   apply, then force a new deployment of `api` and `worker`. Everyone is signed out until the
   two-value rotation of spec 20 arrives (M12).
+- `FIELD_ENCRYPTION_KEY` is generated too, but must **not** be rotated before M12: a new key would
+  leave every encrypted field (TOTP secrets) unreadable. The module refuses a version other than 1.
+  M12's KMS adapter brings re-encryption and rotation (D32).
+- `JWT_PRIVATE_KEY` and `JWT_PUBLIC_KEY` are set by hand (step 8), always as a pair. A new pair
+  signs every parent out of the app until the two-key rotation of spec 20 arrives (M12).
+- `SEED_PASSWORD` is set by hand (step 8); change it, then run the seed task again.
 - `SENTRY_DSN` and `OTEL_EXPORTER_OTLP_HEADERS` are set by hand (step 10) in the same JSON shape.
   After a change, force a new deployment of every service that reads them (`api`, `worker`,
   `staff`, `console`).

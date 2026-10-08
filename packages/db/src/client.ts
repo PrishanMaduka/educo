@@ -73,6 +73,9 @@ function guardClient(client: pg.PoolClient, isClosed: () => boolean): pg.PoolCli
   });
 }
 
+/** Returns a connection to a clean state; one round trip, outside any transaction. */
+const RESET_CONNECTION_SQL = 'reset all; select pg_advisory_unlock_all(); discard temp';
+
 /**
  * Runs `fn` in one transaction on one checked-out connection, then always releases it.
  *
@@ -82,7 +85,9 @@ function guardClient(client: pg.PoolClient, isClosed: () => boolean): pg.PoolCli
  * - While it is checked out we listen for its `error` event (the pool only listens on idle
  *   connections, so a database restart mid-transaction would otherwise crash the process).
  * - Before release, `RESET ALL` clears anything `fn` set at session level (`set_config(…,
- *   false)`, `SET`), so nothing outlives the transaction on a pooled connection.
+ *   false)`, `SET`), `pg_advisory_unlock_all()` drops session-level advisory locks and
+ *   `DISCARD TEMP` drops temporary tables, so nothing outlives the transaction on a pooled
+ *   connection (D27 follow-up).
  * - A connection that errored, or that we could not return to a clean state, is destroyed
  *   instead of going back to the pool.
  */
@@ -106,7 +111,7 @@ export async function runInTransaction<T>(
     });
   } catch (error) {
     // Drizzle has already sent ROLLBACK, but if that failed it throws the rollback error and we
-    // cannot tell whether the transaction is still open. RESET ALL below would succeed inside an
+    // cannot tell whether the transaction is still open. The reset below would succeed inside an
     // open transaction, so roll back once more on this failure path only. When Drizzle's
     // rollback did work, Postgres answers with a harmless "no transaction in progress" notice.
     if (!broken) {
@@ -121,7 +126,7 @@ export async function runInTransaction<T>(
     closed = true;
     if (!broken) {
       try {
-        await client.query('reset all');
+        await client.query(RESET_CONNECTION_SQL);
       } catch (resetError) {
         broken = toError(resetError);
       }

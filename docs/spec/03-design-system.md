@@ -72,12 +72,12 @@ Theme rules:
 
 ## Logo (`packages/tokens/logo`)
 
-- The mark is four rounded tiles on a 64-unit grid: squares of 21 units with 7-unit corners and a 4-unit gap. The top-left tile is indigo `#1F2559` (school), the top-right and bottom-left tiles are lilac `#8B7CF6` (teachers, parents), and the bottom-right tile is coral `#E5534B` (students). A tail goes from (49,49) to (58,58), 7 units wide with round caps, and turns the square into a Q.
-- On dark backgrounds: the indigo tile becomes `#FFFFFF`, the lilac tiles `#C9C4F5` and the coral tile `#FF7A6E`.
-- The wordmark is custom lowercase "quad" drawn with a 9-unit stroke in indigo.
+- The mark is four petals on a 30-unit grid: each is a 13.5-unit square with a 10-unit round outer corner and 3.5-unit inner corners, mirrored into the four quarters with a 3-unit gap. Top left sky `#59C3FF`, top right pink `#FF6FAE`, bottom left lime `#C8F169`, bottom right orange `#FF9B45`.
+- The wordmark is lowercase "quad" in navy `#101632` (cream `#F7F5F0` on dark backgrounds, `quad-logo-white.svg`); the petals keep their colours on dark. `quad-mark-white.svg` is the all-white mark for single-colour use.
+- `QuadMark` and `QuadLogo` take a variant: `color`, `white`, `mono` (all white) and `theme` (the public site's colour tokens, with the wordmark in the current text colour).
 - Source files: `design/brand/quad-logo.svg`, `quad-logo-white.svg`, `quad-mark.svg`, `quad-mark-white.svg`, `quad-app-icon.svg`. Export them as React components for web, and use the SVG files with `flutter_svg` in the parent app. Usage rules are in `design/brand.html`.
 - A school's own logo (uploaded in the console) is shown in its staff portal side bar and in the parent app after sign-in. Quad's mark appears as "powered by Quad", in the console, on the public landing page and sign-in, and on the parent app's splash and sign-in screens before a school is known (the parent app is one Quad app for every school; see [09](09-parent-app.md#start-up)).
-- The parent app icon is `quad-app-icon.svg` for every school; dev and staging builds add a small "DEV" or "STG" badge.
+- The parent app icon is `quad-app-icon.svg` (the petals on navy) for every school; dev and staging builds add a small "DEV" or "STG" badge.
 
 ## Page patterns
 
@@ -133,26 +133,9 @@ A small illustration or icon, one warm sentence, and the next action.
 - Sparklines in early-warning cards: 64×24, with the end point marked; `bad` for falling and `good` for rising.
 
 ### Public landing page
-Reference: `design/landing.html`. It uses the same tokens as the apps, plus:
-- **Accent serif:** one italic word or phrase in each heading ("Every child has a *circle*.") uses **Fraunces** italic, weight 500 (600 where the prototype uses it), letter-spacing −0.01em, with the fallback `Georgia, "Times New Roman", serif`. Token `font-accent`. It is used only on public pages, never in the apps.
-- **Band:** the one full-bleed indigo section ("One school day in Amaya's circle") uses band tokens:
+Reference: `design/landing.html`. The public site has its own palette, font and components, described in [19](19-public-site.md#design-tokens-to-add): `site-*` colour tokens (navy, cream, lime, pink, sky blue and orange, light and dark), Bricolage Grotesque, flat avatars, and a school/parent view switch. They are used only on public pages, never in the apps.
 
-| Token | Light | Dark |
-|---|---|---|
-| `band` | `#1F2559` | `#0D0E22` |
-| `band-2` | `#2A3170` | `#181A38` |
-| `band-ink` | `#F3F2FB` | `#F3F2FB` |
-| `band-ink-2` | `#C9C6EC` | `#B8B6DC` |
-| `band-line` | `#3A4285` | `#2E3260` |
-| `band-tag-teal` (bg / text) | `#1D4F4A` / `#9BEADF` | same |
-| `band-tag-coral` | `#5A2430` / `#FFC3BC` | same |
-| `band-tag-amber` | `#5A4317` / `#FFDDA1` | same |
-| `band-tag-lilac` | `#3A3170` / `#D9D2FF` | same |
-
-- **Heatmap** (the leaders section and the staff Family connection heatmap): `heat-0` (coral at 30% on `surface`), `heat-1` (teal at 30%), `heat-2` (teal at 60%) and `heat-3` (teal), computed the same way on the dark surface. Full list and use in [19](19-public-site.md#design-tokens-to-add).
-
-- Body text is 16 px with a 1.6 line height, the lede 18.5 px, buttons 48 px tall pills, and the focus ring a 2.5 px coral outline. The prototype's slightly different `surface-2` and `line` values map to the app tokens above (spec wins).
-- Everything else follows the principles here: one bold moment (the band), quiet sections, a phone-first layout at 390 px, dark mode and reduced motion (the circle animation stops).
+- **Heatmap** (the staff Family connection heatmap): `heat-0` (coral at 30% on `surface`), `heat-1` (teal at 30%), `heat-2` (teal at 60%) and `heat-3` (teal), computed the same way on the dark surface. They are added to `packages/tokens` with that screen.
 
 ### Floating Ask Quad button
 - Staff and console: a coral pill at the bottom right with a sparkle icon and "Ask Quad". It moves up 92 px when a sticky save bar is shown, and is hidden while the panel is open.

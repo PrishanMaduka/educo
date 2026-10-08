@@ -4,7 +4,6 @@ import {
   colors,
   contrastRatio,
   fontFamily,
-  heatHex,
   publicSite,
   radius,
   shadow,
@@ -50,77 +49,50 @@ describe('colour tokens', () => {
 });
 
 describe('public site tokens', () => {
-  it('use palette B for the band (spec 19 "Palette B tokens")', () => {
-    expect(publicSite.light.band).toBe('#1A2A5E');
-    expect(publicSite.dark.band).toBe('#0F0F13');
-    expect(publicSite.light['band-2']).toBe('#24387A');
-    expect(publicSite.dark['band-2']).toBe('#1D1D23');
-    expect(publicSite.light['band-line']).toBe('#34498F');
-    expect(publicSite.dark['band-line']).toBe('#33333C');
-    expect(publicSite.light['band-ink-2']).toBe('#CDD5F2');
-    expect(publicSite.dark['band-ink-2']).toBe('#D0CFCA');
-    expect(publicSite.light['band-tag-teal-bg']).toBe('#1D4F4A');
-    expect(publicSite.light['band-tag-teal-ink']).toBe('#9BEADF');
-    expect(publicSite.dark['band-tag-coral-bg']).toBe('#5A2430');
-    expect(publicSite.dark['band-tag-amber-ink']).toBe('#FFDDA1');
-    expect(publicSite.light['band-tag-lilac-bg']).toBe('#3A3170');
-    expect(publicSite.light['band-tag-lilac-ink']).toBe('#D9D2FF');
-  });
-
-  it('replace the page background with Sky blue and Soft charcoal', () => {
-    expect(publicSite.palette.light).toEqual({
-      canvas: '#EEF5FB',
-      surface: '#FFFFFF',
-      'surface-2': '#E4EDF7',
-      line: '#D2DEEC',
+  it('use the landing palette: navy, cream, lime, pink, sky blue and orange (spec 19)', () => {
+    expect(publicSite.light).toMatchObject({
+      navy: '#101632',
+      paper: '#F7F5F0',
+      lime: '#C8F169',
+      pink: '#FF6FAE',
+      sky: '#59C3FF',
+      orange: '#FF9B45',
     });
-    expect(publicSite.palette.dark).toMatchObject({
-      canvas: '#18181D',
-      surface: '#222228',
-      ink: '#F3F2EE',
-      'ink-3': '#9C9A93',
-    });
+    expect(publicSite.dark.lime).toBe(publicSite.light.lime);
   });
 
-  it('give coral text and the heat numbers 4.5:1 on their backgrounds', () => {
-    const { landing, palette } = publicSite;
-    expect(contrastRatio(landing.light['coral-ink'], palette.light.canvas)).toBeGreaterThanOrEqual(
-      4.5,
-    );
-    expect(contrastRatio(landing.dark['coral-ink'], palette.dark.canvas)).toBeGreaterThanOrEqual(
-      4.5,
-    );
-    expect(
-      contrastRatio(landing.light['coral-fill-ink'], landing.light['coral-fill']),
-    ).toBeGreaterThanOrEqual(4.5);
-    expect(
-      contrastRatio(landing.dark['coral-fill-ink'], landing.dark['coral-fill']),
-    ).toBeGreaterThanOrEqual(4.5);
-    const darkSurface = { ...colors.dark, surface: palette.dark.surface };
-    expect(contrastRatio(landing.dark['heat-ink'], heatHex(darkSurface, 2))).toBeGreaterThanOrEqual(
-      4.5,
-    );
-    expect(
-      contrastRatio(landing.light['heat-ink'], heatHex(colors.light, 2)),
-    ).toBeGreaterThanOrEqual(4.5);
+  it('switch the page, cards and sheets to the dark navy set in dark mode', () => {
+    expect(publicSite.light['page-bg']).toBe('#F7F5F0');
+    expect(publicSite.dark['page-bg']).toBe('#0F1330');
+    expect(publicSite.dark['hero-bg']).toBe('#0A0D24');
+    expect(publicSite.dark['card-bg']).toBe('#171D45');
+    expect(Object.keys(publicSite.dark)).toEqual(Object.keys(publicSite.light));
   });
 
-  it('define every watercolour pigment from spec 19 in both themes', () => {
-    expect(publicSite.pigments.light.paper).toBe('#F4F1EA');
-    expect(publicSite.pigments.dark.paper).toBe('#1F1F25');
-    expect(publicSite.pigments.light.uniform).toBe('#FDFCF8');
-    expect(publicSite.pigments.dark.window).toBe('#FFD47C');
-    expect(Object.keys(publicSite.pigments.dark)).toEqual(Object.keys(publicSite.pigments.light));
-    expect(publicSite.blend).toEqual({ light: 'multiply', dark: 'normal' });
+  it('give body text 4.5:1 on its ground in both themes', () => {
+    for (const theme of ['light', 'dark'] as const) {
+      const set = publicSite[theme];
+      for (const ink of ['page-ink', 'page-ink-2', 'page-ink-3'] as const) {
+        expect(contrastRatio(set[ink], set['page-bg']), `${theme} ${ink}`).toBeGreaterThanOrEqual(
+          4.5,
+        );
+      }
+      expect(contrastRatio(set['sheet-ink-2'], set['sheet-bg'])).toBeGreaterThanOrEqual(4.5);
+    }
+    for (const ink of ['on-navy', 'on-navy-2', 'on-navy-3'] as const) {
+      expect(contrastRatio(publicSite.light[ink], publicSite.light.navy)).toBeGreaterThanOrEqual(
+        4.5,
+      );
+    }
+    for (const vivid of ['lime', 'pink', 'sky', 'orange'] as const) {
+      expect(
+        contrastRatio(publicSite.light['on-vivid'], publicSite.light[vivid]),
+      ).toBeGreaterThanOrEqual(4.5);
+    }
   });
 
-  it('mixes the heat steps on the theme surface', () => {
-    expect(publicSite.heat).toEqual([
-      { color: 'c1', percent: 30 },
-      { color: 'c5', percent: 30 },
-      { color: 'c5', percent: 60 },
-      { color: 'c5', percent: 100 },
-    ]);
+  it('use lime as the school accent and pink as the parent accent', () => {
+    expect(publicSite.accent).toEqual({ school: 'lime', parent: 'pink' });
   });
 });
 

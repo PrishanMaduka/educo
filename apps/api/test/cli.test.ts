@@ -3,6 +3,7 @@ import { existsSync, mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 
+import { LOCAL_SEED_PASSWORD } from '@quad/contracts';
 import { afterAll, describe, expect, it } from 'vitest';
 
 import { adminConnectionFromEnv, parseRoleFromUrl } from '../src/cli/db-bootstrap';
@@ -113,15 +114,36 @@ describe('db-bootstrap command', () => {
 });
 
 describe('seedRefusal', () => {
+  const STAGING_PASSWORD = 'a-real-staging-password';
+
   it.each([['production'], ['Production'], ['prod'], [undefined], [''], ['Local']])(
     'refuses APP_ENV=%j',
     (appEnv) => {
-      expect(seedRefusal(appEnv)).toMatch(/only runs when APP_ENV is local or staging/);
+      expect(seedRefusal({ APP_ENV: appEnv, SEED_PASSWORD: STAGING_PASSWORD })).toMatch(
+        /only runs when APP_ENV is local or staging/,
+      );
     },
   );
 
-  it.each([['local'], ['staging']])('allows %s', (appEnv) => {
-    expect(seedRefusal(appEnv)).toBeNull();
+  it('allows local, with or without a seed password', () => {
+    expect(seedRefusal({ APP_ENV: 'local' })).toBeNull();
+    expect(seedRefusal({ APP_ENV: 'local', SEED_PASSWORD: LOCAL_SEED_PASSWORD })).toBeNull();
+  });
+
+  it('allows staging with a real seed password', () => {
+    expect(seedRefusal({ APP_ENV: 'staging', SEED_PASSWORD: STAGING_PASSWORD })).toBeNull();
+  });
+
+  it('refuses staging without a seed password (the hand-set placeholder is empty)', () => {
+    expect(seedRefusal({ APP_ENV: 'staging', SEED_PASSWORD: '' })).toBe(
+      'SEED_PASSWORD is required when APP_ENV is staging.',
+    );
+  });
+
+  it('refuses staging with the published local placeholder', () => {
+    expect(seedRefusal({ APP_ENV: 'staging', SEED_PASSWORD: LOCAL_SEED_PASSWORD })).toBe(
+      'SEED_PASSWORD is the published local value; set a real one.',
+    );
   });
 });
 

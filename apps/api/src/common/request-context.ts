@@ -18,7 +18,16 @@ export function runWithRequestContext<T>(requestId: string, fn: () => T): T {
   return storage.run({ requestId, tenantId: null, userId: null }, fn);
 }
 
-/** The current request's context, or undefined outside a request (boot, jobs). */
+/**
+ * Runs a queued job (and everything it awaits) in a context of its own, so its log lines and
+ * spans carry the job's tenant (D28 M1/M6 follow-up). `tenantId` comes from the job's payload
+ * after the processor has parsed it, never from anywhere else.
+ */
+export function runWithJobContext<T>(jobKey: string, tenantId: string | null, fn: () => T): T {
+  return storage.run({ requestId: jobKey, tenantId, userId: null }, fn);
+}
+
+/** The current request's or job's context, or undefined outside both (boot). */
 export function currentRequestContext(): RequestContext | undefined {
   return storage.getStore();
 }

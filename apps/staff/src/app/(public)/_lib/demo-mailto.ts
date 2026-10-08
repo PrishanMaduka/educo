@@ -1,18 +1,13 @@
-import type { DemoCurriculum, DemoRequest, StudentsBand } from '@quad/contracts/public';
-
 /**
- * Translated text for the pre-launch demo email (decision log, 2026-10-08). The server translates
- * it, with markers where the values go, so the browser needs no i18n code.
+ * Translated text for the pre-launch request emails (decision log D30). The server translates
+ * it with markers where the values go, so the browser needs no i18n code.
  */
-export interface DemoMailLabels {
+export interface MailText {
   /** The subject, with `marker.slot` where the school's name goes. */
   subject: string;
   intro: string;
   /** One body line, with `marker.label` and `marker.value`. */
   line: string;
-  fields: Record<keyof DemoRequest, string>;
-  students: Record<StudentsBand, string>;
-  curricula: Record<DemoCurriculum, string>;
   marker: { slot: string; label: string; value: string };
 }
 
@@ -21,27 +16,25 @@ export function fillSlot(template: string, marker: string, value: string): strin
   return template.split(marker).join(value);
 }
 
-const FIELD_ORDER = ['name', 'email', 'school', 'country', 'students', 'curriculum'] as const;
-
 /**
- * The `mailto:` link that opens the visitor's email app with their demo request ready to send:
- * the school in the subject, every field on its own line. RFC 6068: percent-encoding with CRLF
- * line breaks (`encodeURIComponent`, so spaces are `%20`, never `+`).
+ * The `mailto:` link that opens the visitor's email app with their request ready to send: the
+ * school in the subject, then one line per field that has a value, in the form's order. RFC 6068:
+ * percent-encoding with CRLF line breaks (`encodeURIComponent`, so spaces are `%20`, never `+`).
  */
-export function buildDemoMailto(to: string, request: DemoRequest, labels: DemoMailLabels): string {
-  const value = (field: (typeof FIELD_ORDER)[number]): string => {
-    if (field === 'students') return labels.students[request.students];
-    if (field === 'curriculum') return labels.curricula[request.curriculum];
-    return request[field];
-  };
-  const lines = FIELD_ORDER.map((field) =>
-    fillSlot(
-      fillSlot(labels.line, labels.marker.label, labels.fields[field]),
-      labels.marker.value,
-      value(field),
-    ),
-  );
-  const subject = fillSlot(labels.subject, labels.marker.slot, request.school);
-  const body = [labels.intro, '', ...lines].join('\r\n');
+export function buildRequestMailto(
+  to: string,
+  school: string,
+  fields: readonly (readonly [label: string, value: string | undefined])[],
+  text: MailText,
+): string {
+  const lines = fields
+    .filter(
+      (field): field is readonly [string, string] => field[1] !== undefined && field[1] !== '',
+    )
+    .map(([label, value]) =>
+      fillSlot(fillSlot(text.line, text.marker.label, label), text.marker.value, value),
+    );
+  const subject = fillSlot(text.subject, text.marker.slot, school);
+  const body = [text.intro, '', ...lines].join('\r\n');
   return `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 }

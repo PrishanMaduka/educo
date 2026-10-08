@@ -1,90 +1,158 @@
 import { cn } from '@quad/ui';
 
-import { Painting } from '../_illustrations/Painting';
-import { teaScene } from '../_illustrations/sections';
+import { FloatingDoodle } from '../_art/Doodle';
+import { Face } from '../_art/Face';
+import { site } from '../_art/people';
 import { CONTACT_EMAIL } from '../_lib/site';
 
-import { Accented } from './Accented';
+import { AppBadges } from './AppBadges';
 import { DemoForm, type DemoFormLabels } from './DemoForm';
-import { eyebrow, h2, lede, wrap } from './styles';
-
-import type { DemoCurriculum, StudentsBand } from '@quad/contracts/public';
+import { display, onlyParent, onlySchool, wrap } from './styles';
 
 import { SLOT_MARKER, t } from '@/i18n';
 
 // Markers the browser replaces with the visitor's values (none of them occurs in a translation).
 const MARKER = { slot: SLOT_MARKER, label: '⁣label⁣', value: '⁣value⁣' } as const;
 
-function formLabels(): DemoFormLabels {
-  const fields = {
+function formLabels(variant: 'school' | 'parent'): DemoFormLabels {
+  const isSchool = variant === 'school';
+  return {
     name: t('public.demo.field.name'),
-    email: t('public.demo.field.email'),
-    school: t('public.demo.field.school'),
-    country: t('public.demo.field.country'),
+    email: isSchool ? t('public.demo.field.workEmail') : t('public.demo.field.email'),
+    school: isSchool ? t('public.demo.field.school') : t('public.demo.field.childSchool'),
+    place: isSchool ? t('public.demo.field.country') : t('public.demo.field.city'),
     students: t('public.demo.field.students'),
     curriculum: t('public.demo.field.curriculum'),
-  };
-  const students: Record<StudentsBand, string> = {
-    under_300: t('public.demo.students.under_300'),
-    '300_1000': t('public.demo.students.300_1000'),
-    '1000_2500': t('public.demo.students.1000_2500'),
-    over_2500: t('public.demo.students.over_2500'),
-  };
-  const curricula: Record<DemoCurriculum, string> = {
-    cambridge: t('public.demo.curriculum.cambridge'),
-    edexcel: t('public.demo.curriculum.edexcel'),
-    ib: t('public.demo.curriculum.ib'),
-    sri_lankan_national: t('public.demo.curriculum.sri_lankan_national'),
-    other: t('public.demo.curriculum.other'),
-  };
-  return {
-    fields,
-    students,
-    curricula,
-    submit: t('public.demo.submit'),
-    errors: {
-      name_and_school: t('public.demo.error.name_and_school'),
-      work_email: t('public.demo.error.work_email'),
-      choice: t('public.demo.error.choice'),
+    note: t('public.demo.field.note'),
+    noteInEmail: t('public.demo.mail.note'),
+    notePlaceholder: t('public.demo.field.notePlaceholder'),
+    studentsOptions: {
+      under_300: t('public.demo.students.under_300'),
+      '300_1000': t('public.demo.students.300_1000'),
+      '1000_2500': t('public.demo.students.1000_2500'),
+      over_2500: t('public.demo.students.over_2500'),
     },
-    note: t('public.demo.note'),
+    curriculumOptions: {
+      ib: t('public.demo.curriculum.ib'),
+      cambridge: t('public.demo.curriculum.cambridge'),
+      edexcel: t('public.demo.curriculum.edexcel'),
+      american: t('public.demo.curriculum.american'),
+      national: t('public.demo.curriculum.national'),
+      other: t('public.demo.curriculum.other'),
+    },
+    submit: t(`public.demo.${variant}.submit`),
+    errors: {
+      name_and_school: t(`public.demo.${variant}.error.name_and_school`),
+      email: t(`public.demo.${variant}.error.email`),
+      other: t('public.demo.error.other'),
+    },
+    privacy: t('public.demo.note'),
     sent: t('public.demo.sent'),
     fallback: t('public.demo.fallback', { email: MARKER.slot }),
     emailMarker: MARKER.slot,
+    again: t('public.demo.again'),
     mail: {
-      subject: t('public.demo.mail.subject', { school: MARKER.slot }),
-      intro: t('public.demo.mail.intro'),
+      subject: t(`public.demo.${variant}.mail.subject`, { school: MARKER.slot }),
+      intro: t(`public.demo.${variant}.mail.intro`),
       line: t('public.demo.mail.line', { label: MARKER.label, value: MARKER.value }),
-      fields,
-      students,
-      curricula,
       marker: MARKER,
     },
   };
 }
 
-/** Book a 30-minute walkthrough (spec 19 §11). */
+const WAVERS = [
+  { who: 'maya', size: 'size-[84px]', motion: '' },
+  { who: 'okafor', size: 'size-16', motion: '[animation-duration:3.5s] [animation-delay:.3s]' },
+  { who: 'priya', size: 'size-16', motion: '[animation-duration:4s] [animation-delay:.6s]' },
+] as const;
+
+/** The demo panel (spec 19): a demo for schools, or a note to your child's school for parents. */
 export function Demo() {
+  const title = cn(display, 'text-[clamp(42px,6vw,96px)] leading-[.9]');
+  const lede = 'm-0 max-w-[28em] text-[19px] leading-[1.5]';
+  const cheer = <Face who="maya" mood="laugh" />;
   return (
-    <section id="demo" aria-labelledby="demo-title" className="pb-24 max-[820px]:pb-16">
-      <div className={wrap}>
-        <div className="grid grid-cols-2 gap-10 rounded-[28px] border border-line bg-surface p-10 shadow-lg max-[820px]:grid-cols-1 max-[820px]:px-5 max-[820px]:py-[26px]">
-          <div>
-            <p className={cn('m-0', eyebrow)}>{t('public.demo.eyebrow')}</p>
-            <h2 id="demo-title" className={cn(h2, 'mt-3')}>
-              <Accented
-                template={t('public.demo.title', { accent: SLOT_MARKER })}
-                accent={t('public.demo.titleAccent')}
-              />
+    <div id="demo" className="bg-site-page-bg text-site-page-ink">
+      <div className={cn(wrap, 'pb-[clamp(56px,7vw,112px)]')}>
+        <div className="relative flex flex-wrap items-start gap-x-[clamp(32px,5vw,72px)] gap-y-10 overflow-hidden rounded-[40px] bg-site-accent p-[clamp(28px,5vw,72px)] text-site-on-vivid">
+          {/* The prototype's doodle layer is an empty flex item, so it also sets the copy's indent.
+              Below 760 px only the first doodle stays, clear of the copy. */}
+          <div aria-hidden="true" className="max-[760px]:[&>:not(:first-child)]:hidden">
+            <FloatingDoodle
+              kind="star"
+              colour={site('navy')}
+              left="95%"
+              top="4%"
+              size={26}
+              motion="motion-safe:animate-twinkle"
+            />
+            <FloatingDoodle
+              kind="plane"
+              colour={site('white')}
+              left="30%"
+              top="86%"
+              size={40}
+              motion="motion-safe:animate-drift"
+            />
+            <FloatingDoodle
+              kind="heart"
+              colour={site('navy')}
+              left="42%"
+              top="92%"
+              size={20}
+              motion="motion-safe:animate-twinkle [animation-duration:2.6s] [animation-delay:.5s]"
+            />
+            <FloatingDoodle
+              kind="squiggle"
+              colour={site('navy')}
+              left="2%"
+              top="95%"
+              size={36}
+              motion="motion-safe:animate-drift [animation-duration:9s]"
+            />
+          </div>
+          <div className="relative flex flex-[1_1_380px] flex-col gap-[22px]">
+            <h2 id="demo-title" className={title}>
+              <span className={onlySchool}>{t('public.demo.school.title')}</span>
+              <span className={onlyParent}>{t('public.demo.parent.title')}</span>
             </h2>
-            <p className={cn(lede, 'mt-3.5 text-[16.5px]')}>{t('public.demo.lede')}</p>
-            <div className="mt-[22px] max-w-[440px]">
-              <Painting viewBox="0 0 480 220" paint={teaScene} />
+            <p className={cn(lede, onlySchool)}>{t('public.demo.school.lede')}</p>
+            <p className={cn(lede, onlyParent)}>{t('public.demo.parent.lede')}</p>
+            <div className={cn('flex flex-col gap-2.5', onlyParent)}>
+              <p className="m-0 text-base font-bold">{t('public.demo.parent.app')}</p>
+              <AppBadges tone="demo" />
+            </div>
+            <div aria-hidden="true" className="flex items-end gap-2.5">
+              {WAVERS.map(({ who, size, motion }, i) => (
+                <div
+                  key={who}
+                  className={cn(size, 'motion-safe:animate-bob [animation-duration:3s]', motion)}
+                >
+                  <Face who={who} mood={i === 0 ? 'laugh' : 'happy'} bg={site('navy')} />
+                </div>
+              ))}
             </div>
           </div>
-          <DemoForm to={CONTACT_EMAIL} labels={formLabels()} />
+          <div className="relative max-w-[560px] flex-[1.15_1_440px] rounded-[28px] bg-site-navy p-[clamp(22px,3vw,32px)] text-site-on-navy">
+            <div className={onlySchool}>
+              <DemoForm
+                variant="school"
+                to={CONTACT_EMAIL}
+                labels={formLabels('school')}
+                cheer={cheer}
+              />
+            </div>
+            <div className={onlyParent}>
+              <DemoForm
+                variant="parent"
+                to={CONTACT_EMAIL}
+                labels={formLabels('parent')}
+                cheer={cheer}
+              />
+            </div>
+          </div>
         </div>
       </div>
-    </section>
+    </div>
   );
 }

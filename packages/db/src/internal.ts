@@ -3,6 +3,7 @@
  * from an app: use `withTenant` / `withPlatform` from `@quad/db`.
  */
 export * from './index';
+export { assertAccountId, createAccountRunner } from './account';
 export type { BootstrapRoles, RoleCredentials } from './bootstrap';
 export { bootstrapRoles } from './bootstrap';
 export type { PoolOptions, QuadDatabase, QuadTransaction } from './client';
@@ -14,6 +15,7 @@ export {
   databaseUrls,
   isSafeIdentifier,
   loadRootEnv,
+  seedPasswordRefusal,
   withDatabaseName,
 } from './env';
 export { MIGRATIONS_FOLDER, runMigrations } from './migrate';

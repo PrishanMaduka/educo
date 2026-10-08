@@ -1,50 +1,42 @@
 import { cva } from 'class-variance-authority';
 
 /*
- * Class strings shared by the public landing page sections (spec 19, design/landing.html). Token
- * utilities only; palette B comes from the `[data-site="public"]` scope set by the layout.
+ * Class strings shared by the public landing page (spec 19, design/landing.html). `site-*` token
+ * utilities only.
  */
 
-/** The 1120 px column. */
-export const wrap = 'mx-auto w-full max-w-[1120px] px-5 max-[480px]:px-4';
+/** The 1320 px column. */
+export const wrap = 'mx-auto w-full max-w-[1320px] px-[clamp(16px,4vw,56px)]';
 
-export const eyebrow = 'text-[12.5px] font-extrabold uppercase tracking-[.12em] text-coral-ink';
+/** Content for one view only ("I run a school" / "I'm a parent"); the other view hides it. */
+export const onlySchool = 'view-parent:hidden';
+export const onlyParent = 'view-school:hidden';
 
-export const h2 =
-  'm-0 text-[clamp(30px,4.2vw,44px)] leading-[1.08] font-black tracking-[-.025em] text-balance';
-
-export const h3 = 'm-0 text-xl leading-[1.25] font-extrabold tracking-[-.01em] text-balance';
-
-export const lede = 'm-0 max-w-[58ch] text-[18.5px] text-ink-2';
-
-/** The serif accent word in headings (`font-accent`, public pages only). */
-export const accent = 'font-accent font-medium italic tracking-[-.01em]';
-
-/** Spec 19 focus: a 2.5 px coral outline. */
+/** Spec 19 focus: a 3 px outline in the focus token. */
 export const focusRing =
-  'focus-visible:outline-[2.5px] focus-visible:outline-offset-[3px] focus-visible:outline-coral-ink focus-visible:outline-solid';
+  'focus-visible:outline-[3px] focus-visible:outline-offset-[3px] focus-visible:outline-site-focus focus-visible:outline-solid';
 
 export const button = cva(
   [
-    'inline-flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-pill border-[1.5px] font-extrabold no-underline',
-    'transition-[transform,box-shadow,background-color,border-color] duration-150 motion-reduce:transition-none',
+    'inline-flex cursor-pointer items-center gap-3 border-0 font-bold no-underline',
+    'transition-transform duration-[250ms] ease-[cubic-bezier(.3,1.6,.5,1)] hover:-translate-y-0.5 motion-reduce:transition-none motion-reduce:hover:translate-y-0',
     focusRing,
   ],
   {
     variants: {
       variant: {
-        primary:
-          'border-transparent bg-coral-fill text-coral-fill-ink shadow-[0_12px_24px_-12px_var(--quad-c1)] hover:-translate-y-0.5 motion-reduce:hover:translate-y-0',
-        ghost: 'border-line bg-surface text-ink hover:border-ink-3',
+        accent: 'bg-site-accent text-site-on-vivid',
+        line: 'border-2 border-solid border-site-navy-border bg-transparent font-semibold text-site-on-navy hover:border-site-lime',
       },
       size: {
-        lg: 'h-12 px-[22px] text-[15.5px]',
-        nav: 'h-10 px-[18px] text-sm max-[900px]:h-11 max-[480px]:px-[13px] max-[480px]:text-[13.5px]',
+        md: 'rounded-2xl px-6 py-4 text-[17px]',
+        sm: 'rounded-[14px] px-[18px] py-3 text-[15px]',
       },
     },
-    defaultVariants: { variant: 'primary', size: 'lg' },
+    compoundVariants: [{ variant: 'line', size: 'md', className: 'px-[22px] py-3.5' }],
+    defaultVariants: { variant: 'accent', size: 'md' },
   },
 );
 
-/** A text button that reads like a link (Sign in to your school). */
-export const linkButton = `cursor-pointer border-0 bg-transparent p-0 font-extrabold text-coral-ink ${focusRing}`;
+/** The large display headings (prototype `.h2`). */
+export const display = 'm-0 font-extrabold tracking-[-.045em] text-balance';

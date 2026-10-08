@@ -3,22 +3,45 @@ import { hostname } from 'node:os';
 import { Worker } from 'bullmq';
 import { Redis } from 'ioredis';
 
+import { createEmailTransport, emailSettingsOf } from '../common/delivery/email';
+import { EMAIL_QUEUE, SMS_QUEUE } from '../common/delivery/queues';
+import { createSmsSender } from '../common/delivery/sms';
 import { createLogger, errorForLog } from '../observability/logger';
 import { createShutdown, onShutdownSignals } from '../shutdown';
 
 import { startWorkerHeartbeat } from './heartbeat';
 import { isFinalAttempt } from './job-failure';
+import { redisOnce } from './jobs/once';
+import { createSendEmailProcessor } from './jobs/send-email.processor';
+import { createSendSmsProcessor } from './jobs/send-sms.processor';
 
 import type { Config } from '../config';
 import type { ErrorReporter } from '../observability/sentry';
 import type { Tracing } from '../observability/tracing';
 import type { Processor } from 'bullmq';
+import type { Logger } from 'pino';
 
 /**
- * Queue name → processor. Empty in M0; each milestone adds its jobs here (processors live in
- * `src/modules/<area>/jobs/`, cross-tenant ones in `src/worker/platform-jobs/`).
+ * Queue name → processor. Each milestone adds its jobs here (area processors live in
+ * `src/modules/<area>/jobs/`, shared ones in `src/worker/jobs/`, cross-tenant ones in
+ * `src/worker/platform-jobs/`). `redis` is the worker's connection, also used for the
+ * delivered-once markers.
  */
-export const PROCESSORS: Readonly<Record<string, Processor>> = {};
+export async function buildProcessors(
+  config: Config,
+  logger: Logger,
+  redis: Redis,
+): Promise<Readonly<Record<string, Processor>>> {
+  const once = redisOnce(redis);
+  return {
+    [EMAIL_QUEUE]: createSendEmailProcessor({
+      transport: await createEmailTransport(config),
+      once,
+      settings: emailSettingsOf(config),
+    }),
+    [SMS_QUEUE]: createSendSmsProcessor({ sender: createSmsSender(config, logger), once }),
+  };
+}
 
 /** How long the worker waits for Redis at start before giving up (the orchestrator restarts it). */
 const STARTUP_TIMEOUT_MS = 10_000;
@@ -55,7 +78,8 @@ export async function runWorkers(
   });
   await waitForRedis(connection);
 
-  const workers = Object.entries(PROCESSORS).map(([queue, processor]) => {
+  const processors = await buildProcessors(config, logger, connection);
+  const workers = Object.entries(processors).map(([queue, processor]) => {
     const worker = new Worker(queue, processor, { connection });
     worker.on('failed', (job, error) => {
       const final = isFinalAttempt(job, error);
@@ -69,7 +93,7 @@ export async function runWorkers(
   const stopHeartbeat = await startWorkerHeartbeat(config.REDIS_URL, hostname(), (error) => {
     logger.warn({ error: errorForLog(error) }, 'Worker heartbeat write failed');
   });
-  logger.info({ queues: Object.keys(PROCESSORS) }, 'Worker ready');
+  logger.info({ queues: Object.keys(processors) }, 'Worker ready');
 
   onShutdownSignals(
     createShutdown('Worker', {

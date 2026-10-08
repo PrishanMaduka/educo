@@ -12,7 +12,6 @@ describe('theme.css', () => {
     expect(theme).toContain('@theme inline {');
     expect(theme).toContain('--color-canvas: var(--quad-canvas);');
     expect(theme).toContain('--color-ink-2: var(--quad-ink-2);');
-    expect(theme).toContain('--color-band-tag-teal-bg: var(--quad-band-tag-teal-bg);');
     expect(theme).toContain('--radius-card: 16px;');
     expect(theme).toContain('--radius-pill: 999px;');
     expect(theme).toContain('--shadow-card: 0 1px 2px');
@@ -39,36 +38,17 @@ describe('theme.css', () => {
     expect(theme).toMatch(/--quad-rail-active: #6D5AE6;/);
   });
 
-  it('scopes palette B to the public site, light and dark, with heat mixed on its surface', () => {
-    expect(theme).toMatch(
-      /\n\[data-site="public"\] \{[^}]*--quad-canvas: #EEF5FB;[^}]*--quad-heat-2: color-mix/,
-    );
-    expect(theme).toMatch(
-      /\[data-theme="dark"\] \[data-site="public"\],\n\[data-site="public"\]\[data-theme="dark"\] \{[^}]*--quad-canvas: #18181D;/,
-    );
-    expect(theme).toMatch(
-      /@media \(prefers-color-scheme: dark\) \{\s*:root:not\(\[data-theme="light"\]\) \[data-site="public"\] \{[^}]*--quad-ink: #F3F2EE;/,
-    );
-  });
-
-  it('declares the landing colours and watercolour pigments for each theme', () => {
-    expect(theme).toMatch(/:root,\n\[data-theme="light"\] \{[^}]*--quad-coral-ink: #C23A33;/);
-    expect(theme).toMatch(
-      /:root,\n\[data-theme="light"\] \{[^}]*--quad-wc-paper: #F4F1EA;[^}]*--quad-wc-blend: multiply;/,
-    );
-    expect(theme).toMatch(
-      /\[data-theme="dark"\] \{[^}]*--quad-wc-paper: #1F1F25;[^}]*--quad-wc-blend: normal;/,
-    );
-    expect(theme).toContain('--color-wc-peach: var(--quad-wc-peach);');
-    expect(theme).toContain('--color-coral-ink: var(--quad-coral-ink);');
-    expect(theme).not.toContain('--color-wc-blend');
-  });
-
-  it('mixes heat steps on the surface', () => {
+  it('declares the public site palette for each theme and the accent for each view', () => {
+    expect(theme).toMatch(/:root,\n\[data-theme="light"\] \{[^}]*--quad-site-page-bg: #F7F5F0;/);
+    expect(theme).toMatch(/\[data-theme="dark"\] \{[^}]*--quad-site-page-bg: #0F1330;/);
+    expect(theme).toContain(':root {\n  --quad-site-accent: var(--quad-site-lime);');
     expect(theme).toContain(
-      '--quad-heat-0: color-mix(in srgb, var(--quad-c1) 30%, var(--quad-surface));',
+      ':root[data-view="parent"] {\n  --quad-site-accent: var(--quad-site-pink);',
     );
-    expect(theme).toContain('--quad-heat-3: var(--quad-c5);');
+    expect(theme).toContain('--color-site-navy: var(--quad-site-navy);');
+    expect(theme).toContain('--color-site-accent: var(--quad-site-accent);');
+    expect(theme).not.toContain('--quad-band');
+    expect(theme).not.toContain('--quad-wc-');
   });
 
   it('shares its variable blocks with tokens.css, which has no @theme', () => {
@@ -90,13 +70,10 @@ describe('theme.css', () => {
       'hover:bg-brand-fill-strong',
       'text-brand-ink',
       'bg-rail-active',
-      'bg-band',
-      'bg-band-tag-teal-bg',
-      'text-band-tag-teal-ink',
-      'bg-heat-2',
-      'text-coral-ink',
-      'bg-wash-1',
-      'fill-wc-ochre',
+      'bg-site-navy',
+      'text-site-page-ink-2',
+      'fill-site-pink',
+      'bg-site-accent',
       'rounded-card',
       'rounded-scene',
       'rounded-input',
@@ -110,9 +87,9 @@ describe('theme.css', () => {
     expect(css).toContain('color: var(--quad-ink-2)');
     expect(css).toContain('border-color: var(--quad-line)');
     expect(css).toContain('color: var(--quad-brand-ink)');
-    expect(css).toContain('background-color: var(--quad-heat-2)');
-    expect(css).toContain('color: var(--quad-coral-ink)');
-    expect(css).toContain('fill: var(--quad-wc-ochre)');
+    expect(css).toContain('background-color: var(--quad-site-navy)');
+    expect(css).toContain('color: var(--quad-site-page-ink-2)');
+    expect(css).toContain('fill: var(--quad-site-pink)');
     expect(css).toContain('border-radius: 16px');
     expect(css).toContain('.rounded-pill');
     expect(css).toContain('.shadow-card');
@@ -146,8 +123,8 @@ describe('tokens.g.dart', () => {
     expect(dart).toContain('Color.lerp(');
     expect(dart).toContain('brandFill: Color(0x');
     expect(dart).toContain('brandFillStrong: Color(0x');
-    expect(dart).toContain('bandTagTealBg:');
-    expect(dart).toContain('heat0:');
+    expect(dart).not.toContain('bandTagTealBg');
+    expect(dart).not.toContain('site');
     expect(dart).toContain('static const consoleLight = QuadColors(');
   });
 });

@@ -74,7 +74,7 @@ export function ThemeSwitch({
       aria-label={label}
       onClick={toggle}
       className={cn(
-        'grid size-10 flex-none cursor-pointer place-items-center rounded-full border-0 bg-transparent text-ink-2 hover:bg-surface-2 hover:text-ink',
+        'grid size-10 flex-none cursor-pointer place-items-center rounded-xl border-0 bg-transparent text-site-on-navy-2 hover:bg-site-navy-2 hover:text-site-on-navy',
         focusRing,
         className,
       )}
