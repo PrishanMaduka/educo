@@ -65,7 +65,7 @@ afterEach(() => vi.restoreAllMocks());
 
 describe('DemoForm', () => {
   it('asks for the name and school first, marks them and opens nothing', async () => {
-    render(<DemoForm to="hello@quad-edu.com" labels={labels} />);
+    render(<DemoForm to="support@quad-edu.com" labels={labels} />);
     await userEvent.type(screen.getByLabelText('Work email'), 'bad');
     await userEvent.click(screen.getByRole('button', { name: 'Request a demo' }));
     expect(screen.getByRole('alert')).toHaveTextContent('Add your name and your school.');
@@ -77,7 +77,7 @@ describe('DemoForm', () => {
   });
 
   it('then asks for a work email', async () => {
-    render(<DemoForm to="hello@quad-edu.com" labels={labels} />);
+    render(<DemoForm to="support@quad-edu.com" labels={labels} />);
     await userEvent.type(screen.getByLabelText('Your name'), 'Sample Person');
     await userEvent.type(screen.getByLabelText('School'), 'Sample School');
     await userEvent.type(screen.getByLabelText('Work email'), 'name@school');
@@ -87,7 +87,7 @@ describe('DemoForm', () => {
   });
 
   it('opens the email app with the request and says what happened', async () => {
-    render(<DemoForm to="hello@quad-edu.com" labels={labels} />);
+    render(<DemoForm to="support@quad-edu.com" labels={labels} />);
     await userEvent.type(screen.getByLabelText('Your name'), 'Sample Person');
     await userEvent.type(screen.getByLabelText('Work email'), 'name@school.lk');
     await userEvent.type(screen.getByLabelText('School'), 'Sample School');
@@ -97,13 +97,13 @@ describe('DemoForm', () => {
     expect(opened).toHaveLength(1);
     const url = new URL(opened[0] ?? '');
     expect(url.protocol).toBe('mailto:');
-    expect(url.pathname).toBe('hello@quad-edu.com');
+    expect(url.pathname).toBe('support@quad-edu.com');
     expect(url.searchParams.get('subject')).toBe('Demo request: Sample School');
     expect(url.searchParams.get('body')).toContain('Curriculum: IB');
     expect(url.searchParams.get('body')).toContain('Students: 300–1,000');
     expect(url.searchParams.get('body')).toContain('Country: Sri Lanka');
     expect(screen.getByRole('status')).toHaveTextContent(labels.sent);
-    expect(screen.getByRole('link', { name: 'hello@quad-edu.com' })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: 'support@quad-edu.com' })).toHaveAttribute(
       'href',
       opened[0],
     );

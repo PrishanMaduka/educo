@@ -40,16 +40,16 @@ const request = {
 } as const;
 
 describe('buildDemoMailto', () => {
-  it('writes to hello@quad-edu.com with the school in the subject', () => {
-    const href = buildDemoMailto('hello@quad-edu.com', request, labels);
+  it('writes to support@quad-edu.com with the school in the subject', () => {
+    const href = buildDemoMailto('support@quad-edu.com', request, labels);
     const url = new URL(href);
     expect(url.protocol).toBe('mailto:');
-    expect(url.pathname).toBe('hello@quad-edu.com');
+    expect(url.pathname).toBe('support@quad-edu.com');
     expect(url.searchParams.get('subject')).toBe('Demo request: Hill & Lake School');
   });
 
   it('puts every field in the body, one per line, with the list labels', () => {
-    const url = new URL(buildDemoMailto('hello@quad-edu.com', request, labels));
+    const url = new URL(buildDemoMailto('support@quad-edu.com', request, labels));
     expect(url.searchParams.get('body')).toBe(
       [
         'Hello Quad, I’d like a walkthrough.',
@@ -65,7 +65,7 @@ describe('buildDemoMailto', () => {
   });
 
   it('percent-encodes spaces, line breaks and ampersands (no + for spaces)', () => {
-    const href = buildDemoMailto('hello@quad-edu.com', request, labels);
+    const href = buildDemoMailto('support@quad-edu.com', request, labels);
     expect(href).toContain('subject=Demo%20request%3A%20Hill%20%26%20Lake%20School');
     expect(href).toContain('%0D%0A');
     expect(href).not.toContain('+');

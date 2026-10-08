@@ -52,9 +52,9 @@ test.describe('landing page', () => {
     await expect(
       page.getByRole('table', { name: /Share of families who heard something positive/ }),
     ).toBeVisible();
-    await expect(page.getByRole('link', { name: /hello@quad-edu\.com/ })).toHaveAttribute(
+    await expect(page.getByRole('link', { name: /support@quad-edu\.com/ })).toHaveAttribute(
       'href',
-      'mailto:hello@quad-edu.com',
+      'mailto:support@quad-edu.com',
     );
     expect(errors).toEqual([]);
   });
@@ -123,12 +123,12 @@ test.describe('landing page', () => {
     const href = opened[0] ?? '';
     const mail = new URL(href);
     expect(mail.protocol).toBe('mailto:');
-    expect(mail.pathname).toBe('hello@quad-edu.com');
+    expect(mail.pathname).toBe('support@quad-edu.com');
     expect(mail.searchParams.get('subject')).toBe('Demo request: Sample School');
     expect(mail.searchParams.get('body')).toContain('Your name: Sample Person');
     expect(mail.searchParams.get('body')).toContain('Students: 1,000–2,500');
     expect(mail.searchParams.get('body')).toContain('Curriculum: Cambridge');
-    await expect(form.getByRole('link', { name: 'hello@quad-edu.com' })).toHaveAttribute(
+    await expect(form.getByRole('link', { name: 'support@quad-edu.com' })).toHaveAttribute(
       'href',
       href,
     );
