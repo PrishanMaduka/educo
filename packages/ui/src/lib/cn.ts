@@ -2,7 +2,6 @@ import { themeColorNames } from '@quad/tokens';
 import { clsx, type ClassValue } from 'clsx';
 import { extendTailwindMerge } from 'tailwind-merge';
 
-
 /** Colour names from the generated `@theme` (packages/tokens), so they merge like built-in colours. */
 const tokenColors = [...themeColorNames];
 
