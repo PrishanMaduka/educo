@@ -12,7 +12,9 @@ function readView(): SiteView {
 function subscribe(onChange: () => void): () => void {
   const observer = new MutationObserver(onChange);
   observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-view'] });
-  return () => { observer.disconnect(); };
+  return () => {
+    observer.disconnect();
+  };
 }
 
 /** The current view; "school" on the server and during hydration. */
