@@ -10,6 +10,8 @@ import { fileURLToPath } from 'node:url';
 
 /** @type {Step[]} */
 export const STEPS = [
+  // First because it takes seconds; the parent app is formatted by `dart format` (its own lint).
+  { name: 'Formatting', command: ['pnpm', 'format:check'] },
   {
     name: 'Typecheck, lint and unit tests',
     command: ['pnpm', 'exec', 'turbo', 'run', 'typecheck', 'lint', 'test'],

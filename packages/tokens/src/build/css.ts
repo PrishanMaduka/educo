@@ -14,9 +14,11 @@ type Decl = [name: string, value: string];
 /** All `--quad-*` declarations for one theme. rail-active is not declared: staff falls back to the live brand at the element that uses it, so a brand set on any ancestor reaches it. */
 function themeDecls(theme: 'light' | 'dark'): Decl[] {
   const set: ColorSet = colors[theme];
-  const decls: Decl[] = colorNames.filter((name) => name !== 'rail-active').map((name): Decl => {
-    return [`--quad-${name}`, set[name]];
-  });
+  const decls: Decl[] = colorNames
+    .filter((name) => name !== 'rail-active')
+    .map((name): Decl => {
+      return [`--quad-${name}`, set[name]];
+    });
   for (const name of publicNames) decls.push([`--quad-${name}`, publicSite[theme][name]]);
   // Mixed here (not on :root only) so the heat steps follow the surface of the element's theme.
   publicSite.heat.forEach((step, i) => {

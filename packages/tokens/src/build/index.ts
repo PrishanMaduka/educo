@@ -17,4 +17,6 @@ function write(file: string, content: string): void {
 write(resolve(dist, 'theme.css'), buildThemeCss());
 write(resolve(dist, 'tokens.css'), buildTokensCss());
 write(dartFile, buildDart());
-process.stdout.write('tokens: wrote dist/theme.css, dist/tokens.css and apps/parent/lib/theme/tokens.g.dart\n');
+process.stdout.write(
+  'tokens: wrote dist/theme.css, dist/tokens.css and apps/parent/lib/theme/tokens.g.dart\n',
+);

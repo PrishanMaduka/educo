@@ -13,11 +13,12 @@ const workspaces = ['apps', 'packages']
   .map(readJson);
 
 // Every `pnpm --filter <pkg> <script>` segment, including those inside `a && b` scripts.
-const delegated = Object.entries(readJson('package.json').scripts ?? {}).flatMap(([name, command]) =>
-  command.split('&&').flatMap((segment) => {
-    const match = /^pnpm --filter (\S+) (\S+)$/.exec(segment.trim());
-    return match ? [{ name, pkg: match[1]!, script: match[2]! }] : [];
-  }),
+const delegated = Object.entries(readJson('package.json').scripts ?? {}).flatMap(
+  ([name, command]) =>
+    command.split('&&').flatMap((segment) => {
+      const match = /^pnpm --filter (\S+) (\S+)$/.exec(segment.trim());
+      return match ? [{ name, pkg: match[1]!, script: match[2]! }] : [];
+    }),
 );
 
 describe('root package scripts', () => {
@@ -29,5 +30,25 @@ describe('root package scripts', () => {
     const target = workspaces.find((w) => w.name === pkg);
     expect(target, `${pkg} is not a known workspace`).toBeDefined();
     expect(Object.keys(target?.scripts ?? {})).toContain(script);
+  });
+});
+
+describe('format gate', () => {
+  it('checks Prettier formatting across the repository', () => {
+    expect(readJson('package.json').scripts?.['format:check']).toBe('prettier --check .');
+  });
+
+  it('leaves generated files to their generators', () => {
+    const ignored = readFileSync(repo('.prettierignore'), 'utf8').split('\n');
+    for (const generated of [
+      'packages/contracts/openapi.json',
+      '**/generated/**',
+      'packages/tokens/dist',
+      '**/*.g.dart',
+      'apps/parent',
+      'packages/db/migrations',
+    ]) {
+      expect(ignored, generated).toContain(generated);
+    }
   });
 });

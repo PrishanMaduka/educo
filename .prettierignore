@@ -16,4 +16,6 @@ CLAUDE.md
 README.md
 packages/db/migrations
 **/generated/**
+packages/tokens/dist
+.cache
 apps/parent

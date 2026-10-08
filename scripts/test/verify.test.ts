@@ -7,6 +7,7 @@ const step = (name: string) => ({ name, command: ['pnpm', name] });
 describe('STEPS', () => {
   it('runs the gate in the order spec 17 and the delivery plan set', () => {
     expect(STEPS.map((s) => s.command.join(' '))).toEqual([
+      'pnpm format:check',
       'pnpm exec turbo run typecheck lint test',
       'pnpm codegen:check',
       'node scripts/check-services.mjs',

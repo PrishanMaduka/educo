@@ -79,7 +79,9 @@ describe('scrubSentryEvent', () => {
     expect(event.request.url).toBe('https://quad-edu.com/links/open');
     expect(event.exception.values[0]?.value).toBe('No guardian with phone [phone]');
     expect(event.exception.values[0]?.stacktrace).toEqual({
-      frames: [{ filename: '/app/dist/main.js', lineno: 10, context_line: "  const to = '[email]';" }],
+      frames: [
+        { filename: '/app/dist/main.js', lineno: 10, context_line: "  const to = '[email]';" },
+      ],
     });
     expect(event.breadcrumbs).toEqual([
       { category: 'http', data: { url: 'https://api.example.com/v1/send?to=[redacted]' } },

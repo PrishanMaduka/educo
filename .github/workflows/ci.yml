@@ -51,6 +51,8 @@ jobs:
       - uses: ./.github/actions/setup
         with:
           flutter: true
+      - name: Formatting
+        run: pnpm format:check
       - name: Lint
         run: pnpm exec turbo run lint
 

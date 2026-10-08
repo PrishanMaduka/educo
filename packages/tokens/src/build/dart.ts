@@ -30,16 +30,20 @@ function instance(name: string, values: Record<string, string>): string {
 
 /** Parses "0 8px 24px -12px rgba(28,27,46,.18)" into a const BoxShadow. */
 function boxShadow(css: string): string {
-  const m = /^(-?\d+)(?:px)? (-?\d+)(?:px)? (\d+)px(?: (-?\d+)px)? rgba\((\d+),(\d+),(\d+),([\d.]+)\)$/.exec(
-    css.trim(),
-  );
+  const m =
+    /^(-?\d+)(?:px)? (-?\d+)(?:px)? (\d+)px(?: (-?\d+)px)? rgba\((\d+),(\d+),(\d+),([\d.]+)\)$/.exec(
+      css.trim(),
+    );
   if (!m) throw new Error(`Unsupported shadow: ${css}`);
   const [, dx = '0', dy = '0', blur = '0', spread = '0', r = '0', g = '0', b = '0', a = '1'] = m;
   const alpha = Math.round(Number(a) * 255)
     .toString(16)
     .padStart(2, '0')
     .toUpperCase();
-  const hex = [r, g, b].map((v) => Number(v).toString(16).padStart(2, '0')).join('').toUpperCase();
+  const hex = [r, g, b]
+    .map((v) => Number(v).toString(16).padStart(2, '0'))
+    .join('')
+    .toUpperCase();
   const parts = [
     `color: Color(0x${alpha}${hex})`,
     `blurRadius: ${blur}`,
@@ -84,7 +88,12 @@ function tokensClass(): string {
 
 function colorsClass(): string {
   const fields = allNames.map(camel);
-  const consoleOver = (rail: ColorSet['rail'], rail2: string, active: string, theme: 'light' | 'dark') => ({
+  const consoleOver = (
+    rail: ColorSet['rail'],
+    rail2: string,
+    active: string,
+    theme: 'light' | 'dark',
+  ) => ({
     ...themeValues(theme),
     rail,
     'rail-2': rail2,
@@ -130,11 +139,7 @@ function colorsClass(): string {
 }
 
 export function buildDart(): string {
-  return [
-    HEADER,
-    "import 'package:flutter/material.dart';",
-    '',
-    tokensClass(),
-    colorsClass(),
-  ].join('\n');
+  return [HEADER, "import 'package:flutter/material.dart';", '', tokensClass(), colorsClass()].join(
+    '\n',
+  );
 }

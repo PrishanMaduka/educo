@@ -215,6 +215,7 @@ Built in M0. Infrastructure and deploys are in [20 Infrastructure and operations
 | `dev` | `turbo run dev --filter=!@quad/parent`: API on :4000 (watch), worker, staff on :3000, console on :3001 |
 | `build` | `turbo run build`: every app and package (Next.js production builds, API `dist`, Docker-ready output) |
 | `typecheck`, `lint`, `format` | `turbo run typecheck` / `turbo run lint` (ESLint, and `flutter analyze` through `apps/parent/package.json`) / Prettier and `dart format` |
+| `format:check` | `prettier --check .`: fails on any file Prettier would change. `.prettierignore` leaves out generated files (the OpenAPI document, `generated/` clients, `packages/tokens/dist`, `*.g.dart`, migrations) and `apps/parent`, which `dart format` covers. Runs first in `verify` and in CI's `lint` job |
 | `db:migrate` | `pnpm --filter @quad/db migrate`: applies Drizzle migrations as `quad_owner` (`DATABASE_OWNER_URL`) |
 | `db:generate` | `drizzle-kit generate`: writes a new migration from schema changes |
 | `db:seed` | `pnpm --filter @quad/db seed`: the deterministic sample platform ([17](17-testing-quality.md#fixtures)) |
@@ -233,7 +234,7 @@ Built in M0. Infrastructure and deploys are in [20 Infrastructure and operations
 | `e2e` | Playwright journeys for completed milestones against a production build of staff and console and the local API |
 | `e2e:mobile` | `integration_test` against the local API, then Maestro flows on a booted simulator or emulator |
 | `eval:assistant` | The Ask Quad evaluation runner ([11](11-ask-quad.md#evaluation-m10)); calls the paid API, so it runs only by hand |
-| `verify` | The quality gate ([17](17-testing-quality.md#quality-gate-pnpm-verify)): `typecheck`, `lint`, `test`, `codegen:check`, `test:api`, `e2e` smoke, `pnpm audit --prod --audit-level high`, in that order, stopping at the first failure (`scripts/verify.mjs`). Excludes `e2e:mobile` (Maestro runs nightly) and `eval:assistant` |
+| `verify` | The quality gate ([17](17-testing-quality.md#quality-gate-pnpm-verify)): `format:check`, `typecheck`, `lint`, `test`, `codegen:check`, `test:api`, `e2e` smoke, `pnpm audit --prod --audit-level high`, in that order, stopping at the first failure (`scripts/verify.mjs`). Excludes `e2e:mobile` (Maestro runs nightly) and `eval:assistant` |
 
 ### Turborepo pipeline (`turbo.json`)
 

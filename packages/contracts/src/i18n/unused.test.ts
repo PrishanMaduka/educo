@@ -10,8 +10,15 @@ describe('findUnusedKeys', () => {
   });
 
   it('counts a quoted key in web sources, in t() calls or typed key values', () => {
-    const web = ["t('nav.home')", 'const k: MessageKey = "students.count";', 'x(`app.name.parent`)'];
-    expect(findUnusedKeys(keys, { web, dart: [] }, {}).unused).toEqual(['theme.light', 'theme.dark']);
+    const web = [
+      "t('nav.home')",
+      'const k: MessageKey = "students.count";',
+      'x(`app.name.parent`)',
+    ];
+    expect(findUnusedKeys(keys, { web, dart: [] }, {}).unused).toEqual([
+      'theme.light',
+      'theme.dark',
+    ]);
   });
 
   it('counts every key under a template prefix as used', () => {
@@ -22,16 +29,16 @@ describe('findUnusedKeys', () => {
   });
 
   it('does not count a key that only appears inside a longer string', () => {
-    expect(findUnusedKeys(['nav.home'], { web: ["'nav.home.extra'"], dart: [] }, {}).unused).toEqual([
-      'nav.home',
-    ]);
+    expect(
+      findUnusedKeys(['nav.home'], { web: ["'nav.home.extra'"], dart: [] }, {}).unused,
+    ).toEqual(['nav.home']);
   });
 
   it('counts the camel-cased getter in Dart sources', () => {
     const dart = ['Text(l10n.navHome)', 'AppLocalizations.of(context).appNameParent'];
-    expect(findUnusedKeys(['nav.home', 'app.name.parent', 'nav.homeX'], { web: [], dart }, {}).unused).toEqual([
-      'nav.homeX',
-    ]);
+    expect(
+      findUnusedKeys(['nav.home', 'app.name.parent', 'nav.homeX'], { web: [], dart }, {}).unused,
+    ).toEqual(['nav.homeX']);
   });
 
   it('skips listed exceptions and reports exceptions that are used or missing', () => {
@@ -57,7 +64,11 @@ describe('findUnusedKeys', () => {
   });
 
   it('ignores keys that only appear in comments', () => {
-    const web = ["// t('nav.home')", "/* t('theme.light')\n */ const x = 1;", '/** `theme.${x}` */'];
+    const web = [
+      "// t('nav.home')",
+      "/* t('theme.light')\n */ const x = 1;",
+      '/** `theme.${x}` */',
+    ];
     const dart = ['// l10n.studentsCount', '/* l10n.appNameParent */'];
     expect(findUnusedKeys(keys, { web, dart }, {}).unused).toEqual(keys);
   });

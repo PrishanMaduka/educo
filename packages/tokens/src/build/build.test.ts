@@ -40,7 +40,9 @@ describe('theme.css', () => {
   });
 
   it('mixes heat steps on the surface', () => {
-    expect(theme).toContain('--quad-heat-0: color-mix(in srgb, var(--quad-c1) 30%, var(--quad-surface));');
+    expect(theme).toContain(
+      '--quad-heat-0: color-mix(in srgb, var(--quad-c1) 30%, var(--quad-surface));',
+    );
     expect(theme).toContain('--quad-heat-3: var(--quad-c5);');
   });
 

@@ -159,6 +159,7 @@ describe('ci.yml', () => {
     const all = Object.values(ci.jobs).map(runs).join('\n');
     expect(runs(ci.jobs.typecheck)).toContain('turbo run typecheck');
     expect(runs(ci.jobs.lint)).toContain('turbo run lint');
+    expect(runs(ci.jobs.lint)).toContain('pnpm format:check');
     expect(runs(ci.jobs.unit)).toContain('turbo run test');
     expect(runs(ci.jobs.unit)).toContain('pnpm audit --prod --audit-level high');
     expect(runs(ci.jobs.codegen)).toContain('pnpm codegen:check');

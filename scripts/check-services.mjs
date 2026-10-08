@@ -33,10 +33,7 @@ const target = (name, url, defaultPort) => {
  * @returns {Target[]}
  */
 export function serviceTargets(env) {
-  return [
-    target('Postgres', env.DATABASE_URL, 5432),
-    target('Redis', env.REDIS_URL, 6379),
-  ];
+  return [target('Postgres', env.DATABASE_URL, 5432), target('Redis', env.REDIS_URL, 6379)];
 }
 
 /** @type {(target: Target) => Promise<boolean>} */
