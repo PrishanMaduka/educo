@@ -322,7 +322,7 @@ Steps:
 | `ensure_account_for_email(p_email citext)` (new; tenant-scoped) | id | Refuses without `app.tenant_id`. Returns the existing account's id, or inserts one (status `active`). Never a second account for one email (Task 13 invites) |
 | `member_two_step_status(p_user_ids uuid[])` (new; tenant-scoped) | user_id, totp_enabled | Only users of `app.tenant_id`; other ids are dropped. Reads `credentials` per account as above (Task 13 list, summary and Remind) |
 | `revoke_member_sessions(p_user_id uuid)` (new; tenant-scoped) | void | The user must belong to `app.tenant_id`. Revokes only that member's account's sessions with `active_tenant_id = app.tenant_id`, plus that account's mobile refresh families for that tenant (Task 13 deactivate and sign out everywhere) |
-| `redeem_support_session(p_support_session_id uuid, p_token_hash bytea)` (new; tenant-less, D16) | session_id | Only when the support session is active and its `sessions` row's `token_hash` is still unset; sets it. Otherwise no row (Task 16) |
+| `redeem_support_session(p_support_session_id uuid, p_token_hash bytea)` (new; tenant-less, D16) | support_session_id | R-support-token: only when the support session is active and its `support_sessions.token_hash` is still unset; sets it. Otherwise no row (Task 16) |
 | `end_support_session(p_token_hash bytea)` (new; tenant-less, D16) | void | Ends both rows (`support_sessions.ended_at`, `sessions.revoked_at`) and writes `platform_audit` (Task 16) |
 | `tenant_by_embed_key(p_key text)` (spec; **stub**) | tenant_id, form_id, active | Body `where false` until M4 creates `enquiry_forms`; the signature is fixed now |
 | `tenant_by_gateway_account(p_provider text, p_account_id text)` (spec; **stub**) | tenant_id, gateway_account_id, mode | Body `where false` until M7 |
@@ -973,7 +973,7 @@ Commit `feat(audit): school and platform audit logs with filtered views and CSV 
 **Flow:**
 1. `POST /platform/tenants/:id/support-session` `{reason (10–500 chars, required)}`:
    - needs the `support`, `admin` or `owner` platform role;
-   - creates `support_sessions` (`expires_at` = now + 60 min) with `withPlatform`, plus a staff `sessions` row (`kind web`, `platform_user_id`, `active_tenant_id`, `support_session_id`, `stage active`, `token_hash` unset);
+   - creates `support_sessions` (`expires_at` = now + 60 min) with `withPlatform`, and no `sessions` row (R-support-token: the redeemed cookie's hash lives on `support_sessions.token_hash`);
    - writes `platform_audit`;
    - returns `{ url: PUBLIC_WEB_URL + '/sign-in/support/' + token }` (purpose `support_session`, 2 min, single use; spec 05).
 2. `POST /auth/support-session` `{token}` (new route, `src/public/signed-links`, `@Public` signed): verifies and consumes the token, generates the cookie token, calls `redeem_support_session(supportSessionId, sha256(cookie))`, sets the staff cookie for that session, and audits `support_session.started` in the school. No `withPlatform` here.
@@ -1549,4 +1549,4 @@ Spec and prototype conflicts noted (spec wins):
 - **E2E stack flakiness.** Journeys now need Postgres, Redis, Mailpit and the API in `pnpm verify` and CI `e2e-smoke`. Unique emails per run and a fresh database per run keep them independent.
 - **New dependencies.** Argon2 is native (prebuilt), plus `openid-client`, `jose`, `otplib`, `nodemailer`, `qrcode` and the Flutter plugins. They may trip `pnpm audit` or need platform builds in the Docker images (`docker/api.Dockerfile` on Alpine needs the musl Argon2 binary; Task 4 checks `scripts/docker-build.mjs api`).
 - **Pre-launch regression.** Any change to `src/app/layout.tsx`, `(public)/**` or shared `@quad/ui` pieces the landing imports reaches `quad-edu.com` on the next merge to `main`. Task 19's guard test and Task 27's export comparison cover it.
-- **Support-session definer writes (open).** `redeem_support_session` and `end_support_session` must write a `sessions` row with a null `account_id`, which neither the account policy nor the SELECT-only `definer_read` admits. Tasks 3 and 16 stop for a controller ruling before building them.
+- **Support-session definer writes (resolved by R-support-token).** Built in Task 3: the support cookie hash lives on `support_sessions.token_hash`; no null-account `sessions` row exists.
