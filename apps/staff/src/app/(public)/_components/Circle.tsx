@@ -58,13 +58,22 @@ export function Circle() {
                 >
                   {i + 1}
                 </span>
-                {t(`public.circle.${STEP_KEY[key]}.where`)}
+                <span className={onlySchool}>{t(`public.circle.${STEP_KEY[key]}.where`)}</span>
+                <span className={onlyParent}>
+                  {t(`public.circle.${STEP_KEY[key]}.parent.where`)}
+                </span>
               </div>
               <strong className="text-[25px] leading-[1.05] tracking-[-.03em]">
-                {t(`public.circle.${STEP_KEY[key]}.title`)}
+                <span className={onlySchool}>{t(`public.circle.${STEP_KEY[key]}.title`)}</span>
+                <span className={onlyParent}>
+                  {t(`public.circle.${STEP_KEY[key]}.parent.title`)}
+                </span>
               </strong>
               <span className="text-[15px] leading-[1.5]">
-                {t(`public.circle.${STEP_KEY[key]}.body`)}
+                <span className={onlySchool}>{t(`public.circle.${STEP_KEY[key]}.body`)}</span>
+                <span className={onlyParent}>
+                  {t(`public.circle.${STEP_KEY[key]}.parent.body`)}
+                </span>
               </span>
             </li>
           ))}

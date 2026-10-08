@@ -4,6 +4,8 @@ import { Doodle, FloatingDoodle } from '../_art/Doodle';
 import { Face } from '../_art/Face';
 import { PEOPLE, ROLE_COLOUR, site, type PersonId } from '../_art/people';
 
+import { AppBadges } from './AppBadges';
+import { GetApp } from './GetApp';
 import { HeroStage, type StageAvatar, type StageMessage } from './HeroStage';
 import { Highlighted } from './Highlighted';
 import { SignInEntry, type ComingSoonLabels } from './SignInEntry';
@@ -75,7 +77,10 @@ function stageMessages(): StageMessage[] {
   });
 }
 
-/** Hero (spec 19 §2): the promise for each view, the actions, and Maya's day on a phone. */
+/**
+ * Hero (spec 19 §2): the promise for each view and its actions. Schools see Maya's day on a phone
+ * with her circle around it; parents see the Quad app on two phones.
+ */
 export function Hero({
   prelaunch,
   comingSoon,
@@ -88,7 +93,12 @@ export function Hero({
       <b className="block text-[28px] leading-[1.2] font-extrabold tracking-[-.03em]">
         {t(`public.hero.stats.${key}.value`)}
       </b>
-      <span className="text-sm text-site-on-navy-3">{t(`public.hero.stats.${key}.label`)}</span>
+      <span className={cn('text-sm text-site-on-navy-3', onlySchool)}>
+        {t(`public.hero.stats.${key}.label`)}
+      </span>
+      <span className={cn('text-sm text-site-on-navy-3', onlyParent)}>
+        {t(`public.hero.stats.${key}.parentLabel`)}
+      </span>
     </div>
   );
   const lede =
@@ -131,16 +141,22 @@ export function Hero({
           </h1>
           <p className={cn(lede, onlySchool)}>{t('public.hero.school.lede')}</p>
           <p className={cn(lede, onlyParent)}>{t('public.hero.parent.lede')}</p>
-          <div className="flex flex-wrap gap-3">
+          <div className={cn('flex flex-wrap gap-3', onlySchool)}>
             <a href="#demo" className={button()}>
-              <span className={onlySchool}>{t('public.cta.school')}</span>
-              <span className={onlyParent}>{t('public.hero.parent.cta')}</span>
-              <span aria-hidden="true">→</span>
+              {t('public.cta.school')} <span aria-hidden="true">→</span>
             </a>
             <a href="#circle" className={button({ variant: 'line' })}>
               {t('public.hero.howItWorks')}
             </a>
           </div>
+          <GetApp
+            labels={{
+              getApp: t('public.hero.parent.getApp'),
+              askSchool: t('public.hero.parent.cta'),
+              note: t('public.hero.parent.getAppNote'),
+            }}
+            badges={<AppBadges />}
+          />
           <div className={cn('text-[15px] text-site-on-navy-2', onlySchool)}>
             {t('public.hero.already')}{' '}
             <SignInEntry
@@ -150,6 +166,9 @@ export function Hero({
               comingSoon={comingSoon}
             />
           </div>
+          <p className={cn('m-0 text-[15px] text-site-on-navy-2', onlyParent)}>
+            {t('public.hero.parent.already')}
+          </p>
           <div className="flex flex-wrap gap-x-7 gap-y-4 pt-1.5">
             {stat('app')}
             {stat('relatives')}
@@ -157,14 +176,65 @@ export function Hero({
           </div>
         </div>
         <HeroStage
-          label={t('public.hero.stage')}
+          label={{ school: t('public.hero.stage'), parent: t('public.hero.parentStage') }}
           phone={{
             initial: t('public.hero.phone.schoolInitial'),
             school: [t('public.hero.phone.schoolLine1'), t('public.hero.phone.schoolLine2')],
             title: t('public.hero.phone.title'),
             detail: t('public.hero.phone.detail'),
             maya: <Face who="maya" mood="laugh" />,
+            tonight: {
+              kicker: t('public.hero.phone.tonight.kicker'),
+              text: t('public.hero.phone.tonight.text'),
+            },
+            tabs: [
+              t('public.hero.phone.tabs.today'),
+              t('public.hero.phone.tabs.circle'),
+              t('public.hero.phone.tabs.ask'),
+              t('public.hero.phone.tabs.pay'),
+            ],
           }}
+          appPhone={{
+            ask: {
+              kicker: t('public.hero.phone.ask.kicker'),
+              question: t('public.hero.phone.ask.question'),
+              answer: t('public.hero.phone.ask.answer'),
+              source: t('public.hero.phone.ask.source'),
+            },
+            pay: {
+              kicker: t('public.hero.phone.pay.kicker'),
+              title: t('public.hero.phone.pay.title'),
+              due: t('public.hero.phone.pay.due'),
+              button: t('public.hero.phone.pay.button'),
+            },
+            family: {
+              kicker: t('public.hero.phone.family.kicker'),
+              title: t('public.hero.phone.family.title'),
+              body: t('public.hero.phone.family.body'),
+            },
+          }}
+          highlights={[
+            {
+              label: t('public.hero.highlights.today'),
+              colour: site('orange'),
+              place: 'top-0 left-0',
+            },
+            {
+              label: t('public.hero.highlights.moments'),
+              colour: site('pink'),
+              place: 'top-[93%] left-[2%]',
+            },
+            {
+              label: t('public.hero.highlights.ask'),
+              colour: site('sky'),
+              place: 'top-[9%] right-0',
+            },
+            {
+              label: t('public.hero.highlights.pay'),
+              colour: site('lime'),
+              place: 'top-[90%] right-[2%]',
+            },
+          ]}
           avatars={stageAvatars()}
           messages={stageMessages()}
           decorations={

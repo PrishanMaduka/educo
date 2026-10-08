@@ -101,7 +101,7 @@ test.describe('landing page', () => {
     await parent.click();
     await expect(parent).toHaveAttribute('aria-pressed', 'true');
     await expect(page.getByRole('heading', { level: 1 })).toHaveAccessibleName(
-      'Hear the good stuff first.',
+      'Hear the good stuff first, in the app.',
     );
     await expect(page).toHaveURL(/\?view=parent$/);
     await expect(
@@ -117,7 +117,7 @@ test.describe('landing page', () => {
 
     await page.reload();
     await expect(page.getByRole('heading', { level: 1 })).toHaveAccessibleName(
-      'Hear the good stuff first.',
+      'Hear the good stuff first, in the app.',
     );
     await page.goto('/?view=school');
     await expect(page.getByRole('heading', { level: 1 })).toHaveAccessibleName(
@@ -155,6 +155,53 @@ test.describe('landing page', () => {
     await again.getByRole('link', { name: 'Book a demo' }).click();
     await expect(again).toBeHidden();
     await expect(page.getByLabel('Your name').filter({ visible: true })).toBeFocused();
+  });
+
+  test('parents get the app instead of signing in: the note, the badges and their form', async ({
+    page,
+  }) => {
+    await page.goto('/?view=parent');
+    const header = page.locator('header');
+    if (isNarrow(page)) await header.getByRole('button', { name: 'Menu' }).click();
+    // Staff sign-in is for schools only; parents see Get the app in its place.
+    await expect(
+      header.getByRole('button', { name: 'Sign in' }).filter({ visible: true }),
+    ).toHaveCount(0);
+    await expect(
+      header.getByRole('link', { name: 'Sign in' }).filter({ visible: true }),
+    ).toHaveCount(0);
+    await expect(
+      header.getByRole('link', { name: 'Get the app' }).filter({ visible: true }),
+    ).toHaveAttribute('href', '#getapp');
+    if (isNarrow(page)) await page.keyboard.press('Escape');
+    await expect(page.getByRole('button', { name: 'Sign in to your school' })).toBeHidden();
+    await expect(page.getByText('Already have the app? Open it on your phone.')).toBeVisible();
+
+    // The app isn't in the stores yet: the button says so instead of linking to a store.
+    const getApp = page.getByRole('button', { name: 'Get the Quad app' });
+    await expect(getApp).toHaveAttribute('aria-expanded', 'false');
+    await getApp.click();
+    await expect(getApp).toHaveAttribute('aria-expanded', 'true');
+    await expect(page.locator('#getapp + div').getByRole('status')).toHaveText(
+      /^Coming soon\. The Quad app isn’t in the App Store or Google Play yet\./,
+    );
+    for (const store of ['App Store, coming soon', 'Google Play, coming soon']) {
+      await expect(page.getByRole('img', { name: store }).filter({ visible: true })).toHaveCount(2);
+    }
+    await expect(page.locator('a[href*="apps.apple.com"], a[href*="play.google.com"]')).toHaveCount(
+      0,
+    );
+
+    // "Ask your school about Quad" leads to the parent form.
+    await page.getByRole('link', { name: 'Ask your school about Quad' }).click();
+    await expect(page).toHaveURL(/#demo$/);
+    await expect(
+      page.getByRole('heading', { name: 'Want this at your child’s school?' }),
+    ).toBeInViewport();
+    await expect(page.getByRole('button', { name: /Send to my school/ })).toBeVisible();
+    await expect(
+      page.getByRole('img', { name: /The Quad parent app on two phones/ }),
+    ).toBeAttached();
   });
 
   test('a school’s demo request checks the fields, then opens an email to support', async ({
@@ -247,7 +294,7 @@ test.describe('landing page', () => {
     await expectAccessibleOnceStill(page);
     await page.goto('/?view=parent');
     await expect(page.getByRole('heading', { level: 1 })).toHaveAccessibleName(
-      'Hear the good stuff first.',
+      'Hear the good stuff first, in the app.',
     );
     await expectNoSideScroll(page);
     await expectAccessibleOnceStill(page);

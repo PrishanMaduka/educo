@@ -27,7 +27,7 @@ export function PublicMenu({
   theme,
 }: {
   label: string;
-  links: readonly { href: string; label: ReactNode }[];
+  links: readonly { href: string; label: ReactNode; className?: string }[];
   /** The Sign in entry for the menu (it opens its own note). */
   signIn: ReactNode;
   theme: ThemeSwitchLabels;
@@ -81,7 +81,7 @@ export function PublicMenu({
           <a
             key={link.href}
             href={link.href}
-            className={menuItem}
+            className={cn(menuItem, link.className)}
             onClick={() => {
               setOpen(false);
             }}

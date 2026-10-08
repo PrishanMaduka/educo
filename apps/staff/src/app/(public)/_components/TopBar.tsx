@@ -9,6 +9,11 @@ import { ViewToggle } from './ViewToggle';
 
 import { t } from '@/i18n';
 
+const navLink = cn(
+  'rounded-md text-site-on-navy-2 no-underline hover:text-site-on-navy',
+  focusRing,
+);
+
 /** "Modules" for schools, "In the app" for parents. */
 function MoreLabel() {
   return (
@@ -20,8 +25,9 @@ function MoreLabel() {
 }
 
 /**
- * The top bar (spec 19): logo, section links and Sign in, the view switch, the theme, Menu at
- * 1100 px and below, and Book a demo (Ask your school for parents). Sticky above 760 px.
+ * The top bar (spec 19): logo, section links and Sign in (Get the app for parents), the view
+ * switch, the theme, Menu at 1100 px and below, and Book a demo (Ask your school for parents).
+ * Sticky above 760 px.
  */
 export function TopBar({
   prelaunch,
@@ -62,23 +68,22 @@ export function TopBar({
           className="flex gap-[22px] text-[15px] font-medium max-[1100px]:hidden"
         >
           {links.map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              className={cn(
-                'rounded-md text-site-on-navy-2 no-underline hover:text-site-on-navy',
-                focusRing,
-              )}
-            >
+            <a key={link.href} href={link.href} className={navLink}>
               {link.label}
             </a>
           ))}
-          <SignInEntry
-            label={t('public.signIn')}
-            look="nav"
-            prelaunch={prelaunch}
-            comingSoon={comingSoon}
-          />
+          {/* Staff sign in for schools; parents get the app instead. */}
+          <span className={cn('contents', onlySchool)}>
+            <SignInEntry
+              label={t('public.signIn')}
+              look="nav"
+              prelaunch={prelaunch}
+              comingSoon={comingSoon}
+            />
+          </span>
+          <a href="#getapp" className={cn(navLink, onlyParent)}>
+            {t('public.nav.getApp')}
+          </a>
         </nav>
         <ViewToggle
           label={t('public.view.label')}
@@ -88,16 +93,21 @@ export function TopBar({
         <ThemeSwitch variant="icon" labels={theme} className="max-[760px]:hidden" />
         <PublicMenu
           label={t('public.nav.menu')}
-          links={links}
+          links={[
+            ...links,
+            { href: '#getapp', label: t('public.nav.getApp'), className: onlyParent },
+          ]}
           theme={theme}
           signIn={
-            <SignInEntry
-              label={t('public.signIn')}
-              look="menu"
-              menuClassName={menuItem}
-              prelaunch={prelaunch}
-              comingSoon={comingSoon}
-            />
+            <span className={cn('contents', onlySchool)}>
+              <SignInEntry
+                label={t('public.signIn')}
+                look="menu"
+                menuClassName={menuItem}
+                prelaunch={prelaunch}
+                comingSoon={comingSoon}
+              />
+            </span>
           }
         />
         <a href="#demo" className={button({ size: 'sm' })}>

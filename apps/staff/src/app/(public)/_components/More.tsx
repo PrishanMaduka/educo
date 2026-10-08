@@ -21,13 +21,14 @@ const MODULES = [
   { key: 'communication', icon: 'bubble', colour: 'pink' },
 ] as const satisfies readonly { key: string; icon: DoodleKind; colour: string }[];
 
-const DAY = [
-  { key: 'arrive', icon: 'sun', colour: 'orange' },
-  { key: 'moment', icon: 'star', colour: 'sky' },
+/** What the parent app does, one card each. */
+const APP = [
+  { key: 'today', icon: 'sun', colour: 'orange' },
+  { key: 'circle', icon: 'star', colour: 'sky' },
   { key: 'family', icon: 'heart', colour: 'pink' },
-  { key: 'people', icon: 'kite', colour: 'lime' },
-  { key: 'try', icon: 'pencil', colour: 'orange' },
   { key: 'quiet', icon: 'moon', colour: 'sky' },
+  { key: 'pay', icon: 'coin', colour: 'lime' },
+  { key: 'kids', icon: 'kite', colour: 'orange' },
 ] as const satisfies readonly { key: string; icon: DoodleKind; colour: string }[];
 
 const SAFE = [
@@ -183,23 +184,23 @@ export function More() {
             </h2>
             <p className={headLede}>{t('public.more.parent.lede')}</p>
           </div>
-          <ul className={cardList}>
-            {DAY.map(({ key, icon, colour }) => (
+          <ul className={cn(cardList, 'grid-cols-[repeat(auto-fit,minmax(min(100%,320px),1fr))]')}>
+            {APP.map(({ key, icon, colour }) => (
               <li key={key} className={card}>
                 <div className="flex items-center justify-between">
                   <b className="text-[30px] font-extrabold tracking-[-.03em]">
-                    {t(`public.more.day.${key}.time`)}
+                    {t(`public.more.app.${key}.label`)}
                   </b>
                   <Icon kind={icon} colour={colour} small />
                 </div>
-                <small className="mt-auto text-[13px] font-bold text-site-page-ink-3">
-                  {t(`public.more.day.${key}.kicker`)}
+                <small className="mt-2.5 text-[13px] font-bold text-site-page-ink-3">
+                  {t(`public.more.app.${key}.kicker`)}
                 </small>
                 <strong className="text-[21px] leading-[1.15] tracking-[-.02em]">
-                  {t(`public.more.day.${key}.title`)}
+                  {t(`public.more.app.${key}.title`)}
                 </strong>
                 <span className="text-sm leading-[1.45] text-site-page-ink-2">
-                  {t(`public.more.day.${key}.body`)}
+                  {t(`public.more.app.${key}.body`)}
                 </span>
               </li>
             ))}

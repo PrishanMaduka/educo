@@ -5,6 +5,7 @@ import { Face } from '../_art/Face';
 import { site } from '../_art/people';
 import { CONTACT_EMAIL } from '../_lib/site';
 
+import { AppBadges } from './AppBadges';
 import { DemoForm, type DemoFormLabels } from './DemoForm';
 import { display, onlyParent, onlySchool, wrap } from './styles';
 
@@ -74,8 +75,9 @@ export function Demo() {
     <div id="demo" className="bg-site-page-bg text-site-page-ink">
       <div className={cn(wrap, 'pb-[clamp(56px,7vw,112px)]')}>
         <div className="relative flex flex-wrap items-start gap-x-[clamp(32px,5vw,72px)] gap-y-10 overflow-hidden rounded-[40px] bg-site-accent p-[clamp(28px,5vw,72px)] text-site-on-vivid">
-          {/* The prototype's doodle layer is an empty flex item, so it also sets the copy's indent. */}
-          <div aria-hidden="true">
+          {/* The prototype's doodle layer is an empty flex item, so it also sets the copy's indent.
+              Below 760 px only the first doodle stays, clear of the copy. */}
+          <div aria-hidden="true" className="max-[760px]:[&>:not(:first-child)]:hidden">
             <FloatingDoodle
               kind="star"
               colour={site('navy')}
@@ -116,6 +118,10 @@ export function Demo() {
             </h2>
             <p className={cn(lede, onlySchool)}>{t('public.demo.school.lede')}</p>
             <p className={cn(lede, onlyParent)}>{t('public.demo.parent.lede')}</p>
+            <div className={cn('flex flex-col gap-2.5', onlyParent)}>
+              <p className="m-0 text-base font-bold">{t('public.demo.parent.app')}</p>
+              <AppBadges tone="demo" />
+            </div>
             <div aria-hidden="true" className="flex items-end gap-2.5">
               {WAVERS.map(({ who, size, motion }, i) => (
                 <div
