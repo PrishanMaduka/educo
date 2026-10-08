@@ -10,16 +10,24 @@ export type QuadMarkProps = Omit<SVGProps<SVGSVGElement>, 'children' | 'width' |
   title?: string;
 };
 
-/** The four tiles of the mark, shared by the mark and the full logo (64-unit grid). */
+/** One rounded petal; the other three are its mirror images (design/brand/quad-mark.svg). */
+const PETAL =
+  'M0 10A10 10 0 0 1 10 0A3.5 3.5 0 0 1 13.5 3.5V10A3.5 3.5 0 0 1 10 13.5H3.5A3.5 3.5 0 0 1 0 10Z';
+const MIRRORS = [
+  undefined,
+  'translate(30 0) scale(-1 1)',
+  'translate(0 30) scale(1 -1)',
+  'translate(30 30) scale(-1 -1)',
+];
+
+/** The four petals of the mark, shared by the mark and the full logo (30-unit grid). */
 export function MarkShapes({ variant = 'color' }: { variant?: LogoVariant }) {
-  const p = logoPalette[variant];
+  const { petals } = logoPalette[variant];
   return (
     <>
-      <rect x="9" y="9" width="21" height="21" rx="7" fill={p.school} />
-      <rect x="34" y="9" width="21" height="21" rx="7" fill={p.people} />
-      <rect x="9" y="34" width="21" height="21" rx="7" fill={p.people} />
-      <rect x="34" y="34" width="21" height="21" rx="7" fill={p.students} />
-      <path d="M49 49l9 9" stroke={p.students} strokeWidth="7" strokeLinecap="round" />
+      {petals.map((fill, i) => (
+        <path key={MIRRORS[i] ?? 'top-left'} d={PETAL} fill={fill} transform={MIRRORS[i]} />
+      ))}
     </>
   );
 }
@@ -28,7 +36,7 @@ export function QuadMark({ variant = 'color', size = 32, title = 'Quad', ...rest
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 64 64"
+      viewBox="0 0 30 30"
       width={size}
       height={size}
       role="img"

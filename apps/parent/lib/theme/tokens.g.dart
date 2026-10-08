@@ -87,23 +87,6 @@ class QuadColors extends ThemeExtension<QuadColors> {
     required this.c5,
     required this.gold,
     required this.goldSoft,
-    required this.band,
-    required this.band2,
-    required this.bandInk,
-    required this.bandInk2,
-    required this.bandLine,
-    required this.bandTagTealBg,
-    required this.bandTagTealInk,
-    required this.bandTagCoralBg,
-    required this.bandTagCoralInk,
-    required this.bandTagAmberBg,
-    required this.bandTagAmberInk,
-    required this.bandTagLilacBg,
-    required this.bandTagLilacInk,
-    required this.heat0,
-    required this.heat1,
-    required this.heat2,
-    required this.heat3,
   });
 
   final Color canvas;
@@ -140,23 +123,6 @@ class QuadColors extends ThemeExtension<QuadColors> {
   final Color c5;
   final Color gold;
   final Color goldSoft;
-  final Color band;
-  final Color band2;
-  final Color bandInk;
-  final Color bandInk2;
-  final Color bandLine;
-  final Color bandTagTealBg;
-  final Color bandTagTealInk;
-  final Color bandTagCoralBg;
-  final Color bandTagCoralInk;
-  final Color bandTagAmberBg;
-  final Color bandTagAmberInk;
-  final Color bandTagLilacBg;
-  final Color bandTagLilacInk;
-  final Color heat0;
-  final Color heat1;
-  final Color heat2;
-  final Color heat3;
 
   static const light = QuadColors(
     canvas: Color(0xFFFAF8F5),
@@ -193,23 +159,6 @@ class QuadColors extends ThemeExtension<QuadColors> {
     c5: Color(0xFF2BB0A0),
     gold: Color(0xFF8B7CF6),
     goldSoft: Color(0xFFEEEAFE),
-    band: Color(0xFF1A2A5E),
-    band2: Color(0xFF24387A),
-    bandInk: Color(0xFFF3F2FB),
-    bandInk2: Color(0xFFCDD5F2),
-    bandLine: Color(0xFF34498F),
-    bandTagTealBg: Color(0xFF1D4F4A),
-    bandTagTealInk: Color(0xFF9BEADF),
-    bandTagCoralBg: Color(0xFF5A2430),
-    bandTagCoralInk: Color(0xFFFFC3BC),
-    bandTagAmberBg: Color(0xFF5A4317),
-    bandTagAmberInk: Color(0xFFFFDDA1),
-    bandTagLilacBg: Color(0xFF3A3170),
-    bandTagLilacInk: Color(0xFFD9D2FF),
-    heat0: Color(0xFFF7CBC9),
-    heat1: Color(0xFFBFE7E3),
-    heat2: Color(0xFF80D0C6),
-    heat3: Color(0xFF2BB0A0),
   );
 
   static const dark = QuadColors(
@@ -247,23 +196,6 @@ class QuadColors extends ThemeExtension<QuadColors> {
     c5: Color(0xFF3CC7B5),
     gold: Color(0xFFA99BFF),
     goldSoft: Color(0xFF262046),
-    band: Color(0xFF0F0F13),
-    band2: Color(0xFF1D1D23),
-    bandInk: Color(0xFFF3F2FB),
-    bandInk2: Color(0xFFD0CFCA),
-    bandLine: Color(0xFF33333C),
-    bandTagTealBg: Color(0xFF1D4F4A),
-    bandTagTealInk: Color(0xFF9BEADF),
-    bandTagCoralBg: Color(0xFF5A2430),
-    bandTagCoralInk: Color(0xFFFFC3BC),
-    bandTagAmberBg: Color(0xFF5A4317),
-    bandTagAmberInk: Color(0xFFFFDDA1),
-    bandTagLilacBg: Color(0xFF3A3170),
-    bandTagLilacInk: Color(0xFFD9D2FF),
-    heat0: Color(0xFF5F394A),
-    heat1: Color(0xFF25505F),
-    heat2: Color(0xFF2F8384),
-    heat3: Color(0xFF3CC7B5),
   );
 
   /// Console overrides: the console has its own, darker rail.
@@ -302,23 +234,6 @@ class QuadColors extends ThemeExtension<QuadColors> {
     c5: Color(0xFF2BB0A0),
     gold: Color(0xFF8B7CF6),
     goldSoft: Color(0xFFEEEAFE),
-    band: Color(0xFF1A2A5E),
-    band2: Color(0xFF24387A),
-    bandInk: Color(0xFFF3F2FB),
-    bandInk2: Color(0xFFCDD5F2),
-    bandLine: Color(0xFF34498F),
-    bandTagTealBg: Color(0xFF1D4F4A),
-    bandTagTealInk: Color(0xFF9BEADF),
-    bandTagCoralBg: Color(0xFF5A2430),
-    bandTagCoralInk: Color(0xFFFFC3BC),
-    bandTagAmberBg: Color(0xFF5A4317),
-    bandTagAmberInk: Color(0xFFFFDDA1),
-    bandTagLilacBg: Color(0xFF3A3170),
-    bandTagLilacInk: Color(0xFFD9D2FF),
-    heat0: Color(0xFFF7CBC9),
-    heat1: Color(0xFFBFE7E3),
-    heat2: Color(0xFF80D0C6),
-    heat3: Color(0xFF2BB0A0),
   );
 
   static const consoleDark = QuadColors(
@@ -356,23 +271,6 @@ class QuadColors extends ThemeExtension<QuadColors> {
     c5: Color(0xFF3CC7B5),
     gold: Color(0xFFA99BFF),
     goldSoft: Color(0xFF262046),
-    band: Color(0xFF0F0F13),
-    band2: Color(0xFF1D1D23),
-    bandInk: Color(0xFFF3F2FB),
-    bandInk2: Color(0xFFD0CFCA),
-    bandLine: Color(0xFF33333C),
-    bandTagTealBg: Color(0xFF1D4F4A),
-    bandTagTealInk: Color(0xFF9BEADF),
-    bandTagCoralBg: Color(0xFF5A2430),
-    bandTagCoralInk: Color(0xFFFFC3BC),
-    bandTagAmberBg: Color(0xFF5A4317),
-    bandTagAmberInk: Color(0xFFFFDDA1),
-    bandTagLilacBg: Color(0xFF3A3170),
-    bandTagLilacInk: Color(0xFFD9D2FF),
-    heat0: Color(0xFF5F394A),
-    heat1: Color(0xFF25505F),
-    heat2: Color(0xFF2F8384),
-    heat3: Color(0xFF3CC7B5),
   );
 
   @override
@@ -411,23 +309,6 @@ class QuadColors extends ThemeExtension<QuadColors> {
     Color? c5,
     Color? gold,
     Color? goldSoft,
-    Color? band,
-    Color? band2,
-    Color? bandInk,
-    Color? bandInk2,
-    Color? bandLine,
-    Color? bandTagTealBg,
-    Color? bandTagTealInk,
-    Color? bandTagCoralBg,
-    Color? bandTagCoralInk,
-    Color? bandTagAmberBg,
-    Color? bandTagAmberInk,
-    Color? bandTagLilacBg,
-    Color? bandTagLilacInk,
-    Color? heat0,
-    Color? heat1,
-    Color? heat2,
-    Color? heat3,
   }) {
     return QuadColors(
       canvas: canvas ?? this.canvas,
@@ -464,23 +345,6 @@ class QuadColors extends ThemeExtension<QuadColors> {
       c5: c5 ?? this.c5,
       gold: gold ?? this.gold,
       goldSoft: goldSoft ?? this.goldSoft,
-      band: band ?? this.band,
-      band2: band2 ?? this.band2,
-      bandInk: bandInk ?? this.bandInk,
-      bandInk2: bandInk2 ?? this.bandInk2,
-      bandLine: bandLine ?? this.bandLine,
-      bandTagTealBg: bandTagTealBg ?? this.bandTagTealBg,
-      bandTagTealInk: bandTagTealInk ?? this.bandTagTealInk,
-      bandTagCoralBg: bandTagCoralBg ?? this.bandTagCoralBg,
-      bandTagCoralInk: bandTagCoralInk ?? this.bandTagCoralInk,
-      bandTagAmberBg: bandTagAmberBg ?? this.bandTagAmberBg,
-      bandTagAmberInk: bandTagAmberInk ?? this.bandTagAmberInk,
-      bandTagLilacBg: bandTagLilacBg ?? this.bandTagLilacBg,
-      bandTagLilacInk: bandTagLilacInk ?? this.bandTagLilacInk,
-      heat0: heat0 ?? this.heat0,
-      heat1: heat1 ?? this.heat1,
-      heat2: heat2 ?? this.heat2,
-      heat3: heat3 ?? this.heat3,
     );
   }
 
@@ -522,23 +386,6 @@ class QuadColors extends ThemeExtension<QuadColors> {
       c5: Color.lerp(c5, other.c5, t)!,
       gold: Color.lerp(gold, other.gold, t)!,
       goldSoft: Color.lerp(goldSoft, other.goldSoft, t)!,
-      band: Color.lerp(band, other.band, t)!,
-      band2: Color.lerp(band2, other.band2, t)!,
-      bandInk: Color.lerp(bandInk, other.bandInk, t)!,
-      bandInk2: Color.lerp(bandInk2, other.bandInk2, t)!,
-      bandLine: Color.lerp(bandLine, other.bandLine, t)!,
-      bandTagTealBg: Color.lerp(bandTagTealBg, other.bandTagTealBg, t)!,
-      bandTagTealInk: Color.lerp(bandTagTealInk, other.bandTagTealInk, t)!,
-      bandTagCoralBg: Color.lerp(bandTagCoralBg, other.bandTagCoralBg, t)!,
-      bandTagCoralInk: Color.lerp(bandTagCoralInk, other.bandTagCoralInk, t)!,
-      bandTagAmberBg: Color.lerp(bandTagAmberBg, other.bandTagAmberBg, t)!,
-      bandTagAmberInk: Color.lerp(bandTagAmberInk, other.bandTagAmberInk, t)!,
-      bandTagLilacBg: Color.lerp(bandTagLilacBg, other.bandTagLilacBg, t)!,
-      bandTagLilacInk: Color.lerp(bandTagLilacInk, other.bandTagLilacInk, t)!,
-      heat0: Color.lerp(heat0, other.heat0, t)!,
-      heat1: Color.lerp(heat1, other.heat1, t)!,
-      heat2: Color.lerp(heat2, other.heat2, t)!,
-      heat3: Color.lerp(heat3, other.heat3, t)!,
     );
   }
 }

@@ -16,8 +16,8 @@ describe('cn', () => {
   });
 
   it('knows the public site colours', () => {
-    expect(cn('text-coral-ink', 'text-[15px]')).toBe('text-coral-ink text-[15px]');
-    expect(cn('bg-wash-1', 'bg-wc-paper')).toBe('bg-wc-paper');
+    expect(cn('text-site-page-ink-2', 'text-[15px]')).toBe('text-site-page-ink-2 text-[15px]');
+    expect(cn('bg-site-lime', 'bg-site-accent')).toBe('bg-site-accent');
   });
 
   it('keeps colour and size utilities apart', () => {

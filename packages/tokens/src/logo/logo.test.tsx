@@ -6,22 +6,22 @@ import { QuadLogo, QuadMark } from './index';
 
 afterEach(cleanup);
 
+const fills = (container: HTMLElement) =>
+  [...container.querySelectorAll('path')].map((p) => p.getAttribute('fill'));
+
 describe('QuadMark', () => {
-  it('is an accessible image named Quad', () => {
+  it('is an accessible image named Quad with four petals', () => {
     render(<QuadMark />);
     const svg = screen.getByRole('img', { name: 'Quad' });
-    expect(svg.getAttribute('viewBox')).toBe('0 0 64 64');
-    expect(svg.querySelectorAll('rect')).toHaveLength(4);
+    expect(svg.getAttribute('viewBox')).toBe('0 0 30 30');
+    expect(svg.querySelectorAll('path')).toHaveLength(4);
   });
 
-  it('uses the colour tiles by default and the white set on request', () => {
+  it('paints the petals sky, pink, lime and orange, or white in the mono mark', () => {
     const { container, rerender } = render(<QuadMark />);
-    expect(container.innerHTML).toContain('#1F2559');
-    expect(container.innerHTML).toContain('#E5534B');
-    rerender(<QuadMark variant="white" />);
-    expect(container.innerHTML).toContain('#C9C4F5');
-    expect(container.innerHTML).toContain('#FF7A6E');
-    expect(container.innerHTML).not.toContain('#1F2559');
+    expect(fills(container)).toEqual(['#59C3FF', '#FF6FAE', '#C8F169', '#FF9B45']);
+    rerender(<QuadMark variant="mono" />);
+    expect(fills(container)).toEqual(['#FFFFFF', '#FFFFFF', '#FFFFFF', '#FFFFFF']);
   });
 
   it('sizes the mark and accepts a title', () => {
@@ -33,35 +33,30 @@ describe('QuadMark', () => {
 });
 
 describe('QuadLogo', () => {
-  it('draws the mark and the wordmark', () => {
-    render(<QuadLogo />);
+  it('draws the mark and the navy wordmark', () => {
+    const { container } = render(<QuadLogo />);
     const svg = screen.getByRole('img', { name: 'Quad' });
-    expect(svg.getAttribute('viewBox')).toBe('-4 -4 292 86');
-    expect(svg.querySelectorAll('circle')).toHaveLength(3);
+    expect(svg.getAttribute('viewBox')).toBe('0 0 101 30');
+    expect(fills(container)).toEqual(['#59C3FF', '#FF6FAE', '#C8F169', '#FF9B45', '#101632']);
   });
 
   it('keeps the aspect ratio when sized by height', () => {
-    render(<QuadLogo size={43} />);
+    render(<QuadLogo size={26} />);
     const svg = screen.getByRole('img', { name: 'Quad' });
-    expect(svg.getAttribute('height')).toBe('43');
-    expect(svg.getAttribute('width')).toBe(String(Math.round((43 * 292) / 86)));
+    expect(svg.getAttribute('height')).toBe('26');
+    expect(svg.getAttribute('width')).toBe(String(Math.round((26 * 101) / 30)));
   });
 
-  it('has a theme variant that reads the mark tokens and the text colour', () => {
-    const { container } = render(<QuadLogo variant="theme" />);
-    const fills = [...container.querySelectorAll('rect')].map((r) => r.getAttribute('fill'));
-    expect(fills).toEqual([
-      'var(--quad-mark-school)',
-      'var(--quad-mark-people)',
-      'var(--quad-mark-people)',
-      'var(--quad-mark-students)',
+  it('has a cream wordmark on dark grounds, and a theme variant that reads the site tokens', () => {
+    const { container, rerender } = render(<QuadLogo variant="white" />);
+    expect(fills(container).at(-1)).toBe('#F7F5F0');
+    rerender(<QuadLogo variant="theme" />);
+    expect(fills(container)).toEqual([
+      'var(--quad-site-sky)',
+      'var(--quad-site-pink)',
+      'var(--quad-site-lime)',
+      'var(--quad-site-orange)',
+      'currentColor',
     ]);
-    expect(container.querySelector('g[stroke]')?.getAttribute('stroke')).toBe('currentColor');
-  });
-
-  it('has a white variant', () => {
-    const { container } = render(<QuadLogo variant="white" />);
-    expect(container.innerHTML).toContain('stroke="#FFFFFF"');
-    expect(container.innerHTML).not.toContain('#1F2559');
   });
 });
