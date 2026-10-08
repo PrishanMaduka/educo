@@ -160,25 +160,49 @@ section.sec{padding-block:96px}
 .sec-h p{color:var(--ink-2);font-size:17px;max-width:52ch}
 @media (max-width:820px){.sec-h{grid-template-columns:1fr}section.sec{padding-block:64px}}
 
-/* The circle, explained */
+/* What is the Quad Circle */
 #circle{background:linear-gradient(180deg,var(--bg),var(--wash-1) 45%,var(--bg))}
 #school{background:linear-gradient(180deg,var(--bg),var(--wash-2) 40%,var(--bg))}
 .step .vig svg{overflow:hidden}
-.places{overflow:hidden;margin-inline:-20px}
-@media (max-width:480px){.places{margin-inline:-16px}}
-.who-groups{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:28px;margin-top:36px}
-.who-groups h3{font-size:14px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2);display:flex;align-items:center;gap:10px;margin-bottom:14px}
-.who-groups h3 i{width:12px;height:12px;border-radius:50%;border:3px solid;display:inline-block}
-.who{list-style:none;margin:0;padding:0;display:grid;gap:12px}
-.who.s{grid-template-columns:repeat(2,minmax(0,1fr))}
-.who li{display:grid;grid-template-columns:64px minmax(0,1fr);gap:14px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:14px 16px}
-.who li svg{width:64px;height:64px}
-.who b{display:block;font-size:16px;line-height:1.3}
-.who small{display:block;color:var(--ink-2);font-weight:700;font-size:12.5px;letter-spacing:.02em}
-.who span{display:block;color:var(--ink-2);font-size:14.5px;line-height:1.45;margin-top:3px}
-@media (max-width:900px){.who-groups{grid-template-columns:1fr}}
-@media (max-width:620px){.places svg{width:180%;margin-left:-40%}}
-@media (max-width:620px){.who.s{grid-template-columns:1fr}}
+.circle-grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:32px 48px;align-items:center}
+.cdiag{margin:0;max-width:640px;width:100%;justify-self:center}
+.cdiag .dname{font:800 19px var(--f-body);fill:var(--ink);text-anchor:middle}
+.cdiag .drole{font:600 15px var(--f-body);fill:var(--ink-2);text-anchor:middle}
+.cdiag .dring{font:900 15px var(--f-body);letter-spacing:.2em;fill:var(--ink-2)}
+.cdiag .dflow{font:800 16px var(--f-body);text-anchor:middle}
+.cdiag{--flow-teal:color-mix(in srgb,var(--teal) 55%,var(--ink))}
+.cpeople{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.cpeople .cp-h{font-weight:800;margin-bottom:8px}.cpeople .cp-h span{font-weight:600;color:var(--ink-2);font-size:13px}
+.cpeople .cp-g{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.cpeople b{display:flex;align-items:center;gap:8px;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2)}
+.cpeople b i{width:11px;height:11px;border-radius:50%;border:3px solid}
+.cpeople ul{margin:6px 0 0;padding-left:18px;font-size:14px;color:var(--ink-2);line-height:1.5}
+.csteps h3{font-size:22px;margin-bottom:18px}
+.loop{list-style:none;margin:0;padding:0 0 0 74px;position:relative;display:grid;gap:14px}
+.loop li{display:grid;grid-template-columns:132px minmax(0,1fr);gap:16px;align-items:center;position:relative;background:color-mix(in srgb,var(--surface) 70%,transparent);border-radius:20px;padding:8px 14px 8px 8px}
+.loop li svg{width:132px;height:auto;display:block}
+.loop .n{position:absolute;left:-62px;top:50%;margin-top:-20px;width:40px;height:40px;border-radius:50%;background:var(--coral-ink);color:#fff;display:grid;place-items:center;font:900 17px var(--f-body);box-shadow:0 0 0 5px color-mix(in srgb,var(--wash-1) 80%,var(--bg));z-index:1}
+:root[data-theme="dark"] .loop .n{background:#C23A33}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .loop .n{background:#C23A33}}
+.loop b{display:block;font:800 17px var(--f-display);line-height:1.3}
+.loop span{display:block;color:var(--ink-2);font-size:14.5px;line-height:1.5;margin-top:3px}
+.loop-svg{position:absolute;left:0;top:0;width:100%;height:100%;overflow:visible;pointer-events:none}
+.loop-again{margin:14px 0 0 74px;font-weight:800;color:var(--coral-ink);font-size:15px}
+.rules-h{font-size:22px;margin:56px 0 18px}
+.rules{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.rules li{display:grid;grid-template-columns:56px minmax(0,1fr);gap:12px;align-items:start;background:color-mix(in srgb,var(--surface) 70%,transparent);border-radius:18px;padding:14px}
+.rules svg{width:56px;height:56px}
+.rules b{display:block;font:800 16px var(--f-display);line-height:1.3}
+.rules span{display:block;color:var(--ink-2);font-size:14px;line-height:1.45;margin-top:3px}
+@media (max-width:980px){.circle-grid{grid-template-columns:1fr}.rules{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:620px){
+  .cpeople{position:static;width:auto;height:auto;overflow:visible;clip:auto;white-space:normal;margin-top:4px}
+  .cdiag .drole{display:none}
+  .loop{padding-left:58px}.loop .n{left:-54px;width:36px;height:36px;margin-top:-18px;font-size:15px}
+  .loop li{grid-template-columns:92px minmax(0,1fr);gap:12px;padding:6px 10px 6px 6px}.loop li svg{width:92px}
+  .loop b{font-size:15.5px}.loop span{font-size:14px}.loop-again{margin-left:58px}
+  .rules{grid-template-columns:1fr}
+}
 
 /* Circle day band (the bold moment) */
 .band{background:radial-gradient(900px 500px at 85% -10%,var(--band-2),transparent 60%),var(--band);color:var(--band-ink);padding-block:96px}
@@ -361,35 +385,42 @@ dialog.si::backdrop{background:rgba(19,20,42,.55);backdrop-filter:blur(3px)}
     <span><svg class="ill" viewBox="0 0 40 40" aria-hidden="true" data-ill="iLanka"></svg><span><b>Made in Sri Lanka</b> for local curricula, rupees and Poya days</span></span>
   </div></div>
 
-  <!-- 2 The circle, explained -->
+  <!-- 2 What is the Quad Circle: who is in it, how it works, what keeps it safe -->
   <section class="sec" id="circle" aria-labelledby="circleH">
     <div class="wrap">
       <div class="sec-h">
-        <div><div class="eyebrow">The Quad Circle</div><h2 id="circleH">Two places, many people, <span class="serif">one child</span></h2></div>
-        <p>A child is looked after by more people than any school system knows about. Quad puts them in one circle, so the people at school and the people at home know each other, and the good news actually reaches home.</p>
+        <div><div class="eyebrow">The Quad Circle</div><h2 id="circleH">What is the Quad <span class="serif">Circle?</span></h2></div>
+        <p>The Circle is the small group of people at school and at home who care for one child, and the simple ways Quad keeps them in touch.</p>
       </div>
-      <div class="places"><svg class="ill" viewBox="0 0 1080 440" aria-hidden="true" data-ill="places"></svg></div>
-      <div class="who-groups">
-        <div>
-          <h3><i style="border-color:var(--indigo-2)"></i>At school</h3>
-          <ul class="who s">
-            <li><svg viewBox="0 0 100 100" aria-hidden="true" data-ill="m:jaya"></svg><div><b>Ms. Jayasinghe</b><small>Class teacher</small><span>Sees Amaya every morning and shares the small good moments in two taps.</span></div></li>
-            <li><svg viewBox="0 0 100 100" aria-hidden="true" data-ill="m:perera"></svg><div><b>Mr. Perera and Ms. Fernando</b><small>Subject teachers</small><span>Say what the class is learning this week, and one thing to try at home.</span></div></li>
-            <li><svg viewBox="0 0 100 100" aria-hidden="true" data-ill="m:herath"></svg><div><b>Coach Herath</b><small>Swimming coach</small><span>Cheers her first full length of butterfly, and makes sure home hears about it.</span></div></li>
-            <li><svg viewBox="0 0 100 100" aria-hidden="true" data-ill="m:silva"></svg><div><b>Ms. Silva</b><small>School counsellor</small><span>Someone to talk to. What Amaya tells her stays private.</span></div></li>
-            <li><svg viewBox="0 0 100 100" aria-hidden="true" data-ill="m:dias"></svg><div><b>Nurse Dias</b><small>School nurse</small><span>Looks after Amaya if she feels unwell during the day.</span></div></li>
-            <li><svg viewBox="0 0 100 100" aria-hidden="true" data-ill="m:sunethra"></svg><div><b>Sunethra aunty</b><small>On the school bus</small><span>Sees her on and off the bus, so home knows she’s on her way.</span></div></li>
-          </ul>
-        </div>
-        <div>
-          <h3><i style="border-color:var(--amber)"></i>At home</h3>
-          <ul class="who">
-            <li><svg viewBox="0 0 100 100" aria-hidden="true" data-ill="m:dilhani"></svg><div><b>Dilhani and Ruwan</b><small>Mum and dad</small><span>See her day as it happens, and say thank you in one tap.</span></div></li>
-            <li><svg viewBox="0 0 100 100" aria-hidden="true" data-ill="m:kamala"></svg><div><b>Kamala, in Kandy</b><small>Grandmother</small><span>Invited by Amaya’s parents to see moments, and only moments.</span></div></li>
-            <li><svg viewBox="0 0 100 100" aria-hidden="true" data-ill="m:sunil"></svg><div><b>Anyone the family invites</b><small>Up to four relatives</small><span>A grandfather, an aunt abroad. Parents can remove them in one tap.</span></div></li>
-          </ul>
+      <div class="circle-grid">
+        <figure class="cdiag">
+          <svg class="ill" viewBox="0 0 640 680" aria-hidden="true" data-ill="circleD"></svg>
+          <figcaption class="cpeople">
+            <p class="cp-h">Who is in Amaya’s circle <span>(a sample school)</span></p>
+            <div class="cp-g">
+              <div><b><i style="border-color:var(--amber)"></i>At home</b><ul><li>Dilhani, her mum</li><li>Ruwan, her dad</li><li>Kamala, her grandmother, invited by her mum</li></ul></div>
+              <div><b><i style="border-color:var(--indigo-2)"></i>At school</b><ul><li>Ms. Jayasinghe, class teacher</li><li>Mr. Perera, maths teacher</li><li>Coach Herath, swimming coach</li><li>Ms. Silva, counsellor</li><li>Nurse Dias, school nurse</li><li>Sunethra aunty, on the school bus</li></ul></div>
+            </div>
+          </figcaption>
+        </figure>
+        <div class="csteps">
+          <h3 id="loopH">How the circle works</h3>
+          <ol class="loop" id="loop" role="list" aria-labelledby="loopH">
+            <li><span class="n" aria-hidden="true">1</span><svg class="ill" viewBox="0 0 160 110" aria-hidden="true" data-ill="cStep1"></svg><div><b>A good moment at school</b><span>Ms. Jayasinghe shares Amaya’s mural in two taps. Only Amaya’s family sees it.</span></div></li>
+            <li><span class="n" aria-hidden="true">2</span><svg class="ill" viewBox="0 0 160 110" aria-hidden="true" data-ill="cStep2"></svg><div><b>Home sees it and says thanks</b><span>Mum sees it straight away and says thank you in one tap. Grandma loves it from Kandy.</span></div></li>
+            <li><span class="n" aria-hidden="true">3</span><svg class="ill" viewBox="0 0 160 110" aria-hidden="true" data-ill="cStep3"></svg><div><b>One thing to try at home</b><span>Each week the class teacher shares what the class is learning and one small thing to try. The family taps We tried it.</span></div></li>
+            <li><span class="n" aria-hidden="true">4</span><svg class="ill" viewBox="0 0 160 110" aria-hidden="true" data-ill="cStep4"></svg><div><b>The teacher knows home is connected</b><span>She sees the thank-you and the try. Her family pulse shows any family that hasn’t heard good news lately.</span></div></li>
+          </ol>
+          <p class="loop-again">Then round again, every week.</p>
         </div>
       </div>
+      <h3 class="rules-h">What keeps it kind and safe</h3>
+      <ul class="rules">
+        <li><svg class="ill" viewBox="0 0 64 64" aria-hidden="true" data-ill="cRule1"></svg><div><b>Families choose who’s in</b><span>Parents invite up to four relatives. Relatives only see moments, and can be removed in one tap.</span></div></li>
+        <li><svg class="ill" viewBox="0 0 64 64" aria-hidden="true" data-ill="cRule2"></svg><div><b>Photos only with permission</b><span>Parents choose who sees photos of their child: the class, family only, or no photos.</span></div></li>
+        <li><svg class="ill" viewBox="0 0 64 64" aria-hidden="true" data-ill="cRule3"></svg><div><b>Quiet hours</b><span>Teachers aren’t pinged from 18:00 to 07:00 or at weekends. Urgent safety alerts still go through.</span></div></li>
+        <li><svg class="ill" viewBox="0 0 64 64" aria-hidden="true" data-ill="cRule4"></svg><div><b>Good news, not records</b><span>Health and safeguarding notes never go into the Circle, and relatives never see fees, marks or attendance.</span></div></li>
+      </ul>
     </div>
   </section>
 
@@ -784,26 +815,6 @@ const Q = (() => {
     return s;
   };
 
-  // The circle explained: school on the left, home on the right, Amaya on the path between, the circle drawn around them all
-  D.places = () => {
-    const W = 1080, H = 360;
-    let s = wash(160, 80, 260, 140, 'lilac') + wash(900, 120, 260, 160, 'amber') + sun(930, 70, 32) + night([[120, 40, 4], [300, 30, 3], [620, 40, 4], [800, 90, 3], [1040, 40, 4]]) + `${cloud(200, 60, .9, .9)}${cloud(720, 52, .7, .8)}` + birds(600, 46) + tea(560, 262, 330, 70)
-      + hills(W, H, 286, tint('teal', 26), tint('teal', 40))
-      + `<path d="M300 340C420 300 470 330 540 312S680 300 790 336" fill="none" stroke="${tint('amber', 50)}" stroke-width="26" stroke-linecap="round"/>`
-      + `<path d="M300 340C420 300 470 330 540 312S680 300 790 336" fill="none" stroke="${v('surface')}" stroke-width="3" stroke-dasharray="10 12" opacity=".8"/>`
-      + school(220, 300, .52, {flag: v('coral')}) + palm(54, 300, .8) + bush(380, 300, .9)
-      + home(880, 300, .9, {roof: v('coral')}) + poya(782, 300, .8) + palm(1010, 304, .78, -1) + tree(110, 300, .9) + tuktuk(300, 352, .55) + bush(770, 300, .8, tint('teal', 70));
-    // the circle around both places
-    s += `<ellipse cx="545" cy="214" rx="510" ry="150" fill="none" stroke="${v('coral')}" stroke-width="3" stroke-dasharray="2 12" stroke-linecap="round" opacity=".75"/>`;
-    // school people at the gate, family at the door
-    s += at(392, 166, .78, full('jaya', {R: 'wave'})) + at(452, 194, .66, full('herath'))
-      + at(746, 172, .76, full('dilhani', {L: 'wave'})) + at(690, 192, .66, full('kamala'));
-    // Amaya walking the path, sparks between the two sides
-    s += at(560, 186, .82, full('amaya', {bag: v('amber'), R: 'wave'}));
-    s += kite(470, 60, .9, v('coral')) + `<g class="bob">${heart(520, 150, 1.1)}</g><g class="bob d2">${heart(610, 136, .9, v('amber'))}</g><g class="bob d3">${star(470, 120, 9, v('lilac'))}</g><g class="bob">${star(650, 166, 7, v('teal'))}</g>`;
-    return s;
-  };
-
   // Band vignettes: 400 × 200 panels on the band colour
   const panel = (inner, sky) => `<rect width="400" height="200" rx="20" fill="${sky || 'var(--band-2)'}"/><g clip-path="inset(0 round 20px)">${wash(70, 30, 190, 120, 'lilac')}${wash(350, 190, 210, 100, 'teal')}${inner}</g>`;
   const bandHills = `<path d="M0 168C80 150 150 162 220 152S340 138 400 148V200H0Z" fill="${mx(v('teal'), 34, 'var(--band-2)')}"/><path d="M0 186C100 172 200 184 300 176S380 172 400 176V200H0Z" fill="${mx(v('teal'), 52, 'var(--band-2)')}"/>`;
@@ -1037,6 +1048,7 @@ const Q = (() => {
     g.push(o.trousers ? pth('M-9 -47h8v45h-8Z M1 -47h8v45h-8Z', 'charcoal', .7, 'wcFig') : pth('M-13 -49L-16 -2Q0 2 16 -2L13 -49Z', c, .8, 'wcFig'));
     g.push(sk(`M${-10 * d} -72Q${-13 * d} -58 ${-11 * d} -47`, top, 5.5, .65));
     g.push(pth('M-11 -75Q0 -79 11 -75L13 -45H-13Z', top, .85, 'wcFig'));
+    if (top === 'uniform') g.push(pth('M-13 -49L-16 -2Q0 2 16 -2L13 -49Z', 'sky', .22, 'wcFig'), pth('M-11 -75Q0 -79 11 -75L13 -45H-13Z', 'sky', .18, 'wcFig'), ln('M-11 -75Q0 -79 11 -75L13 -45L16 -2Q0 2 -16 -2L-13 -45Z', .6, .35));
     if (o.drape) g.push(pth(`M${-10 * d} -75L${13 * d} -38L${7 * d} -36L${-13 * d} -67Z`, o.drape, .7, 'wcFig'));
     const [ax, ay] = o.wave ? [17 * d, -99] : [12 * d, -46];
     g.push(sk(o.wave ? `M${10 * d} -73Q${21 * d} -83 ${ax} ${ay}` : `M${10 * d} -73Q${15 * d} -58 ${ax} ${ay}`, top, 5.5, .85), `<circle cx="${ax}" cy="${ay}" r="2.8" fill="${wv('skin')}" fill-opacity=".9"/>`);
@@ -1047,6 +1059,8 @@ const Q = (() => {
     g.push(`<path d="M${-6 * d} -93Q${1 * d} -99 ${9 * d} -92" fill="none" stroke="${wv(hair)}" stroke-opacity=".9" stroke-width="3.4" stroke-linecap="round"/>`);
     g.push(`<ellipse cx="${6.2 * d}" cy="-84.6" rx="2.3" ry="1.8" fill="${wv('rose')}" fill-opacity=".6"/><path d="M${5 * d} -89.4h${1.8 * d}" stroke="${wv('charcoal')}" stroke-width="1" stroke-linecap="round" opacity=".6"/>`);
     if (o.glasses) g.push(`<circle cx="${6 * d}" cy="-89" r="2.6" fill="none" stroke="${wv('charcoal')}" stroke-width=".7" opacity=".6"/>`);
+    if (o.plaits) [-7, 7].forEach(px => g.push(`<g fill="${wv('hair')}" fill-opacity=".92"><ellipse cx="${px}" cy="-80" rx="3" ry="3.6"/><ellipse cx="${px * 1.05}" cy="-73.5" rx="2.8" ry="3.4"/><ellipse cx="${px * 1.08}" cy="-67.5" rx="2.5" ry="3"/></g><path d="M${px * 1.08} -63l-4.5 -3v6Z M${px * 1.08} -63l4.5 -3v6Z" fill="${wv('rose')}" fill-opacity=".9"/>`));
+    if (o.phone) g.push(`<rect x="${ax - 3.4}" y="${ay - 9}" width="6.8" height="10.5" rx="1.4" fill="${wv('charcoal')}" fill-opacity=".85"/>`);
     return `<g transform="translate(${x} ${y}) scale(${s})">${g.join('')}</g>`;
   }
 
@@ -1087,27 +1101,6 @@ const Q = (() => {
     return wscene('mHero', 800, 860, S.join(''), 26);
   };
 
-  // The circle explained: school and home joined by a path, with the people in between
-  D.places = () => wscene('mPlaces', 1080, 440, [
-    ell(300, 80, 440, 150, 'peach', .32), ell(1010, 60, 150, 100, 'sky', .12), ell(560, 236, 600, 70, 'apricot', .24), ell(800, 110, 200, 80, 'rose', .1),
-    moon(930, 70, 18), wstars([[120, 40], [300, 30], [620, 40], [800, 90], [1020, 50]]),
-    pth('M0 268Q200 230 380 252T760 244T1080 256V320H0Z', 'lilac', .3, 'wcBig'), wstupa(560, 262, .55),
-    pth('M0 290Q160 252 330 274T660 360H0Z', 'olive', .4, 'wcBig'), teaRows(0, 346, 520, 70),
-    pth('M420 360Q600 262 780 262T1080 276V360Z', 'teal', .38, 'wcBig'), teaRows(560, 352, 520, 70),
-    wschool(210, 344, 1.15), wpalm(62, 352, .72), wpalm(372, 350, .58, -1),
-    whome(880, 344, 1.15), wpoya(800, 344, .8), wpalm(1010, 356, .7, -1),
-    `<path d="M290 352C400 430 700 432 850 352" fill="none" stroke="${wv('ochre')}" stroke-opacity=".42" stroke-width="30" stroke-linecap="round" filter="url(#wcBig)"${BL}/>`,
-    pth('M0 360Q300 340 540 372T1080 362V440H0Z', 'olive', .38, 'wcBig'), pth('M0 400Q320 384 600 404T1080 396V440H0Z', 'teal', .28, 'wcBig'),
-    grass(10, 1070, 368, 436, 150, .45),
-    ln('M240 210Q540 40 860 210', 1, .3).replace('stroke-linecap', 'stroke-dasharray="3 7" stroke-linecap'),
-    wkite('herath', 430, 120, .5, 'apricot', -6), wkite('kamala', 650, 90, .46, 'peach', 8), wkite('jaya', 540, 168, .55, 'lilac', -3),
-    vbirds(720, 150, .8, .45), vbirds(330, 110, .6, .4),
-    wfig(306, 360, .78, {d: 1, dress: 'lilac', drape: 'ochre', hair: 'long', wave: true}),
-    amayaBack(560, 412, .48),
-    wfig(796, 362, .76, {d: -1, dress: 'rose', hair: 'long', wave: true}),
-    wfig(838, 364, .7, {d: -1, dress: 'ochre', drape: 'roof', grey: true, bun: true, glasses: true})
-  ].join(''), 22);
-
   // 09:10: Grandma in Kandy loves the moment, in her armchair by the window, tea hills outside
   D.vGrandma = () => wscene('mGrandma', 400, 200, [
     ell(190, 100, 260, 140, 'apricot', .36), ell(90, 50, 150, 90, 'peach', .3), ell(320, 160, 160, 80, 'lilac', .18),
@@ -1129,6 +1122,62 @@ const Q = (() => {
     ln('M156 132Q164 96 168 64', .7, .35).replace('stroke-linecap', 'stroke-dasharray="2 4" stroke-linecap')
   ].join(''), 16, true);
 
+
+  // What is the Quad Circle: the circle diagram (who), four small scenes (how), four rule icons (what keeps it safe)
+  const ptAt = (r, deg, c = 320) => [c + r * Math.cos(deg * Math.PI / 180), c + r * Math.sin(deg * Math.PI / 180)];
+  const dLabel = (x, y, name, role) => `<ellipse cx="${x}" cy="${y + 8}" rx="${Math.max(name.length, role.length) * 4.9 + 10}" ry="22" fill="${wv('paper')}" fill-opacity=".82" filter="url(#wcMid)"/><text class="dname" x="${x}" y="${y + 4}">${name}</text><text class="drole" x="${x}" y="${y + 22}">${role}</text>`;
+  const arrowPaint = (d, head, c) => `<path d="${d}" fill="none" stroke="${c}" stroke-opacity=".3" stroke-width="16" stroke-linecap="round" filter="url(#wcMid)"/><path d="${d}" fill="none" stroke="${c}" stroke-width="3.2" stroke-linecap="round" opacity=".9" filter="url(#wcInk)"/><path d="${head}" fill="${c}" fill-opacity=".95" filter="url(#wcFig)"/>`;
+  D.circleD = () => {
+    const RO = 244, RI = 140, CY = 336, P = (r, deg) => ptAt(r, deg).map((v, i) => i ? v + CY - 320 : v);
+    const SCHOOL = [['Ms. Jayasinghe', 'Class teacher', -90, {dress: 'lilac', drape: 'ochre', hair: 'long'}], ['Mr. Perera', 'Maths teacher', -30, {top: 'sky', trousers: true}],
+      ['Coach Herath', 'Swimming coach', 30, {top: 'roof', trousers: true}], ['Nurse Dias', 'School nurse', 90, {dress: 'teal', bun: true}],
+      ['Ms. Silva', 'Counsellor', 150, {dress: 'ochre', drape: 'lilac', hair: 'long'}], ['Sunethra', 'Bus aunty', 210, {dress: 'rose', drape: 'ochre', bun: true}]];
+    const HOME = [['Dilhani', 'Mum', 0, {dress: 'rose', hair: 'long'}], ['Ruwan', 'Dad', 120, {top: 'sea', trousers: true}], ['Kamala', 'Grandma, invited', 240, {dress: 'ochre', drape: 'roof', grey: true, bun: true, glasses: true}]];
+    const S = [ell(320, CY, 300, 300, 'apricot', .14), ell(230, 220, 180, 140, 'peach', .14), ell(430, 470, 200, 140, 'lilac', .12),
+      `<circle cx="320" cy="${CY}" r="${RO}" fill="none" stroke="${wv('sky')}" stroke-opacity=".32" stroke-width="30" filter="url(#wcMid)"${BL}/><circle cx="320" cy="${CY}" r="${RO}" fill="none" stroke="${wv('sky')}" stroke-width="1.2" stroke-dasharray="3 7" opacity=".7"/>`,
+      `<circle cx="320" cy="${CY}" r="${RI}" fill="none" stroke="${wv('apricot')}" stroke-opacity=".5" stroke-width="28" filter="url(#wcMid)"${BL}/><circle cx="320" cy="${CY}" r="${RI}" fill="none" stroke="${wv('ochre')}" stroke-width="1.2" stroke-dasharray="3 7" opacity=".7"/>`,
+      ell(320, CY - 6, 78, 84, 'rose', .2, 'wcMid'),
+      `<defs><path id="dArcS" d="M${P(RO + 30, -112).join(' ')}A${RO + 30} ${RO + 30} 0 0 1 ${P(RO + 30, -8).join(' ')}"/><path id="dArcH" d="M${P(RI - 26, -104).join(' ')}A${RI - 26} ${RI - 26} 0 0 1 ${P(RI - 26, -16).join(' ')}"/></defs>`,
+      `<text class="dring"><textPath href="#dArcS" startOffset="50%" text-anchor="middle">AT SCHOOL</textPath></text><text class="dring" style="fill:${mx(v('amber'), 45, v('ink'))}"><textPath href="#dArcH" startOffset="50%" text-anchor="middle">AT HOME</textPath></text>`];
+    // what flows: moments and learning go home; thanks and tries come back to school
+    const [a1, a2] = [P(226, 60), P(160, 60)], [b1, b2] = [P(160, 180), P(226, 180)];
+    S.push(arrowPaint(`M${a1[0]} ${a1[1]}Q${(a1[0] + a2[0]) / 2 + 10} ${(a1[1] + a2[1]) / 2 + 6} ${a2[0]} ${a2[1]}`, `M${a2[0] - 11} ${a2[1] + 4}L${a2[0] - 2} ${a2[1] - 16}L${a2[0] + 12} ${a2[1] - 2}Z`, 'var(--coral-ink)'));
+    S.push(arrowPaint(`M${b1[0]} ${b1[1]}Q${(b1[0] + b2[0]) / 2} ${b1[1] - 12} ${b2[0]} ${b2[1]}`, `M${b2[0] + 2} ${b2[1] - 12}L${b2[0] - 16} ${b2[1]}L${b2[0] + 2} ${b2[1] + 12}Z`, 'var(--flow-teal)'));
+    const ta = P(206, 76), tb = P(198, 170);
+    S.push(`<text class="dflow" x="${ta[0] + 10}" y="${ta[1] - 4}" style="fill:var(--coral-ink)">moments</text><text class="dflow" x="${ta[0] + 10}" y="${ta[1] + 14}" style="fill:var(--coral-ink)">&amp; learning</text>`);
+    S.push(`<text class="dflow" x="${tb[0]}" y="${tb[1] - 6}" style="fill:var(--flow-teal)">thanks</text><text class="dflow" x="${tb[0]}" y="${tb[1] + 12}" style="fill:var(--flow-teal)">&amp; tries</text>`);
+    [[SCHOOL, RO, .7], [HOME, RI, .72]].forEach(([L, R, sc]) => L.forEach(([name, role, deg, o]) => { const [x, y] = P(R, deg); S.push(wfig(x, y + 30, sc, {d: x > 330 ? -1 : 1, ...o}), dLabel(x, y + 48, name, role)); }));
+    S.push(wfig(320, CY + 42, .95, {dress: 'uniform', top: 'uniform', plaits: true, d: 1}));
+    S.push(`<g transform="translate(320 ${CY + 66})"><rect x="-48" y="-17" width="96" height="34" rx="17" fill="#C23A33"/><text x="0" y="0" dy=".35em" text-anchor="middle" style="font:900 18px var(--f-body);fill:#fff">Amaya</text></g>`);
+    return `<defs><mask id="mCircleD" maskUnits="userSpaceOnUse" x="0" y="0" width="640" height="680"><circle cx="320" cy="${CY}" r="300" fill="#fff" filter="url(#wcFeather)"/></mask></defs>`
+      + `<g mask="url(#mCircleD)"><g style="isolation:isolate"><rect width="640" height="680" fill="${wv('paper')}"/>${S.slice(0, 6).join('')}<rect width="640" height="680" fill="#000" filter="url(#wcPaper)" style="mix-blend-mode:multiply" opacity=".28"/></g></g>${S.slice(6).join('')}`;
+  };
+  // the uniform needs a shade to read on paper
+  const mural = (x, y, w, h) => pth(`M${x} ${y}h${w}v${h}h${-w}Z`, 'white', .95, 'wcFig') + pth(`M${x} ${y + h * .62}q${w * .3} ${-h * .25} ${w * .55} ${-h * .05}t${w * .45} ${-h * .1}V${y + h}H${x}Z`, 'teal', .7, 'wcFig') + `<circle cx="${x + w * .75}" cy="${y + h * .3}" r="${h * .14}" fill="${wv('roof')}" fill-opacity=".8"/>` + ln(`M${x} ${y}h${w}v${h}h${-w}Z`, .8, .45);
+  const heartP = (x, y, s, c = 'rose') => `<path transform="translate(${x} ${y}) scale(${s})" d="M0 -3C0 -9 -9 -10 -9 -3.5C-9 2 0 8 0 8S9 2 9 -3.5C9 -10 0 -9 0 -3Z" fill="${wv(c)}" fill-opacity=".9" filter="url(#wcFig)"/>`;
+  const groundS = (W, H) => pth(`M0 ${H - 18}Q${W / 2} ${H - 28} ${W} ${H - 18}V${H}H0Z`, 'olive', .3, 'wcMid');
+  D.cStep1 = () => wscene('mS1', 160, 110, [ell(80, 50, 90, 60, 'peach', .3), groundS(160, 110), mural(14, 24, 62, 44),
+    wfig(88, 98, .5, {dress: 'uniform', top: 'uniform', plaits: true, d: -1}), wfig(124, 100, .7, {dress: 'lilac', drape: 'ochre', hair: 'long', d: -1, phone: true}),
+    heartP(140, 22, .9), ln('M120 40Q130 30 136 26', .8, .45).replace('stroke-linecap', 'stroke-dasharray="2 3" stroke-linecap')].join(''), 6, true);
+  D.cStep2 = () => wscene('mS2', 160, 110, [ell(70, 60, 90, 60, 'apricot', .3), groundS(160, 110),
+    wfig(52, 100, .72, {dress: 'rose', hair: 'long', d: 1, phone: true}), heartP(70, 24, .85),
+    `<circle cx="124" cy="44" r="27" fill="${wv('paper')}" fill-opacity=".9"/>`, ell(124, 44, 26, 26, 'sky', .3, 'wcMid'), pth('M98 52q12 -10 26 -4t26 -2v14h-52Z', 'olive', .5, 'wcFig'),
+    wfig(124, 70, .42, {dress: 'ochre', drape: 'roof', grey: true, bun: true, glasses: true, d: -1}), `<circle cx="124" cy="44" r="27" fill="none" stroke="${wv('charcoal')}" stroke-width=".9" opacity=".4" filter="url(#wcInk)"/>`, heartP(146, 18, .6, 'rose')].join(''), 6, true);
+  D.cStep3 = () => wscene('mS3', 160, 110, [ell(80, 46, 90, 54, 'apricot', .32), ln('M80 0V14', .8, .5), pth('M68 20Q80 8 92 20Z', 'ochre', .8, 'wcFig'),
+    wfig(52, 104, .7, {dress: 'rose', hair: 'long', d: 1}), wfig(104, 104, .55, {dress: 'uniform', top: 'uniform', plaits: true, d: -1}),
+    pth('M10 78h140v8h-140Z', 'roof', .7, 'wcFig'), pth('M60 66l30 -4l4 14l-30 4Z', 'white', .95, 'wcFig'), ln('M64 70l20 -3M66 74l16 -2', .6, .4),
+    `<circle cx="132" cy="58" r="11" fill="${wv('teal')}" fill-opacity=".85" filter="url(#wcFig)"/><path d="M127 58l3.5 3.5 6 -7" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>`].join(''), 6, true);
+  D.cStep4 = () => wscene('mS4', 160, 110, [ell(90, 50, 90, 60, 'lilac', .26), groundS(160, 110),
+    whome(22, 60, .34), whome(56, 62, .3), whome(90, 60, .32),
+    heartP(22, 26, .55), heartP(56, 30, .5, 'ochre'), heartP(90, 26, .55),
+    ln('M100 44Q116 30 124 46', .8, .45).replace('stroke-linecap', 'stroke-dasharray="2 3" stroke-linecap'),
+    wfig(132, 100, .7, {dress: 'lilac', drape: 'ochre', hair: 'long', d: -1, phone: true})].join(''), 6, true);
+  const ruleBg = c => ell(32, 32, 28, 28, c, .35, 'wcMid');
+  D.cRule1 = () => ruleBg('apricot') + whome(32, 50, .5) + heartP(32, 12, .7);
+  D.cRule2 = () => ruleBg('sky') + pth('M12 24h40v26h-40Z', 'charcoal', .7, 'wcFig') + pth('M24 24l4 -6h8l4 6Z', 'charcoal', .7, 'wcFig') + `<circle cx="32" cy="37" r="8" fill="${wv('sky')}" fill-opacity=".9"/><circle cx="48" cy="48" r="9" fill="${wv('teal')}" fill-opacity=".95" filter="url(#wcFig)"/><path d="M44 48l3 3 5 -6" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`;
+  D.cRule3 = () => ruleBg('lilac') + `<path d="M40 14A18 18 0 1 0 50 44A14 14 0 0 1 40 14Z" fill="${wv('ochre')}" fill-opacity=".85" filter="url(#wcFig)"/>` + ln('M44 18h6l-6 7h6', 1.4, .7) + `<circle cx="16" cy="18" r="1.4" fill="${wv('charcoal')}" opacity=".6"/><circle cx="52" cy="34" r="1.2" fill="${wv('charcoal')}" opacity=".6"/>`;
+  D.cRule4 = () => ruleBg('teal') + pth('M32 10L50 17V31C50 42 42 50 32 54C22 50 14 42 14 31V17Z', 'sea', .7, 'wcFig') + heartP(32, 30, .95, 'white');
+
   const kiteIcon = k => wkite(k, 0, 0, 1, KCOL[k] || 'lilac', 0, false);
 
   return {D, P, KPOS, AMAYA, kiteIcon, portrait, svgWrap, bust};
@@ -1138,7 +1187,7 @@ const Q = (() => {
 document.querySelectorAll('svg[data-ill]').forEach(s => {
   const k = s.dataset.ill;
   s.insertAdjacentHTML('beforeend', k.startsWith('m:') ? Q.portrait(k.slice(2)) : Q.D[k]());
-  if (!/^(hero|places|vGrandma|i[A-Z]|tea|m:)/.test(k)) { const [, , w, h] = s.getAttribute('viewBox').split(' ').map(Number); s.insertAdjacentHTML('beforeend', `<rect width="${w}" height="${h}" rx="${k[0] === 'v' ? 20 : 0}" fill="#000" filter="url(#qGrain)" style="mix-blend-mode:multiply" opacity=".32"/>`); }
+  if (!/^(hero|vGrandma|circleD|cStep|cRule|i[A-Z]|tea|m:)/.test(k)) { const [, , w, h] = s.getAttribute('viewBox').split(' ').map(Number); s.insertAdjacentHTML('beforeend', `<rect width="${w}" height="${h}" rx="${k[0] === 'v' ? 20 : 0}" fill="#000" filter="url(#qGrain)" style="mix-blend-mode:multiply" opacity=".32"/>`); }
   if (!s.hasAttribute('role')) s.setAttribute('focusable', 'false');
 });
 
@@ -1167,6 +1216,21 @@ document.querySelectorAll('svg[data-ill]').forEach(s => {
   fly(FEED[0]);
   setInterval(() => { i = (i + 1) % FEED.length; tx.style.opacity = 0; setTimeout(() => { show(FEED[i]); tx.style.opacity = 1; }, 300); fly(FEED[i]); }, 3200);
 })();
+
+// The painted loop beside "How the circle works": 1 → 2 → 3 → 4 and back to 1, with a glint travelling round
+(() => { const ol = document.getElementById('loop'); if (!ol) return; const NS = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(NS, 'svg'); svg.setAttribute('class', 'loop-svg'); svg.setAttribute('aria-hidden', 'true'); ol.prepend(svg);
+  let path = null, glint = null;
+  const draw = () => { const o = ol.getBoundingClientRect(), c = [...ol.querySelectorAll('.n')].map(n => { const r = n.getBoundingClientRect(); return [r.left - o.left + r.width / 2, r.top - o.top + r.height / 2]; });
+    if (c.length < 2) return; const x = c[0][0], y1 = c[0][1], y4 = c[c.length - 1][1], back = Math.max(4, x - 30);
+    const d = `M${x} ${y1}V${y4}C${x} ${y4 + 26} ${back} ${y4 + 26} ${back} ${y4 - 6}V${y1 + 6}C${back} ${y1 - 26} ${x - 26} ${y1 - 30} ${x - 6} ${y1 - 18}`;
+    const chev = c.slice(0, -1).map((p, i) => { const my = (p[1] + c[i + 1][1]) / 2; return `M${x - 7} ${my - 5}L${x} ${my + 3}L${x + 7} ${my - 5}`; }).join('');
+    svg.innerHTML = `<path d="${d}" fill="none" stroke="var(--wc-roof)" stroke-opacity=".22" stroke-width="12" stroke-linecap="round" filter="url(#wcMid)"/><path id="loopP" d="${d}" fill="none" stroke="var(--coral-ink)" stroke-opacity=".75" stroke-width="3" stroke-linecap="round" filter="url(#wcInk)"/><path d="${chev}" fill="none" stroke="var(--coral-ink)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" opacity=".8"/><path d="M${x - 14} ${y1 - 25}L${x - 2} ${y1 - 16}L${x - 15} ${y1 - 9}Z" fill="var(--coral-ink)" opacity=".85"/><g id="loopG"><circle r="9" fill="#FFE7A8" opacity=".45"/><circle r="3.6" fill="#fff"/></g>`;
+    path = svg.querySelector('#loopP'); glint = svg.querySelector('#loopG'); glint.setAttribute('transform', `translate(${x} ${y1})`); };
+  draw(); if ('ResizeObserver' in window) new ResizeObserver(draw).observe(ol);
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const t0 = performance.now(); const tick = now => { if (path && glint) { const L = path.getTotalLength(), p = path.getPointAtLength(((now - t0) / 7000 % 1) * L); glint.setAttribute('transform', `translate(${p.x} ${p.y})`); } requestAnimationFrame(tick); };
+  requestAnimationFrame(tick); })();
 
 // Band steps rise in as they scroll into view (not with reduced motion: the CSS keeps them visible)
 (() => { const steps = document.querySelectorAll('.step');
