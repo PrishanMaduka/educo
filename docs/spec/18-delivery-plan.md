@@ -44,6 +44,7 @@ To run a milestone in Claude Code, type `/build-milestone M3` (ids with a letter
 
 ## M0b Infrastructure and staging
 **Read:** 20, 02 (Environments, Paths, Environment variables), 16 (Operational security).
+**Status:** written and validated offline; pending first deploy (see [`infra/README.md`](../../infra/README.md)). No AWS, Firebase, Sentry, Apple or Google account exists yet, so nothing has been applied or deployed and the acceptance checks below are still open. Tick M0b in Progress only after the first deploy meets them.
 **Scope:**
 - `infra/` Terraform with the modules `network`, `data`, `app`, `edge`, `dns` and the `staging` environment; remote state in S3 with a DynamoDB lock; separate AWS accounts for tooling and staging.
 - Route 53 zone for `quad-edu.com`, ACM certificates, CloudFront + WAF + ALB with the path routing from D14 (`/api/v1/*` and `/socket.io/*` to the API, sticky `/socket.io`, everything else to staff; `console.staging.quad-edu.com` to the console), the origin secret header.
@@ -338,7 +339,7 @@ To run a milestone in Claude Code, type `/build-milestone M3` (ids with a letter
 
 ## Progress
 - [x] M0 Foundations
-- [ ] M0b Infrastructure and staging
+- [ ] M0b Infrastructure and staging (written and validated offline; pending first deploy, see infra/README.md)
 - [ ] M1 Auth, tenancy and permissions
 - [ ] M1b Public site
 - [ ] M2 Platform console
