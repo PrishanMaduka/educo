@@ -566,6 +566,16 @@ run "deploy_role_passes_only_its_roles" {
     )
     error_message = "The deploy role pushes only to the four repositories, reads only the deploy parameters, and no secret."
   }
+
+  # The deploy stops a one-off task the waiter gave up on (Task 15 fix round, M8), and only tasks
+  # in this cluster.
+  assert {
+    condition = (
+      jsonencode(flatten([for s in jsondecode(aws_iam_role_policy.deploy.policy).Statement : s.Resource if contains(flatten([s.Action]), "ecs:StopTask")])) ==
+      jsonencode(["arn:aws:ecs:ap-south-1:123456789012:task/${aws_ecs_cluster.this.name}/*"])
+    )
+    error_message = "The deploy role may stop tasks in the staging cluster only."
+  }
 }
 
 run "plan_and_apply_roles_reach_state_through_the_tooling_roles" {

@@ -1,6 +1,7 @@
 # The ECS cluster, its services, Cloud Map, the task log groups and the tasks security group.
 # Terraform creates the services with the first task definitions; the deploy workflow registers
-# later revisions and owns the task count, so both are ignored after creation (D28).
+# later revisions, so the task definition is ignored after creation. Terraform owns the task count
+# (var.desired_count, ruling R-desired-count); the workflow never changes it (D28).
 
 locals {
   # Every task definition, long-running services and one-off tasks alike, keyed by its name.

@@ -89,9 +89,10 @@ locals {
         Condition = { ArnEquals = { "ecs:cluster" = aws_ecs_cluster.this.arn } }
       },
       {
-        Sid      = "WatchTasks"
+        # StopTask: the deploy stops a one-off task its waiter gave up on (scripts/ecs-deploy.mjs).
+        Sid      = "WatchAndStopTasks"
         Effect   = "Allow"
-        Action   = ["ecs:DescribeTasks"]
+        Action   = ["ecs:DescribeTasks", "ecs:StopTask"]
         Resource = ["arn:${local.partition}:ecs:${local.region}:${local.account_id}:task/${aws_ecs_cluster.this.name}/*"]
       },
       {
