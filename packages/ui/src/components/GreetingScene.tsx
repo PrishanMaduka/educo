@@ -4,7 +4,7 @@ import { useId, type CSSProperties, type ReactNode } from 'react';
 
 import { cn } from '../lib/cn';
 
-import type { GreetingPeriod } from '@quad/domain';
+import type { GreetingPeriod } from '@quad/contracts';
 
 /*
  * Port of design/brand/greeting/scenes.js `greetScene` (same 1200 x 320 geometry and per-period elements).

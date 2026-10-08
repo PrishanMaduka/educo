@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 
 import { GreetingScene } from './GreetingScene';
 
-import type { GreetingPeriod } from '@quad/domain';
+import type { GreetingPeriod } from '@quad/contracts';
 
 const periods: GreetingPeriod[] = ['morning', 'afternoon', 'evening', 'night'];
 

@@ -10,3 +10,12 @@ export {
   MIN_PASSWORD_LENGTH,
   checkPasswordPolicy,
 } from './auth/password-policy';
+export type { SessionExpiry, SessionExpiryInput } from './auth/session-expiry';
+export {
+  CONSOLE_IDLE_HOURS,
+  DEFAULT_SESSION_HOURS,
+  KEEP_SIGNED_IN_DAYS,
+  REFRESH_FAMILY_DAYS,
+  sessionExpiry,
+} from './auth/session-expiry';
+export { firstNameOf } from './people/first-name';

@@ -555,9 +555,6 @@ importers:
       '@quad/contracts':
         specifier: workspace:*
         version: link:../contracts
-      '@quad/domain':
-        specifier: workspace:*
-        version: link:../domain
       '@quad/tokens':
         specifier: workspace:*
         version: link:../tokens
