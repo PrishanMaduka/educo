@@ -21,9 +21,10 @@
   }
 
   // Palettes. The prototypes use CSS variables so the scene follows the theme; asset export uses hex.
-  const VARS = {surface: 'var(--surface)', ink3: 'var(--ink-3)', c1: 'var(--c1)', c2: 'var(--c2)', c3: 'var(--c3)', c4: 'var(--c4)', c5: 'var(--c5)', deep: 'var(--rail, #1F2559)'};
-  const LIGHT = {surface: '#FFFFFF', ink3: '#7D7A90', c1: '#E5534B', c2: '#3B4AA8', c3: '#8B7CF6', c4: '#F2A93B', c5: '#2BB0A0', deep: '#1F2559'};
-  const DARK = {surface: '#1B1D3A', ink3: '#9395B5', c1: '#FF7A6E', c2: '#7B8BF0', c3: '#A99BFF', c4: '#F5B95A', c5: '#3CC7B5', deep: '#0D0E22'};
+  const VARS = {surface: 'var(--surface)', ink3: 'var(--ink-3)', c1: 'var(--c1)', c2: 'var(--c2)', c3: 'var(--c3)', c4: 'var(--c4)', c5: 'var(--c5)', deep: 'var(--rail, #101632)'};
+  // Values from design/system/tokens.css (light and dark): surface, ink-3, c1–c5 and the rail.
+  const LIGHT = {surface: '#FFFFFF', ink3: '#5A5F7B', c1: '#E0478A', c2: '#4048B8', c3: '#1F8ACF', c4: '#D9640B', c5: '#4E8A12', deep: '#101632'};
+  const DARK = {surface: '#171D45', ink3: '#A9ACC8', c1: '#FF6FAE', c2: '#8C93FF', c3: '#59C3FF', c4: '#FF9B45', c5: '#C8F169', deep: '#0A0D24'};
 
   const hex = s => /^#[0-9a-f]{6}$/i.test(s);
   const toRgb = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
