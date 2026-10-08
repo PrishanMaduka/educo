@@ -277,11 +277,13 @@ describe('composite foreign keys keep rows inside one school (D23)', () => {
     expect(sample).toMatchObject({ code: '23503', constraint: 'sessions_preview_sample_user_fk' });
   });
 
-  it('refuses a membership or preview id on a session with no school', async () => {
+  it.each([
+    ['activeUserId', () => ({ activeUserId: schoolA.member.id })],
+    ['previewRoleId', () => ({ previewRoleId: schoolA.role.id })],
+    ['previewSampleUserId', () => ({ previewSampleUserId: schoolA.member.id })],
+  ] as const)('refuses %s on a session with no school', async (_column, ids) => {
     const cause = await failure(
-      withAccount(person.id, (tx) =>
-        tx.insert(sessions).values(buildSession(person.id, { activeUserId: schoolA.member.id })),
-      ),
+      withAccount(person.id, (tx) => tx.insert(sessions).values(buildSession(person.id, ids()))),
     );
     expect(cause).toMatchObject({ code: '23514', constraint: 'sessions_school_ids_need_school' });
   });
