@@ -1,5 +1,5 @@
 import { themeBootstrapScript } from '@quad/ui/theme';
-import { Figtree } from 'next/font/google';
+import localFont from 'next/font/local';
 
 import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from 'react';
@@ -8,9 +8,13 @@ import { t } from '@/i18n';
 
 import './globals.css';
 
-const figtree = Figtree({
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700', '800'],
+// Figtree (OFL, _fonts/OFL.txt), self-hosted so builds never fetch from Google Fonts (the Pages
+// export must build offline). One variable file with the latin and latin-ext characters Google
+// Fonts serves, unhinted like Google's own files, so text renders as it did when loaded from Google Fonts.
+const figtree = localFont({
+  src: './_fonts/figtree-latin.woff2',
+  weight: '400 800',
+  style: 'normal',
   variable: '--font-figtree',
   display: 'swap',
 });

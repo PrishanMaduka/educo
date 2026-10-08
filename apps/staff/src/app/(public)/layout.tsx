@@ -8,8 +8,8 @@ import type { ReactNode } from 'react';
 
 // The public site's typeface (spec 19): Bricolage Grotesque (OFL, _fonts/OFL.txt), variable in
 // weight and optical size, public pages only. The file is Google Fonts' latin build for Linux and
-// Windows: next/font/google downloads the macOS build, which has no hinting program and renders
-// about 3 % wider there than the prototype.
+// Windows: next/font's Google loader downloads the macOS build, which has no hinting program and
+// renders about 3 % wider there than the prototype.
 const bricolage = localFont({
   src: './_fonts/bricolage-grotesque-latin.woff2',
   weight: '400 800',
