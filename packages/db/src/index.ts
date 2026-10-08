@@ -14,6 +14,12 @@ export {
 export type { PlatformRunner, PlatformTx } from './platform';
 export { PLATFORM_TABLES } from './platform-tables';
 export { TransactionClosedError } from './client';
+export type { FieldCipher } from './crypto/field-cipher';
+export {
+  FIELD_ENCRYPTION_KEY_MIN_LENGTH,
+  FieldCipherError,
+  createFieldCipher,
+} from './crypto/field-cipher';
 export type { DefinerCalls } from './definers';
 export { pingDatabase } from './ping';
 export type { SqlQueryable, TableClasses } from './rls';
