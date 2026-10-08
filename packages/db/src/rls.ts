@@ -88,7 +88,8 @@ function deparsedAccountMatch(key: string): string {
 
 const TENANT_DML = ['SELECT', 'INSERT', 'UPDATE', 'DELETE'] as const;
 const ALL_TABLE_PRIVILEGES = [...TENANT_DML, 'TRUNCATE', 'REFERENCES', 'TRIGGER'] as const;
-const COLUMN_PRIVILEGES = 'SELECT, INSERT, UPDATE, REFERENCES';
+/** The privileges Postgres can also grant on single columns. */
+const COLUMN_PRIVILEGES = ['SELECT', 'INSERT', 'UPDATE', 'REFERENCES'] as const;
 const SEQUENCE_PRIVILEGES = 'USAGE, SELECT, UPDATE';
 
 /** How each table is isolated (D32). A table in none of these lists is a tenant table. */
@@ -115,7 +116,8 @@ interface TableRow {
   has_tenant_index: boolean;
   columns: string[];
   app_privileges: string[];
-  app_column_privileges: boolean;
+  /** Each of `COLUMN_PRIVILEGES` quad_app holds on at least one column (or the whole table). */
+  app_column_privileges: string[];
 }
 
 interface SequenceRow {
@@ -154,9 +156,12 @@ const TABLES_SQL = `
            where ca.attrelid = c.oid and ca.attnum > 0 and not ca.attisdropped
            order by ca.attnum
          ) as columns,
-         exists (select 1 from pg_roles where rolname = 'quad_app')
-           and has_any_column_privilege('quad_app', c.oid, '${COLUMN_PRIVILEGES}')
-           as app_column_privileges,
+         array(
+           select p from unnest($2::text[]) with ordinality as t(p, ord)
+           where exists (select 1 from pg_roles where rolname = 'quad_app')
+             and has_any_column_privilege('quad_app', c.oid, p)
+           order by ord
+         ) as app_column_privileges,
          array(
            select p from unnest($1::text[]) with ordinality as t(p, ord)
            where exists (select 1 from pg_roles where rolname = 'quad_app')
@@ -222,17 +227,29 @@ function reporter(table: TableRow): { violations: string[]; report: (problem: st
   };
 }
 
-/** Reports a privilege set that differs from the declared one, in a stable order. */
+/**
+ * Reports a privilege set that differs from the declared one, in a stable order, and any
+ * undeclared privilege granted on single columns (`grant update (col)`), which
+ * `has_table_privilege` does not see. An undeclared table privilege is reported once, as a table
+ * privilege.
+ */
 function checkExactPrivileges(
   table: TableRow,
   declared: readonly TablePrivilege[],
   report: (problem: string) => void,
 ): void {
-  const expected = ALL_TABLE_PRIVILEGES.filter((p) => declared.some((d) => d === p));
+  const isDeclared = (privilege: string): boolean => declared.some((d) => d === privilege);
+  const expected = ALL_TABLE_PRIVILEGES.filter(isDeclared);
   const found = table.app_privileges;
   if (expected.join(',') !== found.join(',')) {
     const foundText = found.length > 0 ? found.join(', ') : 'none';
     report(`quad_app privileges must be ${expected.join(', ')}, found ${foundText}`);
+  }
+  const columnOnly = table.app_column_privileges.filter(
+    (privilege) => !isDeclared(privilege) && !found.includes(privilege),
+  );
+  if (columnOnly.length > 0) {
+    report(`quad_app has undeclared column privileges: ${columnOnly.join(', ')}`);
   }
 }
 
@@ -282,7 +299,7 @@ function platformTableViolations(table: TableRow): string[] {
   if (table.app_privileges.length > 0) {
     return [`${table.name}: quad_app must have no privileges`];
   }
-  if (table.app_column_privileges) {
+  if (table.app_column_privileges.length > 0) {
     return [`${table.name}: quad_app must have no column privileges`];
   }
   return [];
@@ -356,17 +373,30 @@ function classViolations(
   return tenantTableViolations(table, policies);
 }
 
+/** Every table `classes` names, platform first, then account, then open, as declared. */
+function declaredTableNames(classes: TableClasses): string[] {
+  return [
+    ...classes.platformTables,
+    ...Object.keys(classes.accountTables),
+    ...Object.keys(classes.openTables),
+  ];
+}
+
 /**
  * Lists every way the database breaks the tenancy rules (spec 02, D17; D32). Every table is in
  * exactly one class:
  * - **platform** (`PLATFORM_TABLES`): `quad_app` holds no table, column or sequence privilege;
  * - **account** (`ACCOUNT_TABLES`): its key column, ENABLE and FORCE row level security, the
  *   account isolation policy on that column as its only permissive policy, and exactly the
- *   declared `quad_app` privileges;
- * - **open** (`OPEN_TABLES`): no row level security and exactly the declared privileges;
+ *   declared `quad_app` privileges, with no other privilege granted on single columns;
+ * - **open** (`OPEN_TABLES`): no row level security and exactly the declared privileges, again
+ *   with no other column privilege;
  * - **tenant** (anything else, so an unclassified table fails here): a not-null uuid
  *   `tenant_id`, a valid, non-partial index led by `tenant_id`, ENABLE and FORCE row level
  *   security, the tenant isolation policy as its only permissive policy, and DML for `quad_app`.
+ *
+ * A declared table that does not exist is reported too, so a typo or a dropped table cannot
+ * pass silently.
  *
  * `quad_app` must not bypass RLS or be a superuser. Returns `[]` when everything is in order.
  * Run it as `quad_owner`. `classes` defaults to the schema's own lists; tests pass probes.
@@ -376,7 +406,7 @@ export async function findTenancyViolations(
   classes: TableClasses = TABLE_CLASSES,
 ): Promise<string[]> {
   const [tables, policies, sequences, roles] = await Promise.all([
-    db.query<TableRow>(TABLES_SQL, [ALL_TABLE_PRIVILEGES]),
+    db.query<TableRow>(TABLES_SQL, [ALL_TABLE_PRIVILEGES, COLUMN_PRIVILEGES]),
     db.query<PolicyRow>(POLICIES_SQL),
     db.query<SequenceRow>(APP_SEQUENCES_SQL),
     db.query<RoleRow>(`select rolsuper, rolbypassrls from pg_roles where rolname = 'quad_app'`),
@@ -388,6 +418,12 @@ export async function findTenancyViolations(
       policies.rows.filter((policy) => policy.oid === table.oid),
     ),
   );
+  const existing = new Set(tables.rows.map((table) => table.name));
+  for (const name of declaredTableNames(classes)) {
+    if (!existing.has(name)) {
+      violations.push(`${name}: declared but missing`);
+    }
+  }
   for (const sequence of sequences.rows) {
     if (classes.platformTables.includes(sequence.owner_table)) {
       violations.push(`${sequence.name}: quad_app must have no privileges on a platform sequence`);

@@ -374,6 +374,62 @@ describe('table classes: tenant, account, open and platform (D32)', () => {
     }
   });
 
+  it('fails for an open table with a column grant beyond the declared privileges', async () => {
+    await withProbeTable(
+      `create table rls_probe (id uuid not null);
+       grant select, insert on rls_probe to quad_app;
+       grant update (id), references (id) on rls_probe to quad_app;`,
+      (violations) => {
+        expect(violations).toEqual([
+          'rls_probe: quad_app has undeclared column privileges: UPDATE, REFERENCES',
+        ]);
+      },
+      PROBE_AS_OPEN_TABLE,
+    );
+  });
+
+  it('fails for an account table with a column grant beyond the declared privileges', async () => {
+    await withProbeTable(
+      `${ACCOUNT_PROBE_SQL}
+       grant references (account_id) on rls_probe to quad_app;`,
+      (violations) => {
+        expect(violations).toEqual([
+          'rls_probe: quad_app has undeclared column privileges: REFERENCES',
+        ]);
+      },
+      PROBE_AS_ACCOUNT_TABLE,
+    );
+  });
+
+  it('reports an undeclared table privilege once, not again as a column privilege', async () => {
+    await withProbeTable(
+      `create table rls_probe (id uuid not null);
+       grant select, insert, update on rls_probe to quad_app;`,
+      (violations) => {
+        expect(violations).toEqual([
+          'rls_probe: quad_app privileges must be SELECT, INSERT, found SELECT, INSERT, UPDATE',
+        ]);
+      },
+      PROBE_AS_OPEN_TABLE,
+    );
+  });
+
+  it('fails for a declared table that does not exist', async () => {
+    const violations = await findTenancyViolations(testDb().owner, {
+      platformTables: [...PLATFORM_TABLES, 'ghost_platform'],
+      accountTables: {
+        ...ACCOUNT_TABLES,
+        ghost_account: { key: 'account_id', privileges: ['SELECT'] },
+      },
+      openTables: { ...OPEN_TABLES, ghost_open: { privileges: ['SELECT'] } },
+    });
+    expect(violations).toEqual([
+      'ghost_platform: declared but missing',
+      'ghost_account: declared but missing',
+      'ghost_open: declared but missing',
+    ]);
+  });
+
   it('fails when quad_app can use a platform table sequence', async () => {
     const { owner } = testDb();
     await owner.query('grant usage on sequence drizzle.__drizzle_migrations_id_seq to quad_app');
@@ -406,8 +462,8 @@ describe('table classes: tenant, account, open and platform (D32)', () => {
 });
 
 describe('platform_audit is append-only', () => {
-  it('refuses UPDATE, DELETE and TRUNCATE, even for quad_platform', async () => {
-    const { platform } = testDb();
+  it('refuses UPDATE and DELETE, even for quad_platform, and TRUNCATE, even for the owner', async () => {
+    const { owner, platform } = testDb();
     await platform.query(
       `insert into platform_audit (action, target_type, meta) values ('test.recorded', 'test', '{}')`,
     );
@@ -415,9 +471,8 @@ describe('platform_audit is append-only', () => {
       /append-only/,
     );
     await expect(platform.query('delete from platform_audit')).rejects.toThrow(/append-only/);
-    await expect(platform.query('truncate platform_audit')).rejects.toThrow(
-      /append-only|permission denied/,
-    );
+    // quad_platform has no TRUNCATE privilege, so only the owner reaches the trigger.
+    await expect(owner.query('truncate platform_audit')).rejects.toThrow(/append-only/);
     const { rows } = await platform.query<{ action: string }>('select action from platform_audit');
     expect(rows).toEqual([{ action: 'test.recorded' }]);
   });
