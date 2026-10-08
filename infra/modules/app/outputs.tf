@@ -44,6 +44,6 @@ output "ecs_service_names_for_dashboard" {
 }
 
 output "api_environment" {
-  description = "The plain (non-secret) environment of the api's first task definition, by name. Secrets are ARNs in the task definition and never appear here."
+  description = "The plain (non-secret) environment of Terraform's api task definition revision, by name. The deploy workflow registers later revisions, which this does not reflect. Secrets are ARNs in the task definition and never appear here."
   value       = { for variable in jsondecode(aws_ecs_task_definition.this["api"].container_definitions)[0].environment : variable.name => variable.value }
 }

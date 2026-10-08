@@ -161,7 +161,7 @@ variable "image_tag" {
 
 variable "desired_count" {
   type        = number
-  description = "Tasks per service when Terraform creates it; the deploy workflow owns the count afterwards."
+  description = "Tasks per service. Terraform owns the count (ruling R-desired-count): the first apply passes 0, before any image is pushed, and a later apply scales up. The deploy workflow never changes it."
   default     = 1
 }
 

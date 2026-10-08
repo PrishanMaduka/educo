@@ -766,3 +766,31 @@ run "github_names_cannot_widen_the_trust" {
 
   expect_failures = [var.github_repository, var.github_environment, var.github_infra_environment]
 }
+
+# Ruling R-desired-count: Terraform owns the count. The first apply creates the services at 0
+# (no image yet); a later apply at 1 must scale them, so desired_count is not ignored.
+run "first_apply_creates_the_services_at_zero" {
+  command = apply
+
+  variables {
+    desired_count = 0
+  }
+
+  assert {
+    condition     = alltrue([for service in aws_ecs_service.this : service.desired_count == 0])
+    error_message = "desired_count = 0 must create every service with no tasks."
+  }
+}
+
+run "a_later_apply_scales_the_services" {
+  command = apply
+
+  variables {
+    desired_count = 1
+  }
+
+  assert {
+    condition     = alltrue([for service in aws_ecs_service.this : service.desired_count == 1])
+    error_message = "A later apply must change the services' desired_count (it is not in ignore_changes)."
+  }
+}

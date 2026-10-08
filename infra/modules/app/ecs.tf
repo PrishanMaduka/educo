@@ -250,7 +250,10 @@ resource "aws_ecs_service" "this" {
     aws_vpc_security_group_egress_rule.tasks,
   ]
 
+  # The deploy workflow registers task definition revisions, so Terraform ignores that one.
+  # Ruling R-desired-count: Terraform owns the count (the first apply passes 0, a later one 1); the
+  # deploy workflow never passes --desired-count.
   lifecycle {
-    ignore_changes = [task_definition, desired_count]
+    ignore_changes = [task_definition]
   }
 }
