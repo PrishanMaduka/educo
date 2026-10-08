@@ -7,10 +7,12 @@
 //   node scripts/ecs-deploy.mjs register --family <f> --container <c> --image <ref> [--env K=V]...
 //   node scripts/ecs-deploy.mjs run-task --family-arn <arn> --container <c>
 //   node scripts/ecs-deploy.mjs update-service --service <s> --task-definition <arn>
-//   node scripts/ecs-deploy.mjs wait-stable --services a,b,…
+//   node scripts/ecs-deploy.mjs wait-stable --expect <service>=<task definition arn>,…
 // run-task exits 1 unless the one-off task's container exited 0, so a failed migration stops the
-// workflow before any service is updated (Review Focus #4). update-service never passes
-// --desired-count: Terraform owns the count (ruling R-desired-count).
+// workflow before any service is updated (Review Focus #4); a task still running when the waiter
+// gives up is stopped. wait-stable exits 1 unless each service's PRIMARY deployment runs the
+// expected revision and completed, so a circuit-breaker rollback fails the deploy. update-service
+// never passes --desired-count: Terraform owns the count (ruling R-desired-count).
 import { spawnSync } from 'node:child_process';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
@@ -51,7 +53,7 @@ const COMMANDS = {
   register: { required: ['family', 'container', 'image'], env: true },
   'run-task': { required: ['family-arn', 'container'] },
   'update-service': { required: ['service', 'task-definition'] },
-  'wait-stable': { required: ['services'] },
+  'wait-stable': { required: ['expect'] },
 };
 
 /**
@@ -163,6 +165,61 @@ export function taskOutcome(runTaskOutput, describeTasksOutput, container) {
         ? `${container} did not stop with an exit code (status ${status}).`
         : `${container} did not run to completion: ${why}.`,
   };
+}
+
+/**
+ * Parses `--expect api=<arn>,worker=<arn>`: the task definition each service must end up running.
+ * @param {string} value
+ * @returns {Record<string, string>}
+ */
+export function parseExpectations(value) {
+  /** @type {Record<string, string>} */
+  const expected = {};
+  for (const pair of value.split(',')) {
+    const eq = pair.indexOf('=');
+    const service = pair.slice(0, eq);
+    const arn = pair.slice(eq + 1);
+    if (eq <= 0 || arn === '') {
+      throw new Error(`--expect ${JSON.stringify(pair)} is not <service>=<task definition arn>.`);
+    }
+    if (Object.hasOwn(expected, service)) {
+      throw new Error(`--expect names ${service} twice.`);
+    }
+    expected[service] = arn;
+  }
+  return expected;
+}
+
+/**
+ * Whether every service finished deploying what was registered for it: its PRIMARY deployment
+ * runs the expected task definition and its rolloutState is COMPLETED. A deployment circuit
+ * breaker that rolled back leaves the previous revision as PRIMARY, so it is reported as a failure.
+ * @param {Record<string, unknown>} describeServicesOutput
+ * @param {Record<string, string>} expected service name → task definition ARN
+ * @returns {{ ok: boolean, message: string }}
+ */
+export function serviceOutcome(describeServicesOutput, expected) {
+  const failures = failureReasons(describeServicesOutput);
+  if (failures !== '') return { ok: false, message: `describe-services failed: ${failures}.` };
+  const services = records(describeServicesOutput.services);
+  const problems = Object.entries(expected).flatMap(([name, arn]) => {
+    const service = services.find((candidate) => candidate.serviceName === name);
+    if (service === undefined) return [`${name} was not found`];
+    const primary = records(service.deployments).find(
+      (deployment) => deployment.status === 'PRIMARY',
+    );
+    if (primary === undefined) return [`${name} has no PRIMARY deployment`];
+    if (primary.taskDefinition !== arn) {
+      return [`${name} runs ${String(primary.taskDefinition)}, not ${arn} (rolled back?)`];
+    }
+    if (primary.rolloutState !== 'COMPLETED') {
+      return [`${name}'s rollout is ${String(primary.rolloutState)}, not COMPLETED`];
+    }
+    return [];
+  });
+  return problems.length === 0
+    ? { ok: true, message: `Deployed and stable: ${Object.keys(expected).join(', ')}.` }
+    : { ok: false, message: `${problems.join('; ')}.` };
 }
 
 /**
@@ -391,25 +448,8 @@ export function runDeploy(parsed, aws, write, writeError) {
         write(`${option('service')} is deploying ${option('task-definition')}.\n`);
         return 0;
       }
-      case 'wait-stable': {
-        const services = option('services').split(',').filter(Boolean);
-        const cluster = setting(aws, 'cluster');
-        const waited = aws([
-          'ecs',
-          'wait',
-          'services-stable',
-          '--cluster',
-          cluster,
-          '--services',
-          ...services,
-        ]);
-        if (waited.status !== 0) {
-          writeError(`These services did not become stable: ${services.join(', ')}.\n`);
-          return 1;
-        }
-        write(`Stable: ${services.join(', ')}.\n`);
-        return 0;
-      }
+      case 'wait-stable':
+        return waitStable(aws, parseExpectations(option('expect')), write, writeError);
       default: {
         /** @type {never} */
         const unknown = command;
@@ -422,6 +462,59 @@ export function runDeploy(parsed, aws, write, writeError) {
     );
     return 1;
   }
+}
+
+/**
+ * The waiter's own message (its stderr), on a line of its own, or nothing.
+ * @param {AwsResult} result
+ * @returns {string}
+ */
+const waiterError = (result) => {
+  const detail = (result.stderr ?? '').trim();
+  return detail === '' ? '' : `${detail}\n`;
+};
+
+/**
+ * Waits for the services to be stable, then checks that each one runs its expected revision.
+ * describe-services runs even when the waiter gives up, so the message says what went wrong.
+ * @param {Aws} aws
+ * @param {Record<string, string>} expected
+ * @param {(line: string) => void} write
+ * @param {(line: string) => void} writeError
+ * @returns {number}
+ */
+function waitStable(aws, expected, write, writeError) {
+  const services = Object.keys(expected);
+  const cluster = setting(aws, 'cluster');
+  const waited = aws([
+    'ecs',
+    'wait',
+    'services-stable',
+    '--cluster',
+    cluster,
+    '--services',
+    ...services,
+  ]);
+  if (waited.status !== 0) writeError(waiterError(waited));
+  const described = callJson(aws, [
+    'ecs',
+    'describe-services',
+    '--cluster',
+    cluster,
+    '--services',
+    ...services,
+    '--output',
+    'json',
+  ]);
+  const outcome = serviceOutcome(described, expected);
+  if (waited.status !== 0 || !outcome.ok) {
+    const prefix =
+      waited.status === 0 ? '' : 'The services did not become stable before the waiter gave up. ';
+    writeError(`${prefix}${outcome.message}\n`);
+    return 1;
+  }
+  write(`${outcome.message}\n`);
+  return 0;
 }
 
 /**
@@ -473,9 +566,27 @@ function runOneOff(aws, taskDefinition, container, write, writeError) {
     'json',
   ]);
   const outcome = taskOutcome(started, described, container);
+  if (waited.status !== 0) writeError(waiterError(waited));
   if (!outcome.ok) {
-    const timedOut = waited.status === 0 ? '' : ' The task did not stop before the waiter gave up.';
-    writeError(`${outcome.message}${timedOut}\n`);
+    const running = records(described.tasks).filter((task) => task.lastStatus !== 'STOPPED');
+    // A task the waiter gave up on would otherwise keep running (and, for migrate, keep holding
+    // its lock) after the deploy failed.
+    for (const task of running) {
+      call(aws, [
+        'ecs',
+        'stop-task',
+        '--cluster',
+        cluster,
+        '--task',
+        String(task.taskArn),
+        '--reason',
+        'deploy-staging: the waiter gave up',
+        '--output',
+        'json',
+      ]);
+    }
+    const stoppedIt = running.length === 0 ? '' : ' The deploy stopped it.';
+    writeError(`${outcome.message}${stoppedIt}\n`);
     return 1;
   }
   write(`${outcome.message}\n`);
@@ -499,7 +610,8 @@ if (isMain) {
     runDeploy(
       parsed,
       (args) => {
-        // stderr is passed through so the waiters' and the CLI's messages show in the job log.
+        // stdout and stderr are captured: runDeploy parses stdout and passes a failed call's
+        // stderr (a waiter's message included) to writeError.
         const result = spawnSync('aws', args, {
           encoding: 'utf8',
           stdio: ['ignore', 'pipe', 'pipe'],

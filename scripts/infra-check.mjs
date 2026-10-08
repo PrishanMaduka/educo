@@ -146,7 +146,12 @@ export function checkSteps(
   for (const dir of dirs) {
     const tf = ['terraform', `-chdir=${dir}`];
     const tested = exists(`${dir}/tests`);
-    steps.push({ name: `Init ${dir}`, command: [...tf, 'init', '-backend=false', '-input=false'] });
+    // The roots commit .terraform.lock.hcl, so init must not change it; modules have none.
+    const lockfile = INFRA_ROOTS.includes(dir) ? ['-lockfile=readonly'] : [];
+    steps.push({
+      name: `Init ${dir}`,
+      command: [...tf, 'init', '-backend=false', '-input=false', ...lockfile],
+    });
     if (!(tested && hasAliases(dir))) {
       steps.push({ name: `Validate ${dir}`, command: [...tf, 'validate'] });
     }

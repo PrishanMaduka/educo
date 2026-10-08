@@ -60,6 +60,20 @@ describe('checkSteps', () => {
     ]);
   });
 
+  it('initialises the roots, which commit a lock file, with -lockfile=readonly', () => {
+    const steps = commands(
+      checkSteps(
+        ['infra/modules/app', 'infra/envs/staging'],
+        { tflint: false, checkov: false },
+        none,
+      ),
+    );
+    expect(steps).toContain(
+      'terraform -chdir=infra/envs/staging init -backend=false -input=false -lockfile=readonly',
+    );
+    expect(steps).toContain('terraform -chdir=infra/modules/app init -backend=false -input=false');
+  });
+
   it('runs terraform test only where a tests directory exists', () => {
     const steps = commands(
       checkSteps(

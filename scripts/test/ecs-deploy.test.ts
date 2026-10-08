@@ -3,8 +3,10 @@ import { describe, expect, it } from 'vitest';
 import {
   DEPLOY_TAGS,
   parseDeployArgs,
+  parseExpectations,
   renderTaskDefinition,
   runDeploy,
+  serviceOutcome,
   runTaskArgs,
   taskOutcome,
   updateServiceArgs,
@@ -246,6 +248,7 @@ describe('parseDeployArgs', () => {
     [['register', '--env', 'NOPE'], /is not K=V/],
     [['register', '--colour', 'red'], /Unknown option "--colour"/],
     [['update-service', '--service', 'api'], /--task-definition is required/],
+    [['wait-stable', '--services', 'api'], /Unknown option "--services"/],
     [
       ['update-service', '--service', 'api', '--task-definition', 'x', '--desired-count', '2'],
       /Unknown option "--desired-count"/,
@@ -255,9 +258,91 @@ describe('parseDeployArgs', () => {
   });
 });
 
+describe('parseExpectations', () => {
+  it('reads service=arn pairs', () => {
+    expect(parseExpectations('api=arn:a:1,worker=arn:b:2')).toEqual({
+      api: 'arn:a:1',
+      worker: 'arn:b:2',
+    });
+  });
+
+  it.each(['', 'api', 'api=', '=arn', 'api=a,api=b'])('refuses %j', (value) => {
+    expect(() => parseExpectations(value)).toThrow(/--expect/);
+  });
+});
+
+describe('serviceOutcome (I2: a rolled-back deployment fails the deploy)', () => {
+  const service = (name: string, deployments: Record<string, unknown>[]) => ({
+    serviceName: name,
+    deployments,
+  });
+  const primary = (taskDefinition: string, rolloutState = 'COMPLETED') => ({
+    status: 'PRIMARY',
+    taskDefinition,
+    rolloutState,
+  });
+
+  it('is ok when every PRIMARY deployment runs the registered revision and completed', () => {
+    expect(
+      serviceOutcome(
+        { services: [service('api', [primary('arn:8')])], failures: [] },
+        { api: 'arn:8' },
+      ),
+    ).toEqual({ ok: true, message: 'Deployed and stable: api.' });
+  });
+
+  it('is not ok when the circuit breaker rolled back to the previous revision', () => {
+    const outcome = serviceOutcome(
+      {
+        services: [
+          service('api', [
+            primary('arn:7'),
+            { status: 'ACTIVE', taskDefinition: 'arn:8', rolloutState: 'FAILED' },
+          ]),
+        ],
+        failures: [],
+      },
+      { api: 'arn:8' },
+    );
+    expect(outcome.ok).toBe(false);
+    expect(outcome.message).toContain('api runs arn:7, not arn:8');
+  });
+
+  it.each(['IN_PROGRESS', 'FAILED'])('is not ok when the rollout is %s', (state) => {
+    const outcome = serviceOutcome(
+      { services: [service('api', [primary('arn:8', state)])], failures: [] },
+      { api: 'arn:8' },
+    );
+    expect(outcome.ok).toBe(false);
+    expect(outcome.message).toContain(state);
+  });
+
+  it('is not ok when a service is missing or describe-services reports failures', () => {
+    expect(serviceOutcome({ services: [], failures: [] }, { api: 'arn:8' }).message).toContain(
+      'api was not found',
+    );
+    expect(
+      serviceOutcome(
+        { services: [], failures: [{ arn: 'api', reason: 'MISSING' }] },
+        { api: 'arn:8' },
+      ).message,
+    ).toContain('MISSING');
+  });
+
+  it('is not ok without a PRIMARY deployment', () => {
+    expect(
+      serviceOutcome({ services: [service('api', [])], failures: [] }, { api: 'arn:8' }).ok,
+    ).toBe(false);
+  });
+});
+
 type Call = string[];
 /** A fake `aws` CLI: answers by subcommand, records every call. */
-function fakeAws(answers: Record<string, unknown>, statuses: Record<string, number> = {}) {
+function fakeAws(
+  answers: Record<string, unknown>,
+  statuses: Record<string, number> = {},
+  stderrs: Record<string, string> = {},
+) {
   const calls: Call[] = [];
   const aws = (args: string[]) => {
     calls.push(args);
@@ -272,7 +357,11 @@ function fakeAws(answers: Record<string, unknown>, statuses: Record<string, numb
       };
       return { status: 0, stdout: `${settings[name] ?? ''}\n` };
     }
-    return { status: statuses[key] ?? 0, stdout: JSON.stringify(answers[key] ?? {}) };
+    return {
+      status: statuses[key] ?? 0,
+      stdout: JSON.stringify(answers[key] ?? {}),
+      stderr: stderrs[key] ?? '',
+    };
   };
   return { aws, calls };
 }
@@ -334,8 +423,8 @@ describe('runDeploy', () => {
     expect(out.lines.join('')).toContain('migrate exited with code 0');
   });
 
-  it('run-task still reads the stopped task when the waiter gives up', () => {
-    const { aws } = fakeAws(
+  it('run-task stops the task and fails when the waiter gives up (M8)', () => {
+    const { aws, calls } = fakeAws(
       {
         'ecs run-task': started,
         'ecs describe-tasks': {
@@ -344,6 +433,7 @@ describe('runDeploy', () => {
         },
       },
       { 'ecs wait': 255 },
+      { 'ecs wait': 'Waiter TasksStopped failed: Max attempts exceeded' },
     );
     const err = capture();
     expect(
@@ -354,7 +444,31 @@ describe('runDeploy', () => {
         err.write,
       ),
     ).toBe(1);
-    expect(err.lines.join('')).toContain('did not stop');
+    const stop = calls.find((call) => call[1] === 'stop-task');
+    expect(stop?.join(' ')).toContain(`ecs stop-task --cluster quad-staging --task ${taskArn}`);
+    const message = err.lines.join('');
+    expect(message).toContain('did not stop');
+    expect(message).toContain('Max attempts exceeded');
+    expect(message).toContain('stopped it');
+  });
+
+  it('run-task does not stop a task that stopped although the waiter failed', () => {
+    const { aws, calls } = fakeAws(
+      {
+        'ecs run-task': started,
+        'ecs describe-tasks': stopped({ exitCode: 0 }, { lastStatus: 'STOPPED' }),
+      },
+      { 'ecs wait': 255 },
+    );
+    expect(
+      runDeploy(
+        parseDeployArgs(['run-task', '--family-arn', 'arn:td:3', '--container', 'migrate']),
+        aws,
+        capture().write,
+        capture().write,
+      ),
+    ).toBe(0);
+    expect(calls.some((call) => call[1] === 'stop-task')).toBe(false);
   });
 
   it('register renders the latest revision, tags it and prints the new ARN', () => {
@@ -432,17 +546,46 @@ describe('runDeploy', () => {
     );
   });
 
-  it('wait-stable waits for every named service and fails when the waiter does', () => {
-    const { aws, calls } = fakeAws({}, { 'ecs wait': 255 });
-    const err = capture();
+  const expectArg = 'api=arn:td/quad-staging-api:8,worker=arn:td/quad-staging-worker:8';
+  const described = (api: Record<string, unknown>, worker: Record<string, unknown> = {}) => ({
+    services: [
+      {
+        serviceName: 'api',
+        deployments: [
+          {
+            status: 'PRIMARY',
+            taskDefinition: 'arn:td/quad-staging-api:8',
+            rolloutState: 'COMPLETED',
+            ...api,
+          },
+        ],
+      },
+      {
+        serviceName: 'worker',
+        deployments: [
+          {
+            status: 'PRIMARY',
+            taskDefinition: 'arn:td/quad-staging-worker:8',
+            rolloutState: 'COMPLETED',
+            ...worker,
+          },
+        ],
+      },
+    ],
+    failures: [],
+  });
+
+  it('wait-stable waits for every expected service, then checks what each one runs (I2)', () => {
+    const { aws, calls } = fakeAws({ 'ecs describe-services': described({}) });
+    const out = capture();
     const code = runDeploy(
-      parseDeployArgs(['wait-stable', '--services', 'api,worker,staff']),
+      parseDeployArgs(['wait-stable', '--expect', expectArg]),
       aws,
+      out.write,
       capture().write,
-      err.write,
     );
-    expect(code).toBe(1);
-    expect(calls.at(-1)).toEqual([
+    expect(code).toBe(0);
+    expect(calls).toContainEqual([
       'ecs',
       'wait',
       'services-stable',
@@ -451,9 +594,46 @@ describe('runDeploy', () => {
       '--services',
       'api',
       'worker',
-      'staff',
     ]);
-    expect(err.lines.join('')).toContain('api, worker, staff');
+    expect(calls.at(-1)?.slice(0, 2)).toEqual(['ecs', 'describe-services']);
+    expect(out.lines.join('')).toContain('api, worker');
+  });
+
+  it('wait-stable fails when the circuit breaker rolled a service back (I2)', () => {
+    const { aws } = fakeAws({
+      'ecs describe-services': described({ taskDefinition: 'arn:td/quad-staging-api:7' }),
+    });
+    const err = capture();
+    expect(
+      runDeploy(
+        parseDeployArgs(['wait-stable', '--expect', expectArg]),
+        aws,
+        capture().write,
+        err.write,
+      ),
+    ).toBe(1);
+    expect(err.lines.join('')).toContain('api runs arn:td/quad-staging-api:7');
+  });
+
+  it('wait-stable fails and passes the waiter error through when the waiter gives up (M4)', () => {
+    const { aws } = fakeAws(
+      { 'ecs describe-services': described({}, { rolloutState: 'IN_PROGRESS' }) },
+      { 'ecs wait': 255 },
+      { 'ecs wait': 'Waiter ServicesStable failed: Max attempts exceeded' },
+    );
+    const err = capture();
+    expect(
+      runDeploy(
+        parseDeployArgs(['wait-stable', '--expect', expectArg]),
+        aws,
+        capture().write,
+        err.write,
+      ),
+    ).toBe(1);
+    const message = err.lines.join('');
+    expect(message).toContain('Max attempts exceeded');
+    expect(message).toContain('worker');
+    expect(message).toContain('IN_PROGRESS');
   });
 
   it('setting prints one deploy setting', () => {
