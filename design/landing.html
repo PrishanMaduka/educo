@@ -4,6 +4,8 @@
 <meta charset="utf-8">
 <title>Quad – School management built around the child</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#EEF5FB" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#18181D" media="(prefers-color-scheme: dark)">
 <meta name="description" content="Quad runs your whole school and keeps everyone who looks after a child connected: teachers, parents and grandparents, in one circle.">
 <link rel="icon" href="brand/quad-app-icon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -28,24 +30,24 @@
   --f-accent:"Fraunces",Georgia,"Times New Roman",serif;
   color-scheme:light}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#0F1530;--surface:#172042;--surface-2:#1E2950;--line:#2A3866;--wash-1:#1E2452;--wash-2:#2A2A3C;--ink:#F1F1FA;--ink-2:#C4C5DD;--ink-3:#9395B5;
-  --coral:#FF7A6E;--coral-soft:#3A2230;--indigo:#C9C4F5;--indigo-2:#7B8BF0;--lilac:#A99BFF;--lilac-soft:#262046;--amber:#F5BC5E;--amber-soft:#33291A;--teal:#4CC9B8;--teal-soft:#16302F;
+  --bg:#18181D;--surface:#222228;--surface-2:#2A2A31;--line:#36363F;--wash-1:#24232C;--wash-2:#2C2A24;--ink:#F3F2EE;--ink-2:#CFCDC6;--ink-3:#9C9A93;
+  --coral:#FF7A6E;--coral-soft:#3A2526;--indigo:#C9C4F5;--indigo-2:#7B8BF0;--lilac:#A99BFF;--lilac-soft:#2A2638;--amber:#F5BC5E;--amber-soft:#342B1D;--teal:#4CC9B8;--teal-soft:#1C302E;
   --coral-ink:#FF8F84;--heat-ink:#000000;
-  --band:#080D24;--band-2:#131C3D;--band-ink:#F3F2FB;--band-ink-2:#BCC6E8;--band-line:#263463;
-  --illo-skin-1:#B98058;--illo-skin-2:#9A6340;--illo-skin-3:#7E4F33;--illo-skin-4:#C99671;--illo-hair:#1B1622;--illo-hair-grey:#B3AEC0;--illo-white:#E6E4F0;--illo-face:#1B1622;--illo-line:rgba(5,5,14,.7);--illo-sun:#F1E6C4;
+  --band:#0F0F13;--band-2:#1D1D23;--band-ink:#F3F2EE;--band-ink-2:#D0CFCA;--band-line:#33333C;
+  --illo-skin-1:#B98058;--illo-skin-2:#9A6340;--illo-skin-3:#7E4F33;--illo-skin-4:#C99671;--illo-hair:#1B1622;--illo-hair-grey:#B3AEC0;--illo-white:#E6E4F0;--illo-face:#1B1622;--illo-line:rgba(8,8,10,.7);--illo-sun:#F1E6C4;
   --shadow:0 24px 50px -28px rgba(0,0,0,.7);color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#0F1530;--surface:#172042;--surface-2:#1E2950;--line:#2A3866;--wash-1:#1E2452;--wash-2:#2A2A3C;--ink:#F1F1FA;--ink-2:#C4C5DD;--ink-3:#9395B5;
-  --coral:#FF7A6E;--coral-soft:#3A2230;--indigo:#C9C4F5;--indigo-2:#7B8BF0;--lilac:#A99BFF;--lilac-soft:#262046;--amber:#F5BC5E;--amber-soft:#33291A;--teal:#4CC9B8;--teal-soft:#16302F;
+  --bg:#18181D;--surface:#222228;--surface-2:#2A2A31;--line:#36363F;--wash-1:#24232C;--wash-2:#2C2A24;--ink:#F3F2EE;--ink-2:#CFCDC6;--ink-3:#9C9A93;
+  --coral:#FF7A6E;--coral-soft:#3A2526;--indigo:#C9C4F5;--indigo-2:#7B8BF0;--lilac:#A99BFF;--lilac-soft:#2A2638;--amber:#F5BC5E;--amber-soft:#342B1D;--teal:#4CC9B8;--teal-soft:#1C302E;
   --coral-ink:#FF8F84;--heat-ink:#000000;
-  --band:#080D24;--band-2:#131C3D;--band-ink:#F3F2FB;--band-ink-2:#BCC6E8;--band-line:#263463;
-  --illo-skin-1:#B98058;--illo-skin-2:#9A6340;--illo-skin-3:#7E4F33;--illo-skin-4:#C99671;--illo-hair:#1B1622;--illo-hair-grey:#B3AEC0;--illo-white:#E6E4F0;--illo-face:#1B1622;--illo-line:rgba(5,5,14,.7);--illo-sun:#F1E6C4;
+  --band:#0F0F13;--band-2:#1D1D23;--band-ink:#F3F2EE;--band-ink-2:#D0CFCA;--band-line:#33333C;
+  --illo-skin-1:#B98058;--illo-skin-2:#9A6340;--illo-skin-3:#7E4F33;--illo-skin-4:#C99671;--illo-hair:#1B1622;--illo-hair-grey:#B3AEC0;--illo-white:#E6E4F0;--illo-face:#1B1622;--illo-line:rgba(8,8,10,.7);--illo-sun:#F1E6C4;
   --shadow:0 24px 50px -28px rgba(0,0,0,.7);color-scheme:dark}
 
 /* Watercolour scenes (style study): muted picture-book pigments; dusk versions in dark mode */
 :root{--wc-paper:#F4F1EA;--wc-peach:#E8B79C;--wc-apricot:#F0C899;--wc-sky:#9CBAD5;--wc-lilac:#B7A8D4;--wc-teal:#5F9C95;--wc-sea:#3F8783;--wc-ochre:#D29A4C;--wc-olive:#8B8F52;--wc-charcoal:#4A4850;--wc-rose:#D98B7C;--wc-roof:#C4673F;--wc-white:#FBFAF5;--wc-window:#F5C15A;--wc-skin:#B67C56;--wc-hair:#3A2B2A;--wc-uniform:#FDFCF8;--wc-blend:multiply}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--wc-paper:#161E40;--wc-peach:#4C467A;--wc-apricot:#7E5470;--wc-sky:#2A3B70;--wc-lilac:#4A4088;--wc-teal:#2D5A5E;--wc-sea:#24494F;--wc-ochre:#8A6638;--wc-olive:#3C4632;--wc-charcoal:#0F1220;--wc-rose:#8E5260;--wc-roof:#6E3A30;--wc-white:#B9B8CF;--wc-window:#FFD47C;--wc-skin:#94653F;--wc-hair:#1A1216;--wc-uniform:#D6D4E4;--wc-blend:normal}}
-:root[data-theme="dark"]{--wc-paper:#161E40;--wc-peach:#4C467A;--wc-apricot:#7E5470;--wc-sky:#2A3B70;--wc-lilac:#4A4088;--wc-teal:#2D5A5E;--wc-sea:#24494F;--wc-ochre:#8A6638;--wc-olive:#3C4632;--wc-charcoal:#0F1220;--wc-rose:#8E5260;--wc-roof:#6E3A30;--wc-white:#B9B8CF;--wc-window:#FFD47C;--wc-skin:#94653F;--wc-hair:#1A1216;--wc-uniform:#D6D4E4;--wc-blend:normal}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--wc-paper:#1F1F25;--wc-peach:#4E4550;--wc-apricot:#7A5A58;--wc-sky:#33384A;--wc-lilac:#4A4466;--wc-teal:#2E5250;--wc-sea:#2A4244;--wc-ochre:#8C6B3C;--wc-olive:#3F4234;--wc-charcoal:#0E0E12;--wc-rose:#8A5458;--wc-roof:#6E3A30;--wc-white:#C4C2BC;--wc-window:#FFD47C;--wc-skin:#94653F;--wc-hair:#1A1216;--wc-uniform:#D9D7D0;--wc-blend:normal}}
+:root[data-theme="dark"]{--wc-paper:#1F1F25;--wc-peach:#4E4550;--wc-apricot:#7A5A58;--wc-sky:#33384A;--wc-lilac:#4A4466;--wc-teal:#2E5250;--wc-sea:#2A4244;--wc-ochre:#8C6B3C;--wc-olive:#3F4234;--wc-charcoal:#0E0E12;--wc-rose:#8A5458;--wc-roof:#6E3A30;--wc-white:#C4C2BC;--wc-window:#FFD47C;--wc-skin:#94653F;--wc-hair:#1A1216;--wc-uniform:#D9D7D0;--wc-blend:normal}
 .wc-moon{opacity:0}
 :root[data-theme="dark"] .wc-moon{opacity:1}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .wc-moon{opacity:1}}
@@ -302,7 +304,7 @@ footer a:hover{color:var(--ink)}
 
 /* Sign-in dialog */
 dialog.si{width:min(440px,calc(100% - 32px));border:1px solid var(--line);border-radius:24px;padding:28px;background:var(--surface);color:var(--ink);box-shadow:0 40px 80px -30px rgba(0,0,0,.5)}
-dialog.si::backdrop{background:rgba(19,20,42,.55);backdrop-filter:blur(3px)}
+dialog.si::backdrop{background:rgba(16,16,20,.6);backdrop-filter:blur(3px)}
 .si-x{position:absolute;top:14px;right:14px;margin:0}
 .si-close{all:unset;cursor:pointer;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-size:22px;color:var(--ink-3)}
 .si-close:hover{background:var(--surface-2)}
