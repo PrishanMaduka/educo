@@ -1,7 +1,21 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
+}
+
+// Release signing (spec 20, App store publishing): fastlane's Android
+// staging_build lane writes android/key.properties and the keystore from the
+// GitHub staging environment secrets. Both are git-ignored and never committed.
+// Without the file, release builds use the debug keys so that
+// `flutter run --release` still works locally.
+val keyProperties = Properties()
+val keyPropertiesFile = rootProject.file("key.properties")
+val hasReleaseKey = keyPropertiesFile.exists()
+if (hasReleaseKey) {
+    keyPropertiesFile.inputStream().use { keyProperties.load(it) }
 }
 
 android {
@@ -48,11 +62,21 @@ android {
         }
     }
 
+    signingConfigs {
+        if (hasReleaseKey) {
+            create("release") {
+                storeFile = file(keyProperties.getProperty("storeFile"))
+                storePassword = keyProperties.getProperty("storePassword")
+                keyAlias = keyProperties.getProperty("keyAlias")
+                keyPassword = keyProperties.getProperty("keyPassword")
+            }
+        }
+    }
+
     buildTypes {
         release {
-            // Release signing arrives with the fastlane lanes (M0b); until then the
-            // debug keys let `flutter run --release` work locally.
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig =
+                signingConfigs.getByName(if (hasReleaseKey) "release" else "debug")
         }
     }
 }

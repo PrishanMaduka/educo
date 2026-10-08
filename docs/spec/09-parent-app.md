@@ -221,7 +221,7 @@ At launch and on resume (at most hourly) the app calls `GET /app/config`. If the
 
 ### Store publishing
 - Accounts: Apple Developer Program and Google Play Console under Quad's company. One listing each: "Quad – School & Family".
-- Builds: `fastlane` lanes in GitHub Actions (macOS runner for iOS) produce signed `prod` builds to TestFlight and the Play internal track; `staging` builds go to TestFlight and Firebase App Distribution.
+- Builds: `fastlane` lanes in GitHub Actions (macOS runner for iOS) produce signed `prod` builds to TestFlight and the Play internal track; `staging` builds (bundle id `com.quadedu.parent.staging`) also go to TestFlight and the Play internal track ([20](20-infrastructure-operations.md#app-store-publishing), D28). Signing credentials come only from the GitHub `staging` environment secrets or fastlane `match`; nothing is committed.
 - Privacy: App Store privacy labels and the Google Play data-safety form declare contact info (phone, email), user content (messages, photos), identifiers (push token) and purchases, used for app functionality, not tracking. The privacy policy URL is `https://quad-edu.com/legal/privacy`.
 - Review: a demo account for app review uses a reserved phone number whose OTP is fixed and works only on the production review school (an isolated demo tenant with sample data). It is set by environment variables and listed in the review notes.
 - Permissions strings: camera (invite and pickup scanning, moments photos are staff-only), Face ID, notifications, photo library (profile photo of a pickup person).

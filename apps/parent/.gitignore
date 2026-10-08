@@ -52,3 +52,19 @@ app.*.map.json
 
 # Diff images flutter test writes when a golden fails
 test/goldens/failures/
+
+# Release signing: written by fastlane from environment secrets, never committed
+/android/key.properties
+*.jks
+*.keystore
+
+# Firebase client configs for staging and production stay out of git (spec 02);
+# see firebase/README.md
+/android/app/src/*/google-services.json
+/ios/config/*/GoogleService-Info.plist
+
+# fastlane and Bundler output
+/fastlane/report.xml
+/fastlane/*.ipa
+/vendor/bundle/
+/.bundle/

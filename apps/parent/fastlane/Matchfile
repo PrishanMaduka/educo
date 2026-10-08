@@ -1,0 +1,10 @@
+# Code signing for iOS through fastlane match (git storage, read-only in CI).
+# match reads MATCH_GIT_URL, MATCH_PASSWORD (the repository's encryption
+# passphrase) and MATCH_GIT_BASIC_AUTHORIZATION (base64 of "user:token") from
+# the environment. Nothing secret is written in this file.
+
+git_url(ENV.fetch("MATCH_GIT_URL", ""))
+storage_mode("git")
+type("appstore")
+app_identifier(["com.quadedu.parent.staging"])
+readonly(true)
