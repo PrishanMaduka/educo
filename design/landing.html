@@ -179,17 +179,24 @@ section.sec{padding-block:96px}
 .cpeople b{display:flex;align-items:center;gap:8px;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2)}
 .cpeople b i{width:11px;height:11px;border-radius:50%;border:3px solid}
 .cpeople ul{margin:6px 0 0;padding-left:18px;font-size:14px;color:var(--ink-2);line-height:1.5}
-.csteps h3{font-size:22px;margin-bottom:18px}
-.loop{list-style:none;margin:0;padding:0 0 0 74px;position:relative;display:grid;gap:14px}
-.loop li{display:grid;grid-template-columns:132px minmax(0,1fr);gap:16px;align-items:center;position:relative;background:color-mix(in srgb,var(--surface) 70%,transparent);border-radius:20px;padding:8px 14px 8px 8px}
-.loop li svg{width:132px;height:auto;display:block}
-.loop .n{position:absolute;left:-62px;top:50%;margin-top:-20px;width:40px;height:40px;border-radius:50%;background:var(--coral-ink);color:#fff;display:grid;place-items:center;font:900 17px var(--f-body);box-shadow:0 0 0 5px color-mix(in srgb,var(--wash-1) 80%,var(--bg));z-index:1}
-:root[data-theme="dark"] .loop .n{background:#C23A33}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .loop .n{background:#C23A33}}
-.loop b{display:block;font:800 17px var(--f-display);line-height:1.3}
-.loop span{display:block;color:var(--ink-2);font-size:14.5px;line-height:1.5;margin-top:3px}
-.loop-svg{position:absolute;left:0;top:0;width:100%;height:100%;overflow:visible;pointer-events:none}
-.loop-again{margin:14px 0 0 74px;font-weight:800;color:var(--coral-ink);font-size:15px}
+.csteps h3{font-size:22px;margin-bottom:10px;text-align:center}
+.loopwrap{position:relative}
+.loop{list-style:none;margin:0;padding:0;position:relative;z-index:1;display:grid;grid-template-columns:minmax(0,1fr) 92px minmax(0,1fr);grid-template-areas:"a a a" "d . b" "c c c";row-gap:0;align-items:center}
+.loop li{position:relative;text-align:center;display:flex;flex-direction:column;align-items:center;padding:0 4px}
+.loop li:nth-child(1){grid-area:a}.loop li:nth-child(2){grid-area:b}.loop li:nth-child(3){grid-area:c}.loop li:nth-child(4){grid-area:d}
+.loop li:nth-child(1),.loop li:nth-child(3){width:min(260px,56%);justify-self:center}
+.loop li svg.ill{width:100%;max-width:232px;height:auto}
+.loop li:nth-child(1) > b,.loop li:nth-child(1) > span,.loop li:nth-child(3) > b,.loop li:nth-child(3) > span{max-width:78%}
+.loop li:nth-child(1) svg.ill{order:3}.loop li:nth-child(1) > b{order:1;margin:0}.loop li:nth-child(1) > span{order:2;margin-bottom:2px}
+.loop li:nth-child(2) > b,.loop li:nth-child(2) > span{align-self:flex-end;text-align:right;max-width:82%}
+.loop li:nth-child(4) > b,.loop li:nth-child(4) > span{align-self:flex-start;text-align:left;max-width:82%}
+.loop li:nth-child(2) .n{left:auto;right:2px}
+.loop .n{position:absolute;left:2px;top:-4px;font:italic 600 40px/1 var(--f-accent);color:var(--coral-ink);text-shadow:0 0 12px var(--bg),0 0 4px var(--bg)}
+.loop b{display:block;font:800 16.5px var(--f-display);line-height:1.25;margin-top:-4px}
+.loop span{display:block;color:var(--ink-2);font-size:14px;line-height:1.45;margin-top:2px;max-width:30ch}
+.loop-art{position:absolute;left:0;top:0;width:100%;height:100%;overflow:visible;pointer-events:none;z-index:0}
+.loop-again{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);margin:0;text-align:center;font:italic 500 19px/1.15 var(--f-accent);color:var(--coral-ink);width:100px;z-index:1}
+.loop-again span{display:block}
 .rules-h{font-size:22px;margin:56px 0 18px}
 .rules{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
 .rules li{display:grid;grid-template-columns:56px minmax(0,1fr);gap:12px;align-items:start;background:color-mix(in srgb,var(--surface) 70%,transparent);border-radius:18px;padding:14px}
@@ -200,9 +207,14 @@ section.sec{padding-block:96px}
 @media (max-width:620px){
   .cpeople{position:static;width:auto;height:auto;overflow:visible;clip:auto;white-space:normal;margin-top:4px}
   .cdiag .drole{display:none}
-  .loop{padding-left:58px}.loop .n{left:-54px;width:36px;height:36px;margin-top:-18px;font-size:15px}
-  .loop li{grid-template-columns:92px minmax(0,1fr);gap:12px;padding:6px 10px 6px 6px}.loop li svg{width:92px}
-  .loop b{font-size:15.5px}.loop span{font-size:14px}.loop-again{margin-left:58px}
+  .loop{display:flex;flex-direction:column;gap:26px}
+  .loop li:nth-child(n){width:auto;display:grid;grid-template-columns:44% minmax(0,1fr);column-gap:14px;text-align:left;align-items:center;padding:0}
+  .loop li:nth-child(n) svg.ill{grid-column:1;grid-row:1/span 2;order:0}
+  .loop li:nth-child(even) svg.ill{margin-left:14px;width:calc(100% - 14px)}
+  .loop li:nth-child(n) > b{grid-column:2;grid-row:1;align-self:end;order:0;margin:0;max-width:none;text-align:left}
+  .loop li:nth-child(n) > span:not(.n){grid-column:2;grid-row:2;align-self:start;order:0;max-width:none;text-align:left}
+  .loop li:nth-child(n) .n{left:-4px;right:auto;top:-12px;font-size:34px}
+  .loop-again{position:static;transform:none;width:auto;margin:18px 0 0;font-size:19px}.loop-again span{display:inline}
   .rules{grid-template-columns:1fr}
 }
 
@@ -407,13 +419,15 @@ dialog.si::backdrop{background:rgba(16,16,20,.6);backdrop-filter:blur(3px)}
         </figure>
         <div class="csteps">
           <h3 id="loopH">How the circle works</h3>
-          <ol class="loop" id="loop" role="list" aria-labelledby="loopH">
-            <li><span class="n" aria-hidden="true">1</span><svg class="ill" viewBox="0 0 160 110" aria-hidden="true" data-ill="cStep1"></svg><div><b>A good moment at school</b><span>Ms. Jayasinghe shares Amaya’s mural in two taps. Only Amaya’s family sees it.</span></div></li>
-            <li><span class="n" aria-hidden="true">2</span><svg class="ill" viewBox="0 0 160 110" aria-hidden="true" data-ill="cStep2"></svg><div><b>Home sees it and says thanks</b><span>Mum sees it straight away and says thank you in one tap. Grandma loves it from Kandy.</span></div></li>
-            <li><span class="n" aria-hidden="true">3</span><svg class="ill" viewBox="0 0 160 110" aria-hidden="true" data-ill="cStep3"></svg><div><b>One thing to try at home</b><span>Each week the class teacher shares what the class is learning and one small thing to try. The family taps We tried it.</span></div></li>
-            <li><span class="n" aria-hidden="true">4</span><svg class="ill" viewBox="0 0 160 110" aria-hidden="true" data-ill="cStep4"></svg><div><b>The teacher knows home is connected</b><span>She sees the thank-you and the try. Her family pulse shows any family that hasn’t heard good news lately.</span></div></li>
-          </ol>
-          <p class="loop-again">Then round again, every week.</p>
+          <div class="loopwrap" id="loopwrap">
+            <ol class="loop" id="loop" aria-labelledby="loopH">
+              <li><span class="n" aria-hidden="true">1</span><svg class="ill" viewBox="0 0 160 110" aria-hidden="true" data-ill="cStep1"></svg><b>A moment at school</b><span>Two taps, and only Amaya’s family sees her mural.</span></li>
+              <li><span class="n" aria-hidden="true">2</span><svg class="ill" viewBox="0 0 160 110" aria-hidden="true" data-ill="cStep2"></svg><b>Home says thanks</b><span>Mum taps thank you. Grandma, invited, loves it.</span></li>
+              <li><span class="n" aria-hidden="true">3</span><svg class="ill" viewBox="0 0 160 110" aria-hidden="true" data-ill="cStep3"></svg><b>Try it at home</b><span>One small idea from class. They tap We tried it.</span></li>
+              <li><span class="n" aria-hidden="true">4</span><svg class="ill" viewBox="0 0 160 110" aria-hidden="true" data-ill="cStep4"></svg><b>The teacher sees it</b><span>Her family pulse shows who needs good news next.</span></li>
+            </ol>
+            <p class="loop-again">Every week, <span>round again</span></p>
+          </div>
         </div>
       </div>
       <h3 class="rules-h">What keeps it kind and safe</h3>
@@ -1042,6 +1056,52 @@ const Q = (() => {
     return `<g transform="translate(${x} ${y}) scale(${s})">${g.join('')}</g>`;
   }
 
+
+  // Amaya, front three-quarter view, in her school kit: crisp white frock with a collar and a pleated skirt, the school tie,
+  // white socks and black shoes, plaits with rose ribbons (as in the hero), and her ochre satchel. Feet at 0, about 112 tall.
+  function wamaya(x, y, s) {
+    const W = 'uniform', sh = (d, op = .2) => pth(d, 'sky', op, 'wcFig'), warm = (d, op = .12) => pth(d, 'apricot', op, 'wcFig');
+    const skirt = 'M-13 -52L-21 -26Q-11 -22 0 -23Q11 -22 21 -26L13 -52Z', bodice = 'M-11.5 -79Q0 -83 11.5 -79L13 -52H-13Z';
+    const g = [ell(0, 1.5, 22, 4, 'charcoal', .22, 'wcMid'),
+      // legs, socks, shoes
+      pth('M-8 -26h5.6v20h-5.6Z M2.4 -26h5.6v20h-5.6Z', 'skin', .9, 'wcFig'), pth('M-5 -26h2.6v20h-2.6Z M5.4 -26h2.6v20h-2.6Z', 'roof', .1, 'wcFig'),
+      pth('M-8.4 -13h6.4v9h-6.4Z M2 -13h6.4v9h-6.4Z', W, .97, 'wcFig'), sh('M-8.4 -13h6.4v9h-6.4Z M2 -13h6.4v9h-6.4Z', .22), ln('M-8.4 -12h6.4M2 -12h6.4', .6, .35),
+      pth('M-10 -4.5h8q2.4 0 2.4 2.6v2.4h-10.4Z M1.6 -4.5h8q2.4 0 2.4 2.6v2.4h-10.4Z', 'charcoal', .92, 'wcFig'), `<path d="M-7 -3.4h3M4.6 -3.4h3" stroke="#fff" stroke-width=".9" stroke-linecap="round" opacity=".55"/>`,
+      // satchel strap behind the body, bag at the left hip
+      // pleated skirt with soft shade and fold lines
+      pth(skirt, W, .97, 'wcFig'), sh('M4 -52L13 -52L21 -26Q12 -22.5 6 -23Z', .24), warm('M-13 -52L-21 -26Q-15 -23.5 -10 -23.5L-6 -52Z'),
+      ln('M-7.5 -51L-11 -24M-2.5 -51.5L-3.5 -23M2.5 -51.5L3.5 -23M7.5 -51L11 -24', .6, .34), ln(skirt, .6, .4),
+      // bodice, belt, puff sleeves, arms
+      pth(bodice, W, .97, 'wcFig'), sh('M4 -81Q10 -80.5 11.5 -79L13 -52H5Z', .22), ln(bodice, .6, .38),
+      pth('M-13 -56h26v4.4h-26Z', W, .97, 'wcFig'), sh('M-13 -56h26v4.4h-26Z', .3), ln('M-13 -56h26M-13 -51.6h26', .5, .38),
+      `<ellipse cx="-13" cy="-76" rx="6" ry="5" fill="${wv(W)}" fill-opacity=".97" filter="url(#wcFig)"/><ellipse cx="13" cy="-76" rx="6" ry="5" fill="${wv(W)}" fill-opacity=".97" filter="url(#wcFig)"/>`,
+      sh('M8 -79a6 5 0 0 1 11 3.5a6 5 0 0 1 -6 4.5Z', .28), ln('M-19 -75a6 5 0 0 1 12 -2M7 -77a6 5 0 0 1 12 2', .55, .35),
+      sk('M-16 -72Q-19 -60 -17 -49', 'skin', 5, .92), `<circle cx="-17" cy="-48" r="2.7" fill="${wv('skin')}" fill-opacity=".95"/>`,
+      sk('M16 -72Q19 -62 12 -57', 'skin', 5, .92), `<circle cx="11.4" cy="-57" r="2.7" fill="${wv('skin')}" fill-opacity=".95"/>`,
+      // satchel: strap across from the right shoulder to the left hip, bag with a flap and buckle
+      `<path d="M10 -80L-14 -46" fill="none" stroke="${wv('roof')}" stroke-opacity=".8" stroke-width="2.6" stroke-linecap="round" filter="url(#wcFig)"/>`,
+      pth('M-24 -50h14q2 0 2 2v12q0 2 -2 2h-14q-2 0 -2 -2v-12q0 -2 2 -2Z', 'ochre', .85, 'wcFig'), pth('M-24 -50h14q2 0 2 2v6h-18v-6q0 -2 2 -2Z', 'roof', .38, 'wcFig'),
+      `<rect x="-18.6" y="-44.6" width="3.2" height="2.6" rx=".6" fill="${wv('white')}" fill-opacity=".9"/>`, ln('M-26 -50h18v16h-18Z', .5, .35),
+      // neck, collar and the school tie
+      pth('M-3.4 -88h6.8v8h-6.8Z', 'skin', .92, 'wcFig'),
+      pth('M-8.5 -81Q-6 -74 0 -77Q6 -74 8.5 -81Q4 -83 0 -81Q-4 -83 -8.5 -81Z', W, .98, 'wcFig'), ln('M-8.5 -81Q-6 -74 0 -77Q6 -74 8.5 -81', .6, .45),
+      pth('M-2.2 -79.5h4.4l.8 3h-6Z', 'roof', .95, 'wcFig'), pth('M-2.1 -76.5L-3 -64.5L0 -61.2L3 -64.5L2.1 -76.5Z', 'roof', .9, 'wcFig'), pth('M.4 -76.5L3 -64.5L0 -61.2Z', 'charcoal', .14, 'wcFig'),
+      // head: neat hair with a centre parting, face in three-quarter view, rosy cheek
+      `<circle cx="-.5" cy="-96" r="11.2" fill="${wv('hair')}" fill-opacity=".95" filter="url(#wcFig)"/>`,
+      `<circle cx="1.6" cy="-94" r="9.6" fill="${wv('skin')}" fill-opacity=".95" filter="url(#wcFig)"/>`,
+      `<path d="M-10 -96Q-9 -106 0 -107Q10 -106 11 -97Q7 -103 1 -102.6L0 -100Q-5 -103 -10 -96Z" fill="${wv('hair')}" fill-opacity=".95"/>`,
+      `<path d="M0 -106.6L.6 -100.6" stroke="${wv('white')}" stroke-width=".7" opacity=".55"/>`,
+      `<ellipse cx="6.6" cy="-90.4" rx="2.4" ry="1.8" fill="${wv('rose')}" fill-opacity=".6"/><ellipse cx="-3" cy="-90.6" rx="1.9" ry="1.5" fill="${wv('rose')}" fill-opacity=".45"/>`,
+      `<path d="M3.6 -95.2q1 -.8 2 0M-2.6 -95.2q1 -.8 2 0" fill="none" stroke="${wv('charcoal')}" stroke-width=".8" stroke-linecap="round" opacity=".7"/><path d="M.8 -89.2q1.4 1 2.8 0" fill="none" stroke="${wv('roof')}" stroke-width=".8" stroke-linecap="round" opacity=".6"/>`];
+    // plaits over the shoulders, tied with rose ribbon bows
+    [[-11.4, -1], [12, 1]].forEach(([px, d]) => {
+      g.push(`<g fill="${wv('hair')}" fill-opacity=".95" filter="url(#wcFig)"><ellipse cx="${px}" cy="-89" rx="3.2" ry="3.8"/><ellipse cx="${px + d * .6}" cy="-82.4" rx="3" ry="3.6"/><ellipse cx="${px + d * 1}" cy="-76.2" rx="2.8" ry="3.4"/><ellipse cx="${px + d * 1.2}" cy="-70.4" rx="2.5" ry="3"/></g>`,
+        ln(`M${px - 2} -91l3 2M${px - 2} -84.4l3 2M${px - 1.6} -78.2l3 2`, .5, .4, 'white'),
+        pth(`M${px + d * 1.2} -66.2l-5.4 -3.2l.4 6.4Z M${px + d * 1.2} -66.2l5.4 -3.2l-.4 6.4Z`, 'rose', .95, 'wcFig'), `<circle cx="${px + d * 1.2}" cy="-66.2" r="1.3" fill="${wv('roof')}" fill-opacity=".8"/>`,
+        ln(`M${px + d * 1.2 - 1} -65.4l-1.4 5.4M${px + d * 1.2 + 1} -65.4l1.4 5.4`, 1.1, .6, 'rose'));
+    });
+    return `<g transform="translate(${x} ${y}) scale(${s})">${g.join('')}</g>`;
+  }
   // Small painted figures in three-quarter view (feet at 0, about 100 tall). No outlined faces: a rosy cheek and a hint of an eye.
   function wfig(x, y, s, o) {
     const d = o.d || 1, c = o.dress, top = o.top || o.dress, g = [ell(0, 1, 19, 3.6, 'charcoal', .2, 'wcMid')];
@@ -1134,7 +1194,7 @@ const Q = (() => {
     const SCHOOL = [['Ms. Jayasinghe', 'Class teacher', -90, {dress: 'lilac', drape: 'ochre', hair: 'long'}], ['Mr. Perera', 'Maths teacher', -30, {top: 'sky', trousers: true}],
       ['Coach Herath', 'Swimming coach', 30, {top: 'roof', trousers: true}], ['Nurse Dias', 'School nurse', 90, {dress: 'teal', bun: true}],
       ['Ms. Silva', 'Counsellor', 150, {dress: 'ochre', drape: 'lilac', hair: 'long'}], ['Sunethra', 'Bus aunty', 210, {dress: 'rose', drape: 'ochre', bun: true}]];
-    const HOME = [['Dilhani', 'Mum', 0, {dress: 'rose', hair: 'long'}], ['Ruwan', 'Dad', 120, {top: 'sea', trousers: true}], ['Kamala', 'Grandma, invited', 240, {dress: 'ochre', drape: 'roof', grey: true, bun: true, glasses: true}]];
+    const HOME = [['Dilhani', 'Mum', 0, {dress: 'rose', hair: 'long'}], ['Ruwan', 'Dad', 120, {top: 'sea', trousers: true}], ['Kamala', 'Grandma, invited', 224, {dress: 'ochre', drape: 'roof', grey: true, bun: true, glasses: true}]];
     const S = [ell(320, CY, 300, 300, 'apricot', .14), ell(230, 220, 180, 140, 'peach', .14), ell(430, 470, 200, 140, 'lilac', .12),
       `<circle cx="320" cy="${CY}" r="${RO}" fill="none" stroke="${wv('sky')}" stroke-opacity=".32" stroke-width="30" filter="url(#wcMid)"${BL}/><circle cx="320" cy="${CY}" r="${RO}" fill="none" stroke="${wv('sky')}" stroke-width="1.2" stroke-dasharray="3 7" opacity=".7"/>`,
       `<circle cx="320" cy="${CY}" r="${RI}" fill="none" stroke="${wv('apricot')}" stroke-opacity=".5" stroke-width="28" filter="url(#wcMid)"${BL}/><circle cx="320" cy="${CY}" r="${RI}" fill="none" stroke="${wv('ochre')}" stroke-width="1.2" stroke-dasharray="3 7" opacity=".7"/>`,
@@ -1149,8 +1209,8 @@ const Q = (() => {
     S.push(`<text class="dflow" x="${ta[0] + 10}" y="${ta[1] - 4}" style="fill:var(--coral-ink)">moments</text><text class="dflow" x="${ta[0] + 10}" y="${ta[1] + 14}" style="fill:var(--coral-ink)">&amp; learning</text>`);
     S.push(`<text class="dflow" x="${tb[0]}" y="${tb[1] - 6}" style="fill:var(--flow-teal)">thanks</text><text class="dflow" x="${tb[0]}" y="${tb[1] + 12}" style="fill:var(--flow-teal)">&amp; tries</text>`);
     [[SCHOOL, RO, .7], [HOME, RI, .72]].forEach(([L, R, sc]) => L.forEach(([name, role, deg, o]) => { const [x, y] = P(R, deg); S.push(wfig(x, y + 30, sc, {d: x > 330 ? -1 : 1, ...o}), dLabel(x, y + 48, name, role)); }));
-    S.push(wfig(320, CY + 42, .95, {dress: 'uniform', top: 'uniform', plaits: true, d: 1}));
-    S.push(`<g transform="translate(320 ${CY + 66})"><rect x="-48" y="-17" width="96" height="34" rx="17" fill="#C23A33"/><text x="0" y="0" dy=".35em" text-anchor="middle" style="font:900 18px var(--f-body);fill:#fff">Amaya</text></g>`);
+    S.push(ell(320, CY - 18, 70, 82, 'apricot', .22, 'wcMid'), wamaya(320, CY + 56, 1.22));
+    S.push(`<g transform="translate(320 ${CY + 80})"><rect x="-48" y="-17" width="96" height="34" rx="17" fill="#C23A33"/><text x="0" y="0" dy=".35em" text-anchor="middle" style="font:900 18px var(--f-body);fill:#fff">Amaya</text></g>`);
     return `<defs><mask id="mCircleD" maskUnits="userSpaceOnUse" x="0" y="0" width="640" height="680"><circle cx="320" cy="${CY}" r="300" fill="#fff" filter="url(#wcFeather)"/></mask></defs>`
       + `<g mask="url(#mCircleD)"><g style="isolation:isolate"><rect width="640" height="680" fill="${wv('paper')}"/>${S.slice(0, 6).join('')}<rect width="640" height="680" fill="#000" filter="url(#wcPaper)" style="mix-blend-mode:multiply" opacity=".28"/></g></g>${S.slice(6).join('')}`;
   };
@@ -1159,14 +1219,14 @@ const Q = (() => {
   const heartP = (x, y, s, c = 'rose') => `<path transform="translate(${x} ${y}) scale(${s})" d="M0 -3C0 -9 -9 -10 -9 -3.5C-9 2 0 8 0 8S9 2 9 -3.5C9 -10 0 -9 0 -3Z" fill="${wv(c)}" fill-opacity=".9" filter="url(#wcFig)"/>`;
   const groundS = (W, H) => pth(`M0 ${H - 18}Q${W / 2} ${H - 28} ${W} ${H - 18}V${H}H0Z`, 'olive', .3, 'wcMid');
   D.cStep1 = () => wscene('mS1', 160, 110, [ell(80, 50, 90, 60, 'peach', .3), groundS(160, 110), mural(14, 24, 62, 44),
-    wfig(88, 98, .5, {dress: 'uniform', top: 'uniform', plaits: true, d: -1}), wfig(124, 100, .7, {dress: 'lilac', drape: 'ochre', hair: 'long', d: -1, phone: true}),
+    wamaya(88, 99, .47), wfig(124, 100, .7, {dress: 'lilac', drape: 'ochre', hair: 'long', d: -1, phone: true}),
     heartP(140, 22, .9), ln('M120 40Q130 30 136 26', .8, .45).replace('stroke-linecap', 'stroke-dasharray="2 3" stroke-linecap')].join(''), 6, true);
   D.cStep2 = () => wscene('mS2', 160, 110, [ell(70, 60, 90, 60, 'apricot', .3), groundS(160, 110),
     wfig(52, 100, .72, {dress: 'rose', hair: 'long', d: 1, phone: true}), heartP(70, 24, .85),
     `<circle cx="124" cy="44" r="27" fill="${wv('paper')}" fill-opacity=".9"/>`, ell(124, 44, 26, 26, 'sky', .3, 'wcMid'), pth('M98 52q12 -10 26 -4t26 -2v14h-52Z', 'olive', .5, 'wcFig'),
     wfig(124, 70, .42, {dress: 'ochre', drape: 'roof', grey: true, bun: true, glasses: true, d: -1}), `<circle cx="124" cy="44" r="27" fill="none" stroke="${wv('charcoal')}" stroke-width=".9" opacity=".4" filter="url(#wcInk)"/>`, heartP(146, 18, .6, 'rose')].join(''), 6, true);
   D.cStep3 = () => wscene('mS3', 160, 110, [ell(80, 46, 90, 54, 'apricot', .32), ln('M80 0V14', .8, .5), pth('M68 20Q80 8 92 20Z', 'ochre', .8, 'wcFig'),
-    wfig(52, 104, .7, {dress: 'rose', hair: 'long', d: 1}), wfig(104, 104, .55, {dress: 'uniform', top: 'uniform', plaits: true, d: -1}),
+    wfig(52, 104, .7, {dress: 'rose', hair: 'long', d: 1}), wamaya(106, 106, .52),
     pth('M10 78h140v8h-140Z', 'roof', .7, 'wcFig'), pth('M60 66l30 -4l4 14l-30 4Z', 'white', .95, 'wcFig'), ln('M64 70l20 -3M66 74l16 -2', .6, .4),
     `<circle cx="132" cy="58" r="11" fill="${wv('teal')}" fill-opacity=".85" filter="url(#wcFig)"/><path d="M127 58l3.5 3.5 6 -7" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>`].join(''), 6, true);
   D.cStep4 = () => wscene('mS4', 160, 110, [ell(90, 50, 90, 60, 'lilac', .26), groundS(160, 110),
@@ -1219,19 +1279,30 @@ document.querySelectorAll('svg[data-ill]').forEach(s => {
   setInterval(() => { i = (i + 1) % FEED.length; tx.style.opacity = 0; setTimeout(() => { show(FEED[i]); tx.style.opacity = 1; }, 300); fly(FEED[i]); }, 3200);
 })();
 
-// The painted loop beside "How the circle works": 1 → 2 → 3 → 4 and back to 1, with a glint travelling round
-(() => { const ol = document.getElementById('loop'); if (!ol) return; const NS = 'http://www.w3.org/2000/svg';
-  const svg = document.createElementNS(NS, 'svg'); svg.setAttribute('class', 'loop-svg'); svg.setAttribute('aria-hidden', 'true'); ol.prepend(svg);
-  let path = null, glint = null;
-  const draw = () => { const o = ol.getBoundingClientRect(), c = [...ol.querySelectorAll('.n')].map(n => { const r = n.getBoundingClientRect(); return [r.left - o.left + r.width / 2, r.top - o.top + r.height / 2]; });
-    if (c.length < 2) return; const x = c[0][0], y1 = c[0][1], y4 = c[c.length - 1][1], back = Math.max(4, x - 30);
-    const d = `M${x} ${y1}V${y4}C${x} ${y4 + 26} ${back} ${y4 + 26} ${back} ${y4 - 6}V${y1 + 6}C${back} ${y1 - 26} ${x - 26} ${y1 - 30} ${x - 6} ${y1 - 18}`;
-    const chev = c.slice(0, -1).map((p, i) => { const my = (p[1] + c[i + 1][1]) / 2; return `M${x - 7} ${my - 5}L${x} ${my + 3}L${x + 7} ${my - 5}`; }).join('');
-    svg.innerHTML = `<path d="${d}" fill="none" stroke="var(--wc-roof)" stroke-opacity=".22" stroke-width="12" stroke-linecap="round" filter="url(#wcMid)"/><path id="loopP" d="${d}" fill="none" stroke="var(--coral-ink)" stroke-opacity=".75" stroke-width="3" stroke-linecap="round" filter="url(#wcInk)"/><path d="${chev}" fill="none" stroke="var(--coral-ink)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" opacity=".8"/><path d="M${x - 14} ${y1 - 25}L${x - 2} ${y1 - 16}L${x - 15} ${y1 - 9}Z" fill="var(--coral-ink)" opacity=".85"/><g id="loopG"><circle r="9" fill="#FFE7A8" opacity=".45"/><circle r="3.6" fill="#fff"/></g>`;
-    path = svg.querySelector('#loopP'); glint = svg.querySelector('#loopG'); glint.setAttribute('transform', `translate(${x} ${y1})`); };
-  draw(); if ('ResizeObserver' in window) new ResizeObserver(draw).observe(ol);
+// The painted loop: a brush-stroke path through the four pictures, clockwise from 1 and back to 1, with a glint travelling round
+(() => { const wrap = document.getElementById('loopwrap'); if (!wrap) return; const NS = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(NS, 'svg'); svg.setAttribute('class', 'loop-art'); svg.setAttribute('aria-hidden', 'true'); svg.setAttribute('focusable', 'false'); wrap.prepend(svg);
+  let full = null, glint = null;
+  const centre = el => { const o = wrap.getBoundingClientRect(), r = el.getBoundingClientRect(); return [r.left - o.left + r.width / 2, r.top - o.top + r.height / 2]; };
+  const curve = (pts, closed) => { const n = pts.length, P = i => pts[closed ? (i + n) % n : Math.max(0, Math.min(n - 1, i))], out = [];
+    for (let i = 0; i < (closed ? n : n - 1); i++) { const [a, b, c, d] = [P(i - 1), P(i), P(i + 1), P(i + 2)];
+      out.push(`M${b[0]} ${b[1]}C${b[0] + (c[0] - a[0]) / 5} ${b[1] + (c[1] - a[1]) / 5} ${c[0] - (d[0] - b[0]) / 5} ${c[1] - (d[1] - b[1]) / 5} ${c[0]} ${c[1]}`); }
+    return out; };
+  const draw = () => {
+    let pts = [...wrap.querySelectorAll('.loop li svg.ill')].map(centre); if (pts.length < 4) return;
+    const round = pts[3][1] < pts[2][1] - 10; // 4 sits beside 2 on wide screens: draw a closed loop
+    if (round) { const mx = (pts[1][0] + pts[3][0]) / 2, my = (pts[0][1] + pts[2][1]) / 2; pts = pts.map(([x, y]) => [x + (mx - x) * .42, y + (my - y) * .42]); }
+    let segs = curve(pts, round);
+    if (!round) { const f = pts[0], l = pts[3], x = -9; segs.push(`M${l[0]} ${l[1]}C${l[0]} ${l[1] + 40} ${x} ${l[1] + 40} ${x} ${l[1] - 20}V${f[1] + 20}C${x} ${f[1] - 40} ${f[0]} ${f[1] - 50} ${f[0]} ${f[1] - 30}`); }
+    svg.innerHTML = segs.map((d, i) => `<path d="${d}" fill="none" stroke="var(--wc-roof)" stroke-opacity=".22" stroke-width="20" stroke-linecap="round" filter="url(#wcMid)"/><path class="brush" d="${d}" fill="none" stroke="var(--coral-ink)" stroke-opacity=".78" stroke-width="${i === segs.length - 1 && !round ? 3 : 4.4}" stroke-linecap="round"${i === segs.length - 1 && !round ? ' stroke-dasharray="2 9"' : ''} filter="url(#wcFig)"/>`).join('')
+      + `<path id="loopFull" d="${segs.map((d, i) => i ? d.replace(/^M[^C]+/, '') : d).join('')}" fill="none" stroke="none"/>`;
+    [...svg.querySelectorAll('.brush')].forEach(p => { const L = p.getTotalLength(), at = L * (round ? .52 : .55), a = p.getPointAtLength(at), b = p.getPointAtLength(at + 2), ang = Math.atan2(b.y - a.y, b.x - a.x) * 180 / Math.PI;
+      svg.insertAdjacentHTML('beforeend', `<path d="M-10 -9L8 0L-10 9Q-5 0 -10 -9Z" transform="translate(${a.x} ${a.y}) rotate(${ang})" fill="var(--coral-ink)" fill-opacity=".9" filter="url(#wcFig)"/>`); });
+    svg.insertAdjacentHTML('beforeend', '<g id="loopG"><circle r="11" fill="#FFE7A8" opacity=".45"/><circle r="4" fill="#fff"/></g>');
+    full = svg.querySelector('#loopFull'); glint = svg.querySelector('#loopG'); const s0 = full.getPointAtLength(0); glint.setAttribute('transform', `translate(${s0.x} ${s0.y})`); };
+  draw(); if ('ResizeObserver' in window) new ResizeObserver(draw).observe(wrap);
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  const t0 = performance.now(); const tick = now => { if (path && glint) { const L = path.getTotalLength(), p = path.getPointAtLength(((now - t0) / 7000 % 1) * L); glint.setAttribute('transform', `translate(${p.x} ${p.y})`); } requestAnimationFrame(tick); };
+  const t0 = performance.now(); const tick = now => { if (full && glint) { const p = full.getPointAtLength(((now - t0) / 9000 % 1) * full.getTotalLength()); glint.setAttribute('transform', `translate(${p.x} ${p.y})`); } requestAnimationFrame(tick); };
   requestAnimationFrame(tick); })();
 
 // Band steps rise in as they scroll into view (not with reduced motion: the CSS keeps them visible)
