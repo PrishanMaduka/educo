@@ -1,0 +1,5 @@
+/** Where the public site sends people to talk to Quad (spec 19 footer). */
+export const CONTACT_EMAIL = 'hello@quad-edu.com';
+
+/** The canonical origin of the public site (spec 19 SEO). */
+export const SITE_ORIGIN = 'https://quad-edu.com';

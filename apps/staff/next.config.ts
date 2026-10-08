@@ -26,6 +26,9 @@ const config: NextConfig = {
   },
   // The workspace packages ship TypeScript source.
   transpilePackages: ['@quad/contracts', '@quad/domain', '@quad/tokens', '@quad/ui'],
+  // Import only the @quad/ui modules a page uses, not the whole barrel: a server component that
+  // imports `cn` must not pull every client component into the page's JavaScript (spec 19 budget).
+  experimental: { optimizePackageImports: ['@quad/ui'] },
   // `pnpm lint` runs ESLint for every package; the build only type-checks.
   eslint: { ignoreDuringBuilds: true },
   rewrites() {

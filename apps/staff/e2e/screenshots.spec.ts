@@ -11,6 +11,15 @@ test.describe('screenshots', () => {
     await saveScreenshot(page, testInfo, 'm0', 'staff-app');
   });
 
+  // docs/screenshots/landing/app-<width>-<scheme>.png, still (reduced motion), to set beside the
+  // prototype renders in the same folder.
+  test('/ (landing)', async ({ page }, testInfo) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto('/');
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+    await saveScreenshot(page, testInfo, 'landing', 'app');
+  });
+
   test('/design', async ({ page }, testInfo) => {
     await page.goto('/design');
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();

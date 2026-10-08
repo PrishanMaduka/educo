@@ -16,7 +16,7 @@ import { useTranslation } from 'react-i18next';
 
 import type { ReactNode } from 'react';
 
-import { useShellLabels } from '@/i18n';
+import { useShellLabels } from '@/i18n/client';
 import { PLACEHOLDER_SCHOOL, PLACEHOLDER_USER } from '@/lib/placeholders';
 
 /** The staff portal's side bar, top bar and search around every /app page. */

@@ -1,2 +1,59 @@
 @import 'tailwindcss';
 @import '@quad/ui/app.css';
+
+/* Public site (spec 19). next/font gives Fraunces a generated family name, set on the (public) layout. */
+@theme inline {
+  --font-accent: var(--font-fraunces), Georgia, 'Times New Roman', serif;
+}
+
+@theme {
+  /* Kites and hearts bob gently in the illustrations; used with motion-safe: only. */
+  --animate-bob: quad-bob 5s ease-in-out infinite;
+  @keyframes quad-bob {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-6px);
+    }
+  }
+}
+
+/* Watercolour washes multiply in light mode and blend normally at dusk (the wc-blend token). */
+@utility wc-blend {
+  mix-blend-mode: var(--quad-wc-blend);
+}
+
+/*
+ * The band's steps fade and rise as they scroll into view, without JavaScript (CSS scroll-driven
+ * animation). Browsers without it, and reduced motion, show them as they are.
+ */
+@keyframes quad-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+}
+
+@utility reveal-on-scroll {
+  @media (prefers-reduced-motion: no-preference) {
+    @supports (animation-timeline: view()) {
+      animation: quad-reveal linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 40%;
+    }
+  }
+}
+
+/* Section links land below the sticky top bar; smooth unless the visitor asked for less motion. */
+@layer base {
+  html:has([data-site='public']) {
+    scroll-padding-top: 80px;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    html:has([data-site='public']) {
+      scroll-behavior: smooth;
+    }
+  }
+}

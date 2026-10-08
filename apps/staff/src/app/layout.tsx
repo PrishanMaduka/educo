@@ -1,16 +1,17 @@
-import { themeBootstrapScript } from '@quad/ui/shell';
+import { themeBootstrapScript } from '@quad/ui/theme';
 import { Figtree } from 'next/font/google';
 
 import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from 'react';
 
-import { I18nProvider, t } from '@/i18n';
+import { t } from '@/i18n';
 
 import './globals.css';
 
+// Static weights, as the prototypes load them; 900 is for the public site's headings.
 const figtree = Figtree({
   subsets: ['latin'],
-  weight: ['400', '500', '600', '700', '800'],
+  weight: ['400', '500', '600', '700', '800', '900'],
   variable: '--font-figtree',
   display: 'swap',
 });
@@ -25,6 +26,10 @@ export const viewport: Viewport = {
   viewportFit: 'cover',
 };
 
+/**
+ * The root layout. Translations reach client components through `I18nProvider` in the portal's
+ * own layouts, so the public pages load no i18n code in the browser.
+ */
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     // The inline script sets data-theme before paint, so React must not complain that <html> differs.
@@ -32,9 +37,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeBootstrapScript }} />
       </head>
-      <body>
-        <I18nProvider>{children}</I18nProvider>
-      </body>
+      <body>{children}</body>
     </html>
   );
 }

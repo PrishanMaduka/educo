@@ -168,11 +168,4 @@ test.describe('staff shell', () => {
       }
     }
   });
-
-  test('/ is the landing placeholder with a link to the portal', async ({ page }) => {
-    await page.goto('/');
-    await expect(page.getByText('Quad: the landing page arrives in M1b')).toBeVisible();
-    await page.getByRole('link', { name: 'Open the staff portal' }).click();
-    await expect(page).toHaveURL(/\/app$/);
-  });
 });
