@@ -1,0 +1,903 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quad design system</title>
+<meta name="description" content="The shared design system for the Quad staff portal, platform console and parent app: tokens, type, components and the school brand colour.">
+<link rel="icon" href="brand/quad-mark.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Figtree:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="system/tokens.css">
+<script>try { const t = localStorage.getItem('quad-system-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
+<style>
+/* Page layout: the app shell itself (navy side bar, translucent top bar, cream canvas) so the page doubles as a sample. */
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:84px}
+body{margin:0;background:var(--canvas);color:var(--ink);font:14.5px/1.55 var(--f-body);-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+a{color:var(--brand-text);text-underline-offset:3px}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+[hidden]{display:none!important}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.skip{position:absolute;left:12px;top:-60px;z-index:100;background:var(--surface);color:var(--ink);padding:10px 14px;border-radius:var(--r-sm);box-shadow:var(--shadow-lg);font-weight:700}
+.skip:focus{top:12px}
+.num{font-variant-numeric:tabular-nums}
+h1,h2,h3,h4{font-family:var(--f-display);margin:0;letter-spacing:-.02em;text-wrap:balance;font-weight:800}
+p{margin:0}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}html{scroll-behavior:auto}}
+
+.shell{display:grid;grid-template-columns:256px minmax(0,1fr);min-height:100vh;background:linear-gradient(90deg,var(--rail) 256px,transparent 256px)}
+.side{position:sticky;top:0;height:100vh;background:var(--rail);color:var(--rail-ink);display:flex;flex-direction:column;padding:18px 12px;overflow-y:auto}
+.side .logo{display:flex;align-items:center;gap:10px;padding:4px 10px 18px;color:var(--rail-ink);text-decoration:none}
+.side .logo svg{width:30px;height:30px;flex:none}
+.side .logo b{font:800 21px/1 var(--f-display);letter-spacing:-.03em}
+.side .logo small{display:block;font-size:11.5px;color:var(--rail-ink-2);font-weight:600;margin-top:3px}
+.navlabel{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--rail-ink-2);padding:14px 12px 6px}
+.side nav a{display:flex;align-items:center;gap:11px;padding:8px 12px;border-radius:var(--r-pill);color:var(--rail-ink);text-decoration:none;font-weight:600;font-size:14px}
+.side nav a:hover{background:var(--rail-2)}
+.side nav a.on{background:var(--rail-active);color:var(--rail-active-ink)}
+.side nav a svg{width:18px;height:18px;flex:none;opacity:.9}
+.side nav .count{margin-left:auto;font-size:11.5px;font-weight:800;background:rgba(255,255,255,.12);border-radius:var(--r-pill);padding:1px 8px}
+.side .foot{margin-top:auto;border-top:1px solid var(--rail-line);padding:14px 10px 0;display:flex;gap:10px;align-items:center;font-size:12.5px;color:var(--rail-ink-2)}
+.side .foot b{color:var(--rail-ink);display:block;font-size:13px}
+.side .foot .av{width:34px;height:34px}
+
+.main{min-width:0;display:flex;flex-direction:column}
+.top{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:12px;padding:12px 28px;background:color-mix(in srgb,var(--canvas) 86%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.top .crumb{font-weight:700;font-size:13px;color:var(--ink-3)}
+.top .crumb b{color:var(--ink)}
+.top .grow{flex:1}
+.content{padding:28px;max-width:1240px;width:100%;display:flex;flex-direction:column;gap:56px}
+.menu-btn{display:none}
+
+/* Page head and sections */
+.eyebrow{font-size:11.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.sec{display:flex;flex-direction:column;gap:20px}
+.sec-h{display:flex;flex-direction:column;gap:6px;max-width:760px}
+.sec-h h2{font-size:30px;line-height:1.08}
+.sec-h p{color:var(--ink-2)}
+.sub{font:800 18px/1.2 var(--f-display);letter-spacing:-.015em;margin:8px 0 2px}
+.note{font-size:13px;color:var(--ink-3)}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:22px;box-shadow:var(--shadow-sm);min-width:0}
+.row{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:18px}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:18px}
+
+/* ---------- Components (the reference look; each app's prototype restyles its own classes to match) ---------- */
+/* Buttons: pills. Primary = school brand, secondary = outlined, ghost, danger; 36 px (md) and 30 px (sm); 44 px touch on phones */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:40px;padding:0 18px;border-radius:var(--r-pill);border:1.5px solid var(--line-strong);background:var(--surface);color:var(--ink);font-weight:700;font-size:14px;white-space:nowrap;transition:background .15s,border-color .15s,transform .15s}
+.btn:hover{background:var(--surface-2);border-color:var(--field-line)}
+.btn:active{transform:translateY(1px)}
+.btn svg{width:17px;height:17px;flex:none}
+.btn.primary{background:var(--brand-fill);border-color:var(--brand-fill);color:var(--brand-ink)}
+.btn.primary:hover{background:var(--brand-fill-strong);border-color:var(--brand-fill-strong)}
+.btn.ghost{background:transparent;border-color:transparent}
+.btn.ghost:hover{background:var(--surface-2)}
+.btn.danger{background:var(--bad);border-color:var(--bad);color:var(--surface)}
+.btn.danger-soft{background:var(--bad-soft);border-color:transparent;color:var(--bad)}
+.btn.sm{height:32px;padding:0 13px;font-size:13px}
+.btn.icon{width:40px;padding:0}
+.btn.sm.icon{width:32px}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.btn.on-navy{background:transparent;border-color:var(--navy-line);color:var(--on-navy)}
+.btn.on-navy:hover{background:var(--navy-2)}
+.btn.primary.on-dark{background:var(--rail-active);border-color:var(--rail-active);color:var(--rail-active-ink)}
+
+/* Fields */
+.field{display:flex;flex-direction:column;gap:6px;min-width:0}
+.field label,.field .lbl{font-size:13px;font-weight:700;color:var(--ink-2)}
+.field .hint{font-size:12.5px;color:var(--ink-3)}
+.field .err{font-size:12.5px;color:var(--bad);font-weight:600}
+.input{height:42px;border:1.5px solid var(--field-line);background:var(--surface);border-radius:var(--r-sm);padding:0 13px;width:100%;min-width:0}
+textarea.input{height:auto;min-height:88px;padding:10px 13px;resize:vertical}
+.input:hover{border-color:var(--ink-3)}
+.input:focus{outline:none;border-color:var(--focus);box-shadow:0 0 0 3px color-mix(in srgb,var(--focus) 25%,transparent)}
+.input.bad{border-color:var(--bad)}
+.input::placeholder{color:var(--ink-3)}
+select.input{appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--ink-2) 50%),linear-gradient(135deg,var(--ink-2) 50%,transparent 50%);background-position:calc(100% - 18px) 18px,calc(100% - 13px) 18px;background-size:5px 5px;background-repeat:no-repeat;padding-right:34px}
+.check{display:flex;gap:10px;align-items:flex-start;font-size:14px;cursor:pointer}
+.check input{appearance:none;width:20px;height:20px;border:1.5px solid var(--field-line);border-radius:6px;background:var(--surface);margin:1px 0 0;flex:none;display:grid;place-items:center;cursor:pointer}
+.check input[type=radio]{border-radius:50%}
+.check input:checked{background:var(--brand-fill);border-color:var(--brand-fill)}
+.check input[type=checkbox]:checked::after{content:"";width:10px;height:6px;border:2.5px solid var(--brand-ink);border-top:0;border-right:0;transform:translateY(-1px) rotate(-45deg)}
+.check input[type=radio]:checked::after{content:"";width:8px;height:8px;border-radius:50%;background:var(--brand-ink)}
+.check small{display:block;color:var(--ink-3);font-size:12.5px}
+.switch{appearance:none;width:42px;height:24px;border-radius:var(--r-pill);background:var(--line-strong);position:relative;cursor:pointer;flex:none;border:0;transition:background .2s}
+.switch::after{content:"";position:absolute;left:3px;top:3px;width:18px;height:18px;border-radius:50%;background:var(--surface);box-shadow:var(--shadow-sm);transition:transform .2s}
+.switch:checked{background:var(--brand-fill)}
+.switch:checked::after{transform:translateX(18px);background:var(--brand-ink)}
+.setrow{display:flex;gap:14px;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px dashed var(--line-strong)}
+.setrow:last-child{border-bottom:0}
+.setrow b{display:block;font-size:14px}.setrow small{color:var(--ink-3);font-size:12.5px}
+
+/* Segmented control and tabs */
+.seg{display:inline-flex;background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r-pill);padding:3px;gap:2px;max-width:100%;overflow-x:auto;scrollbar-width:none}
+.seg button{border:0;background:none;height:32px;padding:0 14px;border-radius:var(--r-pill);font-weight:700;font-size:13px;color:var(--ink-2);white-space:nowrap}
+.seg button[aria-pressed=true]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow-sm),0 0 0 1px var(--line)}
+.seg button .n{color:var(--ink-3);font-weight:600;margin-left:4px}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:none}
+.tabs button{border:0;background:none;padding:10px 12px 11px;font-weight:700;color:var(--ink-3);border-bottom:2.5px solid transparent;margin-bottom:-1px;white-space:nowrap;font-size:14px}
+.tabs button:hover{color:var(--ink)}
+.tabs button[aria-selected=true]{color:var(--ink);border-color:var(--brand-text)}
+.tabs .n{display:inline-block;margin-left:6px;font-size:11.5px;background:var(--surface-2);border-radius:var(--r-pill);padding:0 7px;color:var(--ink-2)}
+
+/* Chips (filters), pills (status), badges (counts), tags (categories) */
+.chip{display:inline-flex;align-items:center;gap:6px;height:32px;border:1.5px solid var(--line-strong);background:var(--surface);border-radius:var(--r-pill);padding:0 13px;font-size:13px;font-weight:700;color:var(--ink-2)}
+.chip[aria-pressed=true]{background:var(--ink);border-color:var(--ink);color:var(--surface)}
+.chip .n{color:var(--ink-3);font-weight:600}
+.chip[aria-pressed=true] .n{color:var(--surface);opacity:.85}
+.chip .x{margin-left:2px;width:18px;height:18px;border-radius:50%;display:grid;place-items:center;background:var(--surface-2);color:var(--ink-2);border:0;padding:0}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:800;padding:3px 10px;border-radius:var(--r-pill);white-space:nowrap;line-height:1.4}
+.pill::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.pill.good{background:var(--good-soft);color:var(--good)}.pill.warn{background:var(--warn-soft);color:var(--warn)}
+.pill.bad{background:var(--bad-soft);color:var(--bad)}.pill.info{background:var(--info-soft);color:var(--info)}
+.pill.muted{background:var(--surface-2);color:var(--ink-2)}
+.pill.brand{background:var(--brand-soft);color:var(--brand-text)}
+.badge{display:inline-grid;place-items:center;min-width:22px;height:22px;padding:0 7px;border-radius:var(--r-pill);font-size:12px;font-weight:800;background:var(--bad);color:var(--surface)}
+.badge.brand{background:var(--brand-fill);color:var(--brand-ink)}
+.badge.quiet{background:var(--surface-2);color:var(--ink-2)}
+.tag{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;padding:4px 11px;border-radius:var(--r-pill)}
+.tag.lime{background:var(--lime-soft);color:var(--lime-ink)}.tag.pink{background:var(--pink-soft);color:var(--pink-ink)}
+.tag.sky{background:var(--sky-soft);color:var(--sky-ink)}.tag.orange{background:var(--orange-soft);color:var(--orange-ink)}
+.mark{box-shadow:inset 0 -.32em 0 var(--gold-soft);border-radius:2px}
+
+/* Cards */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);min-width:0;overflow:hidden}
+.card-h{display:flex;align-items:center;gap:10px;padding:16px 20px;border-bottom:1px dashed var(--line-strong)}
+.card-h h3{flex:1;font-size:17px}
+.card-b{padding:16px 20px}
+.story{position:relative;overflow:hidden;background:var(--navy);color:var(--on-navy);border-radius:var(--r-lg);padding:30px 32px 32px;display:flex;flex-direction:column;gap:12px;isolation:isolate}
+:root[data-theme="dark"] .story{background:var(--navy-2);box-shadow:inset 0 0 0 1px var(--navy-line)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .story{background:var(--navy-2);box-shadow:inset 0 0 0 1px var(--navy-line)}}
+.story .eyebrow{color:var(--on-navy-3)}
+.story h3{font-size:clamp(30px,4.2vw,46px);line-height:1;letter-spacing:-.035em;max-width:16ch}
+.story h3 em{font-style:normal;background:var(--lime);color:var(--navy);border-radius:var(--r-pill);padding:0 .28em;display:inline-block;transform:rotate(-2deg)}
+.story p{color:var(--on-navy-2);max-width:60ch;font-size:15.5px}
+.story p b{color:var(--on-navy)}
+.story .row{margin-top:6px}
+.story .doo{position:absolute;z-index:-1;pointer-events:none}
+.story .todo{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px}
+.story .todo span{display:inline-flex;align-items:center;gap:8px;background:var(--navy-2);border:1px solid var(--navy-line);border-radius:var(--r-pill);padding:5px 12px 5px 6px;font-size:13px;font-weight:700;color:var(--on-navy)}
+.story .todo i{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:11px;font-weight:800;color:var(--navy)}
+
+/* Stat tiles */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr));gap:14px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;display:flex;flex-direction:column;gap:4px;box-shadow:var(--shadow-sm)}
+.stat .top-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.stat .l{font-size:13px;font-weight:700;color:var(--ink-2)}
+.stat .ic{width:34px;height:34px;border-radius:11px;display:grid;place-items:center}
+.stat .ic svg{width:18px;height:18px}
+.stat .v{font:800 32px/1.05 var(--f-display);letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.stat .d{font-size:12.5px;color:var(--ink-3);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.up{color:var(--good);font-weight:800}.down{color:var(--bad);font-weight:800}
+
+/* Table */
+.tbl-wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th{text-align:left;font-size:11.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);background:var(--surface-2);padding:10px 16px;white-space:nowrap}
+td{padding:11px 16px;border-top:1px solid var(--line);vertical-align:middle}
+tr.click{cursor:pointer}
+tr.click:hover td{background:color-mix(in srgb,var(--brand-soft) 60%,var(--surface))}
+tr[aria-selected=true] td{background:var(--brand-soft)}
+td.r,th.r{text-align:right}
+.who{display:flex;align-items:center;gap:11px;min-width:0}
+.who .av{width:34px;height:34px}
+.who b{display:block;font-weight:700}
+.who small{color:var(--ink-3);font-size:12.5px}
+.av{border-radius:50%;flex:none;display:block;overflow:hidden}
+.tbl-foot{display:flex;align-items:center;gap:10px;padding:12px 16px;border-top:1px solid var(--line);font-size:13px;color:var(--ink-3)}
+@media (max-width:640px){.hide-sm{display:none}}
+
+/* List rows */
+.list{display:flex;flex-direction:column}
+.li{display:flex;gap:12px;align-items:center;padding:12px 20px;border-top:1px solid var(--line)}
+.li:first-child{border-top:0}
+.li .ic{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;flex:none}
+.li .ic svg{width:19px;height:19px}
+.li .m{flex:1;min-width:0}
+.li .m b{display:block;font-weight:700}
+.li .m small{color:var(--ink-3);font-size:13px}
+.li time{font-size:12.5px;color:var(--ink-3);white-space:nowrap}
+
+/* Progress and the day ring */
+.progress{height:10px;background:var(--surface-2);border-radius:var(--r-pill);overflow:hidden;box-shadow:inset 0 0 0 1px var(--line)}
+.progress i{display:block;height:100%;border-radius:inherit;background:var(--c5)}
+.prog-row{display:flex;flex-direction:column;gap:6px}
+.prog-row .row{justify-content:space-between;font-size:13px;font-weight:700}
+.ring{position:relative;width:132px;height:132px;flex:none}
+.ring > svg{width:100%;height:100%}
+.ring .c{position:absolute;inset:18px;border-radius:50%;overflow:hidden}
+
+/* Drawer, dialog, toast, empty state */
+.scrim{position:fixed;inset:0;background:var(--scrim);opacity:0;pointer-events:none;transition:opacity .2s;z-index:60}
+.scrim.on{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(520px,100vw);background:var(--canvas);z-index:61;display:flex;flex-direction:column;transform:translateX(102%);transition:transform .26s cubic-bezier(.2,.8,.2,1);box-shadow:var(--shadow-lg);border-radius:var(--r-lg) 0 0 var(--r-lg);visibility:hidden}
+.drawer.on{transform:none;visibility:visible}
+.drawer-preview{position:relative;transform:none;visibility:visible;width:100%;max-width:520px;box-shadow:var(--shadow);border:1px solid var(--line);border-radius:var(--r-lg);z-index:auto;inset:auto}
+.dr-h{display:flex;gap:14px;align-items:flex-start;padding:20px 22px;background:var(--surface);border-bottom:1px solid var(--line);border-radius:inherit;border-bottom-left-radius:0;border-bottom-right-radius:0}
+.dr-h .tile{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;flex:none;background:var(--brand-soft);color:var(--brand-text)}
+.dr-h .tile svg{width:22px;height:22px}
+.dr-h .t{flex:1;min-width:0}
+.dr-h h3{font-size:22px;line-height:1.1}
+.dr-h p{font-size:13.5px;color:var(--ink-3);margin-top:3px}
+.dr-b{flex:1;overflow-y:auto;padding:20px 22px;display:flex;flex-direction:column;gap:16px}
+.dr-b .group{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px;display:flex;flex-direction:column;gap:14px}
+.dr-f{display:flex;justify-content:flex-end;gap:10px;padding:14px 22px;background:var(--surface);border-top:1px solid var(--line);border-radius:inherit;border-top-left-radius:0;border-top-right-radius:0}
+.form2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form2 .full{grid-column:1/-1}
+@media (max-width:600px){.form2{grid-template-columns:1fr}.drawer{border-radius:0}}
+.steps{display:flex;gap:6px;align-items:center;font-size:12.5px;font-weight:700;color:var(--ink-3);margin-top:10px;flex-wrap:wrap}
+.steps span{display:inline-flex;align-items:center;gap:6px}
+.steps i{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-style:normal;background:var(--surface-2);color:var(--ink-2);font-size:11.5px}
+.steps .on{color:var(--ink)}.steps .on i{background:var(--brand-fill);color:var(--brand-ink)}
+.steps .done i{background:var(--good-soft);color:var(--good)}
+.steps b{width:18px;height:2px;background:var(--line-strong);border-radius:2px}
+dialog.dlg{border:0;padding:0;border-radius:var(--r-lg);background:var(--surface);color:var(--ink);box-shadow:var(--shadow-lg);width:min(440px,calc(100vw - 32px))}
+dialog.dlg::backdrop{background:var(--scrim)}
+.dlg-card{border-radius:var(--r-lg);background:var(--surface);border:1px solid var(--line);max-width:440px;box-shadow:var(--shadow)}
+.dlg-b{padding:24px 24px 8px;display:flex;flex-direction:column;gap:10px}
+.dlg-b .tile{width:48px;height:48px;border-radius:16px;display:grid;place-items:center;background:var(--bad-soft);color:var(--bad)}
+.dlg-b h3{font-size:22px}
+.dlg-b p{color:var(--ink-2)}
+.dlg-f{display:flex;justify-content:flex-end;gap:10px;padding:18px 24px 22px;flex-wrap:wrap}
+.toasts{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);display:flex;flex-direction:column;gap:8px;z-index:90;align-items:center;width:max-content;max-width:calc(100vw - 32px)}
+.toast{display:inline-flex;align-items:center;gap:10px;background:var(--navy);color:var(--on-navy);border-radius:var(--r-pill);padding:10px 16px 10px 10px;font-weight:700;font-size:14px;box-shadow:var(--shadow-lg)}
+:root[data-theme="dark"] .toast{background:var(--on-navy);color:var(--navy)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .toast{background:var(--on-navy);color:var(--navy)}}
+.toast i{width:24px;height:24px;border-radius:50%;background:var(--lime);display:grid;place-items:center;color:var(--navy);flex:none}
+.toast i svg{width:14px;height:14px}
+.empty{display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;padding:34px 24px}
+.empty .art{width:150px;height:110px;position:relative}
+.empty h4{font-size:20px}
+.empty p{color:var(--ink-2);max-width:38ch}
+
+/* Top bar and side bar samples */
+.mini-shell{display:grid;grid-template-columns:200px 1fr;border-radius:var(--r);overflow:hidden;border:1px solid var(--line);box-shadow:var(--shadow);min-height:300px;background:var(--canvas)}
+.mini-shell .side{position:static;height:auto;padding:14px 10px;border-radius:0}
+.mini-shell .topbar{display:flex;align-items:center;gap:10px;padding:10px 16px;background:var(--surface);border-bottom:1px solid var(--line);flex-wrap:wrap}
+.search{flex:1;min-width:140px;display:flex;align-items:center;gap:8px;height:38px;border:1.5px solid var(--line);background:var(--surface-2);border-radius:var(--r-pill);padding:0 14px;color:var(--ink-3);font-size:13.5px}
+.search svg{width:16px;height:16px;flex:none}
+kbd{font:700 11px var(--f-body);border:1px solid var(--line-strong);border-bottom-width:2px;border-radius:6px;padding:0 6px;color:var(--ink-3);background:var(--surface)}
+.askq{display:inline-flex;align-items:center;gap:8px;height:38px;padding:0 14px 0 8px;border-radius:var(--r-pill);background:var(--navy);color:var(--on-navy);font-weight:700;font-size:13.5px;border:0}
+.askq .spark{width:24px;height:24px;border-radius:50%;background:var(--lime);display:grid;place-items:center;color:var(--navy)}
+.askq .spark svg{width:14px;height:14px}
+:root[data-theme="dark"] .askq{background:var(--navy-2);box-shadow:inset 0 0 0 1px var(--navy-line)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .askq{background:var(--navy-2);box-shadow:inset 0 0 0 1px var(--navy-line)}}
+.iconbtn{width:38px;height:38px;border-radius:50%;border:1.5px solid var(--line);background:var(--surface);display:grid;place-items:center;color:var(--ink-2);position:relative;flex:none}
+.iconbtn:hover{background:var(--surface-2);color:var(--ink)}
+.iconbtn svg{width:18px;height:18px}
+.iconbtn .dot{position:absolute;top:6px;right:7px;width:9px;height:9px;border-radius:50%;background:var(--pink);border:2px solid var(--surface)}
+
+/* Phone tab bar */
+.phone-demo{width:300px;max-width:100%;border-radius:30px;background:var(--canvas);border:1px solid var(--line);box-shadow:var(--shadow);overflow:hidden}
+.phone-demo .pbody{padding:16px;display:flex;flex-direction:column;gap:10px;min-height:120px}
+.ptabs{display:flex;justify-content:space-around;padding:8px 6px 14px;background:var(--surface);border-top:1px solid var(--line)}
+.ptabs button{border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11.5px;font-weight:700;color:var(--ink-3);min-width:56px;padding:4px 0}
+.ptabs .pi{width:44px;height:28px;border-radius:var(--r-pill);display:grid;place-items:center}
+.ptabs svg{width:20px;height:20px}
+.ptabs button[aria-current=page]{color:var(--ink)}
+.ptabs button[aria-current=page] .pi{background:var(--brand-fill);color:var(--brand-ink)}
+
+/* Chart */
+.chart{width:100%;height:auto;display:block;overflow:visible}
+#lines .chart{max-width:820px}
+.chart text{font:600 11.5px var(--f-body);fill:var(--ink-3)}
+.chart .gl{stroke:var(--line);stroke-width:1}
+.chart .target{stroke:var(--ink-2);stroke-dasharray:4 4;stroke-width:1.5}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--ink-2);font-weight:600}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+
+/* Swatches and tables of tokens */
+.sw-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,170px),1fr));gap:12px}
+.sw{border:1px solid var(--line);border-radius:var(--r-sm);overflow:hidden;background:var(--surface);min-width:0}
+.sw .chip-c{height:62px;border-bottom:1px solid var(--line);display:flex;align-items:flex-end;padding:6px 10px;font:800 20px var(--f-display)}
+.sw .meta{padding:8px 10px 10px;font-size:12px;color:var(--ink-3);display:flex;flex-direction:column;gap:1px}
+.sw .meta b{color:var(--ink);font-size:13px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:700;word-break:break-all}
+.sw .meta code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--ink-2)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.92em;background:var(--surface-2);border-radius:6px;padding:1px 5px}
+.map td,.map th{padding:8px 12px;font-size:13px}
+.map td:first-child{font-weight:700;white-space:nowrap}
+.map .dot{display:inline-block;width:14px;height:14px;border-radius:4px;vertical-align:-2px;margin-right:6px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.15)}
+.map td code{overflow-wrap:anywhere}
+
+/* Brand picker */
+.picker{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.picker button{display:inline-flex;align-items:center;gap:9px;height:40px;padding:0 15px 0 8px;border-radius:var(--r-pill);border:1.5px solid var(--line-strong);background:var(--surface);font-weight:700;font-size:13.5px}
+.picker button i{width:24px;height:24px;border-radius:50%;box-shadow:inset 0 0 0 1px rgba(0,0,0,.15)}
+.picker button[aria-pressed=true]{border-color:var(--ink);box-shadow:0 0 0 1px var(--ink)}
+.picker label{display:inline-flex;align-items:center;gap:8px;font-weight:700;font-size:13.5px;color:var(--ink-2)}
+.picker input[type=color]{width:40px;height:40px;border:1.5px solid var(--line-strong);border-radius:50%;padding:3px;background:var(--surface);cursor:pointer}
+.derived{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,230px),1fr));gap:10px}
+.derived div{display:flex;gap:10px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-sm);padding:9px 10px;font-size:12.5px;color:var(--ink-3);min-width:0}
+.derived i{width:34px;height:34px;border-radius:9px;flex:none;display:grid;place-items:center;font-style:normal;font-weight:800;font-size:13px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.12)}
+.derived b{display:block;color:var(--ink);font-size:13px}
+
+/* Type specimens */
+.type-row{display:grid;grid-template-columns:170px minmax(0,1fr);gap:16px;align-items:baseline;padding:14px 0;border-top:1px dashed var(--line-strong)}
+.type-row:first-child{border-top:0}
+.type-row small{color:var(--ink-3);font-size:12.5px;line-height:1.4}
+.type-row small b{display:block;color:var(--ink);font-size:13px}
+@media (max-width:640px){.type-row{grid-template-columns:1fr;gap:4px}}
+.rad-grid{display:flex;flex-wrap:wrap;gap:14px}
+.rad-grid div{width:110px;height:84px;background:var(--surface);border:1.5px solid var(--line-strong);display:grid;place-items:center;font-size:12.5px;font-weight:700;color:var(--ink-2);text-align:center;line-height:1.3}
+.space-grid{display:flex;flex-direction:column;gap:6px}
+.space-grid div{display:flex;align-items:center;gap:12px;font-size:12.5px;color:var(--ink-2);font-weight:600}
+.space-grid i{height:12px;background:var(--sky);border-radius:3px;display:block}
+.shadow-grid{display:flex;flex-wrap:wrap;gap:18px}
+.shadow-grid div{width:150px;height:96px;background:var(--surface);border-radius:var(--r);display:grid;place-items:center;font-size:12.5px;font-weight:700;color:var(--ink-2);border:1px solid var(--line)}
+
+/* Responsive shell */
+@media (max-width:900px){
+  .shell{grid-template-columns:1fr;background:none}
+  .side{position:fixed;left:0;top:0;bottom:0;width:272px;z-index:70;transform:translateX(-102%);transition:transform .25s;visibility:hidden}
+  .shell.menu-open .side{transform:none;visibility:visible}
+  .menu-btn{display:grid}
+  .top{padding:10px 16px}
+  .content{padding:20px 16px;gap:44px}
+  .mini-shell{grid-template-columns:1fr}
+  .mini-shell .side{display:none}
+  .story{padding:24px 20px}
+  .panel{padding:16px}
+  .story .doo{display:none}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="qMark" viewBox="0 0 30 30"><path d="M0 10A10 10 0 0 1 10 0A3.5 3.5 0 0 1 13.5 3.5V10A3.5 3.5 0 0 1 10 13.5H3.5A3.5 3.5 0 0 1 0 10Z" fill="#59C3FF"/><path d="M0 10A10 10 0 0 1 10 0A3.5 3.5 0 0 1 13.5 3.5V10A3.5 3.5 0 0 1 10 13.5H3.5A3.5 3.5 0 0 1 0 10Z" fill="#FF6FAE" transform="translate(30 0) scale(-1 1)"/><path d="M0 10A10 10 0 0 1 10 0A3.5 3.5 0 0 1 13.5 3.5V10A3.5 3.5 0 0 1 10 13.5H3.5A3.5 3.5 0 0 1 0 10Z" fill="#C8F169" transform="translate(0 30) scale(1 -1)"/><path d="M0 10A10 10 0 0 1 10 0A3.5 3.5 0 0 1 13.5 3.5V10A3.5 3.5 0 0 1 10 13.5H3.5A3.5 3.5 0 0 1 0 10Z" fill="#FF9B45" transform="translate(30 30) scale(-1 -1)"/></symbol>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/></symbol>
+    <symbol id="i-palette" viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 0 18c1.1 0 2-.9 2-2 0-.5-.2-1-.5-1.3-.3-.4-.5-.8-.5-1.3 0-1.1.9-2 2-2h2.4A4.6 4.6 0 0 0 22 9.8C22 6 17.5 3 12 3Z" fill="none" stroke="currentColor" stroke-width="1.9"/><circle cx="7.5" cy="11" r="1.4" fill="currentColor"/><circle cx="10" cy="7" r="1.4" fill="currentColor"/><circle cx="15" cy="7" r="1.4" fill="currentColor"/></symbol>
+    <symbol id="i-type" viewBox="0 0 24 24"><path d="M4 7V5h16v2M9 19h6M12 5v14" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></symbol>
+    <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="2" fill="none" stroke="currentColor" stroke-width="1.9"/><rect x="14" y="3" width="7" height="7" rx="2" fill="none" stroke="currentColor" stroke-width="1.9"/><rect x="3" y="14" width="7" height="7" rx="2" fill="none" stroke="currentColor" stroke-width="1.9"/><rect x="14" y="14" width="7" height="7" rx="2" fill="none" stroke="currentColor" stroke-width="1.9"/></symbol>
+    <symbol id="i-swap" viewBox="0 0 24 24"><path d="M4 8h13l-3-3M20 16H7l3 3" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5" fill="none" stroke="currentColor" stroke-width="1.9"/><path d="M2.5 20c.6-3.5 3.3-5.5 6.5-5.5s5.9 2 6.5 5.5M16 4.8a3.5 3.5 0 0 1 0 6.4M18 14.8c2 .7 3.2 2.5 3.5 5.2" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="m20 20-4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15zM10 21h4" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5Z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="1.9"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></symbol>
+    <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+    <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 3c.6 4.4 2.6 6.4 7 7-4.4.6-6.4 2.6-7 7-.6-4.4-2.6-6.4-7-7 4.4-.6 6.4-2.6 7-7Z" fill="currentColor"/></symbol>
+    <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="3" fill="none" stroke="currentColor" stroke-width="1.9"/><path d="M8 3v4M16 3v4M3.5 10h17" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 4 2.8 19.5h18.4z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/><path d="M12 10v4M12 17h.01" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
+    <symbol id="i-card" viewBox="0 0 24 24"><rect x="3" y="5.5" width="18" height="13" rx="3" fill="none" stroke="currentColor" stroke-width="1.9"/><path d="M3 10h18M7 15h3" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></symbol>
+    <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 20s-7.5-4.4-9-9.3C2 7.4 4.3 4.5 7.4 4.5c2 0 3.4 1.1 4.6 2.7 1.2-1.6 2.6-2.7 4.6-2.7 3.1 0 5.4 2.9 4.4 6.2-1.5 4.9-9 9.3-9 9.3Z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/></symbol>
+    <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5zM4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/></symbol>
+    <symbol id="i-chat" viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/></symbol>
+    <symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3" fill="none" stroke="currentColor" stroke-width="1.9"/><path d="m4 7 8 6 8-6" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/></symbol>
+    <symbol id="i-trend" viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8M15 7h6v6" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  </defs>
+</svg>
+
+<div class="shell" id="shell">
+  <aside class="side" id="side" aria-label="Design system sections">
+    <a class="logo" href="#top"><svg aria-hidden="true"><use href="#qMark"/></svg><div><b>quad</b><small>App design system</small></div></a>
+    <nav>
+      <p class="navlabel">Foundations</p>
+      <a href="#top" class="on" aria-current="true"><svg aria-hidden="true"><use href="#i-home"/></svg><span>Overview</span></a>
+      <a href="#colour"><svg aria-hidden="true"><use href="#i-palette"/></svg><span>Colour</span></a>
+      <a href="#brand"><svg aria-hidden="true"><use href="#i-swap"/></svg><span>School brand</span><span class="count">AA</span></a>
+      <a href="#type"><svg aria-hidden="true"><use href="#i-type"/></svg><span>Type</span></a>
+      <a href="#shape"><svg aria-hidden="true"><use href="#i-grid"/></svg><span>Space and shape</span></a>
+      <p class="navlabel">Components</p>
+      <a href="#actions"><svg aria-hidden="true"><use href="#i-check"/></svg><span>Buttons and fields</span></a>
+      <a href="#status"><svg aria-hidden="true"><use href="#i-spark"/></svg><span>Chips and status</span></a>
+      <a href="#cards"><svg aria-hidden="true"><use href="#i-book"/></svg><span>Cards and stats</span></a>
+      <a href="#data"><svg aria-hidden="true"><use href="#i-users"/></svg><span>Tables and lists</span></a>
+      <a href="#overlays"><svg aria-hidden="true"><use href="#i-chat"/></svg><span>Drawers and toasts</span></a>
+      <a href="#people"><svg aria-hidden="true"><use href="#i-heart"/></svg><span>Avatars</span></a>
+      <a href="#nav"><svg aria-hidden="true"><use href="#i-menu"/></svg><span>Navigation</span></a>
+      <a href="#charts"><svg aria-hidden="true"><use href="#i-trend"/></svg><span>Progress and charts</span></a>
+      <p class="navlabel">Code</p>
+      <a href="#mapping"><svg aria-hidden="true"><use href="#i-swap"/></svg><span>Token mapping</span></a>
+    </nav>
+    <div class="foot"><span class="av" id="footAv"></span><div><b>Design reference</b>Staff, console and parent</div></div>
+  </aside>
+
+  <div class="main">
+    <header class="top">
+      <button class="iconbtn menu-btn" id="menuBtn" aria-label="Open sections" aria-controls="side" aria-expanded="false"><svg aria-hidden="true"><use href="#i-menu"/></svg></button>
+      <p class="crumb">Quad · <b>Design system</b></p>
+      <span class="grow"></span>
+      <button class="iconbtn" id="themeBtn" aria-label="Switch to dark mode"><svg aria-hidden="true"><use href="#i-moon"/></svg></button>
+    </header>
+
+    <main class="content" id="main">
+      <!-- Overview: story first -->
+      <section class="sec" id="top" aria-labelledby="h-top">
+        <div class="story" id="heroStory">
+          <p class="eyebrow">Quad app design system · staff, console and parent</p>
+          <h1 id="h-top" style="font-size:clamp(34px,5vw,56px);line-height:.98;letter-spacing:-.04em;max-width:15ch">The landing page’s <em style="font-style:normal;background:var(--lime);color:var(--navy);border-radius:999px;padding:0 .26em;display:inline-block;transform:rotate(-2deg)">warmth</em>, tuned for a working day.</h1>
+          <p>Navy, cream and four bright accents, Bricolage headings and flat people, used calmly: cream pages, white cards, colour only where it means something (<b>status</b>, <b>categories</b> and the <b>school’s own colour</b>), stories before tables, and forms in right-side drawers.</p>
+          <div class="todo" aria-label="What this page covers">
+            <span><i style="background:var(--lime)">1</i>Tokens, light and dark</span>
+            <span><i style="background:var(--pink)">2</i>Any school colour, always AA</span>
+            <span><i style="background:var(--sky)">3</i>28 components</span>
+            <span><i style="background:var(--orange)">4</i>Old to new token map</span>
+          </div>
+          <div id="heroDoodles" aria-hidden="true"></div>
+        </div>
+        <div class="grid3">
+          <div class="panel"><p class="eyebrow">Calm canvas</p><h3 style="font-size:19px;margin:6px 0">Cream page, white cards, navy bar</h3><p style="color:var(--ink-2)">The page is quiet so the work stands out. Dashed dividers inside cards, soft shadows, 20 px corners and pill buttons.</p></div>
+          <div class="panel"><p class="eyebrow">Colour means something</p><h3 style="font-size:19px;margin:6px 0">Status, category or the school</h3><p style="color:var(--ink-2)">Green, orange, red and blue are only for status. Lime, pink, sky and orange tag categories and people. The school colour marks actions and where you are.</p></div>
+          <div class="panel"><p class="eyebrow">Two typefaces</p><h3 style="font-size:19px;margin:6px 0">Bricolage speaks, Figtree works</h3><p style="color:var(--ink-2)">Bricolage Grotesque for greetings, page titles, card titles and big numbers. Figtree for everything you read and fill in: tables, forms, labels.</p></div>
+        </div>
+      </section>
+
+      <!-- Colour -->
+      <section class="sec" id="colour" aria-labelledby="h-colour">
+        <div class="sec-h"><p class="eyebrow">Foundations</p><h2 id="h-colour">Colour</h2><p>Every colour is a token on <code>:root</code> in <code>design/system/tokens.css</code>, with a dark value. The values below are read live from the page, so they follow the theme and the school colour you pick.</p></div>
+        <div id="swatches"></div>
+      </section>
+
+      <!-- Brand swap -->
+      <section class="sec" id="brand" aria-labelledby="h-brand">
+        <div class="sec-h"><p class="eyebrow">Foundations</p><h2 id="h-brand">The school’s colour, always readable</h2><p>A school picks one colour in the console. Inside its staff portal and parent app it replaces the brand tokens. <code>system/brand.js</code> derives the rest so text passes WCAG AA for any colour, in light and dark. Pick a school to re-theme this whole page.</p></div>
+        <div class="panel" style="display:flex;flex-direction:column;gap:16px">
+          <div class="picker" id="picker" role="group" aria-label="Sample school colours"></div>
+          <div class="derived" id="derived" aria-live="polite"></div>
+          <div class="row" style="gap:10px">
+            <button class="btn primary"><svg aria-hidden="true"><use href="#i-plus"/></svg>Invite staff</button>
+            <button class="btn">Export list</button>
+            <span class="pill brand">Selected</span>
+            <span class="badge brand">12</span>
+            <a href="#brand">A link in the brand colour</a>
+            <label class="check"><input type="checkbox" checked> Keep me signed in</label>
+            <input class="switch" type="checkbox" role="switch" checked aria-label="Sample switch">
+          </div>
+          <ol class="note" style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px">
+            <li><b>Buttons and badges</b> use <code>brand-fill</code> with <code>brand-ink</code>. The ink is white when the colour can carry it (3:1 or more), otherwise navy. The fill then moves away from the ink, 1% at a time, until the text is 4.5:1.</li>
+            <li><b>Dark mode</b> first lifts a deep colour toward white until it stands out 3:1 from the card, so a maroon or navy school still has a visible button.</li>
+            <li><b>Text, links and icons</b> use <code>brand-text</code>: the colour moved toward black (light) or white (dark) until it is 4.5:1 on the canvas, cards, table headers and <code>brand-soft</code>.</li>
+            <li><b>The side bar</b> stays Quad navy for every school. Its active item uses <code>rail-active</code>, lifted until it stands out 3:1 from the bar.</li>
+            <li><b>Focus rings</b> are always <code>focus</code> blue, so they never vanish into a school’s colour.</li>
+          </ol>
+        </div>
+      </section>
+
+      <!-- Type -->
+      <section class="sec" id="type" aria-labelledby="h-type">
+        <div class="sec-h"><p class="eyebrow">Foundations</p><h2 id="h-type">Type</h2><p>Bricolage Grotesque (weights 600–800, optical size on) for display and headings; Figtree (400–800) for body and interface text. Numbers in tables and tiles use tabular figures.</p></div>
+        <div class="panel">
+          <div class="type-row"><small><b>Display</b>Bricolage 800 · 44/46 · −0.035em<br>Greetings, the parent Today title</small><p style="font:800 44px/1.05 var(--f-display);letter-spacing:-.035em">Good morning, <span class="mark">Prishan</span></p></div>
+          <div class="type-row"><small><b>Page title</b>Bricolage 800 · 30/34 · −0.025em</small><p style="font:800 30px/1.13 var(--f-display);letter-spacing:-.025em">Students</p></div>
+          <div class="type-row"><small><b>Section</b>Bricolage 800 · 22/26 · −0.02em<br>Drawer and dialog titles</small><p style="font:800 22px/1.18 var(--f-display);letter-spacing:-.02em">Invite a member of staff</p></div>
+          <div class="type-row"><small><b>Card title</b>Bricolage 700 · 17/22 · −0.015em</small><p style="font:700 17px/1.3 var(--f-display);letter-spacing:-.015em">Needs you today</p></div>
+          <div class="type-row"><small><b>Stat</b>Bricolage 800 · 32 · tabular</small><p class="num" style="font:800 32px/1 var(--f-display);letter-spacing:-.03em">1,181 <span style="font:600 14px var(--f-body);color:var(--ink-3);letter-spacing:0">of 1,248 in school</span></p></div>
+          <div class="type-row"><small><b>Body</b>Figtree 400 · 14.5/22 (web), 15/22 (phone)</small><p style="max-width:62ch">Ms. Okafor shared a moment: Maya painted the canteen mural, and her brushwork is getting really careful.</p></div>
+          <div class="type-row"><small><b>Label and button</b>Figtree 700 · 13–14</small><p style="font-weight:700;font-size:13.5px">Work email · Send invite · Save changes</p></div>
+          <div class="type-row"><small><b>Caption</b>Figtree 500 · 12.5 · ink-3</small><p style="font-size:12.5px;color:var(--ink-3)">Updated 2 minutes ago · Year 4 · 28 students</p></div>
+          <div class="type-row"><small><b>Eyebrow and table head</b>Figtree 800 · 11.5 · +0.1em · uppercase</small><p class="eyebrow">Needs you today</p></div>
+        </div>
+      </section>
+
+      <!-- Space, shape, elevation, focus -->
+      <section class="sec" id="shape" aria-labelledby="h-shape">
+        <div class="sec-h"><p class="eyebrow">Foundations</p><h2 id="h-shape">Space, shape, elevation and focus</h2><p>A 4 px grid. Corners get rounder as things get bigger, buttons and chips are pills, and shadows are soft and navy-tinted.</p></div>
+        <div class="grid2">
+          <div class="panel"><h3 class="sub">Spacing</h3><div class="space-grid" id="spaces"></div></div>
+          <div class="panel"><h3 class="sub">Radii</h3><div class="rad-grid">
+            <div style="border-radius:var(--r-xs)">r-xs 8<br>kbd, swatch</div><div style="border-radius:var(--r-sm)">r-sm 12<br>inputs, tiles</div><div style="border-radius:var(--r)">r 20<br>cards</div><div style="border-radius:var(--r-lg)">r-lg 28<br>story, drawer</div><div style="border-radius:var(--r-pill)">pill<br>buttons, chips</div></div></div>
+          <div class="panel"><h3 class="sub">Elevation</h3><div class="shadow-grid"><div style="box-shadow:var(--shadow-sm)">shadow-sm<br>tiles</div><div style="box-shadow:var(--shadow)">shadow<br>cards</div><div style="box-shadow:var(--shadow-lg)">shadow-lg<br>drawers, menus</div></div></div>
+          <div class="panel"><h3 class="sub">Focus ring</h3><p class="note" style="margin-bottom:12px">2 px <code>focus</code> blue outline, 2 px offset, on every interactive element. Inputs show a 3 px soft halo as well. Tab through these:</p><div class="row"><button class="btn primary">Focus me</button><button class="btn">Then me</button><input class="input" style="max-width:200px" aria-label="Sample input" placeholder="And me"></div></div>
+        </div>
+      </section>
+
+      <!-- Buttons and fields -->
+      <section class="sec" id="actions" aria-labelledby="h-actions">
+        <div class="sec-h"><p class="eyebrow">Components</p><h2 id="h-actions">Buttons and fields</h2><p>Buttons say what happens. One primary action per view; the rest are secondary or ghost. Fields have a visible label, a 3:1 border and errors in words.</p></div>
+        <div class="grid2">
+          <div class="panel" style="display:flex;flex-direction:column;gap:14px">
+            <h3 class="sub">Buttons</h3>
+            <div class="row"><button class="btn primary"><svg aria-hidden="true"><use href="#i-plus"/></svg>New application</button><button class="btn">Arrange cover</button><button class="btn ghost">Cancel</button></div>
+            <div class="row"><button class="btn danger">Suspend school</button><button class="btn danger-soft">Remove access</button><button class="btn" disabled>Saved</button></div>
+            <div class="row"><button class="btn primary sm">Send wishes</button><button class="btn sm">Remind</button><button class="btn icon" aria-label="Search"><svg aria-hidden="true"><use href="#i-search"/></svg></button><button class="btn sm icon" aria-label="Close"><svg aria-hidden="true"><use href="#i-x"/></svg></button></div>
+            <div class="row" style="background:var(--navy);padding:14px;border-radius:var(--r)"><button class="btn primary on-dark">Take attendance</button><button class="btn on-navy">New application</button></div>
+            <p class="note">On navy (story cards, the side bar) the primary button uses <code>rail-active</code>, which is lifted to stand out from navy.</p>
+          </div>
+          <div class="panel" style="display:flex;flex-direction:column;gap:14px">
+            <h3 class="sub">Inputs, select, checkbox, radio and switch</h3>
+            <div class="form2">
+              <div class="field"><label for="f1">First name</label><input class="input" id="f1" value="Nadeesha"></div>
+              <div class="field"><label for="f2">Work email</label><input class="input bad" id="f2" value="nadeesha@" aria-invalid="true" aria-describedby="f2e"><span class="err" id="f2e">Add the rest of the email, like name@school.edu.</span></div>
+              <div class="field"><label for="f3">Role</label><select class="input" id="f3"><option>Class teacher</option><option>Head of year</option><option>Finance officer</option></select></div>
+              <div class="field"><label for="f4">Starts on</label><input class="input" id="f4" type="text" value="Mon 12 Oct"><span class="hint">They get the invite now and access on this day.</span></div>
+              <div class="field full"><label for="f5">Note (optional)</label><textarea class="input" id="f5" placeholder="Anything they should know on day one"></textarea></div>
+            </div>
+            <div class="row" style="gap:20px">
+              <label class="check"><input type="checkbox" checked><span>Send a welcome email<small>From the school’s address</small></span></label>
+              <label class="check"><input type="radio" name="r1" checked><span>Teacher</span></label>
+              <label class="check"><input type="radio" name="r1"><span>Support staff</span></label>
+            </div>
+            <div class="setrow"><div><b>Two-step sign-in</b><small>Required for staff who see sensitive records</small></div><input class="switch" type="checkbox" role="switch" checked aria-label="Two-step sign-in"></div>
+            <div class="setrow"><div><b>Weekly digest</b><small>Fridays at 16:00</small></div><input class="switch" type="checkbox" role="switch" aria-label="Weekly digest"></div>
+          </div>
+          <div class="panel" style="display:flex;flex-direction:column;gap:14px">
+            <h3 class="sub">Segmented control</h3>
+            <div class="seg" role="group" aria-label="Show students"><button aria-pressed="true">All <span class="n">1,248</span></button><button aria-pressed="false">Present <span class="n">1,181</span></button><button aria-pressed="false">Absent <span class="n">67</span></button></div>
+            <h3 class="sub">Tabs</h3>
+            <div class="tabs" role="tablist" aria-label="Users and roles"><button role="tab" aria-selected="true">People <span class="n">86</span></button><button role="tab" aria-selected="false">Roles <span class="n">9</span></button><button role="tab" aria-selected="false">Invites <span class="n">3</span></button><button role="tab" aria-selected="false">Sign-in rules</button></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Chips and status -->
+      <section class="sec" id="status" aria-labelledby="h-status">
+        <div class="sec-h"><p class="eyebrow">Components</p><h2 id="h-status">Chips, status and tags</h2><p>Status always pairs a colour with a word and a dot, never colour alone. Categories use the four accents. Counts use badges.</p></div>
+        <div class="grid2">
+          <div class="panel" style="display:flex;flex-direction:column;gap:14px">
+            <h3 class="sub">Filter chips</h3>
+            <div class="row"><button class="chip" aria-pressed="true">Year 4 <span class="n">186</span></button><button class="chip" aria-pressed="false">Year 5 <span class="n">192</span></button><button class="chip" aria-pressed="false">Needs a conversation <span class="n">11</span></button><span class="chip">House: Ruby <button class="x" aria-label="Clear house filter"><svg width="10" height="10" aria-hidden="true"><use href="#i-x"/></svg></button></span></div>
+            <h3 class="sub">Status pills</h3>
+            <div class="row"><span class="pill good">Present</span><span class="pill warn">Late</span><span class="pill bad">Absent</span><span class="pill info">Invited</span><span class="pill muted">Archived</span><span class="pill brand">Your class</span></div>
+          </div>
+          <div class="panel" style="display:flex;flex-direction:column;gap:14px">
+            <h3 class="sub">Category tags</h3>
+            <div class="row"><span class="tag sky">Teaching</span><span class="tag lime">Care</span><span class="tag pink">Family</span><span class="tag orange">Student</span></div>
+            <h3 class="sub">Badges and the highlight</h3>
+            <div class="row"><span class="badge">3</span><span class="badge brand">12</span><span class="badge quiet">86</span><span>Every Friday the app brings the week <span class="mark">together</span>.</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Cards and stats -->
+      <section class="sec" id="cards" aria-labelledby="h-cards">
+        <div class="sec-h"><p class="eyebrow">Components</p><h2 id="h-cards">Cards and stat tiles</h2><p>Every page opens with a story card: one sentence about what is happening and what needs you, then two or three actions. Detail follows in plain cards.</p></div>
+        <div class="story">
+          <p class="eyebrow">Monday 5 October · Week 6 of Term 1</p>
+          <h3>Good morning, <em>Prishan</em></h3>
+          <p><b>1,181 of 1,248 students</b> are in school today. Year 5 is lowest at 85%. Term 1 fees are 78% collected, and <b>5 things</b> need you before assembly.</p>
+          <div class="row"><button class="btn primary on-dark"><svg aria-hidden="true"><use href="#i-check"/></svg>Take attendance</button><button class="btn on-navy">New application</button></div>
+          <div id="storyDoodles" aria-hidden="true"></div>
+        </div>
+        <div class="stats">
+          <div class="stat"><div class="top-row"><span class="l">In school today</span><span class="ic" style="background:var(--lime-soft);color:var(--lime-ink)"><svg aria-hidden="true"><use href="#i-users"/></svg></span></div><span class="v">94.6%</span><span class="d"><span class="up">▲ 1.2</span> on last week</span></div>
+          <div class="stat"><div class="top-row"><span class="l">Fees collected</span><span class="ic" style="background:var(--sky-soft);color:var(--sky-ink)"><svg aria-hidden="true"><use href="#i-card"/></svg></span></div><span class="v">78%</span><span class="d">$412,300 of $528,600</span></div>
+          <div class="stat"><div class="top-row"><span class="l">Need a conversation</span><span class="ic" style="background:var(--pink-soft);color:var(--pink-ink)"><svg aria-hidden="true"><use href="#i-alert"/></svg></span></div><span class="v">11</span><span class="d"><span class="down">▲ 3</span> since Friday</span></div>
+          <div class="stat"><div class="top-row"><span class="l">Thank-yous this week</span><span class="ic" style="background:var(--orange-soft);color:var(--orange-ink)"><svg aria-hidden="true"><use href="#i-heart"/></svg></span></div><span class="v">214</span><span class="d">From 167 families</span></div>
+        </div>
+        <div class="grid2">
+          <div class="card"><div class="card-h"><h3>Needs you today</h3><span class="badge">5</span></div>
+            <div class="list">
+              <div class="li"><span class="ic" style="background:var(--bad-soft);color:var(--bad)"><svg aria-hidden="true"><use href="#i-users"/></svg></span><div class="m"><b>15 lessons have no cover yet</b><small>3 staff are absent. First lesson at 07:50.</small></div><button class="btn sm">Arrange cover</button></div>
+              <div class="li"><span class="ic" style="background:var(--warn-soft);color:var(--warn)"><svg aria-hidden="true"><use href="#i-card"/></svg></span><div class="m"><b>6 invoices are overdue</b><small>A friendly reminder usually works.</small></div><button class="btn sm">Remind</button></div>
+              <div class="li"><span class="ic" style="background:var(--info-soft);color:var(--info)"><svg aria-hidden="true"><use href="#i-mail"/></svg></span><div class="m"><b>3 applicants waiting over two weeks</b><small>A call today keeps them warm.</small></div><button class="btn sm">Open pipeline</button></div>
+            </div></div>
+          <div class="card"><div class="card-h"><h3>Good news</h3><span class="tag lime">This week</span></div>
+            <div class="list">
+              <div class="li"><span class="ic" style="background:var(--pink-soft);color:var(--pink-ink)"><svg aria-hidden="true"><use href="#i-heart"/></svg></span><div class="m"><b>3 birthdays today</b><small>Zara (Year 4), Hiruni (Year 6), Sofia (Year 1)</small></div><button class="btn sm primary">Send wishes</button></div>
+              <div class="li"><span class="ic" style="background:var(--lime-soft);color:var(--lime-ink)"><svg aria-hidden="true"><use href="#i-trend"/></svg></span><div class="m"><b>4 students are improving</b><small>Their support plans are working</small></div><time>Today</time></div>
+              <div class="li"><span class="ic" style="background:var(--sky-soft);color:var(--sky-ink)"><svg aria-hidden="true"><use href="#i-spark"/></svg></span><div class="m"><b>Year 11 had the best week</b><small>97.5% attendance</small></div><time>Fri</time></div>
+            </div></div>
+        </div>
+      </section>
+
+      <!-- Table and lists -->
+      <section class="sec" id="data" aria-labelledby="h-data">
+        <div class="sec-h"><p class="eyebrow">Components</p><h2 id="h-data">Tables and list rows</h2><p>Dense but readable: 14 px rows with 11 px padding, uppercase heads on <code>surface-2</code>, tabular numbers, a tint on hover and on selected rows. On phones, columns hide or rows become cards.</p></div>
+        <div class="card">
+          <div class="card-h" style="flex-wrap:wrap"><h3>Year 4 · Emerald</h3><div class="search" style="max-width:260px;flex:1 1 200px"><svg aria-hidden="true"><use href="#i-search"/></svg><span>Search 28 students</span></div></div>
+          <div class="tbl-wrap" tabindex="0" role="region" aria-label="Year 4 Emerald students"><table>
+            <thead><tr><th scope="col"><span class="sr">Select</span></th><th scope="col">Student</th><th scope="col" class="hide-sm">Class teacher</th><th scope="col">Today</th><th scope="col" class="r hide-sm">Attendance</th><th scope="col" class="r hide-sm">Fees due</th></tr></thead>
+            <tbody id="tbody"></tbody>
+          </table></div>
+          <div class="tbl-foot"><span>Showing 4 of 28</span><span style="flex:1"></span><button class="btn sm">Previous</button><button class="btn sm">Next</button></div>
+        </div>
+      </section>
+
+      <!-- Overlays -->
+      <section class="sec" id="overlays" aria-labelledby="h-overlays">
+        <div class="sec-h"><p class="eyebrow">Components</p><h2 id="h-overlays">Drawers, dialogs, toasts and empty states</h2><p>Create and edit always open in a right-side drawer (full screen on phones). Dialogs are only for confirming something you cannot undo. Toasts say what happened.</p></div>
+        <div class="grid2">
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div class="drawer drawer-preview" aria-label="Drawer preview">
+              <div class="dr-h"><span class="tile"><svg aria-hidden="true"><use href="#i-users"/></svg></span><div class="t"><p class="eyebrow">Users and roles</p><h3>Invite a member of staff</h3><p>They get an email to set up their account.</p><div class="steps" aria-label="Step 1 of 3"><span class="on"><i>1</i>Details</span><b></b><span><i>2</i>Role</span><b></b><span><i>3</i>Check</span></div></div><button class="btn sm icon ghost" aria-label="Close preview"><svg aria-hidden="true"><use href="#i-x"/></svg></button></div>
+              <div class="dr-b"><div class="group"><div class="form2"><div class="field"><label for="d1">First name</label><input class="input" id="d1" value="Nadeesha"></div><div class="field"><label for="d2">Last name</label><input class="input" id="d2" value="Jayasinghe"></div><div class="field full"><label for="d3">Work email</label><input class="input" id="d3" value="nadeesha.jayasinghe@colombo-intl.lk"></div></div></div></div>
+              <div class="dr-f"><button class="btn ghost">Cancel</button><button class="btn primary">Continue to role<svg aria-hidden="true"><use href="#i-arrow"/></svg></button></div>
+            </div>
+            <div class="row"><button class="btn" id="openDrawer" aria-haspopup="dialog">Open the drawer</button><button class="btn" id="openDialog" aria-haspopup="dialog">Open the dialog</button><button class="btn" id="showToast">Show a toast</button></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:18px">
+            <div class="dlg-card"><div class="dlg-b"><span class="tile"><svg width="24" height="24" aria-hidden="true"><use href="#i-alert"/></svg></span><h3>Remove Ruwan’s access?</h3><p>He will be signed out of Greenfield International straight away. His records and messages stay.</p></div><div class="dlg-f"><button class="btn ghost">Keep access</button><button class="btn danger">Remove access</button></div></div>
+            <div class="row"><span class="toast" style="position:static"><i><svg aria-hidden="true"><use href="#i-check"/></svg></i>Invite sent to Nadeesha</span></div>
+            <div class="card"><div class="empty"><div class="art" id="emptyArt" aria-hidden="true"></div><h4>No overdue invoices</h4><p>Every family is up to date. We’ll show reminders here when something is late.</p><button class="btn">See all invoices</button></div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Avatars -->
+      <section class="sec" id="people" aria-labelledby="h-people">
+        <div class="sec-h"><p class="eyebrow">Components</p><h2 id="h-people">Avatars</h2><p>The flat illustrated people from the landing page appear in onboarding, empty states and the sample cast. Real people get their photo or flat initials: Quad never guesses what a real child or parent looks like.</p></div>
+        <div class="grid2">
+          <div class="panel"><h3 class="sub">Illustrated (sample cast, onboarding, empty states)</h3><div class="row" id="faceRow" style="gap:14px;margin-top:10px"></div></div>
+          <div class="panel"><h3 class="sub">Initials (real people), sizes 28 / 36 / 48 / 72</h3><div class="row" id="initRow" style="gap:14px;margin-top:10px;align-items:flex-end"></div>
+            <div class="row" style="margin-top:16px"><span style="display:flex">
+              <span class="av" id="st1" style="width:36px;height:36px;box-shadow:0 0 0 2.5px var(--surface)"></span><span class="av" id="st2" style="width:36px;height:36px;margin-left:-9px;box-shadow:0 0 0 2.5px var(--surface)"></span><span class="av" id="st3" style="width:36px;height:36px;margin-left:-9px;box-shadow:0 0 0 2.5px var(--surface)"></span></span><span class="note">Stacks overlap by a quarter, with a 2.5 px ring in the card colour.</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Navigation -->
+      <section class="sec" id="nav" aria-labelledby="h-nav">
+        <div class="sec-h"><p class="eyebrow">Components</p><h2 id="h-nav">Side bar, top bar and the phone tab bar</h2><p>The side bar is Quad navy for every school, with the school’s logo and name at the top. The top bar is translucent cream with search, Ask Quad, the theme and notifications. The parent app has four tabs.</p></div>
+        <div class="grid2">
+          <div class="mini-shell">
+            <div class="side" aria-label="Sample side bar"><div class="logo"><span style="width:30px;height:30px;border-radius:9px;background:var(--rail-active);color:var(--rail-active-ink);display:grid;place-items:center;font:800 12px var(--f-display)">GI</span><div><b style="font-size:15px">Greenfield</b><small>Staff portal</small></div></div>
+              <nav><a href="#nav" class="on"><svg aria-hidden="true"><use href="#i-home"/></svg><span>Today</span></a><a href="#nav"><svg aria-hidden="true"><use href="#i-users"/></svg><span>Students</span><span class="count">1,248</span></a><a href="#nav"><svg aria-hidden="true"><use href="#i-cal"/></svg><span>Timetable</span></a><a href="#nav"><svg aria-hidden="true"><use href="#i-chat"/></svg><span>Messages</span><span class="count">2</span></a></nav></div>
+            <div><div class="topbar"><div class="search"><svg aria-hidden="true"><use href="#i-search"/></svg><span>Search</span><kbd>Ctrl K</kbd></div><button class="askq"><span class="spark"><svg aria-hidden="true"><use href="#i-spark"/></svg></span>Ask Quad</button><button class="iconbtn" aria-label="Notifications, 3 new"><svg aria-hidden="true"><use href="#i-bell"/></svg><span class="dot"></span></button></div>
+              <div style="padding:18px"><p class="eyebrow">Students</p><p style="font:800 26px/1.1 var(--f-display);letter-spacing:-.025em;margin-top:4px">1,248 students</p><p class="note" style="margin-top:6px">94.6% in school today.</p></div></div>
+          </div>
+          <div class="row" style="align-items:flex-start;gap:18px">
+            <div class="phone-demo">
+              <div class="pbody"><p class="eyebrow">Today</p><p style="font:800 24px/1.05 var(--f-display);letter-spacing:-.03em">Maya’s day</p><p class="note">In school since 07:42 · 2 new moments</p></div>
+              <nav class="ptabs" aria-label="Sample parent app tabs"><button aria-current="page"><span class="pi"><svg aria-hidden="true"><use href="#i-home"/></svg></span>Today</button><button><span class="pi"><svg aria-hidden="true"><use href="#i-heart"/></svg></span>Circle</button><button><span class="pi"><svg aria-hidden="true"><use href="#i-spark"/></svg></span>Ask</button><button><span class="pi"><svg aria-hidden="true"><use href="#i-card"/></svg></span>Pay</button></nav>
+            </div>
+            <p class="note" style="flex:1;min-width:200px">The active tab is a brand-filled pill around the icon, with the label in ink. Tabs are 44 px or taller. The parent app shows Quad pink before sign-in and the school’s colour after.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Progress, ring, charts -->
+      <section class="sec" id="charts" aria-labelledby="h-charts">
+        <div class="sec-h"><p class="eyebrow">Components</p><h2 id="h-charts">Progress, the day ring and charts</h2><p>Charts use <code>c1</code>–<code>c5</code>, faint grids, a dashed target and the latest value labelled. Every tick is a value the data reaches.</p></div>
+        <div class="grid3">
+          <div class="panel" style="display:flex;flex-direction:column;gap:14px">
+            <h3 class="sub">Progress</h3>
+            <div class="prog-row"><div class="row"><span>Term 1 fees</span><span class="num">78%</span></div><div class="progress" role="progressbar" aria-label="Term 1 fees collected" aria-valuenow="78" aria-valuemin="0" aria-valuemax="100"><i style="width:78%"></i></div></div>
+            <div class="prog-row"><div class="row"><span>Setup</span><span class="num">3 of 6</span></div><div class="progress" role="progressbar" aria-label="Setup steps done" aria-valuenow="3" aria-valuemin="0" aria-valuemax="6"><i style="width:50%;background:var(--c3)"></i></div></div>
+            <div class="prog-row"><div class="row"><span>Seats used</span><span class="num">1,480 of 1,500</span></div><div class="progress" role="progressbar" aria-label="Seats used" aria-valuenow="1480" aria-valuemin="0" aria-valuemax="1500"><i style="width:98.7%;background:var(--c4)"></i></div></div>
+          </div>
+          <div class="panel" style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">
+            <div class="ring" id="ring" role="img" aria-label="Maya’s day: 4 of 7 periods done"></div>
+            <div style="flex:1;min-width:130px"><h3 class="sub" style="margin-top:0">Day ring</h3><p class="note">The parent app’s Today ring: one arc per period, filled as the day goes; the child’s photo or initials sit inside.</p></div>
+          </div>
+          <div class="panel"><h3 class="sub" style="margin-top:0">Attendance this week</h3><div id="bars"></div><div class="legend" style="margin-top:8px"><span><i style="background:var(--c3)"></i>In school</span><span><i style="background:none;border-top:2px dashed var(--ink-2);border-radius:0;height:0;vertical-align:3px"></i>Target 95%</span></div></div>
+          <div class="panel" style="grid-column:1/-1"><h3 class="sub" style="margin-top:0">Fees collected by year group, Term 1</h3><div id="lines"></div><div class="legend" id="lineLegend" style="margin-top:8px"></div></div>
+        </div>
+      </section>
+
+      <!-- Mapping -->
+      <section class="sec" id="mapping" aria-labelledby="h-mapping">
+        <div class="sec-h"><p class="eyebrow">Code</p><h2 id="h-mapping">Old tokens to new</h2><p>The names in <code>packages/tokens</code> stay, so components keep compiling; the values change. New tokens are listed after. Port: copy the values into <code>colors.ts</code>, add the new names, and replace <code>deriveBrand()</code> with the rules in <code>system/brand.js</code>.</p></div>
+        <div class="card"><div class="tbl-wrap" tabindex="0" role="region" aria-label="Old tokens to new"><table class="map">
+          <thead><tr><th scope="col">Token</th><th scope="col">Old light / dark</th><th scope="col">New light / dark</th><th scope="col">Notes</th></tr></thead>
+          <tbody id="mapBody"></tbody>
+        </table></div></div>
+        <div class="card"><div class="card-h"><h3>New tokens</h3></div><div class="tbl-wrap" tabindex="0" role="region" aria-label="New tokens"><table class="map">
+          <thead><tr><th scope="col">Token</th><th scope="col">Light / dark</th><th scope="col">Use</th></tr></thead>
+          <tbody id="newBody"></tbody>
+        </table></div></div>
+        <div class="grid2">
+          <div class="panel"><h3 class="sub" style="margin-top:0">Type, shape and elevation</h3><div class="tbl-wrap" tabindex="0" role="region" aria-label="Type, shape and elevation tokens"><table class="map"><tbody>
+            <tr><td>fontFamily.sans</td><td>Figtree (unchanged)</td></tr>
+            <tr><td>fontFamily.display <span class="pill info">new</span></td><td><code>"Bricolage Grotesque"</code>, self-hosted, optical size 12–96, weights 600–800</td></tr>
+            <tr><td>fontFamily.accent</td><td>Fraunces: retire (Bricolage covers display)</td></tr>
+            <tr><td>type.size.pageTitle</td><td>30 (Bricolage 800, −0.025em)</td></tr>
+            <tr><td>type.size.display <span class="pill info">new</span></td><td>44 (greetings, parent Today)</td></tr>
+            <tr><td>type.size.cardTitle</td><td>18 → 17 (Bricolage 700)</td></tr>
+            <tr><td>radius.card</td><td>16 → 20</td></tr>
+            <tr><td>radius.scene</td><td>24 → 28 (story cards, drawers, dialogs)</td></tr>
+            <tr><td>radius.input</td><td>12 (unchanged); buttons and chips stay pills</td></tr>
+            <tr><td>shadow.card / lg</td><td>navy-tinted, see <code>--shadow</code> and <code>--shadow-lg</code></td></tr>
+          </tbody></table></div></div>
+          <div class="panel"><h3 class="sub" style="margin-top:0">Rules that change in spec 03</h3><ul class="note" style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px">
+            <li>“Indigo side bar, coral actions, lilac highlights” becomes navy side bar, school-colour actions, lime highlights.</li>
+            <li>The side bar is no longer tinted by the school colour (<code>rail</code>, <code>rail-2</code> are fixed navy).</li>
+            <li>The console’s active item is Quad lime, not violet.</li>
+            <li><code>brand-ink</code> is chosen per colour (white or navy), not always white.</li>
+            <li>New <code>brand-text</code> for brand-coloured text and icons; never put text in <code>brand</code> directly.</li>
+            <li>Focus rings use <code>focus</code> blue instead of the brand.</li>
+            <li>The default school colour (no colour chosen) is Quad lime <code>#C8F169</code>. Schools that saved <code>#DD4A42</code> keep it.</li>
+            <li>Heat steps: pink for none, lime for a little to a lot (were coral and teal).</li>
+          </ul></div>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="drH" tabindex="-1">
+  <div class="dr-h"><span class="tile"><svg aria-hidden="true"><use href="#i-users"/></svg></span><div class="t"><p class="eyebrow">Users and roles</p><h3 id="drH">Invite a member of staff</h3><p>They get an email to set up their account.</p></div><button class="btn sm icon ghost" id="drClose" aria-label="Close"><svg aria-hidden="true"><use href="#i-x"/></svg></button></div>
+  <div class="dr-b"><div class="group"><div class="form2"><div class="field"><label for="e1">First name</label><input class="input" id="e1"></div><div class="field"><label for="e2">Last name</label><input class="input" id="e2"></div><div class="field full"><label for="e3">Work email</label><input class="input" id="e3" type="email"></div><div class="field full"><label for="e4">Role</label><select class="input" id="e4"><option>Class teacher</option><option>Head of year</option></select></div></div></div></div>
+  <div class="dr-f"><button class="btn ghost" id="drCancel">Cancel</button><button class="btn primary" id="drSend">Send invite</button></div>
+</aside>
+<dialog class="dlg" id="dlg" aria-labelledby="dlgH"><div class="dlg-b"><span class="tile"><svg width="24" height="24" aria-hidden="true"><use href="#i-alert"/></svg></span><h3 id="dlgH">Remove Ruwan’s access?</h3><p>He will be signed out straight away. His records and messages stay.</p></div><form method="dialog" class="dlg-f"><button class="btn ghost" value="keep">Keep access</button><button class="btn danger" value="remove">Remove access</button></form></dialog>
+<div class="toasts" id="toasts" role="status" aria-live="polite"></div>
+
+<script src="system/brand.js"></script>
+<script src="system/faces.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const {face, doodle, initials} = QuadFaces;
+const css = n => getComputedStyle(document.documentElement).getPropertyValue('--' + n).trim();
+
+/* Theme */
+const isDark = () => { const t = document.documentElement.dataset.theme; return t ? t === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches; };
+function paintTheme() { $('themeBtn').innerHTML = `<svg aria-hidden="true"><use href="#i-${isDark() ? 'sun' : 'moon'}"/></svg>`; $('themeBtn').setAttribute('aria-label', isDark() ? 'Switch to light mode' : 'Switch to dark mode'); paintAll(); }
+$('themeBtn').onclick = () => { const t = isDark() ? 'light' : 'dark'; document.documentElement.dataset.theme = t; try { localStorage.setItem('quad-system-theme', t); } catch (e) {} paintTheme(); };
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', paintTheme);
+
+/* Menu on phones */
+$('menuBtn').onclick = () => { const o = $('shell').classList.toggle('menu-open'); $('menuBtn').setAttribute('aria-expanded', o); if (o) $('side').querySelector('a').focus(); };
+$('side').addEventListener('click', e => { if (e.target.closest('a')) { $('shell').classList.remove('menu-open'); $('menuBtn').setAttribute('aria-expanded', 'false'); } });
+
+/* Scroll spy for the side bar */
+const links = [...document.querySelectorAll('#side nav a')];
+const spy = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) links.forEach(a => { const on = a.getAttribute('href') === '#' + e.target.id; a.classList.toggle('on', on); if (on) a.setAttribute('aria-current', 'true'); else a.removeAttribute('aria-current'); }); }), {rootMargin: '-30% 0px -65% 0px'});
+document.querySelectorAll('main > section').forEach(s => spy.observe(s));
+
+/* Swatches */
+const GROUPS = [
+  ['Surfaces and lines', 'Cream canvas, white cards. surface-2 is for table heads and quiet fills; surface-3 for pressed states.', [['canvas', 'Page background'], ['surface', 'Cards, drawers, inputs'], ['surface-2', 'Table heads, quiet fills'], ['surface-3', 'Pressed, selected'], ['line', 'Card borders, rows'], ['line-strong', 'Dashed dividers, chips'], ['field-line', 'Input borders, 3:1']]],
+  ['Text', 'All three pass 4.5:1 on canvas, surface and surface-2.', [['ink', 'Headings, body'], ['ink-2', 'Secondary text'], ['ink-3', 'Captions, labels']]],
+  ['Navy and the side bar', 'The same navy as the landing page. The bar stays navy for every school.', [['navy', 'Story cards, toasts'], ['navy-2', 'Raised on navy'], ['rail', 'Side bar'], ['rail-2', 'Side bar hover'], ['rail-ink', 'Side bar text'], ['rail-ink-2', 'Side bar labels'], ['rail-active', 'Active item (brand)']]],
+  ['School brand (live)', 'Derived from the colour picked under School brand. Text never uses brand-fill.', [['brand-raw', 'The school’s colour as saved'], ['brand-fill', 'Buttons, active tab'], ['brand-ink', 'Text on brand-fill'], ['brand-fill-strong', 'Hover'], ['brand-text', 'Links, icons, selected text'], ['brand-soft', 'Selected rows, tiles']]],
+  ['Accents', 'The four petals. For categories, people and illustrations, never for status. Text sits on the -soft tint in the -ink colour.', [['lime', 'Care, highlights'], ['lime-soft', 'Tint'], ['lime-ink', 'Text on tint'], ['pink', 'Family, parents'], ['pink-soft', 'Tint'], ['pink-ink', 'Text on tint'], ['sky', 'Teaching'], ['sky-soft', 'Tint'], ['sky-ink', 'Text on tint'], ['orange', 'Students, children'], ['orange-soft', 'Tint'], ['orange-ink', 'Text on tint']]],
+  ['Status', 'Only for state. Always with a word or an icon. Text 4.5:1 on its -soft and on cards.', [['good', 'Present, paid, done'], ['good-soft', ''], ['warn', 'Late, due soon'], ['warn-soft', ''], ['bad', 'Absent, overdue, errors'], ['bad-soft', ''], ['info', 'Invited, new, tips'], ['info-soft', '']]],
+  ['Charts and subjects', 'c1–c5 in this order. 3:1 or more on cards in both themes.', [['c1', 'Pink'], ['c2', 'Indigo'], ['c3', 'Sky'], ['c4', 'Orange'], ['c5', 'Green']]],
+  ['Highlight, heat and focus', 'gold is the historical name of the highlight; heat is the Family connection heatmap.', [['gold', 'Highlight'], ['gold-soft', 'Marker under a word'], ['gold-ink', 'Text on highlight'], ['heat-0', 'No contact'], ['heat-1', 'A little'], ['heat-2', 'Some'], ['heat-3', 'A lot'], ['focus', 'Focus ring']]]
+];
+const INK_FOR = {'brand-fill': 'brand-ink', 'brand-fill-strong': 'brand-ink', 'rail-active': 'rail-active-ink', rail: 'rail-ink', 'rail-2': 'rail-ink', navy: 'on-navy', 'navy-2': 'on-navy', 'lime-soft': 'lime-ink', 'pink-soft': 'pink-ink', 'sky-soft': 'sky-ink', 'orange-soft': 'orange-ink', 'good-soft': 'good', 'warn-soft': 'warn', 'bad-soft': 'bad', 'info-soft': 'info', 'brand-soft': 'brand-text', 'gold-soft': 'ink', 'heat-0': 'heat-0-ink', 'heat-1': 'heat-1-ink', 'heat-2': 'heat-2-ink', 'heat-3': 'heat-3-ink'};
+const toHex = v => { if (/^#/.test(v)) return v.toUpperCase(); const m = v.match(/[\d.]+/g); return m ? '#' + m.slice(0, 3).map(x => (+x).toString(16).padStart(2, '0')).join('').toUpperCase() : v; };
+function onColour(bg, name) { if (INK_FOR[name]) return `var(--${INK_FOR[name]})`; try { return QuadBrand.contrast(bg, '#101632') >= QuadBrand.contrast(bg, '#FFFFFF') ? '#101632' : '#FFFFFF'; } catch (e) { return 'var(--ink)'; } }
+function paintSwatches() {
+  $('swatches').innerHTML = GROUPS.map(([t, d, list]) => `<div style="margin-bottom:26px"><h3 class="sub">${t}</h3><p class="note" style="margin-bottom:12px">${d}</p><div class="sw-grid">${list.map(([n, use]) => { const v = toHex(css(n)); return `<div class="sw"><div class="chip-c" style="background:var(--${n});color:${onColour(v, n)}">Aa</div><div class="meta"><code>--${n}</code><b>${v}</b>${use ? `<span>${use}</span>` : ''}</div></div>`; }).join('')}</div></div>`).join('');
+}
+
+/* Brand picker */
+const SCHOOLS = [['Quad default', '#C8F169'], ['Greenfield International', '#1B7F53'], ['Harbour View School', '#7A1F3D'], ['Sunridge Academy', '#F2B705']];
+let pick = '#C8F169';
+try { pick = localStorage.getItem('quad-system-brand') || pick; } catch (e) {}
+function paintPicker() {
+  $('picker').innerHTML = SCHOOLS.map(([n, c]) => `<button type="button" aria-pressed="${c === pick}" data-c="${c}"><i style="background:${c}"></i>${n}</button>`).join('') + `<label>Any colour <input type="color" id="anyColour" value="${pick.toLowerCase()}" aria-label="Pick any school colour"></label>`;
+  $('picker').querySelectorAll('button').forEach(b => b.onclick = () => setBrand(b.dataset.c));
+  $('anyColour').oninput = e => setBrand(e.target.value.toUpperCase(), true);
+}
+function setBrand(c, keepPicker) { pick = c; try { localStorage.setItem('quad-system-brand', c); } catch (e) {} QuadBrand.applyBrand(c); if (!keepPicker) paintPicker(); else $('picker').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', b.dataset.c === c)); paintAll(); }
+function paintDerived() {
+  const d = QuadBrand.deriveBrand(pick, isDark() ? 'dark' : 'light');
+  const cell = (bg, fg, name, val, note) => `<div><i style="background:${bg};color:${fg}">Aa</i><span><b>${name}</b>${val}${note ? ` · ${note}` : ''}</span></div>`;
+  $('derived').innerHTML = cell(d.brand, onColour(d.brand), 'The school’s colour', d.brand, 'decoration only')
+    + cell(d.fill, d.ink, 'brand-fill + brand-ink', `${d.fill} / ${d.ink === '#FFFFFF' ? 'white' : 'navy'}`, `${d.checks.ink}:1`)
+    + cell(d.fillStrong, d.ink, 'brand-fill-strong', d.fillStrong, 'hover')
+    + cell(css('surface'), d.text, 'brand-text', d.text, `${d.checks.text}:1 or more`)
+    + cell(d.soft, d.text, 'brand-soft', d.soft, 'tint')
+    + cell(css('rail'), d.railActive, 'rail-active on the bar', d.railActive, `${d.checks.rail}:1 text`);
+}
+
+/* Spacing */
+$('spaces').innerHTML = [4, 8, 12, 16, 20, 24, 32, 40, 48].map(s => `<div><span class="num" style="width:28px">${s}</span><i style="width:${s * 3}px"></i><span>${{4: 'icon gaps', 8: 'chip gaps', 12: 'list gaps', 16: 'card padding (phone)', 20: 'card padding, grid gaps', 24: 'page padding', 32: 'story padding', 40: 'section gaps (phone)', 48: 'section gaps'}[s]}</span></div>`).join('');
+
+/* Illustrations */
+const fl = (k, c, l, t, s) => `<div class="doo" style="left:${l};top:${t};width:${s}px;height:${s}px">${doodle(k, c)}</div>`;
+$('heroDoodles').innerHTML = fl('star', 'var(--lime)', '86%', '12%', 34) + fl('kite', 'var(--orange)', '92%', '46%', 44) + fl('heart', 'var(--pink)', '78%', '70%', 24) + fl('cloud', 'var(--navy-line)', '70%', '20%', 60);
+$('storyDoodles').innerHTML = fl('sun', 'var(--orange)', '88%', '14%', 46) + fl('cloud', 'var(--navy-line)', '76%', '30%', 64) + fl('star', 'var(--lime)', '93%', '70%', 22);
+$('emptyArt').innerHTML = `<div style="position:absolute;left:34px;top:6px;width:84px;height:84px">${face('maya', {mood: 'laugh'})}</div>` + fl('star', 'var(--lime)', '4%', '10%', 26) + fl('coin', 'var(--orange)', '78%', '50%', 30) + fl('heart', 'var(--pink)', '82%', '4%', 22);
+$('faceRow').innerHTML = Object.keys(QuadFaces.PEEPS).map(k => `<figure style="margin:0;text-align:center;width:72px"><div style="width:64px;height:64px;margin:0 auto">${face(k)}</div><figcaption class="note" style="margin-top:6px;font-weight:700">${QuadFaces.PEEPS[k].name.split(',')[0]}</figcaption></figure>`).join('');
+$('initRow').innerHTML = [['Nadeesha Jayasinghe', 28], ['Ruwan Mendis', 36], ['Hiruni Fernando', 48], ['Kavindu Perera', 72]].map(([n, s]) => `<span class="av" style="width:${s}px;height:${s}px" title="${n}">${initials(n)}</span>`).join('');
+$('st1').innerHTML = face('okafor'); $('st2').innerHTML = face('priya'); $('st3').innerHTML = initials('Ruwan Mendis');
+$('footAv').innerHTML = face('okafor');
+
+/* Table */
+const ROWS = [['Maya Chen', null, 'Ms. Okafor', ['good', 'Present'], '97.8%', '$0'], ['Leo Martins', null, 'Ms. Okafor', ['warn', 'Late 08:10'], '91.2%', '$120'], ['Zara Ahmed', null, 'Ms. Okafor', ['bad', 'Absent'], '84.5%', '$0'], ['Kai Novak', null, 'Ms. Okafor', ['good', 'Present'], '99.1%', '$45']];
+$('tbody').innerHTML = ROWS.map(([n, f, t, [s, sl], a, fee], i) => `<tr class="click" tabindex="0" aria-selected="${i === 1}"><td><label class="check"><input type="checkbox" ${i === 1 ? 'checked' : ''} aria-label="Select ${n}"></label></td><td><div class="who"><span class="av">${f ? face(f) : initials(n)}</span><div><b>${n}</b><small>Year 4 · Emerald</small></div></div></td><td class="hide-sm">${t}</td><td><span class="pill ${s}">${sl}</span></td><td class="r num hide-sm">${a}</td><td class="r num hide-sm">${fee}</td></tr>`).join('');
+
+/* Ring */
+function paintRing() {
+  const segs = 7, done = 4, r = 58, cx = 66, gap = 7, step = 360 / segs, col = ['var(--c3)', 'var(--c1)', 'var(--c5)', 'var(--c4)'];
+  const pt = a => { const t = (a - 90) * Math.PI / 180; return `${(cx + r * Math.cos(t)).toFixed(2)} ${(cx + r * Math.sin(t)).toFixed(2)}`; };
+  const arc = (a0, a1) => `M${pt(a0)}A${r} ${r} 0 0 1 ${pt(a1)}`;
+  $('ring').innerHTML = `<svg viewBox="0 0 132 132" aria-hidden="true">${Array.from({length: segs}, (_, i) => `<path d="${arc(i * step + gap / 2, (i + 1) * step - gap / 2)}" fill="none" stroke="${i < done ? col[i] : 'var(--surface-3)'}" stroke-width="9" stroke-linecap="round"/>`).join('')}</svg><div class="c">${face('maya')}</div>`;
+}
+/* Charts: values the ticks reach; the latest point labelled */
+function paintBars() {
+  const D = [['Mon', 96], ['Tue', 95], ['Wed', 93], ['Thu', 94], ['Fri', 97]], W = 320, H = 170, L = 34, B = 26, top = 10, min = 90, max = 100;
+  const y = v => top + (H - top - B) * (1 - (v - min) / (max - min)), bw = (W - L) / D.length;
+  let s = `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Attendance this week: ${D.map(d => d[0] + ' ' + d[1] + '%').join(', ')}">`;
+  [90, 95, 100].forEach(v => s += `<line class="gl" x1="${L}" x2="${W}" y1="${y(v)}" y2="${y(v)}"/><text x="${L - 6}" y="${y(v) + 4}" text-anchor="end">${v}%</text>`);
+  D.forEach(([d, v], i) => { const x = L + i * bw + bw * .2, w = bw * .6; s += `<rect x="${x}" y="${y(v)}" width="${w}" height="${y(min) - y(v)}" rx="6" fill="var(--c3)" opacity="${i === D.length - 1 ? 1 : .55}"/><text x="${x + w / 2}" y="${H - 8}" text-anchor="middle">${d}</text>`; if (i === D.length - 1) s += `<text x="${x + w / 2}" y="${y(v) - 6}" text-anchor="middle" style="fill:var(--ink);font-weight:800">${v}%</text>`; });
+  s += `<line class="target" x1="${L}" x2="${W}" y1="${y(95)}" y2="${y(95)}"/></svg>`;
+  $('bars').innerHTML = s;
+}
+function paintLines() {
+  const S = [['Year 3', 'var(--c1)', [20, 42, 58, 71, 80]], ['Year 4', 'var(--c2)', [15, 35, 52, 66, 78]], ['Year 5', 'var(--c3)', [10, 26, 40, 55, 64]], ['Year 6', 'var(--c4)', [25, 45, 60, 70, 76]], ['Year 7', 'var(--c5)', [12, 30, 48, 62, 72]]];
+  const X = ['Wk 2', 'Wk 4', 'Wk 6', 'Wk 8', 'Wk 10'], W = 760, H = 220, L = 40, R = 70, B = 26, top = 12;
+  const x = i => L + (W - L - R) * i / (X.length - 1), y = v => top + (H - top - B) * (1 - v / 100);
+  let s = `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Fees collected by week 10: ${S.map(t => t[0] + ' ' + t[2][4] + '%').join(', ')}">`;
+  [0, 25, 50, 75, 100].forEach(v => s += `<line class="gl" x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}"/><text x="${L - 8}" y="${y(v) + 4}" text-anchor="end">${v}%</text>`);
+  X.forEach((t, i) => s += `<text x="${x(i)}" y="${H - 6}" text-anchor="middle">${t}</text>`);
+  S.forEach(([n, c, v]) => { s += `<polyline points="${v.map((p, i) => x(i) + ',' + y(p)).join(' ')}" fill="none" stroke="${c}" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/><circle cx="${x(4)}" cy="${y(v[4])}" r="4.5" fill="${c}" stroke="var(--surface)" stroke-width="2"/>`; });
+  const ends = S.map(([n, c, v]) => [n, v[4]]).sort((a, b) => b[1] - a[1]); let last = -99;
+  ends.forEach(([n, v]) => { let yy = Math.max(y(v) + 4, last + 14); last = yy; s += `<text x="${W - R + 10}" y="${yy}" style="fill:var(--ink-2);font-weight:700">${n} ${v}%</text>`; });
+  $('lines').innerHTML = s + '</svg>';
+  $('lineLegend').innerHTML = S.map(([n, c]) => `<span><i style="background:${c}"></i>${n}</span>`).join('');
+}
+
+/* Mapping tables */
+const MAP = [
+  ['canvas', '#FAF8F5 / #13142A', '#F7F5F0 / #0F1330', 'Cream, the landing page’s paper'],
+  ['surface', '#FFFFFF / #1B1D3A', '#FFFFFF / #171D45', ''],
+  ['surface-2', '#F6F3EF / #22254A', '#F0EEE7 / #1D2550', 'Table heads, quiet fills'],
+  ['line', '#ECE8E3 / #2E3260', '#E4E1D8 / #2A3266', ''],
+  ['line-strong', '#DCD6CF / #3D4277', '#CDC8BA / #3A4378', 'Dashed dividers, chips; inputs move to field-line'],
+  ['ink', '#1C1B2E / #F1F1FA', '#101632 / #F7F5F0', 'Navy text; cream in dark'],
+  ['ink-2', '#4E4C63 / #C4C5DD', '#3D4263 / #C9CBE0', ''],
+  ['ink-3', '#7D7A90 / #9395B5', '#5A5F7B / #A9ACC8', 'Now 5.4:1 on surface-2 (was 3.9:1)'],
+  ['brand', '#DD4A42 / #FF7A6E', 'school colour / same', 'Default Quad lime #C8F169. The raw colour, for decoration only'],
+  ['brand-strong', '#C23B34 / #FF978C', '= brand-fill-strong', 'Hover; derived'],
+  ['brand-soft', '#FDE7E5 / #3D1F2A', 'derived', 'brand 16% on surface (light), 20% (dark)'],
+  ['brand-ink', '#FFFFFF / #1B1D3A', 'derived: white or navy', 'White when the colour gives 3:1 or more, else navy'],
+  ['brand-fill', 'derived (darken to 4.5:1)', 'derived', 'Moves away from its ink until 4.5:1; dark mode lifts deep colours to 3:1 on cards first'],
+  ['brand-fill-strong', 'derived', 'derived', 'Fill 86%, moved further from the ink'],
+  ['rail', '#1F2559 / #0E0F22', '#101632 / #0A0D24', 'No longer tinted by the school colour'],
+  ['rail-2', '#2C3370 / #2C3370', '#1D2550 / #161C48', 'Hover'],
+  ['rail-ink', '#E6E7F5', '#F7F5F0', 'Both themes'],
+  ['rail-ink-2', '#A3A6CC', '#A9ACC8', 'Both themes'],
+  ['rail-active', 'brand / console #6D5AE6', 'derived / console #C8F169', 'Lifted to 3:1 on the bar; console is Quad lime with navy text'],
+  ['good / good-soft', '#1F8A5B #E3F4EC / #4CC992 #123326', '#16703F #DDF4E4 / #5FD394 #12382A', ''],
+  ['warn / warn-soft', '#B26A00 #FFF1DC / #F0B357 #3A2A10', '#A04A00 #FFE9D3 / #FFB066 #3D2610', ''],
+  ['bad / bad-soft', '#D13A3A #FDE6E6 / #FF7A7A #3D1A1E', '#C4234A #FFE3E9 / #FF7C9C #401A2A', ''],
+  ['info / info-soft', '#6D5AE6 #EEEAFE / #A99BFF #262046', '#0B67A8 #DDF0FF / #7CCBFF #12304F', 'Violet becomes blue'],
+  ['c1', '#E5534B / #FF7A6E coral', '#E0478A / #FF6FAE pink', 'Order keeps the greeting scenes working'],
+  ['c2', '#3B4AA8 / #7B8BF0 indigo', '#4048B8 / #8C93FF indigo', ''],
+  ['c3', '#8B7CF6 / #A99BFF lilac', '#1F8ACF / #59C3FF sky', ''],
+  ['c4', '#F2A93B / #F5B95A amber', '#D9640B / #FF9B45 orange', ''],
+  ['c5', '#2BB0A0 / #3CC7B5 teal', '#4E8A12 / #C8F169 green, lime', ''],
+  ['gold', '#8B7CF6 / #A99BFF lilac', '#C8F169 / #C8F169 lime', 'The highlight'],
+  ['gold-soft', '#EEEAFE / #262046', '#E6F6B5 / #41504E', 'Marker under a key word']
+];
+const NEW = [
+  ['surface-3', '#E8E5DC / #242C5C', 'Pressed and selected fills'],
+  ['field-line', '#8E8A7D / #636DAA', 'Input, checkbox and select borders, 3:1 on cards'],
+  ['navy, navy-2, navy-line', '#101632, #1D2550, #2F3870', 'Story cards, toasts, Ask Quad; same in both themes'],
+  ['on-navy, on-navy-2, on-navy-3', '#F7F5F0, #C9CBE0, #A9ACC8', 'Text on navy'],
+  ['rail-line', '#2A3266 / #232A5C', 'Dividers in the side bar'],
+  ['rail-active-ink', 'derived', 'Text on rail-active'],
+  ['brand-text', 'derived', 'Brand-coloured text, links, icons, selected tab: 4.5:1 on canvas, surface, surface-2 and brand-soft'],
+  ['brand-raw', 'the saved colour', 'Logos, swatches and the colour picker'],
+  ['lime, pink, sky, orange', '#C8F169, #FF6FAE, #59C3FF, #FF9B45', 'Accents: categories, people, illustrations (same in dark)'],
+  ['*-soft', '#EDF8CC, #FFE3EF, #DCF1FF, #FFE8D2 / tints on #171D45', 'Accent tints'],
+  ['*-ink', '#3D5410, #8A1D4C, #0D4F7A, #7A3A07 / #D8F59A, #FFB3D3, #A8DDFF, #FFC694', 'Text on accent tints, 7:1 or more'],
+  ['gold-ink', '#3D5410 / #D8F59A', 'Text in the highlight colour'],
+  ['heat-0…heat-3, heat-N-ink', '#FFD4E7, #ECFACB, #DBF69E, #C8F169 / #683A6A, #4C5D50, #819C5B, #C8F169', 'Family connection heatmap (returns with that screen)'],
+  ['focus', '#2F6BFF / #7FA6FF', 'Focus rings'],
+  ['scrim', 'navy 45% / 60%', 'Behind drawers and dialogs'],
+  ['shadow-sm', '0 1px 2px navy 6%', 'Tiles and chips']
+];
+const dots = s => s.replace(/#[0-9A-F]{6}/gi, h => `<span class="dot" style="background:${h}"></span><code>${h}</code>`);
+$('mapBody').innerHTML = MAP.map(([n, o, w, note]) => `<tr><td><code>${n}</code></td><td>${dots(o)}</td><td>${dots(w)}</td><td>${note}</td></tr>`).join('');
+$('newBody').innerHTML = NEW.map(([n, v, u]) => `<tr><td><code>${n}</code></td><td>${dots(v)}</td><td>${u}</td></tr>`).join('');
+
+/* Drawer, dialog, toast */
+let opener = null;
+function openDrawer() { opener = document.activeElement; $('drawer').classList.add('on'); $('scrim').classList.add('on'); setTimeout(() => $('e1').focus(), 50); }
+function closeDrawer() { $('drawer').classList.remove('on'); $('scrim').classList.remove('on'); if (opener) opener.focus(); }
+$('openDrawer').onclick = openDrawer; $('drClose').onclick = closeDrawer; $('drCancel').onclick = closeDrawer; $('scrim').onclick = closeDrawer;
+$('drSend').onclick = () => { closeDrawer(); toast(`Invite sent to ${$('e1').value.trim() || 'your colleague'}`); };
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && $('drawer').classList.contains('on')) closeDrawer(); });
+$('drawer').addEventListener('keydown', e => { if (e.key !== 'Tab') return; const f = [...$('drawer').querySelectorAll('button,input,select,textarea')]; const a = f[0], z = f[f.length - 1]; if (e.shiftKey && document.activeElement === a) { e.preventDefault(); z.focus(); } else if (!e.shiftKey && document.activeElement === z) { e.preventDefault(); a.focus(); } });
+$('openDialog').onclick = () => $('dlg').showModal();
+$('dlg').addEventListener('close', () => { if ($('dlg').returnValue === 'remove') toast('Ruwan’s access removed'); });
+$('showToast').onclick = () => toast('Plan saved for Hiruni');
+function toast(t) { const el = document.createElement('div'); el.className = 'toast'; el.innerHTML = `<i><svg aria-hidden="true"><use href="#i-check"/></svg></i>${t}`; $('toasts').appendChild(el); while ($('toasts').children.length > 2) $('toasts').firstChild.remove(); setTimeout(() => el.remove(), 2800); }
+
+/* Segmented, tabs, chips: toggles so the states can be tried */
+document.querySelectorAll('.seg').forEach(g => g.addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; g.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b)); }));
+document.querySelectorAll('.tabs').forEach(g => g.addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; g.querySelectorAll('button').forEach(x => x.setAttribute('aria-selected', x === b)); }));
+document.querySelectorAll('button.chip').forEach(b => b.onclick = () => b.setAttribute('aria-pressed', b.getAttribute('aria-pressed') !== 'true'));
+document.querySelectorAll('.ptabs').forEach(g => g.addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; g.querySelectorAll('button').forEach(x => x === b ? x.setAttribute('aria-current', 'page') : x.removeAttribute('aria-current')); }));
+
+function paintAll() { paintSwatches(); paintDerived(); paintRing(); paintBars(); paintLines(); }
+QuadBrand.applyBrand(pick); paintPicker(); paintTheme();
+</script>
+</body>
+</html>

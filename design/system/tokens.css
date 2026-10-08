@@ -1,0 +1,91 @@
+/* Quad app design system: tokens for the staff portal, the platform console and the parent app.
+   The landing page's language (navy, cream, lime, pink, sky, orange; Bricolage Grotesque headings) tuned for daily work.
+   Names follow packages/tokens (canvas, surface, ink, brand, rail, good, warn, bad, info, c1–c5, gold) plus the new
+   accent, heat, focus and navy tokens. design/system.html documents every value and the mapping from the old ones.
+   The --brand* block is the default (Quad lime). A school's colour replaces it at runtime: system/brand.js writes a
+   <style id="quad-brand"> with the derived values for both themes. */
+:root{
+  /* Surfaces */
+  --canvas:#F7F5F0; --surface:#FFFFFF; --surface-2:#F0EEE7; --surface-3:#E8E5DC;
+  --line:#E4E1D8; --line-strong:#CDC8BA; --field-line:#8E8A7D;
+  /* Text */
+  --ink:#101632; --ink-2:#3D4263; --ink-3:#5A5F7B;
+  /* Navy: the side bar, hero cards and the parent welcome. The same in both themes. */
+  --navy:#101632; --navy-2:#1D2550; --navy-line:#2F3870; --on-navy:#F7F5F0; --on-navy-2:#C9CBE0; --on-navy-3:#A9ACC8;
+  --rail:#101632; --rail-2:#1D2550; --rail-line:#2A3266; --rail-ink:#F7F5F0; --rail-ink-2:#A9ACC8;
+  /* School brand (default: Quad lime). Use --brand / --brand-fill behind --brand-ink, and --brand-text for text and icons. */
+  --brand:#C8F169; --brand-fill:#C8F169; --brand-ink:#101632; --brand-strong:#D0F37E; --brand-fill-strong:#D0F37E;
+  --brand-text:#5E7131; --brand-soft:#F6FDE7; --brand-raw:#C8F169; --rail-active:#C8F169; --rail-active-ink:#101632;
+  /* Accents (categories, avatars, illustrations). -soft is a tint, -ink is text on the tint (7:1+). */
+  --lime:#C8F169; --lime-soft:#EDF8CC; --lime-ink:#3D5410;
+  --pink:#FF6FAE; --pink-soft:#FFE3EF; --pink-ink:#8A1D4C;
+  --sky:#59C3FF; --sky-soft:#DCF1FF; --sky-ink:#0D4F7A;
+  --orange:#FF9B45; --orange-soft:#FFE8D2; --orange-ink:#7A3A07;
+  /* Status: text and icons 4.5:1 on canvas, cards, table headers and their own -soft. */
+  --good:#16703F; --good-soft:#DDF4E4; --warn:#A04A00; --warn-soft:#FFE9D3;
+  --bad:#C4234A; --bad-soft:#FFE3E9; --info:#0B67A8; --info-soft:#DDF0FF;
+  /* Charts and subject colours: deep enough for 3:1 on white. c1 pink, c2 indigo, c3 sky, c4 orange, c5 green. */
+  --c1:#E0478A; --c2:#4048B8; --c3:#1F8ACF; --c4:#D9640B; --c5:#4E8A12;
+  /* Highlight (the marker under a key word, Ask Quad). The name is historical. */
+  --gold:#C8F169; --gold-soft:#E6F6B5; --gold-ink:#3D5410;
+  /* Family connection heatmap: none, a little, some, a lot. */
+  --heat-0:#FFD4E7; --heat-1:#ECFACB; --heat-2:#DBF69E; --heat-3:#C8F169;
+  --heat-0-ink:#101632; --heat-1-ink:#101632; --heat-2-ink:#101632; --heat-3-ink:#101632;
+  /* Focus ring: blue in every school colour, so it never disappears into the brand. */
+  --focus:#2F6BFF;
+  /* Elevation */
+  --shadow-sm:0 1px 2px rgba(16,22,50,.06);
+  --shadow:0 1px 2px rgba(16,22,50,.05),0 10px 28px -18px rgba(16,22,50,.30);
+  --shadow-lg:0 30px 70px -24px rgba(16,22,50,.45);
+  --scrim:rgba(16,22,50,.45);
+  /* Shape */
+  --r-xs:8px; --r-sm:12px; --r:20px; --r-lg:28px; --r-pill:999px;
+  /* Type */
+  --f-display:"Bricolage Grotesque","Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-body:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --canvas:#0F1330; --surface:#171D45; --surface-2:#1D2550; --surface-3:#242C5C;
+  --line:#2A3266; --line-strong:#3A4378; --field-line:#636DAA;
+  --ink:#F7F5F0; --ink-2:#C9CBE0; --ink-3:#A9ACC8;
+  --rail:#0A0D24; --rail-2:#161C48; --rail-line:#232A5C;
+  --brand:#C8F169; --brand-fill:#C8F169; --brand-ink:#101632; --brand-strong:#D0F37E; --brand-fill-strong:#D0F37E;
+  --brand-text:#C8F169; --brand-soft:#37434B; --brand-raw:#C8F169; --rail-active:#C8F169; --rail-active-ink:#101632;
+  --lime-soft:#37434B; --lime-ink:#D8F59A; --pink-soft:#452D5A; --pink-ink:#FFB3D3;
+  --sky-soft:#243E6A; --sky-ink:#A8DDFF; --orange-soft:#453645; --orange-ink:#FFC694;
+  --good:#5FD394; --good-soft:#12382A; --warn:#FFB066; --warn-soft:#3D2610;
+  --bad:#FF7C9C; --bad-soft:#401A2A; --info:#7CCBFF; --info-soft:#12304F;
+  --c1:#FF6FAE; --c2:#8C93FF; --c3:#59C3FF; --c4:#FF9B45; --c5:#C8F169;
+  --gold:#C8F169; --gold-soft:#41504E; --gold-ink:#D8F59A;
+  --heat-0:#683A6A; --heat-1:#4C5D50; --heat-2:#819C5B; --heat-3:#C8F169;
+  --heat-0-ink:#F7F5F0; --heat-1-ink:#F7F5F0; --heat-2-ink:#101632; --heat-3-ink:#101632;
+  --focus:#7FA6FF;
+  --shadow-sm:0 1px 2px rgba(0,0,0,.3);
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 12px 30px -18px rgba(0,0,0,.7);
+  --shadow-lg:0 30px 70px -24px rgba(0,0,0,.8);
+  --scrim:rgba(5,8,26,.6);
+  color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --canvas:#0F1330; --surface:#171D45; --surface-2:#1D2550; --surface-3:#242C5C;
+  --line:#2A3266; --line-strong:#3A4378; --field-line:#636DAA;
+  --ink:#F7F5F0; --ink-2:#C9CBE0; --ink-3:#A9ACC8;
+  --rail:#0A0D24; --rail-2:#161C48; --rail-line:#232A5C;
+  --brand:#C8F169; --brand-fill:#C8F169; --brand-ink:#101632; --brand-strong:#D0F37E; --brand-fill-strong:#D0F37E;
+  --brand-text:#C8F169; --brand-soft:#37434B; --brand-raw:#C8F169; --rail-active:#C8F169; --rail-active-ink:#101632;
+  --lime-soft:#37434B; --lime-ink:#D8F59A; --pink-soft:#452D5A; --pink-ink:#FFB3D3;
+  --sky-soft:#243E6A; --sky-ink:#A8DDFF; --orange-soft:#453645; --orange-ink:#FFC694;
+  --good:#5FD394; --good-soft:#12382A; --warn:#FFB066; --warn-soft:#3D2610;
+  --bad:#FF7C9C; --bad-soft:#401A2A; --info:#7CCBFF; --info-soft:#12304F;
+  --c1:#FF6FAE; --c2:#8C93FF; --c3:#59C3FF; --c4:#FF9B45; --c5:#C8F169;
+  --gold:#C8F169; --gold-soft:#41504E; --gold-ink:#D8F59A;
+  --heat-0:#683A6A; --heat-1:#4C5D50; --heat-2:#819C5B; --heat-3:#C8F169;
+  --heat-0-ink:#F7F5F0; --heat-1-ink:#F7F5F0; --heat-2-ink:#101632; --heat-3-ink:#101632;
+  --focus:#7FA6FF;
+  --shadow-sm:0 1px 2px rgba(0,0,0,.3);
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 12px 30px -18px rgba(0,0,0,.7);
+  --shadow-lg:0 30px 70px -24px rgba(0,0,0,.8);
+  --scrim:rgba(5,8,26,.6);
+  color-scheme:dark;
+}
