@@ -124,6 +124,7 @@ resource "aws_cloudwatch_log_group" "this" {
 # --- Security groups ---
 
 resource "aws_security_group" "tasks" {
+  #checkov:skip=CKV2_AWS_5:Attached to the ECS services and one-off tasks through local.security_groups (network_configuration and the deploy settings), which this check does not follow.
   name        = "${var.name}-tasks"
   description = "ECS tasks: the task ports from the ALB, HTTPS out"
   vpc_id      = var.vpc_id
@@ -132,6 +133,7 @@ resource "aws_security_group" "tasks" {
 }
 
 resource "aws_security_group" "clamav_clients" {
+  #checkov:skip=CKV2_AWS_5:Attached to the ECS services and one-off tasks through local.security_groups (network_configuration and the deploy settings), which this check does not follow.
   name        = "${var.name}-clamav-clients"
   description = "Tasks that scan uploads with clamd (api, worker)"
   vpc_id      = var.vpc_id
@@ -140,6 +142,7 @@ resource "aws_security_group" "clamav_clients" {
 }
 
 resource "aws_security_group" "clamav" {
+  #checkov:skip=CKV2_AWS_5:Attached to the ECS services and one-off tasks through local.security_groups (network_configuration and the deploy settings), which this check does not follow.
   name        = "${var.name}-clamav"
   description = "clamd: 3310 from the clamav clients only, HTTPS out for signature updates"
   vpc_id      = var.vpc_id
@@ -168,6 +171,9 @@ resource "aws_vpc_security_group_ingress_rule" "tasks" {
 # HTTPS out reaches the interface endpoints (ECR, Secrets Manager, Logs), S3 through its gateway
 # endpoint, and SES, SNS, Sentry, the OTLP collector and the ClamAV mirror through NAT. The
 # database and Redis rules are on the data client group.
+# Trivy AWS-0104 (egress to 0.0.0.0/0): accepted, port 443 only; SES, SNS, Sentry, the OTLP
+# collector and the ClamAV mirror have no fixed address ranges.
+#trivy:ignore:AWS-0104
 resource "aws_vpc_security_group_egress_rule" "tasks" {
   for_each = {
     https             = { group = aws_security_group.tasks.id, cidr = "0.0.0.0/0", to = null, port = 443, description = "HTTPS to AWS endpoints and the internet" }

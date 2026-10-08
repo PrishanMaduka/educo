@@ -86,6 +86,9 @@ resource "aws_security_group" "alb" {
   tags = merge(local.tags, { Name = "${var.name}-alb" })
 }
 
+# Trivy AWS-0053 (public load balancer): CloudFront calls the ALB over the internet; its security
+# group admits only CloudFront's origin-facing prefix list, and every rule requires the origin secret.
+#trivy:ignore:AWS-0053
 resource "aws_lb" "this" {
   #checkov:skip=CKV_AWS_91:staging; production logging arrives in M12.
   #checkov:skip=CKV2_AWS_28:WAF is attached to the CloudFront distribution, the only way in; the ALB admits only CloudFront.
