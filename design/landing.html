@@ -11,17 +11,15 @@
 <script>
 /* Theme: follows the system unless the visitor chose one (quad_theme cookie, as in the apps). Runs before paint. */
 (() => { try { const m = document.cookie.match(/(?:^|; )quad_theme=(light|dark)/); if (m) document.documentElement.dataset.theme = m[1]; } catch (e) {} })();
-/* Prototype only: background palette A, B or C (localStorage, or ?palette=b for screenshots). Removed once a palette is chosen. */
-(() => { let p = new URLSearchParams(location.search).get('palette'); try { if (p) localStorage.setItem('quad_landing_palette', p); else p = localStorage.getItem('quad_landing_palette'); } catch (e) {} document.documentElement.dataset.palette = /^[abc]$/.test(p || '') ? p : 'a'; })();
 </script>
 <style>
 /* Layout: one 1120px column. Every section is carried by an inline SVG illustration drawn from the palette tokens,
    so the art follows light and dark mode. The one bold moment is the full-bleed indigo band: a school day in the circle. */
 :root{
-  --bg:#FBF6EC;--surface:#FFFDF8;--surface-2:#F4EDDF;--line:#E6DCC8;--wash-1:#E0EBD8;--wash-2:#FBE0CE;--ink:#1C1B2E;--ink-2:#4E4C63;--ink-3:#7D7A90;
+  --bg:#EEF5FB;--surface:#FFFFFF;--surface-2:#E4EDF7;--line:#D2DEEC;--wash-1:#E8E3FA;--wash-2:#FAF0C8;--ink:#1C1B2E;--ink-2:#4E4C63;--ink-3:#7D7A90;
   --coral:#DD4A42;--coral-soft:#FDE7E5;--indigo:#1F2559;--indigo-2:#3B4AA8;--lilac:#8B7CF6;--lilac-soft:#EEEAFE;--amber:#F2A93B;--amber-soft:#FDF1DC;--teal:#2BB0A0;--teal-soft:#DDF4F1;
   --coral-ink:#C23A33;--heat-ink:#1C1B2E;
-  --band:#1F2559;--band-2:#2A3170;--band-ink:#F3F2FB;--band-ink-2:#C9C6EC;--band-line:#3A4285;
+  --band:#1A2A5E;--band-2:#24387A;--band-ink:#F3F2FB;--band-ink-2:#CDD5F2;--band-line:#34498F;
   /* Illustration tokens: skin tones, hair and school-uniform white (see spec 19 → Design tokens) */
   --illo-skin-1:#C98B62;--illo-skin-2:#A96C45;--illo-skin-3:#8A5636;--illo-skin-4:#DCA67D;--illo-hair:#2B2230;--illo-hair-grey:#C9C4D2;--illo-white:#FFFFFF;--illo-face:#2B2230;--illo-line:rgba(58,36,40,.62);--illo-sun:#F4B04A;
   --shadow:0 24px 50px -28px rgba(31,37,89,.45);
@@ -30,28 +28,27 @@
   --f-accent:"Fraunces",Georgia,"Times New Roman",serif;
   color-scheme:light}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#13142A;--surface:#1B1D3A;--surface-2:#22254A;--line:#2E3260;--wash-1:#1D2440;--wash-2:#2A1F35;--ink:#F1F1FA;--ink-2:#C4C5DD;--ink-3:#9395B5;
+  --bg:#0F1530;--surface:#172042;--surface-2:#1E2950;--line:#2A3866;--wash-1:#1E2452;--wash-2:#2A2A3C;--ink:#F1F1FA;--ink-2:#C4C5DD;--ink-3:#9395B5;
   --coral:#FF7A6E;--coral-soft:#3A2230;--indigo:#C9C4F5;--indigo-2:#7B8BF0;--lilac:#A99BFF;--lilac-soft:#262046;--amber:#F5BC5E;--amber-soft:#33291A;--teal:#4CC9B8;--teal-soft:#16302F;
   --coral-ink:#FF8F84;--heat-ink:#000000;
-  --band:#0D0E22;--band-2:#181A38;--band-ink:#F3F2FB;--band-ink-2:#B8B6DC;--band-line:#2E3260;
+  --band:#080D24;--band-2:#131C3D;--band-ink:#F3F2FB;--band-ink-2:#BCC6E8;--band-line:#263463;
   --illo-skin-1:#B98058;--illo-skin-2:#9A6340;--illo-skin-3:#7E4F33;--illo-skin-4:#C99671;--illo-hair:#1B1622;--illo-hair-grey:#B3AEC0;--illo-white:#E6E4F0;--illo-face:#1B1622;--illo-line:rgba(5,5,14,.7);--illo-sun:#F1E6C4;
   --shadow:0 24px 50px -28px rgba(0,0,0,.7);color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#13142A;--surface:#1B1D3A;--surface-2:#22254A;--line:#2E3260;--wash-1:#1D2440;--wash-2:#2A1F35;--ink:#F1F1FA;--ink-2:#C4C5DD;--ink-3:#9395B5;
+  --bg:#0F1530;--surface:#172042;--surface-2:#1E2950;--line:#2A3866;--wash-1:#1E2452;--wash-2:#2A2A3C;--ink:#F1F1FA;--ink-2:#C4C5DD;--ink-3:#9395B5;
   --coral:#FF7A6E;--coral-soft:#3A2230;--indigo:#C9C4F5;--indigo-2:#7B8BF0;--lilac:#A99BFF;--lilac-soft:#262046;--amber:#F5BC5E;--amber-soft:#33291A;--teal:#4CC9B8;--teal-soft:#16302F;
   --coral-ink:#FF8F84;--heat-ink:#000000;
-  --band:#0D0E22;--band-2:#181A38;--band-ink:#F3F2FB;--band-ink-2:#B8B6DC;--band-line:#2E3260;
+  --band:#080D24;--band-2:#131C3D;--band-ink:#F3F2FB;--band-ink-2:#BCC6E8;--band-line:#263463;
   --illo-skin-1:#B98058;--illo-skin-2:#9A6340;--illo-skin-3:#7E4F33;--illo-skin-4:#C99671;--illo-hair:#1B1622;--illo-hair-grey:#B3AEC0;--illo-white:#E6E4F0;--illo-face:#1B1622;--illo-line:rgba(5,5,14,.7);--illo-sun:#F1E6C4;
   --shadow:0 24px 50px -28px rgba(0,0,0,.7);color-scheme:dark}
 
-/* Background palettes (prototype only, pending the product owner's choice; spec 19). They change background, surface, wash and band variables only. */
-:root[data-palette="b"]{--bg:#EEF5FB;--surface:#FFFFFF;--surface-2:#E4EDF7;--line:#D2DEEC;--wash-1:#E8E3FA;--wash-2:#FAF0C8;--band:#1A2A5E;--band-2:#24387A;--band-line:#34498F;--band-ink-2:#CDD5F2}
-:root[data-palette="c"]{--bg:#EEF6EF;--surface:#FFFFFF;--surface-2:#E2EEE4;--line:#CFE1D3;--wash-1:#FBE3CC;--wash-2:#F8DDE2;--band:#163A2D;--band-2:#1F4A3A;--band-line:#2E5F4C;--band-ink-2:#C9E4D6}
-@media (prefers-color-scheme:dark){
-  :root[data-palette="b"]:not([data-theme="light"]){--bg:#0F1530;--surface:#172042;--surface-2:#1E2950;--line:#2A3866;--wash-1:#1E2452;--wash-2:#2A2A3C;--band:#080D24;--band-2:#131C3D;--band-line:#263463;--band-ink-2:#BCC6E8}
-  :root[data-palette="c"]:not([data-theme="light"]){--bg:#0F1A16;--surface:#16241F;--surface-2:#1D2F28;--line:#2A4037;--wash-1:#2A2219;--wash-2:#2B1C22;--band:#07110D;--band-2:#12221B;--band-line:#24382F;--band-ink-2:#B7D5C6}}
-:root[data-palette="b"][data-theme="dark"]{--bg:#0F1530;--surface:#172042;--surface-2:#1E2950;--line:#2A3866;--wash-1:#1E2452;--wash-2:#2A2A3C;--band:#080D24;--band-2:#131C3D;--band-line:#263463;--band-ink-2:#BCC6E8}
-:root[data-palette="c"][data-theme="dark"]{--bg:#0F1A16;--surface:#16241F;--surface-2:#1D2F28;--line:#2A4037;--wash-1:#2A2219;--wash-2:#2B1C22;--band:#07110D;--band-2:#12221B;--band-line:#24382F;--band-ink-2:#B7D5C6}
+/* Watercolour scenes (style study): muted picture-book pigments; dusk versions in dark mode */
+:root{--wc-paper:#F4F1EA;--wc-peach:#E8B79C;--wc-apricot:#F0C899;--wc-sky:#9CBAD5;--wc-lilac:#B7A8D4;--wc-teal:#5F9C95;--wc-sea:#3F8783;--wc-ochre:#D29A4C;--wc-olive:#8B8F52;--wc-charcoal:#4A4850;--wc-rose:#D98B7C;--wc-roof:#C4673F;--wc-white:#FBFAF5;--wc-window:#F5C15A;--wc-skin:#B67C56;--wc-hair:#3A2B2A;--wc-uniform:#FDFCF8;--wc-blend:multiply}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--wc-paper:#161E40;--wc-peach:#4C467A;--wc-apricot:#7E5470;--wc-sky:#2A3B70;--wc-lilac:#4A4088;--wc-teal:#2D5A5E;--wc-sea:#24494F;--wc-ochre:#8A6638;--wc-olive:#3C4632;--wc-charcoal:#0F1220;--wc-rose:#8E5260;--wc-roof:#6E3A30;--wc-white:#B9B8CF;--wc-window:#FFD47C;--wc-skin:#94653F;--wc-hair:#1A1216;--wc-uniform:#D6D4E4;--wc-blend:normal}}
+:root[data-theme="dark"]{--wc-paper:#161E40;--wc-peach:#4C467A;--wc-apricot:#7E5470;--wc-sky:#2A3B70;--wc-lilac:#4A4088;--wc-teal:#2D5A5E;--wc-sea:#24494F;--wc-ochre:#8A6638;--wc-olive:#3C4632;--wc-charcoal:#0F1220;--wc-rose:#8E5260;--wc-roof:#6E3A30;--wc-white:#B9B8CF;--wc-window:#FFD47C;--wc-skin:#94653F;--wc-hair:#1A1216;--wc-uniform:#D6D4E4;--wc-blend:normal}
+.wc-moon{opacity:0}
+:root[data-theme="dark"] .wc-moon{opacity:1}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .wc-moon{opacity:1}}
 
 *{box-sizing:border-box}
 html{scroll-behavior:smooth;scroll-padding-top:80px}
@@ -75,9 +72,6 @@ svg.ill{display:block;width:100%;height:auto;overflow:visible}
 .ill .night{opacity:0}
 :root[data-theme="dark"] .ill .night{opacity:1}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .ill .night{opacity:1}}
-.pal{height:36px;border-radius:999px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);font:700 13px var(--f-body);padding:0 8px;max-width:170px;cursor:pointer}
-.pal:focus-visible{outline:2.5px solid var(--coral);outline-offset:2px}
-.menu .pal-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 4px;font-weight:800;border-bottom:1px solid var(--line)}
 
 /* Buttons */
 .btn{display:inline-flex;align-items:center;gap:8px;height:48px;padding:0 22px;border-radius:999px;font:800 15.5px var(--f-body);text-decoration:none;border:1.5px solid transparent;cursor:pointer;transition:transform .15s,box-shadow .15s,background .2s;white-space:nowrap}
@@ -109,9 +103,8 @@ svg.ill{display:block;width:100%;height:auto;overflow:visible}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .theme-btn .moon{display:block}:root:not([data-theme="light"]) .theme-btn .sun{display:none}}
 .menu-btn{display:none}
 .menu{display:none}
-@media (max-width:1080px){
+@media (max-width:900px){
   .nav nav{display:none}
-  .nav .pal{display:none}
   .menu-btn{display:grid;margin-left:auto}
   .nav .theme-btn{display:none}
   .menu:not([hidden]){display:flex;flex-direction:column;position:absolute;left:0;right:0;top:68px;background:var(--bg);border-bottom:1px solid var(--line);padding:8px 16px 16px;box-shadow:var(--shadow)}
@@ -131,11 +124,11 @@ svg.ill{display:block;width:100%;height:auto;overflow:visible}
 .hero .fine{margin-top:14px;font-size:13.5px;color:var(--ink-2);display:flex;gap:6px 16px;flex-wrap:wrap}
 .hero .fine span{display:inline-flex;align-items:center;gap:6px}
 .hero .fine i{width:7px;height:7px;border-radius:50%;background:var(--teal);display:inline-block}
-@media (max-width:900px){.hero .wrap{grid-template-columns:1fr}.hero{padding-block:28px 16px}}
+@media (max-width:900px){.hero .wrap{grid-template-columns:1fr}.hero .wrap>.orbit{order:-1;margin-inline:-16px;max-width:none;width:calc(100% + 32px)}.hero .wrap>.orbit .ticker{width:calc(100% - 32px)}.hero{padding-block:8px 16px}}
 
 /* Hero orbit illustration */
-.orbit{position:relative;max-width:620px;width:100%;margin-inline:auto;display:flex;flex-direction:column;align-items:center;gap:6px}
-.orbit svg{width:100%;height:auto;aspect-ratio:1/1;display:block;overflow:visible}
+.orbit{position:relative;max-width:680px;width:100%;margin-inline:auto;display:flex;flex-direction:column;align-items:center;gap:6px}
+.orbit svg{width:100%;height:auto;display:block;overflow:visible}
 .orbit .lbl{font:800 14px var(--f-body);fill:var(--ink-2);text-anchor:middle}
 .orbit .arc{font:900 12px var(--f-body);letter-spacing:.22em;fill:var(--ink-3)}
 @media (max-width:560px){.orbit .lbl{display:none}}
@@ -146,7 +139,7 @@ svg.ill{display:block;width:100%;height:auto;overflow:visible}
 @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
 .ticker{position:relative;width:min(380px,100%);background:var(--surface);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:12px 14px;display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:center;min-height:70px;margin-top:6px}
 .ticker .av{width:42px;height:42px;flex:none}
-.ticker .av svg{width:42px;height:42px;display:block}
+.ticker .av svg{width:42px;height:58px;display:block;margin-top:-8px}
 .ticker b{display:block;font-size:14px;line-height:1.3}
 .ticker small{display:block;color:var(--ink-2);font-size:12.5px;font-weight:600}
 .ticker .tx{transition:opacity .35s}
@@ -171,7 +164,8 @@ section.sec{padding-block:96px}
 #circle{background:linear-gradient(180deg,var(--bg),var(--wash-1) 45%,var(--bg))}
 #school{background:linear-gradient(180deg,var(--bg),var(--wash-2) 40%,var(--bg))}
 .step .vig svg{overflow:hidden}
-.places{border-radius:28px;overflow:hidden;background:linear-gradient(180deg,color-mix(in srgb,var(--wash-1) 60%,var(--surface)),color-mix(in srgb,var(--wash-2) 70%,var(--surface)));border:1px solid var(--line)}
+.places{overflow:hidden;margin-inline:-20px}
+@media (max-width:480px){.places{margin-inline:-16px}}
 .who-groups{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:28px;margin-top:36px}
 .who-groups h3{font-size:14px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2);display:flex;align-items:center;gap:10px;margin-bottom:14px}
 .who-groups h3 i{width:12px;height:12px;border-radius:50%;border:3px solid;display:inline-block}
@@ -319,7 +313,7 @@ dialog.si::backdrop{background:rgba(19,20,42,.55);backdrop-filter:blur(3px)}
 
 <!-- Shared illustration defs: the round portrait crop used by every person in the page -->
 <!-- Storybook look: qInk gives each figure or object a wobbly, slightly uneven hand-drawn outline; qWob makes painted edges wobble; qGrain is a faint paper grain; qW-* are watercolour washes -->
-<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><clipPath id="qClip" clipPathUnits="userSpaceOnUse"><circle cx="50" cy="50" r="46"/></clipPath><filter id="qInk" x="-8%" y="-8%" width="116%" height="116%" color-interpolation-filters="sRGB"><feTurbulence type="fractalNoise" baseFrequency=".045" numOctaves="2" seed="4" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G" result="w"/><feMorphology in="w" operator="dilate" radius="1.5" result="d"/><feDisplacementMap in="d" in2="n" scale="2" xChannelSelector="G" yChannelSelector="B" result="d2"/><feFlood style="flood-color:var(--illo-line)" result="c"/><feComposite in="c" in2="d2" operator="in" result="o"/><feMerge><feMergeNode in="o"/><feMergeNode in="w"/></feMerge></filter><filter id="qWob" x="-4%" y="-6%" width="108%" height="112%"><feTurbulence type="fractalNoise" baseFrequency=".018" numOctaves="2" seed="9" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="7" xChannelSelector="R" yChannelSelector="G"/></filter><filter id="qGrain" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="1" seed="2" stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 .3  0 0 0 0 .2  0 0 0 0 .12  0 0 0 .55 -.14"/><feComposite in2="SourceAlpha" operator="in"/></filter><radialGradient id="qW-teal"><stop offset="0" style="stop-color:var(--teal);stop-opacity:.34"/><stop offset=".55" style="stop-color:var(--teal);stop-opacity:.15"/><stop offset="1" style="stop-color:var(--teal);stop-opacity:0"/></radialGradient><radialGradient id="qW-coral"><stop offset="0" style="stop-color:var(--coral);stop-opacity:.34"/><stop offset=".55" style="stop-color:var(--coral);stop-opacity:.15"/><stop offset="1" style="stop-color:var(--coral);stop-opacity:0"/></radialGradient><radialGradient id="qW-amber"><stop offset="0" style="stop-color:var(--amber);stop-opacity:.34"/><stop offset=".55" style="stop-color:var(--amber);stop-opacity:.15"/><stop offset="1" style="stop-color:var(--amber);stop-opacity:0"/></radialGradient><radialGradient id="qW-lilac"><stop offset="0" style="stop-color:var(--lilac);stop-opacity:.34"/><stop offset=".55" style="stop-color:var(--lilac);stop-opacity:.15"/><stop offset="1" style="stop-color:var(--lilac);stop-opacity:0"/></radialGradient><radialGradient id="qW-indigo-2"><stop offset="0" style="stop-color:var(--indigo-2);stop-opacity:.34"/><stop offset=".55" style="stop-color:var(--indigo-2);stop-opacity:.15"/><stop offset="1" style="stop-color:var(--indigo-2);stop-opacity:0"/></radialGradient></defs></svg>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><clipPath id="qClip" clipPathUnits="userSpaceOnUse"><circle cx="50" cy="50" r="46"/></clipPath><filter id="qInk" x="-8%" y="-8%" width="116%" height="116%" color-interpolation-filters="sRGB"><feTurbulence type="fractalNoise" baseFrequency=".045" numOctaves="2" seed="4" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G" result="w"/><feMorphology in="w" operator="dilate" radius="1.5" result="d"/><feDisplacementMap in="d" in2="n" scale="2" xChannelSelector="G" yChannelSelector="B" result="d2"/><feFlood style="flood-color:var(--illo-line)" result="c"/><feComposite in="c" in2="d2" operator="in" result="o"/><feMerge><feMergeNode in="o"/><feMergeNode in="w"/></feMerge></filter><filter id="qWob" x="-4%" y="-6%" width="108%" height="112%"><feTurbulence type="fractalNoise" baseFrequency=".018" numOctaves="2" seed="9" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="7" xChannelSelector="R" yChannelSelector="G"/></filter><filter id="qGrain" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="1" seed="2" stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 .3  0 0 0 0 .2  0 0 0 0 .12  0 0 0 .55 -.14"/><feComposite in2="SourceAlpha" operator="in"/></filter><radialGradient id="qW-teal"><stop offset="0" style="stop-color:var(--teal);stop-opacity:.34"/><stop offset=".55" style="stop-color:var(--teal);stop-opacity:.15"/><stop offset="1" style="stop-color:var(--teal);stop-opacity:0"/></radialGradient><radialGradient id="qW-coral"><stop offset="0" style="stop-color:var(--coral);stop-opacity:.34"/><stop offset=".55" style="stop-color:var(--coral);stop-opacity:.15"/><stop offset="1" style="stop-color:var(--coral);stop-opacity:0"/></radialGradient><radialGradient id="qW-amber"><stop offset="0" style="stop-color:var(--amber);stop-opacity:.34"/><stop offset=".55" style="stop-color:var(--amber);stop-opacity:.15"/><stop offset="1" style="stop-color:var(--amber);stop-opacity:0"/></radialGradient><radialGradient id="qW-lilac"><stop offset="0" style="stop-color:var(--lilac);stop-opacity:.34"/><stop offset=".55" style="stop-color:var(--lilac);stop-opacity:.15"/><stop offset="1" style="stop-color:var(--lilac);stop-opacity:0"/></radialGradient><radialGradient id="qW-indigo-2"><stop offset="0" style="stop-color:var(--indigo-2);stop-opacity:.34"/><stop offset=".55" style="stop-color:var(--indigo-2);stop-opacity:.15"/><stop offset="1" style="stop-color:var(--indigo-2);stop-opacity:0"/></radialGradient><filter id="wcBig" x="-25%" y="-25%" width="150%" height="150%" color-interpolation-filters="sRGB"><feTurbulence type="fractalNoise" baseFrequency=".009" numOctaves="3" seed="2" result="t"/><feDisplacementMap in="SourceGraphic" in2="t" scale="44" xChannelSelector="R" yChannelSelector="G" result="d"/><feGaussianBlur in="d" stdDeviation="2.4" result="b"/><feTurbulence type="fractalNoise" baseFrequency=".022" numOctaves="2" seed="7" result="t2"/><feColorMatrix in="t2" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -1.5 1.25" result="m"/><feComposite in="b" in2="m" operator="in" result="p"/><feComponentTransfer in="b" result="base"><feFuncA type="linear" slope=".6"/></feComponentTransfer><feMorphology in="d" operator="erode" radius="2.2" result="e"/><feComposite in="d" in2="e" operator="out" result="r"/><feGaussianBlur in="r" stdDeviation="1" result="r2"/><feComponentTransfer in="r2" result="r3"><feFuncA type="linear" slope=".45"/></feComponentTransfer><feMerge><feMergeNode in="base"/><feMergeNode in="p"/><feMergeNode in="r3"/></feMerge></filter><filter id="wcMid" x="-15%" y="-15%" width="130%" height="130%" color-interpolation-filters="sRGB"><feTurbulence type="fractalNoise" baseFrequency=".03" numOctaves="2" seed="4" result="t"/><feDisplacementMap in="SourceGraphic" in2="t" scale="9" xChannelSelector="R" yChannelSelector="G" result="d"/><feGaussianBlur in="d" stdDeviation=".7" result="b"/><feTurbulence type="fractalNoise" baseFrequency=".06" numOctaves="2" seed="13" result="t2"/><feColorMatrix in="t2" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -2.4 1.7" result="m"/><feComposite in="b" in2="m" operator="in" result="p"/><feComponentTransfer in="b" result="base"><feFuncA type="linear" slope=".6"/></feComponentTransfer><feMorphology in="d" operator="erode" radius="1.3" result="e"/><feComposite in="d" in2="e" operator="out" result="r"/><feComponentTransfer in="r" result="r3"><feFuncA type="linear" slope=".75"/></feComponentTransfer><feMerge><feMergeNode in="base"/><feMergeNode in="p"/><feMergeNode in="r3"/></feMerge></filter><filter id="wcFig" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB"><feTurbulence type="fractalNoise" baseFrequency=".09" numOctaves="2" seed="8" result="t"/><feDisplacementMap in="SourceGraphic" in2="t" scale="2.4" xChannelSelector="R" yChannelSelector="G" result="d"/><feColorMatrix in="t" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -1.6 1.55" result="m"/><feComposite in="d" in2="m" operator="in" result="p"/><feComponentTransfer in="d" result="base"><feFuncA type="linear" slope=".9"/></feComponentTransfer><feMorphology in="d" operator="erode" radius=".7" result="e"/><feComposite in="d" in2="e" operator="out" result="r"/><feMerge><feMergeNode in="base"/><feMergeNode in="p"/><feMergeNode in="r"/></feMerge></filter><filter id="wcInk" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence type="fractalNoise" baseFrequency=".25" numOctaves="1" seed="3" result="t"/><feDisplacementMap in="SourceGraphic" in2="t" scale="1.6" xChannelSelector="R" yChannelSelector="G"/></filter><filter id="wcBloom" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="10"/></filter><filter id="wcFeather" x="-15%" y="-15%" width="130%" height="130%"><feTurbulence type="fractalNoise" baseFrequency=".011" numOctaves="3" seed="5" result="t"/><feDisplacementMap in="SourceGraphic" in2="t" scale="90" xChannelSelector="R" yChannelSelector="G" result="d"/><feGaussianBlur in="d" stdDeviation="22"/></filter><filter id="wcFeatherS" x="-15%" y="-15%" width="130%" height="130%"><feTurbulence type="fractalNoise" baseFrequency=".02" numOctaves="3" seed="5" result="t"/><feDisplacementMap in="SourceGraphic" in2="t" scale="16" xChannelSelector="R" yChannelSelector="G" result="d"/><feGaussianBlur in="d" stdDeviation="9"/></filter><filter id="wcPaper" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".75" numOctaves="2" seed="21" stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 .35  0 0 0 0 .28  0 0 0 0 .2  0 0 0 .7 -.22"/><feComposite in2="SourceAlpha" operator="in"/></filter></defs></svg>
 
 <header class="nav">
   <div class="wrap">
@@ -329,14 +323,12 @@ dialog.si::backdrop{background:rgba(19,20,42,.55);backdrop-filter:blur(3px)}
     </a>
     <nav aria-label="Sections"><a href="#circle">Quad Circle</a><a href="#day">A school day</a><a href="#ideas">Why Quad</a><a href="#school">Your whole school</a><a href="#trust">Privacy</a></nav>
     <button class="icon-btn menu-btn" type="button" aria-expanded="false" aria-controls="menu" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
-    <select class="pal" data-palette-select aria-label="Background palette (prototype only)"><option value="a">Palette A · Morning paper</option><option value="b">Palette B · Sky blue</option><option value="c">Palette C · Garden</option></select>
     <button class="icon-btn theme-btn" type="button" data-theme-toggle aria-label="Switch to dark mode"><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></svg><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg></button>
     <button class="btn ghost" type="button" data-signin>Sign in</button><a class="btn primary" href="#demo">Book a demo</a>
   </div>
   <div class="menu" id="menu" hidden>
     <a href="#circle">Quad Circle</a><a href="#day">A school day</a><a href="#ideas">Why Quad</a><a href="#school">Your whole school</a><a href="#trust">Privacy</a>
     <button type="button" data-theme-toggle aria-label="Switch to dark mode">Dark mode</button>
-    <label class="pal-row">Palette <select class="pal" data-palette-select aria-label="Background palette (prototype only)"><option value="a">A · Morning paper</option><option value="b">B · Sky blue</option><option value="c">C · Garden</option></select></label>
   </div>
 </header>
 
@@ -354,8 +346,8 @@ dialog.si::backdrop{background:rgba(19,20,42,.55);backdrop-filter:blur(3px)}
         <div class="fine"><span><i></i>Cambridge, Edexcel, IB and national curricula</span><span><i></i>Rupees, PayHere and Poya days built in</span></div>
       </div>
       <div class="orbit">
-        <svg class="ill" viewBox="0 0 640 640" role="img" aria-labelledby="orbT" data-ill="hero">
-          <title id="orbT">Amaya in the centre of her circle. Around her at school: Ms. Jayasinghe, her class teacher; Mr. Perera, maths; Ms. Fernando, English; Coach Herath; Nurse Dias; Ms. Silva, the counsellor; and Sunethra, the bus aunty. At home: her mum Dilhani, her dad Ruwan and her grandmother Kamala.</title>
+        <svg class="ill" viewBox="0 0 800 860" role="img" aria-labelledby="orbT" data-ill="hero">
+          <title id="orbT">A watercolour picture: Amaya, in her white school uniform and plaits, stands on a path between her school and her home in the tea hills, looking up. Around her in the sky drift kites, one for each person in her circle: at school Ms. Jayasinghe, Mr. Perera, Coach Herath, Nurse Dias and Sunethra on the bus; at home her mum Dilhani, her dad Ruwan and her grandmother Kamala.</title>
         </svg>
         <div class="ticker" role="status" aria-live="polite"><span class="av" id="tkAv" aria-hidden="true"></span><div class="tx" id="tkTx"></div></div>
         <p class="sample">A sample school. Amaya and her circle are fictional.</p>
@@ -376,7 +368,7 @@ dialog.si::backdrop{background:rgba(19,20,42,.55);backdrop-filter:blur(3px)}
         <div><div class="eyebrow">The Quad Circle</div><h2 id="circleH">Two places, many people, <span class="serif">one child</span></h2></div>
         <p>A child is looked after by more people than any school system knows about. Quad puts them in one circle, so the people at school and the people at home know each other, and the good news actually reaches home.</p>
       </div>
-      <div class="places"><svg class="ill" viewBox="0 0 1080 360" aria-hidden="true" data-ill="places"></svg></div>
+      <div class="places"><svg class="ill" viewBox="0 0 1080 440" aria-hidden="true" data-ill="places"></svg></div>
       <div class="who-groups">
         <div>
           <h3><i style="border-color:var(--indigo-2)"></i>At school</h3>
@@ -979,37 +971,197 @@ const Q = (() => {
   D.iLanka = () => `<circle cx="20" cy="20" r="20" fill="${tint('teal', 20)}"/><path d="M17 8C14 8 13 11 14 13C15 16 13 20 13 24C13 29 16 33 21 33C26 33 28 28 27 23C26 18 23 14 20 10Z" fill="${v('teal')}"/>`;
   D.iShield = () => `<circle cx="22" cy="22" r="22" fill="rgba(255,255,255,.08)"/><path d="M22 9L33 13V21C33 28 28 33 22 35C16 33 11 28 11 21V13Z" fill="${v('teal')}"/><path d="M17 22l4 4 7-8" stroke="#fff" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`;
 
-  return {D, P, POS, C, portrait, svgWrap, bust};
+
+  /* ── Watercolour picture-book scenes (style study: hero, the circle explained, the 09:10 vignette) ──
+     Shared filters: wcBig (sky and land washes: displaced edges, blotchy pigment, a darker dried edge), wcMid (buildings,
+     hills, kites), wcFig (small figures), wcInk (dry-brush lines), wcFeather/wcFeatherS (painted vignette into the page),
+     wcPaper (grain). Washes multiply in light mode for pigment build-up; dark mode is a dusk version of each scene. */
+  const wv = n => `var(--wc-${n})`;
+  const BL = ' style="mix-blend-mode:var(--wc-blend)"';
+  const pth = (d, c, op = .55, f = 'wcMid') => `<path d="${d}" fill="${wv(c)}" fill-opacity="${op}" filter="url(#${f})"${f === 'wcFig' || c === 'white' || c === 'uniform' ? '' : BL}/>`;
+  const ell = (cx, cy, rx, ry, c, op = .5, f = 'wcBig') => `<ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="${wv(c)}" fill-opacity="${op}" filter="url(#${f})"${BL}/>`;
+  const ln = (d, w = 1.2, op = .6, c = 'charcoal') => `<path d="${d}" fill="none" stroke="${wv(c)}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" opacity="${op}" filter="url(#wcInk)"/>`;
+  const sk = (d, c, w, op = .85) => `<path d="${d}" fill="none" stroke="${wv(c)}" stroke-opacity="${op}" stroke-width="${w}" stroke-linecap="round" filter="url(#wcFig)"/>`;
+  let sd = 11; const rnd = () => (sd = sd * 16807 % 2147483647) / 2147483647;
+  const grass = (x0, x1, y0, y1, n, op = .5) => { sd = 97 + x0; let d = ''; for (let i = 0; i < n; i++) { const x = x0 + rnd() * (x1 - x0), y = y0 + rnd() * (y1 - y0), h = 4 + rnd() * 9, b = (rnd() - .5) * 7; d += `M${x.toFixed(1)} ${y.toFixed(1)}q${(b / 2).toFixed(1)} ${(-h / 2).toFixed(1)} ${b.toFixed(1)} ${(-h).toFixed(1)}`; } return ln(d, .8, op, 'olive'); };
+  const vbirds = (x, y, s = 1, op = .55) => ln(`M${x} ${y}q${4 * s} ${-4 * s} ${8 * s} 0q${4 * s} ${-4 * s} ${8 * s} 0M${x + 22 * s} ${y - 10 * s}q${3 * s} ${-3 * s} ${6 * s} 0q${3 * s} ${-3 * s} ${6 * s} 0M${x + 8 * s} ${y - 22 * s}q${2.5 * s} ${-2.5 * s} ${5 * s} 0q${2.5 * s} ${-2.5 * s} ${5 * s} 0`, 1, op);
+  const teaRows = (x, y, w, h, n = 5) => { let d = ''; for (let k = 1; k <= n; k++) { const yy = y - h * k / (n + 1); d += `M${x + w * .06 * k} ${yy + h * .12}Q${x + w / 2} ${yy - h * .22} ${x + w - w * .06 * k} ${yy + h * .12}`; } return `<path d="${d}" fill="none" stroke="${wv('olive')}" stroke-width="2.2" stroke-dasharray="1.5 5" stroke-linecap="round" opacity=".45" filter="url(#wcInk)"/>`; };
+  const wscene = (id, W, H, inner, pad, small) => `<defs><mask id="${id}" maskUnits="userSpaceOnUse" x="0" y="0" width="${W}" height="${H}"><rect x="${pad}" y="${pad}" width="${W - 2 * pad}" height="${H - 2 * pad}" rx="${pad * 3}" fill="#fff" filter="url(#${small ? 'wcFeatherS' : 'wcFeather'})"/></mask></defs>`
+    + `<g mask="url(#${id})"><g style="isolation:isolate"><rect width="${W}" height="${H}" fill="${wv('paper')}"/>${inner}<rect width="${W}" height="${H}" fill="#000" filter="url(#wcPaper)" style="mix-blend-mode:multiply" opacity=".3"/></g></g>`;
+  const moon = (x, y, r) => `<g class="wc-moon"><circle cx="${x}" cy="${y}" r="${r * 2.6}" fill="#F3EBD2" opacity=".16" filter="url(#wcBloom)"/><circle cx="${x}" cy="${y}" r="${r}" fill="#F3EBD2" opacity=".9" filter="url(#wcMid)"/></g>`;
+  const wstars = pts => `<g class="wc-moon">${pts.map(([a, b, r = 1.5]) => `<circle cx="${a}" cy="${b}" r="${r}" fill="#fff" opacity=".75"/>`).join('')}</g>`;
+
+  // Kites carry a tiny silhouette of someone in Amaya's circle
+  const KITE_HAIR = {jaya: 'long', perera: 'short', fernando: 'long', herath: 'cap', dias: 'bun', silva: 'long', sunethra: 'bun', dilhani: 'long', ruwan: 'short', kamala: 'grey'};
+  function wkite(k, x, y, s, c, rot = 0, tail = true) {
+    const h = KITE_HAIR[k], ink = `fill="${wv('charcoal')}"`;
+    let sil = `<circle cx="0" cy="-7" r="5" ${ink} fill-opacity=".5"/><path d="M-9.5 9Q-9 -1 0 -1.2Q9 -1 9.5 9Z" ${ink} fill-opacity=".5"/>`;
+    if (h === 'long') sil += `<path d="M-5.4 -7Q-7 3 -4 6H4Q7 3 5.4 -7Z" ${ink} fill-opacity=".38"/>`;
+    if (h === 'bun') sil += `<circle cx="0" cy="-13.4" r="2.7" ${ink} fill-opacity=".5"/>`;
+    if (h === 'grey') sil += `<circle cx="0" cy="-13.4" r="2.9" fill="${wv('white')}" fill-opacity=".95"/><path d="M-5 -9Q0 -14 5 -9" fill="none" stroke="${wv('white')}" stroke-width="2.2"/>`;
+    if (h === 'cap') sil += `<path d="M-5.5 -9Q0 -16 5.5 -9L9.5 -8.5Z" ${ink} fill-opacity=".7"/>`;
+    return `<g transform="translate(${x} ${y}) rotate(${rot}) scale(${s})">`
+      + (tail ? ln('M0 40C-9 52 9 62 -2 74S7 94 0 108', .9, .4) + `<path d="M-3 58l-6 -3.4v6.8Z M-3 58l6 -3.4v6.8Z M1 86l-6 -3.4v6.8Z M1 86l6 -3.4v6.8Z" fill="${wv('rose')}" fill-opacity=".65"/>` : '')
+      + pth('M0 -36L25 -2L0 40L-25 -2Z', c, .6) + pth('M0 -36L25 -2L0 -2Z', 'white', .3)
+      + ln('M0 -36V40M-25 -2H25', .7, .35) + `<g transform="translate(0 6)">${sil}</g></g>`;
+  }
+
+  // Amaya from behind: white uniform, plaits with ribbons, school bag, one hand on the strap, looking up at the sky
+  function amayaBack(x, y, s) {
+    const g = [ell(0, 2, 30, 6, 'charcoal', .22, 'wcMid'),
+      pth('M-8.5 -34h6v24h-6Z M2.5 -34h6v24h-6Z', 'skin', .85, 'wcFig'),
+      pth('M-9.5 -13h7v9h-7Z M2.5 -13h7v9h-7Z', 'sky', .3, 'wcFig'),
+      pth('M-11 -4.5h9q2 0 2 3v2.5h-11Z M2 -4.5h9q2 0 2 3v2.5h-11Z', 'charcoal', .85, 'wcFig'),
+      sk('M-17 -92Q-26 -74 -24 -56', 'sky', 9.5, .35), sk('M-17 -92Q-26 -74 -24 -56', 'uniform', 8, .95), `<circle cx="-24" cy="-54" r="3.6" fill="${wv('skin')}" fill-opacity=".9"/>`,
+      pth('M-17 -97Q0 -103 17 -97L21 -62L28 -33Q0 -26 -28 -33L-21 -62Z', 'uniform', .97, 'wcFig'), pth('M-17 -97Q0 -103 17 -97L21 -62L28 -33Q0 -26 -28 -33L-21 -62Z', 'sky', .2, 'wcFig'), ln('M-17 -97Q0 -103 17 -97L21 -62L28 -33Q0 -26 -28 -33L-21 -62Z', .8, .35),
+      pth('M7 -95Q17 -93 19 -70L27 -34Q15 -30 7 -30Z', 'sky', .3, 'wcFig'),
+      ln('M-23 -60Q0 -55 23 -60', .8, .3),
+      pth('M-15 -93h30q4 0 4 4v31q0 4 -4 4h-30q-4 0 -4 -4v-31q0 -4 4 -4Z', 'ochre', .78, 'wcFig'),
+      pth('M-15 -93h30q4 0 4 4v9h-38v-9q0 -4 4 -4Z', 'roof', .45, 'wcFig'),
+      ln('M-12 -95Q-15 -101 -9 -105M12 -95Q15 -101 9 -105', 1.8, .55, 'roof'),
+      sk('M17 -92Q25 -84 14 -78', 'sky', 9.5, .35), sk('M17 -92Q25 -84 14 -78', 'uniform', 8, .95), `<circle cx="13" cy="-78" r="3.6" fill="${wv('skin')}" fill-opacity=".9"/>`,
+      pth('M-4.5 -106h9v10h-9Z', 'skin', .9, 'wcFig'),
+      `<circle cx="3.2" cy="-118" r="12.6" fill="${wv('skin')}" fill-opacity=".9" filter="url(#wcFig)"/>`,
+      `<ellipse cx="13.6" cy="-114" rx="2.6" ry="3.6" fill="${wv('skin')}" fill-opacity=".95"/><ellipse cx="13.5" cy="-109.5" rx="2.8" ry="2.2" fill="${wv('rose')}" fill-opacity=".55"/>`,
+      `<circle cx="-.5" cy="-119.5" r="13.4" fill="${wv('hair')}" fill-opacity=".92" filter="url(#wcFig)"/>`,
+      ln('M-1 -132V-108', .7, .35, 'white')];
+    [-6.5, 6.5].forEach(px => { g.push(`<g fill="${wv('hair')}" fill-opacity=".9" filter="url(#wcFig)"><ellipse cx="${px}" cy="-103" rx="3.6" ry="4.4"/><ellipse cx="${px * 1.05}" cy="-95.5" rx="3.3" ry="4.2"/><ellipse cx="${px * 1.1}" cy="-88.5" rx="3" ry="3.8"/></g>`, `<path d="M${px * 1.1} -83l-5.5 -3.4v6.8Z M${px * 1.1} -83l5.5 -3.4v6.8Z" fill="${wv('rose')}" fill-opacity=".85"/>`); });
+    return `<g transform="translate(${x} ${y}) scale(${s})">${g.join('')}</g>`;
+  }
+
+  // Small painted figures in three-quarter view (feet at 0, about 100 tall). No outlined faces: a rosy cheek and a hint of an eye.
+  function wfig(x, y, s, o) {
+    const d = o.d || 1, c = o.dress, top = o.top || o.dress, g = [ell(0, 1, 19, 3.6, 'charcoal', .2, 'wcMid')];
+    const hair = o.grey ? 'white' : 'hair';
+    if (o.hair === 'long') g.push(pth(`M${-9 * d} -92Q${-13 * d} -74 ${-7 * d} -64L${-1 * d} -70Z`, 'hair', .85, 'wcFig'));
+    g.push(o.trousers ? pth('M-9 -47h8v45h-8Z M1 -47h8v45h-8Z', 'charcoal', .7, 'wcFig') : pth('M-13 -49L-16 -2Q0 2 16 -2L13 -49Z', c, .8, 'wcFig'));
+    g.push(sk(`M${-10 * d} -72Q${-13 * d} -58 ${-11 * d} -47`, top, 5.5, .65));
+    g.push(pth('M-11 -75Q0 -79 11 -75L13 -45H-13Z', top, .85, 'wcFig'));
+    if (o.drape) g.push(pth(`M${-10 * d} -75L${13 * d} -38L${7 * d} -36L${-13 * d} -67Z`, o.drape, .7, 'wcFig'));
+    const [ax, ay] = o.wave ? [17 * d, -99] : [12 * d, -46];
+    g.push(sk(o.wave ? `M${10 * d} -73Q${21 * d} -83 ${ax} ${ay}` : `M${10 * d} -73Q${15 * d} -58 ${ax} ${ay}`, top, 5.5, .85), `<circle cx="${ax}" cy="${ay}" r="2.8" fill="${wv('skin')}" fill-opacity=".9"/>`);
+    g.push(pth('M-3 -84h6v9h-6Z', 'skin', .9, 'wcFig'));
+    g.push(`<circle cx="${-2 * d}" cy="-90" r="8.6" fill="${wv(hair)}" fill-opacity=".92" filter="url(#wcFig)"/>`);
+    if (o.bun) g.push(`<circle cx="${-9.5 * d}" cy="-92" r="3.8" fill="${wv(hair)}" fill-opacity=".92"/>`);
+    g.push(`<circle cx="${2.6 * d}" cy="-87.6" r="7.6" fill="${wv('skin')}" fill-opacity=".92" filter="url(#wcFig)"/>`);
+    g.push(`<path d="M${-6 * d} -93Q${1 * d} -99 ${9 * d} -92" fill="none" stroke="${wv(hair)}" stroke-opacity=".9" stroke-width="3.4" stroke-linecap="round"/>`);
+    g.push(`<ellipse cx="${6.2 * d}" cy="-84.6" rx="2.3" ry="1.8" fill="${wv('rose')}" fill-opacity=".6"/><path d="M${5 * d} -89.4h${1.8 * d}" stroke="${wv('charcoal')}" stroke-width="1" stroke-linecap="round" opacity=".6"/>`);
+    if (o.glasses) g.push(`<circle cx="${6 * d}" cy="-89" r="2.6" fill="none" stroke="${wv('charcoal')}" stroke-width=".7" opacity=".6"/>`);
+    return `<g transform="translate(${x} ${y}) scale(${s})">${g.join('')}</g>`;
+  }
+
+  const wschool = (x, y, s) => { let w = ''; [-58, -42, -26, 26, 42, 58].forEach(i => { w += pth(`M${i - 5} -4V-15A5 5 0 0 1 ${i + 5} -15V-4Z`, 'sky', .5, 'wcFig') + pth(`M${i - 4.5} -38h9v-9h-9Z`, 'sky', .45, 'wcFig'); });
+    return `<g transform="translate(${x} ${y}) scale(${s})">` + pth('M-72 0V-50H72V0Z', 'white', .95) + pth('M-72 0V-50H72V0Z', 'sky', .16) + pth('M20 0V-50H72V0Z', 'sky', .14) + ln('M-72 0V-50H72V0', .7, .3) + pth('M-80 -48L-64 -64H64L80 -48Z', 'roof', .7) + w
+      + pth('M-15 -50V-90H15V-50Z', 'white', .97) + pth('M3 -50V-90H15V-50Z', 'sky', .2) + ln('M-15 -50V-90H15V-50', .7, .3) + pth('M-21 -88L0 -104L21 -88Z', 'roof', .75) + `<circle cx="0" cy="-74" r="5.5" fill="none" stroke="${wv('charcoal')}" stroke-opacity=".5" stroke-width="1"/>`
+      + pth('M-8 0V-20A8 8 0 0 1 8 -20V0Z', 'charcoal', .5, 'wcFig') + ln('M0 -104V-128', 1, .55) + pth('M1 -127Q8 -130 15 -126V-118Q8 -122 1 -119Z', 'rose', .8, 'wcFig') + ln('M-74 0H74', .8, .3) + `</g>`; };
+  const whome = (x, y, s) => `<g transform="translate(${x} ${y}) scale(${s})">` + pth('M-42 0V-40H42V0Z', 'white', .92) + pth('M-42 0V-40H42V0Z', 'ochre', .14) + pth('M10 0V-40H42V0Z', 'sky', .14) + ln('M-42 0V-40H42V0', .7, .3) + pth('M-52 -38L0 -72L52 -38Z', 'roof', .72)
+    + `<ellipse cx="22" cy="-21" rx="26" ry="20" fill="${wv('window')}" opacity=".35" filter="url(#wcBloom)"/>` + pth('M14 -29h16v14h-16Z', 'window', .95, 'wcFig') + ln('M22 -29v14M14 -22h16', .7, .45)
+    + pth('M-16 0V-26H0V0Z', 'roof', .55, 'wcFig') + ln('M-44 0H44', .8, .3) + `</g>`;
+  const wpalm = (x, y, s, d = 1) => `<g transform="translate(${x} ${y}) scale(${s * d} ${s})">` + ln('M0 0C-3 -40 3 -82 14 -112', 2.6, .65)
+    + pth('M14 -112Q-10 -126 -42 -100Q-12 -110 14 -112Z', 'olive', .7, 'wcFig') + pth('M14 -112Q40 -130 70 -104Q40 -112 14 -112Z', 'teal', .65, 'wcFig')
+    + pth('M14 -112Q6 -140 26 -156Q22 -132 14 -112Z', 'olive', .6, 'wcFig') + pth('M14 -112Q-14 -110 -26 -80Q-8 -100 14 -112Z', 'teal', .55, 'wcFig') + pth('M14 -112Q40 -108 50 -78Q32 -100 14 -112Z', 'olive', .55, 'wcFig') + `</g>`;
+  const wstupa = (x, y, s) => `<g transform="translate(${x} ${y}) scale(${s})">${pth('M-24 0A24 21 0 0 1 24 0Z', 'white', .92, 'wcFig')}${pth('M-6 -21h12v-7h-12Z M-2.4 -28L0 -50L2.4 -28Z', 'white', .92, 'wcFig')}${ln('M-26 0H26', .7, .35)}</g>`;
+  const wpoya = (x, y, s) => ln(`M${x} ${y}V${y - 70 * s}`, 1.1, .6) + `<g transform="translate(${x + 1} ${y - 68 * s}) scale(${s})" filter="url(#wcFig)">${['sky', 'ochre', 'rose', 'white', 'apricot'].map((c, i) => `<rect x="${i * 6}" y="${(i % 2) * .8}" width="6.4" height="20" fill="${wv(c)}" fill-opacity=".85"/>`).join('')}</g>`;
+
+  // Hero: Amaya on the path between school and home; the people in her circle drift around her as kites
+  const KITES = [['jaya', 132, 300, 1.45, 'lilac', -10], ['perera', 250, 130, 1.1, 'sky', 6], ['herath', 430, 92, 1.25, 'apricot', -4], ['dias', 610, 150, 1.05, 'teal', 12], ['sunethra', 700, 330, .95, 'ochre', -6], ['dilhani', 560, 420, 1.35, 'rose', 8], ['ruwan', 400, 300, 1.05, 'sea', -8], ['kamala', 80, 490, .95, 'peach', 4]];
+  const KPOS = {}, KCOL = {}; KITES.forEach(([k, x, y, s, c]) => { KPOS[k] = [x, y]; KCOL[k] = c; });
+  const AMAYA = [270, 620];
+  D.hero = () => {
+    const S = [`<defs><linearGradient id="hSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--wc-peach);stop-opacity:.6"/><stop offset=".45" style="stop-color:var(--wc-apricot);stop-opacity:.42"/><stop offset=".72" style="stop-color:var(--wc-paper);stop-opacity:0"/></linearGradient></defs><rect width="800" height="860" fill="url(#hSky)"/>`,
+      ell(170, 140, 240, 130, 'peach', .16), ell(620, 220, 240, 160, 'rose', .12), ell(300, 380, 300, 110, 'apricot', .16), ell(700, 90, 200, 110, 'lilac', .14),
+      moon(728, 66, 20), wstars([[80, 70], [250, 52], [420, 34], [560, 64], [750, 50], [730, 250], [60, 230], [360, 220, 1.2]]),
+      pth('M0 612Q140 586 260 598T520 590T800 600V660H0Z', 'lilac', .22, 'wcBig'), wstupa(470, 604, .55),
+      pth('M300 700Q430 606 580 606T800 618V700Z', 'teal', .34, 'wcBig'), teaRows(380, 700, 420, 70),
+      pth('M0 640Q100 612 220 624T500 700H0Z', 'olive', .3, 'wcBig'),
+      wschool(560, 640, .62), whome(726, 656, .66), wpoya(682, 654, .55), wpalm(770, 668, .5, -1), wpalm(612, 646, .42, -1),
+      pth('M372 860C430 800 470 760 520 724S590 676 600 660L612 662C604 690 560 720 540 760S500 830 520 860Z', 'ochre', .36, 'wcBig'),
+      pth('M0 690Q180 650 330 690T520 760L560 860H0Z', 'olive', .5, 'wcBig'), pth('M0 760Q160 720 330 752T500 860H0Z', 'teal', .3, 'wcBig'),
+      pth('M560 760Q680 724 800 736V860H600Z', 'olive', .36, 'wcBig'),
+      grass(10, 470, 690, 850, 120, .5), grass(600, 790, 744, 850, 50, .45),
+      vbirds(560, 560, .8, .45), vbirds(120, 520, .6, .35)];
+    S.push(KITES.map(([k, x, y, s]) => `<path d="M${x} ${y + 40 * s}Q${(x + AMAYA[0]) / 2} ${Math.max(y + 60, 420)} ${AMAYA[0]} ${AMAYA[1] - 10}" fill="none" stroke="${wv('charcoal')}" stroke-width=".8" stroke-dasharray="2 6" opacity=".22"/>`).join(''));
+    S.push(KITES.map(([k, x, y, s, c, r], i) => `<g class="bob${i % 3 ? ' d' + (i % 3 + 1) : ''}">${wkite(k, x, y, s, c, r)}</g>`).join(''));
+    S.push(amayaBack(268, 836, 1.75));
+    S.push(`<g id="sparks"></g>`);
+    return wscene('mHero', 800, 860, S.join(''), 26);
+  };
+
+  // The circle explained: school and home joined by a path, with the people in between
+  D.places = () => wscene('mPlaces', 1080, 440, [
+    ell(300, 80, 440, 150, 'peach', .32), ell(1010, 60, 150, 100, 'sky', .12), ell(560, 236, 600, 70, 'apricot', .24), ell(800, 110, 200, 80, 'rose', .1),
+    moon(930, 70, 18), wstars([[120, 40], [300, 30], [620, 40], [800, 90], [1020, 50]]),
+    pth('M0 268Q200 230 380 252T760 244T1080 256V320H0Z', 'lilac', .3, 'wcBig'), wstupa(560, 262, .55),
+    pth('M0 290Q160 252 330 274T660 360H0Z', 'olive', .4, 'wcBig'), teaRows(0, 346, 520, 70),
+    pth('M420 360Q600 262 780 262T1080 276V360Z', 'teal', .38, 'wcBig'), teaRows(560, 352, 520, 70),
+    wschool(210, 344, 1.15), wpalm(62, 352, .72), wpalm(372, 350, .58, -1),
+    whome(880, 344, 1.15), wpoya(800, 344, .8), wpalm(1010, 356, .7, -1),
+    `<path d="M290 352C400 430 700 432 850 352" fill="none" stroke="${wv('ochre')}" stroke-opacity=".42" stroke-width="30" stroke-linecap="round" filter="url(#wcBig)"${BL}/>`,
+    pth('M0 360Q300 340 540 372T1080 362V440H0Z', 'olive', .38, 'wcBig'), pth('M0 400Q320 384 600 404T1080 396V440H0Z', 'teal', .28, 'wcBig'),
+    grass(10, 1070, 368, 436, 150, .45),
+    ln('M240 210Q540 40 860 210', 1, .3).replace('stroke-linecap', 'stroke-dasharray="3 7" stroke-linecap'),
+    wkite('herath', 430, 120, .5, 'apricot', -6), wkite('kamala', 650, 90, .46, 'peach', 8), wkite('jaya', 540, 168, .55, 'lilac', -3),
+    vbirds(720, 150, .8, .45), vbirds(330, 110, .6, .4),
+    wfig(306, 360, .78, {d: 1, dress: 'lilac', drape: 'ochre', hair: 'long', wave: true}),
+    amayaBack(560, 412, .48),
+    wfig(796, 362, .76, {d: -1, dress: 'rose', hair: 'long', wave: true}),
+    wfig(838, 364, .7, {d: -1, dress: 'ochre', drape: 'roof', grey: true, bun: true, glasses: true})
+  ].join(''), 22);
+
+  // 09:10: Grandma in Kandy loves the moment, in her armchair by the window, tea hills outside
+  D.vGrandma = () => wscene('mGrandma', 400, 200, [
+    ell(190, 100, 260, 140, 'apricot', .36), ell(90, 50, 150, 90, 'peach', .3), ell(320, 160, 160, 80, 'lilac', .18),
+    pth('M236 26h134v94h-134Z', 'sky', .32, 'wcMid'), pth('M236 84Q270 62 300 74T370 66V120H236Z', 'olive', .45, 'wcMid'), teaRows(236, 120, 134, 40, 4),
+    pth('M236 96Q290 84 370 98V120H236Z', 'teal', .35, 'wcMid'), wstupa(330, 76, .35), vbirds(256, 50, .5, .4),
+    ln('M236 26h134v94h-134ZM303 26v94M236 73h134', 1.6, .55),
+    pth('M0 168Q200 158 400 168V200H0Z', 'olive', .25, 'wcBig'),
+    pth('M206 132h44v6h-44Z', 'roof', .6, 'wcFig'), ln('M212 138v40M244 138v40', 1.6, .5), pth('M218 118h18v10q0 6 -6 6h-6q-6 0 -6 -6Z', 'white', .9, 'wcFig'), ln('M223 112q-3 -6 0 -11M231 112q-3 -6 0 -11', .9, .45),
+    pth('M54 74Q54 46 84 46H162Q192 46 192 74V176H54Z', 'rose', .5, 'wcMid'), pth('M44 116q0 -8 10 -8h14v66h-24Z M178 108h14q10 0 10 8v58h-24Z', 'rose', .62, 'wcMid'),
+    // Grandma, three-quarter view, facing the window
+    pth('M92 176L94 130Q96 112 124 108Q150 112 154 130L156 150Z', 'ochre', .85, 'wcFig'), pth('M94 148Q130 140 172 150Q182 160 176 176H94Z', 'ochre', .85, 'wcFig'), pth('M94 148Q130 140 172 150Q182 160 176 176H94Z', 'roof', .14, 'wcFig'), ln('M120 152Q122 164 118 176M134 150Q137 164 134 176M148 151Q152 164 150 176', .7, .35), pth('M100 114Q118 128 132 150Q142 162 150 176H138Q128 160 118 148Q106 134 96 126Z', 'roof', .5, 'wcFig'),
+    pth('M118 104h12v12h-12Z', 'skin', .9, 'wcFig'),
+    `<circle cx="120" cy="88" r="16" fill="${wv('white')}" fill-opacity=".95" filter="url(#wcFig)"/><circle cx="104" cy="84" r="7" fill="${wv('white')}" fill-opacity=".95" filter="url(#wcFig)"/>`,
+    `<circle cx="126" cy="91" r="14.5" fill="${wv('skin')}" fill-opacity=".92" filter="url(#wcFig)"/>`,
+    `<path d="M110 82Q122 72 140 84" fill="none" stroke="${wv('white')}" stroke-width="5" stroke-linecap="round"/>`,
+    `<ellipse cx="136" cy="98" rx="3.6" ry="2.6" fill="${wv('rose')}" fill-opacity=".6"/><circle cx="134" cy="89" r="4.2" fill="none" stroke="${wv('charcoal')}" stroke-width=".8" opacity=".6"/><path d="M139 92q2 1 0 3" fill="none" stroke="${wv('charcoal')}" stroke-width=".8" opacity=".5"/>`,
+    sk('M146 124Q160 140 150 146', 'ochre', 7, .85), `<circle cx="150" cy="146" r="4" fill="${wv('skin')}" fill-opacity=".9"/>`, pth('M146 132h9v15h-9Z', 'charcoal', .75, 'wcFig'),
+    `<g class="bob">${pth('M170 46c-6 -8 -16 -2 -10 6l10 9l10 -9c6 -8 -4 -14 -10 -6Z', 'rose', .85, 'wcFig')}</g><g class="bob d2">${pth('M194 26c-4 -5 -10 -1 -6 4l6 5l6 -5c4 -5 -2 -9 -6 -4Z', 'ochre', .8, 'wcFig')}</g>`,
+    ln('M156 132Q164 96 168 64', .7, .35).replace('stroke-linecap', 'stroke-dasharray="2 4" stroke-linecap')
+  ].join(''), 16, true);
+
+  const kiteIcon = k => wkite(k, 0, 0, 1, KCOL[k] || 'lilac', 0, false);
+
+  return {D, P, KPOS, AMAYA, kiteIcon, portrait, svgWrap, bust};
 })();
 
 // Draw every illustration, with a faint paper grain over each scene
 document.querySelectorAll('svg[data-ill]').forEach(s => {
   const k = s.dataset.ill;
   s.insertAdjacentHTML('beforeend', k.startsWith('m:') ? Q.portrait(k.slice(2)) : Q.D[k]());
-  if (!/^(hero|i[A-Z]|tea|m:)/.test(k)) { const [, , w, h] = s.getAttribute('viewBox').split(' ').map(Number); s.insertAdjacentHTML('beforeend', `<rect width="${w}" height="${h}" rx="${k[0] === 'v' ? 20 : 0}" fill="#000" filter="url(#qGrain)" style="mix-blend-mode:multiply" opacity=".32"/>`); }
+  if (!/^(hero|places|vGrandma|i[A-Z]|tea|m:)/.test(k)) { const [, , w, h] = s.getAttribute('viewBox').split(' ').map(Number); s.insertAdjacentHTML('beforeend', `<rect width="${w}" height="${h}" rx="${k[0] === 'v' ? 20 : 0}" fill="#000" filter="url(#qGrain)" style="mix-blend-mode:multiply" opacity=".32"/>`); }
   if (!s.hasAttribute('role')) s.setAttribute('focusable', 'false');
 });
 
-// Hero: moments travel around the circle, with a ticker that says what just happened
+// Hero: moments travel between the kites and Amaya as small glints, with a ticker that says what just happened
 (() => {
-  const NS = 'http://www.w3.org/2000/svg', {POS, C} = Q, sparks = document.getElementById('sparks');
+  const NS = 'http://www.w3.org/2000/svg', {KPOS, AMAYA} = Q, sparks = document.getElementById('sparks');
   const FEED = [
-    ['jaya', 'dilhani', 'var(--coral)', 'Ms. Jayasinghe shared a moment', 'Amaya painted the canteen mural · 08:55'],
-    ['dilhani', 'jaya', 'var(--amber)', 'Dilhani said thank you', '“She came home so proud today.”'],
-    ['perera', 'ruwan', 'var(--indigo-2)', 'Mr. Perera shared this week’s learning', 'Try at home: cut a roti into quarters'],
-    ['kamala', 'jaya', 'var(--amber)', 'Grandma loved a moment', 'Kamala Perera, from Kandy'],
-    ['herath', 'ruwan', 'var(--coral)', 'Coach Herath shared a moment', 'First full length of butterfly!'],
-    ['dilhani', 'perera', 'var(--teal)', 'We tried it at home', 'Fractions with a roti · Mon 18:20']
+    ['jaya', 'dilhani', 'Ms. Jayasinghe shared a moment', 'Amaya painted the canteen mural · 08:55'],
+    ['dilhani', 'jaya', 'Dilhani said thank you', '“She came home so proud today.”'],
+    ['perera', 'ruwan', 'Mr. Perera shared this week’s learning', 'Try at home: cut a roti into quarters'],
+    ['kamala', 'jaya', 'Grandma loved a moment', 'Kamala Perera, from Kandy'],
+    ['herath', 'ruwan', 'Coach Herath shared a moment', 'First full length of butterfly!'],
+    ['dilhani', 'perera', 'We tried it at home', 'Fractions with a roti · Mon 18:20']
   ];
   const av = document.getElementById('tkAv'), tx = document.getElementById('tkTx');
-  const show = f => { av.innerHTML = Q.svgWrap('0 0 100 100', Q.portrait(f[0])); tx.innerHTML = `<b>${f[3]}</b><small>${f[4]}</small>`; };
+  const show = f => { av.innerHTML = Q.svgWrap('-30 -40 60 84', Q.kiteIcon(f[0])); tx.innerHTML = `<b>${f[2]}</b><small>${f[3]}</small>`; };
   let i = 0; show(FEED[0]);
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  const fly = f => { const a = POS[f[0]], b = POS[f[1]];
-    const g = document.createElementNS(NS, 'g'); g.innerHTML = `<circle r="16" fill="${f[2]}" opacity=".22"/><circle r="8" fill="${f[2]}"/><circle r="3" fill="#fff"/>`; sparks.appendChild(g);
-    const t0 = performance.now(), Dur = 1600, mid = [C + (a[0] + b[0] - 2 * C) * .12, C + (a[1] + b[1] - 2 * C) * .12];
+  const fly = f => { const a = KPOS[f[0]], b = KPOS[f[1]], m = AMAYA;
+    const g = document.createElementNS(NS, 'g'); g.innerHTML = '<circle r="14" fill="#FFE7A8" opacity=".35"/><circle r="5" fill="#FFF6DA"/><circle r="2.2" fill="#fff"/>'; sparks.appendChild(g);
+    const t0 = performance.now(), Dur = 2200;
     const step = now => { const k = Math.min(1, (now - t0) / Dur), e = k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2, u = 1 - e;
-      g.setAttribute('transform', `translate(${u * u * a[0] + 2 * u * e * mid[0] + e * e * b[0]} ${u * u * a[1] + 2 * u * e * mid[1] + e * e * b[1]})`); g.setAttribute('opacity', k > .88 ? (1 - k) / .12 : 1);
+      g.setAttribute('transform', `translate(${u * u * a[0] + 2 * u * e * m[0] + e * e * b[0]} ${u * u * a[1] + 2 * u * e * m[1] + e * e * b[1]})`); g.setAttribute('opacity', k > .85 ? (1 - k) / .15 : Math.min(1, k * 8));
       if (k < 1) requestAnimationFrame(step); else g.remove(); };
     requestAnimationFrame(step); };
   fly(FEED[0]);
@@ -1028,11 +1180,6 @@ document.querySelectorAll('svg[data-ill]').forEach(s => {
   const label = () => btns.forEach(b => { const t = dark() ? 'Switch to light mode' : 'Switch to dark mode'; b.setAttribute('aria-label', t); if (!b.querySelector('svg')) b.textContent = dark() ? 'Light mode' : 'Dark mode'; });
   btns.forEach(b => b.addEventListener('click', () => { root.dataset.theme = dark() ? 'light' : 'dark'; try { document.cookie = `quad_theme=${root.dataset.theme}; path=/; max-age=31536000; samesite=lax`; } catch (e) {} label(); }));
   label(); })();
-
-// Palette switcher (prototype only)
-(() => { const root = document.documentElement, sels = document.querySelectorAll('[data-palette-select]');
-  const set = v => { if (!/^[abc]$/.test(v)) v = 'a'; root.dataset.palette = v; sels.forEach(x => { x.value = v; }); try { localStorage.setItem('quad_landing_palette', v); } catch (e) {} };
-  sels.forEach(x => x.addEventListener('change', () => set(x.value))); sels.forEach(x => { x.value = root.dataset.palette; }); })();
 
 // Section menu at phone width
 (() => { const btn = document.querySelector('.menu-btn'), menu = document.getElementById('menu');
