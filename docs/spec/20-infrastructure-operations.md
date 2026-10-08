@@ -35,7 +35,7 @@ flowchart LR
 |---|---|---|
 | `quad-edu.com` | CloudFront (production) | Landing, sign-in, staff portal, API, realtime, legal, app links |
 | `www.quad-edu.com` | CloudFront | 301 to `quad-edu.com` |
-| `console.quad-edu.com` | CloudFront → ALB (console + `/api/v1/platform/*`) | Separate cookie; WAF rule allows only Quad office and VPN ranges plus Google SSO callbacks (optional, off at launch) |
+| `console.quad-edu.com` | CloudFront → ALB (console; `/api/v1/platform/*`, sign-in under `/api/v1/platform/auth/*` included, and `/socket.io/*` go to the API) | Separate cookie; WAF rule allows only Quad office and VPN ranges plus Google SSO callbacks (optional, off at launch) |
 | `staging.quad-edu.com`, `console.staging.quad-edu.com` | Staging CloudFront | `noindex` header; basic WAF rules |
 | `mail.quad-edu.com` | SES (MAIL FROM, DKIM CNAMEs) | Sending domain for all Quad email (D19) |
 | `status.quad-edu.com` | Hosted status page provider | Outside AWS so it stays up when AWS is down |
@@ -46,9 +46,9 @@ flowchart LR
 
 ## Edge and routing
 
-- **CloudFront** is the only public entry. Behaviours (D14): `/api/v1/*` and `/socket.io/*` go to the ALB with caching off and every header, cookie and query string forwarded; `/_next/static/*` and `/assets/*` cache for a year (hashed names); everything else goes to the ALB with caching off. CloudFront adds a secret origin header that the ALB requires, so the ALB cannot be reached directly.
-- **ALB** listener rules: host `console.*` → console target group (and `/api/v1/platform/*` → api); `/api/v1/*` and `/socket.io/*` → api; everything else → staff. Stickiness (application cookie, 1 day) on the `/socket.io` rule for the long-polling fallback. Idle timeout 120 s for WebSockets.
-- **AWS WAF** on CloudFront: AWS managed rules (common, known bad inputs, SQL injection, IP reputation, anonymous IP for the console), rate rules (2,000 requests per 5 minutes per IP overall; 100 per 5 minutes per IP on `/api/v1/auth/*` and `/api/v1/public/*`), and a geo block list kept empty by default. Application rate limits in Redis stay in place behind it ([16](16-security-privacy.md)).
+- **CloudFront** is the only public entry. Behaviours (D14): `/api/v1/*` and `/socket.io/*` go to the ALB with caching off and every header, cookie and query string forwarded; `/_next/static/*` and `/assets/*` cache for a year (hashed names); everything else goes to the ALB with caching off. CloudFront adds a secret origin header that the ALB requires, so the ALB cannot be reached directly; the secret rotates without downtime through two slots the ALB accepts at once (D28).
+- **ALB** listener rules, each also requiring the origin header: host `console.*` with `/api/v1/platform/*` → api and with `/socket.io/*` → the api's realtime target group, the rest of `console.*` → console; `/api/v1/*` → api; `/socket.io/*` → the realtime target group; everything else → staff. The realtime target group is sticky on the ALB's own cookie (`lb_cookie`, 1 day) for the long-polling fallback, so the app sets no cookie for it; the Flutter client connects with `transports: ['websocket']` and needs no stickiness (M6). Idle timeout 120 s for WebSockets.
+- **AWS WAF** on CloudFront: AWS managed rules (common, known bad inputs, SQL injection, IP reputation, anonymous IP for the console), rate rules (2,000 requests per 5 minutes per IP overall, not counting `/_next/static/*` and `/assets/*`; 100 per 5 minutes per IP on `/api/v1/auth/*`, `/api/v1/platform/auth/*` and `/api/v1/public/*`), and a geo block list kept empty by default. The common rule set's 8 KB body limit only counts and is enforced outside `/api/v1/*`, where the API's own body limits apply; the anonymous IP list's hosting-provider rule only counts, so CI runners reach the console. Application rate limits in Redis stay in place behind it ([16](16-security-privacy.md)).
 
 ## Compute (ECS Fargate)
 
@@ -69,10 +69,10 @@ Staging runs one task of each at the smallest size. Deploys are rolling with the
 | Store | Setup |
 |---|---|
 | RDS PostgreSQL 16 | `db.r6g.large` Multi-AZ at launch, gp3 storage with autoscaling, encrypted with KMS, Performance Insights on. Parameter group: `rds.force_ssl=1`, `log_min_duration_statement=500`. Roles `quad_owner`, `quad_app`, `quad_platform` ([02](02-architecture.md#database-roles-and-rls-d17)) |
-| RDS Proxy | In front of RDS for the api and worker (IAM auth, TLS). `withTenant` uses `set_config(..., true)` inside a transaction, so connections are not pinned. Migrations connect directly to RDS, not through the proxy |
+| RDS Proxy | In front of RDS for the api and worker (IAM auth, TLS). Staging uses Secrets Manager password auth (SCRAM-SHA-256, TLS required) until production adds IAM auth and rotation in M12. `withTenant` uses `set_config(..., true)` inside a transaction, so connections are not pinned. Migrations connect directly to RDS, not through the proxy |
 | Backups | Automated backups with point-in-time recovery for **35 days**; a daily snapshot copied to `ap-southeast-1` and kept 35 days; a monthly snapshot kept 12 months. Deletion protection on |
 | ElastiCache Redis 7 | `cache.t4g.medium`, primary + replica, Multi-AZ failover, TLS and AUTH, `noeviction` (queues must not lose jobs) |
-| S3 | `quad-<env>-private` (uploads, exports, report PDFs; block public access; SSE-KMS; versioning with 30-day noncurrent expiry; presigned PUT, signed CloudFront GET) and `quad-<env>-public` (landing images, logo variants; behind CloudFront with origin access control). Lifecycle: `tmp/` expires after 1 day, exports after 7 days |
+| S3 | `quad-<env>-private` (uploads, exports, report PDFs; block public access; SSE-KMS; versioning with 30-day noncurrent expiry; presigned PUT, signed CloudFront GET) and `quad-<env>-public` (landing images, logo variants; behind CloudFront with origin access control). Lifecycle: `tmp/` expires after 1 day, exports after 7 days, offboarding exports (`offboarding/`) after 30 days |
 | ClamAV | `clamav` service with `freshclam` updates; the `scan-file` job streams each upload to it and marks the file `clean` or `infected` ([15](15-cross-cutting.md#files)) |
 | Search | PostgreSQL full-text search; no separate search service in v1 |
 
@@ -80,27 +80,31 @@ Staging runs one task of each at the smallest size. Deploys are rolling with the
 
 ```
 infra/
+├── bootstrap/     # tooling account: the state bucket, lock table, state KMS key and per-environment state roles
 ├── modules/
-│   ├── network/   # VPC, 3 public + 3 private subnets, NAT gateways (1 in staging, 3 in production), VPC endpoints for S3, ECR, Secrets Manager, Logs
-│   ├── data/      # RDS, RDS Proxy, ElastiCache, S3 buckets, KMS keys, backup copy
-│   ├── app/       # ECS cluster, services, task roles, ECR, autoscaling, Cloud Map, the migrate task definition
+│   ├── network/   # VPC, 3 public + 3 private subnets, NAT gateways (1 in staging, 3 in production), the S3 gateway endpoint and interface endpoints for ECR, Secrets Manager, Logs (one zone in staging)
+│   ├── data/      # RDS, RDS Proxy, ElastiCache, S3 buckets, KMS keys, the database and Redis secrets, backup copy
+│   ├── app/       # ECS cluster, services, task roles, ECR, autoscaling, Cloud Map, the migrate, seed and db-bootstrap task definitions, GitHub OIDC roles
 │   ├── edge/      # ALB, CloudFront, WAF, ACM
-│   └── dns/       # Route 53 zone and records, SES domain identity
-└── envs/
-    ├── staging/
-    └── production/
+│   └── dns/       # the environment's records in the shared zone, SES domain identity and events topic
+├── envs/
+│   ├── global/    # tooling account: the quad-edu.com zone, records shared by every environment, DNS roles
+│   ├── staging/
+│   └── production/
+└── observability/ # dashboards as code (staging: the CloudWatch overview)
 ```
 
-- State in an S3 bucket with versioning and a DynamoDB lock table, one state per environment, in a separate AWS account for shared tooling. Staging and production are separate AWS accounts under AWS Organizations.
-- `terraform plan` runs on every pull request that touches `infra/` and is posted as a comment; `apply` runs only from the deploy workflow with approval.
+- State in an S3 bucket with versioning and a DynamoDB lock table (plus Terraform's S3 lock file), one state per environment, in a separate AWS account for shared tooling (`infra/bootstrap`). Plans and applies reach it through per-environment state roles, and every backend passes the state KMS key. The zone lives in the tooling account too (`envs/global`); each environment writes only its own record names through its own DNS role. Staging and production are separate AWS accounts under AWS Organizations.
+- `terraform plan` runs on every same-repository pull request that touches `infra/` (`infra.yml`), without a refresh or a lock, because the plan role may not read secret values (ruling R-pr-plan, D28). The repository is public, so only a summary (resource addresses, actions and counts) is posted as a comment, never the full plan. `apply` runs on `main` behind the `infra-staging` environment's reviewers, after a refreshed plan; a weekly refresh-only plan reports drift. An infra change that an app change needs is merged and applied first, since the app deploy does not wait for the apply.
 - Tags on every resource: `env`, `service`, `owner`, `cost-centre`.
+- The first deploy, the checks it must make and the runbooks are in [`infra/README.md`](../../infra/README.md).
 
 ## CI/CD (GitHub Actions)
 
 | Trigger | Does |
 |---|---|
 | Pull request | Install with cache, `pnpm verify` against Docker services (no preview environments, D18), build every app and image, `terraform plan` if `infra/` changed. Required checks: typecheck, lint, unit, codegen, api-integration, e2e-smoke, build |
-| Merge to `main` | The same, then push images to ECR, run the **migrate** task on staging, deploy staging, run the smoke journeys against `staging.quad-edu.com`, build the parent app `staging` flavor and upload it to TestFlight and the Play internal track |
+| Merge to `main` | The same; then, once CI is green and only for the tip of `main` (`deploy-staging.yml`), push images to ECR, run the **db-bootstrap** and **migrate** tasks on staging, deploy staging, seed it, run the smoke checks against `staging.quad-edu.com`, build the parent app `staging` flavor and upload it to TestFlight and the Play internal track |
 | Release tag `v*` | Manual approval in the `production` GitHub environment, then the migrate task on production, deploy production with the same image digests, smoke check, Sentry release |
 | Nightly | Maestro and `integration_test` on iOS and Android simulators (macOS runner), dependency and image scans, the OWASP ZAP baseline scan of staging (from M12) |
 
@@ -113,14 +117,15 @@ Deploy access uses GitHub OIDC to assume an AWS role per environment; there are 
 - AWS Secrets Manager holds every secret listed in [02 → Environment variables](02-architecture.md#environment-variables); ECS injects them into tasks. Non-secret config is plain task environment.
 - KMS keys: one for RDS and S3, one for field-level encryption (TOTP secrets, safeguarding, medical notes, school gateway credentials).
 - Rotation: database passwords every 90 days (Secrets Manager rotation); `SESSION_SECRET`, `LINK_SIGNING_SECRET` and JWT keys support two active values (current and previous) so rotation does not sign everyone out. Runbook below.
-- App signing keys and store credentials live in GitHub environment secrets (production environment, approval required).
+- App signing keys and store credentials live in GitHub environment secrets: `staging-stores` for staging builds and `production` for releases, each with required reviewers and deployments from `main` only. The `staging` environment, which the staging deploy uses, allows `main` only and has no reviewers, so a merge to `main` deploys staging with no manual step (ruling R-env-approvals, D28); `infra-staging` (Terraform applies) keeps its reviewers.
+- Staging (M0b) generates database passwords, the Redis token and the session and link-signing secrets in Terraform as write-only values, never in state, and rotates them by raising a version (`infra/README.md` runbooks); Secrets Manager rotation arrives with production.
 
 ## Providers
 
 ### Email (Amazon SES)
 - Sending domain `mail.quad-edu.com` with SPF (`include:amazonses.com`), DKIM (Easy DKIM, 2048-bit), a custom MAIL FROM, and DMARC `p=quarantine` with reports to a Quad mailbox. The apex keeps Google Workspace (D19).
 - From `"{School name} via Quad" <no-reply@mail.quad-edu.com>`; Reply-To the school's office address from School settings. Platform mail (console, billing, demo replies) comes from `Quad <hello@mail.quad-edu.com>`.
-- Bounces and complaints: SES configuration set → SNS → `POST /api/v1/webhooks/ses` (signature checked) → `email_suppressions` (address, reason, at). Suppressed addresses are skipped and the school sees "Email bounced" on the person. Production access requested from AWS before M12.
+- Bounces and complaints: SES configuration set → SNS → `POST /api/v1/webhooks/ses` (signature checked) → `email_suppressions` (address, reason, at). Suppressed addresses are skipped and the school sees "Email bounced" on the person. Staging stays in the SES sandbox; production access is requested from AWS before M12.
 
 ### SMS
 - Notify.lk for `+94` numbers; Twilio for every other country. The adapter picks by country code.
@@ -153,11 +158,11 @@ Deploy access uses GitHub OIDC to assume an AWS role per environment; there are 
 
 ## Observability
 
-- **Traces:** OpenTelemetry SDK in api, worker, staff and console; spans carry `tenant_id`, route and job name; exported over OTLP to Grafana Cloud (Tempo), or CloudWatch X-Ray if Grafana is not used. Sampling 10% plus every error and every request over 1 s.
+- **Traces:** OpenTelemetry SDK in api, worker, staff and console; spans carry `tenant_id`, route and job name; exported over OTLP to Grafana Cloud (Tempo), or CloudWatch X-Ray if Grafana is not used. Sampling 10% plus every error and every request over 1 s (staging samples 100%).
 - **Logs:** Pino JSON to CloudWatch Logs (30 days), shipped to Grafana Loki (14 days). No personal data ([15](15-cross-cutting.md#observability)).
 - **Metrics:** request rate, error rate and latency per route; queue depth and failures per queue; webhook outcomes per gateway; push sent and failed; SMS segments and spend; email bounces; Ask Quad tokens, cost and latency; RDS CPU, connections and replica lag; Redis memory.
 - **Errors:** Sentry for API, web and Flutter, with release tags and PII scrubbing (D21).
-- **Dashboards:** Platform overview (SLOs), API, Jobs, Messaging (push, SMS, email), Payments, Ask Quad, Database. Kept as code in `infra/observability/`.
+- **Dashboards:** Platform overview (SLOs), API, Jobs, Messaging (push, SMS, email), Payments, Ask Quad, Database. Kept as code in `infra/observability/`. Staging starts with one CloudWatch dashboard, `quad-staging-overview` (M0b), until the Grafana account exists.
 
 ## Service levels
 

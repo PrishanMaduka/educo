@@ -1,0 +1,50 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "globalDependencies": [
+    ".env.example",
+    ".nvmrc",
+    ".fvmrc",
+    "packages/config/eslint/**",
+    "eslint.config.mjs"
+  ],
+  "agentGuidance": false,
+  "globalEnv": ["APP_ENV", "NODE_ENV"],
+  "globalPassThroughEnv": ["CI", "QUAD_REQUIRE_FLUTTER", "NODE_EXTRA_CA_CERTS"],
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build", "tokens:build"],
+      "env": ["NEXT_PUBLIC_*"],
+      "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
+    },
+    "dev": {
+      "dependsOn": ["^build"],
+      "cache": false,
+      "persistent": true
+    },
+    "typecheck": { "dependsOn": ["^build"], "outputs": [] },
+    "lint": { "outputs": [] },
+    "test": { "dependsOn": ["^build"], "outputs": ["coverage/**"] },
+    "test:api": {
+      "dependsOn": ["^build"],
+      "cache": false,
+      "env": [
+        "DATABASE_URL",
+        "DATABASE_PLATFORM_URL",
+        "DATABASE_OWNER_URL",
+        "DATABASE_ADMIN_URL",
+        "DATABASE_POOL_MAX",
+        "REDIS_URL"
+      ]
+    },
+    "e2e": {
+      "dependsOn": ["build"],
+      "cache": false,
+      "passThroughEnv": ["CI", "PLAYWRIGHT_BROWSERS_PATH", "QUAD_SCREENSHOTS"],
+      "outputs": ["playwright-report/**"]
+    },
+    "tokens:build": {
+      "outputs": ["packages/tokens/dist/**", "apps/parent/lib/theme/tokens.g.dart"]
+    },
+    "i18n:build": { "outputs": ["apps/parent/lib/l10n/*.arb"] }
+  }
+}

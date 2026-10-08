@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig/node.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "allowJs": true,
+    "declaration": false,
+    "lib": ["ES2023", "DOM"],
+    "types": ["node"]
+  },
+  "include": ["test/**/*.ts", "vitest/**/*.ts", "vitest.config.ts", "playwright/**/*.ts"]
+}

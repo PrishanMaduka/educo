@@ -1,0 +1,29 @@
+# Build context for docker/*.Dockerfile (scripts/docker-build.mjs builds from the repository root).
+# Keep every package.json that pnpm-lock.yaml names, so `pnpm install --frozen-lockfile` matches.
+.git
+.github
+.claude
+**/node_modules
+**/.next
+**/dist
+# The generated token CSS is committed and the web builds read it (no tokens:build in the image).
+!packages/tokens/dist
+**/.turbo
+**/.cache
+**/*.tsbuildinfo
+.superpowers
+design
+docs
+infra
+**/.env*
+!.env.example
+apps/parent/android
+apps/parent/ios
+apps/parent/build
+apps/parent/test
+apps/parent/assets
+apps/parent/packages
+apps/parent/.dart_tool
+**/coverage
+**/test-results
+**/playwright-report

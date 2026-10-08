@@ -1,0 +1,5 @@
+// prod flavor, Release build (spec 09, Flavors and configuration).
+#include "Release.xcconfig"
+
+PRODUCT_BUNDLE_IDENTIFIER = com.quadedu.parent
+APP_DISPLAY_NAME = Quad

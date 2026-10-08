@@ -1,0 +1,43 @@
+{
+  "name": "@quad/contracts",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./i18n/en.json": "./i18n/en.json",
+    "./i18n/design.en.json": "./i18n/design.en.json",
+    "./web-env": {
+      "types": "./src/web-env.ts",
+      "default": "./src/web-env.ts"
+    },
+    "./public": {
+      "types": "./src/public/demo-request.ts",
+      "default": "./src/public/demo-request.ts"
+    },
+    "./observability": {
+      "types": "./src/observability/index.ts",
+      "default": "./src/observability/index.ts"
+    }
+  },
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "i18n:build": "tsx src/i18n/cli.ts"
+  },
+  "dependencies": {
+    "zod": "3.25.76"
+  },
+  "devDependencies": {
+    "@formatjs/icu-messageformat-parser": "3.5.21",
+    "@quad/config": "workspace:*",
+    "@types/node": "22.20.5",
+    "tsx": "4.23.15",
+    "typescript": "5.9.3",
+    "vitest": "3.2.7"
+  }
+}

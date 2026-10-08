@@ -1,0 +1,20 @@
+{
+  "$schema": "./node_modules/@openapitools/openapi-generator-cli/config.schema.json",
+  "spaces": 2,
+  "generator-cli": {
+    "version": "7.10.0",
+    "generators": {
+      "quad-api-dart": {
+        "generatorName": "dart-dio",
+        "inputSpec": "packages/contracts/openapi.json",
+        "output": "apps/parent/packages/quad_api",
+        "templateDir": "scripts/openapi-templates/dart-dio",
+        "additionalProperties": {
+          "pubName": "quad_api",
+          "pubDescription": "Generated Quad API client",
+          "serializationLibrary": "json_serializable"
+        }
+      }
+    }
+  }
+}

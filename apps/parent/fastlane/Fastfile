@@ -1,0 +1,146 @@
+# Parent app store lanes (spec 20, App store publishing; D28). Run from
+# apps/parent with `bundle exec fastlane <platform> <lane>`; see README.md.
+#
+# Signing rule: credentials come only from environment variables (the GitHub
+# `staging` environment secrets) or fastlane match. Nothing is committed: the
+# files the lanes write (android/key.properties, the keystore, the Firebase
+# configs) are git-ignored.
+
+require "base64"
+require "fileutils"
+
+# fastlane would otherwise overwrite the hand-written fastlane/README.md.
+skip_docs
+# No usage analytics leave the CI runner.
+opt_out_usage
+
+APP_ROOT = File.expand_path("..", __dir__)
+STAGING_ID = "com.quadedu.parent.staging"
+
+# An optional store build number (CI passes its run number), so that every
+# upload is newer than the last; without it pubspec.yaml's build number is used.
+def build_number_flag
+  number = ENV.fetch("BUILD_NUMBER", "")
+  number.empty? ? "" : " --build-number=#{number}"
+end
+
+# Writes base64 `ENV[name]` to `path` (under apps/parent) when it is set.
+def write_b64(name, path)
+  value = ENV.fetch(name, "")
+  return false if value.empty?
+
+  target = File.join(APP_ROOT, path)
+  FileUtils.mkdir_p(File.dirname(target))
+  File.binwrite(target, Base64.decode64(value))
+  File.chmod(0o600, target)
+  true
+end
+
+ANDROID_SIGNING_VARS = %w[
+  ANDROID_KEYSTORE_B64
+  ANDROID_KEYSTORE_PASSWORD
+  ANDROID_KEY_ALIAS
+  ANDROID_KEY_PASSWORD
+].freeze
+STAGING_AAB = "build/app/outputs/bundle/stagingRelease/app-staging-release.aab"
+
+def android_signing_vars_set?
+  ANDROID_SIGNING_VARS.all? { |name| !ENV.fetch(name, "").empty? }
+end
+
+# A value for a Java .properties file, where a backslash is an escape.
+def properties_value(name)
+  ENV.fetch(name).gsub("\\") { "\\\\" }
+end
+
+# A value match exported for the staging App Store profile
+# (sigh_<app id>_appstore_<suffix>), or a clear error when it is missing.
+def match_value(suffix)
+  name = "sigh_#{STAGING_ID}_appstore_#{suffix}"
+  value = ENV.fetch(name, "")
+  UI.user_error!("match did not export #{name}: check that match ran for #{STAGING_ID}") if value.empty?
+  value
+end
+
+platform :ios do
+  desc "Build the staging flavor and upload it to TestFlight"
+  lane :staging do
+    setup_ci
+    match(type: "appstore", readonly: true, app_identifier: "com.quadedu.parent.staging")
+
+    # Sign Release-staging with the match profile. Flutter then writes the
+    # manual-signing export options itself.
+    update_code_signing_settings(
+      path: File.join(APP_ROOT, "ios/Runner.xcodeproj"),
+      use_automatic_signing: false,
+      targets: ["Runner"],
+      build_configurations: ["Release-staging"],
+      team_id: match_value("team-id"),
+      profile_name: match_value("profile-name"),
+      code_sign_identity: "Apple Distribution"
+    )
+
+    # The quad-staging Firebase app's client config (firebase/README.md).
+    write_b64("GOOGLE_SERVICE_INFO_PLIST_B64", "ios/config/staging/GoogleService-Info.plist")
+
+    Dir.chdir(APP_ROOT) do
+      sh("flutter build ipa --flavor staging --release --dart-define-from-file=env/staging.json --export-method app-store#{build_number_flag}")
+    end
+
+    upload_to_testflight(
+      api_key: app_store_connect_api_key(
+        key_id: ENV.fetch("ASC_KEY_ID"),
+        issuer_id: ENV.fetch("ASC_ISSUER_ID"),
+        key_content: ENV.fetch("ASC_KEY_P8_B64"),
+        is_key_content_base64: true
+      ),
+      app_identifier: STAGING_ID,
+      ipa: Dir[File.join(APP_ROOT, "build/ios/ipa/*.ipa")].first,
+      skip_waiting_for_build_processing: true
+    )
+  end
+end
+
+platform :android do
+  desc "Build the staging flavor's app bundle, signed with the upload key when it is given"
+  lane :staging_build do
+    if android_signing_vars_set?
+      keystore = File.join(APP_ROOT, "android/upload-keystore.jks")
+      write_b64("ANDROID_KEYSTORE_B64", "android/upload-keystore.jks")
+      properties = File.join(APP_ROOT, "android/key.properties")
+      File.write(properties, <<~PROPERTIES)
+        storeFile=#{keystore}
+        storePassword=#{properties_value("ANDROID_KEYSTORE_PASSWORD")}
+        keyAlias=#{properties_value("ANDROID_KEY_ALIAS")}
+        keyPassword=#{properties_value("ANDROID_KEY_PASSWORD")}
+      PROPERTIES
+      File.chmod(0o600, properties)
+    else
+      UI.important("Android signing secrets are not set: the bundle is signed with the debug keys")
+    end
+
+    Dir.chdir(APP_ROOT) do
+      sh("flutter build appbundle --flavor staging --release --dart-define-from-file=env/staging.json#{build_number_flag}")
+    end
+  end
+
+  desc "Build the staging flavor and upload it to the Play internal track"
+  lane :staging do
+    # Play refuses a bundle signed with the debug keys, so fail early.
+    UI.user_error!("Set #{ANDROID_SIGNING_VARS.join(', ')} to upload to Play") unless android_signing_vars_set?
+
+    staging_build
+    upload_to_play_store(
+      track: "internal",
+      package_name: "com.quadedu.parent.staging",
+      aab: File.join(APP_ROOT, STAGING_AAB),
+      json_key_data: ENV.fetch("PLAY_SERVICE_ACCOUNT_JSON"),
+      # Play accepts only drafts until the app's first release is published.
+      release_status: "draft",
+      skip_upload_metadata: true,
+      skip_upload_changelogs: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true
+    )
+  end
+end

@@ -1,0 +1,5 @@
+// staging flavor, Debug build (spec 09, Flavors and configuration).
+#include "Debug.xcconfig"
+
+PRODUCT_BUNDLE_IDENTIFIER = com.quadedu.parent.staging
+APP_DISPLAY_NAME = Quad Staging

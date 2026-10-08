@@ -1,0 +1,6 @@
+# fastlane for the parent app's store lanes (spec 20, App store publishing).
+# Install with `bundle config set --local path vendor/bundle && bundle install`,
+# then run `bundle exec fastlane <platform> <lane>`; see fastlane/README.md.
+source "https://rubygems.org"
+
+gem "fastlane", "2.240.1"

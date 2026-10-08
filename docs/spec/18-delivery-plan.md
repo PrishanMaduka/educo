@@ -44,6 +44,7 @@ To run a milestone in Claude Code, type `/build-milestone M3` (ids with a letter
 
 ## M0b Infrastructure and staging
 **Read:** 20, 02 (Environments, Paths, Environment variables), 16 (Operational security).
+**Status:** written and validated offline; pending first deploy (see [`infra/README.md`](../../infra/README.md)). No AWS, Firebase, Sentry, Apple or Google account exists yet, so nothing has been applied or deployed and the acceptance checks below are still open. Tick M0b in Progress only after the first deploy meets them. Two Accept items are qualified: traces carry `tenant_id` only once requests have a tenant, so that part of the trace check completes in M1; and the fastlane signing and store credentials live in GitHub environment secrets (`staging-stores`, required reviewers), the accepted exception to "no secret … in GitHub except deploy role ARNs" (D28).
 **Scope:**
 - `infra/` Terraform with the modules `network`, `data`, `app`, `edge`, `dns` and the `staging` environment; remote state in S3 with a DynamoDB lock; separate AWS accounts for tooling and staging.
 - Route 53 zone for `quad-edu.com`, ACM certificates, CloudFront + WAF + ALB with the path routing from D14 (`/api/v1/*` and `/socket.io/*` to the API, sticky `/socket.io`, everything else to staff; `console.staging.quad-edu.com` to the console), the origin secret header.
@@ -92,9 +93,11 @@ To run a milestone in Claude Code, type `/build-milestone M3` (ids with a letter
 > Build milestone M1 from docs/spec/18-delivery-plan.md (read 02 Tenancy, 04, 05, 06, 08 Users & roles and School settings, and 16). Implement every sign-in flow, sessions, signed-link tokens, RBAC with the permission matrix, plan and module guards, FORCE RLS on all tenant tables, Settings → Users & roles, the School settings screen shell, the Audit view, the audit logs and support access. Write API integration tests for every flow, including cross-tenant and wrong-role denials, and add journeys 17, 18, 19, 42 and 43. Run pnpm verify.
 
 ## M1b Public site
+**Built early:** the landing page at `/` was built ahead of this milestone for the pre-launch site on GitHub Pages (D30, D31): every section, the illustrations, the tokens, the coming-soon note in place of sign-in and a demo form that opens an email. The rest of M1b below (the sign-in dialog, the demo endpoint, legal pages, `/p/*`, SEO extras, analytics, Lighthouse and the visual test) is still to do, and M1b stays unticked.
+
 **Read:** 19, 05 (Staff portal sign-in), 08 (Public landing page), 03 (public-site tokens), 16 (Data residency).
 **Scope:**
-- The landing page at `/` from `design/landing.html`, section by section as in [19](19-public-site.md#page-structure): top bar, hero with the orbit and ticker, strip, Circle day band, leaders heatmap, Why Quad, modules, Inside Quad with light and dark screenshots, privacy, demo form, footer.
+- The landing page at `/` from `design/landing.html`, section by section as in [19](19-public-site.md#page-structure): top bar, hero with the illustrated orbit and ticker, strip, the circle explained, Circle day band, four ideas, leaders heatmap, modules on the campus illustration, privacy, demo form, footer, with the shared SVG illustration components (no screenshots, D29).
 - The sign-in dialog on the landing page (the M1 flow), `/#signin`, and **Open {school}** for signed-in visitors.
 - Demo requests: `POST /api/v1/public/demo-requests` with Turnstile, a 5 per hour per IP limit and a honeypot; `platform_leads`; the sales email and the requester's confirmation.
 - Legal pages `/legal/terms`, `/legal/privacy`, `/legal/dpa`, `/legal/subprocessors` (the D21 list), `/legal/cookies`.
@@ -192,7 +195,7 @@ To run a milestone in Claude Code, type `/build-milestone M3` (ids with a letter
   - Messages (with mark read, archive and mute), More, staff directory, contact-details change (with the staff review queue), notification settings (seven categories and the SMS backup flag), Help;
   - offline cache encrypted and wiped on sign-out and school switch; `GET /app/config` with force update; the full deep-link table on `quad://` and `https://quad-edu.com/p/…`.
 - Staff side: the Inbox (with reply templates, `message_templates`), Broadcasts (preview, SMS cost estimate, urgent flag), and the "Changes from parents" queue (contact changes now; pickup approvals join it in M11).
-- FCM push with deep links (`go_router`) and the in-app notification list. Realtime connection in all apps.
+- FCM push with deep links (`go_router`) and the in-app notification list. Realtime connection in all apps; the Flutter Socket.IO client uses `transports: ['websocket']` (ruling R-sticky, D28).
 
 **Accept:**
 - Journeys 4 (push), 30, 31, 32 and 45.
@@ -337,8 +340,8 @@ To run a milestone in Claude Code, type `/build-milestone M3` (ids with a letter
 ---
 
 ## Progress
-- [ ] M0 Foundations
-- [ ] M0b Infrastructure and staging
+- [x] M0 Foundations
+- [ ] M0b Infrastructure and staging (written and validated offline; pending first deploy, see infra/README.md)
 - [ ] M1 Auth, tenancy and permissions
 - [ ] M1b Public site
 - [ ] M2 Platform console

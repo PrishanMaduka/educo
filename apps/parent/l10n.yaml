@@ -1,0 +1,8 @@
+# Strings come from packages/contracts/i18n/en.json via `pnpm i18n:build` (writes app_en.arb).
+# Flutter 3.47 has no synthetic package: the classes are generated next to the ARB on
+# `flutter pub get` / `flutter gen-l10n` and are not committed.
+arb-dir: lib/l10n
+template-arb-file: app_en.arb
+output-localization-file: app_localizations.dart
+output-class: AppLocalizations
+nullable-getter: false

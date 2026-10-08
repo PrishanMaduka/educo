@@ -34,7 +34,7 @@ Run tests narrowly while looping: `pnpm --filter @quad/domain test -- fees`, `pn
 - Arrange with factories from `packages/db/test/factories.ts` and the deterministic seed; never depend on wall-clock time (inject `now`) or test order.
 - One behaviour per test; the name says the behaviour: `it('refuses a second booking for a taken slot with 409 slot_taken')`.
 - Assert on contract shapes and stable error `code`s, not on message wording.
-- Cross-tenant tests use two real tenants through the real `quad_app` role (Testcontainers), never mocks of `withTenant`.
+- Cross-tenant tests use two real tenants through the real `quad_app` role (compose or CI service containers, a migrated database per test file), never mocks of `withTenant`.
 - Don't mock what you own inside the API; mock only the edges (payment gateways, SMS, email, push, Anthropic) with the fakes in `apps/api/test/fakes`.
 - Never skip, `.only`, loosen an assertion, or raise a snapshot threshold to get green. Fix the cause.
 

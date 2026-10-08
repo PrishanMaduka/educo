@@ -1,0 +1,295 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Quad API",
+    "version": "0.0.0",
+    "description": "School, parent and console routes. Errors are `{ code, message, fields? }`."
+  },
+  "components": {
+    "schemas": {
+      "ErrorBody": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "fields": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ]
+      },
+      "HealthLive": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ok"
+            ]
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "HealthReady": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "down"
+            ]
+          },
+          "db": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "down"
+            ]
+          },
+          "redis": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "down"
+            ]
+          }
+        },
+        "required": [
+          "status",
+          "db",
+          "redis"
+        ]
+      },
+      "SesWebhookAck": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ok"
+            ]
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "SnsEnvelope": {
+        "type": "object",
+        "properties": {
+          "Type": {
+            "type": "string",
+            "enum": [
+              "Notification",
+              "SubscriptionConfirmation",
+              "UnsubscribeConfirmation"
+            ]
+          },
+          "MessageId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "TopicArn": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512
+          },
+          "Message": {
+            "type": "string",
+            "maxLength": 262144
+          },
+          "Timestamp": {
+            "type": "string",
+            "maxLength": 64,
+            "format": "date-time"
+          },
+          "SignatureVersion": {
+            "type": "string",
+            "maxLength": 8
+          },
+          "Signature": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          },
+          "SigningCertURL": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048
+          },
+          "Subject": {
+            "type": "string",
+            "maxLength": 512
+          },
+          "SubscribeURL": {
+            "type": "string",
+            "maxLength": 2048
+          },
+          "Token": {
+            "type": "string",
+            "maxLength": 2048
+          }
+        },
+        "required": [
+          "Type",
+          "MessageId",
+          "TopicArn",
+          "Message",
+          "Timestamp",
+          "SignatureVersion",
+          "Signature",
+          "SigningCertURL"
+        ]
+      }
+    },
+    "parameters": {}
+  },
+  "paths": {
+    "/api/v1/health/live": {
+      "get": {
+        "summary": "The process is up",
+        "tags": [
+          "health"
+        ],
+        "responses": {
+          "200": {
+            "description": "Up",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthLive"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/health/ready": {
+      "get": {
+        "summary": "Postgres and Redis answer",
+        "tags": [
+          "health"
+        ],
+        "responses": {
+          "200": {
+            "description": "Ready to serve traffic",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthReady"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "A dependency is down; the body names it",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthReady"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/openapi.json": {
+      "get": {
+        "summary": "This OpenAPI document",
+        "tags": [
+          "meta"
+        ],
+        "responses": {
+          "200": {
+            "description": "The OpenAPI 3.1 document",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {}
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/webhooks/ses": {
+      "post": {
+        "summary": "SES bounce and complaint events from SNS (signature version 2, pinned topic)",
+        "tags": [
+          "webhooks"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SnsEnvelope"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SesWebhookAck"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "webhooks": {}
+}

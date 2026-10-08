@@ -1,0 +1,163 @@
+${
+# The staging overview dashboard (spec 18 M0b: "one starter dashboard"; D28). envs/staging renders
+# it with templatefile(). Inputs: name, region, alb_arn_suffix, target_groups (name to ARN suffix),
+# cluster_name, service_names, rds_instance_id, redis_member_clusters and waf_web_acl_name.
+# Grafana dashboards follow when the Grafana Cloud account exists.
+jsonencode({
+  widgets = [
+    {
+      type   = "text"
+      x      = 0
+      y      = 0
+      width  = 24
+      height = 2
+      properties = {
+        markdown = "## ${name}: is staging healthy?\nTarget 5XX errors and slow p95 responses come first. Then the services' CPU and memory, the database, Redis, and the requests WAF blocked. All times are UTC."
+      }
+    },
+    {
+      type   = "metric"
+      x      = 0
+      y      = 2
+      width  = 8
+      height = 6
+      properties = {
+        title  = "Target 5XX errors"
+        region = region
+        view   = "timeSeries"
+        stat   = "Sum"
+        period = 300
+        metrics = [
+          for key, suffix in target_groups :
+          ["AWS/ApplicationELB", "HTTPCode_Target_5XX_Count", "TargetGroup", suffix, "LoadBalancer", alb_arn_suffix, { label = key }]
+        ]
+      }
+    },
+    {
+      type   = "metric"
+      x      = 8
+      y      = 2
+      width  = 8
+      height = 6
+      properties = {
+        title  = "Response time p95 (seconds)"
+        region = region
+        view   = "timeSeries"
+        stat   = "p95"
+        period = 300
+        metrics = [
+          for key, suffix in target_groups :
+          ["AWS/ApplicationELB", "TargetResponseTime", "TargetGroup", suffix, "LoadBalancer", alb_arn_suffix, { label = key }]
+        ]
+      }
+    },
+    {
+      type   = "metric"
+      x      = 16
+      y      = 2
+      width  = 8
+      height = 6
+      properties = {
+        title  = "Requests"
+        region = region
+        view   = "timeSeries"
+        stat   = "Sum"
+        period = 300
+        metrics = [
+          for key, suffix in target_groups :
+          ["AWS/ApplicationELB", "RequestCount", "TargetGroup", suffix, "LoadBalancer", alb_arn_suffix, { label = key }]
+        ]
+      }
+    },
+    {
+      type   = "metric"
+      x      = 0
+      y      = 8
+      width  = 12
+      height = 6
+      properties = {
+        title  = "Service CPU (%)"
+        region = region
+        view   = "timeSeries"
+        stat   = "Average"
+        period = 300
+        metrics = [
+          for service in service_names :
+          ["AWS/ECS", "CPUUtilization", "ClusterName", cluster_name, "ServiceName", service, { label = service }]
+        ]
+      }
+    },
+    {
+      type   = "metric"
+      x      = 12
+      y      = 8
+      width  = 12
+      height = 6
+      properties = {
+        title  = "Service memory (%)"
+        region = region
+        view   = "timeSeries"
+        stat   = "Average"
+        period = 300
+        metrics = [
+          for service in service_names :
+          ["AWS/ECS", "MemoryUtilization", "ClusterName", cluster_name, "ServiceName", service, { label = service }]
+        ]
+      }
+    },
+    {
+      type   = "metric"
+      x      = 0
+      y      = 14
+      width  = 8
+      height = 6
+      properties = {
+        title  = "Database"
+        region = region
+        view   = "timeSeries"
+        period = 300
+        metrics = [
+          ["AWS/RDS", "CPUUtilization", "DBInstanceIdentifier", rds_instance_id, { stat = "Average", label = "CPU (%)" }],
+          ["AWS/RDS", "DatabaseConnections", "DBInstanceIdentifier", rds_instance_id, { stat = "Maximum", label = "Connections", yAxis = "right" }],
+        ]
+      }
+    },
+    {
+      type   = "metric"
+      x      = 8
+      y      = 14
+      width  = 8
+      height = 6
+      properties = {
+        title  = "Redis memory used (%)"
+        region = region
+        view   = "timeSeries"
+        stat   = "Average"
+        period = 300
+        # Redis metrics are per member cluster (<group>-001, -002, …): one line per member.
+        metrics = [
+          for member in redis_member_clusters :
+          ["AWS/ElastiCache", "DatabaseMemoryUsagePercentage", "CacheClusterId", member, { label = member }]
+        ]
+      }
+    },
+    {
+      type   = "metric"
+      x      = 16
+      y      = 14
+      width  = 8
+      height = 6
+      properties = {
+        title = "Requests WAF blocked"
+        # A CloudFront web ACL publishes its metrics in us-east-1, without a Region dimension.
+        region = "us-east-1"
+        view   = "timeSeries"
+        stat   = "Sum"
+        period = 300
+        metrics = [
+          ["AWS/WAFV2", "BlockedRequests", "WebACL", waf_web_acl_name, "Rule", "ALL", { label = "Blocked" }],
+        ]
+      }
+    },
+  ]
+})}

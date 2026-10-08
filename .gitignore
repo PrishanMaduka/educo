@@ -1,0 +1,44 @@
+node_modules
+.next
+next-env.d.ts
+dist
+!packages/tokens/dist
+coverage
+.turbo
+.env
+.env.*.local
+*.tsbuildinfo
+playwright-report
+test-results
+.DS_Store
+
+# Controller scratch files; never commit
+.superpowers/
+
+# Flutter / Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.fvm/flutter_sdk
+apps/parent/**/build/
+**/ios/Pods/
+**/android/.gradle/
+**/android/local.properties
+**/.pub-cache/
+**/.pub/
+.env.local
+!.env.example
+
+# Terraform (toolchain cache from `pnpm infra:tools`, working dirs, state and plans)
+.cache/
+**/.terraform/
+infra/modules/**/.terraform.lock.hcl
+*.tfstate*
+*.tfplan
+# Local-only backend overrides (the bootstrap root's first apply, infra/README.md)
+infra/**/*_override.tf
+
+# The staff app's static export (apps/staff/scripts/build-export.mjs)
+apps/staff/site-export/out
+apps/staff/site-export/next-env.d.ts
+apps/staff/site-export/app/icon.svg

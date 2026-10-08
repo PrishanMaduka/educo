@@ -197,13 +197,15 @@ Every link exists in two forms: the custom scheme `quad://…` (used in push pay
 With biometrics on, the app shows the lock screen at launch and after more than **5 minutes in the background** (measured from `AppLifecycleState.paused`). Payments always ask again, whatever the timer.
 
 ### Flavors and configuration
-Values come from `--dart-define-from-file=config/{flavor}.json` (checked in, no secrets) and the Firebase files per flavor.
+Values come from `--dart-define-from-file=env/{flavor}.json` (checked in, no secrets; keys `APP_ENV` (`local`, `staging`, `production`), `API_URL`, `SOCKET_URL`, `SENTRY_DSN`) and the Firebase files per flavor.
 
 | Flavor | Bundle id / application id | API_URL | SOCKET_URL | Firebase project |
 |---|---|---|---|---|
 | `dev` | `com.quadedu.parent.dev` | `http://localhost:4000/api/v1` (`10.0.2.2` on the Android emulator; LAN address on devices) | `ws://localhost:4000` | `quad-dev` |
-| `staging` | `com.quadedu.parent.staging` | `https://staging.quad-edu.com/api/v1` | `wss://staging.quad-edu.com/socket.io` | `quad-staging` |
-| `prod` | `com.quadedu.parent` | `https://quad-edu.com/api/v1` | `wss://quad-edu.com/socket.io` | `quad-prod` |
+| `staging` | `com.quadedu.parent.staging` | `https://staging.quad-edu.com/api/v1` | `wss://staging.quad-edu.com` | `quad-staging` |
+| `prod` | `com.quadedu.parent` | `https://quad-edu.com/api/v1` | `wss://quad-edu.com` | `quad-prod` |
+
+`SOCKET_URL` is a bare origin in every flavor; the realtime client sets the `/socket.io` path itself ([D15, D27](02-architecture.md#decision-log)), and the app refuses a `SOCKET_URL` with a path at launch.
 
 Each flavor has its own app name suffix ("Quad Dev", "Quad Staging"), icon badge, `google-services.json` / `GoogleService-Info.plist`, associated domains (`applinks:staging.quad-edu.com` for staging) and PayHere/Stripe sandbox or live mode (the mode follows the school's gateway account, not the flavor).
 
@@ -219,7 +221,7 @@ At launch and on resume (at most hourly) the app calls `GET /app/config`. If the
 
 ### Store publishing
 - Accounts: Apple Developer Program and Google Play Console under Quad's company. One listing each: "Quad – School & Family".
-- Builds: `fastlane` lanes in GitHub Actions (macOS runner for iOS) produce signed `prod` builds to TestFlight and the Play internal track; `staging` builds go to TestFlight and Firebase App Distribution.
+- Builds: `fastlane` lanes in GitHub Actions (macOS runner for iOS) produce signed `prod` builds to TestFlight and the Play internal track; `staging` builds (bundle id `com.quadedu.parent.staging`) also go to TestFlight and the Play internal track ([20](20-infrastructure-operations.md#app-store-publishing), D28). Signing credentials come only from the GitHub `staging` environment secrets or fastlane `match`; nothing is committed.
 - Privacy: App Store privacy labels and the Google Play data-safety form declare contact info (phone, email), user content (messages, photos), identifiers (push token) and purchases, used for app functionality, not tracking. The privacy policy URL is `https://quad-edu.com/legal/privacy`.
 - Review: a demo account for app review uses a reserved phone number whose OTP is fixed and works only on the production review school (an isolated demo tenant with sample data). It is set by environment variables and listed in the review notes.
 - Permissions strings: camera (invite and pickup scanning, moments photos are staff-only), Face ID, notifications, photo library (profile photo of a pickup person).

@@ -1,0 +1,11 @@
+# Store identities for the parent app's lanes (spec 09, Flavors; spec 20, App
+# store publishing). Credentials are never here: they come from environment
+# variables (the GitHub `staging` environment secrets) or fastlane match.
+
+for_platform :ios do
+  app_identifier("com.quadedu.parent.staging")
+end
+
+for_platform :android do
+  package_name("com.quadedu.parent.staging")
+end

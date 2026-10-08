@@ -1,0 +1,6 @@
+# Generated client: no docs, tests or CI files.
+README.md
+doc/**
+test/**
+.gitignore
+.travis.yml

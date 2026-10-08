@@ -9,7 +9,7 @@ Open `design/index.html` in a browser. Each prototype is a single self-contained
 | File | What it is |
 |---|---|
 | `design/index.html` | Launcher: what makes Quad different, and links to every prototype |
-| `design/landing.html` | Public landing page for Quad: the Circle concept as the hero (the child's circle with moments travelling around it), a school day in Amaya's circle, the leaders' family connection view, why Quad, modules, real staff portal and parent app screens (light and dark, in `design/landing/`), privacy and a demo request form |
+| `design/landing.html` | Public landing page for Quad: the Circle concept as the hero (the child's circle with moments travelling around it), a school day in Amaya's circle, the leaders' family connection view, why Quad, modules, privacy and a demo request form, all told through watercolour picture-book SVG illustrations (no product screenshots) on the Sky blue palette; screenshots in `docs/screenshots/landing/` |
 | `design/circle.html` | Concept: Quad Circle. Every child has a circle of family and school around them; a live school day links a teacher's phone (capture moments, family pulse, quiet hours), the child's circle and a parent's phone (day ring, moments, the people around the child, learning at home), plus the school's connection view |
 | `design/platform.html` | Platform console for the super admin: schools (tenants), plans, each school's users, roles, modules, branding and security |
 | `design/admin.html` | School admin web app: dashboard, the six core modules, and Users & roles. **View as** (top bar, or Users & roles → Preview a role) shows the portal as each role sees it |
@@ -154,6 +154,7 @@ quad/
 │   ├── console/      # Platform console (Next.js + Tailwind CSS)
 │   └── parent/       # Parent mobile app (Flutter)
 ├── packages/         # tokens, ui, contracts, client, db, domain, config
+├── scripts/          # codegen, the verify gate and the Flutter wrapper (@quad/scripts)
 ├── design/           # Interactive HTML prototypes (reference)
 ├── docs/spec/        # Implementation specification (01–18, plus:)
 │   ├── 19-public-site.md                 # landing page, demo requests, legal pages
@@ -161,3 +162,35 @@ quad/
 │   └── 21-onboarding-import.md           # moving from Classe365 or spreadsheets
 └── infra/            # Terraform (staging in M0b, production in M12)
 ```
+
+## Infrastructure
+
+Quad runs on AWS in `ap-south-1`, with Terraform in `infra/`. The tooling account holds the state
+(`infra/bootstrap`) and the `quad-edu.com` zone (`infra/envs/global`), and staging is `infra/envs/staging`.
+None of it has been applied yet: it is written and checked offline (`pnpm infra:check`).
+[`infra/README.md`](infra/README.md) is the step-by-step guide to the first deploy. It covers the
+accounts, the GitHub settings, the first-deploy checks and the runbooks.
+
+## Getting started
+
+Prerequisites (pinned in the repo):
+- Node.js 22 (`.nvmrc`; `nvm use`) and pnpm 9.15.9 through Corepack (`corepack enable`).
+- Docker with Compose (Postgres 16.4, Redis 7.4, MinIO, Mailpit and ClamAV, pinned in `docker-compose.yml`).
+- Flutter 3.47.6 through FVM (`fvm install` reads `.fvmrc`), or that version on your `PATH`.
+- Java 17 (Temurin), only for `openapi-generator` in `pnpm api:client`.
+
+```
+corepack enable && pnpm install
+cp .env.example .env              # safe local defaults
+docker compose up -d              # Postgres, Redis, MinIO, Mailpit, ClamAV on 127.0.0.1
+pnpm db:migrate && pnpm db:seed   # schema, then the two sample schools (accounts arrive with M1)
+pnpm dev                          # API :4000 (/api/v1), staff portal :3000, console :3001
+pnpm parent:run                   # parent app (flutter run --flavor dev) on a simulator or device
+pnpm verify                       # the full quality gate, the same one CI runs
+```
+
+`pnpm verify` runs, stopping at the first failure: typecheck, lint and unit tests (`turbo run typecheck lint test`), `pnpm codegen:check`, a wait for Postgres and Redis, the API integration tests (`pnpm test:api`, needs Docker), the Playwright smoke tests (`pnpm e2e`) and `pnpm audit --prod --audit-level high`. Without Flutter the parent app's checks are skipped with a warning; CI and `QUAD_REQUIRE_FLUTTER=1` make them fail instead. Turborepo caches a skipped result, so after you install Flutter run the gate once with `QUAD_REQUIRE_FLUTTER=1 pnpm verify` (or `pnpm exec turbo run typecheck lint test --force`) to clear it.
+
+If Docker Hub rate-limits image pulls, prefix the images with a registry mirror: `QUAD_IMAGE_REGISTRY=mirror.gcr.io/ docker compose up -d` (keep the trailing slash). The Postgres init script (`docker/postgres/init`) only runs on a fresh volume; `docker compose down -v` deletes the local database so it runs again.
+
+The seeded sign-ins (they arrive with M1; M0 seeds only the two schools) and the rest of the local setup are in [docs/spec/02-architecture.md → Local development](docs/spec/02-architecture.md#local-development).

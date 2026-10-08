@@ -1,0 +1,60 @@
+/*
+ * Shared base stylesheet for the Quad web apps (staff and console). In an app's globals.css:
+ *   @import 'tailwindcss';
+ *   @import '@quad/ui/app.css';
+ * It brings in the generated token theme, the @quad/ui keyframes, scans this package for classes, and sets the
+ * page defaults. Colours come only from the tokens. The app must put next/font's Figtree variable
+ * (--font-figtree) on <html>.
+ */
+@import '@quad/tokens/theme.css';
+@import './styles.css';
+@import './variants.css';
+
+@source './';
+
+/* next/font gives Figtree a generated family name, so the token stack points at its variable. */
+@theme inline {
+  --font-sans: var(--font-figtree), system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    margin: 0;
+    background-color: var(--color-canvas);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: 14.5px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+  }
+}
+
+/* Spec 03 Type: the lilac marker under a key word in greetings. */
+@utility marker-highlight {
+  white-space: nowrap;
+  padding: 0 0.06em;
+  box-shadow: inset 0 -0.3em 0 var(--color-gold-soft);
+}
+
+/* Prototype `.rail`: a soft light in the top-left corner of the side bar. */
+@utility rail-glow {
+  background-image: radial-gradient(
+    120% 50% at 0% 0%,
+    color-mix(in srgb, var(--color-rail-ink) 7%, transparent),
+    transparent 60%
+  );
+}

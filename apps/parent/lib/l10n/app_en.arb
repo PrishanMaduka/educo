@@ -1,0 +1,498 @@
+{
+  "@@locale": "en",
+  "navStaffHome": "Home",
+  "navStaffStudents": "Students",
+  "navStaffAttendance": "Attendance",
+  "navStaffTeaching": "Teaching",
+  "navStaffFees": "Fees",
+  "navStaffMessages": "Messages",
+  "navStaffSettings": "Settings",
+  "navConsoleOverview": "Overview",
+  "navConsoleSchools": "Schools",
+  "navConsolePlans": "Plans",
+  "navConsoleBilling": "Billing",
+  "navConsoleSystem": "System",
+  "navParentHome": "Home",
+  "navParentCircle": "Circle",
+  "navParentPayments": "Payments",
+  "navParentMessages": "Messages",
+  "navParentMore": "More",
+  "navStaffGroupOverview": "Overview",
+  "navStaffGroupStudents": "Student information",
+  "navStaffGroupLearning": "Learning",
+  "navStaffGroupRelationships": "Relationships",
+  "navStaffGroupFinance": "Finance",
+  "navStaffGroupSettings": "Settings",
+  "navConsoleGroupPlatform": "Platform",
+  "navConsoleGroupOperations": "Operations",
+  "themeSystem": "System",
+  "themeLight": "Light",
+  "themeDark": "Dark",
+  "themeToggle": "Change theme",
+  "themeCurrent": "Theme: {theme}",
+  "@themeCurrent": {
+    "placeholders": {
+      "theme": {
+        "type": "Object"
+      }
+    }
+  },
+  "greetingMorning": "Good morning",
+  "greetingAfternoon": "Good afternoon",
+  "greetingEvening": "Good evening",
+  "greetingHello": "Hello",
+  "notFoundTitle": "We couldn't find that page",
+  "notFoundBody": "The link may be old, or the page may have moved. Head back to Home and try again.",
+  "notFoundAction": "Go to Home",
+  "searchPlaceholder": "Search students, staff and pages",
+  "searchConsolePlaceholder": "Search schools and pages",
+  "searchShortcut": "Ctrl K",
+  "searchGroupPages": "Pages",
+  "askQuadLabel": "Ask Quad",
+  "askQuadShortcut": "/",
+  "authSignOut": "Sign out",
+  "uiFilterClear": "Clear {label}",
+  "@uiFilterClear": {
+    "placeholders": {
+      "label": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiFilterSearch": "Search {label}",
+  "@uiFilterSearch": {
+    "placeholders": {
+      "label": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiFilterEmpty": "No results",
+  "uiDrawerClose": "Close",
+  "uiDrawerSteps": "Progress",
+  "uiDrawerDiscardTitle": "Discard changes?",
+  "uiDrawerDiscardBody": "What you have entered has not been saved.",
+  "uiDrawerDiscardKeep": "Keep editing",
+  "uiDrawerDiscardConfirm": "Discard",
+  "uiPaletteLabel": "Search",
+  "uiSelectPlaceholder": "Choose one",
+  "uiTableSelectAll": "Select all rows",
+  "uiTableSelectRow": "Select {label}",
+  "@uiTableSelectRow": {
+    "placeholders": {
+      "label": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiToastRegion": "Notifications",
+  "studentsCount": "{count, plural, one {{count} student} other {{count} students}}",
+  "@studentsCount": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "appNameStaff": "Quad",
+  "appNameConsole": "Quad Console",
+  "shellSkipToContent": "Skip to main content",
+  "shellSidebarLabel": "Side bar",
+  "shellSidebarCollapse": "Collapse side bar",
+  "shellSidebarExpand": "Expand side bar",
+  "shellNavLabel": "Main",
+  "shellMenuOpen": "Open menu",
+  "shellMenuTitle": "Menu",
+  "shellNotificationsOpen": "Show notifications",
+  "shellProfileOpen": "Open your profile menu",
+  "shellConsoleBadge": "Console",
+  "shellConsoleTitle": "Quad",
+  "shellConsoleSubtitle": "Platform owner, all schools",
+  "shellStaffSubtitle": "Staff portal · powered by Quad",
+  "homeStaffGreeting": "{greeting}, {name}",
+  "@homeStaffGreeting": {
+    "placeholders": {
+      "greeting": {
+        "type": "Object"
+      },
+      "name": {
+        "type": "Object"
+      }
+    }
+  },
+  "homeStaffSummaryPlaceholder": "Once your school is set up, this is where you'll see who is in school today, how fees are going and what needs you first.",
+  "homeConsoleCrumb": "Platform",
+  "homeConsoleTitle": "Overview",
+  "homeConsoleSummaryPlaceholder": "Once schools join Quad, this page will show how each one is doing and which need your attention first.",
+  "roleSchoolAdmin": "School admin",
+  "rolePlatformOwner": "Platform owner",
+  "shellConsolePlaceholderName": "Quad owner",
+  "appNameParent": "Quad",
+  "parentHomePlaceholder": "Once your school invites you, this is where you'll see your children's day, what needs you and what's coming up.",
+  "parentCirclePlaceholder": "Moments that your children's teachers and family share will appear here.",
+  "parentPaymentsPlaceholder": "When your school sends an invoice, you'll see it here and can pay it in a few taps.",
+  "parentMessagesPlaceholder": "Messages from teachers and the school office will appear here.",
+  "parentMorePlaceholder": "Your children's profiles, school life and settings will appear here.",
+  "publicMetaTitle": "Quad – School management built around the child",
+  "publicMetaDescription": "Quad runs your whole school and keeps everyone who looks after a child connected: teachers, parents and grandparents, in one circle.",
+  "publicSkip": "Skip to main content",
+  "publicWordmark": "Quad",
+  "publicNavHome": "Quad home",
+  "publicNavLabel": "Sections",
+  "publicNavCircle": "Quad Circle",
+  "publicNavDay": "A school day",
+  "publicNavIdeas": "Why Quad",
+  "publicNavSchool": "Your whole school",
+  "publicNavTrust": "Privacy",
+  "publicNavMenu": "Menu",
+  "publicThemeToDark": "Switch to dark mode",
+  "publicThemeToLight": "Switch to light mode",
+  "publicThemeDarkMode": "Dark mode",
+  "publicThemeLightMode": "Light mode",
+  "publicSignIn": "Sign in",
+  "publicBookDemo": "Book a demo",
+  "publicComingSoonBadge": "Coming soon",
+  "publicComingSoonTitle": "Sign-in opens when schools go live",
+  "publicComingSoonBody": "Quad is getting ready for its first schools. Once your school is on Quad, you’ll sign in here with your work email. Until then, book a demo and we’ll show you around.",
+  "publicComingSoonClose": "Close",
+  "publicHeroEyebrow": "School management, built around the child",
+  "publicHeroTitle": "Every child has a {accent}",
+  "@publicHeroTitle": {
+    "placeholders": {
+      "accent": {
+        "type": "Object"
+      }
+    }
+  },
+  "publicHeroTitleAccent": "circle.",
+  "publicHeroLede": "The teacher who notices, the coach who cheers, the bus aunty who waves, and the family waiting at home. Quad runs your whole school, from admissions to fees, and keeps every one of those people close to the child they share.",
+  "publicHeroSeeDay": "See a day in the circle",
+  "publicHeroAlready": "Already on Quad?",
+  "publicHeroSignIn": "Sign in to your school",
+  "publicHeroFineCurricula": "Cambridge, Edexcel, IB and national curricula",
+  "publicHeroFineLocal": "Rupees, PayHere and Poya days built in",
+  "publicHeroScene": "A watercolour picture: Amaya, in her white school uniform and plaits, stands on a path between her school and her home in the tea hills, looking up. Around her in the sky drift kites, one for each person in her circle: at school Ms. Jayasinghe, Mr. Perera, Coach Herath, Nurse Dias and Sunethra on the bus; at home her mum Dilhani, her dad Ruwan and her grandmother Kamala.",
+  "publicHeroSample": "A sample school. Amaya and her circle are fictional.",
+  "publicHeroFeedJayaMomentTitle": "Ms. Jayasinghe shared a moment",
+  "publicHeroFeedJayaMomentDetail": "Amaya painted the canteen mural · 08:55",
+  "publicHeroFeedMumThanksTitle": "Dilhani said thank you",
+  "publicHeroFeedMumThanksDetail": "“She came home so proud today.”",
+  "publicHeroFeedPereraLearningTitle": "Mr. Perera shared this week’s learning",
+  "publicHeroFeedPereraLearningDetail": "Try at home: cut a roti into quarters",
+  "publicHeroFeedGrandmaLovesTitle": "Grandma loved a moment",
+  "publicHeroFeedGrandmaLovesDetail": "Kamala Perera, from Kandy",
+  "publicHeroFeedCoachMomentTitle": "Coach Herath shared a moment",
+  "publicHeroFeedCoachMomentDetail": "First full length of butterfly!",
+  "publicHeroFeedTriedAtHomeTitle": "We tried it at home",
+  "publicHeroFeedTriedAtHomeDetail": "Fractions with a roti · Mon 18:20",
+  "publicStripApp": "{lead} for every family, with every child in one login",
+  "@publicStripApp": {
+    "placeholders": {
+      "lead": {
+        "type": "Object"
+      }
+    }
+  },
+  "publicStripAppLead": "One Quad app",
+  "publicStripBrand": "{lead} name, logo and colours, not ours",
+  "@publicStripBrand": {
+    "placeholders": {
+      "lead": {
+        "type": "Object"
+      }
+    }
+  },
+  "publicStripBrandLead": "Your school’s",
+  "publicStripLocal": "{lead} for local curricula, rupees and Poya days",
+  "@publicStripLocal": {
+    "placeholders": {
+      "lead": {
+        "type": "Object"
+      }
+    }
+  },
+  "publicStripLocalLead": "Made in Sri Lanka",
+  "publicCircleEyebrow": "The Quad Circle",
+  "publicCircleTitle": "What is the Quad {accent}",
+  "@publicCircleTitle": {
+    "placeholders": {
+      "accent": {
+        "type": "Object"
+      }
+    }
+  },
+  "publicCircleTitleAccent": "Circle?",
+  "publicCircleLede": "The Circle is the small group of people at school and at home who care for one child, and the simple ways Quad keeps them in touch.",
+  "publicCirclePeopleTitle": "Who is in Amaya’s circle",
+  "publicCirclePeopleSample": "(a sample school)",
+  "publicCirclePeopleHome": "At home",
+  "publicCirclePeopleSchool": "At school",
+  "publicCirclePeopleDilhani": "Dilhani, her mum",
+  "publicCirclePeopleRuwan": "Ruwan, her dad",
+  "publicCirclePeopleKamala": "Kamala, her grandmother, invited by her mum",
+  "publicCirclePeopleJaya": "Ms. Jayasinghe, class teacher",
+  "publicCirclePeoplePerera": "Mr. Perera, maths teacher",
+  "publicCirclePeopleHerath": "Coach Herath, swimming coach",
+  "publicCirclePeopleSilva": "Ms. Silva, counsellor",
+  "publicCirclePeopleDias": "Nurse Dias, school nurse",
+  "publicCirclePeopleSunethra": "Sunethra aunty, on the school bus",
+  "publicCircleDiagramJayaName": "Ms. Jayasinghe",
+  "publicCircleDiagramJayaRole": "Class teacher",
+  "publicCircleDiagramPereraName": "Mr. Perera",
+  "publicCircleDiagramPereraRole": "Maths teacher",
+  "publicCircleDiagramHerathName": "Coach Herath",
+  "publicCircleDiagramHerathRole": "Swimming coach",
+  "publicCircleDiagramDiasName": "Nurse Dias",
+  "publicCircleDiagramDiasRole": "School nurse",
+  "publicCircleDiagramSilvaName": "Ms. Silva",
+  "publicCircleDiagramSilvaRole": "Counsellor",
+  "publicCircleDiagramSunethraName": "Sunethra",
+  "publicCircleDiagramSunethraRole": "Bus aunty",
+  "publicCircleDiagramDilhaniName": "Dilhani",
+  "publicCircleDiagramDilhaniRole": "Mum",
+  "publicCircleDiagramRuwanName": "Ruwan",
+  "publicCircleDiagramRuwanRole": "Dad",
+  "publicCircleDiagramKamalaName": "Kamala",
+  "publicCircleDiagramKamalaRole": "Grandma, invited",
+  "publicCircleDiagramRingSchool": "AT SCHOOL",
+  "publicCircleDiagramRingHome": "AT HOME",
+  "publicCircleDiagramOutLine1": "moments",
+  "publicCircleDiagramOutLine2": "& learning",
+  "publicCircleDiagramBackLine1": "thanks",
+  "publicCircleDiagramBackLine2": "& tries",
+  "publicCircleDiagramAmaya": "Amaya",
+  "publicCircleLoopTitle": "How the circle works",
+  "publicCircleLoopMomentTitle": "A moment at school",
+  "publicCircleLoopMomentBody": "Two taps, and only Amaya’s family sees her mural.",
+  "publicCircleLoopThanksTitle": "Home says thanks",
+  "publicCircleLoopThanksBody": "Mum taps thank you. Grandma, invited, loves it.",
+  "publicCircleLoopTryTitle": "Try it at home",
+  "publicCircleLoopTryBody": "One small idea from class. They tap We tried it.",
+  "publicCircleLoopPulseTitle": "The teacher sees it",
+  "publicCircleLoopPulseBody": "Her family pulse shows who needs good news next.",
+  "publicCircleLoopAgain1": "Every week,",
+  "publicCircleLoopAgain2": "round again",
+  "publicCircleRulesTitle": "What keeps it kind and safe",
+  "publicCircleRulesFamilyTitle": "Families choose who’s in",
+  "publicCircleRulesFamilyBody": "Parents invite up to four relatives. Relatives only see moments, and can be removed in one tap.",
+  "publicCircleRulesPhotosTitle": "Photos only with permission",
+  "publicCircleRulesPhotosBody": "Parents choose who sees photos of their child: the class, family only, or no photos.",
+  "publicCircleRulesQuietTitle": "Quiet hours",
+  "publicCircleRulesQuietBody": "Teachers aren’t pinged from 18:00 to 07:00 or at weekends. Urgent safety alerts still go through.",
+  "publicCircleRulesRecordsTitle": "Good news, not records",
+  "publicCircleRulesRecordsBody": "Health and safeguarding notes never go into the Circle, and relatives never see fees, marks or attendance.",
+  "publicDayEyebrow": "A day in the circle",
+  "publicDayTitle": "One school day in {accent}",
+  "@publicDayTitle": {
+    "placeholders": {
+      "accent": {
+        "type": "Object"
+      }
+    }
+  },
+  "publicDayTitleAccent": "Amaya’s circle",
+  "publicDayLede": "School systems are good at records and bad at relationships. Parents hear nothing until something goes wrong, and teachers get messages at 10 pm. Circle uses what a school already records to keep families close. Here is a Monday for Amaya, Year 4 Emerald.",
+  "publicDayArriveTime": "07:42",
+  "publicDayArriveTag": "The day, as it happens",
+  "publicDayArriveTitle": "Amaya’s mum sees she’s arrived",
+  "publicDayArriveBody": "The gate scan and the register start a ring of Amaya’s day on her mum’s phone. Lessons, lunch and the bus home appear as they happen. Nobody had to send a message.",
+  "publicDayMomentTime": "08:55",
+  "publicDayMomentTag": "Moments",
+  "publicDayMomentTitle": "Her teacher shares a moment in ten seconds",
+  "publicDayMomentBody": "Ms. Jayasinghe taps Amaya’s name, picks Photo, writes a line and tags the skill she noticed. Only Amaya’s family sees it, and only if the family has agreed to photos.",
+  "publicDayGrandmaTime": "09:10",
+  "publicDayGrandmaTag": "Family circle",
+  "publicDayGrandmaTitle": "Grandma in Kandy loves it too",
+  "publicDayGrandmaBody": "Parents can invite up to four relatives to see moments. Grandparents never see fees, results, attendance or health, and can be removed with one tap.",
+  "publicDayPeopleTime": "12:30",
+  "publicDayPeopleTag": "Everyone around the child",
+  "publicDayPeopleTitle": "Dad sees who looks after Amaya",
+  "publicDayPeopleBody": "Every teacher, the coach and the nurse, with what each is working on with Amaya and when they reply. Saying thank you is one tap, and it reaches the teacher.",
+  "publicDayTryTime": "18:20",
+  "publicDayTryTag": "This week in class",
+  "publicDayTryTitle": "They try one thing at home",
+  "publicDayTryBody": "Each week teachers share what the class is learning and one small thing to try at home. Amaya and her mum write a postcard to Grandma, tap We tried it, and Ms. Jayasinghe sees it the next morning.",
+  "publicDayQuietTime": "19:30",
+  "publicDayQuietTag": "Quiet hours",
+  "publicDayQuietTitle": "Teachers get their evenings back",
+  "publicDayQuietBody": "A parent can still write at 19:30. Quad tells them kindly that it reaches the teacher at 07:00, and holds the teacher’s notifications until morning. Urgent safety alerts always go through.",
+  "publicDayRecapTime": "Fri",
+  "publicDayRecapTag": "Weekly recap",
+  "publicDayRecapTitle": "A week with Amaya, in one card",
+  "publicDayRecapBody": "The moments, the skills her teachers noticed, days in school, what the family tried at home, and one idea for the weekend.",
+  "publicDayFoot": "Families choose who sees photos of their child. Nothing about health or safeguarding ever goes into Circle.",
+  "publicDayQuietClock": "07:00",
+  "publicIdeasEyebrow": "Why Quad",
+  "publicIdeasTitle": "Four ideas that put {accent}",
+  "@publicIdeasTitle": {
+    "placeholders": {
+      "accent": {
+        "type": "Object"
+      }
+    }
+  },
+  "publicIdeasTitleAccent": "people first",
+  "publicIdeasLede": "Quad is a complete school system. These are the things it does that others don’t, and the reasons schools tell us they switched.",
+  "publicIdeasStoryKicker": "Story first",
+  "publicIdeasStoryTitle": "Mornings start with a few plain sentences",
+  "publicIdeasStoryBody": "Every home screen opens with what is happening and what needs you: who’s in, what’s due, what went well. The charts come after.",
+  "publicIdeasStoryQuoteLabel": "The principal’s Monday",
+  "publicIdeasStoryQuote": "Good morning, Prishan. 1,186 of 1,248 students are in. Three things need you today.",
+  "publicIdeasWarningKicker": "Early warning",
+  "publicIdeasWarningTitle": "Quad notices the child who’s drifting",
+  "publicIdeasWarningBody": "When a student starts to slip in attendance, homework, behaviour or marks, Quad says why and suggests who is best placed to help. One click starts a support plan.",
+  "publicIdeasWarningQuoteLabel": "Needs a conversation",
+  "publicIdeasWarningQuote": "Kavindu: History down 14 points this term, two missed submissions. Suggested: Mr. Mendis, his class teacher.",
+  "publicIdeasAskKicker": "Ask Quad",
+  "publicIdeasAskTitle": "Ask in plain English, see where the answer came from",
+  "publicIdeasAskBody": "Quad answers from your school’s own records, names its sources, and only uses what you’re allowed to see. It never reads safeguarding or medical notes.",
+  "publicIdeasAskQuoteLabel": "Ms. Fernando asked",
+  "publicIdeasAskQuote": "Who needs attention in Year 9?",
+  "publicIdeasAskQuoteAnswer": "Four students. From: early warning, registers.",
+  "publicIdeasBrandKicker": "Your school’s own brand",
+  "publicIdeasBrandTitle": "One app for every family, wearing your colours",
+  "publicIdeasBrandBody": "Families download one Quad app. Once they sign in it shows your school’s name, logo and colours, and says Year 4, Grade 4 or Form 1 the way you do.",
+  "publicIdeasBrandQuoteLabel": "What parents see",
+  "publicIdeasBrandQuote": "Their school, not a software company.",
+  "publicLeadersEyebrow": "For school leaders",
+  "publicLeadersTitle": "Is every family {accent}",
+  "@publicLeadersTitle": {
+    "placeholders": {
+      "accent": {
+        "type": "Object"
+      }
+    }
+  },
+  "publicLeadersTitleAccent": "connected?",
+  "publicLeadersLede": "One view shows which classes are sharing good news and which families haven’t heard anything positive in two weeks. It is about families, never a league table of teachers.",
+  "publicLeadersPulseTitle": "Family pulse for every class teacher",
+  "publicLeadersPulseBody": "Families with nothing positive lately come first, with a one-tap “Share a moment about Rehan”.",
+  "publicLeadersFollowUpTitle": "A gentle follow-up list",
+  "publicLeadersFollowUpBody": "Remind the class teacher, or send a note from the office.",
+  "publicLeadersQuietTitle": "Quiet hours for the whole school",
+  "publicLeadersQuietBody": "Set once in Communications. Messages and moments wait until morning.",
+  "publicLeadersHeatTitle": "Families who heard something positive",
+  "publicLeadersHeatNote": "Last 2 weeks · sample school",
+  "publicLeadersHeatLabel": "Share of families who heard something positive, by year group and class",
+  "publicLeadersHeatYearGroup": "Year group",
+  "publicLeadersHeatCell": "{value}%",
+  "@publicLeadersHeatCell": {
+    "placeholders": {
+      "value": {
+        "type": "Object"
+      }
+    }
+  },
+  "publicLeadersHeatFewer": "Fewer",
+  "publicLeadersHeatAll": "All families",
+  "publicSchoolEyebrow": "Your whole school",
+  "publicSchoolTitle": "Everything a school runs, {accent}",
+  "@publicSchoolTitle": {
+    "placeholders": {
+      "accent": {
+        "type": "Object"
+      }
+    }
+  },
+  "publicSchoolTitleAccent": "under one roof",
+  "publicSchoolLede": "Turn on the modules you need. Year groups, terms and grading come from your curriculum, so Quad says Year 4, Grade 4 or Form 1 the way your school does.",
+  "publicSchoolCampusMoney": "Rs",
+  "publicSchoolModulesAdmissionsTitle": "Admissions",
+  "publicSchoolModulesAdmissionsBody": "Enquiries, applications, interviews and offers in one pipeline",
+  "publicSchoolModulesStudentsTitle": "Students",
+  "publicSchoolModulesStudentsBody": "Profiles, guardians, documents and a full history",
+  "publicSchoolModulesAttendanceTitle": "Attendance",
+  "publicSchoolModulesAttendanceBody": "Registers in seconds, with alerts to parents at 09:00",
+  "publicSchoolModulesTimetableTitle": "Timetable & cover",
+  "publicSchoolModulesTimetableBody": "A clash-free timetable, and cover for absent colleagues",
+  "publicSchoolModulesExamsTitle": "Exams & reports",
+  "publicSchoolModulesExamsBody": "Exam timetables, gradebooks and report cards in your grading scale",
+  "publicSchoolModulesPastoralTitle": "Pastoral care",
+  "publicSchoolModulesPastoralBody": "Behaviour, rewards, house points and safeguarding with strict access",
+  "publicSchoolModulesFeesTitle": "Fees & finance",
+  "publicSchoolModulesFeesBody": "Billing runs, sibling discounts, PayHere and bank transfer, in rupees",
+  "publicSchoolModulesCommunicationTitle": "Communication",
+  "publicSchoolModulesCommunicationBody": "Messages, news, parents’ evenings and consent forms",
+  "publicTrustEyebrow": "Privacy and safety",
+  "publicTrustTitle": "Children’s data, {accent}",
+  "@publicTrustTitle": {
+    "placeholders": {
+      "accent": {
+        "type": "Object"
+      }
+    }
+  },
+  "publicTrustTitleAccent": "handled with care",
+  "publicTrustLede": "Quad is designed so each person sees only what they need, and every sensitive view is recorded.",
+  "publicTrustWallTitle": "Only your school",
+  "publicTrustWallBody": "Each school’s data is walled off in the database itself, not just hidden in the app.",
+  "publicTrustConsentTitle": "Families decide",
+  "publicTrustConsentBody": "Parents choose who sees photos of their child, and relatives only ever see moments.",
+  "publicTrustLockTitle": "Sensitive stays sensitive",
+  "publicTrustLockBody": "Safeguarding and medical notes need special access, and every view is logged.",
+  "publicTrustLocalTitle": "Local rules",
+  "publicTrustLocalBody": "Built for Sri Lanka’s Personal Data Protection Act, with data kept in the region.",
+  "publicDemoEyebrow": "See it with your school",
+  "publicDemoTitle": "Book a 30‑minute {accent}",
+  "@publicDemoTitle": {
+    "placeholders": {
+      "accent": {
+        "type": "Object"
+      }
+    }
+  },
+  "publicDemoTitleAccent": "walkthrough",
+  "publicDemoLede": "We’ll set up a sample of your school, with your name, colours and curriculum, and walk your team through a full school day in Quad. Tea is on us.",
+  "publicDemoFieldName": "Your name",
+  "publicDemoFieldEmail": "Work email",
+  "publicDemoFieldSchool": "School",
+  "publicDemoFieldCountry": "Country",
+  "publicDemoFieldStudents": "Students",
+  "publicDemoFieldCurriculum": "Curriculum",
+  "publicDemoStudentsUnder300": "Under 300",
+  "publicDemoStudents3001000": "300–1,000",
+  "publicDemoStudents10002500": "1,000–2,500",
+  "publicDemoStudentsOver2500": "More than 2,500",
+  "publicDemoCurriculumCambridge": "Cambridge",
+  "publicDemoCurriculumEdexcel": "Edexcel",
+  "publicDemoCurriculumIb": "IB",
+  "publicDemoCurriculumSriLankanNational": "Sri Lankan national",
+  "publicDemoCurriculumOther": "Other",
+  "publicDemoSubmit": "Request a demo",
+  "publicDemoErrorNameAndSchool": "Add your name and your school.",
+  "publicDemoErrorWorkEmail": "Enter a work email like name@school.lk.",
+  "publicDemoErrorChoice": "Choose an option from each list.",
+  "publicDemoNote": "We’ll only use this to arrange your demo.",
+  "publicDemoSent": "Your email app should open with your request ready to send.",
+  "publicDemoFallback": "If it doesn’t open, email us at {email}.",
+  "@publicDemoFallback": {
+    "placeholders": {
+      "email": {
+        "type": "Object"
+      }
+    }
+  },
+  "publicDemoMailSubject": "Demo request: {school}",
+  "@publicDemoMailSubject": {
+    "placeholders": {
+      "school": {
+        "type": "Object"
+      }
+    }
+  },
+  "publicDemoMailIntro": "Hello Quad, I’d like to book a 30-minute walkthrough for my school.",
+  "publicDemoMailLine": "{label}: {value}",
+  "@publicDemoMailLine": {
+    "placeholders": {
+      "label": {
+        "type": "Object"
+      },
+      "value": {
+        "type": "Object"
+      }
+    }
+  },
+  "publicFooterContact": "Contact",
+  "publicFooterSample": "Sample school and families are fictional.",
+  "publicFooterCopyright": "© Quad"
+}

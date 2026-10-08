@@ -1,0 +1,37 @@
+{
+  "name": "@quad/config",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./tsconfig/*.json": "./tsconfig/*.json",
+    "./eslint/base": "./eslint/base.mjs",
+    "./eslint/react": "./eslint/react.mjs",
+    "./eslint/next": "./eslint/next.mjs",
+    "./vitest": "./vitest/preset.ts",
+    "./prettier": "./prettier.cjs",
+    "./playwright": "./playwright/preset.ts",
+    "./playwright/checks": "./playwright/checks.ts"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint ."
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.11.3",
+    "@eslint/js": "9.39.5",
+    "@next/eslint-plugin-next": "15.5.27",
+    "@playwright/test": "1.56.1",
+    "@types/node": "22.20.5",
+    "eslint": "9.39.5",
+    "eslint-plugin-import-x": "4.17.1",
+    "eslint-plugin-jsx-a11y": "6.10.2",
+    "eslint-plugin-react": "7.37.5",
+    "eslint-plugin-react-hooks": "7.1.1",
+    "globals": "16.5.0",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.71.1",
+    "vitest": "3.2.7"
+  }
+}

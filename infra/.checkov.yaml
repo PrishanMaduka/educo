@@ -1,0 +1,7 @@
+# Checkov for infra/ (run by scripts/infra-check.mjs). Every skipped check has a `# reason` comment.
+framework:
+  - terraform
+quiet: true
+# Scan offline: do not fetch guideline links and severities from Prisma Cloud.
+skip-download: true
+skip-check: []

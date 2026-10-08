@@ -1,0 +1,45 @@
+# Shared job setup (D28): pnpm, Node from .nvmrc and a frozen install, plus Java 17 and Flutter
+# (pinned in .fvmrc) when a job asks for them.
+name: Set up the workspace
+description: Installs pnpm, Node (.nvmrc) and the dependencies, and optionally Java 17 and Flutter (.fvmrc).
+
+inputs:
+  java:
+    description: Install Java 17 (Temurin), for the OpenAPI generator and Android builds.
+    required: false
+    default: 'false'
+  flutter:
+    description: Install Flutter at the version pinned in .fvmrc.
+    required: false
+    default: 'false'
+  install:
+    description: Run pnpm install --frozen-lockfile.
+    required: false
+    default: 'true'
+
+runs:
+  using: composite
+  steps:
+    - uses: pnpm/action-setup@v4
+
+    - uses: actions/setup-node@v4
+      with:
+        node-version-file: .nvmrc
+        cache: pnpm
+
+    - if: inputs.java == 'true'
+      uses: actions/setup-java@v4
+      with:
+        distribution: temurin
+        java-version: '17'
+
+    - if: inputs.flutter == 'true'
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version-file: .fvmrc
+        cache: true
+
+    - if: inputs.install == 'true'
+      name: Install dependencies
+      shell: bash
+      run: pnpm install --frozen-lockfile

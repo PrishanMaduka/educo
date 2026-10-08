@@ -2,7 +2,7 @@
 
 ## Conventions
 
-- Base URLs: `https://quad-edu.com/api/v1` (school, parent and public routes, same origin as the web app) and `https://console.quad-edu.com/api/v1/platform` (console routes, proxied to the same API service and accepted only with a console session). Every route below is written **relative to `/api/v1`**; console routes start with `/platform`.
+- Base URLs: `https://quad-edu.com/api/v1` (school, parent and public routes, same origin as the web app) and `https://console.quad-edu.com/api/v1/platform` (console routes, proxied to the same API service and accepted only with a console session; console sign-in is under `/platform/auth/*`, never `/auth/*`). Every route below is written **relative to `/api/v1`**; console routes start with `/platform`.
 - JSON with `camelCase` keys. Every request and response body has a Zod schema in `packages/contracts`, and OpenAPI is generated from them at `/api/v1/openapi.json`. `packages/client` (TypeScript) and `quad_api` (Dart) are regenerated from it with `pnpm api:client`.
 - Auth: a session cookie (web) or `Authorization: Bearer` (mobile). The tenant always comes from the session or token, except on the tenant-less entry points in [05](05-auth-tenancy-rbac.md#tenant-less-entry-points).
 - Guards: each route carries `@Can('<module>.<action>')` (shown in brackets below where it is not obvious from the module) and `@Module(...)` when it belongs to a plan module. `/family` routes check the guardian–student link. `/platform` routes check the platform role.
@@ -30,6 +30,7 @@ All routes are served from `https://quad-edu.com/api/v1` (the same origin as the
 - `POST /public/demo-requests` (`{name, email, school, students, curriculum, country, turnstileToken}`) → validates the Cloudflare Turnstile token and a honeypot field, rate-limits 5 per hour per IP, writes `platform_leads` (a repeat from the same email within 24 hours updates the lead), queues `demo-request-received`, and answers 202 with no body details. No tenant. See [19](19-public-site.md#demo-requests).
 - `POST /public/enquiry/:embedKey` (rate-limited, captcha) → `tenant_by_embed_key` → creates a lead or applicant
 - `POST /webhooks/payhere`, `POST /webhooks/stripe` (signature verified first, then `tenant_by_gateway_account`; idempotent on the gateway event id)
+- `POST /webhooks/ses` (SES bounce and complaint events from SNS, sent as `text/plain`, body at most 300 KB; first checked: topic pinned to `SES_SNS_TOPIC_ARN`, `SigningCertURL` exactly `https://sns.<topic region>.amazonaws.com/SimpleNotificationService-<32 hex>.pem`, signature version 2 against that single, currently valid certificate, and a one-hour replay window; then `record_email_suppression`, which never replaces a `manual` entry; no tenant; 200 `{status: 'ok'}`, 403 `forbidden` for anything unverified, 400 `validation` for a body that is not JSON, 413 for a larger body. See [20](20-infrastructure-operations.md))
 - `GET /calendar/:token.ics` (a signed calendar-feed token; see [09](09-parent-app.md#school-life-from-more-and-from-to-dos))
 
 ### Platform (console)
@@ -165,7 +166,7 @@ All routes are served from `https://quad-edu.com/api/v1` (the same origin as the
 
 ## Realtime (Socket.IO)
 
-Clients connect to `wss://quad-edu.com/socket.io` with their session or token and join `tenant:{id}` and `user:{id}`. Teachers also join `class:{id}`; console users join `platform`.
+Clients connect to `wss://quad-edu.com/socket.io` with their session or token and join `tenant:{id}` and `user:{id}`. Teachers also join `class:{id}`; console users connect to `wss://console.quad-edu.com/socket.io` (same API service, console session) and join `platform`. The parent app's client uses `transports: ['websocket']` (M6); the web apps may fall back to long polling, which the ALB keeps on one task with its own cookie ([20](20-infrastructure-operations.md)).
 
 | Event | Room | Payload | Used by |
 |---|---|---|---|

@@ -1,0 +1,19 @@
+{
+  "extends": "@quad/config/tsconfig/node.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "declaration": false,
+    "types": ["node"],
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
+  },
+  "include": [
+    "src/**/*.ts",
+    "test/**/*.ts",
+    "vitest.config.ts",
+    "vitest.api.config.ts",
+    "tsup.config.ts"
+  ]
+}

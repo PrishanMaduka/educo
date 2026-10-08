@@ -21,7 +21,7 @@ The sign-in page may remember the last school on the device (a non-sensitive `qu
 Session: an opaque session id in a `__Host-` cookie (HttpOnly, Secure, SameSite=Lax) on `quad-edu.com`. Idle timeout comes from the school setting (default 12 hours; 30 days with "keep me signed in"). The session row is in Postgres and cached in Redis.
 
 ### Platform console (`console.quad-edu.com`)
-Quad staff only. Separate cookie, session rows with `kind='console'`, an idle timeout of 8 hours, and every sign-in (and failure) written to `platform_audit`.
+Quad staff only. Separate cookie, session rows with `kind='console'`, an idle timeout of 8 hours, and every sign-in (and failure) written to `platform_audit`. Console sign-in routes live under `/api/v1/platform/auth/*` on the console host (the ALB sends only `/api/v1/platform/*` and `/socket.io/*` from that host to the API, and WAF rate-limits them as sign-in paths).
 
 - **Production:** Google Workspace SSO for `@quad-edu.com` accounts that exist in `platform_users` with status active, then mandatory TOTP. There is no password sign-in.
 - **Local, dev and staging:** SSO as above, plus email + password + TOTP for seeded platform users (for example `owner@quad.local`), enabled only by the environment flag `CONSOLE_PASSWORD_LOGIN=true`. The API refuses to boot in production if the flag is set.
@@ -57,6 +57,7 @@ The tenant comes from the session or token (the membership chosen at sign-in). T
 | Payment webhooks (PayHere, Stripe) | Verify the gateway signature first, then `tenant_by_gateway_account(provider, account_id)` |
 | Public admissions enquiry form | `tenant_by_embed_key(key)`; rate-limited and captcha-checked |
 | Demo requests from the landing page | Platform level, no tenant (`platform_leads`) |
+| SES bounce and complaint webhook | No tenant: the SNS topic, signing certificate URL, signature (version 2) and replay window are checked first, then `record_email_suppression` writes the platform table `email_suppressions` |
 
 Rules: every tenant-less route lives in `apps/api/src/public/**` or `apps/api/src/webhooks/**`, has an integration test for a forged or expired token, and opens `withTenant()` only after the check.
 

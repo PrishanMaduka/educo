@@ -1,0 +1,286 @@
+# Terraform checks, plans and applies for infra/ (spec 20, D28).
+#   checks  every run, no AWS: fmt, init without a backend, validate, `terraform test` with mocked
+#           providers, tflint and checkov, all required (QUAD_REQUIRE_INFRA_TOOLS=1), through
+#           scripts/infra-check.mjs. CI installs Terraform from releases.hashicorp.com and providers
+#           from the public registry (checked against the lock files), not the local mirror.
+#   plan    same-repository pull requests, once vars.AWS_STAGING_PLAN_ROLE_ARN exists: a staging
+#           plan with -refresh=false -lock=false (ruling R-pr-plan: the plan role may not read
+#           secret values, parameters or decrypt, which a refresh needs). The repository is public,
+#           so only a summary (addresses, actions, counts; scripts/plan-summary.mjs) is logged and
+#           kept up to date in one PR comment; the full plan stays in a file on the runner.
+#   apply   pushes to main, once vars.AWS_STAGING_APPLY_ROLE_ARN exists, behind the
+#           infra-staging environment's reviewers: a fresh plan with a refresh, then apply.
+#   drift   weekly and by hand on main: a refresh-only plan that fails when staging has drifted.
+# init uses -lockfile=readonly, so CI never changes a committed .terraform.lock.hcl.
+# Pull requests run with `pull_request`, never `pull_request_target`, so a fork never gets a token.
+name: Infra
+
+on:
+  pull_request:
+    paths:
+      [
+        'infra/**',
+        'scripts/infra-check.mjs',
+        'scripts/plan-summary.mjs',
+        '.github/workflows/infra.yml',
+      ]
+  push:
+    branches: [main, 'claude/**']
+    paths:
+      [
+        'infra/**',
+        'scripts/infra-check.mjs',
+        'scripts/plan-summary.mjs',
+        '.github/workflows/infra.yml',
+      ]
+  schedule:
+    - cron: '17 3 * * 1'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+env:
+  TF_IN_AUTOMATION: '1'
+  TF_INPUT: '0'
+
+jobs:
+  checks:
+    name: checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      QUAD_REQUIRE_INFRA_TOOLS: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - id: versions
+        name: Read the Terraform version
+        run: echo "terraform=$(cat infra/.terraform-version)" >> "$GITHUB_OUTPUT"
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ steps.versions.outputs.terraform }}
+          terraform_wrapper: false
+      - uses: terraform-linters/setup-tflint@v4
+        with:
+          tflint_version: v0.63.1
+          github_token: ${{ github.token }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install checkov
+        run: pip install checkov==3.3.25
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - name: Check the Terraform
+        env:
+          # tflint --init downloads the AWS ruleset from GitHub releases.
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/infra-check.mjs
+
+  plan:
+    name: plan (staging)
+    needs: checks
+    if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && vars.AWS_STAGING_PLAN_ROLE_ARN != '' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      id-token: write
+      pull-requests: write
+    env:
+      TF_STATE_BUCKET: ${{ vars.TF_STATE_BUCKET }}
+      TF_LOCK_TABLE: ${{ vars.TF_LOCK_TABLE }}
+      TF_STATE_KMS_KEY_ARN: ${{ vars.TF_STATE_KMS_KEY_ARN }}
+      STATE_ROLE_ARN: ${{ vars.TF_STAGING_STATE_READ_ROLE_ARN }}
+      DNS_ROLE_ARN: ${{ vars.TF_DNS_READ_ROLE_ARN }}
+      OTEL_ENDPOINT: ${{ vars.OTEL_EXPORTER_OTLP_ENDPOINT }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: versions
+        name: Read the Terraform version
+        run: echo "terraform=$(cat infra/.terraform-version)" >> "$GITHUB_OUTPUT"
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ steps.versions.outputs.terraform }}
+          terraform_wrapper: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_STAGING_PLAN_ROLE_ARN }}
+          aws-region: ap-south-1
+      # State is read through the tooling account's state-read role (ruling R-origin-secret-state).
+      - name: Initialise with the state backend
+        run: |
+          cat > "$RUNNER_TEMP/backend.hcl" << EOF
+          bucket         = "$TF_STATE_BUCKET"
+          dynamodb_table = "$TF_LOCK_TABLE"
+          kms_key_id     = "$TF_STATE_KMS_KEY_ARN"
+          assume_role = {
+            role_arn = "$STATE_ROLE_ARN"
+          }
+          EOF
+          terraform -chdir=infra/envs/staging init -lockfile=readonly -backend-config="$RUNNER_TEMP/backend.hcl"
+      # The repository is public, so the full plan (which can show values) stays in a file on the
+      # runner: the log and the comment get only addresses, actions and counts (I1, D28).
+      - name: Plan without a refresh
+        run: |
+          terraform -chdir=infra/envs/staging plan -no-color -refresh=false -lock=false -var "dns_role_arn=$DNS_ROLE_ARN" -var "otel_exporter_endpoint=$OTEL_ENDPOINT" -out=tfplan > "$RUNNER_TEMP/plan.log"
+          terraform -chdir=infra/envs/staging show -json tfplan | node scripts/plan-summary.mjs --title "Terraform plan for infra/envs/staging" > "$RUNNER_TEMP/plan-summary.md"
+          cat "$RUNNER_TEMP/plan-summary.md"
+      # One comment per pull request, found by its marker and updated on every run (M6).
+      - name: Post the plan summary on the pull request
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('node:fs');
+            const marker = '<!-- quad-terraform-plan:staging -->';
+            const summary = fs.readFileSync(`${process.env.RUNNER_TEMP}/plan-summary.md`, 'utf8');
+            const body = [
+              marker,
+              summary,
+              'This plan was made without a refresh and without a state lock (ruling R-pr-plan). It compares this change with the state as last applied, so drift does not show here; the apply on main refreshes first, and the weekly drift check reports it.',
+              '',
+              'Only resource addresses and actions are shown: this repository is public, so the full plan is never posted or logged.',
+            ].join('\n');
+            const { owner, repo } = context.repo;
+            const issue_number = context.issue.number;
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner,
+              repo,
+              issue_number,
+              per_page: 100,
+            });
+            const existing = comments.find(
+              (comment) => comment.user?.type === 'Bot' && comment.body?.includes(marker),
+            );
+            if (existing) {
+              await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
+            } else {
+              await github.rest.issues.createComment({ owner, repo, issue_number, body });
+            }
+
+  apply:
+    name: apply (staging)
+    needs: checks
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && vars.AWS_STAGING_APPLY_ROLE_ARN != '' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    environment: infra-staging
+    concurrency:
+      group: infra-staging-state
+      cancel-in-progress: false
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      TF_STATE_BUCKET: ${{ vars.TF_STATE_BUCKET }}
+      TF_LOCK_TABLE: ${{ vars.TF_LOCK_TABLE }}
+      TF_STATE_KMS_KEY_ARN: ${{ vars.TF_STATE_KMS_KEY_ARN }}
+      STATE_ROLE_ARN: ${{ vars.TF_STAGING_STATE_RW_ROLE_ARN }}
+      DNS_ROLE_ARN: ${{ vars.TF_STAGING_DNS_WRITE_ROLE_ARN }}
+      OTEL_ENDPOINT: ${{ vars.OTEL_EXPORTER_OTLP_ENDPOINT }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: versions
+        name: Read the Terraform version
+        run: echo "terraform=$(cat infra/.terraform-version)" >> "$GITHUB_OUTPUT"
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ steps.versions.outputs.terraform }}
+          terraform_wrapper: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_STAGING_APPLY_ROLE_ARN }}
+          aws-region: ap-south-1
+      - name: Initialise with the state backend
+        run: |
+          cat > "$RUNNER_TEMP/backend.hcl" << EOF
+          bucket         = "$TF_STATE_BUCKET"
+          dynamodb_table = "$TF_LOCK_TABLE"
+          kms_key_id     = "$TF_STATE_KMS_KEY_ARN"
+          assume_role = {
+            role_arn = "$STATE_ROLE_ARN"
+          }
+          EOF
+          terraform -chdir=infra/envs/staging init -lockfile=readonly -backend-config="$RUNNER_TEMP/backend.hcl"
+      # A fresh plan with a refresh, so drift shows up here (ruling R-pr-plan).
+      # Output stays in files on the runner; the log and the job summary get only the summary (I1).
+      - name: Plan
+        run: |
+          terraform -chdir=infra/envs/staging plan -no-color -var "dns_role_arn=$DNS_ROLE_ARN" -var "otel_exporter_endpoint=$OTEL_ENDPOINT" -out=tfplan > "$RUNNER_TEMP/plan.log"
+          terraform -chdir=infra/envs/staging show -json tfplan | node scripts/plan-summary.mjs --title "Applying to infra/envs/staging" > "$RUNNER_TEMP/plan-summary.md"
+          cat "$RUNNER_TEMP/plan-summary.md"
+          cat "$RUNNER_TEMP/plan-summary.md" >> "$GITHUB_STEP_SUMMARY"
+      - name: Apply the plan
+        run: terraform -chdir=infra/envs/staging apply -no-color tfplan > "$RUNNER_TEMP/apply.log"
+
+  drift:
+    name: drift (staging)
+    if: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main' && vars.AWS_STAGING_APPLY_ROLE_ARN != '' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: infra-staging
+    concurrency:
+      group: infra-staging-state
+      cancel-in-progress: false
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      TF_STATE_BUCKET: ${{ vars.TF_STATE_BUCKET }}
+      TF_LOCK_TABLE: ${{ vars.TF_LOCK_TABLE }}
+      TF_STATE_KMS_KEY_ARN: ${{ vars.TF_STATE_KMS_KEY_ARN }}
+      STATE_ROLE_ARN: ${{ vars.TF_STAGING_STATE_RW_ROLE_ARN }}
+      DNS_ROLE_ARN: ${{ vars.TF_STAGING_DNS_WRITE_ROLE_ARN }}
+      OTEL_ENDPOINT: ${{ vars.OTEL_EXPORTER_OTLP_ENDPOINT }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: versions
+        name: Read the Terraform version
+        run: echo "terraform=$(cat infra/.terraform-version)" >> "$GITHUB_OUTPUT"
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ steps.versions.outputs.terraform }}
+          terraform_wrapper: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_STAGING_APPLY_ROLE_ARN }}
+          aws-region: ap-south-1
+      - name: Initialise with the state backend
+        run: |
+          cat > "$RUNNER_TEMP/backend.hcl" << EOF
+          bucket         = "$TF_STATE_BUCKET"
+          dynamodb_table = "$TF_LOCK_TABLE"
+          kms_key_id     = "$TF_STATE_KMS_KEY_ARN"
+          assume_role = {
+            role_arn = "$STATE_ROLE_ARN"
+          }
+          EOF
+          terraform -chdir=infra/envs/staging init -lockfile=readonly -backend-config="$RUNNER_TEMP/backend.hcl"
+      # -detailed-exitcode: 0 no drift, 1 error, 2 drift.
+      - name: Check for drift
+        run: |
+          status=0
+          terraform -chdir=infra/envs/staging plan -no-color -refresh-only -detailed-exitcode -var "dns_role_arn=$DNS_ROLE_ARN" -var "otel_exporter_endpoint=$OTEL_ENDPOINT" -out=tfplan > "$RUNNER_TEMP/drift.log" || status=$?
+          if [ "$status" -ne 1 ]; then
+            terraform -chdir=infra/envs/staging show -json tfplan | node scripts/plan-summary.mjs --title "Drift in infra/envs/staging" --drift > "$RUNNER_TEMP/drift-summary.md"
+            cat "$RUNNER_TEMP/drift-summary.md"
+            cat "$RUNNER_TEMP/drift-summary.md" >> "$GITHUB_STEP_SUMMARY"
+          fi
+          if [ "$status" -eq 2 ]; then
+            echo "::error::Staging has drifted from its Terraform state; the summary above lists the resources."
+          fi
+          exit "$status"

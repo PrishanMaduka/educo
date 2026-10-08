@@ -1,0 +1,14 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "extends": ["//"],
+  "tasks": {
+    "test": {
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/infra/toolchain.json",
+        "$TURBO_ROOT$/infra/.terraform-version",
+        "$TURBO_ROOT$/infra/**/versions.tf"
+      ]
+    }
+  }
+}

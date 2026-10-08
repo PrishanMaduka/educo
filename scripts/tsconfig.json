@@ -1,0 +1,11 @@
+{
+  "extends": "../packages/config/tsconfig/node.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "declaration": false,
+    "allowJs": true,
+    "checkJs": true
+  },
+  "include": ["*.mjs", "test/**/*.ts", "vitest.config.ts", "vitest.api.config.ts"],
+  "exclude": ["eslint.config.mjs"]
+}

@@ -1,0 +1,71 @@
+# The pre-launch public site on GitHub Pages (decision log, 2026-10-08; infra/README.md
+# "Pre-launch site"). Builds the static export of the landing page from apps/staff
+# (`pnpm --filter @quad/staff build:export`, NEXT_PUBLIC_QUAD_PRELAUNCH=true), runs the landing
+# journey against the exported files, and on main publishes them to quad-edu.com. On pull requests
+# it only proves the export builds and passes. Replaced by the CloudFront deploy (spec 19, 20).
+name: Pages
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages
+  # Never cancel a deploy half-way; a newer push waits for the running one.
+  cancel-in-progress: false
+
+env:
+  TURBO_TELEMETRY_DISABLED: '1'
+
+jobs:
+  build:
+    name: export
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      NEXT_PUBLIC_QUAD_PRELAUNCH: 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+      - name: Build the design tokens
+        run: pnpm tokens:build
+      - name: Build the static export
+        run: pnpm --filter @quad/staff build:export
+      - name: Install the Playwright browser
+        run: pnpm --filter @quad/staff exec playwright install --with-deps chromium
+      - name: Landing journey against the export
+        run: pnpm --filter @quad/staff e2e:export
+      - name: Upload the Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pages-playwright-report
+          path: apps/staff/playwright-report/
+          if-no-files-found: ignore
+      - name: Upload the site
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: apps/staff/site-export/out
+
+  deploy:
+    name: deploy
+    if: github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

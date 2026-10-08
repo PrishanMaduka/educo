@@ -1,0 +1,28 @@
+/*
+ * Custom variants for the Quad web apps (imported by app.css; variants.test.ts checks the selectors).
+ *
+ * dark: matches the token CSS. An explicit data-theme="dark" wins, except inside a light container placed in
+ * it (the /design style guide does that); with no explicit light theme, the device's dark setting applies.
+ * Nesting limit: one level only; a dark container inside that light one (dark → light → dark) stays light.
+ */
+@custom-variant dark {
+  &:where([data-theme='dark'], [data-theme='dark'] *):not(
+      :where([data-theme='dark'] [data-theme='light'], [data-theme='dark'] [data-theme='light'] *)
+    ) {
+    @slot;
+  }
+  @media (prefers-color-scheme: dark) {
+    &:where(:root:not([data-theme='light']), :root:not([data-theme='light']) *):not(
+        :where([data-theme='light'], [data-theme='light'] *)
+      ) {
+      @slot;
+    }
+  }
+}
+
+/*
+ * rail-collapsed: the side bar is collapsed. The theme bootstrap script sets data-rail="collapsed" on <html>
+ * before paint, so the first paint already has the 72 px rail. Only elements inside a [data-rail-scope]
+ * (the shell grid and its side bar, not the phone menu) respond.
+ */
+@custom-variant rail-collapsed (&:where(:root[data-rail='collapsed'] [data-rail-scope], :root[data-rail='collapsed'] [data-rail-scope] *));

@@ -4,7 +4,7 @@
 | Level | Tool | What | Where |
 |---|---|---|---|
 | Unit | Vitest | `packages/domain` algorithms (timetable, cover order, exam clashes, early-warning scores, fee maths, grading), Zod contracts, UI component logic | `*.test.ts` next to the code |
-| API integration | Vitest + Supertest + Testcontainers (Postgres 16, Redis 7) | Every endpoint: happy path, validation, permission denied, cross-tenant denied, parent-not-linked denied | `apps/api/test/**` |
+| API integration | Vitest + Supertest against Postgres 16 and Redis 7 (Docker Compose locally, service containers in CI), a freshly migrated database per test file | Every endpoint: happy path, validation, permission denied, cross-tenant denied, parent-not-linked denied | `apps/api/test/**` |
 | Web end-to-end | Playwright (Chromium, WebKit) at 1440×900 and 390×844, light and dark | Key journeys per milestone, plus an axe check per page | `apps/staff/e2e`, `apps/console/e2e` |
 | Mobile unit and widget | `flutter_test` with Riverpod overrides and a mocked `quad_api` | Providers, formatting, every screen's states (loading, empty, error, data) | `apps/parent/test` |
 | Mobile golden | Golden image tests at 390×844, light and dark, text scale 1.0 and 2.0 | Home, Circle tab (Moments, People, Learning), pay sheet, child screens | `apps/parent/test/goldens` |
@@ -74,7 +74,7 @@
 50. Preview a role (M1): the school admin previews Finance officer; the menu shows only Dashboard, Communications, Students, Fees & invoicing and Accounting; Students is View only; opening Timetable shows the no-access page; a write during the preview returns 403 `preview_read_only`; Back to my view restores the admin's menu; the audit log has the start and end.
 
 ## Quality gate (`pnpm verify`)
-`turbo run typecheck lint test` (Turborepo runs `flutter analyze` and `flutter test` through `apps/parent/package.json`) → `codegen:check` (API clients, tokens, ARB are up to date) → API integration tests → Playwright smoke (the web journeys for completed milestones, and Lighthouse CI on the landing route from M1b) → `pnpm audit --prod` (no high or critical issues). `pnpm verify` does **not** run Maestro or `integration_test` (`pnpm e2e:mobile`), which need simulators: CI runs them nightly on iOS and Android simulators, and a milestone that adds mobile journeys must show a green nightly run (or a local `pnpm e2e:mobile` run) in its pull request. It also does not run `pnpm eval:assistant`. A milestone is accepted only when `pnpm verify` passes and its own journeys pass.
+`format:check` (Prettier; the parent app uses `dart format`) → `turbo run typecheck lint test` (Turborepo runs `flutter analyze` and `flutter test` through `apps/parent/package.json`) → `codegen:check` (API clients, tokens, ARB are up to date) → API integration tests → Playwright smoke (the web journeys for completed milestones, and Lighthouse CI on the landing route from M1b) → `pnpm audit --prod` (no high or critical issues). `pnpm verify` does **not** run Maestro or `integration_test` (`pnpm e2e:mobile`), which need simulators: CI runs them nightly on iOS and Android simulators, and a milestone that adds mobile journeys must show a green nightly run (or a local `pnpm e2e:mobile` run) in its pull request. It also does not run `pnpm eval:assistant`. A milestone is accepted only when `pnpm verify` passes and its own journeys pass.
 
 ## CI (GitHub Actions)
 - On pull requests: install with cache, `pnpm verify` against Docker services, and build every app and image. There are no preview environments in v1 (D18).

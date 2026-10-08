@@ -1,0 +1,22 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "extends": ["//"],
+  "tasks": {
+    "lint": {
+      "env": ["CI", "QUAD_REQUIRE_FLUTTER"],
+      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/scripts/flutter.mjs"]
+    },
+    "typecheck": {
+      "env": ["CI", "QUAD_REQUIRE_FLUTTER"],
+      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/scripts/flutter.mjs"]
+    },
+    "test": {
+      "env": ["CI", "QUAD_REQUIRE_FLUTTER"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/scripts/flutter.mjs",
+        "$TURBO_ROOT$/packages/contracts/src/observability/telemetry-scrub.cases.json"
+      ]
+    }
+  }
+}
