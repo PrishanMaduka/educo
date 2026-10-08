@@ -13,6 +13,8 @@
 <script>
 /* Theme: follows the system unless the visitor chose one (quad_theme cookie, as in the apps). Runs before paint. */
 (() => { try { const m = document.cookie.match(/(?:^|; )quad_theme=(light|dark)/); if (m) document.documentElement.dataset.theme = m[1]; } catch (e) {} })();
+/* Style study only: ?bg=vivid previews background option 2. Removed once the owner chooses. */
+(() => { if (/[?&]bg=vivid\b/.test(location.search)) document.documentElement.dataset.bg = 'vivid'; })();
 </script>
 <style>
 /* Layout: one 1120px column. Every section is carried by an inline SVG illustration drawn from the palette tokens,
@@ -47,6 +49,16 @@
 .wc-moon{opacity:0}
 :root[data-theme="dark"] .wc-moon{opacity:1}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .wc-moon{opacity:1}}
+
+/* Rich style study, background option 2 ("vivid", ?bg=vivid): brighter page surfaces; deep navy in dark mode, like the reference */
+@media (prefers-color-scheme:light){:root[data-bg="vivid"]:not([data-theme="dark"]){--bg:#F2F6FF;--surface:#FFFFFF;--surface-2:#E6EEFF;--line:#D0DCF7;--wash-1:#D6E4FF;--wash-2:#FFE6A6;--band:#18217A;--band-2:#2230A6;--band-line:#3644BE;--band-ink-2:#D5DCFF}}
+:root[data-bg="vivid"][data-theme="light"]{--bg:#F2F6FF;--surface:#FFFFFF;--surface-2:#E6EEFF;--line:#D0DCF7;--wash-1:#D6E4FF;--wash-2:#FFE6A6;--band:#18217A;--band-2:#2230A6;--band-line:#3644BE;--band-ink-2:#D5DCFF}
+@media (prefers-color-scheme:dark){:root[data-bg="vivid"]:not([data-theme="light"]){--bg:#0B1033;--surface:#141B4D;--surface-2:#1B2360;--line:#2A3478;--wash-1:#16205E;--wash-2:#2A1E4E;--band:#070B26;--band-2:#121A4A;--band-line:#26306E;--band-ink-2:#C9D0F5;--rich-stage-1:#3446C4;--rich-stage-2:#0A0F38}}
+:root[data-bg="vivid"][data-theme="dark"]{--bg:#0B1033;--surface:#141B4D;--surface-2:#1B2360;--line:#2A3478;--wash-1:#16205E;--wash-2:#2A1E4E;--band:#070B26;--band-2:#121A4A;--band-line:#26306E;--band-ink-2:#C9D0F5;--rich-stage-1:#3446C4;--rich-stage-2:#0A0F38}
+/* Rich style study: the glowing stage behind the hero and circle characters */
+:root{--rich-stage-1:#FFFFFF;--rich-stage-2:#CFE0FF}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--rich-stage-1:#2B3A9E;--rich-stage-2:#0C1240}}
+:root[data-theme="dark"]{--rich-stage-1:#2B3A9E;--rich-stage-2:#0C1240}
 
 *{box-sizing:border-box}
 html{scroll-behavior:smooth;scroll-padding-top:80px}
@@ -134,7 +146,7 @@ svg.ill{display:block;width:100%;height:auto;overflow:visible}
 @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
 .ticker{position:relative;width:min(380px,100%);background:var(--surface);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:12px 14px;display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:center;min-height:70px;margin-top:6px}
 .ticker .av{width:42px;height:42px;flex:none}
-.ticker .av svg{width:42px;height:58px;display:block;margin-top:-8px}
+.ticker .av svg{width:42px;height:42px;display:block}
 .ticker b{display:block;font-size:14px;line-height:1.3}
 .ticker small{display:block;color:var(--ink-2);font-size:12.5px;font-weight:600}
 .ticker .tx{transition:opacity .35s}
@@ -342,7 +354,7 @@ dialog.si::backdrop{background:rgba(16,16,20,.6);backdrop-filter:blur(3px)}
 
 <!-- Shared illustration defs: the round portrait crop used by every person in the page -->
 <!-- Watercolour filters shared by every painted scene: wcBig (sky and land washes), wcMid (buildings, hills, kites), wcFig (figures), wcInk (dry-brush lines), wcBloom (glows), wcFeather/wcFeatherS (painted vignettes), wcPaper (grain) -->
-<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><filter id="wcBig" x="-25%" y="-25%" width="150%" height="150%" color-interpolation-filters="sRGB"><feTurbulence type="fractalNoise" baseFrequency=".009" numOctaves="3" seed="2" result="t"/><feDisplacementMap in="SourceGraphic" in2="t" scale="44" xChannelSelector="R" yChannelSelector="G" result="d"/><feGaussianBlur in="d" stdDeviation="2.4" result="b"/><feTurbulence type="fractalNoise" baseFrequency=".022" numOctaves="2" seed="7" result="t2"/><feColorMatrix in="t2" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -1.5 1.25" result="m"/><feComposite in="b" in2="m" operator="in" result="p"/><feComponentTransfer in="b" result="base"><feFuncA type="linear" slope=".6"/></feComponentTransfer><feMorphology in="d" operator="erode" radius="2.2" result="e"/><feComposite in="d" in2="e" operator="out" result="r"/><feGaussianBlur in="r" stdDeviation="1" result="r2"/><feComponentTransfer in="r2" result="r3"><feFuncA type="linear" slope=".45"/></feComponentTransfer><feMerge><feMergeNode in="base"/><feMergeNode in="p"/><feMergeNode in="r3"/></feMerge></filter><filter id="wcSky" x="-25%" y="-25%" width="150%" height="150%" color-interpolation-filters="sRGB"><feTurbulence type="fractalNoise" baseFrequency=".008" numOctaves="2" seed="3" result="t"/><feDisplacementMap in="SourceGraphic" in2="t" scale="50" xChannelSelector="R" yChannelSelector="G" result="d"/><feGaussianBlur in="d" stdDeviation="12" result="b"/><feTurbulence type="fractalNoise" baseFrequency=".018" numOctaves="2" seed="11" result="t2"/><feColorMatrix in="t2" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -1.1 1.1" result="m"/><feComposite in="b" in2="m" operator="in"/></filter><filter id="wcMid" x="-15%" y="-15%" width="130%" height="130%" color-interpolation-filters="sRGB"><feTurbulence type="fractalNoise" baseFrequency=".03" numOctaves="2" seed="4" result="t"/><feDisplacementMap in="SourceGraphic" in2="t" scale="9" xChannelSelector="R" yChannelSelector="G" result="d"/><feGaussianBlur in="d" stdDeviation=".7" result="b"/><feTurbulence type="fractalNoise" baseFrequency=".06" numOctaves="2" seed="13" result="t2"/><feColorMatrix in="t2" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -2.4 1.7" result="m"/><feComposite in="b" in2="m" operator="in" result="p"/><feComponentTransfer in="b" result="base"><feFuncA type="linear" slope=".6"/></feComponentTransfer><feMorphology in="d" operator="erode" radius="1.3" result="e"/><feComposite in="d" in2="e" operator="out" result="r"/><feComponentTransfer in="r" result="r3"><feFuncA type="linear" slope=".75"/></feComponentTransfer><feMerge><feMergeNode in="base"/><feMergeNode in="p"/><feMergeNode in="r3"/></feMerge></filter><filter id="wcFig" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB"><feTurbulence type="fractalNoise" baseFrequency=".09" numOctaves="2" seed="8" result="t"/><feDisplacementMap in="SourceGraphic" in2="t" scale="2.4" xChannelSelector="R" yChannelSelector="G" result="d"/><feColorMatrix in="t" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -1.6 1.55" result="m"/><feComposite in="d" in2="m" operator="in" result="p"/><feComponentTransfer in="d" result="base"><feFuncA type="linear" slope=".9"/></feComponentTransfer><feMorphology in="d" operator="erode" radius=".7" result="e"/><feComposite in="d" in2="e" operator="out" result="r"/><feMerge><feMergeNode in="base"/><feMergeNode in="p"/><feMergeNode in="r"/></feMerge></filter><filter id="wcInk" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence type="fractalNoise" baseFrequency=".25" numOctaves="1" seed="3" result="t"/><feDisplacementMap in="SourceGraphic" in2="t" scale="1.6" xChannelSelector="R" yChannelSelector="G"/></filter><filter id="wcBloom" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="10"/></filter><filter id="wcFeather" x="-15%" y="-15%" width="130%" height="130%"><feTurbulence type="fractalNoise" baseFrequency=".011" numOctaves="3" seed="5" result="t"/><feDisplacementMap in="SourceGraphic" in2="t" scale="90" xChannelSelector="R" yChannelSelector="G" result="d"/><feGaussianBlur in="d" stdDeviation="22"/></filter><filter id="wcFeatherS" x="-15%" y="-15%" width="130%" height="130%"><feTurbulence type="fractalNoise" baseFrequency=".02" numOctaves="3" seed="5" result="t"/><feDisplacementMap in="SourceGraphic" in2="t" scale="16" xChannelSelector="R" yChannelSelector="G" result="d"/><feGaussianBlur in="d" stdDeviation="9"/></filter><filter id="wcPaper" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".75" numOctaves="2" seed="21" stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 .35  0 0 0 0 .28  0 0 0 0 .2  0 0 0 .7 -.22"/><feComposite in2="SourceAlpha" operator="in"/></filter></defs></svg>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><filter id="wcBig" x="-25%" y="-25%" width="150%" height="150%" color-interpolation-filters="sRGB"><feTurbulence type="fractalNoise" baseFrequency=".009" numOctaves="3" seed="2" result="t"/><feDisplacementMap in="SourceGraphic" in2="t" scale="44" xChannelSelector="R" yChannelSelector="G" result="d"/><feGaussianBlur in="d" stdDeviation="2.4" result="b"/><feTurbulence type="fractalNoise" baseFrequency=".022" numOctaves="2" seed="7" result="t2"/><feColorMatrix in="t2" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -1.5 1.25" result="m"/><feComposite in="b" in2="m" operator="in" result="p"/><feComponentTransfer in="b" result="base"><feFuncA type="linear" slope=".6"/></feComponentTransfer><feMorphology in="d" operator="erode" radius="2.2" result="e"/><feComposite in="d" in2="e" operator="out" result="r"/><feGaussianBlur in="r" stdDeviation="1" result="r2"/><feComponentTransfer in="r2" result="r3"><feFuncA type="linear" slope=".45"/></feComponentTransfer><feMerge><feMergeNode in="base"/><feMergeNode in="p"/><feMergeNode in="r3"/></feMerge></filter><filter id="wcSky" x="-25%" y="-25%" width="150%" height="150%" color-interpolation-filters="sRGB"><feTurbulence type="fractalNoise" baseFrequency=".008" numOctaves="2" seed="3" result="t"/><feDisplacementMap in="SourceGraphic" in2="t" scale="50" xChannelSelector="R" yChannelSelector="G" result="d"/><feGaussianBlur in="d" stdDeviation="12" result="b"/><feTurbulence type="fractalNoise" baseFrequency=".018" numOctaves="2" seed="11" result="t2"/><feColorMatrix in="t2" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -1.1 1.1" result="m"/><feComposite in="b" in2="m" operator="in"/></filter><filter id="wcMid" x="-15%" y="-15%" width="130%" height="130%" color-interpolation-filters="sRGB"><feTurbulence type="fractalNoise" baseFrequency=".03" numOctaves="2" seed="4" result="t"/><feDisplacementMap in="SourceGraphic" in2="t" scale="9" xChannelSelector="R" yChannelSelector="G" result="d"/><feGaussianBlur in="d" stdDeviation=".7" result="b"/><feTurbulence type="fractalNoise" baseFrequency=".06" numOctaves="2" seed="13" result="t2"/><feColorMatrix in="t2" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -2.4 1.7" result="m"/><feComposite in="b" in2="m" operator="in" result="p"/><feComponentTransfer in="b" result="base"><feFuncA type="linear" slope=".6"/></feComponentTransfer><feMorphology in="d" operator="erode" radius="1.3" result="e"/><feComposite in="d" in2="e" operator="out" result="r"/><feComponentTransfer in="r" result="r3"><feFuncA type="linear" slope=".75"/></feComponentTransfer><feMerge><feMergeNode in="base"/><feMergeNode in="p"/><feMergeNode in="r3"/></feMerge></filter><filter id="wcFig" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB"><feTurbulence type="fractalNoise" baseFrequency=".09" numOctaves="2" seed="8" result="t"/><feDisplacementMap in="SourceGraphic" in2="t" scale="2.4" xChannelSelector="R" yChannelSelector="G" result="d"/><feColorMatrix in="t" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -1.6 1.55" result="m"/><feComposite in="d" in2="m" operator="in" result="p"/><feComponentTransfer in="d" result="base"><feFuncA type="linear" slope=".9"/></feComponentTransfer><feMorphology in="d" operator="erode" radius=".7" result="e"/><feComposite in="d" in2="e" operator="out" result="r"/><feMerge><feMergeNode in="base"/><feMergeNode in="p"/><feMergeNode in="r"/></feMerge></filter><filter id="wcInk" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence type="fractalNoise" baseFrequency=".25" numOctaves="1" seed="3" result="t"/><feDisplacementMap in="SourceGraphic" in2="t" scale="1.6" xChannelSelector="R" yChannelSelector="G"/></filter><filter id="wcBloom" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="10"/></filter><filter id="wcFeather" x="-15%" y="-15%" width="130%" height="130%"><feTurbulence type="fractalNoise" baseFrequency=".011" numOctaves="3" seed="5" result="t"/><feDisplacementMap in="SourceGraphic" in2="t" scale="90" xChannelSelector="R" yChannelSelector="G" result="d"/><feGaussianBlur in="d" stdDeviation="22"/></filter><filter id="wcFeatherS" x="-15%" y="-15%" width="130%" height="130%"><feTurbulence type="fractalNoise" baseFrequency=".02" numOctaves="3" seed="5" result="t"/><feDisplacementMap in="SourceGraphic" in2="t" scale="16" xChannelSelector="R" yChannelSelector="G" result="d"/><feGaussianBlur in="d" stdDeviation="9"/></filter><filter id="wcPaper" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".75" numOctaves="2" seed="21" stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 .35  0 0 0 0 .28  0 0 0 0 .2  0 0 0 .7 -.22"/><feComposite in2="SourceAlpha" operator="in"/></filter><!-- Rich cartoon style study: glossy gradients, glow, shadows and the portrait and tile clips used by toon() --><linearGradient id="gSk1" x1="0" y1="0" x2="0.7" y2="1"><stop offset="0" stop-color="#E2A982"/><stop offset="1" stop-color="#B8774E"/></linearGradient><linearGradient id="gSk2" x1="0" y1="0" x2="0.7" y2="1"><stop offset="0" stop-color="#CD9068"/><stop offset="1" stop-color="#9C5E38"/></linearGradient><linearGradient id="gSk3" x1="0" y1="0" x2="0.7" y2="1"><stop offset="0" stop-color="#B97A52"/><stop offset="1" stop-color="#83492A"/></linearGradient><linearGradient id="gHair" x1="0" y1="0" x2="0.4" y2="1"><stop offset="0" stop-color="#5A4152"/><stop offset="1" stop-color="#1A1018"/></linearGradient><linearGradient id="gHairG" x1="0" y1="0" x2="0.4" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#C9C3D6"/></linearGradient><linearGradient id="gWhite" x1="0" y1="0" x2="0.6" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#D4DEF2"/></linearGradient><linearGradient id="gBlue" x1="0" y1="0" x2="0.5" y2="1"><stop offset="0" stop-color="#5C86FF"/><stop offset="1" stop-color="#2340C8"/></linearGradient><linearGradient id="gYellow" x1="0" y1="0" x2="0.5" y2="1"><stop offset="0" stop-color="#FFD95E"/><stop offset="1" stop-color="#F2A20F"/></linearGradient><linearGradient id="gCoral" x1="0" y1="0" x2="0.5" y2="1"><stop offset="0" stop-color="#FF8E78"/><stop offset="1" stop-color="#E0413A"/></linearGradient><linearGradient id="gGreen" x1="0" y1="0" x2="0.5" y2="1"><stop offset="0" stop-color="#63DB7F"/><stop offset="1" stop-color="#1F9A47"/></linearGradient><linearGradient id="gTeal" x1="0" y1="0" x2="0.5" y2="1"><stop offset="0" stop-color="#47E3D6"/><stop offset="1" stop-color="#0F9A9C"/></linearGradient><linearGradient id="gPurple" x1="0" y1="0" x2="0.5" y2="1"><stop offset="0" stop-color="#AE8CFF"/><stop offset="1" stop-color="#6A3CDB"/></linearGradient><linearGradient id="gPink" x1="0" y1="0" x2="0.5" y2="1"><stop offset="0" stop-color="#FF9DB4"/><stop offset="1" stop-color="#F0517C"/></linearGradient><linearGradient id="gShoe" x1="0" y1="0" x2="0.4" y2="1"><stop offset="0" stop-color="#4A4A5C"/><stop offset="1" stop-color="#101018"/></linearGradient><linearGradient id="gOrange" x1="0" y1="0" x2="0.5" y2="1"><stop offset="0" stop-color="#FFB25C"/><stop offset="1" stop-color="#F07A12"/></linearGradient><linearGradient id="gNavy" x1="0" y1="0" x2="0.5" y2="1"><stop offset="0" stop-color="#3A4C9C"/><stop offset="1" stop-color="#1A2466"/></linearGradient><radialGradient id="gEye" cx=".4" cy=".35" r=".7"><stop offset="0" stop-color="#5B3A26"/><stop offset=".55" stop-color="#2A160D"/><stop offset="1" stop-color="#0E0705"/></radialGradient><radialGradient id="gCheek"><stop offset="0" stop-color="#FF6F8E" stop-opacity=".55"/><stop offset="1" stop-color="#FF6F8E" stop-opacity="0"/></radialGradient><radialGradient id="gGloss" cx=".35" cy=".25" r=".6"><stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient><radialGradient id="gGlow"><stop offset="0" stop-color="#FFE9A8" stop-opacity=".9"/><stop offset=".45" stop-color="#FFD36B" stop-opacity=".35"/><stop offset="1" stop-color="#FFD36B" stop-opacity="0"/></radialGradient><radialGradient id="gStage" cx=".5" cy=".45" r=".6"><stop offset="0" style="stop-color:var(--rich-stage-1)"/><stop offset=".7" style="stop-color:var(--rich-stage-2)"/><stop offset="1" style="stop-color:var(--rich-stage-2);stop-opacity:0"/></radialGradient><linearGradient id="gRingS" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4F7BFF"/><stop offset="1" stop-color="#22C7D6"/></linearGradient><linearGradient id="gRingH" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFC531"/><stop offset="1" stop-color="#FF7A59"/></linearGradient><filter id="tShadow" x="-30%" y="-30%" width="160%" height="170%"><feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#141C5C" flood-opacity=".28"/></filter><filter id="tGlow" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter><clipPath id="tBub" clipPathUnits="userSpaceOnUse"><circle cx="50" cy="50" r="44"/></clipPath><clipPath id="tTile" clipPathUnits="userSpaceOnUse"><rect width="160" height="110" rx="20"/></clipPath></defs></svg>
 
 <header class="nav">
   <div class="wrap">
@@ -376,7 +388,7 @@ dialog.si::backdrop{background:rgba(16,16,20,.6);backdrop-filter:blur(3px)}
       </div>
       <div class="orbit">
         <svg class="ill" viewBox="0 0 800 860" role="img" aria-labelledby="orbT" data-ill="hero">
-          <title id="orbT">A watercolour picture: Amaya, in her white school uniform and plaits, stands on a path between her school and her home in the tea hills, looking up. Around her in the sky drift kites, one for each person in her circle: at school Ms. Jayasinghe, Mr. Perera, Coach Herath, Nurse Dias and Sunethra on the bus; at home her mum Dilhani, her dad Ruwan and her grandmother Kamala.</title>
+          <title id="orbT">Amaya, smiling in her white school uniform, waves from the centre of a glowing circle. Around her are the people who care for her: at school Ms. Jayasinghe, Mr. Perera and Coach Herath; at home her mum Dilhani, her dad Ruwan and her grandmother Kamala.</title>
         </svg>
         <div class="ticker" role="status" aria-live="polite"><span class="av" id="tkAv" aria-hidden="true"></span><div class="tx" id="tkTx"></div></div>
         <p class="sample">A sample school. Amaya and her circle are fictional.</p>
@@ -994,7 +1006,154 @@ const Q = (() => {
   D.iLanka = () => ell(20, 20, 18, 18, 'teal', .28, 'wcMid') + pth('M18 6C15 6 14 9 15 12C16 15 13 19 13 24C13 30 16 34 21 34C26 34 28 29 27 24C26 18 23 13 20 8Z', 'sea', .85, 'wcFig');
   D.iShield = () => `<circle cx="22" cy="22" r="20" fill="#fff" fill-opacity=".07"/>` + pth('M22 8L34 13V22C34 29 29 34 22 37C15 34 10 29 10 22V13Z', 'teal', .9, 'wcFig') + `<path d="M17 22l4 4 7 -8" stroke="#fff" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`;
 
-  return {D, KPOS, AMAYA, kiteIcon, svgWrap};
+
+  /* ── Rich cartoon style (study): one shared front-facing character, toon(), and a portrait bubble built on it ──
+     Glossy gradients from the shared defs (gSk*, gHair, gWhite, gBlue …), big eyes with catchlights, rosy cheeks, an open smile,
+     a soft rim light and drop shadow. Origin at the feet; a child is about 190 units tall, an adult about 215. */
+  const CAST = {
+    amaya:    {kid: 1, skin: 1, hair: 'plaits', outfit: 'frock', tie: 'gBlue', ribbon: 'gPink'},
+    dilhani:  {skin: 1, hair: 'long', outfit: 'blouse', top: 'gCoral'},
+    ruwan:    {skin: 3, hair: 'short', outfit: 'shirt', top: 'gTeal', moustache: 1},
+    kamala:   {skin: 2, hair: 'grey', outfit: 'saree', top: 'gYellow', drape: 'gOrange', glasses: 1},
+    jaya:     {skin: 2, hair: 'bun', outfit: 'saree', top: 'gPurple', drape: 'gYellow'},
+    perera:   {skin: 3, hair: 'short', outfit: 'shirt', top: 'gGreen', glasses: 1},
+    herath:   {skin: 2, hair: 'short', outfit: 'shirt', top: 'gBlue', whistle: 1},
+    dias:     {skin: 1, hair: 'bun', outfit: 'shirt', top: 'gTeal', nurse: 1},
+    silva:    {skin: 3, hair: 'long', outfit: 'saree', top: 'gCoral', drape: 'gYellow'},
+    sunethra: {skin: 2, hair: 'bun', outfit: 'blouse', top: 'gOrange', vest: 1},
+    kavindu:  {kid: 1, skin: 3, hair: 'short', outfit: 'boy', tie: 'gBlue'}
+  };
+  const U = id => `url(#${id})`;
+  function toon(k, o = {}) {
+    const c = {...CAST[k], ...o}, K = !!c.kid, R = K ? 30 : 25, hy = K ? -132 : -168, sk = U('gSk' + c.skin), hair = c.hair === 'grey' ? U('gHairG') : U('gHair');
+    const W = K ? 22 : 25, sy = hy + R + (K ? 6 : 8), wy = K ? -56 : -88, g = [];
+    g.push(`<ellipse cx="0" cy="0" rx="${K ? 28 : 32}" ry="6" fill="#141C5C" opacity=".16"/>`);
+    // legs and shoes
+    const legTop = K ? -32 : -10;
+    if (K || c.outfit === 'shirt' && !c.nurse) g.push(K ? `<path d="M-11 ${legTop}h8v26h-8Z M3 ${legTop}h8v26h-8Z" fill="${sk}"/><path d="M-11.5 -15h9v10h-9Z M2.5 -15h9v10h-9Z" fill="${U('gWhite')}"/>` : '');
+    g.push(`<path d="M-14 -6h12q3 0 3 3v3h-15Z M2 -6h12q3 0 3 3v3h-15Z" fill="${U('gShoe')}"/><path d="M-11 -4.5h5M5 -4.5h5" stroke="#fff" stroke-width="1.2" stroke-linecap="round" opacity=".5"/>`);
+    // lower body
+    if (c.outfit === 'frock') g.push(`<path d="M-17 ${wy}L-29 -30Q0 -24 29 -30L17 ${wy}Z" fill="${U('gWhite')}"/><path d="M-9 ${wy + 2}L-15 -27M0 ${wy + 2}V-25M9 ${wy + 2}L15 -27" stroke="#9AAACB" stroke-width="1.1" opacity=".55"/>`);
+    else if (c.outfit === 'boy') g.push(`<path d="M-17 ${wy}h34l2 24h-17l-1 -8l-1 8h-17Z" fill="${U('gNavy')}"/>`);
+    else if (c.outfit === 'saree') g.push(`<path d="M-20 ${wy}L-26 -4Q0 1 26 -4L20 ${wy}Z" fill="${U(c.top)}"/><path d="M-25.4 -12Q0 -7 25.4 -12" stroke="${U(c.drape)}" stroke-width="5" fill="none"/>`);
+    else if (c.outfit === 'blouse' || c.nurse) g.push(`<path d="M-20 ${wy}L-24 -4Q0 0 24 -4L20 ${wy}Z" fill="${c.nurse ? U('gWhite') : U('gNavy')}"/>`);
+    else g.push(`<path d="M-18 ${wy}h17v${-wy - 6}h-17Z M1 ${wy}h17v${-wy - 6}h-17Z" fill="${U('gNavy')}"/>`);
+    // torso
+    const top = K && c.outfit === 'frock' || c.outfit === 'boy' ? U('gWhite') : U(c.top);
+    g.push(`<path d="M${-W} ${sy + 12}Q${-W} ${sy} ${-W + 12} ${sy - 2}H${W - 12}Q${W} ${sy} ${W} ${sy + 12}L${W - 2} ${wy + 2}H${-W + 2}Z" fill="${top}"/>`);
+    g.push(`<path d="M${W - 6} ${sy + 4}Q${W} ${sy + 20} ${W - 3} ${wy}" stroke="#fff" stroke-width="2" opacity=".35" fill="none"/>`);
+    if (c.outfit === 'saree') g.push(`<path d="M${-W + 2} ${sy + 2}L${W - 2} ${wy - 2}L${W - 10} ${wy + 2}L${-W - 2} ${sy + 14}Z" fill="${U(c.drape)}" opacity=".95"/>`);
+    if (c.vest) g.push(`<path d="M${-W + 2} ${sy + 4}L-6 ${wy}H${-W + 3}Z M${W - 2} ${sy + 4}L6 ${wy}H${W - 3}Z" fill="${U('gYellow')}"/><path d="M${-W + 4} ${sy + 22}h10M${W - 14} ${sy + 22}h10" stroke="#fff" stroke-width="2.4"/>`);
+    if (c.nurse) g.push(`<rect x="${W - 13}" y="${sy + 10}" width="9" height="9" rx="2" fill="#fff"/><path d="M${W - 8.5} ${sy + 12}v5M${W - 11} ${sy + 14.5}h5" stroke="#E0413A" stroke-width="1.8" stroke-linecap="round"/>`);
+    if (K) { // collar, tie and belt of the school uniform
+      g.push(`<path d="M-11 ${sy - 1}Q-6 ${sy + 9} 0 ${sy + 4}Q6 ${sy + 9} 11 ${sy - 1}Q5 ${sy - 4} 0 ${sy - 3}Q-5 ${sy - 4} -11 ${sy - 1}Z" fill="#fff" stroke="#C3CEE6" stroke-width=".8"/>`);
+      g.push(`<path d="M-2.6 ${sy + 3}h5.2l1 3.4h-7.2Z M-2.4 ${sy + 6.4}L-3.8 ${sy + 22}L0 ${sy + 26}L3.8 ${sy + 22}L2.4 ${sy + 6.4}Z" fill="${U(c.tie)}"/>`);
+      if (c.outfit === 'frock') g.push(`<rect x="${-W + 2}" y="${wy - 2}" width="${2 * W - 4}" height="5" rx="2" fill="#E3EAF8"/>`);
+    } else if (c.outfit === 'shirt') g.push(`<path d="M-8 ${sy - 1}L0 ${sy + 8}L8 ${sy - 1}L4 ${sy + 12}L0 ${sy + 8}L-4 ${sy + 12}Z" fill="#fff" opacity=".85"/>`);
+    if (c.whistle) g.push(`<path d="M-6 ${sy}L0 ${sy + 16}L6 ${sy}" stroke="#fff" stroke-width="1.4" fill="none"/><rect x="-4" y="${sy + 14}" width="8" height="6" rx="3" fill="${U('gYellow')}"/>`);
+    // arms (sleeve colour, then hands)
+    const sleeve = top, aw = K ? 9 : 10, hand = (x, y) => `<circle cx="${x}" cy="${y}" r="${K ? 5 : 5.5}" fill="${sk}"/>`;
+    const arm = (d, hx, hy2) => `<path d="${d}" stroke="${sleeve}" stroke-width="${aw}" stroke-linecap="round" fill="none"/>` + hand(hx, hy2);
+    const L = -W + 3, Rr = W - 3, ay = sy + 7;
+    if (c.pose === 'books') g.push(arm(`M${L} ${ay}Q${L - 4} ${ay + 18} -8 ${wy - 6}`, -8, wy - 6), arm(`M${Rr} ${ay}Q${Rr + 4} ${ay + 18} 8 ${wy - 6}`, 8, wy - 6),
+      `<g transform="translate(0 ${wy - 10}) rotate(-6)"><rect x="-17" y="-6" width="34" height="9" rx="2" fill="${U('gOrange')}"/><rect x="-15" y="-14" width="30" height="8" rx="2" fill="${U('gBlue')}"/><rect x="-16" y="-21" width="32" height="7" rx="2" fill="${U('gGreen')}"/><path d="M-13 -1h26M-11 -9h22" stroke="#fff" stroke-width="1" opacity=".6"/></g>`);
+    else {
+      g.push(arm(`M${L} ${ay}Q${L - 5} ${ay + 18} ${L - 3} ${ay + 32}`, L - 3, ay + 32));
+      if (c.pose === 'wave') g.push(arm(`M${Rr} ${ay}Q${Rr + 26} ${ay - 2} ${Rr + 30} ${ay - 30}`, Rr + 30, ay - 33), `<path d="M${Rr + 25} ${ay - 37}l-3 -6M${Rr + 30} ${ay - 39}v-7M${Rr + 35} ${ay - 37}l3 -6" stroke="${sk}" stroke-width="3.4" stroke-linecap="round"/>`);
+      else if (c.pose === 'phone') g.push(arm(`M${Rr} ${ay}Q${Rr + 6} ${ay + 22} 6 ${ay + 16}`, 6, ay + 16), `<rect x="0" y="${ay + 2}" width="12" height="19" rx="3" fill="${U('gBlue')}"/><rect x="1.8" y="${ay + 4.4}" width="8.4" height="13" rx="1.6" fill="#DDF3FF"/>`);
+      else g.push(arm(`M${Rr} ${ay}Q${Rr + 5} ${ay + 18} ${Rr + 3} ${ay + 32}`, Rr + 3, ay + 32));
+    }
+    // neck and head
+    g.push(`<path d="M-6 ${hy + R - 8}h12v14q-6 4 -12 0Z" fill="${sk}"/><path d="M-6 ${hy + R - 2}q6 5 12 0v3q-6 5 -12 0Z" fill="#000" opacity=".1"/>`);
+    const back = {plaits: `<path d="M${-R - 1} ${hy}Q${-R} ${hy - R * 1.12} 0 ${hy - R * 1.1}Q${R} ${hy - R * 1.12} ${R + 1} ${hy}V${hy + 6}H${-R - 1}Z" fill="${hair}"/>`,
+      long: `<path d="M${-R - 2} ${hy}Q${-R} ${hy - R * 1.15} 0 ${hy - R * 1.12}Q${R} ${hy - R * 1.15} ${R + 2} ${hy}L${R + 4} ${hy + R * 1.5}Q0 ${hy + R * 1.7} ${-R - 4} ${hy + R * 1.5}Z" fill="${hair}"/>`,
+      bun: `<circle cx="0" cy="${hy - R * 1.02}" r="${R * .42}" fill="${hair}"/>`, grey: `<circle cx="0" cy="${hy - R * 1.02}" r="${R * .42}" fill="${hair}"/>`, short: ''}[c.hair];
+    g.push(back);
+    g.push(`<ellipse cx="${-R + 1}" cy="${hy + 3}" rx="${R * .2}" ry="${R * .26}" fill="${sk}"/><ellipse cx="${R - 1}" cy="${hy + 3}" rx="${R * .2}" ry="${R * .26}" fill="${sk}"/>`);
+    g.push(`<ellipse cx="0" cy="${hy}" rx="${R}" ry="${R * 1.03}" fill="${sk}"/><ellipse cx="${-R * .3}" cy="${hy - R * .45}" rx="${R * .5}" ry="${R * .35}" fill="${U('gGloss')}"/>`);
+    g.push(`<path d="M${R * .82} ${hy - R * .5}A${R} ${R * 1.03} 0 0 1 ${R * .7} ${hy + R * .72}" stroke="#FFE9D8" stroke-width="${R * .07}" fill="none" opacity=".55" stroke-linecap="round"/>`);
+    // hair on top
+    const front = c.hair === 'short' ? `<path d="M${-R - 1} ${hy - 2}Q${-R - 2} ${hy - R * 1.2} ${R * .1} ${hy - R * 1.12}Q${R + 3} ${hy - R * 1.05} ${R + 1} ${hy - 2}Q${R * .7} ${hy - R * .62} ${R * .1} ${hy - R * .7}Q${-R * .5} ${hy - R * .5} ${-R - 1} ${hy - 2}Z" fill="${hair}"/>`
+      : `<path d="M${-R - 1} ${hy + 2}Q${-R - 2} ${hy - R * 1.16} 0 ${hy - R * 1.1}Q${R + 2} ${hy - R * 1.16} ${R + 1} ${hy + 2}Q${R * .8} ${hy - R * .55} ${R * .05} ${hy - R * .74}L0 ${hy - R * .9}L${-R * .05} ${hy - R * .74}Q${-R * .8} ${hy - R * .55} ${-R - 1} ${hy + 2}Z" fill="${hair}"/>`;
+    g.push(front, `<path d="M${-R * .55} ${hy - R * .82}Q${-R * .1} ${hy - R * 1.05} ${R * .35} ${hy - R * .92}" stroke="#fff" stroke-width="${R * .09}" stroke-linecap="round" fill="none" opacity="${c.hair === 'grey' ? .7 : .28}"/>`);
+    // face: brows, big eyes with catchlights, cheeks, nose, open smile
+    const ex = R * .36, ey = hy + R * .06, ir = R * .155;
+    g.push(`<path d="M${-ex - R * .14} ${hy - R * .26}q${R * .14} ${-R * .1} ${R * .28} 0M${ex - R * .14} ${hy - R * .26}q${R * .14} ${-R * .1} ${R * .28} 0" stroke="${c.hair === 'grey' ? '#9A90A8' : '#2A1A22'}" stroke-width="${R * .055}" stroke-linecap="round" fill="none"/>`);
+    [-ex, ex].forEach(x => g.push(`<ellipse cx="${x}" cy="${ey}" rx="${ir}" ry="${ir * 1.28}" fill="${U('gEye')}"/><circle cx="${x + ir * .38}" cy="${ey - ir * .5}" r="${ir * .42}" fill="#fff"/><circle cx="${x - ir * .38}" cy="${ey + ir * .5}" r="${ir * .18}" fill="#fff" opacity=".9"/>`));
+    if (c.glasses) g.push(`<g fill="none" stroke="#2B2340" stroke-width="${R * .05}"><circle cx="${-ex}" cy="${ey}" r="${R * .26}"/><circle cx="${ex}" cy="${ey}" r="${R * .26}"/><path d="M${-ex + R * .26} ${ey}h${2 * ex - R * .52}"/></g><path d="M${-ex - R * .12} ${ey - R * .1}l${R * .1} ${-R * .08}M${ex - R * .12} ${ey - R * .1}l${R * .1} ${-R * .08}" stroke="#fff" stroke-width="${R * .04}" stroke-linecap="round" opacity=".7"/>`);
+    g.push(`<ellipse cx="${-R * .58}" cy="${hy + R * .36}" rx="${R * .2}" ry="${R * .13}" fill="${U('gCheek')}"/><ellipse cx="${R * .58}" cy="${hy + R * .36}" rx="${R * .2}" ry="${R * .13}" fill="${U('gCheek')}"/>`);
+    g.push(`<path d="M${-R * .05} ${hy + R * .24}q${R * .05} ${R * .05} ${R * .1} 0" stroke="#8A4A2E" stroke-width="${R * .04}" stroke-linecap="round" fill="none" opacity=".6"/>`);
+    if (c.moustache) g.push(`<path d="M${-R * .26} ${hy + R * .38}q${R * .26} ${-R * .14} ${R * .52} 0q${-R * .26} ${R * .08} ${-R * .52} 0Z" fill="#2A1A22"/>`);
+    const my = hy + R * (c.moustache ? .46 : .4), mw = R * .27;
+    g.push(`<path d="M${-mw} ${my}Q0 ${my + R * .46} ${mw} ${my}Q0 ${my + R * .06} ${-mw} ${my}Z" fill="#7A1E2E"/><path d="M${-mw * .78} ${my + R * .04}Q0 ${my + R * .1} ${mw * .78} ${my + R * .04}L${mw * .7} ${my + R * .1}Q0 ${my + R * .15} ${-mw * .7} ${my + R * .1}Z" fill="#fff"/><ellipse cx="0" cy="${my + R * .15}" rx="${mw * .42}" ry="${R * .045}" fill="#FF7B8E"/>`);
+    // plaits with ribbons hang in front of the shoulders
+    if (c.hair === 'plaits') [-1, 1].forEach(d => { const px = d * (R + 1); g.push(`<g fill="${hair}">${[0, 1, 2, 3].map(i => `<ellipse cx="${px + d * i * .6}" cy="${hy + 10 + i * 9}" rx="${5.6 - i * .5}" ry="6"/>`).join('')}</g><path d="M${px + d * 2} ${hy + 46}l-7 -4v8Z M${px + d * 2} ${hy + 46}l7 -4v8Z" fill="${U(c.ribbon)}"/><circle cx="${px + d * 2}" cy="${hy + 46}" r="2" fill="#fff" opacity=".7"/>`); });
+    return `<g filter="url(#tShadow)">${g.join('')}</g>`;
+  }
+  const place = (x, y, s, inner) => `<g transform="translate(${x} ${y}) scale(${s})">${inner}</g>`;
+  // Portrait bubble: a glossy ring with the character from the chest up
+  const RING = {amaya: 'gPink', dilhani: 'gCoral', ruwan: 'gTeal', kamala: 'gYellow', jaya: 'gPurple', perera: 'gGreen', herath: 'gBlue', dias: 'gTeal', silva: 'gCoral', sunethra: 'gOrange', kavindu: 'gBlue'};
+  const bubbleInner = k => { const kid = CAST[k].kid, hy = kid ? -132 : -168, R = kid ? 30 : 25, s = 34 / R * .9;
+    return `<circle cx="50" cy="50" r="49" fill="${U(RING[k])}"/><circle cx="50" cy="50" r="44" fill="#fff"/><circle cx="50" cy="50" r="44" fill="${U('gStage')}" opacity=".6"/><g clip-path="url(#tBub)"><g transform="translate(50 ${52 - hy * s}) scale(${s})">${toon(k)}</g></g><ellipse cx="34" cy="22" rx="16" ry="9" fill="${U('gGloss')}"/>`; };
+  const bubble = (k, x, y, r) => `<g transform="translate(${x - r} ${y - r}) scale(${r / 50})" filter="url(#tShadow)">${bubbleInner(k)}</g>`;
+  const chip = (x, y, text, fill, ink = '#fff', w) => { const ww = w || text.length * 8.4 + 22; return `<g transform="translate(${x} ${y})" filter="url(#tShadow)"><rect x="${-ww / 2}" y="-14" width="${ww}" height="28" rx="14" fill="${fill}"/><text x="0" y="0" dy=".35em" text-anchor="middle" style="font:800 14px var(--f-body);fill:${ink}">${text}</text></g>`; };
+  const spark = (x, y, r, c = '#FFD95E', cls = 'bob') => `<g class="${cls}"><path d="M${x} ${y - r}Q${x} ${y} ${x + r} ${y}Q${x} ${y} ${x} ${y + r}Q${x} ${y} ${x - r} ${y}Q${x} ${y} ${x} ${y - r}Z" fill="${c}" filter="url(#tGlow)"/></g>`;
+  const heartG = (x, y, s, fill = U('gPink')) => `<path transform="translate(${x} ${y}) scale(${s})" d="M0 -3C0 -9 -9 -10 -9 -3.5C-9 2 0 8 0 8S9 2 9 -3.5C9 -10 0 -9 0 -3Z" fill="${fill}" filter="url(#tShadow)"/>`;
+  const momentCard = (x, y, s = 1) => `<g transform="translate(${x} ${y}) scale(${s}) rotate(-4)" filter="url(#tShadow)"><rect x="0" y="0" width="150" height="104" rx="16" fill="#fff"/><rect x="10" y="10" width="130" height="54" rx="10" fill="${U('gYellow')}"/><path d="M10 50q30 -18 62 -6t68 -4v14q0 10 -10 10h-110q-10 0 -10 -10Z" fill="${U('gGreen')}"/><circle cx="112" cy="26" r="9" fill="${U('gCoral')}"/><rect x="12" y="74" width="80" height="8" rx="4" fill="#C9D3EC"/><rect x="12" y="88" width="52" height="7" rx="3.5" fill="#E1E7F5"/><circle cx="128" cy="86" r="11" fill="${U('gGreen')}"/><path d="M123 86l3.5 3.5 6 -7" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g>`;
+
+  // Hero: Amaya, smiling, at the centre of a glowing circle of the people who care for her
+  const RPOS = {}, RA = [400, 452];
+  const HERO_RING = [['jaya', -132], ['perera', -90], ['herath', -48], ['dilhani', 172], ['ruwan', 128], ['kamala', 52]];
+  HERO_RING.forEach(([k, a]) => { RPOS[k] = [400 + 300 * Math.cos(a * Math.PI / 180), 430 + 300 * Math.sin(a * Math.PI / 180)]; });
+  // keep the ticker's people reachable
+  D.hero = () => {
+    const S = [`<circle cx="400" cy="430" r="390" fill="${U('gStage')}"/>`, `<circle cx="400" cy="400" r="190" fill="${U('gGlow')}"/>`,
+      `<circle cx="400" cy="430" r="300" fill="none" stroke="${U('gRingS')}" stroke-width="10" opacity=".55" filter="url(#tGlow)"/>`, `<circle cx="400" cy="430" r="300" fill="none" stroke="#fff" stroke-width="2" stroke-dasharray="2 12" stroke-linecap="round" opacity=".7"/>`,
+      `<circle cx="400" cy="430" r="190" fill="none" stroke="${U('gRingH')}" stroke-width="6" opacity=".4" filter="url(#tGlow)"/>`,
+      `<ellipse cx="400" cy="704" rx="150" ry="22" fill="${U('gBlue')}" opacity=".25"/>`,
+      `<g id="sparks"></g>`, place(400, 700, 2.55, toon('amaya', {pose: 'wave'})),
+      ...HERO_RING.map(([k]) => bubble(k, RPOS[k][0], RPOS[k][1], 58)),
+      chip(RPOS.jaya[0], RPOS.jaya[1] + 72, 'Ms. Jayasinghe', '#6A3CDB'), chip(RPOS.perera[0], RPOS.perera[1] + 72, 'Mr. Perera', '#1F8A42'), chip(RPOS.herath[0], RPOS.herath[1] + 72, 'Coach Herath', '#2340C8'),
+      chip(RPOS.dilhani[0], RPOS.dilhani[1] + 72, 'Mum', '#C93A33'), chip(RPOS.ruwan[0], RPOS.ruwan[1] + 72, 'Dad', '#0B7F80'), chip(RPOS.kamala[0], RPOS.kamala[1] + 72, 'Grandma', '#A35F00'),
+      `<g class="bob d2">${momentCard(520, 400, .72)}</g>`, `<g class="bob">${chip(190, 396, '♥ 3', U('gPink'))}</g>`, `<g class="bob d3">${chip(668, 392, '+1 ⚡', U('gYellow'), '#3A2A00')}</g>`,
+      `<g class="bob d2">${heartG(300, 252, 1.6)}</g>`, `<g class="bob">${heartG(548, 300, 1.1, U('gCoral'))}</g>`,
+      spark(110, 180, 12), spark(690, 150, 9, '#9EE8FF', 'bob d2'), spark(320, 230, 7, '#fff', 'bob d3'), spark(720, 640, 11), spark(80, 640, 8, '#C9B4FF', 'bob d2'), spark(470, 120, 6, '#fff')];
+    return S.join('');
+  };
+
+  // The circle diagram: glowing rings, portrait bubbles with name chips, Amaya at the centre
+  D.circleD = () => {
+    const RO = 244, RI = 140, CY = 336, P = (r, deg) => [320 + r * Math.cos(deg * Math.PI / 180), CY + r * Math.sin(deg * Math.PI / 180)];
+    const SCHOOL = [['jaya', 'Ms. Jayasinghe', 'Class teacher', -90], ['perera', 'Mr. Perera', 'Maths teacher', -30], ['herath', 'Coach Herath', 'Swimming coach', 30], ['dias', 'Nurse Dias', 'School nurse', 90], ['silva', 'Ms. Silva', 'Counsellor', 150], ['sunethra', 'Sunethra', 'Bus aunty', 210]];
+    const HOME = [['dilhani', 'Dilhani', 'Mum', 0], ['ruwan', 'Ruwan', 'Dad', 120], ['kamala', 'Kamala', 'Grandma, invited', 222]];
+    const label = (x, y, name, role) => `<g transform="translate(${x} ${y})" filter="url(#tShadow)"><rect x="${-Math.max(name.length * 5.4, role.length * 4.6) - 12}" y="-15" width="${2 * Math.max(name.length * 5.4, role.length * 4.6) + 24}" height="${role ? 38 : 28}" rx="12" fill="#fff"/><text class="dname" x="0" y="2" style="fill:#1C1B2E">${name}</text><text class="drole" x="0" y="17" style="fill:#4E4C63">${role}</text></g>`;
+    const S = [`<circle cx="320" cy="${CY}" r="318" fill="${U('gStage')}"/>`,
+      `<circle cx="320" cy="${CY}" r="${RO}" fill="none" stroke="${U('gRingS')}" stroke-width="22" opacity=".28"/><circle cx="320" cy="${CY}" r="${RO}" fill="none" stroke="${U('gRingS')}" stroke-width="4" filter="url(#tGlow)"/>`,
+      `<circle cx="320" cy="${CY}" r="${RI}" fill="none" stroke="${U('gRingH')}" stroke-width="20" opacity=".3"/><circle cx="320" cy="${CY}" r="${RI}" fill="none" stroke="${U('gRingH')}" stroke-width="4" filter="url(#tGlow)"/>`,
+      `<circle cx="320" cy="${CY - 20}" r="96" fill="${U('gGlow')}"/>`,
+      chip(...P(RO + 34, -58), 'AT SCHOOL', '#2340C8', '#fff', 118), chip(...P(RI - 30, -56), 'AT HOME', '#FFC531', '#3A2A00', 96)];
+    const [a1, a2] = [P(222, 60), P(164, 60)], [b1, b2] = [P(164, 186), P(222, 186)];
+    S.push(`<path d="M${a1[0]} ${a1[1]}Q${(a1[0] + a2[0]) / 2 + 12} ${(a1[1] + a2[1]) / 2 + 6} ${a2[0]} ${a2[1]}" stroke="${U('gCoral')}" stroke-width="9" stroke-linecap="round" fill="none" filter="url(#tShadow)"/><path d="M${a2[0] - 13} ${a2[1] + 5}L${a2[0] - 2} ${a2[1] - 18}L${a2[0] + 14} ${a2[1] - 2}Z" fill="#E0413A"/>`);
+    S.push(`<path d="M${b1[0]} ${b1[1]}Q${(b1[0] + b2[0]) / 2} ${b1[1] - 14} ${b2[0]} ${b2[1]}" stroke="${U('gTeal')}" stroke-width="9" stroke-linecap="round" fill="none" filter="url(#tShadow)"/><path d="M${b2[0] + 3} ${b2[1] - 14}L${b2[0] - 18} ${b2[1]}L${b2[0] + 3} ${b2[1] + 14}Z" fill="#0F9A9C"/>`);
+    const ta = P(208, 80), tb = P(196, 162);
+    S.push(chip(470, 578, 'moments & learning', '#C93A33', '#fff'), chip(168, 410, 'thanks & tries', '#0B7F80', '#fff'));
+    [[SCHOOL, RO, 36], [HOME, RI, 34]].forEach(([L, R, r]) => L.forEach(([k, name, role, deg]) => { const [x, y] = P(R, deg); S.push(bubble(k, x, y, r), label(x, k === 'kamala' ? y + r + 44 : y + r + 18, name, role)); }));
+    S.push(place(320, CY + 78, 1.02, toon('amaya', {pose: 'books'})), chip(320, CY + 96, 'Amaya', '#C23A33', '#fff', 92));
+    S.push(spark(150, 110, 9), spark(520, 120, 7, '#9EE8FF', 'bob d2'), spark(560, 560, 9, '#C9B4FF', 'bob d3'), spark(80, 520, 6, '#fff'));
+    return S.join('');
+  };
+
+  // The four loop scenes: bright glossy tiles with the cast and little reward chips
+  const tile = (g1, inner) => `<g clip-path="url(#tTile)"><rect width="160" height="110" fill="${U(g1)}"/><circle cx="40" cy="20" r="70" fill="#fff" opacity=".18"/>${inner}</g><rect x="1" y="1" width="158" height="108" rx="19" fill="none" stroke="#fff" stroke-opacity=".5" stroke-width="2"/>`;
+  const mini = (x, y, s, inner) => place(x, y, s, inner);
+  const chipS = (x, y, t, fill, ink = '#fff') => `<g transform="translate(${x} ${y})"><rect x="${-(t.length * 3.4 + 9)}" y="-9" width="${t.length * 6.8 + 18}" height="18" rx="9" fill="${fill}"/><text x="0" y="0" dy=".35em" text-anchor="middle" style="font:800 10px var(--f-body);fill:${ink}">${t}</text></g>`;
+  D.cStep1 = () => tile('gPurple', mini(52, 132, .58, toon('jaya', {pose: 'phone'})) + `<g transform="translate(86 14) scale(.44)">${momentCard(0, 0)}</g>` + chipS(124, 82, 'Shared ✓', '#1F8A42') + spark(148, 16, 6, '#FFD95E'));
+  D.cStep2 = () => tile('gCoral', mini(50, 132, .6, toon('dilhani', {pose: 'phone'})) + `<g transform="translate(108 34)">${bubble('kamala', 0, 0, 22)}</g>` + heartG(134, 14, .9, U('gPink')) + chipS(110, 78, '♥ 3', '#C2185B') + chipS(110, 98, 'Thank you!', '#2340C8'));
+  D.cStep3 = () => tile('gGreen', mini(48, 134, .56, toon('dilhani')) + mini(104, 132, .58, toon('amaya', {pose: 'books'})) + chipS(118, 18, 'We tried it ✓', '#1A6F3A') + spark(20, 18, 6, '#fff'));
+  D.cStep4 = () => tile('gTeal', mini(110, 134, .58, toon('jaya', {pose: 'phone'})) + [20, 46, 72].map((x, i) => `<g transform="translate(${x} 60)"><path d="M-11 0h22v-14l-11 -9l-11 9Z" fill="#fff"/><rect x="-4" y="-8" width="8" height="8" fill="${i === 1 ? '#FFC531' : '#FFD95E'}"/></g>` + heartG(x, 30, .55, U('gPink'))).join('') + chipS(48, 84, '+1 family', '#0B5F78') + spark(150, 16, 6, '#FFD95E'));
+  const avatar = k => bubbleInner(k);
+
+  return {D, KPOS: RPOS, AMAYA: RA, kiteIcon: avatar, svgWrap};
 })();
 
 // Draw every illustration (each painted scene carries its own paper grain and vignette)
@@ -1012,7 +1171,7 @@ document.querySelectorAll('svg[data-ill]').forEach(s => { s.insertAdjacentHTML('
     ['dilhani', 'perera', 'We tried it at home', 'Fractions with a roti · Mon 18:20']
   ];
   const av = document.getElementById('tkAv'), tx = document.getElementById('tkTx');
-  const show = f => { av.innerHTML = Q.svgWrap('-30 -40 60 84', Q.kiteIcon(f[0])); tx.innerHTML = `<b>${f[2]}</b><small>${f[3]}</small>`; };
+  const show = f => { av.innerHTML = Q.svgWrap('0 0 100 100', Q.kiteIcon(f[0])); tx.innerHTML = `<b>${f[2]}</b><small>${f[3]}</small>`; };
   let i = 0; show(FEED[0]);
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   const fly = f => { const a = KPOS[f[0]], b = KPOS[f[1]], m = AMAYA;
