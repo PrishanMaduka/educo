@@ -22,8 +22,6 @@
   --coral:#DD4A42;--coral-soft:#FDE7E5;--indigo:#1F2559;--indigo-2:#3B4AA8;--lilac:#8B7CF6;--lilac-soft:#EEEAFE;--amber:#F2A93B;--amber-soft:#FDF1DC;--teal:#2BB0A0;--teal-soft:#DDF4F1;
   --coral-ink:#C23A33;--heat-ink:#1C1B2E;
   --band:#1A2A5E;--band-2:#24387A;--band-ink:#F3F2FB;--band-ink-2:#CDD5F2;--band-line:#34498F;
-  /* Illustration tokens: skin tones, hair and school-uniform white (see spec 19 → Design tokens) */
-  --illo-skin-1:#C98B62;--illo-skin-2:#A96C45;--illo-skin-3:#8A5636;--illo-skin-4:#DCA67D;--illo-hair:#2B2230;--illo-hair-grey:#C9C4D2;--illo-white:#FFFFFF;--illo-face:#2B2230;--illo-line:rgba(58,36,40,.62);--illo-sun:#F4B04A;
   --shadow:0 24px 50px -28px rgba(31,37,89,.45);
   --f-display:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
   --f-body:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
@@ -34,14 +32,12 @@
   --coral:#FF7A6E;--coral-soft:#3A2526;--indigo:#C9C4F5;--indigo-2:#7B8BF0;--lilac:#A99BFF;--lilac-soft:#2A2638;--amber:#F5BC5E;--amber-soft:#342B1D;--teal:#4CC9B8;--teal-soft:#1C302E;
   --coral-ink:#FF8F84;--heat-ink:#000000;
   --band:#0F0F13;--band-2:#1D1D23;--band-ink:#F3F2EE;--band-ink-2:#D0CFCA;--band-line:#33333C;
-  --illo-skin-1:#B98058;--illo-skin-2:#9A6340;--illo-skin-3:#7E4F33;--illo-skin-4:#C99671;--illo-hair:#1B1622;--illo-hair-grey:#B3AEC0;--illo-white:#E6E4F0;--illo-face:#1B1622;--illo-line:rgba(8,8,10,.7);--illo-sun:#F1E6C4;
   --shadow:0 24px 50px -28px rgba(0,0,0,.7);color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#18181D;--surface:#222228;--surface-2:#2A2A31;--line:#36363F;--wash-1:#24232C;--wash-2:#2C2A24;--ink:#F3F2EE;--ink-2:#CFCDC6;--ink-3:#9C9A93;
   --coral:#FF7A6E;--coral-soft:#3A2526;--indigo:#C9C4F5;--indigo-2:#7B8BF0;--lilac:#A99BFF;--lilac-soft:#2A2638;--amber:#F5BC5E;--amber-soft:#342B1D;--teal:#4CC9B8;--teal-soft:#1C302E;
   --coral-ink:#FF8F84;--heat-ink:#000000;
   --band:#0F0F13;--band-2:#1D1D23;--band-ink:#F3F2EE;--band-ink-2:#D0CFCA;--band-line:#33333C;
-  --illo-skin-1:#B98058;--illo-skin-2:#9A6340;--illo-skin-3:#7E4F33;--illo-skin-4:#C99671;--illo-hair:#1B1622;--illo-hair-grey:#B3AEC0;--illo-white:#E6E4F0;--illo-face:#1B1622;--illo-line:rgba(8,8,10,.7);--illo-sun:#F1E6C4;
   --shadow:0 24px 50px -28px rgba(0,0,0,.7);color-scheme:dark}
 
 /* Watercolour scenes (style study): muted picture-book pigments; dusk versions in dark mode */
@@ -71,9 +67,6 @@ p{margin:0}
 .num{font-variant-numeric:tabular-nums}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 svg.ill{display:block;width:100%;height:auto;overflow:visible}
-.ill .night{opacity:0}
-:root[data-theme="dark"] .ill .night{opacity:1}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .ill .night{opacity:1}}
 
 /* Buttons */
 .btn{display:inline-flex;align-items:center;gap:8px;height:48px;padding:0 22px;border-radius:999px;font:800 15.5px var(--f-body);text-decoration:none;border:1.5px solid transparent;cursor:pointer;transition:transform .15s,box-shadow .15s,background .2s;white-space:nowrap}
@@ -245,7 +238,6 @@ section.sec{padding-block:96px}
 /* Four ideas */
 .ideas{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
 .idea{background:var(--surface);border:1px solid var(--line);border-radius:26px;overflow:hidden;display:flex;flex-direction:column}
-.idea .pic{border-bottom:1px solid var(--line)}
 .idea .body{padding:24px 26px 26px;display:flex;flex-direction:column;gap:10px;flex:1}
 .idea .k{font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
 .idea p{color:var(--ink-2);font-size:15.5px}
@@ -256,7 +248,6 @@ section.sec{padding-block:96px}
 /* Leaders */
 .lead{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:40px;align-items:center}
 .heat{background:var(--surface);border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow);overflow:hidden}
-.heat .village{background:linear-gradient(180deg,color-mix(in srgb,var(--indigo-2) 14%,var(--surface)),var(--surface))}
 .heat .in{padding:18px 22px 22px}
 .heat .hd{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:baseline;margin-bottom:12px}
 .heat .hd b{font:800 17px var(--f-display)}
@@ -274,7 +265,8 @@ section.sec{padding-block:96px}
 @media (max-width:900px){.lead{grid-template-columns:1fr}}
 
 /* Whole school */
-.campus{border-radius:28px;overflow:hidden;border:1px solid var(--line);background:linear-gradient(180deg,color-mix(in srgb,var(--wash-1) 55%,var(--surface)),color-mix(in srgb,var(--wash-2) 55%,var(--surface)))}
+.campus{margin-inline:-20px;overflow:hidden}
+@media (max-width:480px){.campus{margin-inline:-16px}}
 .mods{list-style:none;margin:20px 0 0;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
 .mods li{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:16px 18px;display:grid;grid-template-columns:30px minmax(0,1fr);gap:4px 12px;align-items:start;align-content:start}
 .mods .n{grid-row:span 2;width:30px;height:30px;border-radius:50%;background:var(--coral-ink);color:#fff;display:grid;place-items:center;font:900 14px var(--f-body)}
@@ -286,7 +278,6 @@ section.sec{padding-block:96px}
 /* Trust */
 .trust{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px}
 .trust>div{background:var(--surface);border:1px solid var(--line);border-radius:22px;overflow:hidden;display:flex;flex-direction:column}
-.trust svg{background:var(--surface-2)}
 .trust .t{padding:16px 18px 20px;display:flex;flex-direction:column;gap:6px}
 .trust b{font:800 16.5px var(--f-display)}
 .trust span{color:var(--ink-2);font-size:14.5px}
@@ -350,8 +341,8 @@ dialog.si::backdrop{background:rgba(16,16,20,.6);backdrop-filter:blur(3px)}
 <a class="skip" href="#main">Skip to main content</a>
 
 <!-- Shared illustration defs: the round portrait crop used by every person in the page -->
-<!-- Storybook look: qInk gives each figure or object a wobbly, slightly uneven hand-drawn outline; qWob makes painted edges wobble; qGrain is a faint paper grain; qW-* are watercolour washes -->
-<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><clipPath id="qClip" clipPathUnits="userSpaceOnUse"><circle cx="50" cy="50" r="46"/></clipPath><filter id="qInk" x="-8%" y="-8%" width="116%" height="116%" color-interpolation-filters="sRGB"><feTurbulence type="fractalNoise" baseFrequency=".045" numOctaves="2" seed="4" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G" result="w"/><feMorphology in="w" operator="dilate" radius="1.5" result="d"/><feDisplacementMap in="d" in2="n" scale="2" xChannelSelector="G" yChannelSelector="B" result="d2"/><feFlood style="flood-color:var(--illo-line)" result="c"/><feComposite in="c" in2="d2" operator="in" result="o"/><feMerge><feMergeNode in="o"/><feMergeNode in="w"/></feMerge></filter><filter id="qWob" x="-4%" y="-6%" width="108%" height="112%"><feTurbulence type="fractalNoise" baseFrequency=".018" numOctaves="2" seed="9" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="7" xChannelSelector="R" yChannelSelector="G"/></filter><filter id="qGrain" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="1" seed="2" stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 .3  0 0 0 0 .2  0 0 0 0 .12  0 0 0 .55 -.14"/><feComposite in2="SourceAlpha" operator="in"/></filter><radialGradient id="qW-teal"><stop offset="0" style="stop-color:var(--teal);stop-opacity:.34"/><stop offset=".55" style="stop-color:var(--teal);stop-opacity:.15"/><stop offset="1" style="stop-color:var(--teal);stop-opacity:0"/></radialGradient><radialGradient id="qW-coral"><stop offset="0" style="stop-color:var(--coral);stop-opacity:.34"/><stop offset=".55" style="stop-color:var(--coral);stop-opacity:.15"/><stop offset="1" style="stop-color:var(--coral);stop-opacity:0"/></radialGradient><radialGradient id="qW-amber"><stop offset="0" style="stop-color:var(--amber);stop-opacity:.34"/><stop offset=".55" style="stop-color:var(--amber);stop-opacity:.15"/><stop offset="1" style="stop-color:var(--amber);stop-opacity:0"/></radialGradient><radialGradient id="qW-lilac"><stop offset="0" style="stop-color:var(--lilac);stop-opacity:.34"/><stop offset=".55" style="stop-color:var(--lilac);stop-opacity:.15"/><stop offset="1" style="stop-color:var(--lilac);stop-opacity:0"/></radialGradient><radialGradient id="qW-indigo-2"><stop offset="0" style="stop-color:var(--indigo-2);stop-opacity:.34"/><stop offset=".55" style="stop-color:var(--indigo-2);stop-opacity:.15"/><stop offset="1" style="stop-color:var(--indigo-2);stop-opacity:0"/></radialGradient><filter id="wcBig" x="-25%" y="-25%" width="150%" height="150%" color-interpolation-filters="sRGB"><feTurbulence type="fractalNoise" baseFrequency=".009" numOctaves="3" seed="2" result="t"/><feDisplacementMap in="SourceGraphic" in2="t" scale="44" xChannelSelector="R" yChannelSelector="G" result="d"/><feGaussianBlur in="d" stdDeviation="2.4" result="b"/><feTurbulence type="fractalNoise" baseFrequency=".022" numOctaves="2" seed="7" result="t2"/><feColorMatrix in="t2" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -1.5 1.25" result="m"/><feComposite in="b" in2="m" operator="in" result="p"/><feComponentTransfer in="b" result="base"><feFuncA type="linear" slope=".6"/></feComponentTransfer><feMorphology in="d" operator="erode" radius="2.2" result="e"/><feComposite in="d" in2="e" operator="out" result="r"/><feGaussianBlur in="r" stdDeviation="1" result="r2"/><feComponentTransfer in="r2" result="r3"><feFuncA type="linear" slope=".45"/></feComponentTransfer><feMerge><feMergeNode in="base"/><feMergeNode in="p"/><feMergeNode in="r3"/></feMerge></filter><filter id="wcMid" x="-15%" y="-15%" width="130%" height="130%" color-interpolation-filters="sRGB"><feTurbulence type="fractalNoise" baseFrequency=".03" numOctaves="2" seed="4" result="t"/><feDisplacementMap in="SourceGraphic" in2="t" scale="9" xChannelSelector="R" yChannelSelector="G" result="d"/><feGaussianBlur in="d" stdDeviation=".7" result="b"/><feTurbulence type="fractalNoise" baseFrequency=".06" numOctaves="2" seed="13" result="t2"/><feColorMatrix in="t2" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -2.4 1.7" result="m"/><feComposite in="b" in2="m" operator="in" result="p"/><feComponentTransfer in="b" result="base"><feFuncA type="linear" slope=".6"/></feComponentTransfer><feMorphology in="d" operator="erode" radius="1.3" result="e"/><feComposite in="d" in2="e" operator="out" result="r"/><feComponentTransfer in="r" result="r3"><feFuncA type="linear" slope=".75"/></feComponentTransfer><feMerge><feMergeNode in="base"/><feMergeNode in="p"/><feMergeNode in="r3"/></feMerge></filter><filter id="wcFig" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB"><feTurbulence type="fractalNoise" baseFrequency=".09" numOctaves="2" seed="8" result="t"/><feDisplacementMap in="SourceGraphic" in2="t" scale="2.4" xChannelSelector="R" yChannelSelector="G" result="d"/><feColorMatrix in="t" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -1.6 1.55" result="m"/><feComposite in="d" in2="m" operator="in" result="p"/><feComponentTransfer in="d" result="base"><feFuncA type="linear" slope=".9"/></feComponentTransfer><feMorphology in="d" operator="erode" radius=".7" result="e"/><feComposite in="d" in2="e" operator="out" result="r"/><feMerge><feMergeNode in="base"/><feMergeNode in="p"/><feMergeNode in="r"/></feMerge></filter><filter id="wcInk" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence type="fractalNoise" baseFrequency=".25" numOctaves="1" seed="3" result="t"/><feDisplacementMap in="SourceGraphic" in2="t" scale="1.6" xChannelSelector="R" yChannelSelector="G"/></filter><filter id="wcBloom" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="10"/></filter><filter id="wcFeather" x="-15%" y="-15%" width="130%" height="130%"><feTurbulence type="fractalNoise" baseFrequency=".011" numOctaves="3" seed="5" result="t"/><feDisplacementMap in="SourceGraphic" in2="t" scale="90" xChannelSelector="R" yChannelSelector="G" result="d"/><feGaussianBlur in="d" stdDeviation="22"/></filter><filter id="wcFeatherS" x="-15%" y="-15%" width="130%" height="130%"><feTurbulence type="fractalNoise" baseFrequency=".02" numOctaves="3" seed="5" result="t"/><feDisplacementMap in="SourceGraphic" in2="t" scale="16" xChannelSelector="R" yChannelSelector="G" result="d"/><feGaussianBlur in="d" stdDeviation="9"/></filter><filter id="wcPaper" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".75" numOctaves="2" seed="21" stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 .35  0 0 0 0 .28  0 0 0 0 .2  0 0 0 .7 -.22"/><feComposite in2="SourceAlpha" operator="in"/></filter></defs></svg>
+<!-- Watercolour filters shared by every painted scene: wcBig (sky and land washes), wcMid (buildings, hills, kites), wcFig (figures), wcInk (dry-brush lines), wcBloom (glows), wcFeather/wcFeatherS (painted vignettes), wcPaper (grain) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><filter id="wcBig" x="-25%" y="-25%" width="150%" height="150%" color-interpolation-filters="sRGB"><feTurbulence type="fractalNoise" baseFrequency=".009" numOctaves="3" seed="2" result="t"/><feDisplacementMap in="SourceGraphic" in2="t" scale="44" xChannelSelector="R" yChannelSelector="G" result="d"/><feGaussianBlur in="d" stdDeviation="2.4" result="b"/><feTurbulence type="fractalNoise" baseFrequency=".022" numOctaves="2" seed="7" result="t2"/><feColorMatrix in="t2" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -1.5 1.25" result="m"/><feComposite in="b" in2="m" operator="in" result="p"/><feComponentTransfer in="b" result="base"><feFuncA type="linear" slope=".6"/></feComponentTransfer><feMorphology in="d" operator="erode" radius="2.2" result="e"/><feComposite in="d" in2="e" operator="out" result="r"/><feGaussianBlur in="r" stdDeviation="1" result="r2"/><feComponentTransfer in="r2" result="r3"><feFuncA type="linear" slope=".45"/></feComponentTransfer><feMerge><feMergeNode in="base"/><feMergeNode in="p"/><feMergeNode in="r3"/></feMerge></filter><filter id="wcSky" x="-25%" y="-25%" width="150%" height="150%" color-interpolation-filters="sRGB"><feTurbulence type="fractalNoise" baseFrequency=".008" numOctaves="2" seed="3" result="t"/><feDisplacementMap in="SourceGraphic" in2="t" scale="50" xChannelSelector="R" yChannelSelector="G" result="d"/><feGaussianBlur in="d" stdDeviation="12" result="b"/><feTurbulence type="fractalNoise" baseFrequency=".018" numOctaves="2" seed="11" result="t2"/><feColorMatrix in="t2" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -1.1 1.1" result="m"/><feComposite in="b" in2="m" operator="in"/></filter><filter id="wcMid" x="-15%" y="-15%" width="130%" height="130%" color-interpolation-filters="sRGB"><feTurbulence type="fractalNoise" baseFrequency=".03" numOctaves="2" seed="4" result="t"/><feDisplacementMap in="SourceGraphic" in2="t" scale="9" xChannelSelector="R" yChannelSelector="G" result="d"/><feGaussianBlur in="d" stdDeviation=".7" result="b"/><feTurbulence type="fractalNoise" baseFrequency=".06" numOctaves="2" seed="13" result="t2"/><feColorMatrix in="t2" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -2.4 1.7" result="m"/><feComposite in="b" in2="m" operator="in" result="p"/><feComponentTransfer in="b" result="base"><feFuncA type="linear" slope=".6"/></feComponentTransfer><feMorphology in="d" operator="erode" radius="1.3" result="e"/><feComposite in="d" in2="e" operator="out" result="r"/><feComponentTransfer in="r" result="r3"><feFuncA type="linear" slope=".75"/></feComponentTransfer><feMerge><feMergeNode in="base"/><feMergeNode in="p"/><feMergeNode in="r3"/></feMerge></filter><filter id="wcFig" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB"><feTurbulence type="fractalNoise" baseFrequency=".09" numOctaves="2" seed="8" result="t"/><feDisplacementMap in="SourceGraphic" in2="t" scale="2.4" xChannelSelector="R" yChannelSelector="G" result="d"/><feColorMatrix in="t" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -1.6 1.55" result="m"/><feComposite in="d" in2="m" operator="in" result="p"/><feComponentTransfer in="d" result="base"><feFuncA type="linear" slope=".9"/></feComponentTransfer><feMorphology in="d" operator="erode" radius=".7" result="e"/><feComposite in="d" in2="e" operator="out" result="r"/><feMerge><feMergeNode in="base"/><feMergeNode in="p"/><feMergeNode in="r"/></feMerge></filter><filter id="wcInk" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence type="fractalNoise" baseFrequency=".25" numOctaves="1" seed="3" result="t"/><feDisplacementMap in="SourceGraphic" in2="t" scale="1.6" xChannelSelector="R" yChannelSelector="G"/></filter><filter id="wcBloom" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="10"/></filter><filter id="wcFeather" x="-15%" y="-15%" width="130%" height="130%"><feTurbulence type="fractalNoise" baseFrequency=".011" numOctaves="3" seed="5" result="t"/><feDisplacementMap in="SourceGraphic" in2="t" scale="90" xChannelSelector="R" yChannelSelector="G" result="d"/><feGaussianBlur in="d" stdDeviation="22"/></filter><filter id="wcFeatherS" x="-15%" y="-15%" width="130%" height="130%"><feTurbulence type="fractalNoise" baseFrequency=".02" numOctaves="3" seed="5" result="t"/><feDisplacementMap in="SourceGraphic" in2="t" scale="16" xChannelSelector="R" yChannelSelector="G" result="d"/><feGaussianBlur in="d" stdDeviation="9"/></filter><filter id="wcPaper" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".75" numOctaves="2" seed="21" stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 .35  0 0 0 0 .28  0 0 0 0 .2  0 0 0 .7 -.22"/><feComposite in2="SourceAlpha" operator="in"/></filter></defs></svg>
 
 <header class="nav">
   <div class="wrap">
@@ -621,385 +612,9 @@ document.documentElement.classList.add('js');
 const Q = (() => {
   const v = n => `var(--${n})`;
   const mx = (a, p, b = 'var(--surface)') => `color-mix(in srgb,${a} ${p}%,${b})`;
-  const tint = (n, p, b) => mx(v(n), p, b);
-  const lite = c => mx(c, 55, '#fff');
-  const deep = c => mx(c, 72, '#1C1B2E');
-
-  // The sample circle. Teachers in Sri Lanka often wear sarees; children wear white uniforms with a school tie.
-  const P = {
-    amaya:    {skin: 1, hair: 'plaits', kid: 1, cloth: v('illo-white'), tie: v('indigo-2')},
-    kavindu:  {skin: 3, hair: 'short', kid: 1, cloth: v('illo-white'), tie: v('indigo-2')},
-    nethmi:   {skin: 4, hair: 'bob', kid: 1, cloth: v('illo-white'), tie: v('indigo-2')},
-    rehan:    {skin: 2, hair: 'short', kid: 1, cloth: v('illo-white'), tie: v('indigo-2')},
-    jaya:     {skin: 2, hair: 'long', cloth: v('lilac'), saree: v('amber'), lanyard: 1, ear: 1},
-    perera:   {skin: 3, hair: 'short', cloth: v('indigo-2'), collar: 1, glasses: 1},
-    fernando: {skin: 4, hair: 'bob', cloth: v('teal'), saree: v('coral'), ear: 1},
-    herath:   {skin: 2, hair: 'cap', cloth: v('coral'), whistle: 1},
-    dias:     {skin: 1, hair: 'bun', cloth: v('illo-white'), cross: 1},
-    silva:    {skin: 3, hair: 'long', cloth: v('amber'), saree: v('lilac'), ear: 1},
-    sunethra: {skin: 2, hair: 'bun', cloth: v('coral'), vest: 1},
-    dilhani:  {skin: 1, hair: 'long', cloth: v('coral'), ear: 1},
-    ruwan:    {skin: 3, hair: 'short', cloth: v('teal'), collar: 1, mous: 1},
-    kamala:   {skin: 2, hair: 'bun', grey: 1, cloth: v('amber'), saree: v('coral'), glasses: 1},
-    sunil:    {skin: 3, hair: 'bald', grey: 1, cloth: v('illo-white'), collar: 1, glasses: 1, mous: 1},
-    prishan:  {skin: 2, hair: 'short', cloth: v('indigo-2'), collar: 1, glasses: 1},
-    mendis:   {skin: 4, hair: 'short', cloth: v('teal'), collar: 1}
-  };
-
-  const PART = 'M33.6 41C32 27 40 21 50 21S68 27 66.4 41C65.5 34 61 29.5 53 29L50 25.5L47 29C39 29.5 34.5 34 33.6 41Z';
-  const SHORT = 'M34 38C32.5 25 40 20 50 20S67.5 25 66 38C65 32.5 62 29.5 58 28.8C53 31 45 31 40.5 29C37 30.5 35 33.5 34 38Z';
-  const face = 'var(--illo-face)';
-
-  function head(p) {
-    const sk = v('illo-skin-' + p.skin), hr = p.grey ? v('illo-hair-grey') : v('illo-hair');
-    let back = '', front = '';
-    if (p.hair === 'long') back = `<path d="M31.5 38C31.5 25 40 20.5 50 20.5S68.5 25 68.5 38L70 66Q50 72 30 66Z" fill="${hr}"/>`;
-    if (p.hair === 'bob') back = `<path d="M32 38C32 25 40 20.5 50 20.5S68 25 68 38L68.5 53Q50 57 31.5 53Z" fill="${hr}"/>`;
-    if (p.hair === 'bun') back = `<circle cx="50" cy="19.5" r="7.5" fill="${hr}"/>`;
-    if (['long', 'bob', 'bun', 'plaits'].includes(p.hair)) front = `<path d="${PART}" fill="${hr}"/>`;
-    if (p.hair === 'short') front = `<path d="${SHORT}" fill="${hr}"/>`;
-    if (p.hair === 'cap') front = `<path d="${SHORT}" fill="${hr}"/><path d="M33.5 32.5C33.5 22 41 18 50 18S66.5 22 66.5 32.5Z" fill="${v('teal')}"/><path d="M31 31.5H69Q71 35 67 35.5H33Q29 35 31 31.5Z" fill="${deep(v('teal'))}"/>`;
-    if (p.hair === 'bald') front = `<path d="M34 43C32.6 36 34.2 31.5 37.4 29.2C37.6 34 37.8 38.5 37.4 43Z M66 43C67.4 36 65.8 31.5 62.6 29.2C62.4 34 62.2 38.5 62.6 43Z" fill="${hr}"/>`;
-    const mouthY = p.mous ? 47.4 : 45.6;
-    let h = `<circle cx="34" cy="40" r="3.6" fill="${sk}"/><circle cx="66" cy="40" r="3.6" fill="${sk}"/><circle cx="50" cy="38" r="16.5" fill="${sk}"/>`
-      + `<circle cx="44" cy="40" r="1.9" fill="${face}"/><circle cx="56" cy="40" r="1.9" fill="${face}"/>`
-      + `<circle cx="40" cy="45.2" r="2.6" fill="${v('coral')}" opacity=".4"/><circle cx="60" cy="45.2" r="2.6" fill="${v('coral')}" opacity=".4"/>`
-      + `<path d="M45.5 ${mouthY}Q50 ${mouthY + 3.8} 54.5 ${mouthY}" fill="none" stroke="${face}" stroke-width="1.7" stroke-linecap="round"/>` + front;
-    if (p.mous) h += `<path d="M44.6 45.4Q50 42.6 55.4 45.4Q50 47 44.6 45.4Z" fill="${hr}"/>`;
-    if (p.glasses) h += `<g fill="none" stroke="${face}" stroke-width="1.5"><circle cx="44" cy="40" r="4.6"/><circle cx="56" cy="40" r="4.6"/><path d="M48.6 40h2.8"/></g>`;
-    if (p.ear) h += `<circle cx="34" cy="46" r="1.8" fill="${v('amber')}"/><circle cx="66" cy="46" r="1.8" fill="${v('amber')}"/>`;
-    return {back, h, sk, hr};
-  }
-  const kidHead = s => `<g transform="matrix(1.12 0 0 1.12 -6 .44)">${s}</g>`;
-  const plaits = hr => [32, 68].map(x => `<circle cx="${x}" cy="57" r="4.2" fill="${hr}"/><circle cx="${x}" cy="64.5" r="3.9" fill="${hr}"/><circle cx="${x}" cy="71.5" r="3.5" fill="${hr}"/><path d="M${x} 77l-5.5-3.4v6.8ZM${x} 77l5.5-3.4v6.8Z" fill="${v('coral')}"/>`).join('');
-
-  // Upper-body details shared by portraits and full figures
-  function torsoDetails(p, kid) {
-    let d = '';
-    const c = p.cloth;
-    if (kid) {
-      d += `<path d="M41.5 73.6L50 80L45.5 86.5Z M58.5 73.6L50 80L54.5 86.5Z" fill="${c}" stroke="${mx(v('ink-3'), 45, c)}" stroke-width="1"/>`;
-      if (p.tie) d += `<path d="M48 79.5h4l1.8 14-3.8 4.2-3.8-4.2Z" fill="${p.tie}"/>`;
-      return d;
-    }
-    if (p.saree) d += `<path d="M28 70C44 70 62 86 73 108H56C50 93 40 78 28 70Z" fill="${lite(c)}"/><path d="M28 70C44 70 62 86 73 108" fill="none" stroke="${p.saree}" stroke-width="2.6"/>`;
-    if (p.collar) d += `<path d="M41 64.6L50 73L45.6 79.5Z M59 64.6L50 73L54.4 79.5Z" fill="${lite(c)}"/>`;
-    if (p.vest) d += `<path d="M26 74L35 108H43L38 68Z M74 74L65 108H57L62 68Z" fill="${v('amber')}"/><path d="M29.5 90h9M61.5 90h9" stroke="${v('illo-white')}" stroke-width="2.4"/>`;
-    if (p.lanyard) d += `<path d="M41 66L50 85L59 66" fill="none" stroke="${v('indigo-2')}" stroke-width="1.8"/><rect x="45.5" y="84" width="9" height="11" rx="2" fill="${v('illo-white')}" stroke="${v('indigo-2')}" stroke-width="1.4"/>`;
-    if (p.whistle) d += `<path d="M41 66L50 84L59 66" fill="none" stroke="${v('illo-white')}" stroke-width="1.6"/><rect x="45" y="83" width="10" height="6.5" rx="3.2" fill="${v('amber')}"/>`;
-    if (p.cross) d += `<path d="M42 64.6L50 72L58 64.6" fill="none" stroke="${v('teal')}" stroke-width="3"/><rect x="59" y="78" width="12" height="12" rx="3" fill="${v('illo-white')}" stroke="${v('coral')}" stroke-width="1.4"/><path d="M65 80.6v6.8M61.6 84h6.8" stroke="${v('coral')}" stroke-width="2.2" stroke-linecap="round"/>`;
-    return d;
-  }
-
-  // Head and shoulders in the 100 box
-  function bust(k) {
-    const p = typeof k === 'string' ? P[k] : k, H = head(p);
-    if (p.kid) return `<path d="M20 108C20 85 33 73 50 73S80 85 80 108Z" fill="${p.cloth}"/>${torsoDetails(p, 1)}<path d="M44.5 54h11v16q-5.5 5-11 0Z" fill="${H.sk}"/>`
-      + kidHead(H.back + H.h) + (p.hair === 'plaits' ? plaits(H.hr) : '');
-    return H.back + `<path d="M12 108C12 78 29 64.5 50 64.5S88 78 88 108Z" fill="${p.cloth}"/><path d="M44 50h12v13q-6 6-12 0Z" fill="${H.sk}"/><path d="M41.5 64.8L50 75L58.5 64.8Q50 67.2 41.5 64.8Z" fill="${H.sk}"/>${torsoDetails(p)}` + H.h;
-  }
-
-  // Arms for full figures and seated busts. Side: 'L' or 'R'; pose names below.
-  function arm(p, side, pose, kid) {
-    const sk = v('illo-skin-' + p.skin), c = p.cloth, w = kid ? 7.5 : 9.5, sx = side === 'L' ? -1 : 1, X = x => 50 + sx * (x - 50);
-    const A = {
-      down:  kid ? [[68, 82], [74, 98], [71, 110]] : [[73, 74], [82, 94], [78, 114]],
-      phone: [[73, 74], [84, 96], [64, 96]],
-      wave:  kid ? [[68, 80], [80, 72], [78, 56]] : [[73, 74], [88, 66], [84, 46]],
-      reach: kid ? [[68, 80], [82, 82], [92, 74]] : [[73, 74], [90, 88], [100, 80]],
-      hold:  kid ? [[66, 82], [70, 98], [58, 100]] : [[72, 76], [80, 100], [60, 100]],
-      write: [[72, 76], [80, 102], [62, 104]]
-    }[pose];
-    const [a, b, e] = A;
-    return `<path d="M${X(a[0])} ${a[1]}Q${X(b[0])} ${b[1]} ${X(e[0])} ${e[1]}" fill="none" stroke="${c}" stroke-width="${w}" stroke-linecap="round"/><circle cx="${X(e[0])}" cy="${e[1]}" r="${kid ? 3.6 : 4.4}" fill="${sk}"/>`;
-  }
-  const phoneAt = (x, y, s = 1) => `<g transform="translate(${x} ${y}) scale(${s})"><rect x="-6" y="-10" width="12" height="20" rx="2.6" fill="${v('indigo-2')}"/><rect x="-4.4" y="-7.6" width="8.8" height="13.6" rx="1.4" fill="${tint('lilac', 40, v('illo-white'))}"/></g>`;
-
-  // Standing figure in a 100 × 172 box (adults) or 100 × 160 (children)
-  function full(k, o = {}) {
-    const p = P[k], H = head(p), L = o.L || 'down', R = o.R || 'down';
-    if (p.kid) {
-      const girl = ['plaits', 'bob'].includes(p.hair);
-      return (o.bag ? `<rect x="60" y="78" width="17" height="26" rx="6" fill="${o.bag}"/>` : '')
-        + `<path d="M39 128h7v22h-7Z M54 128h7v22h-7Z" fill="${H.sk}"/><path d="M38.5 144h8v7h-8Z M53.5 144h8v7h-8Z" fill="${v('illo-white')}"/><ellipse cx="42" cy="153" rx="6.5" ry="3.4" fill="${face}"/><ellipse cx="58" cy="153" rx="6.5" ry="3.4" fill="${face}"/>`
-        + (girl ? `<path d="M32 104L27 132H73L68 104Z" fill="${p.cloth}" stroke="${mx(v('ink-3'), 30, p.cloth)}" stroke-width="1"/>` : `<path d="M33 106h16v22h-16Z M51 106h16v22h-16Z" fill="${v('indigo-2')}"/>`)
-        + `<path d="M32 112L30 86C31 77 39 73 50 73S69 77 70 86L68 112Z" fill="${p.cloth}" stroke="${mx(v('ink-3'), 30, p.cloth)}" stroke-width="1"/>${torsoDetails(p, 1)}`
-        + arm(p, 'L', L, 1) + arm(p, 'R', R, 1)
-        + `<path d="M44.5 54h11v16q-5.5 5-11 0Z" fill="${H.sk}"/>` + kidHead(H.back + H.h) + (p.hair === 'plaits' ? plaits(H.hr) : '');
-    }
-    const skirt = p.saree || ['long', 'bob', 'bun'].includes(p.hair);
-    return H.back
-      + (skirt ? `<path d="M27 112L22 166H78L73 112Z" fill="${p.saree ? lite(p.cloth) : p.cloth}"/>${p.saree ? `<path d="M23.5 158H76.5" stroke="${p.saree}" stroke-width="4"/>` : ''}<ellipse cx="41" cy="168" rx="7" ry="3.4" fill="${face}"/><ellipse cx="59" cy="168" rx="7" ry="3.4" fill="${face}"/>`
-              : `<path d="M30 110h19v56h-19Z M51 110h19v56h-19Z" fill="${deep(v('indigo-2'))}"/><ellipse cx="39" cy="168" rx="9" ry="3.6" fill="${face}"/><ellipse cx="61" cy="168" rx="9" ry="3.6" fill="${face}"/>`)
-      + `<path d="M28 118L25 82C26 71 36 64.5 50 64.5S74 71 75 82L72 118Z" fill="${p.cloth}"/><path d="M44 50h12v13q-6 6-12 0Z" fill="${H.sk}"/><path d="M41.5 64.8L50 75L58.5 64.8Q50 67.2 41.5 64.8Z" fill="${H.sk}"/>`
-      + torsoDetails(p) + arm(p, 'L', L) + arm(p, 'R', R) + H.h;
-  }
-
-  // Place a 100-box drawing: (x, y) is its top centre, s its scale
-  const ink = inner => `<g filter="url(#qInk)">${inner}</g>`;
-  const at = (x, y, s, inner, extra = '') => ink(`<g transform="translate(${x} ${y}) scale(${s}) translate(-50 0)"${extra}>${inner}</g>`);
-  // Round portrait. ring/bg default to the school (indigo) or home (amber) side
-  const PORTRAIT_BG = {jaya: 'lilac', perera: 'indigo-2', fernando: 'teal', herath: 'coral', dias: 'teal', silva: 'amber', sunethra: 'amber', dilhani: 'coral', ruwan: 'teal', kamala: 'amber', sunil: 'lilac', amaya: 'coral', kavindu: 'indigo-2', prishan: 'lilac', mendis: 'teal', nethmi: 'teal', rehan: 'amber'};
-  function portrait(k, o = {}) {
-    const bg = o.bg || tint(PORTRAIT_BG[k] || 'lilac', 26), ring = o.ring || v('surface');
-    return `<circle cx="50" cy="50" r="50" fill="${ring}"/><circle cx="50" cy="50" r="46" fill="${bg}"/><g clip-path="url(#qClip)"><g transform="translate(-7 -1) scale(1.14)">${bust(k)}</g></g>`;
-  }
-  const med = (k, x, y, r, o) => ink(`<g transform="translate(${x - r} ${y - r}) scale(${r / 50})">${portrait(k, o)}</g>`);
-
-  // Small things
-  const heart = (x, y, s, c = v('coral'), extra = '') => `<path transform="translate(${x} ${y}) scale(${s})" d="M0 -3C0 -9 -9 -10 -9 -3.5C-9 2 0 8 0 8S9 2 9 -3.5C9 -10 0 -9 0 -3Z" fill="${c}"${extra}/>`;
-  const star = (x, y, r, c = v('amber'), extra = '') => `<path d="M${x} ${y - r}Q${x} ${y} ${x + r} ${y}Q${x} ${y} ${x} ${y + r}Q${x} ${y} ${x - r} ${y}Q${x} ${y} ${x} ${y - r}Z" fill="${c}"${extra}/>`;
-  const palm = (x, y, s, lean = 1) => `<g filter="url(#qInk)"><g transform="translate(${x} ${y}) scale(${s * lean} ${s})"><path d="M0 0C-2 -40 4 -80 14 -112" fill="none" stroke="${mx(v('amber'), 55, '#6b3f1f')}" stroke-width="7" stroke-linecap="round"/>`
-    + `<g fill="${v('teal')}"><path d="M14 -112C-6 -122 -30 -116 -44 -98C-26 -106 -6 -108 14 -112Z"/><path d="M14 -112C34 -128 58 -124 70 -106C50 -112 32 -112 14 -112Z"/><path d="M14 -112C4 -136 18 -152 34 -156C26 -140 20 -126 14 -112Z"/><path d="M14 -112C-10 -112 -24 -96 -26 -78C-12 -94 0 -104 14 -112Z" opacity=".75"/><path d="M14 -112C36 -110 50 -92 50 -74C38 -92 26 -104 14 -112Z" opacity=".75"/></g><circle cx="16" cy="-108" r="4" fill="${mx(v('amber'), 55, '#6b3f1f')}"/></g></g>`;
-  const bush = (x, y, s, c = v('teal')) => `<g filter="url(#qInk)"><g transform="translate(${x} ${y}) scale(${s})" fill="${c}"><circle cx="-14" cy="-8" r="12"/><circle cx="2" cy="-14" r="15"/><circle cx="17" cy="-7" r="11"/><rect x="-26" y="-10" width="54" height="10" rx="5"/></g></g>`;
-  const cloud = (x, y, s, op = 1, c = mx('#fff', 70, v('surface'))) => `<g filter="url(#qWob)"><g transform="translate(${x} ${y}) scale(${s})" fill="${c}" opacity="${op}"><ellipse cx="0" cy="10" rx="50" ry="14"/><circle cx="-16" cy="2" r="17"/><circle cx="10" cy="-4" r="22"/><circle cx="34" cy="5" r="13"/></g></g>`;
-  const ring = (x, y, r, w, segs, base) => { // the day ring: [fromDeg, toDeg, colour, opacity]
-    const pt = d => { const a = (d - 90) * Math.PI / 180; return [x + r * Math.cos(a), y + r * Math.sin(a)]; };
-    return `<circle cx="${x}" cy="${y}" r="${r}" fill="none" stroke="${base}" stroke-width="${w}"/>` + segs.map(([f, t, c, o = 1]) => { const [x1, y1] = pt(f), [x2, y2] = pt(t); return `<path d="M${x1} ${y1}A${r} ${r} 0 ${t - f > 180 ? 1 : 0} 1 ${x2} ${y2}" fill="none" stroke="${c}" stroke-width="${w}" stroke-linecap="round" opacity="${o}"/>`; }).join('');
-  };
   const svgWrap = (vb, inner) => `<svg viewBox="${vb}" aria-hidden="true" focusable="false">${inner}</svg>`;
-
-  // School building (front view, clay-tile roof and a clock tower). Origin at its ground-centre, ~520 wide.
-  function school(x, y, s, o = {}) {
-    const wall = tint('amber', 16, v('illo-white')), wall2 = tint('amber', 28, v('illo-white')), win = tint('indigo-2', 34), roof = v('coral'), roofD = deep(v('coral'));
-    let g = `<rect x="-250" y="-190" width="500" height="190" rx="6" fill="${wall}"/>`
-      + `<path d="M-272 -186L-226 -238H226L272 -186Z" fill="${roof}"/><path d="M-250 -212H250M-238 -225H238M-260 -199H260" stroke="${roofD}" stroke-width="2" opacity=".5"/>`
-      + `<rect x="-250" y="-100" width="500" height="10" fill="${wall2}"/>`;
-    for (let i = 0; i < 8; i++) { const wx = -226 + i * 58; if (i === 3 || i === 4) continue; g += `<rect x="${wx}" y="-172" width="36" height="46" rx="5" fill="${win}"/><path d="M${wx + 18} -172v46" stroke="${wall}" stroke-width="3"/>`; }
-    for (let i = 0; i < 8; i++) { const wx = -228 + i * 58; if (i === 3 || i === 4) continue; g += `<path d="M${wx} 0V-58A20 20 0 0 1 ${wx + 40} -58V0Z" fill="${win}"/>`; }
-    g += `<rect x="-60" y="-290" width="120" height="290" rx="6" fill="${wall2}"/><path d="M-76 -286L0 -336L76 -286Z" fill="${roof}"/>`
-      + `<circle cx="0" cy="-238" r="30" fill="${v('illo-white')}" stroke="${v('indigo-2')}" stroke-width="5"/><path d="M0 -238V-258M0 -238L13 -230" stroke="${v('indigo')}" stroke-width="4" stroke-linecap="round"/>`
-      + `<path d="M-34 0V-76A34 34 0 0 1 34 -76V0Z" fill="${deep(v('indigo-2'))}"/><path d="M0 0V-108" stroke="${wall2}" stroke-width="3"/>`
-      + `<path d="M0 -336V-388" stroke="${v('ink-3')}" stroke-width="4" stroke-linecap="round"/><path class="flag" d="M2 -386C16 -392 26 -380 40 -386V-362C26 -356 16 -368 2 -362Z" fill="${o.flag || v('lilac')}"/>`;
-    return `<g filter="url(#qInk)"><g transform="translate(${x} ${y}) scale(${s})">${g}${o.extra || ''}</g></g>`;
-  }
-  // A home with a tiled roof. Origin at ground-centre, ~200 wide.
-  function home(x, y, s, o = {}) {
-    const wall = tint('amber', 24, v('illo-white')), roof = o.roof || v('amber');
-    const lit = o.lit === false ? tint('indigo-2', 30) : v('amber');
-    return `<g filter="url(#qInk)"><g transform="translate(${x} ${y}) scale(${s})"><rect x="-90" y="-110" width="180" height="110" rx="6" fill="${wall}"/><path d="M-108 -104L0 -176L108 -104Z" fill="${roof}"/><path d="M-92 -116H92M-68 -134H68M-44 -150H44" stroke="${deep(roof)}" stroke-width="2" opacity=".4"/>`
-      + `<rect x="-22" y="-62" width="44" height="62" rx="5" fill="${tint('coral', 70, '#1C1B2E')}"/><circle cx="12" cy="-30" r="3" fill="${v('amber')}"/>`
-      + `<rect x="-74" y="-80" width="38" height="34" rx="5" fill="${lit}"/><rect x="36" y="-80" width="38" height="34" rx="5" fill="${lit}"/>`
-      + (o.lit === false ? '' : `<rect x="-74" y="-80" width="38" height="34" rx="5" fill="#fff" opacity=".18"/>`)
-      + `</g></g>`;
-  }
-  const hills = (W, H, y, a, b) => `<g filter="url(#qWob)"><path d="M0 ${y + 10}C${W * .18} ${y - 14} ${W * .36} ${y - 6} ${W * .52} ${y - 18}S${W * .82} ${y - 30} ${W} ${y - 12}V${H}H0Z" fill="${a}"/><path d="M0 ${y + 34}C${W * .22} ${y + 16} ${W * .46} ${y + 30} ${W * .66} ${y + 18}S${W * .9} ${y + 12} ${W} ${y + 22}V${H}H0Z" fill="${b}"/></g>`;
-
-  // Storybook details
-  const wood = mx(v('amber'), 55, '#6b3f1f');
-  const wash = (cx, cy, rx, ry, c) => `<ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="url(#qW-${c})"/>`;
-  const birds = (x, y, s = 1) => `<g transform="translate(${x} ${y}) scale(${s})" fill="none" stroke="${v('ink-3')}" stroke-width="2.2" stroke-linecap="round"><path d="M0 0q6-6 12 0q6-6 12 0"/><path d="M30 -14q5-5 10 0q5-5 10 0"/><path d="M6 -28q4-4 8 0q4-4 8 0"/></g>`;
-  const kite = (x, y, s = 1, c = v('coral')) => `<g class="bob d2"><path transform="translate(${x} ${y}) scale(${s})" d="M0 26q-12 14 4 26t-4 30" fill="none" stroke="${v('ink-3')}" stroke-width="1.8"/>`
-    + `<g transform="translate(${x} ${y}) scale(${s})" fill="${v('amber')}"><path d="M-2 40l-7-4v8ZM-2 40l7-4v8Z"/><path d="M2 62l-7-4v8ZM2 62l7-4v8Z" fill="${v('teal')}"/></g>`
-    + ink(`<g transform="translate(${x} ${y}) scale(${s})"><path d="M0 -22L16 0L0 26L-16 0Z" fill="${c}"/><path d="M0 -22L16 0H0Z" fill="#fff" opacity=".3"/><path d="M0 -22V26M-16 0H16" stroke="${v('illo-white')}" stroke-width="1.4" opacity=".7"/></g>`) + `</g>`;
-  const tuktuk = (x, y, s = 1) => ink(`<g transform="translate(${x} ${y}) scale(${s})"><path d="M-40 -34Q-40 -60 -14 -60H34Q50 -60 54 -42L57 -34Z" fill="${deep(v('teal'))}"/><path d="M-44 -34H60Q66 -34 66 -26V-10H-44Z" fill="${v('coral')}"/><path d="M28 -54H44L51 -36H28Z" fill="${tint('indigo-2', 30, v('illo-white'))}"/><path d="M-30 -54H14V-36H-30Z" fill="${tint('amber', 30, v('illo-white'))}"/><path d="M-44 -18H66" stroke="${v('amber')}" stroke-width="3"/><circle cx="-24" cy="-6" r="9" fill="${v('illo-face')}"/><circle cx="-24" cy="-6" r="3.5" fill="${v('ink-3')}"/><circle cx="50" cy="-6" r="9" fill="${v('illo-face')}"/><circle cx="50" cy="-6" r="3.5" fill="${v('ink-3')}"/><circle cx="64" cy="-28" r="3" fill="${v('amber')}"/></g>`);
-  const poya = (x, y, s = 1) => `<path d="M${x} ${y}V${y - 92 * s}" stroke="${v('ink-3')}" stroke-width="${3 * s}" stroke-linecap="round"/>` + ink(`<g transform="translate(${x + 2 * s} ${y - 90 * s}) scale(${s})">${[v('indigo-2'), v('amber'), v('coral'), v('illo-white'), mx(v('coral'), 50, v('amber'))].map((c, i) => `<rect x="${i * 9}" y="${i % 2}" width="9.4" height="30" fill="${c}"/>`).join('')}</g>`);
-  const tea = (x, y, w, h, c = tint('teal', 50), r = deep(v('teal'))) => `<g filter="url(#qWob)"><path d="M${x} ${y}Q${x + w / 2} ${y - h * 2} ${x + w} ${y}Z" fill="${c}"/>${[1, 2, 3, 4].map(k => `<path d="M${x + k * w * .1} ${y - 2}Q${x + w / 2} ${y - h * 2 + k * h * .42} ${x + w - k * w * .1} ${y - 2}" fill="none" stroke="${r}" stroke-width="4" stroke-dasharray="2 8" stroke-linecap="round" opacity=".5"/>`).join('')}</g>`;
-  const tree = (x, y, s = 1, c = v('teal')) => ink(`<g transform="translate(${x} ${y}) scale(${s})"><path d="M-5 0V-34h10V0Z" fill="${wood}"/><circle cy="-50" r="22" fill="${c}"/><circle cx="-16" cy="-38" r="15" fill="${c}"/><circle cx="16" cy="-40" r="16" fill="${c}"/><circle cx="-6" cy="-58" r="8" fill="#fff" opacity=".18"/></g>`);
-  const books = (x, y, s = 1) => ink(`<g transform="translate(${x} ${y}) scale(${s})"><rect x="-18" y="-10" width="36" height="10" rx="2" fill="${v('teal')}"/><rect x="-15" y="-19" width="32" height="9" rx="2" fill="${v('coral')}"/><rect x="-17" y="-27" width="30" height="8" rx="2" fill="${v('amber')}"/><path d="M-12 -5h24M-9 -14h20" stroke="${v('illo-white')}" stroke-width="1.2" opacity=".7"/></g>`);
-  const night = pts => `<g class="night">${pts.map(([x, y, r]) => star(x, y, r, '#fff', ' opacity=".85"')).join('')}</g>`;
-  const sun = (x, y, r) => wash(x, y, r * 2.8, r * 2.8, 'amber') + `<circle cx="${x}" cy="${y}" r="${r}" fill="var(--illo-sun)" filter="url(#qWob)"/>`;
-
-  /* ── Scenes ── */
   const D = {};
-
-  // Hero: Amaya at the centre, the family on the inner ring, the school on the outer ring
-  const C = 320, RS = 252, RF = 148;
-  const SCHOOL = ['jaya', 'perera', 'fernando', 'herath', 'dias', 'silva', 'sunethra'];
-  const SCHOOL_L = ['Ms. Jayasinghe', 'Mr. Perera', 'Ms. Fernando', 'Coach Herath', 'Nurse Dias', 'Ms. Silva', 'Sunethra aunty'];
-  const HOMEP = ['dilhani', 'ruwan', 'kamala'], HOME_L = ['Mum', 'Dad', 'Grandma'];
-  const POS = {};
-  SCHOOL.forEach((k, i) => { const a = -Math.PI / 2 + Math.PI / 7 + i * 2 * Math.PI / 7; POS[k] = [C + RS * Math.cos(a), C + RS * Math.sin(a)]; });
-  HOMEP.forEach((k, i) => { const a = [12.9, 115.7, 218.6][i] * Math.PI / 180; POS[k] = [C + RF * Math.cos(a), C + RF * Math.sin(a)]; });
-  D.hero = () => {
-    let s = `<defs><radialGradient id="hg" cx="50%" cy="50%" r="50%"><stop offset="0" style="stop-color:${tint('coral', 16)}"/><stop offset=".45" style="stop-color:${tint('amber', 14)}"/><stop offset="1" style="stop-color:${tint('lilac', 14)}"/></radialGradient>`
-      + `<path id="arcS" d="M${C - 290} ${C}A290 290 0 0 1 ${C + 290} ${C}"/><path id="arcF" d="M${C - 104} ${C}A104 104 0 0 1 ${C + 104} ${C}"/></defs>`
-      + `<circle cx="${C}" cy="${C}" r="306" fill="url(#hg)" filter="url(#qWob)"/>` + wash(210, 210, 230, 200, 'amber') + wash(450, 450, 230, 200, 'teal') + wash(470, 170, 160, 140, 'lilac') + `<circle cx="${C}" cy="${C}" r="300" fill="#000" filter="url(#qGrain)" style="mix-blend-mode:multiply" opacity=".22"/>` + kite(64, 92, .95, v('teal')) + birds(528, 34, .9) + night([[60, 560, 4], [590, 600, 3], [600, 520, 4]])
-      + `<text class="arc"><textPath href="#arcS" startOffset="50%" text-anchor="middle">AT SCHOOL</textPath></text>`
-      + `<circle cx="${C}" cy="${C}" r="${RS}" fill="none" stroke="${tint('indigo-2', 45, 'transparent')}" stroke-width="2" stroke-dasharray="3 9" stroke-linecap="round"/>`
-      + `<circle cx="${C}" cy="${C}" r="${RF}" fill="none" stroke="${tint('amber', 75, 'transparent')}" stroke-width="2.5" stroke-dasharray="3 9" stroke-linecap="round"/>`;
-    SCHOOL.forEach(k => { const [x, y] = POS[k]; s += `<path d="M${C} ${C}L${x} ${y}" stroke="${tint('indigo-2', 16, 'transparent')}" stroke-width="1.5"/>`; });
-    // a few drifting hearts and stars
-    s += `<g class="bob">${heart(150, 175, 1, tint('coral', 60))}</g><g class="bob d2">${star(500, 190, 9, tint('amber', 80))}</g><g class="bob d3">${heart(505, 470, .85, tint('lilac', 75))}</g><g class="bob d2">${star(130, 450, 7, tint('teal', 70))}</g>`;
-    s += `<circle class="pulse" cx="${C}" cy="${C}" r="96" fill="none" stroke="${v('coral')}" stroke-width="2"/>`;
-    s += `<g id="sparks"></g>`;
-    SCHOOL.forEach((k, i) => { const [x, y] = POS[k]; s += med(k, x, y, 40, {ring: v('surface'), bg: tint(PORTRAIT_BG[k], 28)}); s += `<circle cx="${x}" cy="${y}" r="41.5" fill="none" stroke="${v('indigo-2')}" stroke-width="2.5"/><text class="lbl" x="${x}" y="${y < C ? y - 50 : y + 62}">${SCHOOL_L[i]}</text>`; });
-    HOMEP.forEach((k, i) => { const [x, y] = POS[k]; s += med(k, x, y, 34, {bg: tint(PORTRAIT_BG[k], 28)}); s += `<circle cx="${x}" cy="${y}" r="35.5" fill="none" stroke="${v('amber')}" stroke-width="2.5"/><text class="lbl" x="${x}" y="${i === 2 ? y - 46 : y + 54}">${HOME_L[i]}</text>`; });
-    s += `<text class="arc" style="fill:${mx(v('amber'), 55, v('ink'))}"><textPath href="#arcF" startOffset="50%" text-anchor="middle">AT HOME</textPath></text>`;
-    s += `<circle cx="${C}" cy="${C}" r="92" fill="${tint('coral', 22)}"/>` + med('amaya', C, C, 76, {bg: tint('coral', 30)}) + `<circle cx="${C}" cy="${C}" r="77" fill="none" stroke="${v('coral')}" stroke-width="4"/>`;
-    s += `<g transform="translate(${C} ${C + 86})"><rect x="-60" y="-16" width="120" height="32" rx="16" fill="#C23A33"/><text x="0" y="0" dy=".35em" text-anchor="middle" style="font:900 16px var(--f-body);fill:#fff">Amaya</text></g>`;
-    return s;
-  };
-
-  // Band vignettes: 400 × 200 panels on the band colour
-  const panel = (inner, sky) => `<rect width="400" height="200" rx="20" fill="${sky || 'var(--band-2)'}"/><g clip-path="inset(0 round 20px)">${wash(70, 30, 190, 120, 'lilac')}${wash(350, 190, 210, 100, 'teal')}${inner}</g>`;
-  const bandHills = `<path d="M0 168C80 150 150 162 220 152S340 138 400 148V200H0Z" fill="${mx(v('teal'), 34, 'var(--band-2)')}"/><path d="M0 186C100 172 200 184 300 176S380 172 400 176V200H0Z" fill="${mx(v('teal'), 52, 'var(--band-2)')}"/>`;
-  D.vGate = () => panel(`${wash(330, 54, 80, 70, 'coral')}<circle cx="330" cy="54" r="24" fill="${v('coral')}" opacity=".9" filter="url(#qWob)"/>${birds(230, 40, .8)}${bandHills}${tree(370, 168, .7)}`
-    + `<rect x="40" y="58" width="22" height="118" rx="4" fill="${mx(v('amber'), 30, v('illo-white'))}"/><rect x="164" y="58" width="22" height="118" rx="4" fill="${mx(v('amber'), 30, v('illo-white'))}"/><path d="M40 70Q113 22 186 70" fill="none" stroke="${v('coral')}" stroke-width="10" stroke-linecap="round"/>`
-    + `<g stroke="${mx(v('ink-3'), 70, 'var(--band-2)')}" stroke-width="3">${[78, 98, 128, 148].map(x => `<path d="M${x} 104V176"/>`).join('')}<path d="M62 112H164"/></g>`
-    + at(116, 56, .8, full('amaya', {bag: v('amber'), R: 'wave'}))
-    + ring(286, 128, 30, 9, [[0, 70, v('indigo-2')], [78, 150, v('coral'), .45], [158, 300, v('lilac'), .45]], 'rgba(255,255,255,.14)')
-    + `<circle cx="286" cy="98" r="6" fill="${v('teal')}" stroke="var(--band-2)" stroke-width="2.5"/><circle cx="286" cy="128" r="12" fill="${v('teal')}"/><path d="M280.5 128l4 4 7-8" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>`
-    + `<path d="M196 124C220 120 236 124 248 128" fill="none" stroke="${v('teal')}" stroke-width="2" stroke-dasharray="3 6" stroke-linecap="round"/>`);
-  D.vMoment = () => panel(`<rect x="22" y="26" width="196" height="118" rx="10" fill="${v('amber-soft')}"/><rect x="22" y="26" width="196" height="118" rx="10" fill="none" stroke="${mx(v('amber'), 60, 'var(--band-2)')}" stroke-width="3"/>`
-    + `<circle cx="180" cy="56" r="13" fill="${v('coral')}"/><path d="M22 112c40-14 90-14 130-4s50 6 66-2v38H22Z" fill="${v('teal')}"/><path d="M22 126c50-8 100-6 140-2s40 2 56-2v22H22Z" fill="${v('indigo-2')}" opacity=".75"/><path d="M40 60c10-14 30-6 24 8s-22 12-24 0Z" fill="${v('lilac')}"/><circle cx="90" cy="52" r="6" fill="${v('coral')}"/><circle cx="104" cy="70" r="4" fill="${v('indigo-2')}"/>`
-    + `<rect x="0" y="176" width="400" height="24" fill="${mx(v('band-line'), 80, 'var(--band-2)')}"/>`
-    + at(150, 54, .8, full('amaya', {R: 'wave'})) + `<path d="M172 100l8 -20" stroke="${v('amber')}" stroke-width="3.4" stroke-linecap="round"/><circle cx="181" cy="78" r="4.4" fill="${v('coral')}"/>`
-    + at(296, 36, .84, full('jaya', {R: 'phone'})) + phoneAt(308, 112, .95)
-    + `<path d="M314 108C324 70 350 54 370 42" fill="none" stroke="${v('coral')}" stroke-width="2" stroke-dasharray="3 6" stroke-linecap="round"/>`
-    + `<g class="bob">${heart(372, 36, 1.3)}</g>${star(346, 74, 6, v('amber'))}`);
-  D.vGrandma = () => panel(`<rect x="230" y="22" width="140" height="96" rx="8" fill="${mx(v('lilac'), 20, 'var(--band-2)')}"/><path d="M230 96C260 70 290 82 310 66S350 62 370 74V118H230Z" fill="${mx(v('teal'), 55, 'var(--band-2)')}"/><path d="M230 108C270 92 320 104 370 92V118H230Z" fill="${mx(v('teal'), 75, 'var(--band-2)')}"/><circle cx="342" cy="44" r="10" fill="${v('amber')}"/><rect x="230" y="22" width="140" height="96" rx="8" fill="none" stroke="${mx(v('amber'), 55, '#6b3f1f')}" stroke-width="6"/><path d="M300 22V118" stroke="${mx(v('amber'), 55, '#6b3f1f')}" stroke-width="4"/>`
-    + tea(232, 118, 136, 22, mx(v('teal'), 70, 'var(--band-2)')) + `<rect x="0" y="170" width="400" height="30" fill="${mx(v('band-line'), 80, 'var(--band-2)')}"/>`
-    + `<path d="M58 70Q58 48 80 48H172Q194 48 194 70V170H58Z" fill="${mx(v('coral'), 55, 'var(--band-2)')}"/>`
-    + at(126, 30, 1.3, bust('kamala') + arm(P.kamala, 'R', 'phone')) + phoneAt(143, 148, 1.2)
-    + `<rect x="46" y="118" width="26" height="62" rx="12" fill="${v('coral')}"/><rect x="180" y="118" width="26" height="62" rx="12" fill="${v('coral')}"/><rect x="200" y="140" width="46" height="8" rx="4" fill="${mx(v('amber'), 55, '#6b3f1f')}"/><path d="M212 148v30M234 148v30" stroke="${mx(v('amber'), 55, '#6b3f1f')}" stroke-width="4"/><path d="M212 124h20v10q0 6-6 6h-8q-6 0-6-6Z" fill="${v('illo-white')}"/><path d="M232 128q6 0 6 4t-6 4" fill="none" stroke="${v('illo-white')}" stroke-width="2.5"/><path d="M218 118q-3-6 0-10M226 118q-3-6 0-10" stroke="${v('band-ink-2')}" stroke-width="2" fill="none" stroke-linecap="round" opacity=".6"/>`
-    + `<g class="bob">${heart(196, 40, 1.4)}</g><g class="bob d2">${heart(214, 18, .9, v('amber'))}</g>`);
-  D.vPeople = () => { const pts = [['jaya', 230, 44], ['perera', 300, 34], ['herath', 360, 70], ['dias', 352, 140]];
-    return panel(`<rect x="0" y="160" width="400" height="40" fill="${mx(v('band-line'), 80, 'var(--band-2)')}"/><rect x="20" y="148" width="210" height="10" rx="5" fill="${mx(v('amber'), 55, '#6b3f1f')}"/><path d="M40 158v40M210 158v40" stroke="${mx(v('amber'), 55, '#6b3f1f')}" stroke-width="5"/>`
-      + `<rect x="152" y="112" width="50" height="36" rx="5" fill="${v('indigo-2')}"/><rect x="152" y="112" width="50" height="36" rx="5" fill="#fff" opacity=".1"/><path d="M147 148h60" stroke="${v('indigo-2')}" stroke-width="4" stroke-linecap="round"/>`
-      + at(94, 34, 1.1, bust('ruwan') + arm(P.ruwan, 'R', 'phone')) + phoneAt(109, 132, 1)
-      + pts.map(([k, x, y]) => `<path d="M118 112Q${(118 + x) / 2} ${Math.min(y, 112) - 20} ${x} ${y}" fill="none" stroke="${v('lilac')}" stroke-width="1.8" stroke-dasharray="3 6" stroke-linecap="round" opacity=".8"/>`).join('')
-      + pts.map(([k, x, y]) => med(k, x, y, 24, {ring: v('lilac')})).join('')
-      + `<g class="bob">${heart(260, 112, 1.1)}</g>`); };
-  D.vTry = () => panel(`<rect x="250" y="20" width="120" height="84" rx="8" fill="${mx(v('indigo-2'), 30, 'var(--band-2)')}"/><circle cx="340" cy="44" r="10" fill="${v('amber')}" opacity=".8"/><path d="M250 84C280 70 320 80 370 66V104H250Z" fill="${mx(v('coral'), 30, 'var(--band-2)')}"/><rect x="250" y="20" width="120" height="84" rx="8" fill="none" stroke="${mx(v('amber'), 55, '#6b3f1f')}" stroke-width="5"/>`
-    + `<path d="M120 0V30" stroke="${v('band-ink-2')}" stroke-width="2"/><path d="M98 50Q120 22 142 50Z" fill="${v('amber')}"/><ellipse cx="120" cy="52" rx="30" ry="10" fill="${v('amber')}" opacity=".18"/>`
-    + at(84, 46, 1, bust('dilhani') + arm(P.dilhani, 'R', 'hold')) + at(176, 66, .92, bust('amaya') + arm(P.amaya, 'L', 'write', 1))
-    + `<rect x="0" y="146" width="400" height="54" fill="${mx(v('amber'), 45, '#4a2c16')}"/><rect x="0" y="146" width="400" height="6" fill="#000" opacity=".12"/>`
-    + `<g transform="rotate(-6 150 150)"><rect x="104" y="128" width="92" height="56" rx="5" fill="${v('illo-white')}"/><rect x="170" y="134" width="18" height="20" rx="2" fill="${v('coral')}" opacity=".85"/><path d="M114 142h40M114 152h46M114 162h34" stroke="${v('ink-3')}" stroke-width="2.5" stroke-linecap="round" opacity=".6"/><path d="M150 132V178" stroke="${v('ink-3')}" stroke-width="1" opacity=".4"/></g>`
-    + books(360, 146, .9) + `<g transform="translate(320 160)"><circle r="18" fill="${v('teal')}"/><path d="M-8 0l5 5 10-11" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></g>`);
-  D.vQuiet = () => panel(`<rect x="24" y="22" width="130" height="96" rx="8" fill="${mx(v('indigo'), 20, '#0b0c1e')}"/><circle cx="118" cy="52" r="16" fill="${mx('#fff', 85, v('lilac'))}"/><circle cx="126" cy="46" r="15" fill="${mx(v('indigo'), 20, '#0b0c1e')}"/>${[[44, 40], [70, 60], [56, 96], [96, 90], [140, 100]].map(([x, y], i) => star(x, y, 3 + (i % 2) * 1.5, '#fff', ' opacity=".8"')).join('')}<rect x="24" y="22" width="130" height="96" rx="8" fill="none" stroke="${mx(v('amber'), 55, '#6b3f1f')}" stroke-width="5"/>`
-    + `<rect x="0" y="168" width="400" height="32" fill="${mx(v('band-line'), 80, 'var(--band-2)')}"/>`
-    + `<path d="M150 124Q150 110 164 110H300Q314 110 314 124V176H150Z" fill="${mx(v('teal'), 55, 'var(--band-2)')}"/>`
-    + at(232, 30, 1.08, bust('jaya') + arm(P.jaya, 'L', 'hold') + arm(P.jaya, 'R', 'hold')) + `<path d="M210 140h44v-14q-22-6-44 0Z" fill="${v('coral')}"/><path d="M232 126v14" stroke="${v('illo-white')}" stroke-width="2"/>`
-    + `<path d="M140 146H324V186H140Z" fill="${v('teal')}"/><rect x="134" y="132" width="20" height="52" rx="10" fill="${v('teal')}"/><rect x="310" y="132" width="20" height="52" rx="10" fill="${v('teal')}"/>`
-    + `<g transform="translate(350 70)"><path d="M-30 -18H30V18H-30Z" fill="${v('illo-white')}"/><path d="M-30 -18L0 4L30 -18" fill="none" stroke="${v('ink-3')}" stroke-width="2"/><circle cx="26" cy="16" r="15" fill="${v('lilac')}"/><path d="M26 8v8l5 3" stroke="#fff" stroke-width="2.6" fill="none" stroke-linecap="round"/></g>`
-    + `<text x="350" y="122" text-anchor="middle" style="font:800 14px var(--f-body);fill:var(--band-ink-2)">07:00</text>`
-    + `<path d="M278 70q8-8 0-16q14 4 10 16q-4 8-10 0Z" fill="none"/><text x="290" y="52" style="font:900 16px var(--f-body);fill:var(--band-ink-2)" opacity=".8">z</text><text x="302" y="38" style="font:900 12px var(--f-body);fill:var(--band-ink-2)" opacity=".6">z</text>`);
-  D.vRecap = () => panel(`<path d="M20 30Q110 54 200 30T380 30" fill="none" stroke="${v('band-ink-2')}" stroke-width="1.5" opacity=".5"/>${[0, 1, 2, 3, 4, 5, 6, 7].map(i => { const x = 34 + i * 46, c = [v('coral'), v('amber'), v('teal'), v('lilac')][i % 4]; return `<path d="M${x} ${36 + Math.sin(i / 7 * Math.PI) * 14}l9 18l9 -18Z" fill="${c}" transform="translate(-9 -6)"/>`; }).join('')}`
-    + `<rect x="0" y="170" width="400" height="30" fill="${mx(v('band-line'), 80, 'var(--band-2)')}"/>`
-    + `<path d="M70 120Q70 104 86 104H314Q330 104 330 120V178H70Z" fill="${mx(v('coral'), 55, 'var(--band-2)')}"/>`
-    + at(124, 44, 1, bust('ruwan')) + at(278, 40, 1, bust('dilhani') + arm(P.dilhani, 'L', 'hold')) + at(200, 66, .9, bust('amaya') + arm(P.amaya, 'L', 'hold', 1) + arm(P.amaya, 'R', 'hold', 1))
-    + `<g transform="translate(200 112) rotate(-3)"><rect x="-44" y="-12" width="88" height="56" rx="7" fill="${v('illo-white')}"/>${[[-26, v('lilac'), 1], [-2, v('teal'), .7], [22, v('amber'), .45]].map(([x, c, h]) => `<rect x="${x - 6}" y="${28 - 30 * h}" width="12" height="${30 * h}" rx="3" fill="${c}"/>`).join('')}</g>`
-    + `<path d="M60 150H340V186H60Z" fill="${v('coral')}"/><rect x="50" y="138" width="22" height="48" rx="11" fill="${v('coral')}"/><rect x="328" y="138" width="22" height="48" rx="11" fill="${v('coral')}"/>`
-    + `<g class="bob">${star(200, 52, 9, v('amber'))}</g><g class="bob d2">${star(164, 68, 6, v('teal'))}</g><g class="bob d3">${star(238, 68, 6, v('lilac'))}</g>`);
-
-  // Four ideas: 520 × 260
-  const room = (bg, floor, w1 = 'amber', w2 = 'lilac') => `<rect width="520" height="260" fill="${bg}"/>${wash(110, 70, 240, 150, w1)}${wash(440, 120, 220, 160, w2)}<g filter="url(#qWob)"><rect x="-20" y="206" width="560" height="70" fill="${floor}"/></g>`;
-  D.story = () => room(tint('lilac', 12), tint('lilac', 22))
-    + `<rect x="40" y="30" width="150" height="110" rx="10" fill="${tint('amber', 22)}"/><circle cx="116" cy="118" r="30" fill="${v('coral')}" opacity=".7"/><path d="M40 118C80 100 120 112 190 96V140H40Z" fill="${tint('teal', 50)}"/><rect x="40" y="30" width="150" height="110" rx="10" fill="none" stroke="${v('surface')}" stroke-width="6"/><path d="M115 30V140" stroke="${v('surface')}" stroke-width="4"/>`
-    + birds(70, 60, .6) + at(170, 92, 1.18, bust('prishan') + arm(P.prishan, 'R', 'hold'))
-    + `<rect x="20" y="196" width="480" height="14" rx="7" fill="${mx(v('amber'), 50, '#6b3f1f')}"/>`
-    + `<g transform="translate(70 170)"><path d="M0 0h30v18q0 8-8 8h-14q-8 0-8-8Z" fill="${v('illo-white')}" stroke="${v('ink-3')}" stroke-width="1.2"/><path d="M30 4q9 0 9 7t-9 7" fill="none" stroke="${v('ink-3')}" stroke-width="2"/><path d="M9-6q-4-7 0-13M19-6q-4-7 0-13" fill="none" stroke="${v('ink-3')}" stroke-width="2" stroke-linecap="round" opacity=".5"/></g>`
-    + `<g transform="translate(276 34) rotate(2)"><rect width="206" height="160" rx="14" fill="${v('surface')}" stroke="${v('line')}" stroke-width="2"/>`
-    + `<g transform="translate(26 30)"><circle r="12" fill="${tint('amber', 40)}"/><path d="M-7 4h14M-4 4a4 4 0 0 1 8 0" fill="none" stroke="${v('amber')}" stroke-width="2.4" stroke-linecap="round"/></g><rect x="48" y="22" width="116" height="10" rx="5" fill="${v('ink-2')}" opacity=".85"/><rect x="48" y="38" width="84" height="7" rx="3.5" fill="${v('ink-3')}" opacity=".45"/>`
-    + [[v('teal'), 140], [v('amber'), 120], [v('coral'), 130]].map(([c, w], i) => `<circle cx="28" cy="${76 + i * 26}" r="7" fill="${c}"/><rect x="44" y="${71 + i * 26}" width="${w}" height="9" rx="4.5" fill="${v('ink-3')}" opacity=".35"/>`).join('')
-    + `</g><g class="bob">${star(470, 40, 10, v('amber'))}</g>`;
-  D.warn = () => room(tint('coral', 8), tint('coral', 16), 'coral', 'amber')
-    + `<rect x="40" y="26" width="220" height="106" rx="8" fill="${mx(v('teal'), 40, '#16302F')}"/><rect x="40" y="26" width="220" height="106" rx="8" fill="none" stroke="${mx(v('amber'), 55, '#6b3f1f')}" stroke-width="6"/>`
-    + `<path d="M60 60L100 56L140 62L170 82L196 104" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity=".85"/><path d="M196 104L236 66" fill="none" stroke="${v('amber')}" stroke-width="3" stroke-dasharray="4 7" stroke-linecap="round"/><circle cx="196" cy="104" r="6" fill="${v('coral')}"/><circle cx="236" cy="66" r="5" fill="${v('amber')}"/>`
-    + at(86, 132, .78, bust('nethmi')) + at(176, 132, .78, bust('kavindu')) + at(266, 132, .78, bust('rehan'))
-    + [50, 140, 230].map(x => `<rect x="${x}" y="196" width="72" height="12" rx="4" fill="${mx(v('amber'), 50, '#6b3f1f')}"/><path d="M${x + 8} 208v40M${x + 64} 208v40" stroke="${mx(v('amber'), 50, '#6b3f1f')}" stroke-width="5"/>`).join('')
-    + `<circle cx="176" cy="160" r="54" fill="none" stroke="${v('amber')}" stroke-width="3" stroke-dasharray="2 8" stroke-linecap="round"/>`
-    + at(400, 46, 1.04, full('mendis', {L: 'reach'}))
-    + `<g transform="translate(330 64)"><path d="M-30 -22H30Q38 -22 38 -14V10Q38 18 30 18H-6L-18 30V18H-30Q-38 18 -38 10V-14Q-38 -22 -30 -22Z" fill="${v('surface')}" stroke="${v('line')}" stroke-width="2"/>${heart(0, -2, 1.3, v('coral'))}</g>`
-    + `<path d="M232 150Q290 120 344 150" fill="none" stroke="${v('coral')}" stroke-width="2" stroke-dasharray="3 7" stroke-linecap="round"/>`;
-  D.ask = () => room(tint('teal', 8), tint('teal', 18), 'teal', 'lilac') + books(60, 214, 1.1)
-    + at(110, 64, 1.3, bust('fernando') + arm(P.fernando, 'R', 'phone')) + phoneAt(124, 180, 1.3)
-    + `<rect x="20" y="214" width="200" height="12" rx="6" fill="${mx(v('amber'), 50, '#6b3f1f')}"/>`
-    + `<g transform="translate(190 52)"><path d="M-36 -26H36Q46 -26 46 -16V12Q46 22 36 22H-14L-30 36L-26 22H-36Q-46 22 -46 12V-16Q-46 -26 -36 -26Z" fill="${v('surface')}" stroke="${v('line')}" stroke-width="2"/><text x="0" y="8" text-anchor="middle" style="font:900 30px var(--f-display);fill:${v('teal')}">?</text></g>`
-    + `<g transform="translate(270 74)"><rect width="220" height="128" rx="16" fill="${v('surface')}" stroke="${v('line')}" stroke-width="2"/>`
-    + `<g transform="translate(24 26)">${star(0, 0, 11, v('teal'))}${star(13, 10, 5, v('teal'))}</g><rect x="48" y="20" width="140" height="9" rx="4.5" fill="${v('ink-2')}" opacity=".8"/><rect x="48" y="36" width="110" height="7" rx="3.5" fill="${v('ink-3')}" opacity=".45"/>`
-    + `<g transform="translate(20 66)"><rect width="82" height="44" rx="8" fill="${tint('teal', 20)}"/><path d="M60 0h14l8 8v0" fill="none"/><path d="M12 14h40M12 24h52M12 34h30" stroke="${v('teal')}" stroke-width="3" stroke-linecap="round"/></g>`
-    + `<g transform="translate(114 66)"><rect width="82" height="44" rx="8" fill="${tint('lilac', 22)}"/><path d="M12 34L28 22L44 28L66 12" fill="none" stroke="${v('lilac')}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></g></g>`
-    + `<path d="M246 64Q262 80 272 96" fill="none" stroke="${v('teal')}" stroke-width="2" stroke-dasharray="3 6" stroke-linecap="round"/>`;
-  D.brand = () => {
-    const crests = [[110, v('coral'), 'lotus'], [260, v('teal'), 'palm'], [410, v('indigo-2'), 'book']];
-    const emb = {
-      lotus: `<path d="M0 10C-10 4-12-6-8-14C-2-8 0 0 0 10ZM0 10C10 4 12-6 8-14C2-8 0 0 0 10ZM0 10C-6 0-4-12 0-18C4-12 6 0 0 10Z" fill="#fff"/>`,
-      palm: `<path d="M0 14C0 4 2-4 6-10" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M6-10C-2-14-10-10-14-4C-6-8 0-9 6-10ZM6-10C14-16 22-12 24-6C16-10 10-10 6-10ZM6-10C4-18 10-22 14-22C10-16 8-13 6-10Z" fill="#fff"/>`,
-      book: `<path d="M-14-8Q-7-12 0-8Q7-12 14-8V12Q7 8 0 12Q-7 8-14 12Z" fill="#fff"/><path d="M0-8V12" stroke="${v('indigo-2')}" stroke-width="1.5"/>`
-    };
-    let s = room(tint('amber', 10), tint('amber', 20), 'coral', 'teal') + birds(40, 40, .8) + birds(430, 30, .7);
-    s += `<g transform="translate(260 30)"><circle r="22" fill="${v('surface')}" stroke="${v('line')}" stroke-width="2"/><g transform="translate(-14 -14) scale(.44)"><rect x="9" y="9" width="21" height="21" rx="7" fill="var(--indigo)"/><rect x="34" y="9" width="21" height="21" rx="7" fill="var(--lilac)"/><rect x="9" y="34" width="21" height="21" rx="7" fill="var(--lilac)"/><rect x="34" y="34" width="21" height="21" rx="7" fill="var(--coral)"/></g></g>`;
-    crests.forEach(([x, c, e]) => {
-      s += `<path d="M260 52Q${(260 + x) / 2} 56 ${x} 62" fill="none" stroke="${v('ink-3')}" stroke-width="1.6" stroke-dasharray="3 6" stroke-linecap="round" opacity=".7"/>`;
-      s += `<g transform="translate(${x} 96)"><path d="M-30 -32H30V4Q30 26 0 38Q-30 26 -30 4Z" fill="${c}"/><path d="M-30 -32H30V-22H-30Z" fill="#000" opacity=".12"/><g transform="translate(0 2)">${emb[e]}</g></g>`;
-      const kid = {...P[x === 110 ? 'amaya' : x === 260 ? 'kavindu' : 'nethmi'], tie: c};
-      s += at(x, 140, .98, bust(kid));
-    });
-    return s;
-  };
-
-  // Leaders: a village of families; most windows lit with good news, two still waiting
-  D.village = () => {
-    let s = sun(490, 40, 18) + night([[60, 30, 3], [200, 20, 4], [330, 40, 3], [420, 18, 3]]) + birds(250, 40, .7) + tea(-20, 130, 300, 46) + tea(250, 128, 280, 40) + hills(560, 190, 150, tint('teal', 24), tint('teal', 38));
-    const H = [[40, 132, 1], [104, 140, 1], [168, 130, 0], [232, 140, 1], [296, 132, 1], [360, 140, 1], [424, 130, 0], [74, 176, 1], [140, 182, 1], [206, 176, 1], [272, 182, 1], [338, 176, 1], [404, 182, 1]];
-    H.forEach(([x, y, lit]) => { s += home(x, y, .26, {roof: lit ? v('coral') : v('ink-3'), lit: !!lit}); if (lit) s += `<circle cx="${x}" cy="${y - 20}" r="16" fill="${v('amber')}" opacity=".14"/>`; });
-    s += `<g class="bob">${heart(104, 82, .8)}</g><g class="bob d2">${heart(296, 84, .7, v('amber'))}</g><g class="bob d3">${heart(206, 128, .7)}</g>`;
-    s += `<path d="M482 116Q450 60 424 82" fill="none" stroke="${v('coral')}" stroke-width="2" stroke-dasharray="3 7" stroke-linecap="round"/>` + at(498, 84, .62, full('jaya', {L: 'wave'}));
-    return s;
-  };
-
-  // Whole school: the campus with numbered places for the eight modules
-  D.campus = () => {
-    const S = .86, X = 560, Y = 344, L = (lx, ly) => [X + lx * S, Y + ly * S];
-    const pin = (n, [x, y]) => `<g transform="translate(${x} ${y})"><path d="M0 22L-9 8A18 18 0 1 1 9 8Z" fill="${v('coral-ink')}"/><circle r="17" fill="${v('coral-ink')}"/><circle r="17" fill="none" stroke="${v('surface')}" stroke-width="3"/><text y="1" dy=".35em" text-anchor="middle" style="font:900 19px var(--f-body);fill:#fff">${n}</text></g>`;
-    // the office window (fees), the sick bay (pastoral) and exam papers, drawn in the building's own coordinates
-    const inside = `<rect x="-208" y="-74" width="54" height="40" rx="6" fill="${v('surface')}"/><text x="-181" y="-46" text-anchor="middle" style="font:900 20px var(--f-body);fill:${v('teal')}">Rs</text>`
-      + `<rect x="152" y="-74" width="54" height="40" rx="6" fill="${v('surface')}"/>${heart(179, -54, 1.1, v('coral'))}`
-      + `<g fill="${v('illo-white')}"><rect x="116" y="-160" width="16" height="20" rx="2"/><rect x="174" y="-160" width="16" height="20" rx="2"/></g>`;
-    let s = wash(180, 90, 300, 160, 'lilac') + sun(960, 70, 30) + night([[90, 40, 4], [260, 30, 3], [420, 60, 3], [820, 30, 4], [1030, 150, 3]]) + `${cloud(150, 70, .9, .9)}${cloud(780, 60, .6, .8)}` + birds(860, 110) + kite(330, 64, .9, v('lilac')) + tea(760, Y, 340, 60)
-      + `<path d="M0 ${Y}H1080V400H0Z" fill="${tint('teal', 34)}"/><path d="M0 ${Y}C200 ${Y - 8} 400 ${Y + 4} 600 ${Y - 4}S900 ${Y - 8} 1080 ${Y}" fill="none" stroke="${tint('teal', 50)}" stroke-width="6"/>`
-      + school(X, Y, S, {extra: inside});
-    // gate (admissions) on the left
-    s += `<g transform="translate(0 -18)"><rect x="96" y="250" width="22" height="112" rx="4" fill="${tint('amber', 28, v('illo-white'))}"/><rect x="214" y="250" width="22" height="112" rx="4" fill="${tint('amber', 28, v('illo-white'))}"/><path d="M96 264Q166 210 236 264" fill="none" stroke="${v('indigo-2')}" stroke-width="10" stroke-linecap="round"/><g stroke="${v('ink-3')}" stroke-width="3" opacity=".6">${[130, 150, 182, 202].map(x => `<path d="M${x} 300V362"/>`).join('')}<path d="M118 306H214"/></g></g>`;
-    s += at(172, 238, .58, full('dilhani')) + at(140, 264, .48, full('nethmi', {R: 'wave'}));
-    // notice board (communication) and the school bus
-    s += `<g transform="translate(-30 -18)"><rect x="840" y="272" width="96" height="64" rx="6" fill="${mx(v('amber'), 50, '#6b3f1f')}"/><rect x="848" y="280" width="80" height="48" rx="3" fill="${tint('amber', 30)}"/><rect x="856" y="286" width="26" height="18" fill="${v('illo-white')}"/><rect x="890" y="290" width="30" height="22" fill="${tint('lilac', 50)}"/><rect x="862" y="308" width="22" height="14" fill="${tint('teal', 50)}"/><path d="M856 336v26M920 336v26" stroke="${mx(v('amber'), 50, '#6b3f1f')}" stroke-width="5"/></g>`;
-    s += `<g transform="translate(940 278)"><rect x="0" y="0" width="160" height="58" rx="12" fill="${v('amber')}"/>${[10, 44, 78, 112].map(x => `<rect x="${x}" y="9" width="26" height="20" rx="4" fill="${tint('indigo-2', 40)}"/>`).join('')}<path d="M0 40H160" stroke="${v('coral')}" stroke-width="4"/><circle cx="30" cy="60" r="11" fill="${v('illo-face')}"/><circle cx="112" cy="60" r="11" fill="${v('illo-face')}"/></g>`;
-    // children in the yard
-    s += at(470, 268, .5, full('amaya', {R: 'wave'})) + at(516, 272, .48, full('kavindu')) + at(648, 268, .5, full('rehan', {L: 'wave'})) + palm(30, 348, .95) + tree(1050, Y, .9) + tuktuk(278, Y + 6, .5) + bush(312, 344, .8) + bush(800, 346, .7, tint('teal', 70));
-    s += pin(1, [166, 196]) + pin(2, L(-230, -206)) + pin(3, L(0, -118)) + pin(4, L(52, -262)) + pin(5, L(170, -206)) + pin(6, L(179, -108)) + pin(7, L(-181, -108)) + pin(8, [858, 220]);
-    return s;
-  };
-
-  // Privacy: 260 × 150
-  D.tWall = () => `<rect width="260" height="150" fill="${tint('indigo-2', 10)}"/><path d="M0 128H260V150H0Z" fill="${tint('teal', 30)}"/>`
-    + `<rect x="34" y="40" width="192" height="100" rx="50" fill="none" stroke="${v('indigo-2')}" stroke-width="3" stroke-dasharray="2 8" stroke-linecap="round"/>`
-    + tree(36, 128, .5) + school(130, 128, .26, {flag: v('coral')})
-    + `<g transform="translate(206 112)"><rect x="-14" y="-6" width="28" height="22" rx="5" fill="${v('amber')}"/><path d="M-8 -6V-12A8 8 0 0 1 8 -12V-6" fill="none" stroke="${v('amber')}" stroke-width="4"/><circle cy="4" r="3" fill="${v('illo-face')}"/></g>`
-    + `<g opacity=".4">${school(-10, 128, .14)}${school(270, 128, .14)}</g>`;
-  D.tConsent = () => `<rect width="260" height="150" fill="${tint('amber', 12)}"/><path d="M0 130H260V150H0Z" fill="${tint('amber', 26)}"/>`
-    + at(70, 32, .95, bust('dilhani') + arm(P.dilhani, 'R', 'hold'))
-    + `<g transform="translate(80 102) rotate(-6)"><rect x="-22" y="-18" width="44" height="36" rx="4" fill="${v('illo-white')}" stroke="${v('line')}"/><rect x="-18" y="-14" width="36" height="24" rx="2" fill="${tint('coral', 40)}"/><circle cx="0" cy="-4" r="6" fill="${v('illo-skin-1')}"/></g>`
-    + [['kamala', 160, 38, 1], ['sunil', 214, 58, 1], [null, 176, 100, 0]].map(([k, x, y, ok]) => (k ? med(k, x, y, 20) : `<circle cx="${x}" cy="${y}" r="20" fill="${tint('ink-3', 20)}"/><path d="M${x - 7} ${y - 7}h14v14h-14Z" fill="none" stroke="${v('ink-3')}" stroke-width="2"/>`)
-      + `<g transform="translate(${x + 15} ${y + 14})"><circle r="8" fill="${ok ? v('teal') : v('ink-3')}"/><path d="${ok ? 'M-3.5 0l2.5 2.5 4.5-5' : 'M-3 -3l6 6M3 -3l-6 6'}" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/></g>`).join('');
-  D.tLock = () => `<rect width="260" height="150" fill="${tint('coral', 8)}"/><path d="M0 130H260V150H0Z" fill="${tint('coral', 18)}"/>`
-    + `<path d="M60 44H112L122 54H190V128H60Z" fill="${v('lilac')}"/><rect x="60" y="60" width="130" height="68" rx="6" fill="${tint('lilac', 70, '#fff')}"/>${heart(125, 92, 1.6, v('coral'))}`
-    + `<g transform="translate(184 112)"><rect x="-18" y="-8" width="36" height="28" rx="6" fill="${v('amber')}"/><path d="M-10 -8V-16A10 10 0 0 1 10 -16V-8" fill="none" stroke="${v('amber')}" stroke-width="5"/><circle cy="4" r="3.5" fill="${v('illo-face')}"/><path d="M0 6v6" stroke="${v('illo-face')}" stroke-width="2.4"/></g>`
-    + `<g transform="translate(218 44)"><circle r="16" fill="${v('surface')}" stroke="${v('line')}" stroke-width="1.5"/><path d="M-9 0Q0 -9 9 0Q0 9 -9 0Z" fill="none" stroke="${v('ink-2')}" stroke-width="2"/><circle r="3" fill="${v('ink-2')}"/></g><path d="M206 66h24M206 74h18" stroke="${v('ink-3')}" stroke-width="2.5" stroke-linecap="round" opacity=".6"/>`;
-  D.tLocal = () => `<rect width="260" height="150" fill="${tint('teal', 10)}"/>` + wash(130, 80, 120, 80, 'teal') + birds(20, 30, .6)
-    + `<g transform="translate(70 4)"><path d="M50 8C44 8 42 14 44 20C46 30 38 42 34 58C28 82 34 104 50 118C64 128 84 122 92 104C100 84 92 62 80 46C70 32 58 22 55 12C54 9 52 8 50 8Z" fill="${v('teal')}"/>`
-    + `<g transform="translate(62 70)"><path d="M0 18C-10 6 -14 -2 -14 -8A14 14 0 0 1 14 -8C14 -2 10 6 0 18Z" fill="${v('coral')}"/><circle cy="-8" r="5" fill="#fff"/></g></g>`
-    + `<circle cx="132" cy="74" r="62" fill="none" stroke="${v('indigo-2')}" stroke-width="2" stroke-dasharray="2 8" stroke-linecap="round" opacity=".7"/>`
-    + `<g transform="translate(200 40)">${cloud(0, 0, .5, 1, v('surface'))}<circle cx="6" cy="2" r="9" fill="${v('teal')}"/><path d="M2 2l3 3 6-6" stroke="#fff" stroke-width="2.2" fill="none" stroke-linecap="round"/></g>`;
-
-  // Demo: a walkthrough over tea
-  D.tea = () => `<ellipse cx="240" cy="204" rx="230" ry="14" fill="${tint('lilac', 20)}"/>`
-    + at(120, 34, 1.08, bust('silva') + arm(P.silva, 'R', 'reach')) + at(360, 30, 1.1, bust('prishan') + arm(P.prishan, 'L', 'hold'))
-    + `<rect x="40" y="150" width="400" height="16" rx="8" fill="${mx(v('amber'), 50, '#6b3f1f')}"/><path d="M70 166v40M410 166v40" stroke="${mx(v('amber'), 50, '#6b3f1f')}" stroke-width="7"/>`
-    + `<g transform="translate(206 96)"><path d="M0 54L-8 4H76L68 54Z" fill="${v('indigo-2')}"/><path d="M-12 54H80" stroke="${v('indigo-2')}" stroke-width="5" stroke-linecap="round"/><g transform="translate(22 18) scale(.38)"><rect x="9" y="9" width="21" height="21" rx="7" fill="#fff"/><rect x="34" y="9" width="21" height="21" rx="7" fill="var(--lilac)"/><rect x="9" y="34" width="21" height="21" rx="7" fill="var(--lilac)"/><rect x="34" y="34" width="21" height="21" rx="7" fill="var(--coral)"/></g></g>`
-    + [[160, v('teal')], [330, v('coral')]].map(([x, c]) => `<g transform="translate(${x} 126)"><path d="M0 0h26v14q0 10-10 10h-6q-10 0-10-10Z" fill="${c}"/><path d="M26 4q8 0 8 6t-8 6" fill="none" stroke="${c}" stroke-width="3"/><path d="M9-6q-4-6 0-12M17-6q-4-6 0-12" fill="none" stroke="${v('ink-3')}" stroke-width="2" stroke-linecap="round" opacity=".5"/></g>`).join('')
-    + `<g class="bob">${heart(240, 40, 1)}</g>${star(212, 64, 6, v('amber'))}`;
-
-  // Small icons for the strip and the band foot
-  D.iFamily = () => `<circle cx="20" cy="20" r="20" fill="${tint('coral', 18)}"/><g transform="translate(-2 2) scale(.26)">${bust('dilhani')}</g><g transform="translate(16 12) scale(.24)">${bust('amaya')}</g>`;
-  D.iCrest = () => `<circle cx="20" cy="20" r="20" fill="${tint('amber', 22)}"/><path d="M11 10H29V21Q29 29 20 33Q11 29 11 21Z" fill="${v('coral')}"/><path d="M20 26C15 23 14 18 16 14C18 17 20 20 20 26ZM20 26C25 23 26 18 24 14C22 17 20 20 20 26Z" fill="#fff"/>`;
-  D.iLanka = () => `<circle cx="20" cy="20" r="20" fill="${tint('teal', 20)}"/><path d="M17 8C14 8 13 11 14 13C15 16 13 20 13 24C13 29 16 33 21 33C26 33 28 28 27 23C26 18 23 14 20 10Z" fill="${v('teal')}"/>`;
-  D.iShield = () => `<circle cx="22" cy="22" r="22" fill="rgba(255,255,255,.08)"/><path d="M22 9L33 13V21C33 28 28 33 22 35C16 33 11 28 11 21V13Z" fill="${v('teal')}"/><path d="M17 22l4 4 7-8" stroke="#fff" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`;
-
-
-  /* ── Watercolour picture-book scenes (style study: hero, the circle explained, the 09:10 vignette) ──
+  /* ── Watercolour picture-book scenes ──
      Shared filters: wcBig (sky and land washes: displaced edges, blotchy pigment, a darker dried edge), wcMid (buildings,
      hills, kites), wcFig (small figures), wcInk (dry-brush lines), wcFeather/wcFeatherS (painted vignette into the page),
      wcPaper (grain). Washes multiply in light mode for pigment build-up; dark mode is a dusk version of each scene. */
@@ -1022,40 +637,41 @@ const Q = (() => {
   const KITE_HAIR = {jaya: 'long', perera: 'short', fernando: 'long', herath: 'cap', dias: 'bun', silva: 'long', sunethra: 'bun', dilhani: 'long', ruwan: 'short', kamala: 'grey'};
   function wkite(k, x, y, s, c, rot = 0, tail = true) {
     const h = KITE_HAIR[k], ink = `fill="${wv('charcoal')}"`;
-    let sil = `<circle cx="0" cy="-7" r="5" ${ink} fill-opacity=".5"/><path d="M-9.5 9Q-9 -1 0 -1.2Q9 -1 9.5 9Z" ${ink} fill-opacity=".5"/>`;
-    if (h === 'long') sil += `<path d="M-5.4 -7Q-7 3 -4 6H4Q7 3 5.4 -7Z" ${ink} fill-opacity=".38"/>`;
-    if (h === 'bun') sil += `<circle cx="0" cy="-13.4" r="2.7" ${ink} fill-opacity=".5"/>`;
+    let sil = `<circle cx="0" cy="-7" r="5" ${ink} fill-opacity=".26"/><path d="M-9.5 9Q-9 -1 0 -1.2Q9 -1 9.5 9Z" ${ink} fill-opacity=".26"/>`;
+    if (h === 'long') sil += `<path d="M-5.4 -7Q-7 3 -4 6H4Q7 3 5.4 -7Z" ${ink} fill-opacity=".2"/>`;
+    if (h === 'bun') sil += `<circle cx="0" cy="-13.4" r="2.7" ${ink} fill-opacity=".26"/>`;
     if (h === 'grey') sil += `<circle cx="0" cy="-13.4" r="2.9" fill="${wv('white')}" fill-opacity=".95"/><path d="M-5 -9Q0 -14 5 -9" fill="none" stroke="${wv('white')}" stroke-width="2.2"/>`;
-    if (h === 'cap') sil += `<path d="M-5.5 -9Q0 -16 5.5 -9L9.5 -8.5Z" ${ink} fill-opacity=".7"/>`;
+    if (h === 'cap') sil += `<path d="M-5.5 -9Q0 -16 5.5 -9L9.5 -8.5Z" ${ink} fill-opacity=".34"/>`;
     return `<g transform="translate(${x} ${y}) rotate(${rot}) scale(${s})">`
       + (tail ? ln('M0 40C-9 52 9 62 -2 74S7 94 0 108', .9, .4) + `<path d="M-3 58l-6 -3.4v6.8Z M-3 58l6 -3.4v6.8Z M1 86l-6 -3.4v6.8Z M1 86l6 -3.4v6.8Z" fill="${wv('rose')}" fill-opacity=".65"/>` : '')
-      + pth('M0 -36L25 -2L0 40L-25 -2Z', c, .6) + pth('M0 -36L25 -2L0 -2Z', 'white', .3)
-      + ln('M0 -36V40M-25 -2H25', .7, .35) + `<g transform="translate(0 6)">${sil}</g></g>`;
+      + pth('M0 -36L25 -2L0 40L-25 -2Z', c, .52) + pth('M0 -36L25 -2L0 -2Z', 'white', .28) + pth('M-25 -2L0 40L0 -2Z', c, .18)
+      + ln('M0 -36V40M-25 -2H25', .7, .32) + ln('M0 -36L25 -2L0 40L-25 -2Z', .6, .22) + `<path d="M0 40l-4 4h8Z" fill="${wv('rose')}" fill-opacity=".7"/><g transform="translate(0 6)">${sil}</g></g>`;
   }
 
   // Amaya from behind: white uniform, plaits with ribbons, school bag, one hand on the strap, looking up at the sky
   function amayaBack(x, y, s) {
+    const skirt = 'M-16 -62L-27 -31Q-14 -27 0 -28Q14 -27 27 -31L16 -62Z', bod = 'M-15.5 -97Q0 -102 15.5 -97L17 -60H-17Z';
     const g = [ell(0, 2, 30, 6, 'charcoal', .22, 'wcMid'),
-      pth('M-8.5 -34h6v24h-6Z M2.5 -34h6v24h-6Z', 'skin', .85, 'wcFig'),
-      pth('M-9.5 -13h7v9h-7Z M2.5 -13h7v9h-7Z', 'sky', .3, 'wcFig'),
-      pth('M-11 -4.5h9q2 0 2 3v2.5h-11Z M2 -4.5h9q2 0 2 3v2.5h-11Z', 'charcoal', .85, 'wcFig'),
-      sk('M-17 -92Q-26 -74 -24 -56', 'sky', 9.5, .35), sk('M-17 -92Q-26 -74 -24 -56', 'uniform', 8, .95), `<circle cx="-24" cy="-54" r="3.6" fill="${wv('skin')}" fill-opacity=".9"/>`,
-      pth('M-17 -97Q0 -103 17 -97L21 -62L28 -33Q0 -26 -28 -33L-21 -62Z', 'uniform', .97, 'wcFig'), pth('M-17 -97Q0 -103 17 -97L21 -62L28 -33Q0 -26 -28 -33L-21 -62Z', 'sky', .2, 'wcFig'), ln('M-17 -97Q0 -103 17 -97L21 -62L28 -33Q0 -26 -28 -33L-21 -62Z', .8, .35),
-      pth('M7 -95Q17 -93 19 -70L27 -34Q15 -30 7 -30Z', 'sky', .3, 'wcFig'),
-      ln('M-23 -60Q0 -55 23 -60', .8, .3),
-      pth('M-15 -93h30q4 0 4 4v31q0 4 -4 4h-30q-4 0 -4 -4v-31q0 -4 4 -4Z', 'ochre', .78, 'wcFig'),
-      pth('M-15 -93h30q4 0 4 4v9h-38v-9q0 -4 4 -4Z', 'roof', .45, 'wcFig'),
-      ln('M-12 -95Q-15 -101 -9 -105M12 -95Q15 -101 9 -105', 1.8, .55, 'roof'),
-      sk('M17 -92Q25 -84 14 -78', 'sky', 9.5, .35), sk('M17 -92Q25 -84 14 -78', 'uniform', 8, .95), `<circle cx="13" cy="-78" r="3.6" fill="${wv('skin')}" fill-opacity=".9"/>`,
-      pth('M-4.5 -106h9v10h-9Z', 'skin', .9, 'wcFig'),
+      pth('M-8.5 -32h6v22h-6Z M2.5 -32h6v22h-6Z', 'skin', .88, 'wcFig'),
+      pth('M-9 -14h7v9.5h-7Z M2 -14h7v9.5h-7Z', 'uniform', .97, 'wcFig'), pth('M-9 -14h7v9.5h-7Z M2 -14h7v9.5h-7Z', 'sky', .26, 'wcFig'),
+      pth('M-10.6 -4.8h8.6q2.2 0 2.2 2.8v2.4h-10.8Z M1.8 -4.8h8.6q2.2 0 2.2 2.8v2.4h-10.8Z', 'charcoal', .9, 'wcFig'),
+      sk('M-16 -92Q-24 -76 -22 -60', 'sky', 9.5, .3), sk('M-16 -92Q-24 -76 -22 -60', 'uniform', 8, .97), `<circle cx="-22" cy="-58" r="3.4" fill="${wv('skin')}" fill-opacity=".92"/>`,
+      sk('M16 -92Q24 -80 20 -66', 'sky', 9.5, .3), sk('M16 -92Q24 -80 20 -66', 'uniform', 8, .97), `<circle cx="20" cy="-64" r="3.4" fill="${wv('skin')}" fill-opacity=".92"/>`,
+      pth(skirt, 'uniform', .97, 'wcFig'), pth('M5 -62L16 -62L27 -31Q17 -27.5 9 -28Z', 'sky', .26, 'wcFig'), pth('M-16 -62L-27 -31Q-20 -28 -13 -28L-8 -62Z', 'apricot', .12, 'wcFig'),
+      ln('M-9 -61L-14 -29M-3 -61.5L-4.5 -28M3 -61.5L4.5 -28M9 -61L14 -29', .7, .32), ln(skirt, .6, .36),
+      pth(bod, 'uniform', .97, 'wcFig'), pth('M5 -99Q13 -98.5 15.5 -97L17 -60H7Z', 'sky', .22, 'wcFig'), ln(bod, .6, .36),
+      pth('M-17 -66h34v5h-34Z', 'uniform', .97, 'wcFig'), pth('M-17 -66h34v5h-34Z', 'sky', .3, 'wcFig'),
+      `<path d="M14 -98L-18 -58" fill="none" stroke="${wv('roof')}" stroke-opacity=".85" stroke-width="3.2" stroke-linecap="round" filter="url(#wcFig)"/>`,
+      pth('M-32 -62h16q2.4 0 2.4 2.4v15q0 2.4 -2.4 2.4h-16q-2.4 0 -2.4 -2.4v-15q0 -2.4 2.4 -2.4Z', 'ochre', .88, 'wcFig'), pth('M-32 -62h16q2.4 0 2.4 2.4v6h-20.8v-6q0 -2.4 2.4 -2.4Z', 'roof', .4, 'wcFig'), ln('M-34.4 -62h20.8v19.8h-20.8Z', .5, .35),
+      pth('M-4.5 -106h9v9h-9Z', 'skin', .9, 'wcFig'), pth('M-10 -99Q0 -91 10 -99Q5 -102 0 -101.4Q-5 -102 -10 -99Z', 'uniform', .98, 'wcFig'), ln('M-10 -99Q0 -91 10 -99', .6, .45),
       `<circle cx="3.2" cy="-118" r="12.6" fill="${wv('skin')}" fill-opacity=".9" filter="url(#wcFig)"/>`,
       `<ellipse cx="13.6" cy="-114" rx="2.6" ry="3.6" fill="${wv('skin')}" fill-opacity=".95"/><ellipse cx="13.5" cy="-109.5" rx="2.8" ry="2.2" fill="${wv('rose')}" fill-opacity=".55"/>`,
-      `<circle cx="-.5" cy="-119.5" r="13.4" fill="${wv('hair')}" fill-opacity=".92" filter="url(#wcFig)"/>`,
-      ln('M-1 -132V-108', .7, .35, 'white')];
-    [-6.5, 6.5].forEach(px => { g.push(`<g fill="${wv('hair')}" fill-opacity=".9" filter="url(#wcFig)"><ellipse cx="${px}" cy="-103" rx="3.6" ry="4.4"/><ellipse cx="${px * 1.05}" cy="-95.5" rx="3.3" ry="4.2"/><ellipse cx="${px * 1.1}" cy="-88.5" rx="3" ry="3.8"/></g>`, `<path d="M${px * 1.1} -83l-5.5 -3.4v6.8Z M${px * 1.1} -83l5.5 -3.4v6.8Z" fill="${wv('rose')}" fill-opacity=".85"/>`); });
+      `<circle cx="-.5" cy="-119.5" r="13.4" fill="${wv('hair')}" fill-opacity=".94" filter="url(#wcFig)"/>`, ln('M-1 -132V-108', .7, .35, 'white'), ln('M-8 -126q4 6 2 14M7 -127q-3 6 -1 15', .5, .25, 'white')];
+    [-6.5, 6.5].forEach(px => { g.push(`<g fill="${wv('hair')}" fill-opacity=".92" filter="url(#wcFig)"><ellipse cx="${px}" cy="-103" rx="3.6" ry="4.4"/><ellipse cx="${px * 1.05}" cy="-95.5" rx="3.3" ry="4.2"/><ellipse cx="${px * 1.1}" cy="-88.5" rx="3" ry="3.8"/><ellipse cx="${px * 1.13}" cy="-82" rx="2.7" ry="3.4"/></g>`,
+      ln(`M${px - 2.4} -105l3.5 2M${px - 2.4} -97.6l3.5 2M${px - 2} -90.6l3.5 2`, .5, .4, 'white'),
+      pth(`M${px * 1.13} -77l-6 -3.6v7.2Z M${px * 1.13} -77l6 -3.6v7.2Z`, 'rose', .92, 'wcFig'), ln(`M${px * 1.13 - 1} -76l-1.4 5.4M${px * 1.13 + 1} -76l1.4 5.4`, 1.1, .6, 'rose')); });
     return `<g transform="translate(${x} ${y}) scale(${s})">${g.join('')}</g>`;
   }
-
 
   // Amaya, front three-quarter view, in her school kit: crisp white frock with a collar and a pleated skirt, the school tie,
   // white socks and black shoes, plaits with rose ribbons (as in the hero), and her ochre satchel. Feet at 0, about 112 tall.
@@ -1107,10 +723,14 @@ const Q = (() => {
     const d = o.d || 1, c = o.dress, top = o.top || o.dress, g = [ell(0, 1, 19, 3.6, 'charcoal', .2, 'wcMid')];
     const hair = o.grey ? 'white' : 'hair';
     if (o.hair === 'long') g.push(pth(`M${-9 * d} -92Q${-13 * d} -74 ${-7 * d} -64L${-1 * d} -70Z`, 'hair', .85, 'wcFig'));
-    g.push(o.trousers ? pth('M-9 -47h8v45h-8Z M1 -47h8v45h-8Z', 'charcoal', .7, 'wcFig') : pth('M-13 -49L-16 -2Q0 2 16 -2L13 -49Z', c, .8, 'wcFig'));
+    if (o.shorts) g.push(pth('M-8 -26h5.6v20h-5.6Z M2.4 -26h5.6v20h-5.6Z', 'skin', .88, 'wcFig'), pth('M-8.4 -12h6.4v8h-6.4Z M2 -12h6.4v8h-6.4Z', 'uniform', .95, 'wcFig'), pth('M-8.4 -12h6.4v8h-6.4Z M2 -12h6.4v8h-6.4Z', 'sky', .24, 'wcFig'), pth('M-10 -4.5h8q2.4 0 2.4 2.6v2.4h-10.4Z M1.6 -4.5h8q2.4 0 2.4 2.6v2.4h-10.4Z', 'charcoal', .9, 'wcFig'), pth('M-11 -49h22l1 23h-10l-1 -8l-1 8h-10Z', o.pants || 'sky', .75, 'wcFig'));
+    else if (o.trousers) g.push(pth('M-9 -47h8v45h-8Z M1 -47h8v45h-8Z', o.pants || 'charcoal', .7, 'wcFig'));
+    else { if (o.kid) g.push(pth('M-8 -24h5.6v18h-5.6Z M2.4 -24h5.6v18h-5.6Z', 'skin', .88, 'wcFig'), pth('M-8.4 -12h6.4v8h-6.4Z M2 -12h6.4v8h-6.4Z', 'uniform', .95, 'wcFig'), pth('M-10 -4.5h8q2.4 0 2.4 2.6v2.4h-10.4Z M1.6 -4.5h8q2.4 0 2.4 2.6v2.4h-10.4Z', 'charcoal', .9, 'wcFig'));
+      g.push(pth(o.kid ? 'M-13 -49L-19 -24Q0 -20 19 -24L13 -49Z' : 'M-13 -49L-16 -2Q0 2 16 -2L13 -49Z', c, .8, 'wcFig')); }
     g.push(sk(`M${-10 * d} -72Q${-13 * d} -58 ${-11 * d} -47`, top, 5.5, .65));
     g.push(pth('M-11 -75Q0 -79 11 -75L13 -45H-13Z', top, .85, 'wcFig'));
-    if (top === 'uniform') g.push(pth('M-13 -49L-16 -2Q0 2 16 -2L13 -49Z', 'sky', .22, 'wcFig'), pth('M-11 -75Q0 -79 11 -75L13 -45H-13Z', 'sky', .18, 'wcFig'), ln('M-11 -75Q0 -79 11 -75L13 -45L16 -2Q0 2 -16 -2L-13 -45Z', .6, .35));
+    if (top === 'uniform') g.push(o.kid && !o.shorts && !o.trousers ? pth('M-13 -49L-19 -24Q0 -20 19 -24L13 -49Z', 'sky', .22, 'wcFig') : '', o.kid || o.shorts || o.trousers ? '' : pth('M-13 -49L-16 -2Q0 2 16 -2L13 -49Z', 'sky', .22, 'wcFig'), pth('M-11 -75Q0 -79 11 -75L13 -45H-13Z', 'sky', .18, 'wcFig'), ln('M-11 -75Q0 -79 11 -75L13 -45H-13Z', .6, .35));
+    if (o.tie) g.push(pth('M-1.8 -74L-2.6 -61L0 -58L2.6 -61L1.8 -74Z', o.tie, .9, 'wcFig'), pth('M-7 -76Q-4 -70 0 -73Q4 -70 7 -76Q3 -78 0 -77Q-3 -78 -7 -76Z', 'uniform', .98, 'wcFig'));
     if (o.drape) g.push(pth(`M${-10 * d} -75L${13 * d} -38L${7 * d} -36L${-13 * d} -67Z`, o.drape, .7, 'wcFig'));
     const [ax, ay] = o.wave ? [17 * d, -99] : [12 * d, -46];
     g.push(sk(o.wave ? `M${10 * d} -73Q${21 * d} -83 ${ax} ${ay}` : `M${10 * d} -73Q${15 * d} -58 ${ax} ${ay}`, top, 5.5, .85), `<circle cx="${ax}" cy="${ay}" r="2.8" fill="${wv('skin')}" fill-opacity=".9"/>`);
@@ -1123,15 +743,16 @@ const Q = (() => {
     if (o.glasses) g.push(`<circle cx="${6 * d}" cy="-89" r="2.6" fill="none" stroke="${wv('charcoal')}" stroke-width=".7" opacity=".6"/>`);
     if (o.plaits) [-7, 7].forEach(px => g.push(`<g fill="${wv('hair')}" fill-opacity=".92"><ellipse cx="${px}" cy="-80" rx="3" ry="3.6"/><ellipse cx="${px * 1.05}" cy="-73.5" rx="2.8" ry="3.4"/><ellipse cx="${px * 1.08}" cy="-67.5" rx="2.5" ry="3"/></g><path d="M${px * 1.08} -63l-4.5 -3v6Z M${px * 1.08} -63l4.5 -3v6Z" fill="${wv('rose')}" fill-opacity=".9"/>`));
     if (o.phone) g.push(`<rect x="${ax - 3.4}" y="${ay - 9}" width="6.8" height="10.5" rx="1.4" fill="${wv('charcoal')}" fill-opacity=".85"/>`);
+    if (o.hold) g.push(`<g transform="translate(${ax} ${ay - 4})">${o.hold}</g>`);
     return `<g transform="translate(${x} ${y}) scale(${s})">${g.join('')}</g>`;
   }
 
-  const wschool = (x, y, s) => { let w = ''; [-58, -42, -26, 26, 42, 58].forEach(i => { w += pth(`M${i - 5} -4V-15A5 5 0 0 1 ${i + 5} -15V-4Z`, 'sky', .5, 'wcFig') + pth(`M${i - 4.5} -38h9v-9h-9Z`, 'sky', .45, 'wcFig'); });
+  const wschool = (x, y, s, extra = '') => { let w = ''; [-58, -42, -26, 26, 42, 58].forEach(i => { w += pth(`M${i - 5} -4V-15A5 5 0 0 1 ${i + 5} -15V-4Z`, 'sky', .5, 'wcFig') + pth(`M${i - 4.5} -38h9v-9h-9Z`, 'sky', .45, 'wcFig'); });
     return `<g transform="translate(${x} ${y}) scale(${s})">` + pth('M-72 0V-50H72V0Z', 'white', .95) + pth('M-72 0V-50H72V0Z', 'sky', .16) + pth('M20 0V-50H72V0Z', 'sky', .14) + ln('M-72 0V-50H72V0', .7, .3) + pth('M-80 -48L-64 -64H64L80 -48Z', 'roof', .7) + w
       + pth('M-15 -50V-90H15V-50Z', 'white', .97) + pth('M3 -50V-90H15V-50Z', 'sky', .2) + ln('M-15 -50V-90H15V-50', .7, .3) + pth('M-21 -88L0 -104L21 -88Z', 'roof', .75) + `<circle cx="0" cy="-74" r="5.5" fill="none" stroke="${wv('charcoal')}" stroke-opacity=".5" stroke-width="1"/>`
-      + pth('M-8 0V-20A8 8 0 0 1 8 -20V0Z', 'charcoal', .5, 'wcFig') + ln('M0 -104V-128', 1, .55) + pth('M1 -127Q8 -130 15 -126V-118Q8 -122 1 -119Z', 'rose', .8, 'wcFig') + ln('M-74 0H74', .8, .3) + `</g>`; };
-  const whome = (x, y, s) => `<g transform="translate(${x} ${y}) scale(${s})">` + pth('M-42 0V-40H42V0Z', 'white', .92) + pth('M-42 0V-40H42V0Z', 'ochre', .14) + pth('M10 0V-40H42V0Z', 'sky', .14) + ln('M-42 0V-40H42V0', .7, .3) + pth('M-52 -38L0 -72L52 -38Z', 'roof', .72)
-    + `<ellipse cx="22" cy="-21" rx="26" ry="20" fill="${wv('window')}" opacity=".35" filter="url(#wcBloom)"/>` + pth('M14 -29h16v14h-16Z', 'window', .95, 'wcFig') + ln('M22 -29v14M14 -22h16', .7, .45)
+      + pth('M-8 0V-20A8 8 0 0 1 8 -20V0Z', 'charcoal', .5, 'wcFig') + ln('M0 -104V-128', 1, .55) + pth('M1 -127Q8 -130 15 -126V-118Q8 -122 1 -119Z', 'rose', .8, 'wcFig') + ln('M-74 0H74', .8, .3) + extra + `</g>`; };
+  const whome = (x, y, s, lit = true) => `<g transform="translate(${x} ${y}) scale(${s})">` + pth('M-42 0V-40H42V0Z', 'white', .92) + pth('M-42 0V-40H42V0Z', 'ochre', .14) + pth('M10 0V-40H42V0Z', 'sky', .14) + ln('M-42 0V-40H42V0', .7, .3) + pth('M-52 -38L0 -72L52 -38Z', 'roof', .72)
+    + (lit ? `<ellipse cx="22" cy="-21" rx="26" ry="20" fill="${wv('window')}" opacity=".35" filter="url(#wcBloom)"/>` + pth('M14 -29h16v14h-16Z', 'window', .95, 'wcFig') : pth('M14 -29h16v14h-16Z', 'sky', .5, 'wcFig')) + ln('M22 -29v14M14 -22h16', .7, .45)
     + pth('M-16 0V-26H0V0Z', 'roof', .55, 'wcFig') + ln('M-44 0H44', .8, .3) + `</g>`;
   const wpalm = (x, y, s, d = 1) => `<g transform="translate(${x} ${y}) scale(${s * d} ${s})">` + ln('M0 0C-3 -40 3 -82 14 -112', 2.6, .65)
     + pth('M14 -112Q-10 -126 -42 -100Q-12 -110 14 -112Z', 'olive', .7, 'wcFig') + pth('M14 -112Q40 -130 70 -104Q40 -112 14 -112Z', 'teal', .65, 'wcFig')
@@ -1145,15 +766,14 @@ const Q = (() => {
   const AMAYA = [270, 620];
   D.hero = () => {
     const S = [`<defs><linearGradient id="hSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--wc-peach);stop-opacity:.6"/><stop offset=".45" style="stop-color:var(--wc-apricot);stop-opacity:.42"/><stop offset=".72" style="stop-color:var(--wc-paper);stop-opacity:0"/></linearGradient></defs><rect width="800" height="860" fill="url(#hSky)"/>`,
-      ell(170, 140, 240, 130, 'peach', .16), ell(620, 220, 240, 160, 'rose', .12), ell(300, 380, 300, 110, 'apricot', .16), ell(700, 90, 200, 110, 'lilac', .14),
+      ell(400, 180, 520, 240, 'peach', .16, 'wcSky'), ell(320, 400, 320, 110, 'apricot', .18, 'wcSky'), ell(700, 90, 180, 100, 'lilac', .14, 'wcSky'),
       moon(728, 66, 20), wstars([[80, 70], [250, 52], [420, 34], [560, 64], [750, 50], [730, 250], [60, 230], [360, 220, 1.2]]),
       pth('M0 612Q140 586 260 598T520 590T800 600V660H0Z', 'lilac', .22, 'wcBig'), wstupa(470, 604, .55),
       pth('M300 700Q430 606 580 606T800 618V700Z', 'teal', .34, 'wcBig'), teaRows(380, 700, 420, 70),
       pth('M0 640Q100 612 220 624T500 700H0Z', 'olive', .3, 'wcBig'),
       wschool(560, 640, .62), whome(726, 656, .66), wpoya(682, 654, .55), wpalm(770, 668, .5, -1), wpalm(612, 646, .42, -1),
       pth('M372 860C430 800 470 760 520 724S590 676 600 660L612 662C604 690 560 720 540 760S500 830 520 860Z', 'ochre', .36, 'wcBig'),
-      pth('M0 690Q180 650 330 690T520 760L560 860H0Z', 'olive', .5, 'wcBig'), pth('M0 760Q160 720 330 752T500 860H0Z', 'teal', .3, 'wcBig'),
-      pth('M560 760Q680 724 800 736V860H600Z', 'olive', .36, 'wcBig'),
+      pth('M0 694Q200 650 360 676T800 700V860H0Z', 'olive', .42, 'wcBig'), ell(140, 820, 260, 70, 'teal', .16), ell(640, 800, 240, 60, 'ochre', .1),
       grass(10, 470, 690, 850, 120, .5), grass(600, 790, 744, 850, 50, .45),
       vbirds(560, 560, .8, .45), vbirds(120, 520, .6, .35)];
     S.push(KITES.map(([k, x, y, s]) => `<path d="M${x} ${y + 40 * s}Q${(x + AMAYA[0]) / 2} ${Math.max(y + 60, 420)} ${AMAYA[0]} ${AMAYA[1] - 10}" fill="none" stroke="${wv('charcoal')}" stroke-width=".8" stroke-dasharray="2 6" opacity=".22"/>`).join(''));
@@ -1242,16 +862,143 @@ const Q = (() => {
 
   const kiteIcon = k => wkite(k, 0, 0, 1, KCOL[k] || 'lilac', 0, false);
 
-  return {D, P, KPOS, AMAYA, kiteIcon, portrait, svgWrap, bust};
+
+  /* Painted props shared by the scenes */
+  const plank = (x, y, w, legs = true) => pth(`M${x} ${y}h${w}v8h${-w}Z`, 'roof', .62, 'wcFig') + (legs ? ln(`M${x + 10} ${y + 8}v40M${x + w - 10} ${y + 8}v40`, 1.6, .5) : '');
+  const paper = (x, y, w, h, rot = 0, inner = '') => `<g transform="translate(${x} ${y}) rotate(${rot})">${pth(`M0 0h${w}v${h}h${-w}Z`, 'white', .97, 'wcFig')}${pth(`M${w * .6} 0h${w * .4}v${h}h${-w * .4}Z`, 'sky', .1, 'wcFig')}${ln(`M0 0h${w}v${h}h${-w}Z`, .6, .3)}${inner}</g>`;
+  const cup = (x, y, c = 'white', s = 1) => `<g transform="translate(${x} ${y}) scale(${s})">${pth('M0 0h18v10q0 7 -7 7h-4q-7 0 -7 -7Z', c, .9, 'wcFig')}${ln('M18 3q6 0 6 4.5t-6 4.5', 1.2, .5)}${ln('M6 -4q-3 -5 0 -9M12 -4q-3 -5 0 -9', .8, .4)}</g>`;
+  const wtree = (x, y, s = 1) => `<g transform="translate(${x} ${y}) scale(${s})">${ln('M0 0C-1 -14 1 -26 0 -36', 3, .6)}${pth('M0 -70c-18 0 -28 12 -26 24c-10 4 -8 20 6 20h40c14 0 16 -16 6 -20c2 -12 -8 -24 -26 -24Z', 'olive', .7, 'wcFig')}${pth('M4 -64c-10 2 -14 10 -12 18', 'teal', .0)}${ell(8, -52, 12, 10, 'teal', .35, 'wcFig')}</g>`;
+  const wbus = (x, y, s = 1) => `<g transform="translate(${x} ${y}) scale(${s})">${pth('M0 -52h120q14 0 16 12l4 26v10h-140Z', 'ochre', .92, 'wcFig')}${[8, 36, 64, 92].map(i => pth(`M${i} -44h22v16h-22Z`, 'sky', .55, 'wcFig')).join('')}${pth('M118 -44h14l4 16h-18Z', 'sky', .5, 'wcFig')}${ln('M0 -18H140', 2.4, .55, 'roof')}<circle cx="26" cy="-2" r="10" fill="${wv('charcoal')}" fill-opacity=".85"/><circle cx="112" cy="-2" r="10" fill="${wv('charcoal')}" fill-opacity=".85"/>${ln('M0 -52h120q14 0 16 12l4 26v10h-140Z', .6, .3)}</g>`;
+  const wtuk = (x, y, s = 1) => `<g transform="translate(${x} ${y}) scale(${s})">${pth('M-38 -34Q-38 -58 -14 -58H32Q48 -58 52 -40L55 -34Z', 'sea', .8, 'wcFig')}${pth('M-42 -34H58Q64 -34 64 -26V-10H-42Z', 'roof', .78, 'wcFig')}${pth('M28 -52H42L49 -36H28Z', 'sky', .5, 'wcFig')}<circle cx="-22" cy="-6" r="8.5" fill="${wv('charcoal')}" fill-opacity=".85"/><circle cx="48" cy="-6" r="8.5" fill="${wv('charcoal')}" fill-opacity=".85"/>${ln('M-42 -34H58', .6, .35)}</g>`;
+  const sofa = (x, y, w, c) => ({back: pth(`M${x} ${y + 16}Q${x} ${y} ${x + 16} ${y}H${x + w - 16}Q${x + w} ${y} ${x + w} ${y + 16}V${y + 60}H${x}Z`, c, .5, 'wcMid'), front: pth(`M${x - 8} ${y + 44}H${x + w + 8}V${y + 84}H${x - 8}Z`, c, .75, 'wcFig') + pth(`M${x - 14} ${y + 30}h16v54h-16Z M${x + w - 2} ${y + 30}h16v54h-16Z`, c, .82, 'wcFig')});
+  const wwin = (x, y, w, h, view) => `${view}${ln(`M${x} ${y}h${w}v${h}h${-w}ZM${x + w / 2} ${y}v${h}`, 2, .5, 'roof')}`;
+  const star4 = (x, y, r, c = 'ochre') => `<path d="M${x} ${y - r}Q${x} ${y} ${x + r} ${y}Q${x} ${y} ${x} ${y + r}Q${x} ${y} ${x - r} ${y}Q${x} ${y} ${x} ${y - r}Z" fill="${wv(c)}" fill-opacity=".85"/>`;
+  const AMAYA_KID = {kid: true, dress: 'uniform', top: 'uniform', plaits: true, tie: 'roof'};
+  const BOY = {kid: true, top: 'uniform', shorts: true, tie: 'roof'};
+  const JAYA = {dress: 'lilac', drape: 'ochre', hair: 'long'};
+
+  /* A day in the circle: seven 400 × 200 vignettes, painted on paper that fades into the band */
+  const V = (id, inner) => wscene(id, 400, 200, inner, 14, true);
+  D.vGate = () => V('mGate', [ell(310, 50, 120, 80, 'apricot', .4), `<circle cx="318" cy="50" r="17" fill="${wv('apricot')}" fill-opacity=".85" filter="url(#wcMid)"/>`, vbirds(214, 46, .7, .45),
+    pth('M0 160Q200 146 400 156V200H0Z', 'olive', .38, 'wcBig'), teaRows(220, 170, 180, 30, 3), pth('M120 200Q140 176 170 162L200 162Q194 180 214 200Z', 'ochre', .32, 'wcBig'),
+    pth('M54 70h20v96h-20Z M184 70h20v96h-20Z', 'white', .95, 'wcFig'), pth('M66 70h8v96h-8Z M196 70h8v96h-8Z', 'sky', .22, 'wcFig'), ln('M54 70h20v96h-20ZM184 70h20v96h-20Z', .6, .32),
+    sk('M58 74Q129 22 200 74', 'roof', 9, .8), pth('M104 46h50v14h-50Z', 'white', .95, 'wcFig'), ln('M110 52h38', 1, .4),
+    ln('M84 112v54M96 106v60M162 106v60M174 112v54', 1.6, .45), wamaya(132, 176, .86),
+    sk('M332 106a26 26 0 0 1 26 26', 'teal', 7, .7), sk('M358 132a26 26 0 0 1 -26 26', 'lilac', 7, .4), sk('M332 158a26 26 0 0 1 -26 -26', 'rose', 7, .35), `<circle cx="332" cy="132" r="11" fill="${wv('teal')}" fill-opacity=".85" filter="url(#wcFig)"/><path d="M327 132l3.5 3.5 6 -7" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>`,
+    ln('M166 120Q240 100 296 124', .9, .45).replace('stroke-linecap', 'stroke-dasharray="2 5" stroke-linecap'), wpalm(384, 170, .5, -1)].join(''));
+  D.vMoment = () => V('mMoment', [ell(200, 90, 230, 120, 'apricot', .22), pth('M0 172Q200 166 400 172V200H0Z', 'olive', .26, 'wcBig'),
+    mural(20, 26, 176, 104), wamaya(150, 184, .88), ln('M159 136L176 108', 2, .75, 'roof'), `<circle cx="177" cy="106" r="3" fill="${wv('rose')}" fill-opacity=".9"/>`,
+    wfig(300, 186, 1, {...JAYA, d: -1, phone: true}), ln('M290 104Q312 64 342 46', .9, .45).replace('stroke-linecap', 'stroke-dasharray="2 4" stroke-linecap'),
+    `<g class="bob">${heartP(350, 40, 1.3)}</g>`, star4(326, 74, 5)].join(''));
+  D.vPeople = () => V('mPeople', [ell(110, 90, 160, 100, 'apricot', .24), ell(300, 60, 140, 80, 'peach', .22), pth('M0 176Q200 170 400 176V200H0Z', 'olive', .24, 'wcBig'),
+    wfig(84, 190, 1.02, {top: 'sea', trousers: true, d: 1, phone: true}), pth('M120 120h60l6 30h-72Z', 'sky', .55, 'wcFig'), plank(20, 150, 200),
+    ...[['jaya', 232, 64, .58, 'lilac', -6], ['herath', 300, 44, .52, 'apricot', 6], ['dias', 356, 100, .48, 'teal', 10]].map(([k, x, y, s, c, r]) => ln(`M98 128Q${(98 + x) / 2} ${y + 60} ${x} ${y + 26 * s}`, .8, .4).replace('stroke-linecap', 'stroke-dasharray="2 5" stroke-linecap') + `<g class="bob">${wkite(k, x, y, s, c, r)}</g>`),
+    `<g class="bob d2">${heartP(196, 110, .9)}</g>`].join(''));
+  D.vTry = () => V('mTry', [ell(190, 90, 220, 120, 'apricot', .34), ln('M200 0V30', .9, .5), pth('M180 46Q200 20 220 46Z', 'ochre', .85, 'wcFig'), `<ellipse cx="200" cy="56" rx="60" ry="26" fill="${wv('window')}" opacity=".3" filter="url(#wcBloom)"/>`,
+    wwin(290, 22, 92, 70, pth('M290 22h92v70h-92Z', 'peach', .45, 'wcMid') + pth('M290 70Q330 54 382 64V92H290Z', 'olive', .45, 'wcMid')),
+    wfig(132, 188, 1.06, {dress: 'rose', hair: 'long', d: 1}), wamaya(226, 194, .96),
+    pth('M30 148h340v10h-340Z', 'roof', .66, 'wcFig'), pth('M40 158h320v42h-320Z', 'roof', .22, 'wcMid'),
+    paper(158, 130, 56, 30, -6, ln('M8 9h26M8 16h30M8 23h20', .6, .4) + pth('M42 6h9v10h-9Z', 'rose', .8, 'wcFig')),
+    `<circle cx="318" cy="134" r="12" fill="${wv('teal')}" fill-opacity=".88" filter="url(#wcFig)"/><path d="M312.5 134l4 4 7 -8" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>`,
+    pth('M346 140h30v8h-30Z', 'teal', .75, 'wcFig'), pth('M348 133h26v7h-26Z', 'rose', .75, 'wcFig'), pth('M346 127h28v6h-28Z', 'ochre', .75, 'wcFig')].join(''));
+  D.vQuiet = () => V('mQuiet', [ell(200, 100, 230, 120, 'lilac', .26),
+    wwin(26, 22, 120, 92, pth('M26 22h120v92h-120Z', 'sky', .75, 'wcMid') + `<circle cx="108" cy="50" r="13" fill="#F3EBD2" fill-opacity=".95"/><circle cx="114" cy="46" r="12" fill="${wv('sky')}" fill-opacity=".9"/>` + [[44, 40], [70, 58], [52, 92], [92, 86], [128, 100], [40, 70]].map(([a, b]) => `<circle cx="${a}" cy="${b}" r="1.4" fill="#fff" opacity=".85"/>`).join('')),
+    sofa(160, 100, 170, 'teal').back, wfig(244, 168, 1.02, {...JAYA, d: -1, hold: pth('M-14 -6h24v14h-24Z', 'rose', .9, 'wcFig') + ln('M-2 -6v14', .6, .5)}), sofa(160, 100, 170, 'teal').front,
+    plank(340, 150, 44, true), cup(350, 132, 'white', .9),
+    paper(338, 46, 46, 30, 0, ln('M0 0L23 16L46 0', .7, .45)), `<circle cx="384" cy="78" r="12" fill="${wv('lilac')}" fill-opacity=".85" filter="url(#wcFig)"/><path d="M384 71v7l4.5 3" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"/>`,
+    `<text x="362" y="108" text-anchor="middle" style="font:800 13px var(--f-body);fill:var(--ink-2)">07:00</text>`, ln('M296 66h6l-6 7h6M308 54h4l-4 5h4', 1.2, .55)].join(''));
+  D.vRecap = () => V('mRecap', [ell(200, 100, 230, 120, 'peach', .28), ln('M20 26Q110 50 200 28T380 26', .8, .45),
+    ...[0, 1, 2, 3, 4, 5, 6, 7].map(i => { const x = 34 + i * 46, y = 30 + Math.sin(i / 7 * Math.PI) * 12; return pth(`M${x - 8} ${y}h16l-8 16Z`, ['rose', 'ochre', 'teal', 'lilac'][i % 4], .8, 'wcFig'); }),
+    sofa(70, 106, 260, 'rose').back, wfig(128, 186, 1, {top: 'sea', trousers: true, d: 1}), wfig(276, 186, 1, {dress: 'rose', hair: 'long', d: -1}), wamaya(204, 192, .9),
+    paper(172, 128, 64, 44, -3, `<rect x="12" y="${36 - 26}" width="9" height="26" rx="2" fill="${wv('lilac')}" fill-opacity=".85"/><rect x="28" y="${36 - 18}" width="9" height="18" rx="2" fill="${wv('teal')}" fill-opacity=".85"/><rect x="44" y="${36 - 11}" width="9" height="11" rx="2" fill="${wv('ochre')}" fill-opacity=".85"/>`),
+    sofa(70, 106, 260, 'rose').front, `<g class="bob">${star4(200, 70, 8)}</g>`, star4(164, 80, 5, 'teal'), star4(238, 80, 5, 'lilac')].join(''));
+
+  /* Why Quad: four 520 × 260 scenes */
+  const S4 = (id, inner) => wscene(id, 520, 260, inner, 12, true);
+  D.story = () => S4('mStory', [ell(140, 80, 200, 120, 'peach', .26), ell(400, 130, 200, 130, 'apricot', .2), pth('M0 230Q260 222 520 230V260H0Z', 'olive', .2, 'wcBig'),
+    wwin(40, 30, 150, 104, pth('M40 30h150v104h-150Z', 'apricot', .4, 'wcMid') + `<circle cx="146" cy="104" r="18" fill="${wv('rose')}" fill-opacity=".7"/>` + pth('M40 106Q100 88 190 98V134H40Z', 'olive', .5, 'wcMid') + teaRows(40, 134, 150, 26, 3) + vbirds(70, 66, .6, .45)),
+    wfig(176, 236, 1.32, {top: 'sky', trousers: true, glasses: true, d: 1}), plank(16, 196, 488, false), pth('M24 204h472v56h-472Z', 'roof', .2, 'wcMid'), cup(70, 178),
+    paper(282, 30, 200, 156, 2, `<circle cx="26" cy="28" r="10" fill="${wv('apricot')}" fill-opacity=".8"/>` + ln('M46 24h110M46 36h80', 2.4, .5) + [['teal', 140], ['ochre', 118], ['rose', 128]].map(([c, w], i) => `<circle cx="26" cy="${72 + i * 26}" r="6.5" fill="${wv(c)}" fill-opacity=".9"/>` + ln(`M44 ${72 + i * 26}h${w}`, 2, .32)).join('')),
+    `<g class="bob">${star4(482, 34, 9)}</g>`].join(''));
+  D.warn = () => S4('mWarn', [ell(140, 80, 200, 120, 'rose', .18), ell(420, 120, 180, 120, 'apricot', .2), pth('M0 232Q260 224 520 232V260H0Z', 'olive', .2, 'wcBig'),
+    pth('M40 24h222v108h-222Z', 'sea', .82, 'wcMid'), ln('M40 24h222v108h-222Z', 2.6, .5, 'roof'), ln('M60 60L100 56L140 62L170 82L196 104', 2, .85, 'white'), ln('M196 104L238 64', 1.6, .8, 'ochre').replace('stroke-linecap', 'stroke-dasharray="3 5" stroke-linecap'), `<circle cx="196" cy="104" r="5" fill="${wv('rose')}"/>`,
+    wfig(90, 236, .92, {...AMAYA_KID, d: 1}), ell(180, 136, 34, 18, 'charcoal', .12, 'wcMid'), wfig(180, 238, .92, {...BOY, d: 1}), wfig(270, 236, .92, {...BOY, d: -1, pants: 'olive'}),
+    plank(50, 200, 76), plank(140, 200, 76), plank(230, 200, 76),
+    `<ellipse cx="180" cy="176" rx="50" ry="62" fill="none" stroke="${wv('ochre')}" stroke-width="2" stroke-dasharray="2 7" stroke-linecap="round" opacity=".8"/>`,
+    wfig(420, 246, 1.36, {top: 'teal', trousers: true, d: -1}),
+    paper(306, 34, 80, 50, -3, heartP(40, 24, 1.3)), ln('M232 168Q300 130 372 160', 1, .55, 'roof').replace('stroke-linecap', 'stroke-dasharray="3 6" stroke-linecap')].join(''));
+  D.ask = () => S4('mAsk', [ell(120, 100, 170, 120, 'teal', .14), ell(420, 110, 170, 110, 'apricot', .18), pth('M0 232Q260 224 520 232V260H0Z', 'olive', .2, 'wcBig'),
+    wfig(116, 250, 1.42, {dress: 'teal', drape: 'rose', hair: 'long', d: 1, phone: true}), plank(16, 214, 220, false),
+    pth('M186 196h40v8h-40Z', 'teal', .8, 'wcFig'), pth('M190 188h34v8h-34Z', 'rose', .8, 'wcFig'), pth('M188 181h32v7h-32Z', 'ochre', .8, 'wcFig'),
+    paper(150, 22, 84, 56, -4, `<text x="42" y="42" text-anchor="middle" style="font:italic 600 36px var(--f-accent);fill:${wv('sea')}">?</text>`),
+    paper(272, 72, 220, 132, 1, star4(26, 26, 11, 'teal') + star4(40, 36, 5, 'teal') + ln('M52 22h140M52 36h100', 2.4, .45) + pth('M18 66h82v46h-82Z', 'teal', .28, 'wcFig') + ln('M30 80h50M30 92h58M30 102h34', 1.6, .5, 'sea') + pth('M114 66h86v46h-86Z', 'lilac', .3, 'wcFig') + ln('M126 102L142 88L158 94L184 76', 2, .7, 'lilac')),
+    ln('M236 60Q256 76 272 96', .9, .5, 'sea').replace('stroke-linecap', 'stroke-dasharray="2 5" stroke-linecap')].join(''));
+  D.brand = () => { const crests = [[110, 'roof', `<path d="M0 12C-11 6 -13 -6 -9 -15C-2 -8 0 1 0 12ZM0 12C11 6 13 -6 9 -15C2 -8 0 1 0 12ZM0 12C-7 1 -5 -12 0 -19C5 -12 7 1 0 12Z"/>`], [260, 'teal', `<path d="M0 16C0 5 2 -4 7 -11" fill="none" stroke="#fff" stroke-width="3"/><path d="M7 -11C-2 -15 -11 -11 -15 -4C-6 -9 1 -10 7 -11ZM7 -11C16 -18 25 -13 27 -6C18 -11 12 -11 7 -11ZM7 -11C5 -20 11 -24 16 -24C11 -18 9 -14 7 -11Z"/>`], [410, 'lilac', `<path d="M-15 -9Q-7 -13 0 -9Q7 -13 15 -9V12Q7 8 0 12Q-7 8 -15 12Z"/>`]];
+    return S4('mBrand', [ell(260, 110, 300, 140, 'apricot', .22), pth('M0 232Q260 224 520 232V260H0Z', 'olive', .2, 'wcBig'), vbirds(40, 44, .7, .4), vbirds(440, 30, .6, .4),
+      `<g transform="translate(260 30)"><circle r="22" fill="${wv('white')}" fill-opacity=".9" filter="url(#wcFig)"/><g transform="translate(-14 -14) scale(.44)"><rect x="9" y="9" width="21" height="21" rx="7" fill="var(--indigo)"/><rect x="34" y="9" width="21" height="21" rx="7" fill="var(--lilac)"/><rect x="9" y="34" width="21" height="21" rx="7" fill="var(--lilac)"/><rect x="34" y="34" width="21" height="21" rx="7" fill="var(--coral)"/></g></g>`,
+      ...crests.map(([x, c, em], i) => ln(`M260 52Q${(260 + x) / 2} 56 ${x} 64`, .9, .4).replace('stroke-linecap', 'stroke-dasharray="2 5" stroke-linecap') + `<g transform="translate(${x} 98)">${pth('M-30 -32H30V4Q30 26 0 38Q-30 26 -30 4Z', c, .85, 'wcFig')}${pth('M-30 -32H30V-22H-30Z', 'charcoal', .12, 'wcFig')}<g fill="#fff" fill-opacity=".92" transform="translate(0 2)">${em}</g></g>` + (i === 0 ? wamaya(x, 246, .9) : wfig(x, 244, .92, i === 1 ? {...BOY, tie: c} : {...AMAYA_KID, tie: c, d: -1})))].join('')); };
+
+  /* For leaders: families as homes in the tea hills; lit windows have heard good news */
+  D.village = () => wscene('mVillage', 560, 190, [ell(160, 50, 240, 90, 'peach', .3), ell(460, 40, 160, 70, 'apricot', .2), `<circle cx="494" cy="36" r="14" fill="${wv('apricot')}" fill-opacity=".8" filter="url(#wcMid)"/>`, moon(494, 36, 13), wstars([[60, 30], [200, 20], [330, 40], [420, 18]]), vbirds(250, 40, .7, .4),
+    pth('M-10 130Q140 90 300 112T570 104V190H-10Z', 'olive', .38, 'wcBig'), teaRows(0, 150, 300, 40, 3), teaRows(280, 150, 280, 40, 3), pth('M-10 170Q280 150 570 166V190H-10Z', 'teal', .25, 'wcBig'),
+    ...[[40, 132, 1], [104, 140, 1], [168, 130, 0], [232, 140, 1], [296, 132, 1], [360, 140, 1], [424, 130, 0], [74, 176, 1], [140, 182, 1], [206, 176, 1], [272, 182, 1], [338, 176, 1], [404, 182, 1]].map(([x, y, lit]) => whome(x, y, .3, !!lit) + (lit && x % 3 === 0 ? `<g class="bob">${heartP(x, y - 34, .5)}</g>` : '')),
+    ln('M486 120Q450 64 424 88', .9, .55, 'roof').replace('stroke-linecap', 'stroke-dasharray="3 6" stroke-linecap'), heartP(440, 74, .6), wfig(510, 178, .72, {...JAYA, d: -1, wave: true})].join(''), 8, true);
+
+  /* Your whole school: the campus, with numbered places for the eight modules */
+  D.campus = () => { const S = 2.4, X = 560, Y = 344, L = (lx, ly) => [X + lx * S, Y + ly * S];
+    const pin = (n, [x, y]) => `<g transform="translate(${x} ${y})"><path d="M0 22L-9 8A18 18 0 1 1 9 8Z" fill="#C23A33" filter="url(#wcFig)"/><circle r="12.5" fill="#fff" fill-opacity=".14"/><text y="1" dy=".35em" text-anchor="middle" style="font:900 18px var(--f-body);fill:#fff">${n}</text></g>`;
+    const extra = `${pth('M-58 -33h18v10h-18Z', 'white', .95, 'wcFig')}<text x="-49" y="-25.4" text-anchor="middle" style="font:900 7.5px var(--f-body);fill:${wv('sea')}">Rs</text>${pth('M40 -33h18v10h-18Z', 'white', .95, 'wcFig')}<path transform="translate(49 -28.6) scale(.34)" d="M0 -3C0 -9 -9 -10 -9 -3.5C-9 2 0 8 0 8S9 2 9 -3.5C9 -10 0 -9 0 -3Z" fill="${wv('rose')}"/>`
+      + `<g fill="${wv('white')}">${[30, 38, 46, 54].map(i => `<rect x="${i - 1.5}" y="-46" width="3" height="5" rx=".5"/>`).join('')}</g>`;
+    return wscene('mCampus', 1080, 400, [ell(300, 80, 500, 160, 'peach', .3), ell(880, 80, 260, 130, 'apricot', .2), `<circle cx="968" cy="70" r="26" fill="${wv('apricot')}" fill-opacity=".85" filter="url(#wcMid)"/>`, moon(968, 70, 22), wstars([[90, 40], [260, 30], [420, 60], [820, 30], [1030, 150]]),
+      vbirds(840, 110, 1, .45), `<g class="bob d2">${wkite('kamala', 330, 70, .7, 'peach', 8)}</g>`,
+      pth('M-20 300Q260 250 540 270T1100 266V340H-20Z', 'lilac', .22, 'wcBig'), pth('M700 310Q860 258 1100 276V344H700Z', 'teal', .34, 'wcBig'), teaRows(720, 344, 360, 60, 4),
+      pth(`M-20 ${Y}Q540 ${Y - 8} 1100 ${Y}V400H-20Z`, 'olive', .4, 'wcBig'), ell(300, 390, 300, 30, 'teal', .16), grass(10, 1070, Y + 6, 396, 160, .4),
+      wschool(X, Y, S, extra),
+      pth('M110 236h18v108h-18Z M220 236h18v108h-18Z', 'white', .95, 'wcFig'), pth('M120 236h8v108h-8Z M230 236h8v108h-8Z', 'sky', .22, 'wcFig'), sk('M114 240Q174 192 234 240', 'roof', 9, .8), ln('M142 288v56M154 282v62M194 282v62M206 288v56', 1.6, .45),
+      wfig(178, 346, .86, {dress: 'rose', hair: 'long', d: 1}), wfig(156, 346, .62, {...AMAYA_KID, d: 1, wave: true}),
+      `<g transform="translate(810 284)">${pth('M0 0h88v58h-88Z', 'roof', .55, 'wcFig')}${paper(8, 8, 24, 18, -3)}${paper(40, 10, 30, 22, 4)}${paper(14, 32, 26, 18, 2)}${ln('M8 58v34M80 58v34', 2, .5)}</g>`,
+      wbus(920, Y + 2, 1), wtuk(296, Y + 4, .58), wpalm(40, Y + 4, .95), wpalm(1050, Y + 6, .8, -1), wtree(370, Y, .9), wtree(780, Y, .8),
+      wamaya(470, Y + 6, .62), wfig(512, Y + 6, .62, {...BOY, d: 1}), wfig(650, Y + 6, .64, {...AMAYA_KID, d: -1, wave: true, plaits: true}),
+      pin(1, [174, 206]), pin(2, L(-42, -60)), pin(3, L(0, -34)), pin(4, L(20, -90)), pin(5, L(42, -60)), pin(6, L(49, -40)), pin(7, L(-49, -40)), pin(8, [854, 262])].join(''), 30); };
+
+  /* Privacy and safety: four 260 × 150 scenes */
+  const T = (id, inner) => wscene(id, 260, 150, inner, 8, true);
+  D.tWall = () => T('mWall', [ell(130, 70, 140, 80, 'sky', .26), pth('M0 132Q130 124 260 132V150H0Z', 'olive', .3, 'wcBig'),
+    `<g opacity=".35">${wschool(18, 132, .32)}${wschool(244, 132, .32)}</g>`,
+    `<ellipse cx="130" cy="96" rx="92" ry="58" fill="none" stroke="${wv('teal')}" stroke-opacity=".3" stroke-width="12" filter="url(#wcMid)"/><ellipse cx="130" cy="96" rx="92" ry="58" fill="none" stroke="${wv('sea')}" stroke-width="1.4" stroke-dasharray="3 6" opacity=".8"/>`,
+    wschool(130, 132, .78), `<g transform="translate(208 118)">${pth('M-12 -6h24v20h-24Z', 'ochre', .9, 'wcFig')}${ln('M-7 -6V-12A7 7 0 0 1 7 -12V-6', 2.6, .8, 'ochre')}<circle cy="3" r="2.6" fill="${wv('charcoal')}"/></g>`].join(''));
+  D.tConsent = () => T('mConsent', [ell(100, 80, 120, 80, 'apricot', .28), pth('M0 134Q130 126 260 134V150H0Z', 'olive', .26, 'wcBig'),
+    wfig(66, 150, 1.12, {dress: 'rose', hair: 'long', d: 1}), paper(80, 70, 44, 36, -6, pth('M4 4h36v24h-36Z', 'peach', .5, 'wcFig') + wamaya(22, 30, .2)),
+    wfig(172, 98, .5, {dress: 'ochre', drape: 'roof', grey: true, bun: true, glasses: true, d: -1}), wfig(214, 116, .5, {top: 'white', trousers: true, grey: true, glasses: true, d: -1}),
+    `<ellipse cx="188" cy="126" rx="10" ry="12" fill="none" stroke="${wv('charcoal')}" stroke-width="1" stroke-dasharray="2 3" opacity=".5"/>`,
+    ...[[184, 72, 1], [226, 90, 1], [198, 132, 0]].map(([x, y, ok]) => `<g transform="translate(${x} ${y})"><circle r="7.5" fill="${wv(ok ? 'teal' : 'charcoal')}" fill-opacity="${ok ? .9 : .5}" filter="url(#wcFig)"/><path d="${ok ? 'M-3.5 0l2.5 2.5 4.5 -5' : 'M-3 -3l6 6M3 -3l-6 6'}" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round"/></g>`)].join(''));
+  D.tLock = () => T('mLock', [ell(130, 76, 140, 80, 'rose', .2), pth('M0 134Q130 126 260 134V150H0Z', 'olive', .24, 'wcBig'),
+    pth('M60 44H110L120 54H188V130H60Z', 'lilac', .7, 'wcMid'), paper(70, 60, 110, 64, 0, heartP(55, 30, 1.5)),
+    `<g transform="translate(186 112)">${pth('M-16 -6h32v26h-32Z', 'ochre', .9, 'wcFig')}${ln('M-9 -6V-14A9 9 0 0 1 9 -14V-6', 3.4, .85, 'ochre')}<circle cy="5" r="3.2" fill="${wv('charcoal')}"/></g>`,
+    `<g transform="translate(222 44)"><circle r="15" fill="${wv('white')}" fill-opacity=".92" filter="url(#wcFig)"/>${ln('M-9 0Q0 -9 9 0Q0 9 -9 0Z', 1.6, .7)}<circle r="2.8" fill="${wv('charcoal')}"/></g>`, ln('M208 68h28M208 76h20M208 84h24', 1.6, .45)].join(''));
+  D.tLocal = () => T('mLocal', [ell(130, 76, 140, 80, 'teal', .2), vbirds(26, 34, .6, .4),
+    `<ellipse cx="130" cy="74" rx="62" ry="62" fill="none" stroke="${wv('sea')}" stroke-width="1.4" stroke-dasharray="3 7" opacity=".7"/>`,
+    `<g transform="translate(76 4)">${pth('M50 8C44 8 42 14 44 20C46 30 38 42 34 58C28 82 34 104 50 118C64 128 84 122 92 104C100 84 92 62 80 46C70 32 58 22 55 12C54 9 52 8 50 8Z', 'teal', .8, 'wcMid')}${teaRows(40, 112, 54, 36, 3)}<g transform="translate(62 70)">${pth('M0 18C-10 6 -14 -2 -14 -8A14 14 0 0 1 14 -8C14 -2 10 6 0 18Z', 'rose', .92, 'wcFig')}<circle cy="-8" r="5" fill="#fff"/></g></g>`,
+    `<g transform="translate(214 40)">${ell(0, 4, 26, 13, 'white', .9, 'wcFig')}${ell(-8, -2, 12, 10, 'white', .9, 'wcFig')}<circle cx="6" cy="3" r="8" fill="${wv('teal')}" fill-opacity=".9"/><path d="M2.5 3l2.5 2.5 5 -5.5" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/></g>`].join(''));
+
+  /* Demo: a walkthrough over tea */
+  D.tea = () => wscene('mTea', 480, 220, [ell(240, 100, 260, 120, 'apricot', .24), ell(90, 60, 120, 80, 'peach', .18), pth('M0 206Q240 200 480 206V220H0Z', 'olive', .2, 'wcBig'),
+    wtree(40, 152, .7), wfig(128, 214, 1.32, {dress: 'ochre', drape: 'lilac', hair: 'long', d: 1}), wfig(358, 214, 1.34, {top: 'sky', trousers: true, glasses: true, d: -1}),
+    plank(40, 150, 400), pth('M206 104h68l-6 46h-56Z', 'sky', .65, 'wcFig'), ln('M200 150h80', 2.4, .5), `<g transform="translate(228 116) scale(.38)"><rect x="9" y="9" width="21" height="21" rx="7" fill="#fff"/><rect x="34" y="9" width="21" height="21" rx="7" fill="var(--lilac)"/><rect x="9" y="34" width="21" height="21" rx="7" fill="var(--lilac)"/><rect x="34" y="34" width="21" height="21" rx="7" fill="var(--coral)"/></g>`,
+    cup(156, 132, 'teal'), cup(310, 132, 'rose'), pth('M378 124q0 -14 14 -14h8q14 0 14 14v12q0 4 -4 4h-28q-4 0 -4 -4Z', 'ochre', .85, 'wcFig'), ln('M414 120q10 -2 12 -10', 1.6, .55),
+    `<g class="bob">${heartP(240, 40, 1)}</g>`, star4(212, 62, 6)].join(''), 10, true);
+
+  /* Small painted icons: the strip and the band foot */
+  D.iFamily = () => ell(20, 20, 18, 18, 'rose', .32, 'wcMid') + wfig(15, 37, .32, {dress: 'rose', hair: 'long', d: 1}) + wamaya(26, 37, .24);
+  D.iCrest = () => ell(20, 20, 18, 18, 'apricot', .36, 'wcMid') + pth('M10 9H30V21Q30 29 20 33Q10 29 10 21Z', 'roof', .88, 'wcFig') + `<path d="M20 27C15 24 14 19 16 15C18 18 20 21 20 27ZM20 27C25 24 26 19 24 15C22 18 20 21 20 27Z" fill="#fff" fill-opacity=".92"/>`;
+  D.iLanka = () => ell(20, 20, 18, 18, 'teal', .28, 'wcMid') + pth('M18 6C15 6 14 9 15 12C16 15 13 19 13 24C13 30 16 34 21 34C26 34 28 29 27 24C26 18 23 13 20 8Z', 'sea', .85, 'wcFig');
+  D.iShield = () => `<circle cx="22" cy="22" r="20" fill="#fff" fill-opacity=".07"/>` + pth('M22 8L34 13V22C34 29 29 34 22 37C15 34 10 29 10 22V13Z', 'teal', .9, 'wcFig') + `<path d="M17 22l4 4 7 -8" stroke="#fff" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`;
+
+  return {D, KPOS, AMAYA, kiteIcon, svgWrap};
 })();
 
-// Draw every illustration, with a faint paper grain over each scene
-document.querySelectorAll('svg[data-ill]').forEach(s => {
-  const k = s.dataset.ill;
-  s.insertAdjacentHTML('beforeend', k.startsWith('m:') ? Q.portrait(k.slice(2)) : Q.D[k]());
-  if (!/^(hero|vGrandma|circleD|cStep|cRule|i[A-Z]|tea|m:)/.test(k)) { const [, , w, h] = s.getAttribute('viewBox').split(' ').map(Number); s.insertAdjacentHTML('beforeend', `<rect width="${w}" height="${h}" rx="${k[0] === 'v' ? 20 : 0}" fill="#000" filter="url(#qGrain)" style="mix-blend-mode:multiply" opacity=".32"/>`); }
-  if (!s.hasAttribute('role')) s.setAttribute('focusable', 'false');
-});
+// Draw every illustration (each painted scene carries its own paper grain and vignette)
+document.querySelectorAll('svg[data-ill]').forEach(s => { s.insertAdjacentHTML('beforeend', Q.D[s.dataset.ill]()); if (!s.hasAttribute('role')) s.setAttribute('focusable', 'false'); });
 
 // Hero: moments travel between the kites and Amaya as small glints, with a ticker that says what just happened
 (() => {
