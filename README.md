@@ -163,6 +163,14 @@ quad/
 └── infra/            # Terraform (staging in M0b, production in M12)
 ```
 
+## Infrastructure
+
+Quad runs on AWS in `ap-south-1`, with Terraform in `infra/`. The tooling account holds the state
+(`infra/bootstrap`) and the `quad-edu.com` zone (`infra/envs/global`), and staging is `infra/envs/staging`.
+None of it has been applied yet: it is written and checked offline (`pnpm infra:check`).
+[`infra/README.md`](infra/README.md) is the step-by-step guide to the first deploy. It covers the
+accounts, the GitHub settings, the first-deploy checks and the runbooks.
+
 ## Getting started
 
 Prerequisites (pinned in the repo):
