@@ -174,9 +174,9 @@ describe('ci.yml', () => {
     expect(all).not.toContain('pnpm verify');
   });
 
-  it('gives api-integration Postgres and Redis service containers', () => {
+  it('gives api-integration Postgres, Redis and Mailpit service containers', () => {
     const job = ci.jobs['api-integration'] as Job & { services?: Record<string, unknown> };
-    expect(Object.keys(job.services ?? {}).sort()).toEqual(['postgres', 'redis']);
+    expect(Object.keys(job.services ?? {}).sort()).toEqual(['mailpit', 'postgres', 'redis']);
   });
 
   it('fails Flutter checks instead of skipping them wherever Flutter runs', () => {
