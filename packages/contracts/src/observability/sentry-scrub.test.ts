@@ -33,6 +33,42 @@ describe('scrubSentryEvent', () => {
     expect(scrubbed.user).toEqual({ id: 'u-1' });
   });
 
+  it("drops a Postgres error's detail and where (row values and statement context, D27 follow-up)", () => {
+    const pgError = {
+      name: 'error',
+      code: '23505',
+      severity: 'ERROR',
+      constraint: 'users_tenant_id_account_id_unique',
+      detail: 'Key (tenant_id, email)=(0192…, Amaya Perera) already exists.',
+      where: 'PL/pgSQL function ensure_account_for_email(citext) line 12 at SQL statement',
+    };
+    const event = {
+      exception: { values: [] },
+      contexts: { DatabaseError: { ...pgError } },
+      extra: { cause: { ...pgError } },
+    };
+
+    scrubSentryEvent(event);
+
+    for (const error of [event.contexts.DatabaseError, event.extra.cause]) {
+      expect(error).toEqual({
+        name: 'error',
+        code: '23505',
+        severity: 'ERROR',
+        constraint: 'users_tenant_id_account_id_unique',
+      });
+    }
+  });
+
+  it('keeps a detail field that is not part of a Postgres error', () => {
+    const event = {
+      exception: { values: [] },
+      extra: { step: { detail: 'Opened the settings page' } },
+    };
+    scrubSentryEvent(event);
+    expect(event.extra.step).toEqual({ detail: 'Opened the settings page' });
+  });
+
   it('removes a user that has no id', () => {
     const event: { user?: { id?: string; email?: string } } = {
       user: { email: 'amaya@example.com' },

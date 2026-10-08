@@ -199,14 +199,21 @@ final _sensitivePair = RegExp(
 final _pathToken = RegExp(
   r'''/(?=[A-Za-z_-]*\d)[A-Za-z0-9_-]{32,}(?=[/?#\s"']|$)''',
 );
+// The signed-link pages and routes: their `payload.signature` token has a dot,
+// which keeps it out of `_pathToken`, so the path names the segment instead.
+final _signedLinkPath = RegExp(
+  r'''(/sign-in/(?:reset|invite|support)|/auth/invites)/[^/?#\s"']+''',
+);
 final _uuid = RegExp(
   r'^/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$',
   caseSensitive: false,
 );
 
 /// The text with emails, phone numbers, credentials (auth schemes, JWTs,
-/// sensitive `name=value` pairs), query values and path tokens replaced.
+/// sensitive `name=value` pairs), query values, signed-link tokens and path
+/// tokens replaced.
 String scrubTelemetryText(String text) => text
+    .replaceAllMapped(_signedLinkPath, (m) => '${m[1]}/:token')
     .replaceAll(_jwt, '[jwt]')
     .replaceAllMapped(_authScheme, (m) => '${m[1]} [redacted]')
     .replaceAllMapped(_queryValue, (m) => '${m[1]}[redacted]')

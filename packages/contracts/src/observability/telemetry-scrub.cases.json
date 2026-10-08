@@ -26,7 +26,20 @@
     ["Call 0094 77 000 0001", "Call [phone]"],
     ["Call 0094770000001", "Call [phone]"],
     ["Call 94770000001", "Call [phone]"],
-    ["Call 77 000 0001 or 71-234-5678", "Call [phone] or [phone]"]
+    ["Call 77 000 0001 or 71-234-5678", "Call [phone] or [phone]"],
+    [
+      "GET /sign-in/reset/eyJwdXJwb3NlIjoicGFzc3dvcmRfcmVzZXQifQ.c2lnbmF0dXJlLXNpZw",
+      "GET /sign-in/reset/:token"
+    ],
+    ["/sign-in/invite/eyJwIjoxfQ.c2ln?next=/app", "/sign-in/invite/:token?next=[redacted]"],
+    [
+      "https://quad-edu.com/sign-in/support/abc.def#x",
+      "https://quad-edu.com/sign-in/support/:token#x"
+    ],
+    [
+      "POST /api/v1/auth/invites/eyJwdXJwb3NlIjoic3RhZmZfaW52aXRlIn0.c2ln/accept",
+      "POST /api/v1/auth/invites/:token/accept"
+    ]
   ],
   "unchanged": [
     "SELECT id FROM students WHERE tenant_id = $1 AND id = $2",
@@ -37,7 +50,9 @@
     "theme=dark page=2 limit=200",
     "Processed 770000001 bytes in 94 ms",
     "Took 77 000 ms",
-    "Invoice 2026 00001 for 770 students"
+    "Invoice 2026 00001 for 770 students",
+    "/sign-in/reset",
+    "GET /api/v1/auth/invites/:token"
   ],
   "urls": [
     ["https://quad-edu.com/api/v1/sign-in?token=abc", "https://quad-edu.com/api/v1/sign-in"],
