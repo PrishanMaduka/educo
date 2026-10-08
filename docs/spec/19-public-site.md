@@ -5,7 +5,7 @@ The public landing page at `https://quad-edu.com/`, the sign-in entry, demo requ
 ## Where it lives
 
 - `apps/staff`, route group `(public)`: `/`, `/sign-in`, `/legal/*`, the `/p/*` "Get the Quad app" fallback, `/sitemap.xml`, `/robots.txt` and the `/.well-known/*` app-link files ([02 → Paths](02-architecture.md#paths-on-quad-educom-d14-d15)).
-- Public pages are statically rendered (Next.js static generation) and served through CloudFront. They load no signed-in code: the staff portal bundle starts under `/app`.
+- Public pages are statically rendered (Next.js static generation) and served through CloudFront. Until the AWS deploy exists, a static export of `/` is served from GitHub Pages instead (D30). They load no signed-in code: the staff portal bundle starts under `/app`.
 - Quad-branded only. No school branding appears on public pages (the school is not known yet).
 - A signed-in visitor who opens `/` sees the landing page with **Open {school}** in place of **Sign in**, linking to `/app`.
 

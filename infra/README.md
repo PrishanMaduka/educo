@@ -147,7 +147,8 @@ tooling plan role.
 1. Before you delegate, list the records the domain uses today at the registrar (`dig any
    quad-edu.com`, and MX, TXT and CNAME records for any subdomain in use, such as Google Workspace
    verification). Anything not in `infra/envs/global` must be added there first, or it stops
-   resolving when the name servers change.
+   resolving when the name servers change. That includes the GitHub Pages records if the
+   pre-launch site must stay up ([Pre-launch site](#pre-launch-site-github-pages)).
 2. As the tooling administrator:
    ```bash
    terraform -chdir=infra/envs/global init \
@@ -798,3 +799,57 @@ Dockerfiles. CI on GitHub additionally ran tflint and a real Android staging bui
   environment on `main`. `staging` has no reviewers (ruling R-env-approvals, so merges deploy
   without a manual step), so the mitigation is that the environment allows `main` only and branch
   protection (step 5.4) lets changes reach `main` only as reviewed pull requests with green checks.
+
+## Pre-launch site (GitHub Pages)
+
+Until the AWS deploy exists, `quad-edu.com` serves a static export of the landing page from GitHub
+Pages (decision D30 in [spec 02](../docs/spec/02-architecture.md#decision-log)). Nothing here uses
+AWS or Terraform. `.github/workflows/pages.yml` builds the export
+(`pnpm --filter @quad/staff build:export`, with `NEXT_PUBLIC_QUAD_PRELAUNCH=true`), runs the
+landing journey against it, and on every push to `main` (or a manual run) deploys it. On pull
+requests it builds and tests the export without deploying.
+
+What the owner does, once:
+
+1. Merge the change to `main`. The first `Pages` run builds the site; its deploy job waits until
+   Pages is switched on (step 2), so re-run it after that if it failed.
+2. In the repository, **Settings → Pages**:
+   - **Source:** GitHub Actions.
+   - **Custom domain:** `quad-edu.com`, then **Save** (the export also ships a `CNAME` file with
+     the same name).
+   - **Enforce HTTPS:** tick it once GitHub has issued the certificate (it appears after DNS
+     resolves, usually within an hour).
+3. At the registrar for `quad-edu.com`, add:
+
+   | Name | Type | Value |
+   |---|---|---|
+   | `@` (apex) | A | `185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153` |
+   | `@` (apex) | AAAA | `2606:50c0:8000::153`, `2606:50c0:8001::153`, `2606:50c0:8002::153`, `2606:50c0:8003::153` |
+   | `www` | CNAME | `prishanmaduka.github.io` |
+
+   Remove any other apex A/AAAA records and any parking records. Leave the Google Workspace MX and
+   TXT records alone. If the registrar has CAA records, one must allow `letsencrypt.org` (GitHub
+   Pages certificates come from Let's Encrypt). Check with `dig +short quad-edu.com` and
+   `dig +short www.quad-edu.com`.
+4. Optional but recommended: verify the domain for the account or organisation (**Settings → Pages
+   → Add a domain** at the account level, then the TXT record GitHub shows), so no other
+   repository can claim `quad-edu.com`.
+5. Open `https://quad-edu.com/` and `https://www.quad-edu.com/` (GitHub redirects `www` to the
+   apex).
+
+### How this meets the AWS plan
+
+The first deploy checklist moves the domain to Route 53 in
+[Step 4](#step-4-apply-the-global-root-and-delegate-quad-educom-tooling-account): the registrar's
+name servers are replaced by the four Route 53 ones, so the records above stop being used.
+
+- **Cutting over:** when production is ready (M12), CloudFront serves `/` (spec 19). Delegate as
+  in Step 4, let the production records point the apex and `www` at CloudFront, then switch the
+  Pages site off (**Settings → Pages → Unpublish**, and disable the `Pages` workflow).
+- **Keeping Pages live after delegation** (for example if staging is set up first): before you
+  change the name servers, add the apex A and AAAA records and the `www` CNAME above to
+  `infra/envs/global`, and extend its CAA record with `0 issue "letsencrypt.org"`. The global root
+  only allows `amazon.com` today, so without that GitHub cannot renew the certificate. Step 4's
+  first item ("anything not in `infra/envs/global` must be added there first") covers this. These
+  records go when CloudFront takes over the apex.
+- Staging (`staging.quad-edu.com`) and the console are subdomains and do not touch these records.

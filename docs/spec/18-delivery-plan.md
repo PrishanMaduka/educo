@@ -93,6 +93,8 @@ To run a milestone in Claude Code, type `/build-milestone M3` (ids with a letter
 > Build milestone M1 from docs/spec/18-delivery-plan.md (read 02 Tenancy, 04, 05, 06, 08 Users & roles and School settings, and 16). Implement every sign-in flow, sessions, signed-link tokens, RBAC with the permission matrix, plan and module guards, FORCE RLS on all tenant tables, Settings → Users & roles, the School settings screen shell, the Audit view, the audit logs and support access. Write API integration tests for every flow, including cross-tenant and wrong-role denials, and add journeys 17, 18, 19, 42 and 43. Run pnpm verify.
 
 ## M1b Public site
+**Built early:** the landing page at `/` was built ahead of this milestone for the pre-launch site on GitHub Pages (D30, D31): every section, the illustrations, the tokens, the coming-soon note in place of sign-in and a demo form that opens an email. The rest of M1b below (the sign-in dialog, the demo endpoint, legal pages, `/p/*`, SEO extras, analytics, Lighthouse and the visual test) is still to do, and M1b stays unticked.
+
 **Read:** 19, 05 (Staff portal sign-in), 08 (Public landing page), 03 (public-site tokens), 16 (Data residency).
 **Scope:**
 - The landing page at `/` from `design/landing.html`, section by section as in [19](19-public-site.md#page-structure): top bar, hero with the illustrated orbit and ticker, strip, the circle explained, Circle day band, four ideas, leaders heatmap, modules on the campus illustration, privacy, demo form, footer, with the shared SVG illustration components (no screenshots, D29).
