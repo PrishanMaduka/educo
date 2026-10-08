@@ -188,6 +188,7 @@ describe('ci.yml', () => {
     );
     expect(script).not.toContain('--push');
     expect(script).toContain('hadolint/hadolint:v2.14.0');
+    expect(ci.jobs.images?.env?.QUAD_IMAGE_REGISTRY).toBe('mirror.gcr.io/');
     for (const file of [
       'docker/api.Dockerfile',
       'docker/web.Dockerfile',
@@ -218,6 +219,7 @@ describe('ci.yml', () => {
 });
 
 const DEPLOY_GATE = "vars.AWS_STAGING_DEPLOY_ROLE_ARN != ''";
+const GATE_OPEN = "needs.gate.outputs.deploy == 'true'";
 const AWS_DEPLOY_JOBS = ['build-push', 'migrate', 'deploy', 'seed', 'smoke'];
 
 describe('deploy-staging.yml', () => {
@@ -229,21 +231,44 @@ describe('deploy-staging.yml', () => {
     expect(deploy.concurrency).toEqual({ group: 'deploy-staging', 'cancel-in-progress': false });
   });
 
-  it('has the deploy jobs and the two store lanes', () => {
+  it('has the gate, the deploy jobs and the two store lanes', () => {
     expect(Object.keys(deploy.jobs).sort()).toEqual(
-      [...AWS_DEPLOY_JOBS, 'parent-ios', 'parent-android'].sort(),
+      ['gate', ...AWS_DEPLOY_JOBS, 'parent-ios', 'parent-android'].sort(),
     );
   });
 
+  it('starts with a gate that decides without AWS and without failing (I3, M1, M2)', () => {
+    const gate = deploy.jobs.gate as Job & { outputs?: Record<string, string> };
+    expect(Object.keys(deploy.jobs)[0]).toBe('gate');
+    // It needs nothing from AWS, only something to deploy to.
+    expect(gate.if).toBe(
+      "${{ vars.AWS_STAGING_DEPLOY_ROLE_ARN != '' || vars.IOS_UPLOAD_ENABLED == 'true' || vars.PLAY_UPLOAD_ENABLED == 'true' }}",
+    );
+    expect(needsOf(gate)).toEqual([]);
+    expect(usesAws(gate)).toBe(false);
+    expect(gate.permissions).toEqual({ contents: 'read', actions: 'read' });
+    expect(gate.outputs?.deploy).toBe('${{ steps.decide.outputs.deploy }}');
+    const decide = (gate.steps ?? []).find((step) => step.run?.includes('scripts/deploy-gate.mjs'));
+    expect(decide?.env).toMatchObject({
+      GH_TOKEN: '${{ github.token }}',
+      EVENT_NAME: '${{ github.event_name }}',
+      REF: '${{ github.ref }}',
+      REPOSITORY: '${{ github.repository }}',
+      RUN_CONCLUSION: '${{ github.event.workflow_run.conclusion }}',
+      RUN_EVENT: '${{ github.event.workflow_run.event }}',
+      RUN_HEAD_REPOSITORY: '${{ github.event.workflow_run.head_repository.full_name }}',
+      RUN_HEAD_BRANCH: '${{ github.event.workflow_run.head_branch }}',
+    });
+    expect(JSON.stringify(gate)).not.toContain('secrets.');
+  });
+
   it.each(AWS_DEPLOY_JOBS)(
-    '%s is skipped until the deploy role exists, and only follows a green CI push on main',
+    '%s is skipped until the deploy role exists and the gate says deploy',
     (id) => {
       const job = deploy.jobs[id];
       expect(job?.if).toContain(DEPLOY_GATE);
-      expect(job?.if).toContain("github.event.workflow_run.conclusion == 'success'");
-      // A pull request whose head branch is called main must never deploy.
-      expect(job?.if).toContain("github.event.workflow_run.event == 'push'");
-      expect(job?.if).toContain("github.ref == 'refs/heads/main'");
+      expect(job?.if).toContain(GATE_OPEN);
+      expect(needsOf(job)).toContain('gate');
       expect(environmentOf(job)).toBe('staging');
     },
   );
@@ -254,8 +279,10 @@ describe('deploy-staging.yml', () => {
   ])('%s checks its own upload variable and runs the Task 14 lane', (id, variable, os) => {
     const job = deploy.jobs[id] as Job & { 'runs-on': string };
     expect(job.if).toContain(`vars.${variable} == 'true'`);
+    expect(job.if).toContain(GATE_OPEN);
     expect(job.if).not.toContain('AWS_');
-    expect(needsOf(job)).toEqual([]);
+    // Only the gate: the lanes never wait for the AWS jobs.
+    expect(needsOf(job)).toEqual(['gate']);
     expect(environmentOf(job)).toBe('staging');
     expect(job['runs-on']).toContain(os);
     expect(job.env?.BUILD_NUMBER).toBe('${{ github.run_number }}');
@@ -279,6 +306,8 @@ describe('deploy-staging.yml', () => {
     expect(script).toContain(':$DEPLOY_SHA');
     expect(script).toContain('NEXT_PUBLIC_APP_ENV=staging');
     expect(script).toContain('NEXT_PUBLIC_API_URL=https://staging.quad-edu.com');
+    // Same digests, pulled through the mirror (M5).
+    expect(job?.env?.QUAD_IMAGE_REGISTRY).toBe('mirror.gcr.io/');
     expect(JSON.stringify(job)).toContain('vars.SENTRY_DSN_STAFF');
     expect(JSON.stringify(job)).toContain('vars.SENTRY_DSN_CONSOLE');
     expect((job?.steps ?? []).map((step) => step.uses)).toContain(
@@ -298,14 +327,17 @@ describe('deploy-staging.yml', () => {
     }
   });
 
-  it('updates every service with a forced deployment, then waits for them to be stable', () => {
+  it('registers every service first, then updates them all, then checks what they run (M7, I2)', () => {
     const script = runs(deploy.jobs.deploy);
     for (const service of ['api', 'worker', 'staff', 'console', 'clamav']) {
       expect(script).toContain(service);
     }
     expect(script).toContain('SENTRY_RELEASE=$DEPLOY_SHA');
-    expect(script).toContain('update-service');
-    expect(script.indexOf('wait-stable')).toBeGreaterThan(script.indexOf('update-service'));
+    const lastRegister = script.lastIndexOf('ecs-deploy.mjs register');
+    const firstUpdate = script.indexOf('ecs-deploy.mjs update-service');
+    expect(lastRegister).toBeGreaterThan(-1);
+    expect(firstUpdate).toBeGreaterThan(lastRegister);
+    expect(script.indexOf('ecs-deploy.mjs wait-stable --expect')).toBeGreaterThan(firstUpdate);
   });
 
   it('seeds staging, then smoke-tests it with retries through CloudFront and the origin', () => {
@@ -348,7 +380,12 @@ describe('deploy-staging.yml', () => {
 });
 
 describe('infra.yml', () => {
-  const paths = ['infra/**', 'scripts/infra-check.mjs', '.github/workflows/infra.yml'];
+  const paths = [
+    'infra/**',
+    'scripts/infra-check.mjs',
+    'scripts/plan-summary.mjs',
+    '.github/workflows/infra.yml',
+  ];
 
   it('runs on pull requests and pushes that touch infra, weekly for drift, and by hand', () => {
     expect(infra.on).toMatchObject({
@@ -401,7 +438,6 @@ describe('infra.yml', () => {
     expect(source).toContain('vars.TF_DNS_READ_ROLE_ARN');
     expect(source).toContain('vars.TF_STAGING_STATE_READ_ROLE_ARN');
     expect(source).toContain('vars.TF_STATE_KMS_KEY_ARN');
-    expect(source).toContain('without a refresh');
   });
 
   it('applies on main only, behind the infra-staging environment, from a refreshed plan', () => {
@@ -425,6 +461,48 @@ describe('infra.yml', () => {
     expect(job?.if).toContain("vars.AWS_STAGING_APPLY_ROLE_ARN != ''");
     expect(environmentOf(job)).toBe('infra-staging');
     expect(runs(job)).toContain('-refresh-only -detailed-exitcode');
+  });
+
+  // The repository is public, so logs, comments and artifacts are world-readable (I1).
+  it('never publishes a full plan: plan and apply output goes to a file, only a summary is shown', () => {
+    const source = code('infra.yml');
+    expect(source).not.toMatch(/\btee\b/);
+    expect(source).not.toContain('show -no-color');
+    expect(source).not.toContain('upload-artifact');
+    for (const id of ['plan', 'apply', 'drift']) {
+      const lines = runs(infra.jobs[id]).split('\n');
+      const terraformRuns = lines.filter((line) => /terraform -chdir=\S+ (plan|apply) /.test(line));
+      expect(terraformRuns.length, id).toBeGreaterThan(0);
+      for (const line of terraformRuns) {
+        expect(line, `${id}: ${line}`).toMatch(/> "\$RUNNER_TEMP\/[a-z-]+\.log"/);
+      }
+      const summary = lines.find((line) => line.includes('show -json'));
+      expect(summary, id).toMatch(/show -json tfplan \| node scripts\/plan-summary\.mjs --title/);
+    }
+    expect(runs(infra.jobs.drift)).toContain('--drift');
+    expect(runs(infra.jobs.apply)).toContain('$GITHUB_STEP_SUMMARY');
+    expect(runs(infra.jobs.drift)).toContain('$GITHUB_STEP_SUMMARY');
+  });
+
+  it('keeps one plan comment per pull request up to date (M6)', () => {
+    const comment = (infra.jobs.plan?.steps ?? []).find((step) =>
+      step.uses?.startsWith('actions/github-script'),
+    );
+    const script = typeof comment?.with?.script === 'string' ? comment.with.script : '';
+    expect(script).toContain('<!-- quad-terraform-plan:staging -->');
+    expect(script).toContain('updateComment');
+    expect(script).toContain('createComment');
+    expect(script).toContain('plan-summary.md');
+    expect(script).not.toContain('plan.txt');
+    expect(script).toContain('without a refresh');
+  });
+
+  it('never lets init change a committed lock file (M6)', () => {
+    const inits = Object.values(infra.jobs)
+      .flatMap((job) => runs(job).split('\n'))
+      .filter((line) => /terraform -chdir=\S+ init/.test(line));
+    expect(inits.length).toBe(3);
+    for (const line of inits) expect(line).toContain('-lockfile=readonly');
   });
 
   it('reads the backend settings, the KMS key included, from variables', () => {

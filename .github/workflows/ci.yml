@@ -172,6 +172,9 @@ jobs:
     name: images
     runs-on: ubuntu-latest
     timeout-minutes: 45
+    env:
+      # Same pinned digests, pulled through Google's Docker Hub mirror (no Docker Hub rate limit).
+      QUAD_IMAGE_REGISTRY: mirror.gcr.io/
     steps:
       - uses: actions/checkout@v4
       # hadolint v2.14.0: v2.12.0 cannot parse ADD --checksum (D28).
@@ -179,7 +182,7 @@ jobs:
         run: |
           for file in docker/api.Dockerfile docker/web.Dockerfile docker/clamav/Dockerfile; do
             echo "hadolint $file"
-            docker run --rm -i hadolint/hadolint:v2.14.0 hadolint - < "$file"
+            docker run --rm -i mirror.gcr.io/hadolint/hadolint:v2.14.0 hadolint - < "$file"
           done
       # Local web builds; deploy-staging.yml builds the staging ones and pushes them.
       - name: Build every image

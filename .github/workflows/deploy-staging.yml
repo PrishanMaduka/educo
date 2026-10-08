@@ -1,14 +1,14 @@
 # Deploys staging (spec 20, D28) after CI succeeds on a push to main, or by hand from main:
-#   build-push → migrate (db-bootstrap, then migrate) → deploy (every service, then stable) → seed
-#   → smoke.
+#   gate → build-push → migrate (db-bootstrap, then migrate) → deploy (every service, then stable
+#   and running the new revisions) → seed → smoke.
 # A failed one-off task ends the run before any service changes (scripts/ecs-deploy.mjs run-task,
 # Review Focus #4). Services are updated with --force-new-deployment and never a count: Terraform
 # owns the count (ruling R-desired-count).
-# Every AWS job is skipped, not failed, until vars.AWS_STAGING_DEPLOY_ROLE_ARN exists, so main
+# The gate job (scripts/deploy-gate.mjs) runs first: every other job runs only when it says so,
+# which is only for the tip of main after a green CI push (or by hand from main once CI passed).
+# Every AWS job is also skipped, not failed, until vars.AWS_STAGING_DEPLOY_ROLE_ARN exists, so main
 # stays green before the accounts do (Review Focus #5). The store lanes have their own switches
-# (vars.IOS_UPLOAD_ENABLED, vars.PLAY_UPLOAD_ENABLED) and do not wait for the AWS jobs.
-# A workflow_run job checks event == 'push' so that a pull request from a branch called main can
-# never deploy.
+# (vars.IOS_UPLOAD_ENABLED, vars.PLAY_UPLOAD_ENABLED) and wait only for the gate.
 name: Deploy staging
 
 on:
@@ -30,15 +30,52 @@ env:
   DEPLOY_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
 
 jobs:
+  # Deploys only the tip of main, so a late or re-run workflow for an older commit never rolls
+  # staging back over a newer one (I3). It decides from the workflow_run (green CI, a push, this
+  # repository, main) or, by hand, from main with a green CI push run for the commit (M2), and
+  # sets deploy=false instead of failing when it should not deploy.
+  gate:
+    name: Decide whether to deploy
+    # Nothing to deploy to before the accounts and store switches exist; dependents then skip too.
+    if: ${{ vars.AWS_STAGING_DEPLOY_ROLE_ARN != '' || vars.IOS_UPLOAD_ENABLED == 'true' || vars.PLAY_UPLOAD_ENABLED == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      actions: read
+    outputs:
+      deploy: ${{ steps.decide.outputs.deploy }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - id: decide
+        name: Is this commit the tip of main, and did CI pass?
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT_NAME: ${{ github.event_name }}
+          REF: ${{ github.ref }}
+          REPOSITORY: ${{ github.repository }}
+          RUN_CONCLUSION: ${{ github.event.workflow_run.conclusion }}
+          RUN_EVENT: ${{ github.event.workflow_run.event }}
+          RUN_HEAD_REPOSITORY: ${{ github.event.workflow_run.head_repository.full_name }}
+          RUN_HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+        run: node scripts/deploy-gate.mjs
+
   build-push:
     name: Build and push ${{ matrix.image }}
-    if: ${{ vars.AWS_STAGING_DEPLOY_ROLE_ARN != '' && github.ref == 'refs/heads/main' && (github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push')) }}
+    needs: gate
+    if: ${{ vars.AWS_STAGING_DEPLOY_ROLE_ARN != '' && needs.gate.outputs.deploy == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
     environment: staging
     permissions:
       contents: read
       id-token: write
+    env:
+      # Same pinned digests, pulled through Google's Docker Hub mirror (no Docker Hub rate limit).
+      QUAD_IMAGE_REGISTRY: mirror.gcr.io/
     strategy:
       fail-fast: true
       matrix:
@@ -65,7 +102,9 @@ jobs:
           SENTRY_DSN: ${{ matrix.image == 'staff' && vars.SENTRY_DSN_STAFF || matrix.image == 'console' && vars.SENTRY_DSN_CONSOLE || '' }}
         run: |
           ref="$REGISTRY/quad/$IMAGE:$DEPLOY_SHA"
-          # ECR tags are immutable, so a re-run for the same commit reuses the pushed image.
+          # ECR tags are immutable, so a re-run for the same commit reuses the pushed image. A
+          # reused web image keeps the NEXT_PUBLIC_SENTRY_DSN baked in when it was built; a changed
+          # SENTRY_DSN_* variable takes effect from the next commit.
           if aws ecr describe-images --repository-name "quad/$IMAGE" --image-ids "imageTag=$DEPLOY_SHA" > /dev/null 2>&1; then
             echo "$ref is already in ECR."
             exit 0
@@ -80,8 +119,8 @@ jobs:
 
   migrate:
     name: Migrate the database
-    needs: build-push
-    if: ${{ vars.AWS_STAGING_DEPLOY_ROLE_ARN != '' && github.ref == 'refs/heads/main' && (github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push')) }}
+    needs: [gate, build-push]
+    if: ${{ vars.AWS_STAGING_DEPLOY_ROLE_ARN != '' && needs.gate.outputs.deploy == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     environment: staging
@@ -116,8 +155,8 @@ jobs:
 
   deploy:
     name: Deploy the services
-    needs: migrate
-    if: ${{ vars.AWS_STAGING_DEPLOY_ROLE_ARN != '' && github.ref == 'refs/heads/main' && (github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push')) }}
+    needs: [gate, migrate]
+    if: ${{ vars.AWS_STAGING_DEPLOY_ROLE_ARN != '' && needs.gate.outputs.deploy == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     environment: staging
@@ -135,26 +174,38 @@ jobs:
         with:
           role-to-assume: ${{ vars.AWS_STAGING_DEPLOY_ROLE_ARN }}
           aws-region: ap-south-1
-      # api and worker share the api image. Never --desired-count (ruling R-desired-count).
+      # Every revision is resolved and registered before any service changes, so a failure there
+      # leaves all of them as they were (M7). api and worker share the api image. Never
+      # --desired-count (ruling R-desired-count).
       - name: Register and update every service
         run: |
           registry=$(node scripts/ecs-deploy.mjs setting --name ecr_registry)
-          for service in api worker staff console clamav; do
+          services=(api worker staff console clamav)
+          declare -A arns
+          for service in "${services[@]}"; do
             case "$service" in
               worker) repo=api ;;
               *) repo="$service" ;;
             esac
             image=$(node scripts/ecs-deploy.mjs image-ref --repo "$registry/quad/$repo" --tag "$DEPLOY_SHA")
             arn=$(node scripts/ecs-deploy.mjs register --family "quad-staging-$service" --container "$service" --image "$image" --env "SENTRY_RELEASE=$DEPLOY_SHA")
-            node scripts/ecs-deploy.mjs update-service --service "$service" --task-definition "$arn"
+            arns[$service]="$arn"
           done
-      - name: Wait for the services to be stable
-        run: node scripts/ecs-deploy.mjs wait-stable --services api,worker,staff,console,clamav
+          expect=""
+          for service in "${services[@]}"; do
+            node scripts/ecs-deploy.mjs update-service --service "$service" --task-definition "${arns[$service]}"
+            expect="$expect${expect:+,}$service=${arns[$service]}"
+          done
+          echo "EXPECT=$expect" >> "$GITHUB_ENV"
+      # Fails unless each service's PRIMARY deployment runs the revision registered above and
+      # completed, so a circuit-breaker rollback fails the deploy (I2).
+      - name: Wait for the services and check what they run
+        run: node scripts/ecs-deploy.mjs wait-stable --expect "$EXPECT"
 
   seed:
     name: Seed staging
-    needs: deploy
-    if: ${{ vars.AWS_STAGING_DEPLOY_ROLE_ARN != '' && github.ref == 'refs/heads/main' && (github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push')) }}
+    needs: [gate, deploy]
+    if: ${{ vars.AWS_STAGING_DEPLOY_ROLE_ARN != '' && needs.gate.outputs.deploy == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     environment: staging
@@ -182,8 +233,8 @@ jobs:
 
   smoke:
     name: Smoke-test staging
-    needs: seed
-    if: ${{ vars.AWS_STAGING_DEPLOY_ROLE_ARN != '' && github.ref == 'refs/heads/main' && (github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push')) }}
+    needs: [gate, seed]
+    if: ${{ vars.AWS_STAGING_DEPLOY_ROLE_ARN != '' && needs.gate.outputs.deploy == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     environment: staging
@@ -209,7 +260,8 @@ jobs:
 
   parent-ios:
     name: Parent app to TestFlight
-    if: ${{ vars.IOS_UPLOAD_ENABLED == 'true' && github.ref == 'refs/heads/main' && (github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push')) }}
+    needs: gate
+    if: ${{ vars.IOS_UPLOAD_ENABLED == 'true' && needs.gate.outputs.deploy == 'true' }}
     runs-on: macos-15
     timeout-minutes: 60
     environment: staging
@@ -245,7 +297,8 @@ jobs:
 
   parent-android:
     name: Parent app to Play internal
-    if: ${{ vars.PLAY_UPLOAD_ENABLED == 'true' && github.ref == 'refs/heads/main' && (github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push')) }}
+    needs: gate
+    if: ${{ vars.PLAY_UPLOAD_ENABLED == 'true' && needs.gate.outputs.deploy == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
     environment: staging

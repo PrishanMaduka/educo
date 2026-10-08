@@ -5,19 +5,34 @@
 #           from the public registry (checked against the lock files), not the local mirror.
 #   plan    same-repository pull requests, once vars.AWS_STAGING_PLAN_ROLE_ARN exists: a staging
 #           plan with -refresh=false -lock=false (ruling R-pr-plan: the plan role may not read
-#           secret values, parameters or decrypt, which a refresh needs), posted on the PR.
+#           secret values, parameters or decrypt, which a refresh needs). The repository is public,
+#           so only a summary (addresses, actions, counts; scripts/plan-summary.mjs) is logged and
+#           kept up to date in one PR comment; the full plan stays in a file on the runner.
 #   apply   pushes to main, once vars.AWS_STAGING_APPLY_ROLE_ARN exists, behind the
 #           infra-staging environment's reviewers: a fresh plan with a refresh, then apply.
 #   drift   weekly and by hand on main: a refresh-only plan that fails when staging has drifted.
+# init uses -lockfile=readonly, so CI never changes a committed .terraform.lock.hcl.
 # Pull requests run with `pull_request`, never `pull_request_target`, so a fork never gets a token.
 name: Infra
 
 on:
   pull_request:
-    paths: ['infra/**', 'scripts/infra-check.mjs', '.github/workflows/infra.yml']
+    paths:
+      [
+        'infra/**',
+        'scripts/infra-check.mjs',
+        'scripts/plan-summary.mjs',
+        '.github/workflows/infra.yml',
+      ]
   push:
     branches: [main, 'claude/**']
-    paths: ['infra/**', 'scripts/infra-check.mjs', '.github/workflows/infra.yml']
+    paths:
+      [
+        'infra/**',
+        'scripts/infra-check.mjs',
+        'scripts/plan-summary.mjs',
+        '.github/workflows/infra.yml',
+      ]
   schedule:
     - cron: '17 3 * * 1'
   workflow_dispatch:
@@ -93,6 +108,9 @@ jobs:
         with:
           terraform_version: ${{ steps.versions.outputs.terraform }}
           terraform_wrapper: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ vars.AWS_STAGING_PLAN_ROLE_ARN }}
@@ -108,36 +126,45 @@ jobs:
             role_arn = "$STATE_ROLE_ARN"
           }
           EOF
-          terraform -chdir=infra/envs/staging init -backend-config="$RUNNER_TEMP/backend.hcl"
+          terraform -chdir=infra/envs/staging init -lockfile=readonly -backend-config="$RUNNER_TEMP/backend.hcl"
+      # The repository is public, so the full plan (which can show values) stays in a file on the
+      # runner: the log and the comment get only addresses, actions and counts (I1, D28).
       - name: Plan without a refresh
         run: |
-          terraform -chdir=infra/envs/staging plan -no-color -refresh=false -lock=false -var "dns_role_arn=$DNS_ROLE_ARN" -var "otel_exporter_endpoint=$OTEL_ENDPOINT" -out=tfplan
-          terraform -chdir=infra/envs/staging show -no-color tfplan | tee "$RUNNER_TEMP/plan.txt"
-      - name: Post the plan on the pull request
+          terraform -chdir=infra/envs/staging plan -no-color -refresh=false -lock=false -var "dns_role_arn=$DNS_ROLE_ARN" -var "otel_exporter_endpoint=$OTEL_ENDPOINT" -out=tfplan > "$RUNNER_TEMP/plan.log"
+          terraform -chdir=infra/envs/staging show -json tfplan | node scripts/plan-summary.mjs --title "Terraform plan for infra/envs/staging" > "$RUNNER_TEMP/plan-summary.md"
+          cat "$RUNNER_TEMP/plan-summary.md"
+      # One comment per pull request, found by its marker and updated on every run (M6).
+      - name: Post the plan summary on the pull request
         uses: actions/github-script@v7
         with:
           script: |
             const fs = require('node:fs');
-            const plan = fs.readFileSync(`${process.env.RUNNER_TEMP}/plan.txt`, 'utf8');
-            const limit = 60000;
-            const shown = plan.length > limit
-              ? `${plan.slice(0, limit)}\n… (cut short; the job log has the whole plan)`
-              : plan;
+            const marker = '<!-- quad-terraform-plan:staging -->';
+            const summary = fs.readFileSync(`${process.env.RUNNER_TEMP}/plan-summary.md`, 'utf8');
             const body = [
-              '### Terraform plan for `infra/envs/staging`',
-              '',
+              marker,
+              summary,
               'This plan was made without a refresh and without a state lock (ruling R-pr-plan). It compares this change with the state as last applied, so drift does not show here; the apply on main refreshes first, and the weekly drift check reports it.',
               '',
-              '```',
-              shown,
-              '```',
+              'Only resource addresses and actions are shown: this repository is public, so the full plan is never posted or logged.',
             ].join('\n');
-            await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-              body,
+            const { owner, repo } = context.repo;
+            const issue_number = context.issue.number;
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner,
+              repo,
+              issue_number,
+              per_page: 100,
             });
+            const existing = comments.find(
+              (comment) => comment.user?.type === 'Bot' && comment.body?.includes(marker),
+            );
+            if (existing) {
+              await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
+            } else {
+              await github.rest.issues.createComment({ owner, repo, issue_number, body });
+            }
 
   apply:
     name: apply (staging)
@@ -168,6 +195,9 @@ jobs:
         with:
           terraform_version: ${{ steps.versions.outputs.terraform }}
           terraform_wrapper: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ vars.AWS_STAGING_APPLY_ROLE_ARN }}
@@ -182,12 +212,17 @@ jobs:
             role_arn = "$STATE_ROLE_ARN"
           }
           EOF
-          terraform -chdir=infra/envs/staging init -backend-config="$RUNNER_TEMP/backend.hcl"
+          terraform -chdir=infra/envs/staging init -lockfile=readonly -backend-config="$RUNNER_TEMP/backend.hcl"
       # A fresh plan with a refresh, so drift shows up here (ruling R-pr-plan).
+      # Output stays in files on the runner; the log and the job summary get only the summary (I1).
       - name: Plan
-        run: terraform -chdir=infra/envs/staging plan -no-color -var "dns_role_arn=$DNS_ROLE_ARN" -var "otel_exporter_endpoint=$OTEL_ENDPOINT" -out=tfplan
+        run: |
+          terraform -chdir=infra/envs/staging plan -no-color -var "dns_role_arn=$DNS_ROLE_ARN" -var "otel_exporter_endpoint=$OTEL_ENDPOINT" -out=tfplan > "$RUNNER_TEMP/plan.log"
+          terraform -chdir=infra/envs/staging show -json tfplan | node scripts/plan-summary.mjs --title "Applying to infra/envs/staging" > "$RUNNER_TEMP/plan-summary.md"
+          cat "$RUNNER_TEMP/plan-summary.md"
+          cat "$RUNNER_TEMP/plan-summary.md" >> "$GITHUB_STEP_SUMMARY"
       - name: Apply the plan
-        run: terraform -chdir=infra/envs/staging apply -no-color tfplan
+        run: terraform -chdir=infra/envs/staging apply -no-color tfplan > "$RUNNER_TEMP/apply.log"
 
   drift:
     name: drift (staging)
@@ -217,6 +252,9 @@ jobs:
         with:
           terraform_version: ${{ steps.versions.outputs.terraform }}
           terraform_wrapper: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ vars.AWS_STAGING_APPLY_ROLE_ARN }}
@@ -231,13 +269,18 @@ jobs:
             role_arn = "$STATE_ROLE_ARN"
           }
           EOF
-          terraform -chdir=infra/envs/staging init -backend-config="$RUNNER_TEMP/backend.hcl"
+          terraform -chdir=infra/envs/staging init -lockfile=readonly -backend-config="$RUNNER_TEMP/backend.hcl"
       # -detailed-exitcode: 0 no drift, 1 error, 2 drift.
       - name: Check for drift
         run: |
           status=0
-          terraform -chdir=infra/envs/staging plan -no-color -refresh-only -detailed-exitcode -var "dns_role_arn=$DNS_ROLE_ARN" -var "otel_exporter_endpoint=$OTEL_ENDPOINT" || status=$?
+          terraform -chdir=infra/envs/staging plan -no-color -refresh-only -detailed-exitcode -var "dns_role_arn=$DNS_ROLE_ARN" -var "otel_exporter_endpoint=$OTEL_ENDPOINT" -out=tfplan > "$RUNNER_TEMP/drift.log" || status=$?
+          if [ "$status" -ne 1 ]; then
+            terraform -chdir=infra/envs/staging show -json tfplan | node scripts/plan-summary.mjs --title "Drift in infra/envs/staging" --drift > "$RUNNER_TEMP/drift-summary.md"
+            cat "$RUNNER_TEMP/drift-summary.md"
+            cat "$RUNNER_TEMP/drift-summary.md" >> "$GITHUB_STEP_SUMMARY"
+          fi
           if [ "$status" -eq 2 ]; then
-            echo "::error::Staging has drifted from its Terraform state; the plan above shows what changed."
+            echo "::error::Staging has drifted from its Terraform state; the summary above lists the resources."
           fi
           exit "$status"
