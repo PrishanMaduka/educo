@@ -3,6 +3,7 @@ import { sql } from 'drizzle-orm';
 import {
   boolean,
   check,
+  foreignKey,
   index,
   integer,
   pgEnum,
@@ -16,6 +17,8 @@ import { uuidv7 } from '../../uuid';
 import { platformUsers } from '../platform/platform-users';
 import { supportSessions } from '../platform/support-sessions';
 import { tenants } from '../platform/tenants';
+import { roles } from '../tenant/roles';
+import { users } from '../tenant/users';
 import { bytea, inet } from '../types';
 
 import { accounts } from './accounts';
@@ -26,8 +29,9 @@ export const sessionStage = pgEnum('session_stage', SessionStage.options);
 /**
  * A signed-in browser, phone or console tab (spec 04, Identity; spec 05). Account table keyed on
  * `account_id`: console rows (no account, a platform user) are invisible to `quad_app` and are
- * reached through `withPlatform`. The `active_user_id` and preview foreign keys to `users` and
- * `roles` arrive with those tables (0005).
+ * reached through `withPlatform`. The membership and preview ids are composite foreign keys with
+ * `active_tenant_id` (0005, D23), so they can only name rows of the active school, and they need
+ * a school to be set.
  */
 export const sessions = pgTable(
   'sessions',
@@ -62,11 +66,38 @@ export const sessions = pgTable(
   },
   (table) => [
     check('sessions_one_owner', sql`num_nonnulls(${table.accountId}, ${table.platformUserId}) = 1`),
+    // Composite foreign keys are not checked when a column is null, so a membership or preview
+    // without a school would escape them.
+    check(
+      'sessions_school_ids_need_school',
+      sql`${table.activeTenantId} IS NOT NULL OR num_nonnulls(${table.activeUserId}, ${table.previewRoleId}, ${table.previewSampleUserId}) = 0`,
+    ),
+    foreignKey({
+      name: 'sessions_active_user_fk',
+      columns: [table.activeTenantId, table.activeUserId],
+      foreignColumns: [users.tenantId, users.id],
+    }),
+    foreignKey({
+      name: 'sessions_preview_sample_user_fk',
+      columns: [table.activeTenantId, table.previewSampleUserId],
+      foreignColumns: [users.tenantId, users.id],
+    }),
+    foreignKey({
+      name: 'sessions_preview_role_fk',
+      columns: [table.activeTenantId, table.previewRoleId],
+      foreignColumns: [roles.tenantId, roles.id],
+    }),
     index('sessions_account_id_revoked_at_idx').on(table.accountId, table.revokedAt),
     index('sessions_active_tenant_id_active_user_id_idx').on(
       table.activeTenantId,
       table.activeUserId,
     ),
+    index('sessions_preview_role_idx')
+      .on(table.activeTenantId, table.previewRoleId)
+      .where(sql`${table.previewRoleId} IS NOT NULL`),
+    index('sessions_preview_sample_user_idx')
+      .on(table.activeTenantId, table.previewSampleUserId)
+      .where(sql`${table.previewSampleUserId} IS NOT NULL`),
     index('sessions_platform_user_id_idx').on(table.platformUserId),
     index('sessions_support_session_id_idx').on(table.supportSessionId),
   ],

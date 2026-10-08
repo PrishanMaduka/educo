@@ -22,6 +22,7 @@ import {
   insertTrustedDevice,
   randomTokenHash,
 } from './factories';
+import { postgresCause } from './pg-error';
 import { useTestDatabase } from './setup';
 
 import type { Account, AccountRunner, PlatformRunner, Tenant } from '../src/internal';
@@ -63,11 +64,6 @@ async function ownersUnder(accountId: string, table: string, column: string): Pr
     );
     return result.rows.map((row) => row.owner);
   });
-}
-
-function postgresCause(error: unknown): unknown {
-  // Drizzle wraps the driver error; the Postgres error is its cause.
-  return error instanceof Error && error.cause !== undefined ? error.cause : error;
 }
 
 describe('Review Focus #4 (account tables): quad_app sees only the current account', () => {
