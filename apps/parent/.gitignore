@@ -57,6 +57,8 @@ test/goldens/failures/
 /android/key.properties
 *.jks
 *.keystore
+# App Store Connect API keys and the APNs auth key (firebase/README.md)
+*.p8
 
 # Firebase client configs for staging and production stay out of git (spec 02);
 # see firebase/README.md

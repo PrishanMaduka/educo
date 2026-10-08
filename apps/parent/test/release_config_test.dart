@@ -40,6 +40,7 @@ void main() {
         '/android/key.properties',
         '*.jks',
         '*.keystore',
+        '*.p8',
         '/android/app/src/*/google-services.json',
         '/ios/config/*/GoogleService-Info.plist',
         '/fastlane/report.xml',
@@ -78,6 +79,14 @@ void main() {
     test('reads match read-only', () {
       expect(fastfile, contains('readonly: true'));
     });
+
+    test(
+      'names the missing match profile instead of failing on a KeyError',
+      () {
+        expect(fastfile, isNot(contains('ENV.fetch("sigh_')));
+        expect(fastfile, contains('UI.user_error!("match did not export'));
+      },
+    );
 
     test('pins fastlane', () {
       expect(

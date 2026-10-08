@@ -53,6 +53,15 @@ def properties_value(name)
   ENV.fetch(name).gsub("\\") { "\\\\" }
 end
 
+# A value match exported for the staging App Store profile
+# (sigh_<app id>_appstore_<suffix>), or a clear error when it is missing.
+def match_value(suffix)
+  name = "sigh_#{STAGING_ID}_appstore_#{suffix}"
+  value = ENV.fetch(name, "")
+  UI.user_error!("match did not export #{name}: check that match ran for #{STAGING_ID}") if value.empty?
+  value
+end
+
 platform :ios do
   desc "Build the staging flavor and upload it to TestFlight"
   lane :staging do
@@ -66,8 +75,8 @@ platform :ios do
       use_automatic_signing: false,
       targets: ["Runner"],
       build_configurations: ["Release-staging"],
-      team_id: ENV.fetch("sigh_#{STAGING_ID}_appstore_team-id"),
-      profile_name: ENV.fetch("sigh_#{STAGING_ID}_appstore_profile-name"),
+      team_id: match_value("team-id"),
+      profile_name: match_value("profile-name"),
       code_sign_identity: "Apple Distribution"
     )
 
