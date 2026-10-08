@@ -32,6 +32,26 @@ async function catchEmails(page: Page): Promise<void> {
 const openedEmails = (page: Page) =>
   page.evaluate(() => (window as unknown as { openedEmails: string[] }).openedEmails);
 
+/**
+ * Runs axe on a still page: after hydration (the view switch reports the view that `data-view`
+ * shows) and once no colour transition is running, so axe never samples a colour mid-change.
+ */
+async function expectAccessibleOnceStill(page: Page): Promise<void> {
+  const view = await page.evaluate(() => document.documentElement.dataset.view ?? 'school');
+  const label = view === 'parent' ? 'I’m a parent' : 'I run a school';
+  await expect(
+    page.getByRole('group', { name: 'Choose your view' }).getByRole('button', { name: label }),
+  ).toHaveAttribute('aria-pressed', 'true');
+  await page.waitForFunction(() =>
+    document
+      .getAnimations()
+      .every(
+        (animation) => !(animation instanceof CSSTransition) || animation.playState !== 'running',
+      ),
+  );
+  await expectNoSeriousA11yViolations(page);
+}
+
 test.describe('landing page', () => {
   test('tells the story: hero, the circle, wellbeing, modules and the demo', async ({ page }) => {
     // A hydration mismatch makes React re-render the page and drop the stored theme and view.
@@ -224,13 +244,46 @@ test.describe('landing page', () => {
       GROUND.hero[scheme],
     );
     await expect(page.locator('#circle')).toHaveCSS('background-color', GROUND.page[scheme]);
-    await expectNoSeriousA11yViolations(page);
+    await expectAccessibleOnceStill(page);
     await page.goto('/?view=parent');
     await expect(page.getByRole('heading', { level: 1 })).toHaveAccessibleName(
       'Hear the good stuff first.',
     );
     await expectNoSideScroll(page);
-    await expectNoSeriousA11yViolations(page);
+    await expectAccessibleOnceStill(page);
+  });
+
+  test('the view switch shows the chosen view from the first paint, without a colour swap', async ({
+    page,
+  }) => {
+    // Every frame from the first paint, note the "I run a school" button's background.
+    await page.addInitScript(() => {
+      const seen: string[] = [];
+      Object.assign(window, { schoolButtonBackgrounds: seen });
+      const sample = () => {
+        const button = document.querySelector('[aria-label="Choose your view"] button');
+        if (button) {
+          const background = getComputedStyle(button).backgroundColor;
+          if (seen.at(-1) !== background) seen.push(background);
+        }
+        requestAnimationFrame(sample);
+      };
+      requestAnimationFrame(sample);
+    });
+    await page.goto('/?view=parent');
+    const group = page.getByRole('group', { name: 'Choose your view' });
+    await expect(group.getByRole('button', { name: 'I’m a parent' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+    await expect(group.getByRole('button', { name: 'I run a school' })).toHaveCSS(
+      'background-color',
+      'rgba(0, 0, 0, 0)',
+    );
+    const backgrounds = await page.evaluate(
+      () => (window as unknown as { schoolButtonBackgrounds: string[] }).schoolButtonBackgrounds,
+    );
+    expect(backgrounds).toEqual(['rgba(0, 0, 0, 0)']);
   });
 
   test('the menu opens by keyboard and Escape returns to it', async ({ page }) => {
