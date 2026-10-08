@@ -1,6 +1,7 @@
 /*
  * The sample circle on the public site (spec 19): fictional people at an international school.
- * Names live in en.json (public.people.*); this table only says how each one is drawn.
+ * Names live in en.json (public.people.*); this table only says how each one is drawn
+ * (design/landing.html `PEEPS`).
  */
 
 export type PersonId =
@@ -9,14 +10,39 @@ export type PersonId =
 /** The colour behind each person, by their place in the circle. */
 export type Role = 'teach' | 'care' | 'home' | 'child';
 
-type Hairstyle = 'short' | 'bun' | 'long' | 'pigtails' | 'curly' | 'grandma' | 'cap' | 'beard';
+export type Hairstyle =
+  'short' | 'bun' | 'long' | 'pigtails' | 'curly' | 'grandma' | 'cap' | 'beard' | 'hijab';
 
-interface Look {
+/** A `site-*` colour token name. */
+type Token = string;
+
+export interface Look {
   role: Role;
-  /** `site-skin-*` and `site-hair-*` tokens. */
+  /** `site-skin-*`. */
   skin: `skin-${number}`;
-  hair: 'hair-black' | 'hair-dark' | 'hair-brown' | 'hair-chestnut' | 'hair-grey';
+  /** `site-hair-*` (the hijab's colour for a hijab). */
+  hair: `hair-${string}`;
   style: Hairstyle;
+  /** Head half-width, half-height and jaw width (0 to 1, narrow to square). */
+  head: readonly [w: number, h: number, jaw: number];
+  /** The top they wear. */
+  top: Token;
+  /** Brow tilt: 0 level, 1 a little raised, 2 raised. */
+  brow: 0 | 1 | 2;
+  /** Details: a lanyard (its colour), earrings (their colour), glasses and clothes. */
+  staff?: Token;
+  ear?: Token;
+  glasses?: 'round' | 'square';
+  tie?: Token;
+  uniform?: true;
+  collar?: true;
+  jacket?: true;
+  whistle?: true;
+  scrubs?: true;
+  cardigan?: true;
+  necklace?: true;
+  /** Smile lines by the eyes. */
+  lines?: true;
   /** Staggers the blinks, so the faces never blink together. */
   blink: string;
 }
@@ -27,6 +53,11 @@ export const PEOPLE: Record<PersonId, Look> = {
     skin: 'skin-6',
     hair: 'hair-black',
     style: 'bun',
+    head: [20, 24, 0.5],
+    top: 'cloth-navy',
+    staff: 'lime',
+    ear: 'butter',
+    brow: 2,
     blink: '[animation-delay:.38s]',
   },
   tanaka: {
@@ -34,13 +65,23 @@ export const PEOPLE: Record<PersonId, Look> = {
     skin: 'skin-1',
     hair: 'hair-black',
     style: 'cap',
+    head: [21, 22, 0.82],
+    top: 'cloth-indigo',
+    jacket: true,
+    whistle: true,
+    brow: 0,
     blink: '[animation-delay:.38s]',
   },
   haddad: {
     role: 'care',
     skin: 'skin-3',
-    hair: 'hair-dark',
-    style: 'long',
+    hair: 'hair-plum',
+    style: 'hijab',
+    head: [19, 23, 0.55],
+    top: 'cloth-teal',
+    scrubs: true,
+    staff: 'sky',
+    brow: 1,
     blink: '[animation-delay:.38s]',
   },
   priya: {
@@ -48,6 +89,11 @@ export const PEOPLE: Record<PersonId, Look> = {
     skin: 'skin-4',
     hair: 'hair-black',
     style: 'long',
+    head: [19.5, 23, 0.42],
+    top: 'cloth-blue',
+    necklace: true,
+    ear: 'butter',
+    brow: 2,
     blink: '[animation-delay:3.65s]',
   },
   asha: {
@@ -55,6 +101,12 @@ export const PEOPLE: Record<PersonId, Look> = {
     skin: 'skin-5',
     hair: 'hair-grey',
     style: 'grandma',
+    head: [22, 22, 0.75],
+    top: 'cloth-plum',
+    cardigan: true,
+    glasses: 'round',
+    lines: true,
+    brow: 1,
     blink: '[animation-delay:2.92s]',
   },
   daniel: {
@@ -62,6 +114,10 @@ export const PEOPLE: Record<PersonId, Look> = {
     skin: 'skin-2',
     hair: 'hair-chestnut',
     style: 'beard',
+    head: [20, 24, 0.78],
+    top: 'cloth-sky',
+    collar: true,
+    brow: 0,
     blink: '[animation-delay:.38s]',
   },
   maya: {
@@ -69,6 +125,10 @@ export const PEOPLE: Record<PersonId, Look> = {
     skin: 'skin-4',
     hair: 'hair-black',
     style: 'pigtails',
+    head: [22, 21, 0.7],
+    top: 'white',
+    uniform: true,
+    brow: 1,
     blink: '[animation-delay:2.92s]',
   },
   leo: {
@@ -76,6 +136,10 @@ export const PEOPLE: Record<PersonId, Look> = {
     skin: 'skin-2',
     hair: 'hair-brown',
     style: 'curly',
+    head: [21, 22, 0.72],
+    top: 'white',
+    uniform: true,
+    brow: 1,
     blink: '[animation-delay:2.19s]',
   },
   abara: {
@@ -83,6 +147,13 @@ export const PEOPLE: Record<PersonId, Look> = {
     skin: 'skin-7',
     hair: 'hair-black',
     style: 'short',
+    head: [21, 24, 0.85],
+    top: 'white',
+    collar: true,
+    tie: 'navy-2',
+    staff: 'orange',
+    glasses: 'square',
+    brow: 0,
     blink: '[animation-delay:3.65s]',
   },
 };

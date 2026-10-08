@@ -59,7 +59,22 @@ const constant = {
   'hair-dark': '#2B1D14',
   'hair-brown': '#3A2516',
   'hair-chestnut': '#6B4226',
-  'hair-grey': '#DCD8D0',
+  'hair-grey': '#E4E0D8',
+  'hair-plum': '#6D2F5C',
+  // The avatars' clothes, and the tones the art mixes for shade and shine.
+  'cloth-navy': '#1F3A8A',
+  'cloth-indigo': '#26318A',
+  'cloth-teal': '#1F9E8F',
+  'cloth-blue': '#2F55D4',
+  'cloth-plum': '#8A2A4A',
+  'cloth-sky': '#3A7BD5',
+  'cloth-line': '#D6DBE8',
+  'cloth-line-2': '#C9D0E0',
+  'cloth-trim': '#E8ECFF',
+  'cloth-cream': '#F3E6D0',
+  'shine-grey': '#555555',
+  'brow-grey': '#8D8A86',
+  shade: '#1B0F0C',
 } as const;
 
 /** Colours that change with the theme (the prototype's light and dark). */
