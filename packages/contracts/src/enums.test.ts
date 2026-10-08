@@ -1,10 +1,15 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  AbsenceAlertMode,
   AccountStatus,
+  EarlyWarningSharing,
   MembershipKind,
   MembershipStatus,
   OtpChannel,
+  PermissionAction,
+  PermissionModule,
+  PhotoConsent,
   PlanModule,
   PlatformRole,
   RoleScope,
@@ -12,9 +17,11 @@ import {
   SensitiveKey,
   SessionKind,
   SessionStage,
+  SmsSenderStatus,
   SsoProvider,
   TenantRegion,
   TenantStatus,
+  ThemeChoice,
   TwoStepRule,
 } from './index';
 
@@ -64,5 +71,28 @@ describe('identity and access enums (spec 04 Platform and Identity, spec 05)', (
 
   it('rejects a value outside the enum', () => {
     expect(SessionStage.safeParse('signed_in').success).toBe(false);
+  });
+});
+
+describe('membership, permission matrix and school settings enums (spec 04, 05, 08, 12)', () => {
+  it.each([
+    ['ThemeChoice', ThemeChoice, ['system', 'light', 'dark']],
+    [
+      'PermissionModule',
+      PermissionModule,
+      ['admissions', 'crm', 'sis', 'attendance', 'lms', 'fees', 'finance', 'transport', 'settings'],
+    ],
+    ['PermissionAction', PermissionAction, ['view', 'create', 'edit', 'delete', 'approve']],
+    ['EarlyWarningSharing', EarlyWarningSharing, ['off', 'after_plan', 'automatic']],
+    ['AbsenceAlertMode', AbsenceAlertMode, ['at_time', 'immediately']],
+    ['PhotoConsent', PhotoConsent, ['class', 'family', 'none']],
+    ['SmsSenderStatus', SmsSenderStatus, ['requested', 'approved']],
+  ])('%s lists its values in spec order', (_name, schema, values) => {
+    expect(schema.options).toEqual(values);
+  });
+
+  it('keeps the permission matrix modules apart from the plan modules (spec 05 vs spec 04)', () => {
+    expect(PermissionModule.safeParse('parent').success).toBe(false);
+    expect(PlanModule.safeParse('settings').success).toBe(false);
   });
 });

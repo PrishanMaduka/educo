@@ -84,3 +84,47 @@ export type RoleScope = z.infer<typeof RoleScope>;
 /** Sensitive data a role may be given (spec 04 `role_sensitive.key`, spec 05). */
 export const SensitiveKey = z.enum(['safeguarding', 'medical', 'finance_reports', 'export_data']);
 export type SensitiveKey = z.infer<typeof SensitiveKey>;
+
+/** A person's colour theme in one school (spec 04 `users.theme`; `PATCH /me`). */
+export const ThemeChoice = z.enum(['system', 'light', 'dark']);
+export type ThemeChoice = z.infer<typeof ThemeChoice>;
+
+/**
+ * A row of the permission matrix (spec 05 `role_permissions.module`). Not the same list as
+ * `PlanModule`: the matrix has `attendance` and `settings`, the plan has `parent`.
+ */
+export const PermissionModule = z.enum([
+  'admissions',
+  'crm',
+  'sis',
+  'attendance',
+  'lms',
+  'fees',
+  'finance',
+  'transport',
+  'settings',
+]);
+export type PermissionModule = z.infer<typeof PermissionModule>;
+
+/**
+ * A column of the permission matrix (spec 05), in bit order: `role_permissions.actions` is
+ * `bit(5)` with `view` as the leftmost bit, so `'10000'` is view only and `'11111'` is everything.
+ */
+export const PermissionAction = z.enum(['view', 'create', 'edit', 'delete', 'approve']);
+export type PermissionAction = z.infer<typeof PermissionAction>;
+
+/** When parents see an early-warning concern (spec 04 `school_settings.ew_share_with_parents`). */
+export const EarlyWarningSharing = z.enum(['off', 'after_plan', 'automatic']);
+export type EarlyWarningSharing = z.infer<typeof EarlyWarningSharing>;
+
+/** When absence alerts go to parents (spec 04 `school_settings.absence_alert`). */
+export const AbsenceAlertMode = z.enum(['at_time', 'immediately']);
+export type AbsenceAlertMode = z.infer<typeof AbsenceAlertMode>;
+
+/** Who may see photos of a child (spec 12 Photo consent; `school_settings.photo_consent_default`). */
+export const PhotoConsent = z.enum(['class', 'family', 'none']);
+export type PhotoConsent = z.infer<typeof PhotoConsent>;
+
+/** Where a school's own SMS sender ID stands (spec 08 General: "QUAD" until approved). */
+export const SmsSenderStatus = z.enum(['requested', 'approved']);
+export type SmsSenderStatus = z.infer<typeof SmsSenderStatus>;
