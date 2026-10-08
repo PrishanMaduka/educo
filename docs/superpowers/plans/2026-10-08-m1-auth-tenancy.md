@@ -302,9 +302,9 @@ Steps:
 - `findTenancyViolations` allows exactly that policy (name `definer_read`, `SELECT`, role `quad_owner`, `USING (true)`) on exactly those five tables, from a named constant in `rls.ts`. Any other extra permissive policy still fails, as before.
 
 **Definer writes and `credentials`.** `definer_read` is SELECT-only and does not cover `credentials`.
-- A definer that writes an account-class row or reads `credentials` passes the normal account policy: it sets `app.account_id` to that row's account with `set_config(…, true)` and restores the caller's value before it returns.
+- A definer that writes an account-class row or reads `credentials` passes the normal account policy: it sets `app.account_id` to that row's account with `set_config(…, true)` and restores the caller's value before it returns. (Ruling R-definer-account: accepted. The switch lives in one helper, `with_account_scope`, which restores the caller's value on every path, including errors, through an exception block; a test asserts `current_setting('app.account_id')` is unchanged after a successful and after a failing call, and that the target account must belong to `app.tenant_id`.)
 - Tenant-class reads and writes inside the tenant-scoped definers run under the caller's `app.tenant_id`.
-- **Stop and ask the controller before implementing `redeem_support_session` and `end_support_session`:** they must write a `sessions` row whose `account_id` is null. No account policy admits that row, and `definer_read` gives no write. Build every other function; do not add a policy to work around it.
+- **Support sessions never create a null-account `sessions` row (controller ruling R-support-token).** The support cookie's SHA-256 hash is stored on `support_sessions.token_hash` (new nullable `bytea` column, unique). `redeem_support_session(p_support_session_id uuid, p_token_hash bytea)` sets that column once (refused if already set, ended or expired) and returns the support session id; `end_support_session(p_token_hash bytea)` ends the support session and writes one `platform_audit` row. `session_by_token` resolves a hash against `sessions` first and then against active `support_sessions`, returning `{kind: 'support', tenant_id, support_session_id, expires_at}` for the latter. No new policy is added.
 
 **Functions.** All are `SECURITY DEFINER`, owned by `quad_owner`, `SET search_path = public, pg_temp`, `REVOKE ALL FROM PUBLIC`, `GRANT EXECUTE TO quad_app`.
 
@@ -348,7 +348,7 @@ Steps:
   - `ensure_account_for_email`: refuses with no tenant; returns the same id twice for one email (one account).
   - `member_two_step_status`: under A, B's user ids are dropped.
   - `revoke_member_sessions`: under A, it leaves the member's B sessions and B refresh families untouched, and does nothing for a B user id.
-  - `redeem_support_session` and `end_support_session` (after the controller's ruling): redemption works once; refused for an ended or expired support session; ending writes one `platform_audit` row.
+  - `redeem_support_session` and `end_support_session` (R-support-token): redemption works once; refused for an ended or expired support session; ending writes one `platform_audit` row.
   - The two stubs return 0 rows for any input.
   - As `quad_app`, `select * from tenant_security` still fails with permission denied.
   - `definer_read` gives `quad_app` nothing: as `quad_app` with no setting, `accounts`, `sessions`, `users`, `user_roles` and `roles` return 0 rows; under A they return only A's rows.
@@ -403,7 +403,7 @@ Follow `quad-coding-standards` and `quad-domain-logic` (the expiry and purpose r
   4. `consume_signed_token` for single-use purposes (injected, so unit tests use a fake).
 
   Any failure is a `400 invalid_link` with one message, never naming the school.
-- `FieldCipher`: AES-256-GCM, `v1.<iv>.<ciphertext>.<tag>`, with the key derived by HKDF-SHA256 from `FIELD_ENCRYPTION_KEY` (32 characters or more).
+- `FieldCipher` (lives in `packages/db/src/crypto/field-cipher.ts`, exported from `@quad/db`, so the API and the seed share one implementation; ruling R-fieldcipher): AES-256-GCM, `v1.<iv>.<ciphertext>.<tag>`, with the key derived by HKDF-SHA256 from `FIELD_ENCRYPTION_KEY` (32 characters or more).
   - It sits behind an interface, so a KMS adapter (`KMS_KEY_ID`) can replace it in M12 (D32).
   - It encrypts TOTP secrets now.
 - `PasswordHasher`: Argon2id (`m=19456, t=2, p=1`), with `verifyDummy()` to equalise timing.
@@ -980,7 +980,7 @@ Commit `feat(audit): school and platform audit logs with filtered views and CSV 
 3. In the school, `/me` returns `support: {schoolName, platformUserName}` for the banner; permissions follow `effectivePermissions({ support })`. The `AuthGuard` accepts the session while `session_by_token` returns it (Task 6).
 4. `POST /auth/support-session/end` ("Exit to platform"; `@Public`, authenticated by its own cookie): calls `end_support_session(sha256(cookie))`, which ends both rows and writes `platform_audit`; audits `support_session.ended` in the school; returns `{ redirect: CONSOLE_URL }`. The session hard-expires at 60 minutes.
 
-Steps 2 and 4 depend on the controller's ruling on how those two definers write the null-account `sessions` row (see Task 3). Do not start them without it.
+Steps 2 and 4 follow ruling R-support-token (Task 3): the support cookie is resolved through `support_sessions.token_hash` by `session_by_token`; no `sessions` row is written for a support session, and AuthGuard validates it against `support_sessions` (active, same tenant).
 
 **Tests:**
 - a missing or short reason gives 400;
@@ -1037,7 +1037,7 @@ The Playwright specs in Tasks 19–23 and the journeys in Task 26 need seeded ac
   - `ruwan.mendis@quad.local` (CIS teacher, KHA teacher; role names as the prototype: "Teacher · Mathematics" and "Head of Mathematics" are job titles that arrive in M3, so M1 shows the role names);
   - `dilini.fernando@colombo-intl.local` (CIS finance officer, the preview sample);
   - Dilhani Perera, phone `+94770000001`, a guardian membership at CIS.
-- Prishan, Nadeesha, Ruwan and Dilini have `credentials.totp_enabled = true` with a secret encrypted by `FieldCipher` (Task 4), so `DEV_FIXED_OTP=000000` passes their two-step step (journey 17) instead of sending them to setup.
+- Prishan, Nadeesha, Ruwan and Dilini have `credentials.totp_enabled = true` with a secret encrypted by `FieldCipher` from `@quad/db` (Task 4, R-fieldcipher), so `DEV_FIXED_OTP=000000` passes their two-step step (journey 17) instead of sending them to setup.
 - `SEED_TENANTS` gains fixed ids for the people, exported as `SEED_PEOPLE`.
 
 **Tests:**
