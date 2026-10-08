@@ -12,10 +12,10 @@
 
   Named security-definer functions are the only cross-tenant or cross-account reads (D16, D24).
 - **API.** New modules:
-  - `src/modules/{auth,me,users,roles,school,audit}`;
-  - `src/public/{signed-links,enquiry}` (tenant-less, spec 05 Rules);
-  - `src/platform/{auth,tenants,support,audit}` (the only `withPlatform` callers);
-  - `src/common/{session,guards,rate-limit,crypto,delivery}`.
+  - `src/modules/{auth,me,users,roles,school,audit}` (services; self-scoped `/me*` controllers);
+  - `src/public/{auth,signed-links,enquiry}` (tenant-less controllers, spec 05 Rules);
+  - `src/platform/{auth,me,tenants,support,audit}` (the only `withPlatform` callers);
+  - `src/common/{session,guards,rate-limit,crypto,delivery,audit}`.
 - **Web.**
   - `apps/staff`: a new `(auth)` route group for `/sign-in/**`; the `/app` shell reads the session and permissions.
   - `apps/console`: gains `/sign-in` and a session-aware shell.
@@ -30,7 +30,7 @@
   - `jose` (EdDSA JWT and the fake OIDC issuer in tests);
   - `nodemailer` (SMTP to Mailpit; SES adapter stubbed to the same interface);
   - `@fastify/cookie`.
-- Web: `qrcode` (the TOTP QR, rendered client-side).
+- Web: `qrcode` (the TOTP QR, rendered client-side); `@quad/client` and `@tanstack/react-query` in `apps/staff` and `apps/console`.
 - Flutter: `flutter_secure_storage` and `local_auth`.
 - Pin exact versions at install and record them in D32. Each must pass `pnpm audit --prod --audit-level high` and `flutter pub outdated` review.
 
@@ -57,6 +57,14 @@
 
 ## Global Constraints
 
+**Pre-flight rulings applied (2026-10-08)** (register: `.superpowers/sdd/2026-10-08-m1-auth-tenancy/preflight.md`; every ruling is built into the task text below):
+- Schema, RLS and definers: F01, F03, F04, F10, F17, F21, F22, F40, F46, F47, F49, F50, F51, F59.
+- Guards, sessions and auth routes: F02, F05, F06, F09, F11, F12, F13, F14, F16, F32, F34, F35, F36, F37, F38, F39, F42, F43, F44, F45, F57, F61, F62, F63, F65.
+- Configuration, crypto and logging: F08, F18, F19, F33, F54, F55.
+- Task order, seeds and the e2e stack: F07 (tasks renumbered), F20, F23, F24, F64.
+- Web and Flutter screens: F25, F26, F27, F30, F31, F41, F48, F53, F56, F60.
+- Decision log and spec edits: F15, F28, F29, F52, F58.
+
 **Secrets, credentials and repository content**
 - Commit no secrets: no real keys, passwords, DSNs or personal data.
   - Seed people are the fictional prototype people.
@@ -77,22 +85,30 @@
 - The tenant comes only from the session or token, or from a D16 entry point after verification. Never from body, path, query, host or the `?school=` hint (the hint only picks among the person's own memberships).
 - Every tenant query runs inside `withTenant()`.
 - `withPlatform()` is used only in `apps/api/src/platform/**` and `apps/api/src/worker/platform-jobs/**`, and every write there goes to `platform_audit`.
-- Tenant-less routes live only in `apps/api/src/public/**` or `apps/api/src/webhooks/**`. Each has a forged and an expired token test, and opens `withTenant()` only after the check.
+- Tenant-less routes live only in `apps/api/src/public/**` or `apps/api/src/webhooks/**`. Each has a forged and an expired token test, and opens `withTenant()` only after the check. The sign-in controllers are tenant-less (D16), so they live in `apps/api/src/public/auth/`; their services may stay in `apps/api/src/modules/auth/`.
 - New security-definer functions:
   - are owned by `quad_owner`;
   - pin `search_path`;
   - return the minimum columns;
   - grant `EXECUTE` to `quad_app` only;
   - have a cross-tenant test and a D32 entry.
+- `quad_owner` is `NOBYPASSRLS` and FORCE RLS filters it. Definers read FORCE-RLS tables only through the `definer_read` policy of Task 3, which exists on exactly `accounts`, `sessions`, `users`, `user_roles` and `roles` (an amendment of D24 recorded in D32).
+- Every route carries exactly one access marker: `@Public()`, `@PreAuth(stage)`, `@Authenticated()` (self-scoped: `/me*`, `/auth/sign-out`, `/auth/select-school`, `/school/branding`), `@Can(...)` or `@PlatformRole(...)`. Task 12's route walk fails on anything else.
+- Audits go through `AuditService` and `PlatformAuditService` (both created in Task 6), in the same transaction as the change.
 - Every endpoint gets four tests: happy path, 400 `validation`, 403 (`forbidden`, `module_not_in_plan` or `preview_read_only` as applicable), and cross-tenant (404 by id, absent from lists).
   - For tenant-less auth routes, "permission" becomes 401/`invalid_link`.
   - For these routes, "cross-tenant" becomes "the token or membership of school A never reaches school B".
-- Nothing logs phone numbers, emails, codes, tokens, passwords or TOTP secrets. Signed-link tokens appear only in paths, and the request log records route templates (D25).
+- Nothing logs phone numbers, emails, codes, tokens, passwords or TOTP secrets, except local OTP codes, which the `log` SMS provider prints when `APP_ENV=local` (spec 02). Signed-link tokens appear only in paths, and the request log records route templates (D25).
 - Safeguarding and medical data are refused in support sessions (spec 05).
 
 **Configuration**
-- A new variable goes into the spec 02 table, `.env.example` (same order) and `apps/api/src/config.ts` (or `NOT_READ_BY_THE_API`) in one commit. The parity tests enforce it.
+- A new variable goes into the spec 02 table, `.env.example` (same order) and `apps/api/src/config.ts` (or `NOT_READ_BY_THE_API`) in one commit, in the task that first uses it. The parity tests enforce it.
 - `CONSOLE_PASSWORD_LOGIN=true` and `DEV_FIXED_OTP` stay refused at boot in production (already in `config.ts`; keep the tests).
+
+**Decision log (D32)**
+- Task 1 adds the D32 row skeleton to `docs/spec/02-architecture.md` (D28 style: a summary sentence and a `<ul>` per area: Tables and lookups, Signed links, Sessions, Crypto, Access, Configuration, Testing, Pre-launch).
+- Each task appends the bullets in its own **D32** line, in its own commit, plus the exact versions of any dependency it installs.
+- Task 28 only finalises. The full list is in "Proposed decision-log row" below.
 
 **UI**
 - Web:
@@ -113,14 +129,14 @@
      - `site-export/app/` re-exports only the root layout, `(public)` layout, landing and 404. Add nothing there.
   2. **Keep the root layout unchanged.**
      - The root layout `src/app/layout.tsx` is re-exported by the export. Auth providers, TanStack Query and session code go only in `src/app/(auth)/layout.tsx` and `src/app/app/layout.tsx`.
-     - Task 17 adds a test that `src/app/layout.tsx` imports nothing from `@/lib/session`, `@quad/client` or `(auth)`.
-  3. **Extend the export check.** `apps/staff/scripts/build-export.mjs` `checkExport()` must also refuse `sign-in`, `sign-in.html` and any `sign-in/` folder. It gets a unit test.
-  4. **Assert the export is unchanged.** The `export-*` projects in `e2e/landing.spec.ts` assert that `/sign-in` is a 404 on the served export and that no `a[href^="/sign-in"]` exists (that assertion is already there).
+     - Task 19 adds a test that `src/app/layout.tsx` imports nothing from `@/lib/session`, `@quad/client` or `(auth)`.
+  3. **Extend the export check.** `apps/staff/scripts/build-export.mjs` `checkExport()` must also refuse `sign-in`, `sign-in.html` and any `sign-in/` folder. It gets a unit test in `apps/staff/test/build-export.test.ts`.
+  4. **Assert the export is unchanged.** Task 19 changes `e2e/landing.spec.ts` so that, in the `export-*` projects only, `/sign-in` is a 404 on the served export and no `a[href^="/sign-in"]` exists. Neither assertion exists today (the file asserts the exact `a[href="/sign-in"]`).
   5. **Leave the landing alone.**
      - Do not touch `src/app/(public)/**`. `SignInEntry` keeps its D30 behaviour: the coming-soon note when `NEXT_PUBLIC_QUAD_PRELAUNCH=true`, otherwise a link to `/app`.
      - In the normal build, `/app` redirects a signed-out visitor to `/sign-in?next=/app`. Journey 17 works from the landing's **Sign in** that way.
      - The landing **sign-in dialog**, `/#signin` and **Open {school}** are M1b (spec 19, M1b scope). M1 does not build them.
-  6. **Keep the Pages workflow green.** `pages.yml` must stay green on every M1 commit (`build:export` and `e2e:export`). Run both in Task 26, and compare the export's landing screenshots with `docs/screenshots/landing/` (no visual change).
+  6. **Keep the Pages workflow green.** `pages.yml` must stay green on every M1 commit (`build:export` and `e2e:export`). Run both in Task 27, and compare the export's landing screenshots with `docs/screenshots/landing/` (no visual change).
 
 ## Review Focus
 
@@ -130,9 +146,9 @@
    - Timing is equalised with a dummy Argon2 verify.
    - Task 7 and Task 9 own the tests.
 2. **Choosing a school you don't belong to.**
-   - `POST /auth/select-school` with a tenant the account has no active membership in, or a membership that is deactivated, or a tenant that is suspended, is refused, and the session stays without a school.
+   - `POST /auth/select-school` with a tenant the account has no active membership in, or a membership that is deactivated, or a tenant that is suspended, or a membership of the wrong kind (a guardian membership on the staff cookie, a staff membership on a parent token), is refused, and the session stays without a school.
    - `?school=` never selects a tenant on its own.
-   - Task 7 owns the test.
+   - Task 7 owns the cookie test and Task 9 the bearer test.
 3. **Signed links.** These are all refused with `400 invalid_link` and no school name in the body:
    - a tampered payload;
    - a re-signed payload with another key;
@@ -140,8 +156,8 @@
    - an expired token;
    - a reused single-use nonce.
 
-   Task 4 owns the unit tests, Task 7 the API tests and Task 25 journey 43.
-4. **Raw-query isolation.** As `quad_app`, `select * from <each tenant table>` returns only school A's rows with `app.tenant_id = A`, and nothing with no school. For account tables, it returns only the current account's rows. Task 2 owns the test.
+   Task 4 owns the unit tests (nonce reuse with a fake `consumeSignedToken`), Task 7 the API tests (including the real nonce reuse) and Task 26 journey 43.
+4. **Raw-query isolation.** As `quad_app`, `select * from <each tenant table>` returns only school A's rows with `app.tenant_id = A`, and nothing with no school. For account tables, it returns only the current account's rows. Task 1 owns the account-table test, Task 2 the tenant-table test, and Task 3 the test that the `definer_read` policy gives `quad_app` nothing.
 5. **Preview and support cannot write or see sensitive data.**
    - While previewing, every non-GET route except `DELETE /me/role-preview` and `POST /auth/sign-out` returns 403 `preview_read_only`.
    - A support session gets 403 on any route marked `@Sensitive('safeguarding' | 'medical')`, whatever the role.
@@ -160,29 +176,32 @@ Follow `quad-tenant-table` and `quad-architecture`.
 - Create:
   - `packages/db/src/schema/account/{accounts,credentials,identities,sessions,trusted-devices,otp-challenges}.ts`;
   - `packages/db/src/schema/platform/{platform-users,platform-audit,support-sessions,signed-token-uses,tenant-branding,tenant-modules,tenant-security}.ts`;
-  - `packages/db/src/account-tables.ts`;
+  - `packages/db/src/account-tables.ts` (`ACCOUNT_TABLES` with each table's key column, and `OPEN_TABLES`);
   - `packages/db/src/account.ts` (`withAccount`);
-  - `packages/db/migrations/0003_accounts.sql` and `0004_platform_access.sql` (generated, plus the RLS and grant SQL);
-  - `packages/db/test/account-rls.api.test.ts`.
+  - `packages/db/migrations/0003_platform_access.sql`, then `0004_accounts.sql` (generated in two `pnpm db:generate` runs, platform schema first, so `sessions` can reference `platform_users` and `support_sessions`; plus the RLS and grant SQL);
+  - `packages/db/test/account-rls.api.test.ts`;
+  - `packages/db/test/client-reset.api.test.ts`.
 - Modify:
   - `packages/db/src/{rls.ts,platform-tables.ts,db.ts,index.ts,client.ts,schema/index.ts}`;
   - `packages/contracts/src/enums.ts`;
-  - `packages/db/test/{migration.test.ts,factories.ts}`.
+  - `packages/db/test/{migration.test.ts,factories.ts}`;
+  - `docs/spec/02-architecture.md` (the D32 row skeleton).
 
-**Tables (account class: global rows, no `tenant_id`; RLS `account_id = nullif(current_setting('app.account_id', true), '')::uuid`, ENABLE + FORCE; explicit `quad_app` grants):**
+**Tables (account class: global rows, no `tenant_id`; RLS `<key> = nullif(current_setting('app.account_id', true), '')::uuid`, where the key column is `id` on `accounts` and `account_id` on the others; ENABLE + FORCE; explicit `quad_app` grants):**
 
 | Table | Columns (spec 04 plus the M1 additions in bold) | Index | quad_app |
 |---|---|---|---|
-| `accounts` | id, email citext unique null, phone_e164 unique null (check: at least one), status `account_status` (`active`,`locked`,`disabled`), **locked_until**, created_at, last_sign_in_at | unique email, unique phone | S, I, U |
+| `accounts` (key `id`) | id, email citext unique null, phone_e164 unique null (check: at least one), status `account_status` (`active`,`locked`,`disabled`), **locked_until**, created_at, last_sign_in_at | unique email, unique phone | S, I, U |
 | `credentials` | account_id pk, password_hash, totp_secret_enc, totp_enabled, recovery_codes_hash text[], **password_changed_at** | pk | S, I, U |
 | `identities` | id, account_id, provider `sso_provider`, subject, email; unique (provider, subject) | (account_id) | S, I |
-| `sessions` | the spec 04 columns, plus **token_hash** (unique), **stage** `session_stage` (`two_step`,`two_step_setup`,`choose_school`,`active`), **keep_signed_in**, **refresh_generation** int, **preview_role_id**, **preview_sample_user_id**, **support_session_id** | (account_id, revoked_at), unique token_hash, (active_tenant_id, active_user_id) | S, I, U |
+| `sessions` | the spec 04 columns, plus **token_hash** (unique), **stage** `session_stage` (`two_step`,`two_step_setup`,`choose_school`,`active`), **keep_signed_in**, **refresh_generation** int, **preview_role_id**, **preview_sample_user_id**, **support_session_id**. FKs to `platform_users` and `support_sessions` here; the `users` and `roles` composite FKs come in Task 2's 0005 | (account_id, revoked_at), unique token_hash, (active_tenant_id, active_user_id) | S, I, U |
 | `trusted_devices` (new) | id, account_id, token_hash unique, created_at, expires_at, revoked_at | (account_id) | S, I, U |
-| `otp_challenges` (open table: no account until verified; no RLS; in a separate `OPEN_TABLES` list) | id, subject_hash (HMAC of phone or email), channel `otp_channel`, code_hash, purpose, attempts, expires_at, created_at | (subject_hash, created_at desc) | S, I, U, D |
+| `otp_challenges` (open table: no account until verified; no RLS; listed in `OPEN_TABLES`) | id, subject_hash, channel `otp_channel`, code_hash, purpose, attempts, expires_at, created_at | (subject_hash, created_at desc) | S, I, U, D |
 
 Notes:
 - The policy on `sessions` is `account_id = app.account_id`. Console rows (`account_id` null, `platform_user_id` set) are therefore invisible to `quad_app`; console code reaches them through `withPlatform`.
 - `withAccount(accountId, fn)` sets `app.account_id` (transaction-local). It also accepts `{ tenantId }` to set both settings in one transaction.
+- `otp_challenges` hashes are keyed, because the table is open: `code_hash` is HMAC-SHA256 over `(challenge_id, code)` with a key derived by HKDF-SHA256 from `SESSION_SECRET`; `subject_hash` is HMAC-SHA256 of the normalised phone or email with the same key. Task 9 writes them.
 
 **Tables (platform class: no `quad_app` privilege; added to `PLATFORM_TABLES`):**
 - `platform_users`: spec 04, plus **password_hash** (nullable; used only with `CONSOLE_PASSWORD_LOGIN`) and **totp_enabled**.
@@ -194,9 +213,11 @@ Notes:
 
 **Migration test changes (`rls.ts` `findTenancyViolations`):**
 - A table is a tenant table, an account table (`ACCOUNT_TABLES`), an open table (`OPEN_TABLES`) or a platform table (`PLATFORM_TABLES`). Anything unclassified fails.
-- Account tables must have `account_id`, FORCE RLS, exactly the account policy, and `quad_app` privileges equal to their declared set.
+- Account tables must have their declared key column (`id` on `accounts`, `account_id` elsewhere), FORCE RLS, exactly the account policy on that column, and `quad_app` privileges equal to their declared set.
 - D27 follow-up: the platform check also covers column-level grants and sequences, so `quad_app` holds no column privilege on a platform table and no `USAGE`/`SELECT` on platform sequences.
 - D27 follow-up: connection reset also runs `pg_advisory_unlock_all()` and `DISCARD TEMP` after `RESET ALL` (`client.ts`), with a test.
+
+**D32** (Task 1 creates the row with the area headings above, then appends under Tables and lookups): account tables with RLS on `app.account_id` and `withAccount` (OQ1); `otp_challenges` as the only open table, with HMAC-keyed `code_hash` and `subject_hash`; the account and open table classes in `findTenancyViolations`; migration order `0003_platform_access`, `0004_accounts`; the new columns and `trusted_devices`.
 
 Steps:
 - [ ] **Step 1: Write failing tests.**
@@ -205,15 +226,16 @@ Steps:
     - a probe account table without FORCE fails with `<name>: FORCE ROW LEVEL SECURITY missing`;
     - a probe platform table with a column grant to `quad_app` fails;
     - `quad_app` has no privilege on any platform table.
-  - `account-rls.api.test.ts`:
+  - `account-rls.api.test.ts` (Review Focus #4, account part):
     - under `withAccount(A)`, `quad_app` sees only A's `accounts`, `credentials`, `sessions` and `trusted_devices`;
     - with no account set it sees none;
     - inserting a `sessions` row for B under A fails WITH CHECK.
-  - `client` test: after a transaction that took an advisory lock and a temp table, the next checkout holds neither.
+  - `client-reset.api.test.ts`: after a transaction that took an advisory lock and a temp table, the next checkout holds neither.
 - [ ] **Step 2: Run them to see them fail.** `pnpm --filter @quad/db test:api`. Expected: FAIL.
 - [ ] **Step 3: Implement.**
   - Add the enums to `@quad/contracts` `enums.ts`: `AccountStatus`, `SsoProvider`, `SessionKind`, `SessionStage`, `OtpChannel`, `PlatformRole`, `TwoStepRule`, `PlanModule`, `MembershipKind`, `MembershipStatus`, `RoleScope`, `SensitiveKey`.
-  - Run `pnpm db:generate`, then append an `accountRlsSql(table)` helper's output (ENABLE, FORCE, policy, grants) and the triggers.
+  - Run `pnpm db:generate` for the platform schema (`0003_platform_access`), then again for the account schema (`0004_accounts`). Append an `accountRlsSql(table, keyColumn)` helper's output (ENABLE, FORCE, policy, grants) and the triggers.
+  - Add the D32 row skeleton and this task's bullets.
 - [ ] **Step 4: Run the checks.** `pnpm db:migrate && pnpm --filter @quad/db test && pnpm --filter @quad/db test:api`. Expected: PASS.
 - [ ] **Step 5: Commit.** `feat(db): account and platform access tables with account-scoped RLS`.
 
@@ -226,7 +248,11 @@ Steps:
   - `packages/db/src/schema/tenant/{users,roles,role-permissions,role-sensitive,user-roles,school-settings,audit-log}.ts`;
   - `packages/db/migrations/0005_identity_tenant.sql`;
   - `packages/db/test/identity-tenant.api.test.ts`.
-- Modify: `packages/db/src/schema/index.ts`, `packages/db/test/factories.ts` (factories for every new table), `packages/contracts/src/enums.ts`.
+- Modify:
+  - `packages/db/src/schema/index.ts`;
+  - `packages/db/src/schema/account/sessions.ts` (the composite FKs below);
+  - `packages/db/test/factories.ts` (factories for every new table);
+  - `packages/contracts/src/enums.ts`.
 
 **Tables.** Each has `tenant_id uuid not null references tenants(id)`, a `(tenant_id, …)` index, ENABLE + FORCE RLS, the `tenant_isolation` policy through `tenantRlsSql`, and the cross-tenant test below. Composite FKs `(tenant_id, x_id) → x(tenant_id, id)` follow D23.
 
@@ -234,14 +260,15 @@ Steps:
 |---|---|---|
 | `users` [T][S] | spec 04 | unique (tenant_id, account_id); (tenant_id, kind, status); (tenant_id, email) |
 | `roles` [T] | spec 04; unique (tenant_id, key) | (tenant_id, system) |
-| `role_permissions` [T] | tenant_id, role_id, module `plan_module_or_settings`, actions bit(5); pk (tenant_id, role_id, module) | (tenant_id, role_id) |
+| `role_permissions` [T] | tenant_id, role_id, module `permission_module`, actions bit(5); pk (tenant_id, role_id, module) | (tenant_id, role_id) |
 | `role_sensitive` [T] | tenant_id, role_id, key `sensitive_key`; pk (tenant_id, role_id, key) | (tenant_id, role_id) |
 | `user_roles` [T] | tenant_id, user_id, role_id, primary bool; pk (tenant_id, user_id, role_id); partial unique (tenant_id, user_id) where primary | (tenant_id, role_id) |
 | `school_settings` [T] | spec 04, plus **address** (08 General lists it; no column exists) and **sms_sender_status** (`requested`,`approved`; 08 "QUAD until approved") | pk (tenant_id) |
 | `audit_log` [T] | spec 04, plus **support_session_id**; append-only trigger | (tenant_id, at desc), (tenant_id, actor_user_id, at desc), (tenant_id, action, at desc) |
 
 Other notes:
-- The permission-matrix module enum is the spec 05 list: `admissions`, `crm`, `sis`, `attendance`, `lms`, `fees`, `finance`, `transport`, `settings`. It is separate from `tenant_modules.module` (spec 04: `parent` instead of `attendance` and `settings`). Mapping lives in Task 11.
+- The permission-matrix module enum is `permission_module`, with the spec 05 list: `admissions`, `crm`, `sis`, `attendance`, `lms`, `fees`, `finance`, `transport`, `settings`. It is separate from `tenant_modules.module` (spec 04: `parent` instead of `attendance` and `settings`). Mapping lives in Task 11.
+- 0005 also adds the `sessions` composite FKs that 0004 could not: `(active_tenant_id, active_user_id) → users(tenant_id, id)`, `(active_tenant_id, preview_sample_user_id) → users(tenant_id, id)` and `(active_tenant_id, preview_role_id) → roles(tenant_id, id)`.
 - `devices`, `staff_profiles`, `guardians` and `guardian_invites` are not created in M1. They arrive with M3 and M6, the milestones that write them.
 
 Steps:
@@ -249,8 +276,9 @@ Steps:
   - a row written under A is invisible under B;
   - writing with B's `tenant_id` while in A fails;
   - with no `app.tenant_id`, `select count(*)` is 0;
-  - a raw `quad_app` pool query with `set_config('app.tenant_id', A)` returns only A's rows (Review Focus #4).
-  - Also: `audit_log` refuses UPDATE and DELETE.
+  - a raw `quad_app` pool query with `set_config('app.tenant_id', A)` returns only A's rows (Review Focus #4, tenant part).
+  - Also: `audit_log` refuses UPDATE and DELETE (this is the only test of that trigger; Task 15 does not repeat it).
+  - Also: a `sessions` row whose `active_user_id` belongs to another tenant fails the composite FK.
 - [ ] **Step 2: Run them to see them fail.** Expected: FAIL.
 - [ ] **Step 3: Implement** with `pnpm db:generate` plus `tenantRlsSql` for each table.
 - [ ] **Step 4: Run the checks.** `pnpm db:migrate && pnpm --filter @quad/db test:api`. Expected: PASS, with `findTenancyViolations` empty.
@@ -262,42 +290,75 @@ Steps:
 
 **Files:**
 - Create:
-  - `packages/db/migrations/0006_definers.sql`;
+  - `packages/db/migrations/0006_definers.sql` (hand-written, created with `pnpm db:generate --custom --name definers` so `meta/_journal.json` lists it);
   - `packages/db/test/definers.api.test.ts`.
-- Modify: `packages/db/src/definers.ts` (extend `DefinerCalls`), `packages/db/src/index.ts`.
+- Modify:
+  - `packages/db/src/definers.ts` (extend `DefinerCalls`), `packages/db/src/index.ts`;
+  - `packages/db/src/rls.ts` (the `definer_read` allow-list) and `packages/db/test/migration.test.ts`;
+  - `docs/spec/02-architecture.md` (D32 bullets).
+
+**Definer read access (amends D24).** `quad_owner` is `NOBYPASSRLS` and FORCE RLS filters it, so without this every definer below returns 0 rows.
+- 0006 adds `CREATE POLICY definer_read ON <t> FOR SELECT TO quad_owner USING (true)` on exactly `accounts`, `sessions`, `users`, `user_roles` and `roles`. No other table, command, role or policy.
+- `findTenancyViolations` allows exactly that policy (name `definer_read`, `SELECT`, role `quad_owner`, `USING (true)`) on exactly those five tables, from a named constant in `rls.ts`. Any other extra permissive policy still fails, as before.
+
+**Definer writes and `credentials`.** `definer_read` is SELECT-only and does not cover `credentials`.
+- A definer that writes an account-class row or reads `credentials` passes the normal account policy: it sets `app.account_id` to that row's account with `set_config(…, true)` and restores the caller's value before it returns.
+- Tenant-class reads and writes inside the tenant-scoped definers run under the caller's `app.tenant_id`.
+- **Stop and ask the controller before implementing `redeem_support_session` and `end_support_session`:** they must write a `sessions` row whose `account_id` is null. No account policy admits that row, and `definer_read` gives no write. Build every other function; do not add a policy to work around it.
 
 **Functions.** All are `SECURITY DEFINER`, owned by `quad_owner`, `SET search_path = public, pg_temp`, `REVOKE ALL FROM PUBLIC`, `GRANT EXECUTE TO quad_app`.
 
 | Function | Returns | Rule |
 |---|---|---|
-| `auth_memberships(p_account_id uuid)` (spec) | tenant_id, tenant_name, short_name, logo_file_id, brand_color, kind, user_id, role_names text[] | Only active memberships of tenants with status in (`trial`,`onboarding`,`active`,`past_due`). Suspended tenants are returned with `suspended = true` and the reason, so sign-in can show it (spec 07, journey 23 in M2). Never emails or phones |
+| `auth_memberships(p_account_id uuid)` (spec) | tenant_id, tenant_name, short_name, logo_file_id, brand_color, kind, user_id, role_names text[], suspended bool, suspend_reason | Only active memberships of tenants with status in (`trial`,`onboarding`,`active`,`past_due`,`suspended`). Suspended tenants are returned with `suspended = true` and the reason, so sign-in can show it (spec 07, journey 23 in M2). Never emails or phones. Wider than spec 02 and 04 on purpose: listed in D32, and Task 28 edits spec 02 and 04 |
 | `account_by_identifier(p_email citext, p_phone text)` (new) | id, status, locked_until | Exactly one of the two arguments |
-| `session_by_token(p_token_hash bytea)` (new) | the session row's ids, stage, kind, expiry, revoked flag, preview and support ids | Not revoked; used once per request (cached in Redis) |
+| `session_by_token(p_token_hash bytea)` (new) | session id, account id, platform user id, active tenant id, active user id, stage, kind, expiry fields, preview ids, support session id | Not revoked (no revoked flag in the result). A row with `support_session_id` is returned only while that `support_sessions` row is active (not ended, before `expires_at`) and its tenant equals `active_tenant_id`. Used once per request (cached in Redis) |
 | `sso_methods_for_domain(p_domain citext)` (new) | google bool, microsoft bool | True when any active tenant has that `sso_domain` with the provider on. No tenant id |
-| `auth_sign_in_rules(p_account_id uuid)` (new) | two_step_required bool, password_min_length int | The strictest across the account's active staff memberships (spec 05 step 4) |
+| `auth_sign_in_rules(p_account_id uuid)` (new) | one row per active staff membership: tenant_id, two_step, role_keys text[], password_min_length | No aggregation in SQL: `strictestTwoStep` (Task 7, `packages/domain`) decides |
 | `current_tenant_profile()` (new; reads only `app.tenant_id`) | name, short_name, status, suspend_reason, time_zone, locale, currency, brand_color, logo_file_id, modules text[], two_step, sso_google, sso_microsoft, sso_domain, password_min_length, session_hours, ip_allowlist | No row without `app.tenant_id`. This is how school code reads platform-owned settings (D24) |
 | `update_current_tenant_name(p_name text)` (new) | void | Updates `tenants.name` for `app.tenant_id` only, and writes `platform_audit` |
 | `consume_signed_token(p_nonce text, p_purpose text, p_expires_at timestamptz)` (new) | boolean | `insert … on conflict do nothing`; true only the first time |
 | `record_support_audit(p_support_session_id uuid, p_action text, p_target_type text, p_target_id uuid, p_meta jsonb)` (new) | void | Inserts into `platform_audit` only if that support session is active and its tenant equals `app.tenant_id` |
+| `ensure_account_for_email(p_email citext)` (new; tenant-scoped) | id | Refuses without `app.tenant_id`. Returns the existing account's id, or inserts one (status `active`). Never a second account for one email (Task 13 invites) |
+| `member_two_step_status(p_user_ids uuid[])` (new; tenant-scoped) | user_id, totp_enabled | Only users of `app.tenant_id`; other ids are dropped. Reads `credentials` per account as above (Task 13 list, summary and Remind) |
+| `revoke_member_sessions(p_user_id uuid)` (new; tenant-scoped) | void | The user must belong to `app.tenant_id`. Revokes only that member's account's sessions with `active_tenant_id = app.tenant_id`, plus that account's mobile refresh families for that tenant (Task 13 deactivate and sign out everywhere) |
+| `redeem_support_session(p_support_session_id uuid, p_token_hash bytea)` (new; tenant-less, D16) | session_id | Only when the support session is active and its `sessions` row's `token_hash` is still unset; sets it. Otherwise no row (Task 16) |
+| `end_support_session(p_token_hash bytea)` (new; tenant-less, D16) | void | Ends both rows (`support_sessions.ended_at`, `sessions.revoked_at`) and writes `platform_audit` (Task 16) |
 | `tenant_by_embed_key(p_key text)` (spec; **stub**) | tenant_id, form_id, active | Body `where false` until M4 creates `enquiry_forms`; the signature is fixed now |
 | `tenant_by_gateway_account(p_provider text, p_account_id text)` (spec; **stub**) | tenant_id, gateway_account_id, mode | Body `where false` until M7 |
 
+**D32** (append under Tables and lookups):
+- the new definers `account_by_identifier`, `session_by_token`, `sso_methods_for_domain`, `auth_sign_in_rules`, `current_tenant_profile`, `update_current_tenant_name`, `consume_signed_token`, `record_support_audit`, `ensure_account_for_email`, `member_two_step_status`, `revoke_member_sessions`, `redeem_support_session` and `end_support_session`, and the two D16 stubs;
+- `definer_read` (`FOR SELECT TO quad_owner USING (true)` on exactly `accounts`, `sessions`, `users`, `user_roles` and `roles`) as an amendment of D24's "no other permissive policy", because `quad_owner` is `NOBYPASSRLS`;
+- `auth_memberships` returns suspended schools and the columns `short_name`, `user_id`, `suspended` and `suspend_reason`.
+
 Steps:
-- [ ] **Step 1: Write failing tests** (`definers.api.test.ts`).
+- [ ] **Step 1: Write failing tests** (`definers.api.test.ts`, plus `migration.test.ts`).
   - `auth_memberships`:
     - returns A and B for a two-school account and omits a deactivated membership;
     - omits a `deleted` tenant;
-    - flags a suspended tenant;
+    - flags a suspended tenant with its reason;
     - returns no email or phone column.
+  - `auth_sign_in_rules`: one row per active staff membership with its `role_keys`; none for a guardian membership.
+  - `session_by_token`: omits a revoked row; omits a support row whose support session has ended or expired, or whose tenant differs.
   - `current_tenant_profile()`: under `withTenant(A)` returns A only; with no tenant returns 0 rows.
   - `update_current_tenant_name`: cannot change B while in A.
   - `consume_signed_token`: true, then false.
   - `record_support_audit`: refuses a session for another tenant and an ended session.
+  - `ensure_account_for_email`: refuses with no tenant; returns the same id twice for one email (one account).
+  - `member_two_step_status`: under A, B's user ids are dropped.
+  - `revoke_member_sessions`: under A, it leaves the member's B sessions and B refresh families untouched, and does nothing for a B user id.
+  - `redeem_support_session` and `end_support_session` (after the controller's ruling): redemption works once; refused for an ended or expired support session; ending writes one `platform_audit` row.
   - The two stubs return 0 rows for any input.
   - As `quad_app`, `select * from tenant_security` still fails with permission denied.
+  - `definer_read` gives `quad_app` nothing: as `quad_app` with no setting, `accounts`, `sessions`, `users`, `user_roles` and `roles` return 0 rows; under A they return only A's rows.
+  - `migration.test.ts`: a probe `definer_read` policy on a sixth table fails, and one `TO quad_app` or `FOR ALL` on a listed table fails.
 - [ ] **Step 2: Run them to see them fail.** Expected: FAIL.
-- [ ] **Step 3: Implement** the SQL and the typed `DefinerCalls` methods (`authMemberships`, `accountByIdentifier`, `sessionByToken`, `ssoMethodsForDomain`, `authSignInRules`, `consumeSignedToken`, `tenantByEmbedKey`, `tenantByGatewayAccount`). `currentTenantProfile`, `updateCurrentTenantName` and `recordSupportAudit` run inside `withTenant` through a `tx` helper.
-- [ ] **Step 4: Run the checks.** `pnpm db:migrate && pnpm --filter @quad/db test:api`. Expected: PASS.
+- [ ] **Step 3: Implement** the SQL and the typed `DefinerCalls` methods:
+  - tenant-less: `authMemberships`, `accountByIdentifier`, `sessionByToken`, `ssoMethodsForDomain`, `authSignInRules`, `consumeSignedToken`, `redeemSupportSession`, `endSupportSession`, `tenantByEmbedKey`, `tenantByGatewayAccount`;
+  - inside `withTenant` through a `tx` helper: `currentTenantProfile`, `updateCurrentTenantName`, `recordSupportAudit`, `ensureAccountForEmail`, `memberTwoStepStatus`, `revokeMemberSessions`.
+  - Append the D32 bullets.
+- [ ] **Step 4: Run the checks.** `pnpm db:migrate && pnpm --filter @quad/db test && pnpm --filter @quad/db test:api`. Expected: PASS.
 - [ ] **Step 5: Commit.** `feat(db): security-definer lookups for sign-in, tenant profile and signed tokens`.
 
 **Acceptance:** M1 Scope "`auth_memberships` … `tenant_by_embed_key` and `tenant_by_gateway_account` stubs with tests".
@@ -315,8 +376,9 @@ Follow `quad-coding-standards` and `quad-domain-logic` (the expiry and purpose r
   - `apps/api/src/common/crypto/{signed-links,field-cipher,passwords,breach-check,jwt-keys}.ts`;
   - `apps/api/test/crypto/*.test.ts`.
 - Modify:
-  - `apps/api/src/config.ts`, `.env.example`, `docs/spec/02-architecture.md` (variables table);
+  - `apps/api/src/config.ts`, `.env.example`, `docs/spec/02-architecture.md` (the variables table: `FIELD_ENCRYPTION_KEY` is required in every environment until M12's KMS adapter, and `KMS_KEY_ID` arrives in M12; plus D32 bullets);
   - `infra/modules/app/secrets.tf` and its test (new secrets; offline only);
+  - `infra/modules/app/tasks.tf` (the comment at line 36, to match);
   - `apps/api/src/tokens.ts`.
 
 **Domain:**
@@ -338,7 +400,7 @@ Follow `quad-coding-standards` and `quad-domain-logic` (the expiry and purpose r
   1. a constant-time signature comparison;
   2. the payload schema;
   3. `signedLinkStatus`;
-  4. `consume_signed_token` for single-use purposes.
+  4. `consume_signed_token` for single-use purposes (injected, so unit tests use a fake).
 
   Any failure is a `400 invalid_link` with one message, never naming the school.
 - `FieldCipher`: AES-256-GCM, `v1.<iv>.<ciphertext>.<tag>`, with the key derived by HKDF-SHA256 from `FIELD_ENCRYPTION_KEY` (32 characters or more).
@@ -349,7 +411,7 @@ Follow `quad-coding-standards` and `quad-domain-logic` (the expiry and purpose r
 - `JwtKeys`: EdDSA (Ed25519) from `JWT_PRIVATE_KEY` and `JWT_PUBLIC_KEY`.
 
 **Config (D27 follow-up: format rules):**
-- Now required in every environment: `FIELD_ENCRYPTION_KEY`, `JWT_PRIVATE_KEY` and `JWT_PUBLIC_KEY`.
+- Now required in every environment: `FIELD_ENCRYPTION_KEY`, `JWT_PRIVATE_KEY` and `JWT_PUBLIC_KEY`. Spec 02 currently says "`FIELD_ENCRYPTION_KEY` (local) or `KMS_KEY_ID` (AWS)"; edit that cell and the `tasks.tf` comment in this commit.
 - `.env.example` gets local-only placeholder values, which the API refuses outside `local` (the D25 pattern). That includes a published Ed25519 test key pair.
 - `SEED_PASSWORD` gets a local-only placeholder, refused outside `local`.
 - Infra:
@@ -358,6 +420,8 @@ Follow `quad-coding-standards` and `quad-domain-logic` (the expiry and purpose r
   - `SEED_PASSWORD` is set by hand for staging.
   - Check with `node scripts/infra-check.mjs --only modules/app`.
 
+**D32** (append): Signed links: the payload format, the `SIGNED_LINK_RULES` TTLs, `tid` null for account-level `password_reset`. Crypto: Argon2id through `@node-rs/argon2` (`m=19456, t=2, p=1`); `FieldCipher` AES-256-GCM with HKDF from `FIELD_ENCRYPTION_KEY`, required in every environment until M12's KMS adapter (`KMS_KEY_ID`) replaces it; JWT and field keys required from M1, with local-only placeholders; the breach check fails open. Pinned versions of the packages installed here.
+
 Steps:
 - [ ] **Step 1: Write failing tests.**
   - Domain: table-driven tests for `signedLinkStatus`, including the exact expiry instant (`exp == now` is expired) and every purpose, plus a `fast-check` property that a payload never verifies under a different purpose.
@@ -365,14 +429,14 @@ Steps:
     - a round trip works;
     - flipping one payload byte gives `invalid_link`;
     - a token signed with `SESSION_SECRET` gives `invalid_link`;
-    - a reused single-use nonce gives `invalid_link`;
+    - a reused single-use nonce gives `invalid_link`, using an injected fake `consumeSignedToken` (the real database case is in Task 7's `forgot-reset.api.test.ts`);
     - `FieldCipher` refuses a changed tag;
     - Argon2 verifies, and refuses a wrong password;
     - the breach fake flags `password123`;
     - the config refuses the placeholder key in `staging` and refuses a key under 32 characters.
   - The infra test asserts the new secrets exist and that the task definition passes them to api and worker.
 - [ ] **Step 2: Run them to see them fail.** Expected: FAIL.
-- [ ] **Step 3: Implement.**
+- [ ] **Step 3: Implement.** Include the spec 02 cell, the `tasks.tf` comment and the D32 bullets.
 - [ ] **Step 4: Run the checks.** `pnpm --filter @quad/domain test && pnpm --filter @quad/api test && node scripts/infra-check.mjs --only modules/app`. Expected: PASS.
 - [ ] **Step 5: Commit.** `feat(api): signed links, field encryption, Argon2id passwords and token keys`.
 
@@ -392,20 +456,24 @@ Steps:
 
 **Behaviour:**
 - `RateLimitService.hit(key, limit, windowSeconds, now)`: a Redis fixed window (a Lua script) that returns `{ allowed, retryAfter }`.
-- The `@RateLimit` decorator and a global interceptor apply:
+- The `@RateLimit({ limit, windowSeconds, key? })` decorator and a global interceptor apply:
   - 20 per minute per IP on `/auth/*` and `/platform/auth/*` (spec 06);
   - 600 per minute per user everywhere;
   - 429 `rate_limited` with `Retry-After`.
+- `key: (req) => string` is an optional key function for limits on another subject (Task 7 uses it per email). A key built from an email or phone is an HMAC of it (key derived from `SESSION_SECRET`), never the raw value.
 - Email:
   - `smtp` (Mailpit locally) and an `ses` adapter behind one interface. SES sends are wired, but untested beyond a fake until staging (D19).
   - From "{School} via Quad" for school mail, and "Quad" for account mail; Reply-To is the school's office email (D19).
   - Every send is a BullMQ job (idempotent on a job id).
-- SMS: the `log` provider prints `+94 77 *** **01` and the code only when `APP_ENV=local` (spec 02: codes in the API log; spec 16: no phone numbers in logs, hence the mask). `live` (Notify.lk or Twilio) is out of M1 (OQ12).
+- SMS: the `log` provider prints `+94 77 *** **01` and the code only when `APP_ENV=local` (spec 02: codes in the API log; spec 16: no phone numbers in logs, hence the mask; the one logging exception in Global Constraints). `live` (Notify.lk or Twilio) is out of M1 (OQ12).
 - Jobs run inside a tenant request context built from the job's verified payload (D28 M1/M6 follow-up), so job spans carry `tenant_id`.
+
+**D32** (append under Configuration): pinned `nodemailer` version.
 
 Steps:
 - [ ] **Step 1: Write failing tests.**
   - Rate limit: the 21st call in a minute is refused, and the window resets on a fixed clock.
+  - A key function limits per subject, and the Redis key holds no raw email (no `@`).
   - Templates render with no unfilled ICU arguments.
   - The SMTP adapter delivers to Mailpit (api test, compose Mailpit).
   - The job is idempotent on its id.
@@ -417,20 +485,28 @@ Steps:
 
 ## Phase 3: Auth API flows
 
-### Task 6: Sessions, the auth guard, CSRF and authenticated sockets
+### Task 6: Sessions, the auth guard, CSRF, audit writing and authenticated sockets
 
 **Files:**
 - Create:
   - `apps/api/src/common/session/{session.service.ts,session.repository.ts,cookies.ts,csrf.ts,request-auth.ts}`;
-  - `apps/api/src/common/guards/{auth.guard.ts,public.decorator.ts}`;
+  - `apps/api/src/common/guards/{auth.guard.ts,public.decorator.ts,pre-auth.decorator.ts,authenticated.decorator.ts,platform-controller.decorator.ts}`;
+  - `apps/api/src/common/audit/{audit.service.ts,audit-actions.ts}` (write side; Task 15 adds the read side);
+  - `apps/api/src/platform/audit/platform-audit.service.ts` (write side only);
   - `apps/api/src/modules/me/{me.module.ts,me.controller.ts,me.service.ts,me.routes.ts}` (`GET /me`, `PATCH /me`, `GET /me/sessions`, `DELETE /me/sessions/:id`);
-  - `packages/contracts/src/me/*.ts`;
+  - `packages/contracts/src/me/*.ts` (including `GreetingPeriod`);
+  - `packages/contracts/src/audit/actions.ts` (the action keys);
   - `packages/domain/src/auth/session-expiry.ts` with tests;
-  - `apps/api/test/auth/{session,csrf,me}.api.test.ts` and `apps/api/test/realtime-auth.api.test.ts`.
+  - `apps/api/test/auth/{session,csrf,me}.api.test.ts`, `apps/api/test/audit/{audit-service,platform-audit-service}.api.test.ts` and `apps/api/test/realtime-auth.api.test.ts`.
 - Modify:
   - `apps/api/src/{app.ts,common/request-context.ts,realtime/realtime.service.ts,observability/tenant-span-processor.ts,webhooks/ses/ses-webhook.controller.ts}`;
+  - `apps/api/src/{health/health.controller.ts,openapi/openapi.controller.ts}` (`@Public()`);
   - `packages/contracts/src/observability/telemetry-scrub.ts` (signed-link path rule);
-  - `apps/staff/next.config.ts` (proxy `/socket.io` locally).
+  - `packages/ui/src/components/GreetingScene.tsx` and `GreetingScene.test.tsx` (import `GreetingPeriod` from `@quad/contracts`);
+  - `packages/ui/package.json` (drop `@quad/domain`);
+  - `packages/domain/src/greeting/greeting-period.ts` (import the type from `@quad/contracts`);
+  - `apps/staff/next.config.ts` (proxy `/socket.io` locally);
+  - `docs/spec/02-architecture.md` (D32 bullets).
 
 **Behaviour:**
 - **Cookies:**
@@ -442,46 +518,73 @@ Steps:
 - **Expiry:** `sessionExpiry({ kind, keepSignedIn, sessionHours, supportExpiresAt, lastSeenAt, now })`:
   - web: the school's `session_hours` (default 12 h), or 30 days with "Keep me signed in";
   - console: 8 h idle;
-  - support: 60 min hard.
+  - support: 60 min hard;
+  - parent refresh family: 60 days (spec 05), used by Task 9.
+- **Access markers** (the route walk in Task 12 accepts exactly these plus `@Can` and `@PlatformRole`):
+  - `@Public()`: no session. `/health/*` (`health.controller.ts`), `/openapi.json` (`openapi.controller.ts`) and `/webhooks/ses` (D28 follow-up) carry it, as do the tenant-less sign-in routes that need no session;
+  - `@PreAuth(...stages)`: a pre-auth session at one of the listed stages (the sign-in steps);
+  - `@Authenticated()`: an active session or bearer token, no permission check, for self-scoped routes. In M1 exactly: `/me*` (this task, Task 7 `/me/totp`, Task 12 `/me/permissions` and `/me/role-preview` DELETE), `/auth/sign-out` and `/auth/select-school` (Task 7), `/school/branding` (Task 14);
+  - `@PlatformController()`: set on every controller class in `apps/api/src/platform/**` (Task 10). `AuthGuard` skips these classes; `PlatformSessionGuard` owns them.
 - **Global `AuthGuard`:**
-  - every route needs an active session or a valid bearer JWT unless marked `@Public()` or `@PreAuth(stage)`;
-  - `/health/*`, `/openapi.json`, `/webhooks/ses` (D28 follow-up), `/auth/identify`, `/auth/password` and the other sign-in steps are public or pre-auth;
-  - a session or token whose membership or tenant is no longer active returns 401 (spec 16, "switches into a school they no longer belong to").
-- **CSRF:** double submit. A readable `quad_csrf` cookie holds HMAC(SESSION_SECRET, token_hash), and every cookie-authenticated non-GET request must send `X-CSRF-Token`. Bearer requests are exempt.
+  - every route needs an active session (or, from Task 9, a valid bearer JWT) unless it is `@Public()`, `@PreAuth(...)` at a matching stage, or a `@PlatformController()`;
+  - 401 only for a revoked or expired session, a deactivated membership or a deleted tenant (spec 16, "switches into a school they no longer belong to");
+  - a suspended tenant is not a 401: `TenantStatusGuard` (Task 12) returns 403 `school_suspended` with the reason (spec 05), except on `POST /auth/sign-out`;
+  - a support session has no membership: it is valid while `session_by_token` returns it (its `support_sessions` row active and for the same tenant).
+- **CSRF:** double submit. A readable cookie holds HMAC(SESSION_SECRET, token_hash): `__Host-quad_csrf` (Secure, not HttpOnly) outside local, `quad_csrf` locally. Every cookie-authenticated non-GET request must send it back as `X-CSRF-Token`. Bearer requests are exempt.
 - **`text/plain` bodies:** refused with 415 on every route except `POST /webhooks/ses` (D28 follow-up).
 - **Socket.IO:**
   - `allowRequest` accepts an `Origin` equal to `PUBLIC_WEB_URL` or `CONSOLE_URL`, or no Origin (the parent app);
   - it authenticates with the cookie or `auth.token`;
   - it joins `tenant:{id}` and `user:{id}`, or `platform` for console sessions (spec 06 Realtime; D28 follow-up);
   - staff proxies `/socket.io` to `:4000` locally.
+- **Audit writing** (used from Task 7 on):
+  - `AuditService.record(ctx, action, target, meta)` writes `audit_log` in the same transaction as the change. In a support session it sets `actor_platform_user_id` and `support_session_id`, and also calls `record_support_audit` (spec 05: dual audit).
+  - `PlatformAuditService` (platform folder only) records every `withPlatform` write.
+  - Action keys (contracts):
+    - `auth.*`: `sign_in`, `sign_in_failed`, `sign_out`, `password_reset`;
+    - `user.*`: `invited`, `role_changed`, `deactivated`, `reactivated`, `two_step_reminded`, `password_reset_sent`, `signed_out_everywhere`;
+    - `role.*`: `created`, `updated`, `deleted`, `permissions_changed`;
+    - `role_preview.*`: `started`, `ended`;
+    - `settings.updated`;
+    - `support_session.*`: `started`, `ended`;
+    - `audit.exported`.
 - **`GET /me`** returns:
   - the person (name, first name, theme, locale);
-  - the school (name, short name, time zone, brand: `{ color, fill, fillDark, ink }`, computed with `@quad/tokens` `fillFor` per D27 and D32);
+  - the school (name, short name, time zone, brand: `{ color, fill, fillDark, ink }` from `@quad/tokens` `deriveBrand`: `color` = the brand, `fill` = `deriveBrand(hex, 'light').brandFill`, `fillDark` = `deriveBrand(hex, 'dark').brandFill`, `ink` = the light `brandInk`; dark mode keeps the `brand-ink` token);
   - the other memberships, for Switch school;
   - `preview` and `support` banners' data;
   - `greeting` (period and word from `greetingPeriod` in the school's time zone; the D27 M1 follow-up "the API returning the greeting", with `GreetingPeriod` moved to `@quad/contracts` so `packages/ui` drops `@quad/domain`).
 - The **telemetry scrubber** gets an explicit pattern for `/sign-in/(reset|invite|support)/<token>` and `/auth/invites/<token>` (D28 follow-up), plus a scrub of pg error `detail` and `where` (D27 follow-up).
 
-**Endpoints (four tests each):**
+**Endpoints** (four tests each; the preview cases move to Task 12, so `GET /me` and `PATCH /me` have three here):
 
 | Route | Contract | Guard / permission | Tests |
 |---|---|---|---|
-| `GET /me` | `Me` | session | 200 shape; 401 unauthenticated; preview reflected; B's session never shows A |
-| `PATCH /me` | `MeUpdateInput` (name, theme, locale) | session; refused in preview | 200; 400 bad theme; 403 `preview_read_only`; cross-tenant: changes only the current membership |
-| `GET /me/sessions` | `paginated(SessionSummary)` | session | own sessions only; another account's never listed |
-| `DELETE /me/sessions/:id` | – | session, CSRF | 204; 400 bad id; 403 missing CSRF; 404 for another account's session id |
+| `GET /me` | `Me` | `@Authenticated` | 200 shape; 401 unauthenticated; B's session never shows A |
+| `PATCH /me` | `MeUpdateInput` (name, theme, locale) | `@Authenticated`, CSRF | 200; 400 bad theme; cross-tenant: changes only the current membership |
+| `GET /me/sessions` | `paginated(SessionSummary)` | `@Authenticated` | own sessions only; another account's never listed |
+| `DELETE /me/sessions/:id` | – | `@Authenticated`, CSRF | 204; 400 bad id; 403 missing CSRF; 404 for another account's session id |
+
+**D32** (append): Sessions: opaque 32-byte cookie, SHA-256 in the database, Redis cache for 30 s; `__Host-` names, but `quad_sid` and `quad_console_sid` without `Secure` when `APP_ENV=local`; double-submit CSRF in `__Host-quad_csrf` (`quad_csrf` locally); `stage` on the session row for the sign-in steps. Access: the `@Authenticated()` marker and its routes (`/me*`, `/auth/sign-out`, `/auth/select-school`, `/school/branding`); `@PlatformController()`; the API computes the school brand palette with `@quad/tokens` `deriveBrand` (a new allowed `apps/api` → `@quad/tokens` import, colour maths only); `GreetingPeriod` in `@quad/contracts`. Pinned `@fastify/cookie` version.
 
 Steps:
 - [ ] **Step 1: Write failing tests.** The table above, plus:
   - an expired idle session is 401;
   - a revoked session is 401 within one request (cache invalidation);
+  - a deactivated membership and a deleted tenant are 401;
+  - a support session with no membership works while its support session is active, and is 401 once it has ended;
+  - `/health/live` and `/openapi.json` answer without a session;
+  - a probe controller marked `@PlatformController()` is not handled by `AuthGuard`;
+  - the CSRF cookie is `quad_csrf` with `APP_ENV=local` and `__Host-quad_csrf` otherwise;
   - the `text/plain` POST is 415 except `/webhooks/ses`;
   - a socket from `https://evil.example` is refused;
-  - a socket with no Origin and no token gets no rooms.
+  - a socket with no Origin and no token gets no rooms;
+  - `AuditService`: a rolled-back change leaves no audit row; a support context writes one `audit_log` and one `platform_audit` row;
+  - `PlatformAuditService` writes one `platform_audit` row per write.
 - [ ] **Step 2: Run them to see them fail.** Expected: FAIL.
-- [ ] **Step 3: Implement.** Register `@fastify/cookie`. Declare the routes in `me.routes.ts`, list them in `src/openapi/document.ts`, and run `pnpm api:client`.
-- [ ] **Step 4: Run the checks.** `pnpm --filter @quad/api test && pnpm --filter @quad/api test:api -- auth me realtime && pnpm codegen:check`. Expected: PASS.
-- [ ] **Step 5: Commit.** `feat(api): server-side sessions, auth guard, CSRF and authenticated sockets`.
+- [ ] **Step 3: Implement.** Register `@fastify/cookie`. Declare the routes in `me.routes.ts`, list them in `src/openapi/document.ts`, and run `pnpm api:client`. Append the D32 bullets.
+- [ ] **Step 4: Run the checks.** `pnpm --filter @quad/api test && pnpm --filter @quad/ui test && pnpm --filter @quad/api test:api -- auth me realtime audit && pnpm codegen:check`. Expected: PASS.
+- [ ] **Step 5: Commit.** `feat(api): server-side sessions, auth guard, CSRF, audit writing and authenticated sockets`.
 
 ### Task 7: Staff sign-in: identify, password, two-step, lockout, Choose a school, forgot and reset
 
@@ -489,39 +592,49 @@ Follow `quad-api-endpoint` and `quad-domain-logic`.
 
 **Files:**
 - Create:
-  - `apps/api/src/modules/auth/{auth.module.ts,auth.controller.ts,auth.service.ts,sign-in.service.ts,two-step.service.ts,memberships.service.ts,auth.routes.ts}`;
+  - `apps/api/src/public/auth/{auth.controller.ts,auth.routes.ts}` (identify, password, totp/verify, memberships, select-school, sign-out, password/forgot; tenant-less, so in `src/public`);
+  - `apps/api/src/modules/auth/{auth.module.ts,auth.service.ts,sign-in.service.ts,two-step.service.ts,memberships.service.ts,lockout.service.ts}`;
+  - `apps/api/src/modules/me/totp.controller.ts` (`POST /me/totp`, using `two-step.service.ts`);
   - `apps/api/src/public/signed-links/{password-reset.controller.ts,password-reset.service.ts}`;
   - `packages/contracts/src/auth/*.ts`;
   - `packages/domain/src/auth/{next-sign-in-step,lockout,two-step-rule,recovery-codes}.ts` with tests;
-  - `apps/api/test/auth/{identify,password,totp,lockout,memberships,select-school,forgot-reset}.api.test.ts`.
-- Modify: `packages/contracts/src/common/errors.ts` (codes `invalid_credentials`, `account_locked`, `invalid_link`, `two_step_required`, `preview_read_only`, `invalid_code`), `packages/contracts/i18n/en.json`.
+  - `apps/api/test/auth/{identify,password,totp,lockout,memberships,select-school,forgot-reset,new-device}.api.test.ts`.
+- Modify: `packages/contracts/src/common/errors.ts` (codes `invalid_credentials`, `account_locked`, `invalid_link`, `two_step_required`, `preview_read_only`, `invalid_code`), `packages/contracts/i18n/en.json`, `docs/spec/02-architecture.md` (D32 bullet).
 
 **Domain:**
-- `nextSignInStep({ totpEnabled, twoStepRequired, trustedDevice, membershipCount, rememberedTenantId })` returns `two_step`, `two_step_setup`, `choose_school`, `no_school` or `done`.
+- `nextSignInStep({ totpEnabled, twoStepRequired, trustedDevice, membershipCount })` returns `two_step`, `two_step_setup`, `choose_school`, `no_school` or `done`. One staff membership gives `done`; several give `choose_school`; none gives `no_school`. The server never pre-selects a school (spec 05).
 - `lockoutState(failureTimes, now)`: 5 failures within 15 minutes lock the account until `now + 15 min` (spec 05 step 7).
-- `strictestTwoStep(memberships)`: `off < admins < staff < all`, matched against the role keys in each school.
+- `strictestTwoStep(rows)`: takes the `auth_sign_in_rules` rows; `off < admins < staff < all`, matched against each row's `role_keys`. This is the only place the rule is computed.
 - `generateRecoveryCodes(rng)`: 10 codes, with `rng` injected.
 
-**Endpoints (contracts in `packages/contracts/src/auth`; `@Public` or `@PreAuth`; 20/min per IP):**
+**Lockout storage:** failure timestamps live in Redis, in a sorted set `lockout:{accountId}` with a 15-minute TTL, and feed `lockoutState`. `accounts.locked_until` persists the lock.
 
-| Route | Behaviour | Required tests (beyond happy and 400) |
-|---|---|---|
-| `POST /auth/identify` `{email}` → `{methods}` | `methods` from `sso_methods_for_domain(domain(email))`, plus `password`. Never reads the account | **Identical body and status for unknown and known emails** (Accept); 429 after 20/min per IP and 10/15 min per email |
-| `POST /auth/password` `{email, password, keepSignedIn}` → `{next, …}` | Argon2 verify (dummy for unknown); lockout; breach check only on set, not on sign-in. Creates a pre-auth session (stage per `nextSignInStep`), sets the cookie, and audits a failure to every school the account is staff in (OQ11) | Wrong password and unknown email both give the same 401 `invalid_credentials`; the 6th try gives 423-style 403 `account_locked`, and the lockout email is queued; a disabled account is 401 |
-| `POST /auth/totp/verify` `{code} \| {recoveryCode}, trustDevice` | `otplib` with ±1 step; `DEV_FIXED_OTP` accepted only when set (local and staging); a recovery code is single use; "Trust this device" writes `trusted_devices` and a 30-day cookie | A wrong code counts toward lockout; a reused recovery code is refused; 401 without a pre-auth session |
-| `POST /me/totp` (start) and `POST /me/totp` `{code}` (confirm) → `{otpauthUri}` / `{recoveryCodes}` | Allowed at stage `two_step_setup` or `active`; the secret is encrypted with `FieldCipher` | Refused at stage `choose_school`; refused in preview; a code from another secret is refused |
-| `GET /auth/memberships` → `{items:[{tenantId, name, shortName, logoUrl, brand, roleNames}]}` | Only after the password, SSO or OTP step (spec 16) | 401 at stage `two_step`; never lists a deactivated membership or a deleted school |
-| `POST /auth/select-school` `{tenantId, remember}` | Must be one of `auth_memberships`. Rotates the session token (new cookie), sets `active_tenant_id`/`active_user_id`, writes the `auth.sign_in` audit in that school; `remember` sets the non-sensitive `quad_last_school` cookie (name, logo URL) | **Refuses a tenant the account is not a member of with 403, and the session keeps no school** (Accept); refuses a suspended school with 403 `school_suspended` and the reason; `?school=` alone never selects |
-| `POST /auth/sign-out` | Revokes the session for every school (spec 05) | 204; the cookie is cleared; the old cookie then gets 401 |
-| `POST /auth/password/forgot` `{email}` → 202 | Queues a `password_reset` link (`tid` null, OQ8) to `quad-edu.com/sign-in/reset/{token}` when the account exists | 202 either way, with identical bodies; rate-limited |
-| `POST /auth/password/reset` `{token, password}` (`src/public/signed-links`) | Verifies the link; checks policy and breach; updates the hash; **revokes all sessions and trusted devices** | Second use gives `invalid_link`; expired, tampered or wrong-purpose give `invalid_link` without a school name (journey 43); a weak password gives 400 with `fields.password` |
+**Kind rule:** the cookie flows list and accept only `kind = 'staff'` memberships. A non-staff membership is refused with 403.
+
+**Endpoints (contracts in `packages/contracts/src/auth`; 20/min per IP):**
+
+| Route | Marker | Behaviour | Required tests (beyond happy and 400) |
+|---|---|---|---|
+| `POST /auth/identify` `{email}` → `{methods}` | `@Public` | `methods` from `sso_methods_for_domain(domain(email))`, plus `password`. Never reads the account. Per-email limit through the `@RateLimit` key function (HMAC of the email) | **Identical body and status for unknown and known emails** (Accept); 429 after 20/min per IP and 10/15 min per email |
+| `POST /auth/password` `{email, password, keepSignedIn}` → `{next, …}` | `@Public` | Argon2 verify (dummy for unknown); lockout; breach check only on set, not on sign-in. Creates a pre-auth session (stage per `nextSignInStep`) and sets the cookie. A failure is audited (`auth.sign_in_failed`) in every school where the account is active staff (OQ11), opening one `withTenant` per school | Wrong password and unknown email both give the same 401 `invalid_credentials`; the 6th try gives 403 `account_locked`, and the lockout email is queued; a disabled account is 401 |
+| `POST /auth/totp/verify` `{code} \| {recoveryCode}, trustDevice` | `@PreAuth('two_step')` | `otplib` with ±1 step; `DEV_FIXED_OTP` accepted only when set (local and staging); a recovery code is single use; "Trust this device" writes `trusted_devices` and a 30-day cookie | A wrong code counts toward lockout; a reused recovery code is refused; 401 without a pre-auth session |
+| `POST /me/totp` (start) and `POST /me/totp` `{code}` (confirm) → `{otpauthUri}` / `{recoveryCodes}` (`modules/me/totp.controller.ts`) | `@PreAuth('two_step_setup', 'active')` | The secret is encrypted with `FieldCipher` | Refused at stage `choose_school`; a code from another secret is refused (the preview refusal is in Task 12) |
+| `GET /auth/memberships` → `{items:[{tenantId, name, shortName, logoUrl, brand, roleNames}]}` | `@PreAuth('choose_school', 'active')` | Only after the password, SSO or OTP step (spec 16); staff memberships only | 401 at stage `two_step`; never lists a deactivated membership, a deleted school or a guardian membership |
+| `POST /auth/select-school` `{tenantId, remember}` | `@Authenticated` (also accepts stage `choose_school`) | Must be one of the account's staff `auth_memberships`. Rotates the session token (new cookie), sets `active_tenant_id`/`active_user_id`, writes the `auth.sign_in` audit in that school; `remember` sets the non-sensitive `quad_last_school` cookie (name, logo URL). When the session becomes active and the request has no valid trusted-device cookie, queues the new-device email (spec 16) | **Refuses a tenant the account is not a member of with 403, and the session keeps no school** (Accept); refuses a suspended school with 403 `school_suspended` and the reason; refuses a guardian-only membership with 403; `?school=` alone never selects |
+| `POST /auth/sign-out` | `@Authenticated` (also any pre-auth stage) | Revokes the session for every school (spec 05). Allowed for a suspended school | 204; the cookie is cleared; the old cookie then gets 401 |
+| `POST /auth/password/forgot` `{email}` → 202 | `@Public` | Queues a `password_reset` link (`tid` null, OQ8) to `quad-edu.com/sign-in/reset/{token}` when the account exists | 202 either way, with identical bodies; rate-limited |
+| `POST /auth/password/reset` `{token, password}` (`src/public/signed-links`) | `@Public` (signed) | Verifies the link; checks policy and breach; updates the hash; **revokes all sessions and trusted devices** | Second use gives `invalid_link` (the real nonce-reuse case, against the database); expired, tampered or wrong-purpose give `invalid_link` without a school name (journey 43); a weak password gives 400 with `fields.password` |
 
 Switching school is `POST /auth/select-school` again from an active session. It re-checks the membership and rotates (spec 05).
 
+New-device email tests (`new-device.api.test.ts`): queued once after a sign-in without the trusted-device cookie; not queued with a valid one.
+
+**D32** (append under Sessions): lockout failures in the Redis sorted set `lockout:{accountId}` (15-minute TTL), with `accounts.locked_until` persisting the lock. Pinned `otplib` version.
+
 Steps:
-- [ ] **Step 1: Write the domain tests** (table-driven, boundaries at exactly 5 failures and at 15:00 minutes), then the API tests above, plus Review Focus #1 and #2.
+- [ ] **Step 1: Write the domain tests** (table-driven, boundaries at exactly 5 failures and at 15:00 minutes), then the API tests above, plus Review Focus #1 and #2 (cookie side).
 - [ ] **Step 2: Run them to see them fail.** Expected: FAIL.
-- [ ] **Step 3: Implement.** Then `pnpm api:client`.
+- [ ] **Step 3: Implement.** Then `pnpm api:client`. Append the D32 bullet.
 - [ ] **Step 4: Run the checks.** `pnpm --filter @quad/domain test && pnpm --filter @quad/api test:api -- auth && pnpm codegen:check`. Expected: PASS.
 - [ ] **Step 5: Commit.** `feat(auth): identifier-first staff sign-in with two-step, lockout, school choice and password reset`.
 
@@ -534,13 +647,14 @@ Steps:
 
 **Files:**
 - Create:
-  - `apps/api/src/modules/auth/sso/{sso.controller.ts,sso.service.ts,oidc-clients.ts}`;
+  - `apps/api/src/public/auth/sso.controller.ts` (tenant-less);
+  - `apps/api/src/modules/auth/sso/{sso.service.ts,oidc-clients.ts}`;
   - `apps/api/test/fakes/oidc-issuer.ts` (a small Fastify server: discovery, JWKS, authorize, token; ID tokens signed with `jose`);
   - `scripts/fake-oidc.mjs` (the same issuer for Playwright);
   - `apps/api/test/auth/sso.api.test.ts`.
-- Modify: `apps/api/src/config.ts`, `.env.example` and spec 02 (new variable `OIDC_FAKE_ISSUER_URL`, refused outside `local`; when set, the Google, Microsoft and console Google clients use it; D32).
+- Modify: `apps/api/src/config.ts`, `.env.example` and the spec 02 variables table (new variable `OIDC_FAKE_ISSUER_URL`, refused outside `local`; when set, the Google, Microsoft and console Google clients use it), and the D32 bullet in spec 02.
 
-**Endpoints:**
+**Endpoints** (`@Public`):
 - `POST /auth/sso/:provider/start` `{email, keepSignedIn}` returns `{url}`:
   - the state, nonce and PKCE verifier go in a short-lived signed cookie;
   - `provider` is `google` or `microsoft`; anything else gives 400.
@@ -558,21 +672,29 @@ Steps:
 - an SSO domain of school A cannot open school B when the account has no B membership (cross-tenant);
 - the second sign-in reuses the identity.
 
+**D32** (append under Configuration): `OIDC_FAKE_ISSUER_URL` (local only). Pinned `openid-client` and `jose` versions.
+
 Steps:
 - [ ] **Step 1: Write the tests against the fake issuer.**
 - [ ] **Step 2: Run them to see them fail.** Expected: FAIL.
-- [ ] **Step 3: Implement with `openid-client`.** Then `pnpm api:client`.
-- [ ] **Step 4: Run the checks.** `pnpm --filter @quad/api test:api -- sso`. Expected: PASS.
+- [ ] **Step 3: Implement with `openid-client`.** Then `pnpm api:client`. Append the D32 bullet.
+- [ ] **Step 4: Run the checks.** `pnpm --filter @quad/api test && pnpm --filter @quad/api test:api -- sso`. Expected: PASS.
 - [ ] **Step 5: Commit.** `feat(auth): Google and Microsoft SSO with PKCE and a fake issuer for tests`.
 
 ### Task 9: Parent OTP sign-in, JWT access tokens and refresh rotation
 
 **Files:**
 - Create:
-  - `apps/api/src/modules/auth/otp/{otp.controller.ts,otp.service.ts}` and `apps/api/src/modules/auth/tokens/{token.service.ts,bearer.ts}`;
+  - `apps/api/src/public/auth/otp.controller.ts` (`/auth/otp/request`, `/auth/otp/verify`, `/auth/refresh`; tenant-less);
+  - `apps/api/src/modules/auth/otp/otp.service.ts` and `apps/api/src/modules/auth/tokens/{token.service.ts,bearer.ts}`;
   - `packages/domain/src/auth/{otp-send-decision,fixed-otp,phone-e164}.ts` with tests;
   - `packages/contracts/src/auth/{otp,tokens}.ts`;
-  - `apps/api/test/auth/{otp,refresh}.api.test.ts`.
+  - `apps/api/test/auth/{otp,refresh,bearer}.api.test.ts`.
+- Modify:
+  - `apps/api/src/common/guards/auth.guard.ts` and `apps/api/src/common/session/request-auth.ts` (the bearer path);
+  - `apps/api/src/public/auth/auth.controller.ts` (Task 7's owner of `POST /auth/select-school` and `POST /auth/sign-out`: the bearer variants);
+  - `packages/domain/src/auth/session-expiry.ts` (if Task 6 did not already cover the 60-day family);
+  - `docs/spec/02-architecture.md` (D32 bullets).
 
 **Domain:**
 - `otpSendDecision(history, now)`: at most 3 per 15 minutes and 10 per day per subject; resend after 30 s; returns `{ allowed, retryAfter }`.
@@ -580,24 +702,31 @@ Steps:
   - `DEV_FIXED_OTP` works in local and staging only;
   - `STORE_REVIEW_PHONE` works only for its own number (spec 16).
 - `parsePhone(country, input)`: +94 means 9 digits without the leading 0. Only Sri Lankan (+94) numbers are accepted for now (OQ12, product owner); the list is data so more countries can be added later.
+- `sessionExpiry` for a refresh family: 60 days from the family's creation (spec 05).
+
+**OTP hashing:** `otp_challenges.code_hash` is HMAC-SHA256 over `(challenge_id, code)` with a key derived by HKDF-SHA256 from `SESSION_SECRET`; `subject_hash` is HMAC-SHA256 of the normalised phone or email with the same key (the table is open, so an unkeyed hash of a 6-digit code would be reversible).
+
+**Kind rule:** bearer flows list and accept only `guardian` and `relative` memberships. A staff membership is refused with 403.
 
 **Endpoints:**
 
-| Route | Behaviour | Tests |
-|---|---|---|
-| `POST /auth/otp/request` `{phone}` or `{email}` → 202 | Creates `otp_challenges` (6 digits, 10 min, code hashed); queues SMS or email; same response whether known or not | Identical 202 for an unknown number; the 4th request in 15 min gives 429 with `Retry-After`; 400 for a bad +94 number |
-| `POST /auth/otp/verify` `{phone\|email, code}` → `{status: 'signed_in'\|'choose_school'\|'not_found', firstName?, memberships[], accessToken?, refreshToken?}` | 5 attempts per challenge. Finds the account with `account_by_identifier`; returns guardian and relative memberships from `auth_memberships`. One membership issues a tenant token; several issue a 5-minute `select_school` token (OQ20); none gives `not_found` | A wrong code 5 times kills the challenge; an expired code gives 400 `invalid_code`; a staff-only account gives `not_found`; B's memberships never appear for A's number |
-| `POST /auth/select-school` (bearer, `select_school` scope) | Same rule as staff; returns a tenant token pair | 403 for a non-member tenant |
-| `POST /auth/refresh` `{refreshToken}` → new pair | Format `{sessionId}.{generation}.{secret}`. A matching generation rotates. **An older generation revokes the family** (spec 05) | Review Focus #6; an expired family gives 401; a refresh token from tenant A cannot select B |
-| `POST /auth/sign-out` (bearer) | Revokes this device's family | 204, then refresh gives 401 |
+| Route | Marker | Behaviour | Tests |
+|---|---|---|---|
+| `POST /auth/otp/request` `{phone}` or `{email}` → 202 | `@Public` | Creates `otp_challenges` (6 digits, 10 min, keyed hashes as above); queues SMS or email; same response whether known or not | Identical 202 for an unknown number; the 4th request in 15 min gives 429 with `Retry-After`; 400 for a bad +94 number |
+| `POST /auth/otp/verify` `{phone\|email, code}` → `{status: 'signed_in'\|'choose_school'\|'not_found', firstName?, memberships[], accessToken?, refreshToken?}` | `@Public` | 5 attempts per challenge. Finds the account with `account_by_identifier`; returns guardian and relative memberships from `auth_memberships`. One membership issues a tenant token; several issue a 5-minute `select_school` token (OQ20); none gives `not_found` | A wrong code 5 times kills the challenge; an expired code gives 400 `invalid_code`; a staff-only account gives `not_found`; B's memberships never appear for A's number |
+| `POST /auth/select-school` (bearer, `select_school` scope) | `@Authenticated` | Same rule as staff, for guardian and relative memberships only; returns a tenant token pair | 403 for a non-member tenant; 403 for a staff membership (Review Focus #2, bearer side) |
+| `POST /auth/refresh` `{refreshToken}` → new pair | `@Public` | Format `{sessionId}.{generation}.{secret}`. A matching generation rotates. **An older generation revokes the family** (spec 05). A family lives 60 days | Review Focus #6; a family older than 60 days gives 401; a refresh token from tenant A cannot select B |
+| `POST /auth/sign-out` (bearer) | `@Authenticated` | Revokes this device's family | 204, then refresh gives 401 |
 
-The access JWT (EdDSA, 15 min) carries `sub` (membership id), `acc`, `tid`, `kind` (`guardian` or `relative`), `rh` (the roles hash) and `sid`. Relative tokens reach nothing yet (M9b adds the moments routes; a test asserts `GET /me` works and every other route is 403).
+The access JWT (EdDSA, 15 min) carries `sub` (membership id), `acc`, `tid`, `kind` (`guardian` or `relative`), `rh` (the roles hash) and `sid`. In M1 relative tokens reach only `/auth/refresh` and `/auth/sign-out` (M9b adds the moments routes; spec 05 and 06 make `GET /family/me` their only profile route). A test asserts that a relative token gets 403 on `GET /me` and on every other route.
+
+**D32** (append under Sessions): parent JWT EdDSA, 15 min; refresh `{sid}.{generation}.{secret}`, a 60-day family, revoked on reuse; relative tokens reach only refresh and sign-out in M1; the bearer kind rule (guardian and relative only).
 
 Steps:
 - [ ] **Step 1: Write the tests.**
 - [ ] **Step 2: Run them to see them fail.** Expected: FAIL.
-- [ ] **Step 3: Implement.** Then `pnpm api:client` (the Dart client changes too).
-- [ ] **Step 4: Run the checks.** `pnpm --filter @quad/domain test && pnpm --filter @quad/api test:api -- otp refresh && pnpm codegen:check`. Expected: PASS.
+- [ ] **Step 3: Implement.** Then `pnpm api:client` (the Dart client changes too). Append the D32 bullet.
+- [ ] **Step 4: Run the checks.** `pnpm --filter @quad/domain test && pnpm --filter @quad/api test:api -- otp refresh bearer && pnpm codegen:check`. Expected: PASS.
 - [ ] **Step 5: Commit.** `feat(auth): parent OTP sign-in with EdDSA access tokens and rotating refresh families`.
 
 ### Task 10: Console sign-in under `/platform/auth/*`
@@ -608,31 +737,41 @@ Steps:
   - `apps/api/src/platform/me/platform-me.controller.ts`;
   - `packages/contracts/src/platform/auth.ts`;
   - `apps/api/test/platform/auth.api.test.ts`.
+- Modify:
+  - `apps/api/src/config.ts` and `apps/api/test/config.test.ts` (`CONSOLE_GOOGLE_HD` must be `quad-edu.com` when `APP_ENV=production`);
+  - `.env.example` (`CONSOLE_GOOGLE_HD=quad.local`);
+  - `docs/spec/02-architecture.md` (D32 bullet).
+
+Every controller in `apps/api/src/platform/**` is marked `@PlatformController()` (Task 6), so the global `AuthGuard` skips it and `PlatformSessionGuard` owns it.
 
 **Endpoints** (accepted only with the console cookie; D28 ruling R-console-realtime):
 - `POST /platform/auth/password` `{email, password}`:
-  - exists only when `CONSOLE_PASSWORD_LOGIN=true`; otherwise 404;
+  - always registered (so the OpenAPI document does not depend on the environment); returns 404 `not_found` at runtime when `CONSOLE_PASSWORD_LOGIN` is not `true`;
   - looks up active `platform_users`;
   - leads to the TOTP step.
 - `POST /platform/auth/sso/google/start` and `GET /platform/auth/sso/google/callback`:
-  - require `hd` = `CONSOLE_GOOGLE_HD` and an email ending in `@quad-edu.com` that exists in `platform_users` with status active;
+  - require `hd` = `CONSOLE_GOOGLE_HD`, an email whose domain equals `CONSOLE_GOOGLE_HD` (production `quad-edu.com`, spec 05; `quad.local` in `.env.example` and the e2e stack), and a `platform_users` row with status active;
   - refuse anything else with 403 and a `platform_audit` failure.
 - `POST /platform/auth/totp/verify`, and `POST /platform/auth/totp/setup` (TOTP is mandatory, spec 07; first sign-in sets it up).
-- `POST /platform/auth/sign-out`.
-- `GET /platform/me` (name, role, the `passwordLogin` flag for the sign-in page).
+- `POST /platform/auth/sign-out` (`@PlatformRole()`, any role).
+- `GET /platform/me` (`@PlatformRole()`, any role: name, role, the `passwordLogin` flag for the sign-in page).
 - `GET /platform/auth/methods`: `{password: boolean, google: true}`, so the console only offers the password form when the flag is on (journey 42).
 
-Every sign-in and failure is written to `platform_audit` (spec 05). The session is `kind='console'` with 8 h idle. `@PlatformRole(...)` guards platform routes (spec 05 roles).
+Every sign-in and failure is written to `platform_audit` through `PlatformAuditService` (spec 05). The session is `kind='console'` with 8 h idle. `@PlatformRole(...)` guards platform routes (spec 05 roles).
 
-**Tests:**
+**Tests** (four per endpoint):
+- each of the seven routes has a happy path, a 400 `validation`, a 401 or 403, and "the console cookie of platform user A never acts as B";
 - password + TOTP works when the flag is true;
-- `/platform/auth/password` is 404 when false;
-- Google with `hd` `gmail.com` or an `@other.com` email gives 403;
+- `/platform/auth/password` is 404 when the flag is false, and the route is in the OpenAPI document either way;
+- Google with `hd` `gmail.com`, or an email outside `CONSOLE_GOOGLE_HD`, gives 403;
 - a staff `quad_sid` cookie never authenticates a `/platform` route, and a console cookie never authenticates `/auth`, `/me` or `/users`;
-- a `readonly` platform user is 403 on an owner-only probe route.
+- a `readonly` platform user is 403 on an owner-only probe route;
+- the config refuses `CONSOLE_GOOGLE_HD` other than `quad-edu.com` with `APP_ENV=production`.
 - The boot refusal of `CONSOLE_PASSWORD_LOGIN=true` with `APP_ENV=production` stays covered in `config.test.ts` (Accept).
 
-Steps: test first, implement, `pnpm api:client`, then `pnpm --filter @quad/api test:api -- platform`. Commit `feat(console): console sign-in with Workspace SSO, password flag and TOTP`.
+**D32** (append under Configuration): `CONSOLE_GOOGLE_HD` is `quad.local` locally and in the e2e stack, and must be `quad-edu.com` in production; the console password route is always registered and answers 404 when the flag is off.
+
+Steps: test first, implement, `pnpm api:client`, append the D32 bullet, then `pnpm --filter @quad/api test && pnpm --filter @quad/api test:api -- platform && pnpm codegen:check`. Commit `feat(console): console sign-in with Workspace SSO, password flag and TOTP`.
 
 **Acceptance:** Accept "`CONSOLE_PASSWORD_LOGIN=true` is refused at boot when `APP_ENV=production`". Journey 42 API side.
 
@@ -647,7 +786,7 @@ Follow `quad-domain-logic`. 100% branch coverage (D23).
   - `packages/contracts/src/permissions.ts` (replaces the stub);
   - `packages/contracts/src/access/staff-pages.ts`;
   - `packages/domain/src/access/{matrix,effective-permissions,system-roles,page-access,role-home,grant-checks}.ts` with tests.
-- Modify: `packages/domain/src/index.ts`.
+- Modify: `packages/domain/src/index.ts`, `docs/spec/02-architecture.md` (D32 bullet).
 
 **Contracts:**
 - `PermissionKey`:
@@ -656,7 +795,7 @@ Follow `quad-domain-logic`. 100% branch coverage (D23).
   - `users.manage` (OQ3).
 
   Later milestones add their own keys, for example `circle.connection.read`.
-- `STAFF_PAGES`: data only, the spec 08 navigation, each page with `{ id, group, href, requires: PagePredicate, planModule? }` per OQ4.
+- `STAFF_PAGES`: data only, the spec 08 navigation, each page with `{ id, group, href, requires: PagePredicate, planModule? }` per OQ4. The hrefs for Users & roles and School settings are `/app/settings/users` and `/app/settings/school` (Tasks 21 and 22).
 
 **Domain:**
 - `normaliseRow(row, change)`: unchecking View clears the row; checking any action checks View (spec 05).
@@ -666,14 +805,17 @@ Follow `quad-domain-logic`. 100% branch coverage (D23).
   - a preview uses the previewed role, intersected with the admin's own sensitive keys (spec 06);
   - support gets the `admin` matrix minus `sensitive.safeguarding` and `sensitive.medical` (spec 05).
 - `pageAccess(perms, planModules)`: each page is `hidden`, `view_only` or `full`. `view_only` means the role has `view` but no create, edit, delete or approve on the page's module.
-- `roleHome(perms)`: My teaching when `lms.create` and scope `own_classes`; else Dashboard if visible; else Attendance; else the first visible page (spec 08).
+- `roleHome(perms, primaryRoleScope)`: My teaching when `lms.create` and `primaryRoleScope` is `own_classes`; else Dashboard if visible; else Attendance; else the first visible page (spec 08).
 - `canGrant(granterSensitive, requested)`: a school admin cannot give a sensitive key they do not hold (spec 08).
 
 **Tests:**
 - table-driven for every system role;
 - journey 50's expectation as a unit test: `finance` sees exactly Dashboard, Communications, Students (`view_only`), Fees & invoicing and Accounting, and Timetable is `hidden`;
+- `roleHome` with `lms.create` and scope `school` does not give My teaching;
 - property tests: `normaliseRow` is idempotent, and no output row has an action without View;
 - a preview never adds a sensitive key the admin lacks.
+
+**D32** (append under Access): `users.manage` from `settings.edit`; the `STAFF_PAGES` map; system role defaults (counsellor with `medical`); scope enforcement deferred to M3/M5.
 
 Commit `feat(domain): permission matrix, effective permissions and staff page access`.
 
@@ -683,66 +825,90 @@ Commit `feat(domain): permission matrix, effective permissions and staff page ac
 - Create:
   - `apps/api/src/common/guards/{can.guard.ts,can.decorator.ts,module.guard.ts,module.decorator.ts,sensitive.decorator.ts,preview-read-only.guard.ts,tenant-status.guard.ts}`;
   - `apps/api/src/modules/me/role-preview.{controller,service}.ts`;
-  - `apps/api/src/common/access/permissions.service.ts` (loads roles and `current_tenant_profile()`, cached per request and in Redis for 30 s, keyed by the roles hash);
-  - `apps/api/test/guards/{probe.module.ts,guards.api.test.ts}` (test-only probe routes: `@Can('fees.view')`, `@Module('transport')`, `@Sensitive('safeguarding')`, a POST);
+  - `apps/api/src/common/access/permissions.service.ts` (loads roles and `current_tenant_profile()`, cached per request and in Redis for 30 s);
+  - `apps/api/test/guards/{probe.module.ts,guards.api.test.ts}` (test-only probe routes: `@Can('fees.view')`, `@Can('fees.view', 'finance.view')`, `@Module('transport')`, `@Sensitive('safeguarding')`, a POST);
   - `apps/api/test/me/{permissions,role-preview}.api.test.ts`;
   - `apps/api/test/routes-guarded.test.ts`.
 
 **Rules:**
-- Every non-public route must carry `@Can` or `@PlatformRole`. A test walks the Nest router and the OpenAPI route list and fails on any route without one (the route-walk test).
-- `@Module(m)` returns 403 `module_not_in_plan` when the plan lacks the module.
-- A tenant with status `suspended` returns 403 `school_suspended` with the suspend reason on every staff and parent route (spec 05).
+- **Route walk.** Every route carries exactly one of `@Public`, `@PreAuth`, `@Authenticated`, `@Can` and `@PlatformRole`. A test walks the Nest router and the OpenAPI route list and fails on a route with none (or with any other marker). `@Authenticated` is allowed only on the routes listed in Task 6.
+- `@Can(...keys)` means any-of; the decorator's doc comment says so.
+- `@Module(m)` returns 403 `module_not_in_plan` when the plan lacks the module. The spec name stays: never import Nest's `Module` and ours in one file (a lint note in the decorator is enough).
+- `TenantStatusGuard`: a tenant with status `suspended` returns 403 `school_suspended` with the suspend reason on every staff and parent route (spec 05), except `POST /auth/sign-out`.
 - `@Sensitive(k)` requires `sensitive.k` and **always refuses support sessions** for safeguarding and medical. Each allowed view writes an audit event.
 - While a preview is on, every non-GET returns 403 `preview_read_only`, except `DELETE /me/role-preview` and `/auth/sign-out`.
+- Guard order: CSRF first, then preview read-only, so a write without `X-CSRF-Token` never reports `preview_read_only`.
+- **Permission cache.** The Redis key is the tenant, the roles hash and `max(roles.updated_at)`; role and permission writes (Task 13) also delete the tenant's keys, so a change is never served stale.
 
 **Endpoints (four tests each):**
 
 | Route | Permission | Notes |
 |---|---|---|
-| `GET /me/permissions` → `{keys, pages, home, preview?}` | session | Reflects an active preview (spec 06); `pages` from `pageAccess` |
-| `POST /me/role-preview` `{roleId, sampleUserId?}` | `users.manage` | The role and sample user must belong to the session's school (cross-tenant 404); a teacher preview needs a sample user; audit `role_preview.started` |
-| `DELETE /me/role-preview` | session with a preview | Audit `role_preview.ended` |
+| `GET /me/permissions` → `{keys, pages, home, preview?}` | `@Authenticated` | Reflects an active preview (spec 06); `pages` from `pageAccess`; `home` from `roleHome(perms, primaryRoleScope)` |
+| `POST /me/role-preview` `{roleId, sampleUserId?}` | `@Can('users.manage')` | The role and sample user must belong to the session's school (cross-tenant 404); a teacher preview needs a sample user; audit `role_preview.started` |
+| `DELETE /me/role-preview` | `@Authenticated` (with a preview) | Audit `role_preview.ended` |
 
 Steps:
-- [ ] **Step 1: Write the tests.** Probe tests for 403 `forbidden`, `module_not_in_plan`, `school_suspended`, the support + safeguarding refusal (Accept) and `preview_read_only`; the route-walk test; the endpoint tests.
+- [ ] **Step 1: Write the tests.**
+  - Probe tests for 403 `forbidden`, `module_not_in_plan`, `school_suspended`, the support + safeguarding refusal (Accept) and `preview_read_only`; `@Can` with two keys passes on either.
+  - `POST /auth/sign-out` works for a suspended school.
+  - A preview POST without `X-CSRF-Token` gets the CSRF 403, not `preview_read_only`.
+  - The preview cases moved here from Tasks 6 and 7: `GET /me` reflects an active preview; `PATCH /me` gives 403 `preview_read_only`; `POST /me/totp` is refused in preview.
+  - A permission change through the role tables is visible on the next request (no stale cache).
+  - The route-walk test; the endpoint tests.
 - [ ] **Step 2: Run them to see them fail.** Expected: FAIL.
 - [ ] **Step 3: Implement.** The probe module is imported only by tests, never by `AppModule`, so the OpenAPI document is unchanged.
-- [ ] **Step 4: Run the checks.** `pnpm --filter @quad/api test:api -- guards me`. Expected: PASS.
+- [ ] **Step 4: Run the checks.** `pnpm --filter @quad/api test && pnpm --filter @quad/api test:api -- guards me && pnpm codegen:check`. Expected: PASS.
 - [ ] **Step 5: Commit.** `feat(api): permission, module, sensitive and preview guards with /me/permissions`.
 
 **Acceptance:**
 - Accept "Cross-tenant and wrong-role tests fail with 403/404".
 - Accept "safeguarding routes refuse support sessions" (probe level; real safeguarding routes in M8 reuse `@Sensitive`).
 
-### Task 13: Users & roles API (staff accounts, invites, roles)
+### Task 13: Users & roles API (staff accounts, invites, roles) and the enquiry stub
 
 **Files:**
 - Create:
   - `apps/api/src/modules/users/{users.module.ts,users.controller.ts,users.service.ts,users.repository.ts,invites.service.ts,users.routes.ts}`;
   - `apps/api/src/modules/roles/{roles.controller.ts,roles.service.ts,roles.repository.ts,roles.routes.ts}`;
   - `apps/api/src/public/signed-links/invites.controller.ts`;
-  - `packages/contracts/src/{users,roles}/*.ts`;
-  - `apps/api/test/{users,roles,invites}/*.api.test.ts`.
+  - `apps/api/src/public/enquiry/{enquiry.controller.ts,enquiry.routes.ts}`;
+  - `packages/contracts/src/{users,roles}/*.ts`, `packages/contracts/src/public/enquiry.ts`;
+  - `apps/api/test/{users,roles,invites}/*.api.test.ts`, `apps/api/test/public/enquiry.api.test.ts`.
+- Modify: `packages/contracts/src/common/errors.ts` (codes `last_admin`, `system_role_locked`, `already_member`), `packages/contracts/i18n/en.json`, `docs/spec/02-architecture.md` (D32 bullets).
 
-**Endpoints.** Each has four tests: happy; 400; 403 for a `teacher` session (wrong role) and `preview_read_only`; cross-tenant (B's user or role id gives 404, lists omit A). All are audited per spec 05.
+**Cross-account work goes through the Task 3 definers**, never `withPlatform` and never a direct account-table query for another person:
+- invite: `ensure_account_for_email`;
+- two-step status in the list, the summary and Remind: `member_two_step_status`;
+- deactivate and sign out everywhere: `revoke_member_sessions`, then drop those sessions from the Redis session cache;
+- role and permission writes (`POST`/`PATCH`/`DELETE /roles`, `PUT /roles/:id/permissions`, a role change on `PATCH /users/:id`) delete the tenant's permission cache keys (Task 12).
+
+**Endpoints.** Each has four tests: happy; 400; 403 for a `teacher` session (wrong role) and `preview_read_only`; cross-tenant (B's user or role id gives 404, lists omit A). All are audited per spec 05 through `AuditService`. Business-rule refusals are 422 (spec 06 Conventions) with the codes below.
 
 | Route | Permission | Behaviour and extra tests |
 |---|---|---|
-| `GET /users?status=&roleId=&q=&cursor=` → staff list with role, status, two-step status, last sign-in | `users.manage` | Staff kind only; the story summary ("14 staff, 3 without two-step") |
-| `POST /users/invite` `{emails[1..50], roleId}` | `users.manage` | For each email: find or create the account (`account_by_identifier`); an existing membership gives `fields.emails[i]: already_member`; otherwise creates `users` (status `invited`) and `user_roles`, and queues the `staff_invite` link `quad-edu.com/sign-in/invite/{token}`. An existing account gets a membership, never a second account (spec 05) |
-| `PATCH /users/:id` `{roleId?, status?: 'active'\|'deactivated'}` | `users.manage` | You cannot change your own role or deactivate yourself (422); deactivation revokes that school's sessions and refresh families (spec 05, journey 19); the last active admin cannot be demoted (422 `last_admin`) |
-| `POST /users/:id/remind-two-step` | `users.manage` | Queues the reminder email; 409 when two-step is already on |
-| `POST /users/:id/reset-password` | `users.manage` | Queues a `password_reset` link with `tid` = this school |
-| `POST /users/:id/sign-out-everywhere` | `users.manage` | Revokes the account's sessions in **this school** (OQ10) |
-| `POST /users/:id/resend-invite` (new; prototype "Resend invite") | `users.manage` | A new token; only for `invited` |
-| `GET /auth/invites/:token` → `{school, name, emailMasked, needsPassword}` | public (signed `staff_invite`) | `invalid_link` cases (journey 43) |
-| `POST /auth/invites/:token/accept` `{password?}` | public (signed) or session | New account: sets the password (policy and breach check), then the session goes to `two_step_setup` if the school requires it (OQ9). Existing account: needs a signed-in session for that account (spec 05); activates the membership |
-| `GET /roles` → roles with member count, pages count and home | `users.manage` or `settings.view` | Feeds the Preview card |
-| `POST /roles` `{name, description, color, scope, baseRoleKey}` | `users.manage` | Copies the base role's matrix |
-| `PATCH /roles/:id` / `DELETE /roles/:id` | `users.manage` | System roles give 422 `system_role_locked`; deleting an assigned role gives 409 `in_use` |
-| `PUT /roles/:id/permissions` `{matrix, sensitive[]}` | `users.manage` | Normalised with `normaliseRow`; a module outside the plan gives 422 `module_not_in_plan`; a sensitive key the admin lacks gives 403 (spec 08) |
+| `GET /users?status=&roleId=&q=&cursor=` → staff list with role, status, two-step status, last sign-in | `@Can('users.manage')` | Staff kind only; the story summary ("14 staff, 3 without two-step") |
+| `POST /users/invite` `{emails[1..50], roleId}` | `@Can('users.manage')` | For each email: `ensure_account_for_email`; an existing membership gives `fields.emails[i]: already_member`; otherwise creates `users` (status `invited`) and `user_roles`, and queues the `staff_invite` link `quad-edu.com/sign-in/invite/{token}`. An existing account gets a membership, never a second account (spec 05) |
+| `PATCH /users/:id` `{roleId?, status?: 'active'\|'deactivated'}` | `@Can('users.manage')` | You cannot change your own role or deactivate yourself (422); deactivation revokes that school's sessions and refresh families (spec 05, journey 19); the last active admin cannot be demoted (422 `last_admin`) |
+| `POST /users/:id/remind-two-step` | `@Can('users.manage')` | Queues the reminder email; 409 when two-step is already on |
+| `POST /users/:id/reset-password` | `@Can('users.manage')` | Queues a `password_reset` link with `tid` = this school |
+| `POST /users/:id/sign-out-everywhere` | `@Can('users.manage')` | Revokes the account's sessions in **this school** (OQ10); the member's sessions in another school survive |
+| `POST /users/:id/resend-invite` (new; prototype "Resend invite") | `@Can('users.manage')` | A new token; only for `invited` |
+| `GET /auth/invites/:token` → `{school, name, emailMasked, needsPassword}` | `@Public` (signed `staff_invite`) | `invalid_link` cases (journey 43) |
+| `POST /auth/invites/:token/accept` `{password?}` | `@Public` (signed), with a session check for existing accounts | New account: sets the password (policy and breach check), then the session goes to `two_step_setup` if the school requires it (OQ9, accepted: the one case besides the support session where a token leads to a session). Existing account: needs a signed-in session for that account (spec 05); activates the membership |
+| `GET /roles` → roles with member count, pages count and home | `@Can('users.manage', 'settings.view')` (any-of) | Feeds the Preview card |
+| `POST /roles` `{name, description, color, scope, baseRoleKey}` | `@Can('users.manage')` | Copies the base role's matrix |
+| `PATCH /roles/:id` / `DELETE /roles/:id` | `@Can('users.manage')` | System roles give 422 `system_role_locked`; deleting an assigned role gives 409 `in_use` |
+| `PUT /roles/:id/permissions` `{matrix, sensitive[]}` | `@Can('users.manage')` | Normalised with `normaliseRow`; a module outside the plan gives 422 `module_not_in_plan`; a sensitive key the admin lacks gives 403 (spec 08) |
 
-Steps: test first, implement, `pnpm api:client`, then `pnpm --filter @quad/api test:api -- users roles invites`. Commit `feat(users): staff accounts, invites and roles for Users & roles`.
+**Enquiry stub** (a separate step and commit in this task):
+- `POST /public/enquiry/:embedKey` in `apps/api/src/public/enquiry/`, `@Public`, rate-limited to 20 per minute per IP, listed in `src/openapi/document.ts`, then `pnpm api:client`.
+- It calls `tenant_by_embed_key` (a stub until M4), so every key is unknown: 404 `not_found`. M4 completes it; the captcha (spec 06) arrives in M4.
+- Tests: 404 for an unknown (forged) key; 400 `validation` for a bad body; 429 after 20 per minute.
+
+**D32** (append): Signed links: a new invitee's first password set on the invite page leads to a session (OQ9), the one exception besides the support session to "a token never grants a session by itself"; the enquiry stub route, with the captcha in M4.
+
+Steps: test first, implement, `pnpm api:client`, append the D32 bullets, then `pnpm --filter @quad/api test:api -- users roles invites && pnpm codegen:check`. Commit `feat(users): staff accounts, invites and roles for Users & roles`. Then the enquiry stub: test first, implement, `pnpm api:client`, `pnpm --filter @quad/api test:api -- public && pnpm codegen:check`. Commit `feat(public): enquiry stub route on tenant_by_embed_key`.
 
 ### Task 14: School settings API (General, Sign-in read-only)
 
@@ -754,54 +920,43 @@ Steps: test first, implement, `pnpm api:client`, then `pnpm --filter @quad/api t
   - `apps/api/test/school/*.api.test.ts`.
 
 **Endpoints (four tests each):**
-- `GET /school` [`settings.view`] → `{ name, shortName, officeEmail, officePhone, address, timeZone (read-only), smsSenderId, smsSenderStatus, branding: {color, logoUrl} (read-only), signIn: {sso, twoStep, passwordMinLength, sessionHours, ipAllowlist} (read-only: "Managed by Quad"), summary }`.
-- `PATCH /school` [`settings.edit`] `{name?, officeEmail?, officePhone?, address?, smsSenderId?}`:
+- `GET /school` [`@Can('settings.view')`] → `{ name, shortName, officeEmail, officePhone, address, timeZone (read-only), smsSenderId, smsSenderStatus, branding: {color, logoUrl} (read-only), signIn: {sso, twoStep, passwordMinLength, sessionHours, ipAllowlist} (read-only: "Managed by Quad"), summary }`.
+- `PATCH /school` [`@Can('settings.edit')`] `{name?, officeEmail?, officePhone?, address?, smsSenderId?}`:
   - the name goes through `update_current_tenant_name`;
   - time zone, logo, colour and sign-in rules are not accepted (08 wins over 06; OQ19);
   - takes `If-Match`, and a stale `etag` gives 409;
   - each change writes the `settings.updated` audit with before and after.
-- `GET /school/branding` [session]: read-only.
-- `GET /settings` [`settings.view`]: the `school_settings` row, read-only in M1. `PATCH /settings` arrives with each tab's feature (OQ19).
+- `GET /school/branding` [`@Authenticated`]: read-only.
+- `GET /settings` [`@Can('settings.view')`]: the `school_settings` row, read-only in M1. Spec 08 (`settings.view` to see) wins over spec 06's `[settings.edit]`; Task 28 edits spec 06. `PATCH /settings` arrives with each tab's feature (OQ19).
 - `settingsSummary(settings, profile)` returns codes for the summary sentence, for example "Ask Quad is on. Quiet hours are 18:00–07:00 and weekends." Online payments is omitted until M7.
 
 Commit `feat(school): school settings General and read-only sign-in rules`.
 
 ## Phase 5: Audit and support
 
-### Task 15: Audit log, Settings → Audit API and platform audit
+### Task 15: Settings → Audit API and platform audit (read side)
+
+`AuditService`, `PlatformAuditService` and the action keys already exist (Task 6). This task adds the read side.
 
 **Files:**
 - Create:
-  - `apps/api/src/common/audit/{audit.service.ts,audit-actions.ts}`;
   - `apps/api/src/modules/audit/{audit.controller.ts,audit.repository.ts,audit.routes.ts}`;
-  - `apps/api/src/platform/audit/{platform-audit.service.ts,platform-audit.controller.ts}`;
+  - `apps/api/src/platform/audit/platform-audit.controller.ts` (`@PlatformController()`);
   - `apps/api/src/common/export/csv.ts`;
-  - `packages/contracts/src/audit/*.ts`;
-  - tests.
-
-**Behaviour:**
-- `AuditService.record(ctx, action, target, meta)` writes `audit_log` in the same transaction as the change.
-  - In a support session it sets `actor_platform_user_id` and `support_session_id`, and also calls `record_support_audit` (spec 05: dual audit).
-- `PlatformAuditService` (platform folder only) records every `withPlatform` write.
-- Action keys (contracts):
-  - `auth.*`: `sign_in`, `sign_in_failed`, `sign_out`, `password_reset`;
-  - `user.*`: `invited`, `role_changed`, `deactivated`, `reactivated`, `two_step_reminded`, `password_reset_sent`, `signed_out_everywhere`;
-  - `role.*`: `created`, `updated`, `deleted`, `permissions_changed`;
-  - `role_preview.*`: `started`, `ended`;
-  - `settings.updated`;
-  - `support_session.*`: `started`, `ended`;
-  - `audit.exported`.
+  - `packages/contracts/src/audit/*.ts` (the read schemas);
+  - `apps/api/test/audit/{audit,platform-audit}.api.test.ts`.
 
 **Endpoints (four tests each):**
-- `GET /audit?actor=&action=&from=&to=&cursor=` [`settings.view`]:
-  - `Accept: text/csv` needs `sensitive.export_data`, and the export itself is audited;
+- `GET /audit?actor=&action=&from=&to=&cursor=` [`@Can('settings.view')`]:
+  - `Accept: text/csv` needs `sensitive.export_data`, and the export itself is audited (`audit.exported`);
   - the response is a readable `summary` per row plus `meta`, with `viaSupport` set for support rows (08: "Support sessions from Quad are marked").
-- `GET /platform/audit?actor=&tenantId=&action=&from=&to=` [`@PlatformRole` any], with CSV (spec 07).
+- `GET /platform/audit?actor=&tenantId=&action=&from=&to=` [`@PlatformRole()` any], with CSV (spec 07).
 
 **Extra tests:**
 - B's audit rows never appear for A;
-- CSV without `export_data` gives 403;
-- an UPDATE on `audit_log` fails (trigger).
+- CSV without `export_data` gives 403.
+
+(The `audit_log` UPDATE/DELETE trigger test is Task 2's.)
 
 Commit `feat(audit): school and platform audit logs with filtered views and CSV export`.
 
@@ -809,20 +964,23 @@ Commit `feat(audit): school and platform audit logs with filtered views and CSV 
 
 **Files:**
 - Create:
-  - `apps/api/src/platform/support/{support.controller.ts,support.service.ts}`;
-  - `apps/api/src/platform/tenants/{tenants.controller.ts,tenants.service.ts}` (minimal `GET /platform/tenants` for the console list: id, name, short name, status, colour; M2 extends it);
+  - `apps/api/src/platform/support/{support.controller.ts,support.service.ts}` (`@PlatformController()`);
+  - `apps/api/src/platform/tenants/{tenants.controller.ts,tenants.service.ts}` (`@PlatformController()`; minimal `GET /platform/tenants` for the console list: id, name, short name, status, colour; M2 extends it);
   - `apps/api/src/public/signed-links/support-session.controller.ts`;
-  - tests.
+  - `apps/api/test/support/*.api.test.ts`.
+- Modify: `docs/spec/02-architecture.md` (D32 bullet).
 
 **Flow:**
 1. `POST /platform/tenants/:id/support-session` `{reason (10–500 chars, required)}`:
    - needs the `support`, `admin` or `owner` platform role;
-   - creates `support_sessions` (`expires_at` = now + 60 min) with `withPlatform`, plus a staff `sessions` row (`kind web`, `platform_user_id`, `active_tenant_id`, `support_session_id`, `stage active`);
+   - creates `support_sessions` (`expires_at` = now + 60 min) with `withPlatform`, plus a staff `sessions` row (`kind web`, `platform_user_id`, `active_tenant_id`, `support_session_id`, `stage active`, `token_hash` unset);
    - writes `platform_audit`;
    - returns `{ url: PUBLIC_WEB_URL + '/sign-in/support/' + token }` (purpose `support_session`, 2 min, single use; spec 05).
-2. `POST /auth/support-session` `{token}` (new route, `src/public/signed-links`): verifies and consumes the token, sets the staff cookie for that session, and audits `support_session.started` in the school.
-3. In the school, `/me` returns `support: {schoolName, platformUserName}` for the banner; permissions follow `effectivePermissions({ support })`.
-4. `POST /auth/support-session/end` ("Exit to platform"): ends both rows, audits, and returns `{ redirect: CONSOLE_URL }`. The session hard-expires at 60 minutes.
+2. `POST /auth/support-session` `{token}` (new route, `src/public/signed-links`, `@Public` signed): verifies and consumes the token, generates the cookie token, calls `redeem_support_session(supportSessionId, sha256(cookie))`, sets the staff cookie for that session, and audits `support_session.started` in the school. No `withPlatform` here.
+3. In the school, `/me` returns `support: {schoolName, platformUserName}` for the banner; permissions follow `effectivePermissions({ support })`. The `AuthGuard` accepts the session while `session_by_token` returns it (Task 6).
+4. `POST /auth/support-session/end` ("Exit to platform"; `@Public`, authenticated by its own cookie): calls `end_support_session(sha256(cookie))`, which ends both rows and writes `platform_audit`; audits `support_session.ended` in the school; returns `{ redirect: CONSOLE_URL }`. The session hard-expires at 60 minutes.
+
+Steps 2 and 4 depend on the controller's ruling on how those two definers write the null-account `sessions` row (see Task 3). Do not start them without it.
 
 **Tests:**
 - a missing or short reason gives 400;
@@ -830,36 +988,123 @@ Commit `feat(audit): school and platform audit logs with filtered views and CSV 
 - an unknown tenant gives 404;
 - the link works once (a second use gives `invalid_link`);
 - an expired link (fake clock + 2 min) is refused;
+- a forged link gives `invalid_link`;
 - every write in support produces one `audit_log` and one `platform_audit` row;
 - the support + `@Sensitive('medical')` probe gives 403;
-- after 60 minutes, 401;
+- after 60 minutes, 401; after Exit to platform, 401;
 - a support session for A cannot read B (404).
+
+**D32** (append under Signed links): `POST /auth/support-session` as the support redemption entry point (a D16 row), through `redeem_support_session` and `end_support_session`.
 
 Commit `feat(support): reasoned, time-limited support sessions with dual audit`.
 
 **Acceptance:** Accept "The support banner shows in support view; safeguarding routes refuse support sessions" (API side).
 
-## Phase 6: Staff screens
+## Phase 6: Seeds and the end-to-end stack
 
-All tasks in this phase follow `quad-web-screen`, with the prototype open side by side. Every screen has Playwright screenshots at 1440×900 and 390×844 in light and dark, saved to `docs/screenshots/m1/` in Task 26, and an axe check.
+The Playwright specs in Tasks 19–23 and the journeys in Task 26 need seeded accounts and a live API, so both come first.
 
-### Task 17: `/sign-in` and the signed-link pages
+### Task 17: Seed the M1 accounts and access data
+
+**Files:**
+- Modify:
+  - `packages/db/src/{seed-data.ts,seed.ts}`;
+  - `packages/db/src/env.ts` and `packages/db/src/env.test.ts` (the D27 follow-up: extend `loadRootEnv` into the one gated `.env` loader, local only, as `loadLocalEnvFile` does today; no new file);
+  - `apps/api/src/boot.ts` (import that loader instead of its own `loadLocalEnvFile`);
+  - `packages/db/test/seed.test.ts`;
+  - `packages/db/test/factories.ts`.
+
+**Seed (deterministic, written as `quad_owner`; D24):**
+- `quad_owner` is `NOBYPASSRLS` and FORCE RLS filters it, so inside the seed transaction the seed runs `set_config('app.tenant_id', <school>, true)` before each school's tenant rows and `set_config('app.account_id', <account>, true)` before each account's rows.
+- **Platform:**
+  - `owner@quad.local` (owner; password from `SEED_PASSWORD`; TOTP on; local code `000000`);
+  - `support@quad.local` (support role, for the support journey).
+  - Both match `CONSOLE_GOOGLE_HD=quad.local` locally, so the fake Google sign-in works for them (Task 10).
+- **Colombo International School:**
+  - branding `#DD4A42`;
+  - all modules;
+  - security: `two_step: staff`, `sso_google: true`, `sso_domain: colombo-intl.local` (exercises SSO with the fake issuer);
+  - `school_settings` defaults;
+  - the seven system roles.
+- **Kandy Hill Academy:**
+  - branding `#2BB0A0`;
+  - modules without `transport`;
+  - `two_step: admins`;
+  - system roles.
+- **People** (accounts, credentials and memberships):
+  - `prishan.maduka@colombo-intl.local` (CIS admin);
+  - `nadeesha.jayasinghe@colombo-intl.local` (CIS teacher);
+  - `ruwan.mendis@quad.local` (CIS teacher, KHA teacher; role names as the prototype: "Teacher · Mathematics" and "Head of Mathematics" are job titles that arrive in M3, so M1 shows the role names);
+  - `dilini.fernando@colombo-intl.local` (CIS finance officer, the preview sample);
+  - Dilhani Perera, phone `+94770000001`, a guardian membership at CIS.
+- Prishan, Nadeesha, Ruwan and Dilini have `credentials.totp_enabled = true` with a secret encrypted by `FieldCipher` (Task 4), so `DEV_FIXED_OTP=000000` passes their two-step step (journey 17) instead of sending them to setup.
+- `SEED_TENANTS` gains fixed ids for the people, exported as `SEED_PEOPLE`.
+
+**Tests:**
+- re-seeding is idempotent;
+- `auth_memberships(ruwan)` returns both schools;
+- each seeded password verifies against `SEED_PASSWORD`;
+- the four seeded staff have `totp_enabled` and a secret that decrypts;
+- the seed refuses to run without `SEED_PASSWORD`, and refuses the placeholder outside `local`;
+- the gated loader ignores `.env` when `APP_ENV` is `staging`.
+
+Commit `feat(db): seed platform users, school access settings, roles and the sample people`.
+
+### Task 18: The end-to-end stack
+
+**Files:**
+- Create:
+  - `scripts/e2e-stack.mjs`:
+    - takes a port parameter (default `:4000`; journey 42's second stack uses `:4001`);
+    - creates a fresh database `quad_e2e_<pid>` as admin;
+    - migrates and seeds it (Task 17);
+    - starts `apps/api/dist/main.js` and `dist/worker.js` on that port with that `DATABASE_URL`, Mailpit SMTP, `OIDC_FAKE_ISSUER_URL`, `CONSOLE_GOOGLE_HD=quad.local`, `APP_ENV=local` and `DEV_FIXED_OTP=000000` (no fake-clock variable: expired tokens come from a test helper that signs a past `exp`);
+    - starts `scripts/fake-oidc.mjs`;
+    - waits for `/health/ready`;
+    - drops the database on exit;
+    - has its own test (`scripts/test/e2e-stack.test.ts`);
+  - `packages/config/playwright/{stack.ts,mailpit.ts}` (the stack fixture with the port parameter, and the Mailpit API helper);
+  - `packages/config/playwright/signed-token.ts` (the helper that signs a token with a past `exp` or a wrong purpose for journey 43).
+- Modify:
+  - `packages/config/playwright/preset.ts` (`webServer` becomes `[stack, next start]` when a spec needs the API);
+  - `scripts/check-services.mjs` (Mailpit SMTP when `SMTP_URL` is set);
+  - `.github/workflows/ci.yml` `e2e-smoke` (postgres, redis and mailpit service containers, the same as `api-integration`);
+  - `scripts/test/workflows.test.ts`;
+  - `docs/spec/02-architecture.md` (D32 bullet).
+
+**Tests:**
+- the stack test: it starts on a given port, answers `/health/ready`, and drops its database on exit;
+- two stacks on `:4000` and `:4001` run side by side with separate databases;
+- `workflows.test.ts` asserts the `e2e-smoke` service containers.
+
+**D32** (append under Testing): the e2e stack (fresh database per run, a port parameter, API, worker, fake issuer, Mailpit) and the CI `e2e-smoke` services.
+
+Commit `test(e2e): a real API stack for Playwright with a fresh database per run`.
+
+## Phase 7: Staff screens
+
+All tasks in this phase follow `quad-web-screen`, with the prototype open side by side. Every screen has Playwright screenshots at 1440×900 and 390×844 in light and dark, saved to `docs/screenshots/m1/` in Task 27, and an axe check. Their Playwright specs run against the Task 18 stack with the Task 17 seed.
+
+### Task 19: `/sign-in` and the signed-link pages
 
 **Prototype:** `design/admin.html` `authRender` / `schoolAuth` (art panel and card), restructured identifier-first (spec wins, OQ15). Copy comes from the prototype where the spec is silent: "Sign in to Quad", "One sign-in for every school on Quad…", "Two-step sign-in", "Trust this device for 30 days", "Use a recovery code", "Reset your password", "Check your inbox", "Choose a school", "Remember my choice on this device".
 
 **Files:**
 - Create:
   - `apps/staff/src/app/(auth)/layout.tsx` (app tokens, `QueryClientProvider`, Quad-branded art panel);
-  - `apps/staff/src/app/(auth)/sign-in/page.tsx` and `_components/{IdentifyStep,PasswordStep,SsoButtons,TwoStepStep,TwoStepSetup,RecoveryCodes,ChooseSchool,NoSchool,ForgotStep,CheckInbox,AuthCard,OtpBoxes}.tsx`;
+  - `apps/staff/src/app/(auth)/sign-in/page.tsx` and `_components/{IdentifyStep,PasswordStep,SsoButtons,TwoStepStep,TwoStepSetup,RecoveryCodes,ChooseSchool,NoSchool,ForgotStep,CheckInbox,AuthCard}.tsx`;
+  - `packages/ui/src/components/OtpBoxes.tsx` with its test (shared: the console uses it in Task 23);
   - `(auth)/sign-in/reset/[token]/page.tsx`, `(auth)/sign-in/invite/[token]/page.tsx`, `(auth)/sign-in/support/[token]/page.tsx`;
   - `apps/staff/src/lib/{api.ts,session.ts}`;
-  - `apps/staff/scripts/build-export.test.ts`;
+  - `apps/staff/test/build-export.test.ts` (inside the Vitest include);
   - `apps/staff/e2e/sign-in.spec.ts`.
 - Modify:
+  - `apps/staff/package.json` (`@quad/client` and `@tanstack/react-query`, spec 02);
   - `apps/staff/src/middleware.ts` (`/app/**` without the cookie redirects 307 to `/sign-in?next=`; the token pages get `Referrer-Policy: no-referrer` and `X-Robots-Tag: noindex`);
   - `apps/staff/scripts/build-export.mjs` (refuse `sign-in`);
+  - `apps/staff/e2e/landing.spec.ts` (in the `export-*` projects only: `/sign-in` returns 404, and the selector becomes `a[href^="/sign-in"]`);
   - `packages/contracts/i18n/en.json`;
-  - `packages/ui` (move `OtpBoxes` there if the console uses it: rule of two).
+  - `docs/spec/02-architecture.md` (D32 bullets).
 
 **Behaviour:**
 - Identify, then SSO buttons and/or a password field, then two-step (or setup with QR and 10 recovery codes), then Choose a school (logo or monogram, name, "your role"; none gives the spec 05 message), then "Opening {school}…", then `next` or `/app`.
@@ -878,25 +1123,32 @@ All tasks in this phase follow `quad-web-screen`, with the prototype open side b
   - 390 px with no horizontal scroll;
   - axe clean;
 - `checkExport` refuses an out folder containing `sign-in`;
+- the `export-*` projects: `/sign-in` is a 404 and no `a[href^="/sign-in"]` exists;
 - `src/app/layout.tsx` imports nothing from `(auth)`, `@/lib/session` or `@quad/client` (the pre-launch guard).
+
+**D32** (append): Signed links: web paths `/sign-in/{reset,invite,support}/{token}` with `no-referrer` and `noindex`. Pre-launch: `/sign-in` and `/app` stay out of the static export, and `checkExport` enforces it. Pinned `qrcode`, `@tanstack/react-query` versions.
 
 Commit `feat(staff): identifier-first sign-in page and signed-link pages`.
 
-### Task 18: The portal shell: session, branding, permission-filtered navigation, switch school, banners
+### Task 20: The portal shell: session, branding, permission-filtered navigation, switch school, banners
 
 **Prototype:** `design/admin.html`: the rail, top bar, `.me` profile menu with `swSchool`, `#supportBar`, `#rvBar`, `#rvPick`, `rvDenied`.
 
 **Files:**
 - Modify:
   - `apps/staff/src/app/app/layout.tsx` (server: `GET /me` and `/me/permissions` through `API_INTERNAL_URL`, OQ16; a 401 redirects to `/sign-in?next=`);
-  - `apps/staff/src/components/shell/StaffShell.tsx` (navigation from `STAFF_PAGES` and `pages`; brand CSS variables `--brand`, `--brand-fill`, `--brand-ink` set as inline CSS variables from the API's computed palette; no raw hex in classes);
+  - `docs/spec/02-architecture.md` (the variables table: `API_INTERNAL_URL`), `.env.example` (same order) and `apps/api/src/config.ts` (`NOT_READ_BY_THE_API`), all in this commit;
+  - `apps/staff/src/components/shell/StaffShell.tsx` (navigation from `STAFF_PAGES` and `pages`; brand CSS variables `--brand`, `--brand-fill` and `--brand-ink` set as inline CSS variables from the API's computed palette, with `--brand-fill` taking `fill` in light and `fillDark` in dark; no raw hex in classes);
   - `apps/staff/src/app/app/page.tsx` (the greeting from `/me`);
-  - `packages/ui/src/shell/{AppShell,Topbar,Sidebar}.tsx` (a `banner` slot, a profile menu with Switch school and Sign out, and a desktop `actions` slot for **View as**).
-- Delete: `apps/staff/src/lib/placeholders.ts`.
+  - `packages/ui/src/shell/{AppShell,Topbar,Sidebar}.tsx` (a `banner` slot, a profile menu with Switch school and Sign out, and a desktop `actions` slot for **View as**);
+  - `apps/staff/e2e/screenshots.spec.ts` (sign in through the stack before opening `/app`).
+- Delete:
+  - `apps/staff/src/lib/placeholders.ts`;
+  - `apps/staff/e2e/shell.spec.ts` (folded into `shell-auth.spec.ts`).
 - Create:
   - `apps/staff/src/app/app/[...page]/page.tsx` (placeholder pages for unbuilt navigation items: "{Page} arrives soon", or the no-access page per `pages`);
   - `apps/staff/src/components/shell/{SupportBanner,PreviewBanner,ViewAsPicker,SwitchSchoolMenu,NoAccess,ViewOnlyTag}.tsx`;
-  - `apps/staff/e2e/shell-auth.spec.ts`.
+  - `apps/staff/e2e/shell-auth.spec.ts` (signed in via the stack; takes over the `shell.spec.ts` cases, plus the signed-out redirect to `/sign-in?next=/app`).
 
 **Behaviour:**
 - Items are hidden by `pageAccess` and plan modules.
@@ -909,18 +1161,20 @@ Commit `feat(staff): identifier-first sign-in page and signed-link pages`.
 
 **D27 follow-ups:** RTL unit tests for `Kpi`, `Pill`, `Tabs`, `Checkbox`, `Field` and `Textarea`, and a WebKit Playwright project for drawer focus (Secure cookies on WebKit localhost are why local cookies have no `Secure`, D32).
 
+**D32** (append under Configuration): `API_INTERNAL_URL` (staff and console server components; not read by the API).
+
 Commit `feat(staff): signed-in shell with school branding, role-aware navigation and banners`.
 
-### Task 19: Settings → Users & roles
+### Task 21: Settings → Users & roles
 
 **Prototype:** `design/admin.html` `V.users`: the People and Roles & permissions tabs, `rvCard()`, the invite drawer, row actions.
 
 **Files:**
 - Create:
-  - `apps/staff/src/app/app/settings/users/page.tsx` and `_components/{PeopleTable,RoleSelect,RowActions,PreviewRoleCard,RolesList,PermissionMatrix,SensitiveSwitches,SaveBar}.tsx`;
+  - `apps/staff/src/app/app/settings/users/page.tsx` and `_components/{PeopleTable,RoleSelect,RowActions,PreviewRoleCard,RolesList,SensitiveSwitches,SaveBar}.tsx`;
   - `_drawers/{InviteStaffDrawer,ConfirmDeactivateDrawer}.tsx`;
   - `apps/staff/src/app/app/settings/users/roles/new/page.tsx` (the New role page);
-  - `packages/ui/src/components/PermissionMatrix.tsx` (shared with the console in M2);
+  - `packages/ui/src/components/PermissionMatrix.tsx` (the only `PermissionMatrix`; shared with the console in M2);
   - `apps/staff/e2e/users-roles.spec.ts`.
 
 **Screens:**
@@ -942,7 +1196,7 @@ Commit `feat(staff): signed-in shell with school branding, role-aware navigation
 
 Commit `feat(staff): Users & roles with invites, row actions, role matrix and role preview`.
 
-### Task 20: School settings (General, Sign-in) and the Audit tab
+### Task 22: School settings (General, Sign-in) and the Audit tab
 
 **Prototype:** `design/admin.html` settings styling. Spec 08's School settings table is the authority (no dedicated prototype view; OQ19).
 
@@ -967,27 +1221,30 @@ Commit `feat(staff): Users & roles with invites, row actions, role matrix and ro
 
 Commit `feat(staff): School settings General, sign-in rules and the audit view`.
 
-## Phase 7: Console screens
+## Phase 8: Console screens
 
-### Task 21: Console sign-in, signed-in shell, Open as school admin, Audit log
+### Task 23: Console sign-in, signed-in shell, Open as school admin, Audit log
 
 **Prototype:** `design/platform.html` `platformAuth`, `V.tenants` (the "Open as school admin" button), `V.audit`. Spec wins: a reason is always required (D22).
 
 **Files:**
 - Create:
-  - `apps/console/src/app/sign-in/page.tsx` (Google Workspace button; the email and password form only when `GET /platform/auth/methods` says so; then TOTP or setup);
-  - `apps/console/src/middleware.ts` (a redirect to `/sign-in` without the console cookie; robots stays);
+  - `apps/console/src/app/sign-in/page.tsx` (Google Workspace button; the email and password form only when `GET /platform/auth/methods` says so; then TOTP or setup, with `OtpBoxes` from `packages/ui`);
   - `apps/console/src/app/(console)/schools/page.tsx` (a minimal list from `GET /platform/tenants`);
   - `_drawers/OpenAsSchoolAdminDrawer.tsx` (a required reason with a hint, a button "Open {school} as school admin", which opens the returned URL);
   - `apps/console/src/app/(console)/audit/page.tsx` (filters, table, CSV);
   - `apps/console/e2e/{sign-in,support,audit}.spec.ts`.
-- Modify: `apps/console/src/components/shell/ConsoleShell.tsx` (the real user and role, Sign out). Delete `apps/console/src/lib/placeholders.ts`.
+- Modify:
+  - `apps/console/src/middleware.ts` (it exists: add a redirect to `/sign-in` without the console cookie; robots stays);
+  - `apps/console/package.json` (`@quad/client` and `@tanstack/react-query`);
+  - `apps/console/src/components/shell/ConsoleShell.tsx` (the real user and role, Sign out).
+- Delete: `apps/console/src/lib/placeholders.ts`.
 
 Commit `feat(console): console sign-in, support entry with a reason, and the platform audit log`.
 
-## Phase 8: Parent app (Flutter)
+## Phase 9: Parent app (Flutter)
 
-### Task 22: Auth core: secure storage, token interceptor, auth state and router guard
+### Task 24: Auth core: secure storage, token interceptor, auth state and router guard
 
 Follow `quad-flutter-screen`.
 
@@ -999,7 +1256,8 @@ Follow `quad-flutter-screen`.
   - `apps/parent/pubspec.yaml` (`flutter_secure_storage`, `local_auth`);
   - `lib/core/api.dart` (the interceptor);
   - `lib/router.dart` (a redirect to `/welcome` when signed out and to `/lock` when locked);
-  - Android `MainActivity` (`FlutterFragmentActivity` for `local_auth`) and `Info.plist` (`NSFaceIDUsageDescription`).
+  - Android `MainActivity` (`FlutterFragmentActivity` for `local_auth`) and `Info.plist` (`NSFaceIDUsageDescription`);
+  - `docs/spec/02-architecture.md` (D32: pinned plugin versions).
 
 **Behaviour:**
 - The refresh token lives in `flutter_secure_storage`; the access token only in memory.
@@ -1014,7 +1272,7 @@ Follow `quad-flutter-screen`.
 
 Commit `feat(parent): token storage, refresh interceptor and lock state`.
 
-### Task 23: Sign-in screens, biometric unlock, Switch school and Sign out
+### Task 25: Sign-in screens, biometric unlock, Switch school and Sign out
 
 **Prototype:** `design/parent.html`: the `paGo` states (welcome, phone, code, verify, face) and the lock screen. Spec wins: the welcome and sign-in screens are Quad-branded (D13), and the school branding applies after sign-in.
 
@@ -1037,9 +1295,11 @@ Commit `feat(parent): token storage, refresh interceptor and lock state`.
 - **School picker** when there are several memberships.
 - **Unlock with Face ID?** (Turn on / Not now). "Allow notifications?" is M6.
 - **Lock:** "Welcome back", the school logo, Face ID or fingerprint, "Use passcode".
+- **Switch school** clears the previous school's cached rows before the new school's token is used (spec 09).
 
 **Tests:**
 - widget tests for the loading, empty, error and data states of each screen, with a mocked `quad_api` and a fake `LocalAuthentication`;
+- Switch school leaves no cached row of the previous school;
 - goldens for welcome, phone, code, found you and lock at 390×844, light and dark, text scale 1.0 and 2.0;
 - `integration_test/sign_in_test.dart` against the local API (runs in the nightly `e2e:mobile`, not here).
 
@@ -1047,73 +1307,19 @@ Run `fvm flutter analyze` (or `flutter` per D26), `dart format --set-exit-if-cha
 
 **Acceptance:** Accept "Sign in works in all three apps" (the parent part, with widget and integration tests; the device run is in CI nightly).
 
-## Phase 9: Seeds
-
-### Task 24: Seed the M1 accounts and access data
-
-**Files:**
-- Modify:
-  - `packages/db/src/{seed-data.ts,seed.ts}`;
-  - `packages/db/test/seed.test.ts`;
-  - `packages/db/test/factories.ts`.
-- Create: `packages/db/src/env-loader.ts` (the D27 follow-up: one gated `.env` loader shared by the API and the db scripts; `apps/api/src/boot.ts` uses it too).
-
-**Seed (deterministic, written as `quad_owner`; D24):**
-- **Platform:**
-  - `owner@quad.local` (owner; password from `SEED_PASSWORD`; TOTP on; local code `000000`);
-  - `support@quad.local` (support role, for the support journey).
-- **Colombo International School:**
-  - branding `#DD4A42`;
-  - all modules;
-  - security: `two_step: staff`, `sso_google: true`, `sso_domain: colombo-intl.local` (exercises SSO with the fake issuer);
-  - `school_settings` defaults;
-  - the seven system roles.
-- **Kandy Hill Academy:**
-  - branding `#2BB0A0`;
-  - modules without `transport`;
-  - `two_step: admins`;
-  - system roles.
-- **People** (accounts, credentials and memberships):
-  - `prishan.maduka@colombo-intl.local` (CIS admin);
-  - `nadeesha.jayasinghe@colombo-intl.local` (CIS teacher);
-  - `ruwan.mendis@quad.local` (CIS teacher, KHA teacher; role names as the prototype: "Teacher · Mathematics" and "Head of Mathematics" are job titles that arrive in M3, so M1 shows the role names);
-  - `dilini.fernando@colombo-intl.local` (CIS finance officer, the preview sample);
-  - Dilhani Perera, phone `+94770000001`, a guardian membership at CIS.
-- `SEED_TENANTS` gains fixed ids for the people, exported as `SEED_PEOPLE`.
-
-**Tests:**
-- re-seeding is idempotent;
-- `auth_memberships(ruwan)` returns both schools;
-- each seeded password verifies against `SEED_PASSWORD`;
-- the seed refuses to run without `SEED_PASSWORD`, and refuses the placeholder outside `local`.
-
-Commit `feat(db): seed platform users, school access settings, roles and the sample people`.
-
 ## Phase 10: Journeys
 
-### Task 25: The end-to-end stack and journeys 17, 18, 19, 42, 43, 50
+### Task 26: Journeys 17, 18, 19, 42, 43, 50
+
+They run against the Task 18 stack and the Task 17 seed.
 
 **Files:**
 - Create:
-  - `scripts/e2e-stack.mjs`:
-    - creates a fresh database `quad_e2e_<pid>` as admin;
-    - migrates and seeds it;
-    - starts `apps/api/dist/main.js` and `dist/worker.js` on `:4000` with that `DATABASE_URL`, Mailpit SMTP, `OIDC_FAKE_ISSUER_URL`, `APP_ENV=local` and `DEV_FIXED_OTP=000000`;
-    - starts `scripts/fake-oidc.mjs`;
-    - waits for `/health/ready`;
-    - drops the database on exit;
-    - has its own test;
-  - `packages/config/playwright/{stack.ts,mailpit.ts}` (the Mailpit API helper);
   - `apps/staff/e2e/journeys/{j17-sign-in-one-school,j18-two-schools,j19-invite,j43-signed-links,j50-preview-role}.spec.ts`;
   - `apps/console/e2e/journeys/j42-console-sign-in.spec.ts`.
-- Modify:
-  - `packages/config/playwright/preset.ts` (`webServer` becomes `[stack, next start]` when a spec needs the API);
-  - `scripts/check-services.mjs` (Mailpit SMTP when `SMTP_URL` is set);
-  - `.github/workflows/ci.yml` `e2e-smoke` (postgres, redis and mailpit service containers, the same as `api-integration`);
-  - `scripts/test/workflows.test.ts`.
 
 **Journeys** (spec 17, wording as there; Chromium at 1440 and 390, light and dark; axe on each page):
-- **17:** from `/` (non-prelaunch build), **Sign in** goes to `/app`, then `/sign-in`. Prishan's email, password and `000000` land in `/app` with CIS's name and the brand variable `--brand` = `#DD4A42`.
+- **17:** from `/` (non-prelaunch build), the landing's **Sign in** goes to `/app`, then `/sign-in`. Prishan's email, password and `000000` land in `/app` with CIS's name and the brand variable `--brand` = `#DD4A42`.
 - **18:** Ruwan sees **Choose a school** with both schools and his role in each, picks KHA, and sees KHA's branding. The profile menu's **Switch school** opens CIS, and the session cookie value changes (rotation).
 - **19:**
   - the admin invites `new.teacher+<run>@colombo-intl.local` as Teacher, and the email arrives in Mailpit;
@@ -1123,19 +1329,19 @@ Commit `feat(db): seed platform users, school access settings, roles and the sam
   - deactivating the teacher makes their next request redirect to `/sign-in`.
 - **42:**
   - with `CONSOLE_PASSWORD_LOGIN=true`, `owner@quad.local` signs in with password and `000000`;
-  - a second stack started with the flag off shows only **Continue with Google Workspace**, and the fake Google + TOTP works;
+  - a second stack on `:4001`, started with the flag off, shows only **Continue with Google Workspace**, and the fake Google (`owner@quad.local`, matching `CONSOLE_GOOGLE_HD=quad.local`) + TOTP works;
   - a fake account `someone@gmail.com` is refused.
 - **43 (M1 part):**
   - a reset link from Mailpit works once and is refused the second time;
-  - forged, expired (fake clock through a stack restart with `QUAD_E2E_NOW` local-only, or a token signed with a past `exp` by the test helper), wrong-purpose and tampered tokens are refused, and the page shows no school name;
-  - `POST /api/v1/public/enquiry/unknown-key` gives 404 (a stub route added here in `src/public/enquiry`, rate-limited, which calls `tenant_by_embed_key`; M4 completes it);
+  - forged, expired (a token signed with a past `exp` by the `signed-token.ts` helper), wrong-purpose and tampered tokens are refused, and the page shows no school name;
+  - `POST /api/v1/public/enquiry/unknown-key` gives 404 (the Task 13 stub route);
   - the webhook steps are marked `test.fixme` with `M7`. That is not `.skip`: the list in spec 17 says "webhooks from M7".
 - **50:**
   - Prishan previews Finance officer;
   - the menu shows exactly Dashboard, Communications, Students, Fees & invoicing and Accounting;
   - Students shows **View only**;
   - `/app/timetable` shows the no-access page;
-  - a write (`PATCH /api/v1/me` from the page context) gives 403 `preview_read_only`;
+  - a write (`PATCH /api/v1/me` from the page context, sending `X-CSRF-Token` from the `quad_csrf` cookie) gives 403 `preview_read_only`;
   - **Back to my view** restores the menu;
   - Settings → Audit lists `role_preview.started` and `role_preview.ended`.
 - **Support banner (Accept):** in a console journey step, the support user opens CIS with a reason; the staff portal shows the banner; **Exit to platform** returns to the console.
@@ -1144,7 +1350,7 @@ Commit `test(e2e): sign-in, invite, console, signed-link and role-preview journe
 
 ## Phase 11: Verify and screenshots
 
-### Task 26: Gate, screenshots and review
+### Task 27: Gate, screenshots and review
 
 Steps:
 - [ ] **Step 1: Run the gates.** `pnpm verify && pnpm build`, then `NEXT_PUBLIC_QUAD_PRELAUNCH=true pnpm --filter @quad/staff build:export && pnpm --filter @quad/staff e2e:export`. Expected: all PASS.
@@ -1166,26 +1372,37 @@ Steps:
 
 ## Phase 12: Docs
 
-### Task 27: Decision log, spec edits, README and progress
+### Task 28: Decision log, spec edits, README and progress
 
 **Modify:**
 - `docs/spec/02-architecture.md`:
-  - D32 (one row in the D28 style: a summary sentence and a `<ul>` per area);
-  - the D16 table row for the support session redemption;
-  - the variables table (`OIDC_FAKE_ISSUER_URL`, `API_INTERNAL_URL`).
+  - D32: finalise the row that Tasks 1–26 built (check every item in "Proposed decision-log row" below is present; add only what is missing);
+  - the D16 table row for the support session redemption (`redeem_support_session`, `end_support_session`);
+  - 02:137 (the `auth_memberships` columns `short_name`, `user_id`, `suspended`, `suspend_reason`, and the tenant status set including `suspended`);
+  - 02:276 (`FIELD_ENCRYPTION_KEY` required until M12): Task 4 already made this edit; confirm it.
+  - The variables table needs nothing here: `OIDC_FAKE_ISSUER_URL` came with Task 8 and `API_INTERNAL_URL` with Task 20.
 - `docs/spec/04-data-model.md`:
   - account tables and RLS;
   - the new columns (`accounts.locked_until`, `credentials.password_changed_at`, `sessions.*`, `platform_users.password_hash` and `totp_enabled`, `support_sessions.expires_at`, `school_settings.address` and `sms_sender_status`, `audit_log.support_session_id`);
+  - 04:56: `sessions.token_hash`, `stage`, `keep_signed_in`, `refresh_generation`, `preview_role_id`, `preview_sample_user_id` and `support_session_id`, in place of `refresh_hash`;
+  - 04:58: `otp_challenges.subject_hash` and `channel` (HMAC-keyed);
+  - 04:279: the same `auth_memberships` columns and status set as 02:137;
   - `trusted_devices`;
-  - the new definer functions.
-- `docs/spec/05-auth-tenancy-rbac.md`: `users.manage`; the page-access rule; staff invite TTL; `password_reset` with `tid` null.
+  - the new definer functions and the `definer_read` policy.
+- `docs/spec/05-auth-tenancy-rbac.md`:
+  - `users.manage`; the page-access rule; staff invite TTL; `password_reset` with `tid` null;
+  - 05:34: the country list is LK (+94) only for now (OQ12);
+  - 05:56: "A token never grants a session by itself", except the support session and a new invitee's first password set (OQ9).
 - `docs/spec/06-api-and-events.md`:
   - `POST /auth/support-session`, `POST /auth/support-session/end`, `POST /users/:id/resend-invite`;
   - the `/platform/auth/*` and `/platform/me` lines;
   - `GET /platform/tenants` minimal;
-  - the new error codes.
+  - the new error codes;
+  - 06:24: invite acceptance for a new account without a prior sign-in (OQ9), and the invite response `{school, name, emailMasked, needsPassword}`;
+  - 06:60: `GET /settings` needs `settings.view` (spec 08 wins).
 - `docs/spec/08-staff-portal.md`: the School settings tab list for M1 (Sign-in shown as a read-only tab).
-- `docs/spec/17-testing-quality.md`: journey 17 starts from `/sign-in` until M1b's dialog.
+- `docs/spec/17-testing-quality.md`: journey 17 starts "from the landing's **Sign in** (via `/app` → `/sign-in`) until M1b's dialog".
+- `docs/spec/19-public-site.md` 19:7: `/sign-in` lives in the `(auth)` route group with app tokens, not `(public)` (OQ15).
 - `docs/spec/18-delivery-plan.md`: tick M1. Leave M1b unticked.
 - `README.md`: the seeded sign-ins section, now real.
 - `infra/README.md`: the first-deploy steps for the JWT keys, `SEED_PASSWORD` and `FIELD_ENCRYPTION_KEY`.
@@ -1268,41 +1485,45 @@ Spec and prototype conflicts noted (spec wins):
 
 ## Proposed decision-log row
 
-**D32 (2026-10-08). Auth, tenancy and permissions (M1).** One row in the D28 style, with these items:
+**D32 (2026-10-08). Auth, tenancy and permissions (M1).** One row in the D28 style. Task 1 creates it; the task named in brackets appends each item; Task 28 finalises:
 - **Tables and lookups:**
-  - account tables with RLS on `app.account_id` and `withAccount` (OQ1);
-  - `otp_challenges` as the only open table;
-  - the third and fourth table classes in `findTenancyViolations`;
-  - new definers `account_by_identifier`, `session_by_token`, `sso_methods_for_domain`, `auth_sign_in_rules`, `current_tenant_profile`, `update_current_tenant_name`, `consume_signed_token` and `record_support_audit`;
-  - the two D16 stubs;
-  - new columns and `trusted_devices`.
-- **Signed links:** the payload format and `SIGNED_LINK_RULES` TTLs; `tid` null for account-level `password_reset`; web paths `/sign-in/{reset,invite,support}/{token}` with `no-referrer` and `noindex`; `POST /auth/support-session` as the support redemption entry point (D16 row).
+  - account tables with RLS on `app.account_id` (key `id` on `accounts`) and `withAccount` (OQ1) [1];
+  - `otp_challenges` as the only open table, with HMAC-keyed `code_hash` and `subject_hash` [1];
+  - the account and open table classes in `findTenancyViolations` [1];
+  - migration order `0003_platform_access`, `0004_accounts` [1];
+  - new columns and `trusted_devices` [1];
+  - new definers `account_by_identifier`, `session_by_token`, `sso_methods_for_domain`, `auth_sign_in_rules`, `current_tenant_profile`, `update_current_tenant_name`, `consume_signed_token`, `record_support_audit`, `ensure_account_for_email`, `member_two_step_status`, `revoke_member_sessions`, `redeem_support_session` and `end_support_session`, and the two D16 stubs [3];
+  - `definer_read` (`FOR SELECT TO quad_owner USING (true)` on exactly `accounts`, `sessions`, `users`, `user_roles` and `roles`) as an amendment of D24's "no other permissive policy" [3];
+  - `auth_memberships` returns suspended schools and `short_name`, `user_id`, `suspended`, `suspend_reason` [3].
+- **Signed links:** the payload format and `SIGNED_LINK_RULES` TTLs; `tid` null for account-level `password_reset` [4]; a new invitee's first password set leads to a session (OQ9) [13]; web paths `/sign-in/{reset,invite,support}/{token}` with `no-referrer` and `noindex` [19]; `POST /auth/support-session` as the support redemption entry point (D16 row) [16].
 - **Sessions:**
-  - opaque 32-byte cookie, SHA-256 in the database, Redis cache for 30 s;
-  - `__Host-` names, but `quad_sid` and `quad_console_sid` without `Secure` when `APP_ENV=local`;
-  - double-submit CSRF;
-  - `stage` on the session row for the sign-in steps;
-  - parent JWT EdDSA, 15 min;
-  - refresh `{sid}.{generation}.{secret}` with family revocation on reuse.
+  - opaque 32-byte cookie, SHA-256 in the database, Redis cache for 30 s [6];
+  - `__Host-` names, but `quad_sid` and `quad_console_sid` without `Secure` when `APP_ENV=local` [6];
+  - double-submit CSRF in `__Host-quad_csrf` (`quad_csrf` locally) [6];
+  - `stage` on the session row for the sign-in steps [6];
+  - lockout failures in the Redis sorted set `lockout:{accountId}` [7];
+  - parent JWT EdDSA, 15 min; relative tokens reach only refresh and sign-out in M1 [9];
+  - refresh `{sid}.{generation}.{secret}`, a 60-day family, revoked on reuse [9].
 - **Crypto:**
-  - Argon2id through `@node-rs/argon2` (`m=19456, t=2, p=1`);
-  - `FieldCipher` AES-256-GCM with HKDF from `FIELD_ENCRYPTION_KEY`, KMS in M12;
-  - JWT and field keys required from M1, with local-only placeholders;
-  - the breach-check failure mode.
+  - Argon2id through `@node-rs/argon2` (`m=19456, t=2, p=1`) [4];
+  - `FieldCipher` AES-256-GCM with HKDF from `FIELD_ENCRYPTION_KEY`, required in every environment until M12's KMS adapter replaces it [4];
+  - JWT and field keys required from M1, with local-only placeholders [4];
+  - the breach-check failure mode [4].
 - **Access:**
-  - `users.manage` from `settings.edit`;
-  - the `STAFF_PAGES` map;
-  - system role defaults (counsellor with `medical`);
-  - scope enforcement deferred to M3/M5;
-  - the API computes the school brand palette with `@quad/tokens` `fillFor` (a new allowed `apps/api` → `@quad/tokens` import, colour maths only).
-- **Configuration:** `OIDC_FAKE_ISSUER_URL` (local only) and `API_INTERNAL_URL`.
-- **Testing:** the e2e stack (fresh database per run, API, worker, fake issuer, Mailpit) and the CI `e2e-smoke` services.
-- **Pre-launch:** `/sign-in` and `/app` stay out of the static export; `checkExport` enforces it.
+  - the `@Authenticated()` marker for `/me*`, `/auth/sign-out`, `/auth/select-school` and `/school/branding`; `@PlatformController()` [6];
+  - `users.manage` from `settings.edit` [11];
+  - the `STAFF_PAGES` map [11];
+  - system role defaults (counsellor with `medical`) [11];
+  - scope enforcement deferred to M3/M5 [11];
+  - the API computes the school brand palette with `@quad/tokens` `deriveBrand` (a new allowed `apps/api` → `@quad/tokens` import, colour maths only) [6].
+- **Configuration:** `OIDC_FAKE_ISSUER_URL` (local only) [8]; `CONSOLE_GOOGLE_HD` (`quad.local` locally, `quad-edu.com` in production) and the always-registered console password route [10]; `API_INTERNAL_URL` [20]; the enquiry stub, with the captcha in M4 [13]; pinned dependency versions [each installing task].
+- **Testing:** the e2e stack (fresh database per run, a port parameter, API, worker, fake issuer, Mailpit) and the CI `e2e-smoke` services [18].
+- **Pre-launch:** `/sign-in` and `/app` stay out of the static export; `checkExport` enforces it [19].
 
 ## Risks and size
 
 **Size**
-- 27 tasks, the largest milestone so far. It touches every layer, 4 migrations and about 45 endpoints.
+- 28 tasks, the largest milestone so far. It touches every layer, 4 migrations and about 45 endpoints.
 - Candidates to move to M2 if it runs long, in this order: the staff New role page, the console Audit log page, `GET /me/sessions`.
 
 **Cannot run offline here**
@@ -1327,4 +1548,5 @@ Spec and prototype conflicts noted (spec wins):
 **Tests and dependencies**
 - **E2E stack flakiness.** Journeys now need Postgres, Redis, Mailpit and the API in `pnpm verify` and CI `e2e-smoke`. Unique emails per run and a fresh database per run keep them independent.
 - **New dependencies.** Argon2 is native (prebuilt), plus `openid-client`, `jose`, `otplib`, `nodemailer`, `qrcode` and the Flutter plugins. They may trip `pnpm audit` or need platform builds in the Docker images (`docker/api.Dockerfile` on Alpine needs the musl Argon2 binary; Task 4 checks `scripts/docker-build.mjs api`).
-- **Pre-launch regression.** Any change to `src/app/layout.tsx`, `(public)/**` or shared `@quad/ui` pieces the landing imports reaches `quad-edu.com` on the next merge to `main`. Task 17's guard test and Task 26's export comparison cover it.
+- **Pre-launch regression.** Any change to `src/app/layout.tsx`, `(public)/**` or shared `@quad/ui` pieces the landing imports reaches `quad-edu.com` on the next merge to `main`. Task 19's guard test and Task 27's export comparison cover it.
+- **Support-session definer writes (open).** `redeem_support_session` and `end_support_session` must write a `sessions` row with a null `account_id`, which neither the account policy nor the SELECT-only `definer_read` admits. Tasks 3 and 16 stop for a controller ruling before building them.
