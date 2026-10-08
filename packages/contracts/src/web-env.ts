@@ -42,6 +42,14 @@ export const WebPublicEnvSchema = z
     NEXT_PUBLIC_SENTRY_DSN: optional(z.string().url()),
     NEXT_PUBLIC_TURNSTILE_SITE_KEY: optional(z.string()),
     NEXT_PUBLIC_PLAUSIBLE_DOMAIN: optional(z.string()),
+    /**
+     * Builds the pre-launch public site (decision log, 2026-10-08): Sign in shows a "coming soon"
+     * note and Book a demo opens an email. The GitHub Pages export sets it; the real sign-in and
+     * demo endpoint replace both when it is off.
+     */
+    NEXT_PUBLIC_QUAD_PRELAUNCH: optional(z.enum(['true', 'false'])).transform(
+      (value) => value === 'true',
+    ),
   })
   .superRefine((env, ctx) => {
     if (env.NEXT_PUBLIC_APP_ENV !== 'local' && env.NEXT_PUBLIC_API_URL === undefined) {

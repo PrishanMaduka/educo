@@ -7,7 +7,23 @@ describe('parseWebPublicEnv', () => {
     expect(parseWebPublicEnv({})).toEqual({
       NEXT_PUBLIC_APP_ENV: 'local',
       NEXT_PUBLIC_API_URL: 'http://localhost:4000',
+      NEXT_PUBLIC_QUAD_PRELAUNCH: false,
     });
+  });
+
+  it('reads the pre-launch switch as true or false only', () => {
+    expect(parseWebPublicEnv({ NEXT_PUBLIC_QUAD_PRELAUNCH: 'true' })).toMatchObject({
+      NEXT_PUBLIC_QUAD_PRELAUNCH: true,
+    });
+    expect(parseWebPublicEnv({ NEXT_PUBLIC_QUAD_PRELAUNCH: 'false' })).toMatchObject({
+      NEXT_PUBLIC_QUAD_PRELAUNCH: false,
+    });
+    expect(parseWebPublicEnv({ NEXT_PUBLIC_QUAD_PRELAUNCH: '' })).toMatchObject({
+      NEXT_PUBLIC_QUAD_PRELAUNCH: false,
+    });
+    expect(() => parseWebPublicEnv({ NEXT_PUBLIC_QUAD_PRELAUNCH: 'yes' })).toThrow(
+      /NEXT_PUBLIC_QUAD_PRELAUNCH/,
+    );
   });
 
   it('treats empty values as unset', () => {
