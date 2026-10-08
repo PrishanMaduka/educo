@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 
+import { CryptoModule } from './common/crypto/crypto.module';
 import { CoreModule } from './core.module';
 import { DatabaseModule } from './database/database.module';
 import { HealthModule } from './health/health.module';
@@ -28,6 +29,7 @@ export class AppModule {
       imports: [
         CoreModule.forRoot(config, logger, overrides.now),
         DatabaseModule,
+        CryptoModule,
         HealthModule,
         RealtimeModule,
         SesWebhookModule.register(overrides.snsFetchers),

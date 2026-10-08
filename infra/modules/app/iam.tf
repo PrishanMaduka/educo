@@ -27,6 +27,9 @@ locals {
     var.env_secret_arns["REDIS_URL"],
     aws_secretsmanager_secret.app["SESSION_SECRET"].arn,
     aws_secretsmanager_secret.app["LINK_SIGNING_SECRET"].arn,
+    aws_secretsmanager_secret.app["FIELD_ENCRYPTION_KEY"].arn,
+    aws_secretsmanager_secret.app["JWT_PRIVATE_KEY"].arn,
+    aws_secretsmanager_secret.app["JWT_PUBLIC_KEY"].arn,
     aws_secretsmanager_secret.app["SENTRY_DSN"].arn,
     aws_secretsmanager_secret.app["OTEL_EXPORTER_OTLP_HEADERS"].arn,
   ]
@@ -41,6 +44,9 @@ locals {
     var.env_secret_arns["DATABASE_URL"],
     var.env_secret_arns["DATABASE_PLATFORM_URL"],
     var.db_master_secret_arn,
+    # The seed task's (it shares this role with db-bootstrap and migrate).
+    aws_secretsmanager_secret.app["FIELD_ENCRYPTION_KEY"].arn,
+    aws_secretsmanager_secret.app["SEED_PASSWORD"].arn,
   ]
 
   ecs_tasks_trust = jsonencode({

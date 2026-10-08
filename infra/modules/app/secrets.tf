@@ -1,22 +1,29 @@
 # App secrets (`<name>/env/<NAME>`, spec 20 → Secrets), kept out of Terraform state (Task 8
 # review): every version is written through secret_string_wo.
-#   - SESSION_SECRET and LINK_SIGNING_SECRET come from `ephemeral "random_password"` (64
-#     alphanumeric characters, one draw each, so they differ). Raising app_secret_versions[NAME]
-#     writes a new value in the next apply; restart the api and worker afterwards.
-#   - SENTRY_DSN and OTEL_EXPORTER_OTLP_HEADERS are set by hand (README). Terraform writes a
+#   - SESSION_SECRET, LINK_SIGNING_SECRET and FIELD_ENCRYPTION_KEY come from
+#     `ephemeral "random_password"` (64 alphanumeric characters, one draw each, so they differ).
+#     Raising app_secret_versions[NAME] writes a new value in the next apply; restart the api and
+#     worker afterwards. FIELD_ENCRYPTION_KEY stays at version 1 until M12 (D32): a new key would
+#     leave every encrypted field unreadable, and re-encryption arrives with the KMS adapter.
+#   - JWT_PRIVATE_KEY, JWT_PUBLIC_KEY (an Ed25519 pair made with openssl), SEED_PASSWORD,
+#     SENTRY_DSN and OTEL_EXPORTER_OTLP_HEADERS are set by hand (README). Terraform writes a
 #     placeholder version once, so the tasks can start before they are set: ECS refuses a secret
 #     without a current version, and Secrets Manager refuses an empty string. The placeholder is
 #     a JSON object whose keys hold empty strings, and the task definitions read one key each
 #     (`<arn>:<key>::`), so the apps see an empty variable, which they treat as unset. Its
 #     write-only version never changes, so Terraform never overwrites a value set by hand.
-#     SENTRY_DSN has one key per Sentry project: api (the api and the worker), staff and console.
+#     SENTRY_DSN has one key per Sentry project: api (the api and the worker), staff and console;
+#     the others have one key, `value`. The api refuses to boot until both JWT keys are set.
 
 locals {
-  generated_app_secrets = toset(["SESSION_SECRET", "LINK_SIGNING_SECRET"])
+  generated_app_secrets = toset(["SESSION_SECRET", "LINK_SIGNING_SECRET", "FIELD_ENCRYPTION_KEY"])
 
   placeholder_app_secrets = {
     SENTRY_DSN                 = jsonencode({ api = "", staff = "", console = "" })
     OTEL_EXPORTER_OTLP_HEADERS = jsonencode({ value = "" })
+    JWT_PRIVATE_KEY            = jsonencode({ value = "" })
+    JWT_PUBLIC_KEY             = jsonencode({ value = "" })
+    SEED_PASSWORD              = jsonencode({ value = "" })
   }
 
   app_secret_names = concat(sort(local.generated_app_secrets), sort(keys(local.placeholder_app_secrets)))

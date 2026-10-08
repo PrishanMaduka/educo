@@ -193,15 +193,23 @@ variable "services" {
 
 variable "app_secret_versions" {
   type        = map(number)
-  description = "Write-only version of each generated app secret (SESSION_SECRET, LINK_SIGNING_SECRET). Raising one writes a new random value in the next apply; restart the api and worker afterwards."
+  description = "Write-only version of each generated app secret (SESSION_SECRET, LINK_SIGNING_SECRET, FIELD_ENCRYPTION_KEY). Raising one writes a new random value in the next apply; restart the api and worker afterwards. FIELD_ENCRYPTION_KEY stays at 1 until M12 (D32)."
   default = {
-    SESSION_SECRET      = 1
-    LINK_SIGNING_SECRET = 1
+    SESSION_SECRET       = 1
+    LINK_SIGNING_SECRET  = 1
+    FIELD_ENCRYPTION_KEY = 1
   }
 
   validation {
-    condition     = length(setsubtract(["SESSION_SECRET", "LINK_SIGNING_SECRET"], keys(var.app_secret_versions))) == 0
-    error_message = "app_secret_versions needs SESSION_SECRET and LINK_SIGNING_SECRET."
+    condition     = length(setsubtract(["SESSION_SECRET", "LINK_SIGNING_SECRET", "FIELD_ENCRYPTION_KEY"], keys(var.app_secret_versions))) == 0
+    error_message = "app_secret_versions needs SESSION_SECRET, LINK_SIGNING_SECRET and FIELD_ENCRYPTION_KEY."
+  }
+
+  # A new field key would leave every encrypted value unreadable; re-encryption comes with M12's
+  # KMS adapter (D32).
+  validation {
+    condition     = lookup(var.app_secret_versions, "FIELD_ENCRYPTION_KEY", 1) == 1
+    error_message = "FIELD_ENCRYPTION_KEY cannot be rotated before M12: keep its version at 1."
   }
 }
 

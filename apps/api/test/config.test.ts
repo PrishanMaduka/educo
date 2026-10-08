@@ -1,3 +1,4 @@
+import { generateKeyPairSync } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { parseEnv } from 'node:util';
@@ -12,7 +13,7 @@ import {
   loadConfig,
 } from '../src/config';
 
-import { localEnv, productionEnv } from './env';
+import { TEST_JWT_KEYS, localEnv, productionEnv } from './env';
 
 /**
  * Every variable in `.env.example`, which the repo test `scripts/test/services.test.ts` keeps
@@ -84,6 +85,9 @@ describe('loadConfig', () => {
         'LINK_SIGNING_SECRET',
         'PUBLIC_WEB_URL',
         'CONSOLE_URL',
+        'FIELD_ENCRYPTION_KEY',
+        'JWT_PRIVATE_KEY',
+        'JWT_PUBLIC_KEY',
       ]),
     );
   });
@@ -162,7 +166,11 @@ describe('loadConfig', () => {
     expect(() => loadConfig(localEnv(LOCAL_DEV_SECRETS))).not.toThrow();
     const error = configErrorOf(productionEnv(LOCAL_DEV_SECRETS));
     expect(error.problems.map((p) => p.variable).sort()).toEqual([
+      'FIELD_ENCRYPTION_KEY',
+      'JWT_PRIVATE_KEY',
+      'JWT_PUBLIC_KEY',
       'LINK_SIGNING_SECRET',
+      'SEED_PASSWORD',
       'SESSION_SECRET',
     ]);
   });
@@ -224,5 +232,138 @@ describe('loadConfig', () => {
       }),
     );
     expect(config.DEV_FIXED_OTP).toBe('000000');
+  });
+});
+
+describe('loadConfig: field encryption, token keys and the seed password (M1, D32)', () => {
+  const staging = (overrides: Record<string, string | undefined>) =>
+    productionEnv({ APP_ENV: 'staging', ...overrides });
+
+  it.each(['FIELD_ENCRYPTION_KEY', 'JWT_PRIVATE_KEY', 'JWT_PUBLIC_KEY'])(
+    'requires %s in every environment, local included',
+    (variable) => {
+      expect(configErrorOf(localEnv({ [variable]: undefined })).problems).toContainEqual({
+        variable,
+        problem: 'is missing',
+      });
+      expect(configErrorOf(productionEnv({ [variable]: '' })).problems).toContainEqual({
+        variable,
+        problem: 'is missing',
+      });
+    },
+  );
+
+  it('refuses a FIELD_ENCRYPTION_KEY under 32 characters, even locally', () => {
+    const short = 'k'.repeat(31);
+    for (const env of [
+      localEnv({ FIELD_ENCRYPTION_KEY: short }),
+      staging({ FIELD_ENCRYPTION_KEY: short }),
+    ]) {
+      const error = configErrorOf(env);
+      expect(error.problems).toEqual([
+        { variable: 'FIELD_ENCRYPTION_KEY', problem: 'must be at least 32 characters' },
+      ]);
+      expect(error.message).not.toContain(short);
+    }
+    expect(
+      loadConfig(localEnv({ FIELD_ENCRYPTION_KEY: 'k'.repeat(32) })).FIELD_ENCRYPTION_KEY,
+    ).toBe('k'.repeat(32));
+  });
+
+  it('accepts the published placeholders locally', () => {
+    const config = loadConfig(localEnv(LOCAL_DEV_SECRETS));
+    expect(config.FIELD_ENCRYPTION_KEY).toBe(LOCAL_DEV_SECRETS.FIELD_ENCRYPTION_KEY);
+    expect(config.SEED_PASSWORD).toBe(LOCAL_DEV_SECRETS.SEED_PASSWORD);
+  });
+
+  it.each(['FIELD_ENCRYPTION_KEY', 'SEED_PASSWORD'] as const)(
+    'refuses the placeholder %s in staging and production',
+    (variable) => {
+      for (const env of [staging({}), productionEnv()]) {
+        const error = configErrorOf({ ...env, [variable]: LOCAL_DEV_SECRETS[variable] });
+        expect(error.problems).toEqual([
+          { variable, problem: 'is the published local value; set a real secret' },
+        ]);
+        expect(error.message).not.toContain(LOCAL_DEV_SECRETS[variable]);
+      }
+    },
+  );
+
+  it('accepts a real seed password in staging, and none at all', () => {
+    expect(loadConfig(staging({ SEED_PASSWORD: 'staging-seed-password-1' })).SEED_PASSWORD).toBe(
+      'staging-seed-password-1',
+    );
+    expect(loadConfig(staging({ SEED_PASSWORD: undefined })).SEED_PASSWORD).toBeUndefined();
+  });
+
+  it('refuses the published Ed25519 pair in staging, naming both keys', () => {
+    const published = {
+      JWT_PRIVATE_KEY: LOCAL_DEV_SECRETS.JWT_PRIVATE_KEY,
+      JWT_PUBLIC_KEY: LOCAL_DEV_SECRETS.JWT_PUBLIC_KEY,
+    };
+    expect(() => loadConfig(localEnv(published))).not.toThrow();
+    const error = configErrorOf(staging(published));
+    expect(error.problems).toEqual([
+      { variable: 'JWT_PRIVATE_KEY', problem: 'is the published local value; set a real secret' },
+      { variable: 'JWT_PUBLIC_KEY', problem: 'is the published local value; set a real secret' },
+    ]);
+    expect(error.message).not.toContain('PRIVATE KEY');
+  });
+
+  it('refuses the published private key in staging even when it is written differently', () => {
+    const oneLine = LOCAL_DEV_SECRETS.JWT_PRIVATE_KEY.trim().replaceAll('\n', '\\n');
+    const error = configErrorOf(
+      staging({ JWT_PRIVATE_KEY: oneLine, JWT_PUBLIC_KEY: LOCAL_DEV_SECRETS.JWT_PUBLIC_KEY }),
+    );
+    expect(error.problems.map((p) => p.variable)).toContain('JWT_PRIVATE_KEY');
+  });
+
+  it('accepts PEM keys written on one line with \\n escapes (Secrets Manager, .env)', () => {
+    const escaped = {
+      JWT_PRIVATE_KEY: TEST_JWT_KEYS.JWT_PRIVATE_KEY.replaceAll('\n', '\\n'),
+      JWT_PUBLIC_KEY: TEST_JWT_KEYS.JWT_PUBLIC_KEY.replaceAll('\n', '\\n'),
+    };
+    const config = loadConfig(localEnv(escaped));
+    expect(config.JWT_PRIVATE_KEY).toBe(TEST_JWT_KEYS.JWT_PRIVATE_KEY);
+    expect(config.JWT_PUBLIC_KEY).toBe(TEST_JWT_KEYS.JWT_PUBLIC_KEY);
+  });
+
+  it('refuses a JWT key that is not Ed25519', () => {
+    const rsa = generateKeyPairSync('rsa', { modulusLength: 2048 });
+    const error = configErrorOf(
+      localEnv({
+        JWT_PRIVATE_KEY: rsa.privateKey.export({ type: 'pkcs8', format: 'pem' }).toString(),
+        JWT_PUBLIC_KEY: rsa.publicKey.export({ type: 'spki', format: 'pem' }).toString(),
+      }),
+    );
+    expect(error.problems).toEqual([
+      { variable: 'JWT_PRIVATE_KEY', problem: 'must be an Ed25519 private key (PKCS#8 PEM)' },
+      { variable: 'JWT_PUBLIC_KEY', problem: 'must be an Ed25519 public key (SPKI PEM)' },
+    ]);
+  });
+
+  it('refuses text that is not a PEM key, without echoing it', () => {
+    const error = configErrorOf(localEnv({ JWT_PRIVATE_KEY: 'not-a-key', JWT_PUBLIC_KEY: 'nope' }));
+    expect(error.problems).toEqual([
+      { variable: 'JWT_PRIVATE_KEY', problem: 'must be an Ed25519 private key (PKCS#8 PEM)' },
+      { variable: 'JWT_PUBLIC_KEY', problem: 'must be an Ed25519 public key (SPKI PEM)' },
+    ]);
+    expect(error.message).not.toContain('not-a-key');
+  });
+
+  it('refuses a public key that does not belong to the private key', () => {
+    const other = generateKeyPairSync('ed25519');
+    const error = configErrorOf(
+      localEnv({
+        JWT_PUBLIC_KEY: other.publicKey.export({ type: 'spki', format: 'pem' }).toString(),
+      }),
+    );
+    expect(error.problems).toEqual([
+      { variable: 'JWT_PUBLIC_KEY', problem: 'must be the public half of JWT_PRIVATE_KEY' },
+    ]);
+  });
+
+  it('keeps KMS_KEY_ID optional until the M12 KMS adapter', () => {
+    expect(loadConfig(productionEnv()).KMS_KEY_ID).toBeUndefined();
   });
 });

@@ -54,6 +54,26 @@ override_resource {
 }
 
 override_resource {
+  target = aws_secretsmanager_secret.app["FIELD_ENCRYPTION_KEY"]
+  values = { arn = "arn:aws:secretsmanager:ap-south-1:123456789012:secret:quad-staging/env/FIELD_ENCRYPTION_KEY-AbCdEf" }
+}
+
+override_resource {
+  target = aws_secretsmanager_secret.app["JWT_PRIVATE_KEY"]
+  values = { arn = "arn:aws:secretsmanager:ap-south-1:123456789012:secret:quad-staging/env/JWT_PRIVATE_KEY-AbCdEf" }
+}
+
+override_resource {
+  target = aws_secretsmanager_secret.app["JWT_PUBLIC_KEY"]
+  values = { arn = "arn:aws:secretsmanager:ap-south-1:123456789012:secret:quad-staging/env/JWT_PUBLIC_KEY-AbCdEf" }
+}
+
+override_resource {
+  target = aws_secretsmanager_secret.app["SEED_PASSWORD"]
+  values = { arn = "arn:aws:secretsmanager:ap-south-1:123456789012:secret:quad-staging/env/SEED_PASSWORD-AbCdEf" }
+}
+
+override_resource {
   target = aws_secretsmanager_secret.app["SENTRY_DSN"]
   values = { arn = "arn:aws:secretsmanager:ap-south-1:123456789012:secret:quad-staging/env/SENTRY_DSN-AbCdEf" }
 }
@@ -312,7 +332,7 @@ run "api_runs_behind_two_proxies" {
       jsonencode(sort([for s in jsondecode(aws_ecs_task_definition.this["api"].container_definitions)[0].secrets : s.name])) ==
       jsonencode(sort([
         "DATABASE_URL", "DATABASE_PLATFORM_URL", "REDIS_URL", "SESSION_SECRET", "LINK_SIGNING_SECRET",
-        "SENTRY_DSN", "OTEL_EXPORTER_OTLP_HEADERS",
+        "FIELD_ENCRYPTION_KEY", "JWT_PRIVATE_KEY", "JWT_PUBLIC_KEY", "SENTRY_DSN", "OTEL_EXPORTER_OTLP_HEADERS",
       ]))
     )
     error_message = "The api gets exactly spec 02's runtime variables; with no OTLP endpoint, OTEL_EXPORTER_OTLP_ENDPOINT is left out."
@@ -323,7 +343,7 @@ run "api_runs_behind_two_proxies" {
       for service in ["api", "worker"] :
       { for e in jsondecode(aws_ecs_task_definition.this[service].container_definitions)[0].environment : e.name => e.value }["KMS_KEY_ID"] == var.field_kms_key_arn
     ])
-    error_message = "The api and worker encrypt fields with the field key (KMS_KEY_ID)."
+    error_message = "The api and worker get KMS_KEY_ID, read from M12 when the KMS adapter replaces FIELD_ENCRYPTION_KEY (D32)."
   }
 
   assert {
@@ -353,6 +373,63 @@ run "api_runs_behind_two_proxies" {
     ])
     error_message = "Each service reads its own SENTRY_DSN key (the worker shares the api's)."
   }
+}
+
+run "field_and_token_keys_reach_api_worker_and_seed" {
+  command = apply
+
+  assert {
+    condition = alltrue([
+      for service in ["api", "worker"] :
+      jsonencode({ for s in jsondecode(aws_ecs_task_definition.this[service].container_definitions)[0].secrets : s.name => s.valueFrom if contains(["FIELD_ENCRYPTION_KEY", "JWT_PRIVATE_KEY", "JWT_PUBLIC_KEY"], s.name) }) ==
+      jsonencode({
+        FIELD_ENCRYPTION_KEY = aws_secretsmanager_secret.app["FIELD_ENCRYPTION_KEY"].arn
+        JWT_PRIVATE_KEY      = "${aws_secretsmanager_secret.app["JWT_PRIVATE_KEY"].arn}:value::"
+        JWT_PUBLIC_KEY       = "${aws_secretsmanager_secret.app["JWT_PUBLIC_KEY"].arn}:value::"
+      })
+    ])
+    error_message = "The api and worker get FIELD_ENCRYPTION_KEY (generated) and both JWT keys (the value key of the hand-set placeholders)."
+  }
+
+  assert {
+    condition = alltrue([
+      for name in ["FIELD_ENCRYPTION_KEY", "JWT_PRIVATE_KEY", "JWT_PUBLIC_KEY"] :
+      contains(flatten([for s in jsondecode(aws_iam_role_policy.execution["runtime"].policy).Statement : s.Resource if contains(flatten([s.Action]), "secretsmanager:GetSecretValue")]), aws_secretsmanager_secret.app[name].arn)
+    ])
+    error_message = "runtime-exec may read the field key and both JWT keys."
+  }
+
+  assert {
+    condition = (
+      jsonencode({ for s in jsondecode(aws_ecs_task_definition.this["seed"].container_definitions)[0].secrets : s.name => s.valueFrom }) ==
+      jsonencode({
+        DATABASE_OWNER_URL   = var.env_secret_arns["DATABASE_OWNER_URL"]
+        FIELD_ENCRYPTION_KEY = aws_secretsmanager_secret.app["FIELD_ENCRYPTION_KEY"].arn
+        SEED_PASSWORD        = "${aws_secretsmanager_secret.app["SEED_PASSWORD"].arn}:value::"
+      })
+    )
+    error_message = "The seed gets the owner URL, the field key (to encrypt seeded TOTP secrets) and the hand-set SEED_PASSWORD."
+  }
+
+  assert {
+    condition = alltrue(flatten([
+      for task in ["staff", "console", "clamav", "migrate", "db-bootstrap"] : [
+        for secret in try(jsondecode(aws_ecs_task_definition.this[task].container_definitions)[0].secrets, []) :
+        !contains(["FIELD_ENCRYPTION_KEY", "JWT_PRIVATE_KEY", "JWT_PUBLIC_KEY", "SEED_PASSWORD"], secret.name)
+      ]
+    ]))
+    error_message = "Only the api, the worker and the seed get the field key, the JWT keys or the seed password."
+  }
+}
+
+run "the_field_key_cannot_be_rotated_before_m12" {
+  command = plan
+
+  variables {
+    app_secret_versions = { SESSION_SECRET = 1, LINK_SIGNING_SECRET = 1, FIELD_ENCRYPTION_KEY = 2 }
+  }
+
+  expect_failures = [var.app_secret_versions]
 }
 
 run "otel_endpoint_is_passed_when_set" {
@@ -635,18 +712,18 @@ run "secrets_are_write_only" {
   assert {
     condition = (
       jsonencode(sort([for s in aws_secretsmanager_secret.app : s.name])) ==
-      jsonencode(sort(["quad-staging/env/SESSION_SECRET", "quad-staging/env/LINK_SIGNING_SECRET", "quad-staging/env/SENTRY_DSN", "quad-staging/env/OTEL_EXPORTER_OTLP_HEADERS"])) &&
+      jsonencode(sort([for name in ["SESSION_SECRET", "LINK_SIGNING_SECRET", "FIELD_ENCRYPTION_KEY", "JWT_PRIVATE_KEY", "JWT_PUBLIC_KEY", "SEED_PASSWORD", "SENTRY_DSN", "OTEL_EXPORTER_OTLP_HEADERS"] : "quad-staging/env/${name}"])) &&
       alltrue([for s in aws_secretsmanager_secret.app : s.kms_key_id == var.data_kms_key_arn])
     )
-    error_message = "The four app secrets live at <name>/env/<NAME>, encrypted with the data key."
+    error_message = "The eight app secrets live at <name>/env/<NAME>, encrypted with the data key."
   }
 
   assert {
     condition = (
-      jsonencode(sort(keys(aws_secretsmanager_secret_version.generated))) == jsonencode(["LINK_SIGNING_SECRET", "SESSION_SECRET"]) &&
-      jsonencode(sort(keys(aws_secretsmanager_secret_version.placeholder))) == jsonencode(["OTEL_EXPORTER_OTLP_HEADERS", "SENTRY_DSN"])
+      jsonencode(sort(keys(aws_secretsmanager_secret_version.generated))) == jsonencode(["FIELD_ENCRYPTION_KEY", "LINK_SIGNING_SECRET", "SESSION_SECRET"]) &&
+      jsonencode(sort(keys(aws_secretsmanager_secret_version.placeholder))) == jsonencode(["JWT_PRIVATE_KEY", "JWT_PUBLIC_KEY", "OTEL_EXPORTER_OTLP_HEADERS", "SEED_PASSWORD", "SENTRY_DSN"])
     )
-    error_message = "SESSION_SECRET and LINK_SIGNING_SECRET are generated; SENTRY_DSN and OTEL_EXPORTER_OTLP_HEADERS start as placeholders set by hand."
+    error_message = "SESSION_SECRET, LINK_SIGNING_SECRET and FIELD_ENCRYPTION_KEY are generated; the JWT keys, SEED_PASSWORD, SENTRY_DSN and OTEL_EXPORTER_OTLP_HEADERS start as placeholders set by hand."
   }
 }
 
@@ -654,7 +731,7 @@ run "raising_a_secret_version_rewrites_only_that_secret" {
   command = apply
 
   variables {
-    app_secret_versions = { SESSION_SECRET = 2, LINK_SIGNING_SECRET = 1 }
+    app_secret_versions = { SESSION_SECRET = 2, LINK_SIGNING_SECRET = 1, FIELD_ENCRYPTION_KEY = 1 }
   }
 
   assert {
@@ -682,9 +759,12 @@ run "migrate_task_uses_owner_url" {
   assert {
     condition = (
       jsonencode(sort(flatten([for s in jsondecode(aws_iam_role_policy.execution["migrate"].policy).Statement : s.Resource if contains(flatten([s.Action]), "secretsmanager:GetSecretValue")]))) ==
-      jsonencode(sort([var.env_secret_arns["DATABASE_OWNER_URL"], var.env_secret_arns["DATABASE_URL"], var.env_secret_arns["DATABASE_PLATFORM_URL"], var.db_master_secret_arn]))
+      jsonencode(sort([
+        var.env_secret_arns["DATABASE_OWNER_URL"], var.env_secret_arns["DATABASE_URL"], var.env_secret_arns["DATABASE_PLATFORM_URL"], var.db_master_secret_arn,
+        aws_secretsmanager_secret.app["FIELD_ENCRYPTION_KEY"].arn, aws_secretsmanager_secret.app["SEED_PASSWORD"].arn,
+      ]))
     )
-    error_message = "migrate-exec reads only the three role URLs and the master secret."
+    error_message = "migrate-exec reads only the three role URLs, the master secret, and the field key and seed password the seed task needs."
   }
 }
 

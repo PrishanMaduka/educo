@@ -33,12 +33,14 @@ locals {
     SES_SNS_TOPIC_ARN     = var.ses_events_topic_arn
     EMAIL_FROM_DOMAIN     = var.email_from_domain
     SENTRY_ENVIRONMENT    = var.environment
-    # Field-level encryption on AWS (spec 02: KMS_KEY_ID; FIELD_ENCRYPTION_KEY is local only).
+    # Field-level encryption uses FIELD_ENCRYPTION_KEY (a generated secret, below) in every
+    # environment until M12's KMS adapter reads KMS_KEY_ID; it is passed now, unused (spec 02, D32).
     KMS_KEY_ID = var.field_kms_key_arn
   }, local.otel_endpoint)
 
   sentry_dsn_arn = aws_secretsmanager_secret.app["SENTRY_DSN"].arn
   otel_headers   = { OTEL_EXPORTER_OTLP_HEADERS = "${aws_secretsmanager_secret.app["OTEL_EXPORTER_OTLP_HEADERS"].arn}:value::" }
+  field_key_arn  = aws_secretsmanager_secret.app["FIELD_ENCRYPTION_KEY"].arn
 
   runtime_secrets = merge({
     DATABASE_URL          = var.env_secret_arns["DATABASE_URL"]
@@ -46,6 +48,9 @@ locals {
     REDIS_URL             = var.env_secret_arns["REDIS_URL"]
     SESSION_SECRET        = aws_secretsmanager_secret.app["SESSION_SECRET"].arn
     LINK_SIGNING_SECRET   = aws_secretsmanager_secret.app["LINK_SIGNING_SECRET"].arn
+    FIELD_ENCRYPTION_KEY  = local.field_key_arn
+    JWT_PRIVATE_KEY       = "${aws_secretsmanager_secret.app["JWT_PRIVATE_KEY"].arn}:value::"
+    JWT_PUBLIC_KEY        = "${aws_secretsmanager_secret.app["JWT_PUBLIC_KEY"].arn}:value::"
     SENTRY_DSN            = "${local.sentry_dsn_arn}:api::"
   }, local.otel_headers)
 
@@ -160,7 +165,8 @@ locals {
       volumes     = { tmp = "/tmp" }
       health      = null
     }
-    # The seed refuses any APP_ENV but local and staging, so the task must pass it.
+    # The seed refuses any APP_ENV but local and staging, so the task must pass it. It encrypts
+    # the seeded TOTP secrets with the api's field key and sets SEED_PASSWORD (set by hand).
     seed = {
       cpu         = 512
       memory      = 1024
@@ -169,9 +175,13 @@ locals {
       command     = ["node", "dist/seed.js"]
       ports       = []
       environment = local.one_off_environment
-      secrets     = { DATABASE_OWNER_URL = var.env_secret_arns["DATABASE_OWNER_URL"] }
-      volumes     = { tmp = "/tmp" }
-      health      = null
+      secrets = {
+        DATABASE_OWNER_URL   = var.env_secret_arns["DATABASE_OWNER_URL"]
+        FIELD_ENCRYPTION_KEY = local.field_key_arn
+        SEED_PASSWORD        = "${aws_secretsmanager_secret.app["SEED_PASSWORD"].arn}:value::"
+      }
+      volumes = { tmp = "/tmp" }
+      health  = null
     }
     # Ruling R-db-admin: the master user and password come from the RDS-managed secret's JSON
     # keys; the host is the RDS instance itself, not the proxy.
