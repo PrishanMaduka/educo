@@ -1,23 +1,54 @@
 import { describe, expect, it } from 'vitest';
 
-import { findTenancyViolations, runMigrations, tenantRlsSql } from '../src/internal';
+import {
+  ACCOUNT_TABLES,
+  OPEN_TABLES,
+  PLATFORM_TABLES,
+  accountRlsSql,
+  findTenancyViolations,
+  runMigrations,
+  tenantRlsSql,
+} from '../src/internal';
 
 import { useTestDatabase } from './setup';
+
+import type { TableClasses } from '../src/internal';
 
 const testDb = useTestDatabase();
 
 async function withProbeTable(
   createSql: string,
   check: (violations: string[]) => void,
+  classes?: TableClasses,
 ): Promise<void> {
   const { owner } = testDb();
   await owner.query(createSql);
   try {
-    check(await findTenancyViolations(owner));
+    check(await findTenancyViolations(owner, classes));
   } finally {
     await owner.query('drop table if exists rls_probe');
   }
 }
+
+/** The real classes, plus `rls_probe` as an account table keyed on `account_id`. */
+const PROBE_AS_ACCOUNT_TABLE: TableClasses = {
+  platformTables: PLATFORM_TABLES,
+  accountTables: {
+    ...ACCOUNT_TABLES,
+    rls_probe: { key: 'account_id', privileges: ['SELECT', 'INSERT', 'UPDATE'] },
+  },
+  openTables: OPEN_TABLES,
+};
+
+/** The real classes, plus `rls_probe` as an open table. */
+const PROBE_AS_OPEN_TABLE: TableClasses = {
+  platformTables: PLATFORM_TABLES,
+  accountTables: ACCOUNT_TABLES,
+  openTables: { ...OPEN_TABLES, rls_probe: { privileges: ['SELECT', 'INSERT'] } },
+};
+
+const ACCOUNT_PROBE_SQL = `create table rls_probe (account_id uuid not null);
+  ${accountRlsSql('rls_probe', 'account_id', ['SELECT', 'INSERT', 'UPDATE'])}`;
 
 describe('migrations and the tenancy check', () => {
   it('every non-platform table has tenant_id, a tenant_id-leading index, FORCE RLS and a policy', async () => {
@@ -199,6 +230,196 @@ describe('migrations and the tenancy check', () => {
     } finally {
       await owner.query('drop function default_grant_fn()');
     }
+  });
+});
+
+describe('table classes: tenant, account, open and platform (D32)', () => {
+  it('classifies every table: a tenant_id column, or listed as an account, open or platform table', async () => {
+    const { rows } = await testDb().owner.query<{ name: string; has_tenant_id: boolean }>(
+      `select case when n.nspname = 'public' then c.relname else n.nspname || '.' || c.relname end as name,
+              exists (select 1 from pg_attribute a
+                      where a.attrelid = c.oid and a.attname = 'tenant_id' and not a.attisdropped
+                        and a.attnum > 0) as has_tenant_id
+       from pg_class c join pg_namespace n on n.oid = c.relnamespace
+       where c.relkind in ('r', 'p') and n.nspname not in ('pg_catalog', 'information_schema')
+         and n.nspname not like 'pg\\_%'`,
+    );
+    const listed = (name: string): number =>
+      [
+        PLATFORM_TABLES.includes(name),
+        Object.hasOwn(ACCOUNT_TABLES, name),
+        Object.hasOwn(OPEN_TABLES, name),
+      ].filter(Boolean).length;
+    const unclassified = rows.filter((row) => listed(row.name) === 0 && !row.has_tenant_id);
+    const twice = rows.filter((row) => listed(row.name) > 1);
+    expect(unclassified.map((row) => row.name)).toEqual([]);
+    expect(twice.map((row) => row.name)).toEqual([]);
+    for (const name of [
+      'accounts',
+      'credentials',
+      'identities',
+      'sessions',
+      'trusted_devices',
+      'otp_challenges',
+      'platform_users',
+      'platform_audit',
+      'support_sessions',
+      'signed_token_uses',
+      'tenant_branding',
+      'tenant_modules',
+      'tenant_security',
+    ]) {
+      expect(rows.map((row) => row.name)).toContain(name);
+    }
+  });
+
+  it('fails for an account table without FORCE RLS', async () => {
+    await withProbeTable(
+      `${ACCOUNT_PROBE_SQL}
+       alter table rls_probe no force row level security;`,
+      (violations) => {
+        expect(violations).toEqual(['rls_probe: FORCE ROW LEVEL SECURITY missing']);
+      },
+      PROBE_AS_ACCOUNT_TABLE,
+    );
+  });
+
+  it('passes for an account table set up with accountRlsSql', async () => {
+    await withProbeTable(
+      ACCOUNT_PROBE_SQL,
+      (violations) => {
+        expect(violations).toEqual([]);
+      },
+      PROBE_AS_ACCOUNT_TABLE,
+    );
+  });
+
+  it('fails for an account table without its key column', async () => {
+    await withProbeTable(
+      `create table rls_probe (id uuid not null);
+       alter table rls_probe enable row level security;
+       alter table rls_probe force row level security;`,
+      (violations) => {
+        expect(violations).toEqual([
+          'rls_probe: account_id column missing',
+          'rls_probe: no row level security policy',
+          'rls_probe: quad_app privileges must be SELECT, INSERT, UPDATE, found none',
+        ]);
+      },
+      PROBE_AS_ACCOUNT_TABLE,
+    );
+  });
+
+  it('fails for an account table with a policy on another column, an extra permissive policy or extra privileges', async () => {
+    await withProbeTable(
+      `create table rls_probe (id uuid not null, account_id uuid not null);
+       ${accountRlsSql('rls_probe', 'id', ['SELECT', 'INSERT', 'UPDATE', 'DELETE'])}
+       create policy open_select on rls_probe for select using (true);`,
+      (violations) => {
+        expect(violations).toEqual([
+          'rls_probe: policy account_isolation does not match the account isolation expression on account_id',
+          'rls_probe: policy open_select does not match the account isolation expression on account_id',
+          'rls_probe: no permissive account isolation policy',
+          'rls_probe: quad_app privileges must be SELECT, INSERT, UPDATE, found SELECT, INSERT, UPDATE, DELETE',
+        ]);
+      },
+      PROBE_AS_ACCOUNT_TABLE,
+    );
+  });
+
+  it('fails for an open table whose quad_app privileges differ from the declared set', async () => {
+    await withProbeTable(
+      `create table rls_probe (id uuid not null);
+       grant select, insert, delete on rls_probe to quad_app;`,
+      (violations) => {
+        expect(violations).toEqual([
+          'rls_probe: quad_app privileges must be SELECT, INSERT, found SELECT, INSERT, DELETE',
+        ]);
+      },
+      PROBE_AS_OPEN_TABLE,
+    );
+  });
+
+  it('fails for an open table with row level security', async () => {
+    await withProbeTable(
+      `create table rls_probe (id uuid not null);
+       alter table rls_probe enable row level security;
+       grant select, insert on rls_probe to quad_app;`,
+      (violations) => {
+        expect(violations).toEqual(['rls_probe: an open table must not enable row level security']);
+      },
+      PROBE_AS_OPEN_TABLE,
+    );
+  });
+
+  it('fails for a table listed in more than one class', async () => {
+    await withProbeTable(
+      ACCOUNT_PROBE_SQL,
+      (violations) => {
+        expect(violations).toEqual(['rls_probe: listed in more than one table class']);
+      },
+      { ...PROBE_AS_ACCOUNT_TABLE, platformTables: [...PLATFORM_TABLES, 'rls_probe'] },
+    );
+  });
+
+  it('fails for a platform table with a column grant to quad_app', async () => {
+    const { owner } = testDb();
+    await owner.query('grant select (name), update (status) on tenants to quad_app');
+    try {
+      expect(await findTenancyViolations(owner)).toEqual([
+        'tenants: quad_app must have no column privileges',
+      ]);
+    } finally {
+      await owner.query('revoke select (name), update (status) on tenants from quad_app');
+    }
+  });
+
+  it('fails when quad_app can use a platform table sequence', async () => {
+    const { owner } = testDb();
+    await owner.query('grant usage on sequence drizzle.__drizzle_migrations_id_seq to quad_app');
+    try {
+      expect(await findTenancyViolations(owner)).toEqual([
+        'drizzle.__drizzle_migrations_id_seq: quad_app must have no privileges on a platform sequence',
+      ]);
+    } finally {
+      await owner.query('revoke all on sequence drizzle.__drizzle_migrations_id_seq from quad_app');
+    }
+  });
+
+  it('gives quad_app no privilege on any platform table, its columns or its sequences', async () => {
+    const { rows } = await testDb().owner.query<{
+      name: string;
+      table_privilege: boolean;
+      column_privilege: boolean;
+    }>(
+      `select t.name,
+              has_any_column_privilege('quad_app', t.name::regclass, 'SELECT, INSERT, UPDATE, REFERENCES')
+                as column_privilege,
+              (has_table_privilege('quad_app', t.name::regclass,
+                 'SELECT, INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER')) as table_privilege
+       from unnest($1::text[]) as t(name) order by t.name`,
+      [PLATFORM_TABLES],
+    );
+    expect(rows).toHaveLength(PLATFORM_TABLES.length);
+    expect(rows.filter((row) => row.table_privilege || row.column_privilege)).toEqual([]);
+  });
+});
+
+describe('platform_audit is append-only', () => {
+  it('refuses UPDATE, DELETE and TRUNCATE, even for quad_platform', async () => {
+    const { platform } = testDb();
+    await platform.query(
+      `insert into platform_audit (action, target_type, meta) values ('test.recorded', 'test', '{}')`,
+    );
+    await expect(platform.query(`update platform_audit set action = 'changed'`)).rejects.toThrow(
+      /append-only/,
+    );
+    await expect(platform.query('delete from platform_audit')).rejects.toThrow(/append-only/);
+    await expect(platform.query('truncate platform_audit')).rejects.toThrow(
+      /append-only|permission denied/,
+    );
+    const { rows } = await platform.query<{ action: string }>('select action from platform_audit');
+    expect(rows).toEqual([{ action: 'test.recorded' }]);
   });
 });
 

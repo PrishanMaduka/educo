@@ -1,9 +1,8 @@
 import { EmailSuppressionReason } from '@quad/contracts';
 import { sql } from 'drizzle-orm';
-import { check, customType, pgEnum, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
+import { check, pgEnum, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
 
-/** Case-insensitive text (the `citext` extension from the first migration). */
-const citext = customType<{ data: string }>({ dataType: () => 'citext' });
+import { citext } from '../types';
 
 export const emailSuppressionReason = pgEnum(
   'email_suppression_reason',
