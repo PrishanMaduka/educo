@@ -1,6 +1,6 @@
 # 19 Public site
 
-The public landing page at `https://quad-edu.com/`, the sign-in entry, demo requests and the legal pages. Reference: `design/landing.html` (illustrated, with no product screenshots; reference renders in `docs/screenshots/landing/`). Built in **M1b** ([18](18-delivery-plan.md)).
+The public landing page at `https://quad-edu.com/`, the sign-in entry, demo requests and the legal pages. Reference: `design/landing.html` (storybook illustrations, no product screenshots, three background palettes pending choice; reference renders in `docs/screenshots/landing/`). Built in **M1b** ([18](18-delivery-plan.md)).
 
 ## Where it lives
 
@@ -13,11 +13,11 @@ The public landing page at `https://quad-edu.com/`, the sign-in entry, demo requ
 
 Copy comes from the prototype; strings live in `packages/contracts/i18n/en.json` under `public.*`. Sample people (Amaya, her family and her teachers) are fictional and marked as a sample school in the page.
 
-The page is concept-led (D29): it explains Quad Circle and the four ideas through illustrations, not product screenshots. Every section is carried by an inline SVG illustration in one flat, rounded style, built from the palette tokens so it follows light and dark mode. People are South Asian, with skin, hair and uniform colours from the illustration tokens below. Each person is drawn the same way everywhere: head and shoulders in a round portrait, or a full figure in a scene. Illustrations are decorative (`aria-hidden`) unless stated, because the text beside them says the same thing. No raster images, and no browser or phone frames showing app screens.
+The page is concept-led (D29): it explains Quad Circle and the four ideas through illustrations, not product screenshots. Every section is carried by an inline SVG illustration in a **children's storybook style**: soft painterly shapes, gentle hand-drawn outlines that vary slightly in weight, rounded characters with dot eyes and rosy cheeks, and cosy scenes with small Sri Lankan details (palms, tea-country hills, a tuk-tuk, a Poya flag, kites, birds, a school bus, a home with a lit window). The art is built from the palette tokens, so it follows light and dark mode. In dark mode, scenes with a sky turn to evening: the sun becomes a moon, stars appear, and windows stay lit. People are South Asian, with skin, hair and uniform colours from the illustration tokens below. Each person is drawn the same way everywhere: head and shoulders in a round portrait, or a full figure in a scene. Illustrations are decorative (`aria-hidden`) unless stated, because the text beside them says the same thing. No raster images, and no browser or phone frames showing app screens.
 
 | # | Section | What it shows | Behaviour |
 |---|---|---|---|
-| 1 | **Top bar** | Skip link; Quad mark and wordmark; section links (Quad Circle, A school day, Why Quad, Your whole school, Privacy); theme toggle; **Sign in** (ghost) and **Book a demo** (primary) | Sticky with a blur background. At 900 px and below the section links and the theme toggle move into a **Menu** button (`aria-expanded`, Escape closes); Sign in and Book a demo stay visible |
+| 1 | **Top bar** | Skip link; Quad mark and wordmark; section links (Quad Circle, A school day, Why Quad, Your whole school, Privacy); the prototype-only Palette control (removed after the choice); theme toggle; **Sign in** (ghost) and **Book a demo** (primary) | Sticky with a blur background. At 1080 px and below the section links, the Palette control and the theme toggle move into a **Menu** button (`aria-expanded`, Escape closes); Sign in and Book a demo stay visible |
 | 2 | **Hero** | Eyebrow "School management, built around the child"; heading "Every child has a *circle.*" (the last word in the serif accent); lede naming the people around a child; **Book a demo** and **See a day in the circle ↓** (to `#day`); "Already on Quad? **Sign in to your school**"; two fine-print points (curricula; rupees, PayHere and Poya days) | — |
 | 3 | **Hero orbit** | An illustrated circle: Amaya's round portrait in the centre with her name tag; the family on the inner ring (Mum, Dad, Grandma, amber rings, "AT HOME" along the ring); seven school people on the outer ring (class teacher, two subject teachers, coach, nurse, counsellor, bus aunty, indigo rings, "AT SCHOOL" along the ring), each a portrait with a name label; faint spokes, drifting hearts and stars, a soft pulse around the child | One spark every 3.2 s travels between two portraits along a curve. The **ticker** below (`role="status"`, `aria-live="polite"`) shows the sender's portrait and says what just happened ("Ms. Jayasinghe shared a moment · Amaya painted the canteen mural · 08:55"), cycling through six sample events. Under it: "A sample school. Amaya and her circle are fictional." Name labels hide below 560 px. With `prefers-reduced-motion`, no sparks, pulse or drifting, and the ticker shows the first event only. The SVG is one labelled image whose `<title>` lists the people |
 | 4 | **Strip** | Three short claims, each with a small round illustration: one Quad app for every family; your school's name, logo and colours; made in Sri Lanka for local curricula, rupees and Poya days | Wraps to a column at 820 px |
@@ -30,7 +30,31 @@ The page is concept-led (D29): it explains Quad Circle and the four ideas throug
 | 11 | **Demo** (`#demo`) | "Book a 30-minute *walkthrough*" with an illustration of a walkthrough over tea, and the form (below) | Replaces the prototype's "nothing is sent" note |
 | 12 | **Footer** | Mark, links (Privacy, Terms, DPA, Sub-processors, Cookies, Status → `status.quad-edu.com`, Contact `hello@quad-edu.com`), "Sample school and families are fictional", © Quad | Prototype links to other prototypes are not carried over |
 
-How the illustrations ship: each is a React server component that renders static SVG markup (the prototype builds the same markup with a small script). People come from one shared figure and portrait component, so the style stays consistent. No illustration code runs on the client except the hero sparks and ticker.
+How the illustrations ship: each is a React server component that renders static SVG markup (the prototype builds the same markup with a small script). People come from one shared figure and portrait component, so the style stays consistent. The same characters appear throughout: Amaya, her mum Dilhani, her grandmother Kamala and her class teacher Ms. Jayasinghe. No illustration code runs on the client except the hero sparks and ticker.
+
+The storybook texture comes from four shared SVG definitions, defined once on the page and reused by every scene:
+
+| Definition | What it does | Used on |
+|---|---|---|
+| `qInk` | `feTurbulence` + `feDisplacementMap` wobble, plus a dilated, displaced outline in `illo-line`, so each outline looks hand-drawn and varies in weight | Each person, portrait, building, tree, vehicle and prop (one filter per object, not per scene, so outlines appear inside a scene) |
+| `qWob` | A low-frequency displacement that makes painted edges wobble | Hills, clouds, floors, the sun and moon, tea hills |
+| `qGrain` | Fine fractal noise clipped to the shape, at about 30% opacity with `multiply` | One rectangle over each scene, and the hero disc |
+| `qW-teal`, `qW-coral`, `qW-amber`, `qW-lilac`, `qW-indigo-2` | Radial watercolour washes that fade to nothing | Soft pools of colour behind scenes |
+
+Keep these cheap: two octaves of turbulence at most, filter regions close to the object, and no animated filters. The 390 px page must scroll smoothly on a mid-range Android.
+
+### Background palettes (pending choice)
+
+The prototype offers three background palettes so the product owner can choose one. A small **Palette** control in the top bar (a `<select>` labelled "Background palette (prototype only)", inside the menu at 1080 px and below) switches between them. The choice is stored in `localStorage` (`quad_landing_palette`, with every access wrapped in try/catch), and `?palette=a|b|c` sets it for screenshots. Each palette has a light and a dark version and works with the theme toggle. Palettes change only `bg`, `surface`, `surface-2`, `line`, `wash-1`, `wash-2` and the band tokens; the brand colours, the illustrations and the characters stay the same.
+
+| Palette | Light | Dark |
+|---|---|---|
+| **A · Morning paper** (default) | Warm cream paper, with sage and peach washes; deep indigo band | Indigo night |
+| **B · Sky blue** | Pale sky, with lilac and butter washes; deep twilight-blue band | Deep night blue |
+| **C · Garden** | Pale mint, with apricot and rose washes; deep forest-green band | Deep green-black |
+
+All three keep text at 4.5:1 or more in light and dark (axe reports no serious or critical issues for any of them). Once the product owner chooses, the switcher and the other two palettes are removed, and the chosen values become the `public-site` tokens. Reference screenshots for each palette are in `docs/screenshots/landing/`.
+
 
 Theme: follows the system setting, with the same toggle pattern as the apps (stored in a `quad_theme` cookie, no server state). Everything works at 390 px with a 16 px gutter and no horizontal scroll.
 
@@ -126,6 +150,24 @@ The landing page uses tokens that [03](03-design-system.md) must define in `pack
 | `illo-skin-1` … `illo-skin-4` | `#C98B62`, `#A96C45`, `#8A5636`, `#DCA67D` | `#B98058`, `#9A6340`, `#7E4F33`, `#C99671` | Skin tones of the illustrated people |
 | `illo-hair`, `illo-hair-grey` | `#2B2230`, `#C9C4D2` | `#1B1622`, `#B3AEC0` | Hair (and eyes, glasses and shoes, as `illo-face`, same values as `illo-hair`) |
 | `illo-white` | `#FFFFFF` | `#E6E4F0` | School uniforms, paper and white clothing in illustrations (dimmed in dark mode) |
+| `illo-line` | `rgba(58,36,40,.62)` | `rgba(5,5,14,.7)` | The hand-drawn outline colour in `qInk` |
+| `illo-sun` | `#F4B04A` | `#F1E6C4` | The sun in light mode, the moon in dark mode |
+| `wash-1`, `wash-2` | per palette (below) | per palette (below) | Section washes (hero, the circle section, the whole-school section) and scene backgrounds |
+
+**Palette tokens, proposed (pending choice).** Only one set will ship.
+
+| Token | A light | A dark | B light | B dark | C light | C dark |
+|---|---|---|---|---|---|---|
+| `bg` | `#FBF6EC` | `#13142A` | `#EEF5FB` | `#0F1530` | `#EEF6EF` | `#0F1A16` |
+| `surface` | `#FFFDF8` | `#1B1D3A` | `#FFFFFF` | `#172042` | `#FFFFFF` | `#16241F` |
+| `surface-2` | `#F4EDDF` | `#22254A` | `#E4EDF7` | `#1E2950` | `#E2EEE4` | `#1D2F28` |
+| `line` | `#E6DCC8` | `#2E3260` | `#D2DEEC` | `#2A3866` | `#CFE1D3` | `#2A4037` |
+| `wash-1` | `#E0EBD8` (sage) | `#1D2440` | `#E8E3FA` (lilac) | `#1E2452` | `#FBE3CC` (apricot) | `#2A2219` |
+| `wash-2` | `#FBE0CE` (peach) | `#2A1F35` | `#FAF0C8` (butter) | `#2A2A3C` | `#F8DDE2` (rose) | `#2B1C22` |
+| `band` | `#1F2559` | `#0D0E22` | `#1A2A5E` | `#080D24` | `#163A2D` | `#07110D` |
+| `band-2` | `#2A3170` | `#181A38` | `#24387A` | `#131C3D` | `#1F4A3A` | `#12221B` |
+| `band-line` | `#3A4285` | `#2E3260` | `#34498F` | `#263463` | `#2E5F4C` | `#24382F` |
+| `band-ink-2` | `#C9C6EC` | `#B8B6DC` | `#CDD5F2` | `#BCC6E8` | `#C9E4D6` | `#B7D5C6` |
 
 Everything else in the illustrations uses the existing palette tokens (`indigo`, `indigo-2`, `coral`, `lilac`, `amber`, `teal`, their `-soft` tints, `surface`, `line`, `ink-2`, `ink-3` and the band tokens) and `color-mix()` tints of them. The prototype also mixes in three fixed colours: white for highlights, a wood brown (`#6B3F1F`, for furniture, frames and palm trunks) and near-black (`#1C1B2E`, for shading). In the build these become `illo-wood` and `illo-shade` (same value in both themes), so the components use tokens only.
 

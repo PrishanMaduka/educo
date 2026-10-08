@@ -9,7 +9,7 @@ Open `design/index.html` in a browser. Each prototype is a single self-contained
 | File | What it is |
 |---|---|
 | `design/index.html` | Launcher: what makes Quad different, and links to every prototype |
-| `design/landing.html` | Public landing page for Quad: the Circle concept as the hero (the child's circle with moments travelling around it), a school day in Amaya's circle, the leaders' family connection view, why Quad, modules, real staff portal and parent app screens (light and dark, in `design/landing/`), privacy and a demo request form |
+| `design/landing.html` | Public landing page for Quad: the Circle concept as the hero (the child's circle with moments travelling around it), a school day in Amaya's circle, the leaders' family connection view, why Quad, modules, privacy and a demo request form, all told through storybook SVG illustrations (no product screenshots). Three background palettes (A Morning paper, B Sky blue, C Garden) can be switched in the top bar while the product owner chooses; screenshots are in `docs/screenshots/landing/` |
 | `design/circle.html` | Concept: Quad Circle. Every child has a circle of family and school around them; a live school day links a teacher's phone (capture moments, family pulse, quiet hours), the child's circle and a parent's phone (day ring, moments, the people around the child, learning at home), plus the school's connection view |
 | `design/platform.html` | Platform console for the super admin: schools (tenants), plans, each school's users, roles, modules, branding and security |
 | `design/admin.html` | School admin web app: dashboard, the six core modules, and Users & roles. **View as** (top bar, or Users & roles → Preview a role) shows the portal as each role sees it |
