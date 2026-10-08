@@ -579,7 +579,7 @@ Steps:
 - `fixedOtpFor({ appEnv, devFixedOtp, storeReviewPhone }, subject)`:
   - `DEV_FIXED_OTP` works in local and staging only;
   - `STORE_REVIEW_PHONE` works only for its own number (spec 16).
-- `parsePhone(country, input)`: +94 means 9 digits without the leading 0. The country list covers LK, MV, AE and IN (OQ12).
+- `parsePhone(country, input)`: +94 means 9 digits without the leading 0. Only Sri Lankan (+94) numbers are accepted for now (OQ12, product owner); the list is data so more countries can be added later.
 
 **Endpoints:**
 
@@ -1194,7 +1194,7 @@ Commit `docs: M1 decisions, spec updates and progress`.
 
 ---
 
-## Open questions and spec gaps (each with a recommended answer)
+## Open questions (owner: all recommendations accepted on 2026-10-08, except OQ12 = Sri Lankan numbers only) and spec gaps (each with a recommended answer)
 
 1. **How `quad_app` reaches global identity rows.**
    - Spec 04 marks `accounts`, `credentials`, `identities`, `sessions` and `otp_challenges` global. D24 closes every non-tenant table to `quad_app`.
@@ -1241,7 +1241,7 @@ Commit `docs: M1 decisions, spec updates and progress`.
     - unknown emails are not audited (rate-limit metrics only);
     - console failures go to `platform_audit`.
 12. **Parent OTP abuse controls.** Spec 16 asks for a captcha after 3 attempts, a country allowlist, and SMS spend caps. **Recommend:**
-    - M1: rate limits plus a global country allowlist (LK, MV, AE, IN);
+    - M1: rate limits plus a global country allowlist of LK only (product owner, 2026-10-08; MV, AE and IN can be added later);
     - M6, when live SMS ships: the captcha (Turnstile on the email path and an app-attestation check on mobile) and spend caps.
 13. **"Found you" without students.** Students arrive in M4. **Recommend:** M1 shows "Welcome, {first name}. You're connected to {school}.", and the children line appears when the API returns children (M6).
 14. **Breached-password check offline and on failure.** **Recommend:** a range-API adapter with a 2 s timeout that fails open (logged); `APP_ENV=local` and the tests use an offline fake list; no new variable.
