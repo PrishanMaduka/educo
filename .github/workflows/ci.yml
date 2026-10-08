@@ -1,8 +1,11 @@
-# The quality gate (`pnpm verify`) and a production build. Runs on pull requests, on pushes to
-# main, develop and the claude/** working branches (work there is pushed without a pull request),
-# and on demand.
+# The quality gate, split into the required checks from spec 17 and 20 (typecheck, lint, unit,
+# codegen, api-integration, e2e-smoke, build), plus the container images and the parent app's
+# staging Android build (D28). Together the jobs run every step of `pnpm verify`
+# (scripts/verify.mjs), which stays the local gate. Runs on pull requests, on pushes to main,
+# develop and the claude/** working branches (work there is pushed without a pull request), and on
+# demand. No job here touches AWS.
 # The database credentials below are the throwaway local ones from .env.example and
-# docker/postgres/init/01-roles.sql; they only exist inside this job's service containers.
+# docker/postgres/init/01-roles.sql; they only exist inside the job's service containers.
 name: CI
 
 on:
@@ -18,12 +21,80 @@ concurrency:
 permissions:
   contents: read
 
-jobs:
-  verify:
-    name: Verify and build
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
+env:
+  TURBO_TELEMETRY_DISABLED: '1'
 
+jobs:
+  typecheck:
+    name: typecheck
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      # Flutter checks fail instead of skipping (scripts/flutter.mjs).
+      QUAD_REQUIRE_FLUTTER: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+        with:
+          flutter: true
+      - name: Typecheck
+        run: pnpm exec turbo run typecheck
+
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      QUAD_REQUIRE_FLUTTER: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+        with:
+          flutter: true
+      - name: Lint
+        run: pnpm exec turbo run lint
+
+  unit:
+    name: unit
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      QUAD_REQUIRE_FLUTTER: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+        with:
+          flutter: true
+      - name: Unit tests
+        run: pnpm exec turbo run test
+      - name: Production dependency audit
+        run: pnpm audit --prod --audit-level high
+
+  codegen:
+    name: codegen
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      QUAD_REQUIRE_FLUTTER: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+        with:
+          java: true
+          flutter: true
+      # openapi-generator-cli downloads its jar (version in openapitools.json) into its package folder.
+      - name: Cache the openapi-generator jar
+        uses: actions/cache@v4
+        with:
+          path: node_modules/.pnpm/@openapitools+openapi-generator-cli@*/node_modules/@openapitools/openapi-generator-cli/versions
+          key: openapi-generator-${{ runner.os }}-${{ hashFiles('openapitools.json', 'pnpm-lock.yaml') }}
+      - name: Generated files are up to date
+        run: pnpm codegen:check
+
+  api-integration:
+    name: api-integration
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
     services:
       postgres:
         image: postgres:16.4
@@ -47,63 +118,37 @@ jobs:
           --health-interval 5s
           --health-timeout 3s
           --health-retries 12
-
     env:
-      # Flutter checks fail instead of skipping (scripts/flutter.mjs).
-      QUAD_REQUIRE_FLUTTER: '1'
       DATABASE_URL: postgres://quad_app:quad_app@localhost:5432/quad
       DATABASE_PLATFORM_URL: postgres://quad_platform:quad_platform@localhost:5432/quad
       DATABASE_OWNER_URL: postgres://quad_owner:quad_owner@localhost:5432/quad
       DATABASE_ADMIN_URL: postgres://postgres:postgres@localhost:5432/quad
       REDIS_URL: redis://localhost:6379
-      TURBO_TELEMETRY_DISABLED: '1'
-
     steps:
       - uses: actions/checkout@v4
-
       # Service containers start before checkout, so the init script cannot be mounted;
       # apply it the way docker-entrypoint-initdb.d would on a fresh volume.
       - name: Create the database roles
         env:
           PGPASSWORD: postgres
         run: psql -h localhost -U postgres -d quad -v ON_ERROR_STOP=1 -f docker/postgres/init/01-roles.sql
+      - uses: ./.github/actions/setup
+      - name: Postgres and Redis are reachable
+        run: node scripts/check-services.mjs
+      - name: API integration tests
+        run: pnpm test:api
 
-      - uses: pnpm/action-setup@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version-file: .nvmrc
-          cache: pnpm
-
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '17'
-
-      - uses: subosito/flutter-action@v2
-        with:
-          flutter-version-file: .fvmrc
-          cache: true
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      # openapi-generator-cli downloads its jar (version in openapitools.json) into its package folder.
-      - name: Cache the openapi-generator jar
-        uses: actions/cache@v4
-        with:
-          path: node_modules/.pnpm/@openapitools+openapi-generator-cli@*/node_modules/@openapitools/openapi-generator-cli/versions
-          key: openapi-generator-${{ runner.os }}-${{ hashFiles('openapitools.json', 'pnpm-lock.yaml') }}
-
+  e2e-smoke:
+    name: e2e-smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
       - name: Install the Playwright browser
         run: pnpm --filter @quad/staff exec playwright install --with-deps chromium
-
-      - name: Verify
-        run: pnpm verify
-
-      - name: Build
-        run: pnpm build
-
+      - name: End-to-end smoke tests
+        run: pnpm e2e
       - name: Upload the Playwright reports
         if: failure()
         uses: actions/upload-artifact@v4
@@ -111,3 +156,52 @@ jobs:
           name: playwright-reports
           path: apps/*/playwright-report/
           if-no-files-found: ignore
+
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+      # The API production bundle and scripts/check-dist.mjs run here (D27).
+      - name: Build
+        run: pnpm build
+
+  images:
+    name: images
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      # hadolint v2.14.0: v2.12.0 cannot parse ADD --checksum (D28).
+      - name: Lint the Dockerfiles
+        run: |
+          for file in docker/api.Dockerfile docker/web.Dockerfile docker/clamav/Dockerfile; do
+            echo "hadolint $file"
+            docker run --rm -i hadolint/hadolint:v2.14.0 hadolint - < "$file"
+          done
+      # Local web builds; deploy-staging.yml builds the staging ones and pushes them.
+      - name: Build every image
+        run: node scripts/docker-build.mjs all --build-arg NEXT_PUBLIC_APP_ENV=local
+
+  parent-build:
+    name: parent-build
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      QUAD_REQUIRE_FLUTTER: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+        with:
+          java: true
+          flutter: true
+          install: false
+      # No signing secrets here: without android/key.properties Gradle signs the staging release
+      # with the debug keys, which proves the build. deploy-staging.yml's parent-android uploads.
+      - name: Build the staging APK and app bundle
+        working-directory: apps/parent
+        run: |
+          flutter build apk --flavor staging --release --dart-define-from-file=env/staging.json
+          flutter build appbundle --flavor staging --release --dart-define-from-file=env/staging.json
