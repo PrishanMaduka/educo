@@ -4,11 +4,13 @@ import {
   accounts,
   auditLog,
   credentials,
+  platformUsers,
   rolePermissions,
   roleSensitive,
   roles,
   schoolSettings,
   sessions,
+  supportSessions,
   tenants,
   trustedDevices,
   userRoles,
@@ -23,20 +25,24 @@ import type {
   NewAccount,
   NewAuditEntry,
   NewCredential,
+  NewPlatformUser,
   NewRole,
   NewRolePermission,
   NewSchoolSettings,
   NewSession,
+  NewSupportSession,
   NewTenant,
   NewTrustedDevice,
   NewUser,
   NewUserRole,
   PlatformRunner,
+  PlatformUser,
   Role,
   RolePermission,
   RoleSensitive,
   SchoolSettings,
   Session,
+  SupportSession,
   Tenant,
   TenantRunner,
   TrustedDevice,
@@ -315,4 +321,49 @@ export async function insertAuditEntry(
       .returning(),
   );
   return single(rows, 'Audit entry');
+}
+
+/** Inserts a Quad staff member (`platform_users`) through `withPlatform`; default role `support`. */
+export async function insertPlatformUser(
+  withPlatform: PlatformRunner,
+  overrides: Partial<NewPlatformUser> = {},
+): Promise<PlatformUser> {
+  const suffix = randomBytes(4).toString('hex');
+  const rows = await withPlatform((tx) =>
+    tx
+      .insert(platformUsers)
+      .values({
+        name: `Quad Staff ${suffix}`,
+        email: `staff-${suffix}@example.test`,
+        role: 'support',
+        ...overrides,
+      })
+      .returning(),
+  );
+  return single(rows, 'Platform user');
+}
+
+/**
+ * Inserts an unredeemed support visit by `platformUserId` to `tenantId` through `withPlatform`,
+ * expiring in 60 minutes (spec 05); override any column.
+ */
+export async function insertSupportSession(
+  withPlatform: PlatformRunner,
+  platformUserId: string,
+  tenantId: string,
+  overrides: Partial<NewSupportSession> = {},
+): Promise<SupportSession> {
+  const rows = await withPlatform((tx) =>
+    tx
+      .insert(supportSessions)
+      .values({
+        platformUserId,
+        tenantId,
+        reason: 'Helping with a test',
+        expiresAt: new Date(Date.now() + 60 * 60 * 1000),
+        ...overrides,
+      })
+      .returning(),
+  );
+  return single(rows, 'Support session');
 }

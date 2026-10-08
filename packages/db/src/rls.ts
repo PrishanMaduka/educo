@@ -129,6 +129,10 @@ interface PolicyRow {
   oid: number;
   name: string;
   permissive: boolean;
+  /** `pg_policy.polcmd`: `r` SELECT, `a` INSERT, `w` UPDATE, `d` DELETE, `*` ALL. */
+  command: string;
+  /** Role names, or `public` for a policy with no `TO` clause. */
+  roles: string[];
   qual: string | null;
   with_check: string | null;
 }
@@ -198,10 +202,53 @@ const POLICIES_SQL = `
   select p.polrelid::int as oid,
          p.polname as name,
          p.polpermissive as permissive,
+         p.polcmd::text as command,
+         array(
+           select case when r.oid = 0 then 'public' else pg_get_userbyid(r.oid)::text end
+           from unnest(p.polroles) as r(oid) order by 1
+         ) as roles,
          pg_get_expr(p.polqual, p.polrelid) as qual,
          pg_get_expr(p.polwithcheck, p.polrelid) as with_check
   from pg_policy p
   order by p.polname`;
+
+/**
+ * The tables the security-definer lookups read (D16; D32, amending D24). Their owner `quad_owner`
+ * is NOBYPASSRLS and FORCE RLS filters it, so each of these tables carries one extra permissive
+ * policy, `DEFINER_READ_POLICY`, and no other table may.
+ */
+export const DEFINER_READ_TABLES: readonly string[] = Object.freeze([
+  'accounts',
+  'sessions',
+  'users',
+  'user_roles',
+  'roles',
+]);
+
+/**
+ * The one extra permissive policy allowed, on `DEFINER_READ_TABLES` only:
+ * `CREATE POLICY definer_read ON <t> FOR SELECT TO quad_owner USING (true)`. It gives `quad_app`
+ * nothing, because it names `quad_owner` alone and only for SELECT.
+ */
+export const DEFINER_READ_POLICY = Object.freeze({
+  name: 'definer_read',
+  command: 'r',
+  roles: Object.freeze(['quad_owner']),
+  qual: 'true',
+});
+
+/** Whether `policy` on `table` is exactly the allowed `definer_read` policy. */
+function isDefinerReadPolicy(table: TableRow, policy: PolicyRow): boolean {
+  return (
+    DEFINER_READ_TABLES.includes(table.name) &&
+    policy.name === DEFINER_READ_POLICY.name &&
+    policy.permissive &&
+    policy.command === DEFINER_READ_POLICY.command &&
+    policy.roles.join(',') === DEFINER_READ_POLICY.roles.join(',') &&
+    policy.qual === DEFINER_READ_POLICY.qual &&
+    policy.with_check === null
+  );
+}
 
 /**
  * A permissive policy isolates tenants only if every expression it has is the tenant match.
@@ -364,13 +411,16 @@ function classViolations(
   if (isPlatform) {
     return platformTableViolations(table);
   }
+  // The allowed definer_read policy is checked by name, command, role and expression, then
+  // left out, so every other permissive policy is still judged as before.
+  const checked = policies.filter((policy) => !isDefinerReadPolicy(table, policy));
   if (account) {
-    return accountTableViolations(table, account, policies);
+    return accountTableViolations(table, account, checked);
   }
   if (open) {
     return openTableViolations(table, open);
   }
-  return tenantTableViolations(table, policies);
+  return tenantTableViolations(table, checked);
 }
 
 /** Every table `classes` names, platform first, then account, then open, as declared. */
@@ -394,6 +444,9 @@ function declaredTableNames(classes: TableClasses): string[] {
  * - **tenant** (anything else, so an unclassified table fails here): a not-null uuid
  *   `tenant_id`, a valid, non-partial index led by `tenant_id`, ENABLE and FORCE row level
  *   security, the tenant isolation policy as its only permissive policy, and DML for `quad_app`.
+ *
+ * The one exception to "only permissive policy" is `DEFINER_READ_POLICY` on exactly
+ * `DEFINER_READ_TABLES` (D32): any other shape, name or table is reported like any other policy.
  *
  * A declared table that does not exist is reported too, so a typo or a dropped table cannot
  * pass silently.

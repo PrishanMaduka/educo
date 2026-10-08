@@ -17,7 +17,14 @@ export { TransactionClosedError } from './client';
 export type { DefinerCalls } from './definers';
 export { pingDatabase } from './ping';
 export type { SqlQueryable, TableClasses } from './rls';
-export { TABLE_CLASSES, accountRlsSql, findTenancyViolations, tenantRlsSql } from './rls';
+export {
+  DEFINER_READ_POLICY,
+  DEFINER_READ_TABLES,
+  TABLE_CLASSES,
+  accountRlsSql,
+  findTenancyViolations,
+  tenantRlsSql,
+} from './rls';
 export * from './schema';
 export { SEED_TENANTS } from './seed-data';
 export type { TenantRunner, TenantTx } from './tenant';

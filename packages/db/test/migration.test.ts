@@ -461,6 +461,70 @@ describe('table classes: tenant, account, open and platform (D32)', () => {
   });
 });
 
+/** Runs `ddl` as quad_owner in a transaction, checks the violations, then rolls it all back. */
+async function withRolledBackChange(
+  ddl: string,
+  check: (violations: string[]) => void,
+): Promise<void> {
+  const client = await testDb().owner.connect();
+  try {
+    await client.query('begin');
+    await client.query(ddl);
+    check(await findTenancyViolations(client));
+  } finally {
+    await client.query('rollback');
+    client.release();
+  }
+}
+
+describe('definer_read (D32, amends D24)', () => {
+  it('fails for a definer_read policy on a table outside the five', async () => {
+    await withProbeTable(
+      `create table rls_probe (tenant_id uuid not null);
+       create index rls_probe_tenant_idx on rls_probe (tenant_id);
+       ${tenantRlsSql('rls_probe')}
+       create policy definer_read on rls_probe for select to quad_owner using (true);`,
+      (violations) => {
+        expect(violations).toEqual([
+          'rls_probe: policy definer_read does not match the tenant isolation expression',
+        ]);
+      },
+    );
+  });
+
+  it.each([
+    ['roles', 'for select to quad_app using (true)', 'the tenant isolation expression'],
+    ['users', 'for all to quad_owner using (true)', 'the tenant isolation expression'],
+    ['users', 'for select to quad_owner, quad_app using (true)', 'the tenant isolation expression'],
+    [
+      'user_roles',
+      'for select to quad_owner using (tenant_id is not null)',
+      'the tenant isolation expression',
+    ],
+    ['accounts', 'for all to quad_owner using (true)', 'the account isolation expression on id'],
+    ['sessions', 'for select using (true)', 'the account isolation expression on account_id'],
+  ])('fails for definer_read on %s %s', async (table, clause, expression) => {
+    await withRolledBackChange(
+      `drop policy definer_read on ${table};
+       create policy definer_read on ${table} ${clause};`,
+      (violations) => {
+        expect(violations).toEqual([`${table}: policy definer_read does not match ${expression}`]);
+      },
+    );
+  });
+
+  it('fails for a second SELECT-to-quad_owner policy under another name on a listed table', async () => {
+    await withRolledBackChange(
+      'create policy owner_read on roles for select to quad_owner using (true);',
+      (violations) => {
+        expect(violations).toEqual([
+          'roles: policy owner_read does not match the tenant isolation expression',
+        ]);
+      },
+    );
+  });
+});
+
 describe('platform_audit is append-only', () => {
   it('refuses UPDATE and DELETE, even for quad_platform, and TRUNCATE, even for the owner', async () => {
     const { owner, platform } = testDb();

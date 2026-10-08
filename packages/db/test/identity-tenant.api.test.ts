@@ -3,6 +3,7 @@ import { DatabaseError } from 'pg';
 import { beforeAll, describe, expect, it } from 'vitest';
 
 import {
+  DEFINER_READ_TABLES,
   auditLog,
   createAccountRunner,
   createPlatformRunner,
@@ -201,7 +202,7 @@ describe('Review Focus #4 (tenant tables): quad_app sees only the current school
     expect(cause).toMatchObject({ code: '42501' });
   });
 
-  it('every identity table has ENABLE and FORCE row level security and tenant_isolation', async () => {
+  it('every identity table has ENABLE and FORCE row level security, tenant_isolation, and definer_read only where listed', async () => {
     const { rows } = await testDb().owner.query<{
       name: string;
       rls: boolean;
@@ -216,9 +217,15 @@ describe('Review Focus #4 (tenant tables): quad_app sees only the current school
       [TENANT_TABLES],
     );
     expect(rows).toEqual(
-      [...TENANT_TABLES]
-        .sort()
-        .map((name) => ({ name, rls: true, force: true, policies: ['tenant_isolation'] })),
+      [...TENANT_TABLES].sort().map((name) => ({
+        name,
+        rls: true,
+        force: true,
+        // definer_read (0006, D32): SELECT for quad_owner only, so the D16 definers can read.
+        policies: DEFINER_READ_TABLES.includes(name)
+          ? ['definer_read', 'tenant_isolation']
+          : ['tenant_isolation'],
+      })),
     );
   });
 });
