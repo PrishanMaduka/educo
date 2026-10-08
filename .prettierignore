@@ -19,3 +19,4 @@ packages/db/migrations
 packages/tokens/dist
 .cache
 apps/parent
+apps/staff/site-export/out

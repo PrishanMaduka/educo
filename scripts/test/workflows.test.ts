@@ -73,9 +73,12 @@ describe('every workflow', () => {
       expect(typeof job.permissions, `${file} ${id}`).toBe('object');
       for (const [scope, level] of Object.entries(job.permissions as Record<string, string>)) {
         if (level !== 'write') continue;
+        const isPagesDeploy = file === 'pages.yml' && id === 'deploy';
         if (scope === 'id-token') {
-          // OIDC only for a job that assumes an AWS role.
-          expect(usesAws(job), `${file} ${id} id-token without AWS`).toBe(true);
+          // OIDC only for a job that assumes an AWS role, or that deploys GitHub Pages (D30).
+          expect(usesAws(job) || isPagesDeploy, `${file} ${id} id-token without AWS`).toBe(true);
+        } else if (isPagesDeploy) {
+          expect(scope, `${file} ${id} ${scope}: write`).toBe('pages');
         } else {
           // The PR plan comment is the only other write.
           expect([file, id, scope], `${file} ${id} ${scope}: write`).toEqual([
@@ -528,5 +531,40 @@ describe('infra.yml', () => {
       }
       expect(runs(infra.jobs[id]), id).toContain('kms_key_id');
     }
+  });
+});
+
+describe('pages.yml', () => {
+  const pages = load('pages.yml');
+  const build = pages.jobs.build;
+  const deployPages = pages.jobs.deploy;
+
+  it('runs on pushes to main, pull requests and by hand, one deploy at a time', () => {
+    expect(pages.on).toEqual({
+      push: { branches: ['main'] },
+      pull_request: null,
+      workflow_dispatch: null,
+    });
+    expect(pages.concurrency).toEqual({ group: 'pages', 'cancel-in-progress': false });
+    expect(pages.permissions).toEqual({ contents: 'read' });
+  });
+
+  it('builds the pre-launch export and runs the landing journey against it', () => {
+    expect(build?.env).toMatchObject({ NEXT_PUBLIC_QUAD_PRELAUNCH: 'true' });
+    expect(runs(build)).toContain('pnpm --filter @quad/staff build:export');
+    expect(runs(build)).toContain('pnpm --filter @quad/staff e2e:export');
+    const upload = build?.steps?.find((step) =>
+      step.uses?.startsWith('actions/upload-pages-artifact@'),
+    );
+    expect(upload?.with).toEqual({ path: 'apps/staff/site-export/out' });
+    expect(upload?.if).toBe("github.event_name != 'pull_request'");
+  });
+
+  it('deploys only outside pull requests, to the github-pages environment', () => {
+    expect(deployPages?.if).toBe("github.event_name != 'pull_request'");
+    expect(needsOf(deployPages)).toEqual(['build']);
+    expect(environmentOf(deployPages)).toBe('github-pages');
+    expect(deployPages?.permissions).toEqual({ pages: 'write', 'id-token': 'write' });
+    expect(deployPages?.steps?.map((step) => step.uses)).toEqual(['actions/deploy-pages@v4']);
   });
 });

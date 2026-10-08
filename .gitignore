@@ -37,3 +37,8 @@ infra/modules/**/.terraform.lock.hcl
 *.tfplan
 # Local-only backend overrides (the bootstrap root's first apply, infra/README.md)
 infra/**/*_override.tf
+
+# The staff app's static export (apps/staff/scripts/build-export.mjs)
+apps/staff/site-export/out
+apps/staff/site-export/next-env.d.ts
+apps/staff/site-export/app/icon.svg

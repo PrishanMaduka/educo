@@ -4,7 +4,9 @@
     "declaration": false,
     "sourceMap": false,
     "types": ["node"],
-    "paths": { "@/*": ["./src/*"] }
+    "paths": {
+      "@/*": ["./src/*"]
+    }
   },
   "include": [
     "next-env.d.ts",
@@ -12,7 +14,9 @@
     "src/**/*.tsx",
     "e2e/**/*.ts",
     "*.ts",
-    ".next/types/**/*.ts"
+    ".next/types/**/*.ts",
+    "site-export/app/**/*.tsx",
+    "site-export/next.config.ts"
   ],
   "exclude": ["node_modules", ".next"]
 }
