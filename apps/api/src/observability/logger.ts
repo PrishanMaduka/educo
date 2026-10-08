@@ -29,6 +29,11 @@ const REDACT_PATHS = [
   '*.name',
   'headers.authorization',
   'headers.cookie',
+  // The double-submit CSRF value and the cookies a response sets (D32).
+  'headers["x-csrf-token"]',
+  '*.headers["x-csrf-token"]',
+  'headers["set-cookie"]',
+  '*.headers["set-cookie"]',
   // CloudFront's origin secret (D28). The ALB checks it and forwards it to the task.
   'headers["x-quad-origin-secret"]',
   '*.headers["x-quad-origin-secret"]',

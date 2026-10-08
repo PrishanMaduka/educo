@@ -10,7 +10,7 @@ import { DatabaseModule } from './database/database.module';
 import { HealthModule } from './health/health.module';
 import { MeModule } from './modules/me/me.module';
 import { OpenApiController } from './openapi/openapi.controller';
-import { PlatformCoreModule } from './platform/platform-core.module';
+import { PlatformModule } from './platform/platform.module';
 import { RealtimeModule } from './realtime/realtime.module';
 import { RedisModule } from './redis/redis.module';
 import { SesWebhookModule } from './webhooks/ses/ses-webhook.module';
@@ -51,7 +51,7 @@ export class AppModule {
         RateLimitModule,
         CryptoModule,
         AuditModule,
-        PlatformCoreModule,
+        PlatformModule,
         DeliveryModule.register(overrides.delivery),
         HealthModule,
         RealtimeModule,

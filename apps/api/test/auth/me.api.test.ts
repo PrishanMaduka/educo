@@ -195,10 +195,12 @@ describe('PATCH /me', () => {
       name: 'Same Person',
     });
 
-    await inject('PATCH', '/me', sessionHeaders(inA.session), {
+    const response = await inject('PATCH', '/me', sessionHeaders(inA.session), {
       name: 'Renamed in A',
       theme: 'dark',
     });
+    expect(response.statusCode).toBe(200);
+    expect(Me.parse(response.json()).school.id).toBe(schoolA.id);
 
     const { rows } = await db().platform.query<{ id: string; name: string; theme: string }>(
       'select id, name, theme from users where account_id = $1 order by name',

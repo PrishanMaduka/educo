@@ -45,7 +45,8 @@ export class AuthGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    if (context.getType() !== 'http') return true;
+    // Deny by default: the API serves HTTP only (sockets authenticate in RealtimeService).
+    if (context.getType() !== 'http') return false;
     const platform = this.reflector.getAllAndOverride<true | undefined>(
       PlatformControllerMarker.KEY,
       [context.getClass()],

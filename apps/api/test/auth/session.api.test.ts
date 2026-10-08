@@ -85,6 +85,15 @@ describe('the global AuthGuard', () => {
     );
     expect((await getMe(sessionHeaders(twoStep))).statusCode).toBe(401);
 
+    // A sign-in step's write needs the CSRF header too.
+    const noCsrf = await request(
+      'POST',
+      '/probe/two-step',
+      sessionHeaders(twoStep, { csrfHeader: false }),
+    );
+    expect(noCsrf.statusCode).toBe(403);
+    expect(noCsrf.json()).toMatchObject({ code: 'forbidden' });
+
     const choosing = await insertWebSession(db(), accountId, { stage: 'choose_school' });
     expect((await request('POST', '/probe/two-step', sessionHeaders(choosing))).statusCode).toBe(
       401,

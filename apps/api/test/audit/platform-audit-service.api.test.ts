@@ -3,7 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
 
 import { PlatformAuditService } from '../../src/platform/audit/platform-audit.service';
-import { PLATFORM_DB } from '../../src/tokens';
+import { PLATFORM_DB } from '../../src/platform/tokens';
 import { useDatabaseApp } from '../helpers/database-app';
 import { insertPlatformUser, insertSchool } from '../helpers/identity';
 

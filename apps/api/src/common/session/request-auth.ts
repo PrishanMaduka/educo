@@ -28,6 +28,10 @@ export interface PersonAuth {
   readonly userId: string | null;
   readonly previewRoleId: string | null;
   readonly previewSampleUserId: string | null;
+  /**
+   * A `sessions` row tied to a support visit (`session_by_token` returns it while the visit is
+   * active). The person is still the actor: audits count a visit only with a platform user.
+   */
   readonly supportSessionId: string | null;
   /** SHA-256 of the cookie: the CSRF token and the cache are keyed on it. */
   readonly tokenHash: Buffer;

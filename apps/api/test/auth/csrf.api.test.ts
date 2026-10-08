@@ -1,3 +1,6 @@
+import { randomUUID } from 'node:crypto';
+
+import { Redis } from 'ioredis';
 import { describe, expect, it } from 'vitest';
 
 import {
@@ -15,6 +18,8 @@ import { insertSchool, sessionHeaders, signedInMember } from '../helpers/identit
 import { AccessProbeModule } from './probe.module';
 
 import type { NestFastifyApplication } from '@nestjs/platform-fastify';
+
+const REDIS_URL = process.env.REDIS_URL ?? 'redis://localhost:6379';
 
 const { db, app } = useDatabaseApp({}, { overrides: { testModules: [AccessProbeModule] } });
 
@@ -120,7 +125,7 @@ async function cookiesFrom(app: NestFastifyApplication) {
 describe('cookie names and attributes (spec 05, ruling F63)', () => {
   const local = useTestApp(CLOSED_PORTS, { overrides: { testModules: [AccessProbeModule] } });
   const staging = useTestApp(
-    { ...productionEnv({ APP_ENV: 'staging' }), REDIS_URL: CLOSED_PORTS.REDIS_URL },
+    { ...productionEnv({ APP_ENV: 'staging' }), REDIS_URL },
     { overrides: { testModules: [AccessProbeModule] } },
   );
 
@@ -136,6 +141,49 @@ describe('cookie names and attributes (spec 05, ruling F63)', () => {
       '__Host-quad_sid=token; Path=/; HttpOnly; Secure; SameSite=Lax',
       '__Host-quad_csrf=csrf; Path=/; Secure; SameSite=Lax',
     ]);
+  });
+
+  it('a non-local app reads the session from __Host-quad_sid, and ignores quad_sid', async () => {
+    // A staging config refuses the compose database's passwords, so the session is served from
+    // the Redis cache entry SessionService would have written (no database is reached).
+    const token = newSessionToken();
+    const tenantId = randomUUID();
+    const userId = randomUUID();
+    const redis = new Redis(REDIS_URL);
+    try {
+      await redis.set(
+        `quad:session:${hashSessionToken(token).toString('hex')}`,
+        JSON.stringify({
+          kind: 'web',
+          sessionId: randomUUID(),
+          accountId: randomUUID(),
+          stage: 'active',
+          tenantId,
+          userId,
+          previewRoleId: null,
+          previewSampleUserId: null,
+          supportSessionId: null,
+          keepSignedIn: false,
+          sessionHours: 12,
+          lastSeenAt: new Date().toISOString(),
+          expiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+        }),
+        'EX',
+        30,
+      );
+    } finally {
+      await redis.quit();
+    }
+    const probe = (cookie: string) =>
+      staging()
+        .getHttpAdapter()
+        .getInstance()
+        .inject({ method: 'GET', url: '/api/v1/probe/context', headers: { cookie } });
+
+    const hosted = await probe(`__Host-quad_sid=${token}`);
+    expect(hosted.statusCode).toBe(200);
+    expect(hosted.json()).toMatchObject({ tenantId, userId, kind: 'web' });
+    expect((await probe(`quad_sid=${token}`)).statusCode).toBe(401);
   });
 
   it('name the console session too', () => {

@@ -37,8 +37,8 @@ export function auditActorOf(school: SchoolAuth, ip: string | null): AuditActor 
 
 /**
  * Writes a school's audit log (spec 05 → Audit). Call it with the `withTenant` transaction that
- * makes the change, so the entry commits or rolls back with it. In a support visit the entry
- * names the Quad staff member and the visit, and `record_support_audit` writes the same action
+ * makes the change, so the entry commits or rolls back with it. In a support visit (a
+ * `platformUserId` with its `supportSessionId`) the entry names the Quad staff member and the visit, and `record_support_audit` writes the same action
  * to `platform_audit` in the same transaction (spec 05, dual audit).
  */
 @Injectable()
@@ -51,21 +51,29 @@ export class AuditService {
     target: AuditTarget | null,
     meta: AuditMeta = {},
   ): Promise<void> {
-    const inSupport = ctx.supportSessionId !== null;
+    // A support visit is a Quad staff member acting through a visit; anyone else is the member
+    // (or a system job), so a row always names who acted.
+    if (ctx.platformUserId !== null && ctx.supportSessionId === null) {
+      throw new Error('A Quad staff member acts in a school only through a support visit.');
+    }
+    const support =
+      ctx.platformUserId === null || ctx.supportSessionId === null
+        ? null
+        : { platformUserId: ctx.platformUserId, supportSessionId: ctx.supportSessionId };
     await ctx.tx.insert(auditLog).values({
       tenantId: ctx.tenantId,
-      actorUserId: inSupport ? null : ctx.userId,
-      actorPlatformUserId: inSupport ? ctx.platformUserId : null,
-      supportSessionId: ctx.supportSessionId,
+      actorUserId: support === null ? ctx.userId : null,
+      actorPlatformUserId: support?.platformUserId ?? null,
+      supportSessionId: support?.supportSessionId ?? null,
       action,
       targetType: target?.type ?? null,
       targetId: target?.id ?? null,
       meta,
       ip: ctx.ip,
     });
-    if (ctx.supportSessionId !== null) {
+    if (support !== null) {
       await this.db.definers.recordSupportAudit(ctx.tx, {
-        supportSessionId: ctx.supportSessionId,
+        supportSessionId: support.supportSessionId,
         action,
         targetType: target?.type ?? null,
         targetId: target?.id ?? null,

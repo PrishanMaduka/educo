@@ -164,6 +164,57 @@ describe('AuditService.record (spec 05 → Audit)', () => {
     expect(await platformRows(visit.id)).toEqual([]);
   });
 
+  it('treats a member session that names a visit as the member: never a row without an actor', async () => {
+    const school = await insertSchool(db());
+    const { userId } = await signedInMember(db(), school);
+    const staff = await insertPlatformUser(db(), 'Ruwan Mendis');
+    const visit = await insertSupportVisit(db(), staff, school.id);
+    await tenantDb().withTenant(school.id, (tx) =>
+      audit().record(
+        {
+          tx,
+          tenantId: school.id,
+          userId,
+          supportSessionId: visit.id,
+          platformUserId: null,
+          ip: null,
+        },
+        'settings.updated',
+        null,
+      ),
+    );
+    expect(await auditRows(school.id)).toEqual([
+      expect.objectContaining({
+        actor_user_id: userId,
+        actor_platform_user_id: null,
+        support_session_id: null,
+      }),
+    ]);
+    expect(await platformRows(visit.id)).toEqual([]);
+  });
+
+  it('refuses a Quad staff member without a support visit, and writes nothing', async () => {
+    const school = await insertSchool(db());
+    const staff = await insertPlatformUser(db(), 'Ruwan Mendis');
+    await expect(
+      tenantDb().withTenant(school.id, (tx) =>
+        audit().record(
+          {
+            tx,
+            tenantId: school.id,
+            userId: null,
+            supportSessionId: null,
+            platformUserId: staff,
+            ip: null,
+          },
+          'settings.updated',
+          null,
+        ),
+      ),
+    ).rejects.toThrow(/support visit/);
+    expect(await auditRows(school.id)).toEqual([]);
+  });
+
   it("cannot write into another school's log from this school's transaction (RLS)", async () => {
     const schoolA = await insertSchool(db());
     const schoolB = await insertSchool(db());

@@ -2,9 +2,10 @@ import { Inject, Module } from '@nestjs/common';
 import { createPlatformDb } from '@quad/db';
 
 import { errorForLog } from '../observability/logger';
-import { CONFIG, LOGGER, PLATFORM_DB } from '../tokens';
+import { CONFIG, LOGGER } from '../tokens';
 
 import { PlatformAuditService } from './audit/platform-audit.service';
+import { PLATFORM_DB } from './tokens';
 
 import type { Config } from '../config';
 import type { OnApplicationShutdown } from '@nestjs/common';
