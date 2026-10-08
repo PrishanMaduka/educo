@@ -568,25 +568,32 @@ function runOneOff(aws, taskDefinition, container, write, writeError) {
   const outcome = taskOutcome(started, described, container);
   if (waited.status !== 0) writeError(waiterError(waited));
   if (!outcome.ok) {
+    // The outcome comes first, so a failing stop-task below can never hide why the deploy failed.
+    writeError(`${outcome.message}\n`);
     const running = records(described.tasks).filter((task) => task.lastStatus !== 'STOPPED');
     // A task the waiter gave up on would otherwise keep running (and, for migrate, keep holding
     // its lock) after the deploy failed.
     for (const task of running) {
-      call(aws, [
-        'ecs',
-        'stop-task',
-        '--cluster',
-        cluster,
-        '--task',
-        String(task.taskArn),
-        '--reason',
-        'deploy-staging: the waiter gave up',
-        '--output',
-        'json',
-      ]);
+      const arn = String(task.taskArn);
+      try {
+        call(aws, [
+          'ecs',
+          'stop-task',
+          '--cluster',
+          cluster,
+          '--task',
+          arn,
+          '--reason',
+          'deploy-staging: the waiter gave up',
+          '--output',
+          'json',
+        ]);
+        writeError(`The deploy stopped it (${arn}).\n`);
+      } catch (error) {
+        const detail = error instanceof Error ? error.message : String(error);
+        writeError(`Note: Could not stop ${arn}; stop it by hand. ${detail}\n`);
+      }
     }
-    const stoppedIt = running.length === 0 ? '' : ' The deploy stopped it.';
-    writeError(`${outcome.message}${stoppedIt}\n`);
     return 1;
   }
   write(`${outcome.message}\n`);

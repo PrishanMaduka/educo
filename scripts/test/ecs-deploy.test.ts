@@ -452,6 +452,37 @@ describe('runDeploy', () => {
     expect(message).toContain('stopped it');
   });
 
+  it('run-task reports the outcome first, then a stop-task that failed, and still fails', () => {
+    const { aws, calls } = fakeAws(
+      {
+        'ecs run-task': started,
+        'ecs describe-tasks': {
+          tasks: [{ taskArn, lastStatus: 'RUNNING', containers: [{ name: 'migrate' }] }],
+          failures: [],
+        },
+      },
+      { 'ecs wait': 255, 'ecs stop-task': 254 },
+      { 'ecs stop-task': 'AccessDeniedException: not authorized to perform ecs:StopTask' },
+    );
+    const err = capture();
+    expect(
+      runDeploy(
+        parseDeployArgs(['run-task', '--family-arn', 'arn:td:3', '--container', 'migrate']),
+        aws,
+        capture().write,
+        err.write,
+      ),
+    ).toBe(1);
+    expect(calls.some((call) => call[1] === 'stop-task')).toBe(true);
+    const message = err.lines.join('');
+    const outcome = message.indexOf('did not stop');
+    const note = message.indexOf(`Could not stop ${taskArn}`);
+    expect(outcome).toBeGreaterThan(-1);
+    expect(note).toBeGreaterThan(outcome);
+    expect(message).toContain('not authorized to perform ecs:StopTask');
+    expect(message).not.toContain('The deploy stopped it');
+  });
+
   it('run-task does not stop a task that stopped although the waiter failed', () => {
     const { aws, calls } = fakeAws(
       {
