@@ -1,6 +1,7 @@
 import { colorNames, colors, type ColorSet, type RailOverrides } from '../colors';
 import { publicSite } from '../public-site';
 import { radius, shadow } from '../shape';
+import { themeColorNames } from '../theme-colors';
 import { fontFamily } from '../type';
 
 const HEADER =
@@ -11,6 +12,9 @@ const publicNames = Object.keys(publicSite.light) as (keyof typeof publicSite.li
 
 type Decl = [name: string, value: string];
 
+/** The element that wraps the public site (apps/staff `(public)` layout). */
+const PUBLIC = '[data-site="public"]';
+
 /** All `--quad-*` declarations for one theme. rail-active is not declared: staff falls back to the live brand at the element that uses it, so a brand set on any ancestor reaches it. */
 function themeDecls(theme: 'light' | 'dark'): Decl[] {
   const set: ColorSet = colors[theme];
@@ -20,15 +24,33 @@ function themeDecls(theme: 'light' | 'dark'): Decl[] {
       return [`--quad-${name}`, set[name]];
     });
   for (const name of publicNames) decls.push([`--quad-${name}`, publicSite[theme][name]]);
-  // Mixed here (not on :root only) so the heat steps follow the surface of the element's theme.
-  publicSite.heat.forEach((step, i) => {
+  decls.push(...heatDecls());
+  for (const name of publicSite.landingNames) {
+    decls.push([`--quad-${name}`, publicSite.landing[theme][name]]);
+  }
+  for (const name of publicSite.pigmentNames) {
+    decls.push([`--quad-wc-${name}`, publicSite.pigments[theme][name]]);
+  }
+  decls.push(['--quad-wc-blend', publicSite.blend[theme]]);
+  return decls;
+}
+
+/** Mixed where they are declared, so the heat steps follow the surface of the element's theme. */
+function heatDecls(): Decl[] {
+  return publicSite.heat.map((step, i): Decl => {
     const value =
       step.percent === 100
         ? `var(--quad-${step.color})`
         : `color-mix(in srgb, var(--quad-${step.color}) ${step.percent}%, var(--quad-surface))`;
-    decls.push([`--quad-heat-${i}`, value]);
+    return [`--quad-heat-${i}`, value];
   });
-  return decls;
+}
+
+/** Palette B (spec 19) for the public site, with the heat steps mixed again on its surface. */
+function paletteDecls(theme: 'light' | 'dark'): Decl[] {
+  const set = publicSite.palette[theme];
+  const decls = Object.entries(set).map(([name, value]): Decl => [`--quad-${name}`, value]);
+  return [...decls, ...heatDecls()];
 }
 
 function railDecls(o: RailOverrides): Decl[] {
@@ -71,6 +93,10 @@ export function buildVariableBlocks(): string {
       consoleDark,
       '  ',
     )}}\n`,
+    '/* Public site: palette B "Sky blue" and, in dark, Soft charcoal (spec 19). */',
+    block(PUBLIC, paletteDecls('light')),
+    block(`[data-theme="dark"] ${PUBLIC},\n${PUBLIC}[data-theme="dark"]`, paletteDecls('dark')),
+    `@media (prefers-color-scheme: dark) {\n${block(`${dataDark} ${PUBLIC}`, paletteDecls('dark'), '  ')}}\n`,
   ].join('\n');
 }
 
@@ -81,7 +107,7 @@ export function buildTokensCss(): string {
 
 /** Tailwind v4 theme: utilities read the runtime `--quad-*` variables. */
 export function buildThemeCss(): string {
-  const names = [...colorNames, ...publicNames, 'heat-0', 'heat-1', 'heat-2', 'heat-3'];
+  const names = themeColorNames;
   const colorLines = names.map((n) =>
     n === 'rail-active'
       ? `  --color-${n}: var(--quad-rail-active, var(--quad-brand));`

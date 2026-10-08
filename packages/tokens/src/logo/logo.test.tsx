@@ -47,6 +47,18 @@ describe('QuadLogo', () => {
     expect(svg.getAttribute('width')).toBe(String(Math.round((43 * 292) / 86)));
   });
 
+  it('has a theme variant that reads the mark tokens and the text colour', () => {
+    const { container } = render(<QuadLogo variant="theme" />);
+    const fills = [...container.querySelectorAll('rect')].map((r) => r.getAttribute('fill'));
+    expect(fills).toEqual([
+      'var(--quad-mark-school)',
+      'var(--quad-mark-people)',
+      'var(--quad-mark-people)',
+      'var(--quad-mark-students)',
+    ]);
+    expect(container.querySelector('g[stroke]')?.getAttribute('stroke')).toBe('currentColor');
+  });
+
   it('has a white variant', () => {
     const { container } = render(<QuadLogo variant="white" />);
     expect(container.innerHTML).toContain('stroke="#FFFFFF"');

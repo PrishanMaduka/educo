@@ -39,6 +39,31 @@ describe('theme.css', () => {
     expect(theme).toMatch(/--quad-rail-active: #6D5AE6;/);
   });
 
+  it('scopes palette B to the public site, light and dark, with heat mixed on its surface', () => {
+    expect(theme).toMatch(
+      /\n\[data-site="public"\] \{[^}]*--quad-canvas: #EEF5FB;[^}]*--quad-heat-2: color-mix/,
+    );
+    expect(theme).toMatch(
+      /\[data-theme="dark"\] \[data-site="public"\],\n\[data-site="public"\]\[data-theme="dark"\] \{[^}]*--quad-canvas: #18181D;/,
+    );
+    expect(theme).toMatch(
+      /@media \(prefers-color-scheme: dark\) \{\s*:root:not\(\[data-theme="light"\]\) \[data-site="public"\] \{[^}]*--quad-ink: #F3F2EE;/,
+    );
+  });
+
+  it('declares the landing colours and watercolour pigments for each theme', () => {
+    expect(theme).toMatch(/:root,\n\[data-theme="light"\] \{[^}]*--quad-coral-ink: #C23A33;/);
+    expect(theme).toMatch(
+      /:root,\n\[data-theme="light"\] \{[^}]*--quad-wc-paper: #F4F1EA;[^}]*--quad-wc-blend: multiply;/,
+    );
+    expect(theme).toMatch(
+      /\[data-theme="dark"\] \{[^}]*--quad-wc-paper: #1F1F25;[^}]*--quad-wc-blend: normal;/,
+    );
+    expect(theme).toContain('--color-wc-peach: var(--quad-wc-peach);');
+    expect(theme).toContain('--color-coral-ink: var(--quad-coral-ink);');
+    expect(theme).not.toContain('--color-wc-blend');
+  });
+
   it('mixes heat steps on the surface', () => {
     expect(theme).toContain(
       '--quad-heat-0: color-mix(in srgb, var(--quad-c1) 30%, var(--quad-surface));',
@@ -69,6 +94,9 @@ describe('theme.css', () => {
       'bg-band-tag-teal-bg',
       'text-band-tag-teal-ink',
       'bg-heat-2',
+      'text-coral-ink',
+      'bg-wash-1',
+      'fill-wc-ochre',
       'rounded-card',
       'rounded-scene',
       'rounded-input',
@@ -83,6 +111,8 @@ describe('theme.css', () => {
     expect(css).toContain('border-color: var(--quad-line)');
     expect(css).toContain('color: var(--quad-brand-ink)');
     expect(css).toContain('background-color: var(--quad-heat-2)');
+    expect(css).toContain('color: var(--quad-coral-ink)');
+    expect(css).toContain('fill: var(--quad-wc-ochre)');
     expect(css).toContain('border-radius: 16px');
     expect(css).toContain('.rounded-pill');
     expect(css).toContain('.shadow-card');

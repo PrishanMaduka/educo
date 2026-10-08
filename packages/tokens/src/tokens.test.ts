@@ -1,6 +1,16 @@
 import { describe, expect, it } from 'vitest';
 
-import { colors, publicSite, radius, shadow, spacing, type, fontFamily } from './index';
+import {
+  colors,
+  contrastRatio,
+  fontFamily,
+  heatHex,
+  publicSite,
+  radius,
+  shadow,
+  spacing,
+  type,
+} from './index';
 
 describe('colour tokens', () => {
   it('match the spec for the light theme', () => {
@@ -40,19 +50,68 @@ describe('colour tokens', () => {
 });
 
 describe('public site tokens', () => {
-  it('match the spec 19 table', () => {
-    expect(publicSite.light.band).toBe('#1F2559');
-    expect(publicSite.dark.band).toBe('#0D0E22');
-    expect(publicSite.light['band-2']).toBe('#2A3170');
-    expect(publicSite.dark['band-2']).toBe('#181A38');
-    expect(publicSite.dark['band-ink-2']).toBe('#B8B6DC');
-    expect(publicSite.dark['band-line']).toBe('#2E3260');
+  it('use palette B for the band (spec 19 "Palette B tokens")', () => {
+    expect(publicSite.light.band).toBe('#1A2A5E');
+    expect(publicSite.dark.band).toBe('#0F0F13');
+    expect(publicSite.light['band-2']).toBe('#24387A');
+    expect(publicSite.dark['band-2']).toBe('#1D1D23');
+    expect(publicSite.light['band-line']).toBe('#34498F');
+    expect(publicSite.dark['band-line']).toBe('#33333C');
+    expect(publicSite.light['band-ink-2']).toBe('#CDD5F2');
+    expect(publicSite.dark['band-ink-2']).toBe('#D0CFCA');
     expect(publicSite.light['band-tag-teal-bg']).toBe('#1D4F4A');
     expect(publicSite.light['band-tag-teal-ink']).toBe('#9BEADF');
     expect(publicSite.dark['band-tag-coral-bg']).toBe('#5A2430');
     expect(publicSite.dark['band-tag-amber-ink']).toBe('#FFDDA1');
     expect(publicSite.light['band-tag-lilac-bg']).toBe('#3A3170');
     expect(publicSite.light['band-tag-lilac-ink']).toBe('#D9D2FF');
+  });
+
+  it('replace the page background with Sky blue and Soft charcoal', () => {
+    expect(publicSite.palette.light).toEqual({
+      canvas: '#EEF5FB',
+      surface: '#FFFFFF',
+      'surface-2': '#E4EDF7',
+      line: '#D2DEEC',
+    });
+    expect(publicSite.palette.dark).toMatchObject({
+      canvas: '#18181D',
+      surface: '#222228',
+      ink: '#F3F2EE',
+      'ink-3': '#9C9A93',
+    });
+  });
+
+  it('give coral text and the heat numbers 4.5:1 on their backgrounds', () => {
+    const { landing, palette } = publicSite;
+    expect(contrastRatio(landing.light['coral-ink'], palette.light.canvas)).toBeGreaterThanOrEqual(
+      4.5,
+    );
+    expect(contrastRatio(landing.dark['coral-ink'], palette.dark.canvas)).toBeGreaterThanOrEqual(
+      4.5,
+    );
+    expect(
+      contrastRatio(landing.light['coral-fill-ink'], landing.light['coral-fill']),
+    ).toBeGreaterThanOrEqual(4.5);
+    expect(
+      contrastRatio(landing.dark['coral-fill-ink'], landing.dark['coral-fill']),
+    ).toBeGreaterThanOrEqual(4.5);
+    const darkSurface = { ...colors.dark, surface: palette.dark.surface };
+    expect(contrastRatio(landing.dark['heat-ink'], heatHex(darkSurface, 2))).toBeGreaterThanOrEqual(
+      4.5,
+    );
+    expect(
+      contrastRatio(landing.light['heat-ink'], heatHex(colors.light, 2)),
+    ).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it('define every watercolour pigment from spec 19 in both themes', () => {
+    expect(publicSite.pigments.light.paper).toBe('#F4F1EA');
+    expect(publicSite.pigments.dark.paper).toBe('#1F1F25');
+    expect(publicSite.pigments.light.uniform).toBe('#FDFCF8');
+    expect(publicSite.pigments.dark.window).toBe('#FFD47C');
+    expect(Object.keys(publicSite.pigments.dark)).toEqual(Object.keys(publicSite.pigments.light));
+    expect(publicSite.blend).toEqual({ light: 'multiply', dark: 'normal' });
   });
 
   it('mixes the heat steps on the theme surface', () => {

@@ -38,11 +38,11 @@
   --quad-c5: #2BB0A0;
   --quad-gold: #8B7CF6;
   --quad-gold-soft: #EEEAFE;
-  --quad-band: #1F2559;
-  --quad-band-2: #2A3170;
+  --quad-band: #1A2A5E;
+  --quad-band-2: #24387A;
   --quad-band-ink: #F3F2FB;
-  --quad-band-ink-2: #C9C6EC;
-  --quad-band-line: #3A4285;
+  --quad-band-ink-2: #CDD5F2;
+  --quad-band-line: #34498F;
   --quad-band-tag-teal-bg: #1D4F4A;
   --quad-band-tag-teal-ink: #9BEADF;
   --quad-band-tag-coral-bg: #5A2430;
@@ -55,6 +55,44 @@
   --quad-heat-1: color-mix(in srgb, var(--quad-c5) 30%, var(--quad-surface));
   --quad-heat-2: color-mix(in srgb, var(--quad-c5) 60%, var(--quad-surface));
   --quad-heat-3: var(--quad-c5);
+  --quad-coral-ink: #C23A33;
+  --quad-coral-fill: #C23A33;
+  --quad-coral-fill-ink: #FFFFFF;
+  --quad-heat-ink: #1C1B2E;
+  --quad-wash-1: #E8E3FA;
+  --quad-wash-2: #FAF0C8;
+  --quad-coral-soft: #FDE7E5;
+  --quad-amber-soft: #FDF1DC;
+  --quad-teal-soft: #DDF4F1;
+  --quad-lilac-soft: #EEEAFE;
+  --quad-band-eyebrow: #FFA399;
+  --quad-band-accent: #FFB8AF;
+  --quad-mark-school: #1F2559;
+  --quad-mark-people: #8B7CF6;
+  --quad-mark-students: #E5534B;
+  --quad-wc-paper: #F4F1EA;
+  --quad-wc-peach: #E8B79C;
+  --quad-wc-apricot: #F0C899;
+  --quad-wc-sky: #9CBAD5;
+  --quad-wc-lilac: #B7A8D4;
+  --quad-wc-teal: #5F9C95;
+  --quad-wc-sea: #3F8783;
+  --quad-wc-ochre: #D29A4C;
+  --quad-wc-olive: #8B8F52;
+  --quad-wc-charcoal: #4A4850;
+  --quad-wc-rose: #D98B7C;
+  --quad-wc-roof: #C4673F;
+  --quad-wc-white: #FBFAF5;
+  --quad-wc-window: #F5C15A;
+  --quad-wc-skin: #B67C56;
+  --quad-wc-hair: #3A2B2A;
+  --quad-wc-uniform: #FDFCF8;
+  --quad-wc-moonlight: #F3EBD2;
+  --quad-wc-glint: #FFE7A8;
+  --quad-wc-glint-core: #FFF6DA;
+  --quad-wc-light: #FFFFFF;
+  --quad-wc-shade: #000000;
+  --quad-wc-blend: multiply;
 }
 
 [data-theme="dark"] {
@@ -92,11 +130,11 @@
   --quad-c5: #3CC7B5;
   --quad-gold: #A99BFF;
   --quad-gold-soft: #262046;
-  --quad-band: #0D0E22;
-  --quad-band-2: #181A38;
+  --quad-band: #0F0F13;
+  --quad-band-2: #1D1D23;
   --quad-band-ink: #F3F2FB;
-  --quad-band-ink-2: #B8B6DC;
-  --quad-band-line: #2E3260;
+  --quad-band-ink-2: #D0CFCA;
+  --quad-band-line: #33333C;
   --quad-band-tag-teal-bg: #1D4F4A;
   --quad-band-tag-teal-ink: #9BEADF;
   --quad-band-tag-coral-bg: #5A2430;
@@ -109,6 +147,44 @@
   --quad-heat-1: color-mix(in srgb, var(--quad-c5) 30%, var(--quad-surface));
   --quad-heat-2: color-mix(in srgb, var(--quad-c5) 60%, var(--quad-surface));
   --quad-heat-3: var(--quad-c5);
+  --quad-coral-ink: #FF8F84;
+  --quad-coral-fill: #C23A33;
+  --quad-coral-fill-ink: #FFFFFF;
+  --quad-heat-ink: #000000;
+  --quad-wash-1: #24232C;
+  --quad-wash-2: #2C2A24;
+  --quad-coral-soft: #3A2526;
+  --quad-amber-soft: #342B1D;
+  --quad-teal-soft: #1C302E;
+  --quad-lilac-soft: #2A2638;
+  --quad-band-eyebrow: #FFA399;
+  --quad-band-accent: #FFB8AF;
+  --quad-mark-school: #C9C4F5;
+  --quad-mark-people: #A99BFF;
+  --quad-mark-students: #FF7A6E;
+  --quad-wc-paper: #1F1F25;
+  --quad-wc-peach: #4E4550;
+  --quad-wc-apricot: #7A5A58;
+  --quad-wc-sky: #33384A;
+  --quad-wc-lilac: #4A4466;
+  --quad-wc-teal: #2E5250;
+  --quad-wc-sea: #2A4244;
+  --quad-wc-ochre: #8C6B3C;
+  --quad-wc-olive: #3F4234;
+  --quad-wc-charcoal: #0E0E12;
+  --quad-wc-rose: #8A5458;
+  --quad-wc-roof: #6E3A30;
+  --quad-wc-white: #C4C2BC;
+  --quad-wc-window: #FFD47C;
+  --quad-wc-skin: #94653F;
+  --quad-wc-hair: #1A1216;
+  --quad-wc-uniform: #D9D7D0;
+  --quad-wc-moonlight: #F3EBD2;
+  --quad-wc-glint: #FFE7A8;
+  --quad-wc-glint-core: #FFF6DA;
+  --quad-wc-light: #FFFFFF;
+  --quad-wc-shade: #000000;
+  --quad-wc-blend: normal;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -147,11 +223,11 @@
     --quad-c5: #3CC7B5;
     --quad-gold: #A99BFF;
     --quad-gold-soft: #262046;
-    --quad-band: #0D0E22;
-    --quad-band-2: #181A38;
+    --quad-band: #0F0F13;
+    --quad-band-2: #1D1D23;
     --quad-band-ink: #F3F2FB;
-    --quad-band-ink-2: #B8B6DC;
-    --quad-band-line: #2E3260;
+    --quad-band-ink-2: #D0CFCA;
+    --quad-band-line: #33333C;
     --quad-band-tag-teal-bg: #1D4F4A;
     --quad-band-tag-teal-ink: #9BEADF;
     --quad-band-tag-coral-bg: #5A2430;
@@ -164,6 +240,44 @@
     --quad-heat-1: color-mix(in srgb, var(--quad-c5) 30%, var(--quad-surface));
     --quad-heat-2: color-mix(in srgb, var(--quad-c5) 60%, var(--quad-surface));
     --quad-heat-3: var(--quad-c5);
+    --quad-coral-ink: #FF8F84;
+    --quad-coral-fill: #C23A33;
+    --quad-coral-fill-ink: #FFFFFF;
+    --quad-heat-ink: #000000;
+    --quad-wash-1: #24232C;
+    --quad-wash-2: #2C2A24;
+    --quad-coral-soft: #3A2526;
+    --quad-amber-soft: #342B1D;
+    --quad-teal-soft: #1C302E;
+    --quad-lilac-soft: #2A2638;
+    --quad-band-eyebrow: #FFA399;
+    --quad-band-accent: #FFB8AF;
+    --quad-mark-school: #C9C4F5;
+    --quad-mark-people: #A99BFF;
+    --quad-mark-students: #FF7A6E;
+    --quad-wc-paper: #1F1F25;
+    --quad-wc-peach: #4E4550;
+    --quad-wc-apricot: #7A5A58;
+    --quad-wc-sky: #33384A;
+    --quad-wc-lilac: #4A4466;
+    --quad-wc-teal: #2E5250;
+    --quad-wc-sea: #2A4244;
+    --quad-wc-ochre: #8C6B3C;
+    --quad-wc-olive: #3F4234;
+    --quad-wc-charcoal: #0E0E12;
+    --quad-wc-rose: #8A5458;
+    --quad-wc-roof: #6E3A30;
+    --quad-wc-white: #C4C2BC;
+    --quad-wc-window: #FFD47C;
+    --quad-wc-skin: #94653F;
+    --quad-wc-hair: #1A1216;
+    --quad-wc-uniform: #D9D7D0;
+    --quad-wc-moonlight: #F3EBD2;
+    --quad-wc-glint: #FFE7A8;
+    --quad-wc-glint-core: #FFF6DA;
+    --quad-wc-light: #FFFFFF;
+    --quad-wc-shade: #000000;
+    --quad-wc-blend: normal;
   }
 }
 
@@ -187,5 +301,48 @@
     --quad-rail: #0C0D20;
     --quad-rail-2: #23265A;
     --quad-rail-active: #6D5AE6;
+  }
+}
+
+/* Public site: palette B "Sky blue" and, in dark, Soft charcoal (spec 19). */
+[data-site="public"] {
+  --quad-canvas: #EEF5FB;
+  --quad-surface: #FFFFFF;
+  --quad-surface-2: #E4EDF7;
+  --quad-line: #D2DEEC;
+  --quad-heat-0: color-mix(in srgb, var(--quad-c1) 30%, var(--quad-surface));
+  --quad-heat-1: color-mix(in srgb, var(--quad-c5) 30%, var(--quad-surface));
+  --quad-heat-2: color-mix(in srgb, var(--quad-c5) 60%, var(--quad-surface));
+  --quad-heat-3: var(--quad-c5);
+}
+
+[data-theme="dark"] [data-site="public"],
+[data-site="public"][data-theme="dark"] {
+  --quad-canvas: #18181D;
+  --quad-surface: #222228;
+  --quad-surface-2: #2A2A31;
+  --quad-line: #36363F;
+  --quad-ink: #F3F2EE;
+  --quad-ink-2: #CFCDC6;
+  --quad-ink-3: #9C9A93;
+  --quad-heat-0: color-mix(in srgb, var(--quad-c1) 30%, var(--quad-surface));
+  --quad-heat-1: color-mix(in srgb, var(--quad-c5) 30%, var(--quad-surface));
+  --quad-heat-2: color-mix(in srgb, var(--quad-c5) 60%, var(--quad-surface));
+  --quad-heat-3: var(--quad-c5);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) [data-site="public"] {
+    --quad-canvas: #18181D;
+    --quad-surface: #222228;
+    --quad-surface-2: #2A2A31;
+    --quad-line: #36363F;
+    --quad-ink: #F3F2EE;
+    --quad-ink-2: #CFCDC6;
+    --quad-ink-3: #9C9A93;
+    --quad-heat-0: color-mix(in srgb, var(--quad-c1) 30%, var(--quad-surface));
+    --quad-heat-1: color-mix(in srgb, var(--quad-c5) 30%, var(--quad-surface));
+    --quad-heat-2: color-mix(in srgb, var(--quad-c5) 60%, var(--quad-surface));
+    --quad-heat-3: var(--quad-c5);
   }
 }
