@@ -10,65 +10,115 @@ import {
  * playwright.export.config.ts, against the pre-launch static export (project metadata `prelaunch`).
  */
 const isPrelaunch = (testInfo: TestInfo) => testInfo.project.metadata.prelaunch === true;
-const isPhone = (page: Page) => (page.viewportSize()?.width ?? 0) <= 900;
+const isNarrow = (page: Page) => (page.viewportSize()?.width ?? 0) <= 1100;
 
-/** Palette B canvas (spec 19): Sky blue in light, Soft charcoal in dark. */
-const CANVAS = { light: 'rgb(238, 245, 251)', dark: 'rgb(24, 24, 29)' } as const;
+/** The hero (navy) and page (cream) grounds, light and dark (spec 19 palette). */
+const GROUND = {
+  hero: { light: 'rgb(16, 22, 50)', dark: 'rgb(10, 13, 36)' },
+  page: { light: 'rgb(247, 245, 240)', dark: 'rgb(15, 19, 48)' },
+} as const;
+
+/** Catches the mailto: links the forms open, instead of opening an email app. */
+async function catchEmails(page: Page): Promise<void> {
+  await page.addInitScript(() => {
+    const opened: string[] = [];
+    Object.assign(window, { openedEmails: opened });
+    HTMLAnchorElement.prototype.click = function click(this: HTMLAnchorElement) {
+      opened.push(this.href);
+    };
+  });
+}
+
+const openedEmails = (page: Page) =>
+  page.evaluate(() => (window as unknown as { openedEmails: string[] }).openedEmails);
 
 test.describe('landing page', () => {
-  test('tells the story: hero, the Circle, its steps and every section', async ({ page }) => {
-    // A hydration mismatch makes React re-render the page and drop the stored theme.
+  test('tells the story: hero, the circle, wellbeing, modules and the demo', async ({ page }) => {
+    // A hydration mismatch makes React re-render the page and drop the stored theme and view.
     const errors: string[] = [];
     page.on('pageerror', (error) => errors.push(error.message));
     await page.goto('/');
     await expect(page).toHaveTitle('Quad – School management built around the child');
-    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Every child has a circle.');
-    await expect(page.getByRole('img', { name: /A watercolour picture: Amaya/ })).toBeVisible();
-    await expect(page.getByRole('status').first()).toContainText('Ms. Jayasinghe shared a moment');
+    await expect(page.getByRole('heading', { level: 1 })).toHaveAccessibleName(
+      'Every child has a circle.',
+    );
+    await expect(
+      page.getByRole('img', { name: /A sample school day. Maya’s circle/ }),
+    ).toBeVisible();
 
-    const circle = page.locator('#circle');
-    await expect(circle.getByRole('heading', { level: 2 })).toHaveText('What is the Quad Circle?');
-    const steps = circle.getByRole('list', { name: 'How the circle works' }).getByRole('listitem');
+    const steps = page.locator('#circle').getByRole('listitem');
     await expect(steps).toHaveCount(4);
     await expect(steps.nth(0)).toContainText('A moment at school');
     await expect(steps.nth(3)).toContainText('The teacher sees it');
-    // The diagram's text equivalent lists everyone in Amaya's circle.
-    await expect(
-      circle.getByRole('listitem').filter({ hasText: 'Kamala, her grandmother' }),
-    ).toHaveCount(1);
-    await expect(circle.getByRole('listitem').filter({ hasText: 'Sunethra aunty' })).toHaveCount(1);
 
     for (const heading of [
-      'One school day in Amaya’s circle',
-      'Four ideas that put people first',
-      'Is every family connected?',
-      'Everything a school runs, under one roof',
-      'Children’s data, handled with care',
-      'Book a 30‑minute walkthrough',
+      'One week, round the circle.',
+      'Quad notices the child who’s drifting.',
+      'Everything a school runs, under one roof.',
+      'Kind and safe by design',
+      'See your school’s circle in 30 minutes.',
     ]) {
-      await expect(page.getByRole('heading', { level: 2, name: heading })).toBeVisible();
+      await expect(page.getByRole('heading', { name: heading })).toBeVisible();
     }
-    await expect(page.locator('#day').getByRole('listitem')).toHaveCount(7);
     await expect(
-      page.getByRole('table', { name: /Share of families who heard something positive/ }),
+      page.locator('#more').getByRole('listitem').filter({ hasText: 'Admissions' }),
     ).toBeVisible();
-    await expect(page.getByRole('link', { name: /support@quad-edu\.com/ })).toHaveAttribute(
+    await expect(page.getByRole('link', { name: 'support@quad-edu.com' })).toHaveAttribute(
       'href',
       'mailto:support@quad-edu.com',
     );
     expect(errors).toEqual([]);
   });
 
+  test('“I’m a parent” switches the page, and ?view=parent remembers it', async ({ page }) => {
+    await page.goto('/');
+    const views = page.getByRole('group', { name: 'Choose your view' });
+    const parent = views.getByRole('button', { name: 'I’m a parent' });
+    await expect(views.getByRole('button', { name: 'I run a school' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+    await parent.click();
+    await expect(parent).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.getByRole('heading', { level: 1 })).toHaveAccessibleName(
+      'Hear the good stuff first.',
+    );
+    await expect(page).toHaveURL(/\?view=parent$/);
+    await expect(
+      page.getByRole('heading', { name: 'Watch a week of good news grow.' }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: 'Quad notices the child who’s drifting.' }),
+    ).toBeHidden();
+    await expect(
+      page.getByRole('heading', { name: 'Want this at your child’s school?' }),
+    ).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Sign in to your school' })).toBeHidden();
+
+    await page.reload();
+    await expect(page.getByRole('heading', { level: 1 })).toHaveAccessibleName(
+      'Hear the good stuff first.',
+    );
+    await page.goto('/?view=school');
+    await expect(page.getByRole('heading', { level: 1 })).toHaveAccessibleName(
+      'Every child has a circle.',
+    );
+  });
+
   test('Sign in shows the coming-soon note before launch, and Escape closes it', async ({
     page,
   }, testInfo) => {
     await page.goto('/');
-    const banner = page.getByRole('banner');
+    if (isNarrow(page)) await page.getByRole('button', { name: 'Menu' }).click();
+    const header = page.locator('header');
     if (!isPrelaunch(testInfo)) {
-      await expect(banner.getByRole('link', { name: 'Sign in' })).toHaveAttribute('href', '/app');
+      await expect(header.getByRole('link', { name: 'Sign in' }).first()).toHaveAttribute(
+        'href',
+        '/app',
+      );
       return;
     }
-    const signIn = banner.getByRole('button', { name: 'Sign in' });
+    const signIn = header.getByRole('button', { name: 'Sign in' }).filter({ visible: true });
     await signIn.click();
     const note = page.getByRole('dialog', { name: 'Sign-in opens when schools go live' });
     await expect(note).toBeVisible();
@@ -79,27 +129,21 @@ test.describe('landing page', () => {
     await expect(signIn).toBeFocused();
 
     // The hero's "Sign in to your school" opens the same note; booking a demo leads to the form.
+    if (isNarrow(page)) await page.keyboard.press('Escape');
     await page.getByRole('button', { name: 'Sign in to your school' }).click();
     const again = page.getByRole('dialog', { name: 'Sign-in opens when schools go live' });
     await again.getByRole('link', { name: 'Book a demo' }).click();
     await expect(again).toBeHidden();
-    await expect(page.getByLabel('Your name')).toBeFocused();
+    await expect(page.getByLabel('Your name').filter({ visible: true })).toBeFocused();
   });
 
-  test('the demo form checks the fields, then opens an email with the request', async ({
+  test('a school’s demo request checks the fields, then opens an email to support', async ({
     page,
   }) => {
-    // Catch the mailto: link instead of opening an email app.
-    await page.addInitScript(() => {
-      const opened: string[] = [];
-      Object.assign(window, { openedEmails: opened });
-      HTMLAnchorElement.prototype.click = function click(this: HTMLAnchorElement) {
-        opened.push(this.href);
-      };
-    });
+    await catchEmails(page);
     await page.goto('/#demo');
-    const form = page.locator('#demo form');
-    const submit = form.getByRole('button', { name: 'Request a demo' });
+    const form = page.locator('#demo form').filter({ visible: true });
+    const submit = form.getByRole('button', { name: /Request a demo/ });
     await submit.click();
     await expect(form.getByRole('alert')).toHaveText('Add your name and your school.');
     await expect(form.getByLabel('Your name')).toHaveAttribute('aria-invalid', 'true');
@@ -108,88 +152,137 @@ test.describe('landing page', () => {
     await form.getByLabel('School').fill('Sample School');
     await form.getByLabel('Work email').fill('not-an-email');
     await submit.click();
-    await expect(form.getByRole('alert')).toHaveText('Enter a work email like name@school.lk.');
+    await expect(form.getByRole('alert')).toHaveText('Enter a work email like name@school.org.');
 
-    await form.getByLabel('Work email').fill('name@school.lk');
+    await form.getByLabel('Work email').fill('name@school.org');
+    await form.getByLabel('Country').fill('Portugal');
     await form.getByLabel('Students').selectOption('1000_2500');
     await submit.click();
-    await expect(form.getByRole('status')).toContainText(
-      'Your email app should open with your request ready to send.',
-    );
-    const opened = await page.evaluate(
-      () => (window as unknown as { openedEmails: string[] }).openedEmails,
-    );
+    const done = page.locator('#demo').getByRole('status').filter({ visible: true });
+    await expect(done).toContainText('Your email app should open with your request ready to send.');
+    const opened = await openedEmails(page);
     expect(opened).toHaveLength(1);
-    const href = opened[0] ?? '';
-    const mail = new URL(href);
-    expect(mail.protocol).toBe('mailto:');
+    const mail = new URL(opened[0] ?? '');
     expect(mail.pathname).toBe('support@quad-edu.com');
     expect(mail.searchParams.get('subject')).toBe('Demo request: Sample School');
-    expect(mail.searchParams.get('body')).toContain('Your name: Sample Person');
+    expect(mail.searchParams.get('body')).toContain('Work email: name@school.org');
+    expect(mail.searchParams.get('body')).toContain('Country: Portugal');
     expect(mail.searchParams.get('body')).toContain('Students: 1,000–2,500');
-    expect(mail.searchParams.get('body')).toContain('Curriculum: Cambridge');
-    await expect(form.getByRole('link', { name: 'support@quad-edu.com' })).toHaveAttribute(
+    expect(mail.searchParams.get('body')).toContain('Curriculum: IB');
+    await expect(done.getByRole('link', { name: 'support@quad-edu.com' })).toHaveAttribute(
       'href',
-      href,
+      opened[0] ?? '',
     );
     await expect(page).toHaveURL(/\/#demo$/);
   });
 
-  test('fits the screen, follows the theme and passes axe', async ({ page }, testInfo) => {
+  test('a parent’s request goes to support with the school and the note', async ({ page }) => {
+    await catchEmails(page);
+    await page.goto('/?view=parent#demo');
+    const form = page.locator('#demo form').filter({ visible: true });
+    await form.getByRole('button', { name: /Send to my school/ }).click();
+    await expect(form.getByRole('alert')).toHaveText('Add your name and your child’s school.');
+    await form.getByLabel('Your name').fill('Sample Parent');
+    await form.getByLabel('Your email').fill('name@example.com');
+    await form.getByLabel('Your child’s school').fill('Sample School');
+    await form.getByLabel('City').fill('Lisbon');
+    await form.getByLabel(/A note to the school/).fill('We would love it.');
+    await form.getByRole('button', { name: /Send to my school/ }).click();
+    const mail = new URL((await openedEmails(page))[0] ?? '');
+    expect(mail.pathname).toBe('support@quad-edu.com');
+    expect(mail.searchParams.get('subject')).toBe('Quad for Sample School');
+    expect(mail.searchParams.get('body')).toContain('City: Lisbon');
+    expect(mail.searchParams.get('body')).toContain('Note: We would love it.');
+  });
+
+  test('Leo’s card starts a support plan and replays', async ({ page }) => {
+    await page.goto('/#wellbeing');
+    const card = page.locator('#wellbeing');
+    const plan = card.getByRole('button', { name: 'Start a support plan' });
+    await expect(card.getByText('Needs a conversation')).toBeVisible();
+    await plan.click();
+    const replay = card.getByRole('button', { name: 'Replay' });
+    await expect(replay).toHaveAttribute('aria-pressed', 'true');
+    await expect(card.getByText('Back on track')).toBeVisible();
+    await expect(card.getByText(/Six weeks later: Leo’s History is back up/)).toBeVisible();
+    await replay.click();
+    await expect(plan).toHaveAttribute('aria-pressed', 'false');
+    await expect(card.getByText(/down 14 points this term/)).toBeVisible();
+  });
+
+  test('fits the screen, follows the theme and passes axe in both views', async ({
+    page,
+  }, testInfo) => {
+    const scheme = schemeOf(testInfo);
+    // axe checks a still page: a lit avatar's name changes colour over 300 ms as moments arrive.
+    await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.goto('/');
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
     await expectNoSideScroll(page);
     await expect(page.locator('[data-site="public"]')).toHaveCSS(
       'background-color',
-      CANVAS[schemeOf(testInfo)],
+      GROUND.hero[scheme],
     );
+    await expect(page.locator('#circle')).toHaveCSS('background-color', GROUND.page[scheme]);
+    await expectNoSeriousA11yViolations(page);
+    await page.goto('/?view=parent');
+    await expect(page.getByRole('heading', { level: 1 })).toHaveAccessibleName(
+      'Hear the good stuff first.',
+    );
+    await expectNoSideScroll(page);
     await expectNoSeriousA11yViolations(page);
   });
 
-  test('the phone menu opens by keyboard and Escape returns to it', async ({ page }) => {
-    test.skip(!isPhone(page), 'The section links move into Menu at 900 px and below');
+  test('the menu opens by keyboard and Escape returns to it', async ({ page }) => {
+    test.skip(!isNarrow(page), 'The section links move into Menu at 1100 px and below');
     await page.goto('/');
     const menu = page.getByRole('button', { name: 'Menu' });
     await menu.focus();
     await page.keyboard.press('Enter');
     await expect(menu).toHaveAttribute('aria-expanded', 'true');
-    await expect(page.getByRole('link', { name: 'Why Quad' })).toBeVisible();
+    await expect(
+      page.getByRole('link', { name: 'Wellbeing' }).filter({ visible: true }),
+    ).toBeVisible();
     await page.keyboard.press('Escape');
     await expect(menu).toHaveAttribute('aria-expanded', 'false');
     await expect(menu).toBeFocused();
-    await expect(page.getByRole('banner').getByRole('link', { name: 'Book a demo' })).toBeVisible();
+    await expect(page.locator('header').getByRole('link', { name: 'Book a demo' })).toBeVisible();
   });
 
   test('the theme button switches light and dark and remembers it', async ({ page }, testInfo) => {
     await page.goto('/');
     const scheme = schemeOf(testInfo);
     const next = scheme === 'dark' ? 'light' : 'dark';
-    if (isPhone(page)) await page.getByRole('button', { name: 'Menu' }).click();
-    const scope = isPhone(page) ? page.locator('header') : page.getByRole('banner');
-    const toggle = scope.getByRole('button', { name: /Switch to (dark|light) mode/ }).last();
+    if ((page.viewportSize()?.width ?? 0) <= 760)
+      await page.getByRole('button', { name: 'Menu' }).click();
+    const toggle = page
+      .locator('header')
+      .getByRole('button', { name: /Switch to (dark|light) mode/ })
+      .filter({ visible: true });
     // After hydration the label follows the device's scheme.
     await expect(toggle).toHaveAttribute('aria-label', `Switch to ${next} mode`);
     await toggle.click();
     await expect(page.locator('html')).toHaveAttribute('data-theme', next);
-    await expect(page.locator('[data-site="public"]')).toHaveCSS('background-color', CANVAS[next]);
+    await expect(page.locator('#circle')).toHaveCSS('background-color', GROUND.page[next]);
     await page.reload();
     await expect(page.locator('html')).toHaveAttribute('data-theme', next);
-    await expect(page.locator('[data-site="public"]')).toHaveCSS('background-color', CANVAS[next]);
   });
 
-  test('with reduced motion the ticker stays on the first event', async ({ page }) => {
+  test('with reduced motion the phone stays on its first messages', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.goto('/');
-    const ticker = page.locator('[role="status"][aria-live="polite"]').first();
-    await expect(ticker).toContainText('Ms. Jayasinghe shared a moment');
-    await page.waitForTimeout(3600);
-    await expect(ticker).toContainText('Ms. Jayasinghe shared a moment');
+    const live = page.locator('#main [role="status"][aria-live="polite"]').first();
+    await expect(live).toHaveText(
+      'Priya said thank you: Thank you! She talked about it all breakfast.',
+    );
+    await page.waitForTimeout(4000);
+    await expect(live).toHaveText(/^Priya said thank you/);
   });
 
-  test('without reduced motion the ticker moves on every 3.2 seconds', async ({ page }) => {
+  test('without reduced motion each new moment is announced politely', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'no-preference' });
     await page.goto('/');
-    const ticker = page.locator('[role="status"][aria-live="polite"]').first();
-    await expect(ticker).toContainText('Dilhani said thank you', { timeout: 6000 });
+    const live = page.locator('#main [role="status"][aria-live="polite"]').first();
+    await expect(live).toHaveText(/^Nani Asha loved it: Invited relative/, { timeout: 6000 });
   });
 });

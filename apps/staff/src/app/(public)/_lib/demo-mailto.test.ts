@@ -1,71 +1,50 @@
 import { describe, expect, it } from 'vitest';
 
-import { buildDemoMailto, fillSlot } from './demo-mailto';
+import { buildRequestMailto, fillSlot } from './demo-mailto';
 
-const labels = {
-  subject: 'Demo request: ⁣slot⁣',
+const marker = { slot: '⁣slot⁣', label: '⁣label⁣', value: '⁣value⁣' };
+const text = {
+  subject: `Demo request: ${marker.slot}`,
   intro: 'Hello Quad, I’d like a walkthrough.',
-  line: '⁣label⁣: ⁣value⁣',
-  fields: {
-    name: 'Your name',
-    email: 'Work email',
-    school: 'School',
-    country: 'Country',
-    students: 'Students',
-    curriculum: 'Curriculum',
-  },
-  students: {
-    under_300: 'Under 300',
-    '300_1000': '300–1,000',
-    '1000_2500': '1,000–2,500',
-    over_2500: 'More than 2,500',
-  },
-  curricula: {
-    cambridge: 'Cambridge',
-    edexcel: 'Edexcel',
-    ib: 'IB',
-    sri_lankan_national: 'Sri Lankan national',
-    other: 'Other',
-  },
-  marker: { slot: '⁣slot⁣', label: '⁣label⁣', value: '⁣value⁣' },
-} as const;
+  line: `${marker.label}: ${marker.value}`,
+  marker,
+};
 
-const request = {
-  name: 'Sample Person',
-  email: 'name@school.lk',
-  school: 'Hill & Lake School',
-  country: 'Sri Lanka',
-  students: '300_1000',
-  curriculum: 'sri_lankan_national',
-} as const;
+describe('buildRequestMailto', () => {
+  const href = buildRequestMailto(
+    'support@quad-edu.com',
+    'Hill & Lake School',
+    [
+      ['Your name', 'Sample Person'],
+      ['Work email', 'name@school.org'],
+      ['School', 'Hill & Lake School'],
+      ['Country', undefined],
+      ['Curriculum', 'IB'],
+    ],
+    text,
+  );
 
-describe('buildDemoMailto', () => {
   it('writes to support@quad-edu.com with the school in the subject', () => {
-    const href = buildDemoMailto('support@quad-edu.com', request, labels);
     const url = new URL(href);
     expect(url.protocol).toBe('mailto:');
     expect(url.pathname).toBe('support@quad-edu.com');
     expect(url.searchParams.get('subject')).toBe('Demo request: Hill & Lake School');
   });
 
-  it('puts every field in the body, one per line, with the list labels', () => {
-    const url = new URL(buildDemoMailto('support@quad-edu.com', request, labels));
-    expect(url.searchParams.get('body')).toBe(
+  it('puts each field with a value on its own line, in order', () => {
+    expect(new URL(href).searchParams.get('body')).toBe(
       [
         'Hello Quad, I’d like a walkthrough.',
         '',
         'Your name: Sample Person',
-        'Work email: name@school.lk',
+        'Work email: name@school.org',
         'School: Hill & Lake School',
-        'Country: Sri Lanka',
-        'Students: 300–1,000',
-        'Curriculum: Sri Lankan national',
+        'Curriculum: IB',
       ].join('\r\n'),
     );
   });
 
   it('percent-encodes spaces, line breaks and ampersands (no + for spaces)', () => {
-    const href = buildDemoMailto('support@quad-edu.com', request, labels);
     expect(href).toContain('subject=Demo%20request%3A%20Hill%20%26%20Lake%20School');
     expect(href).toContain('%0D%0A');
     expect(href).not.toContain('+');

@@ -8,10 +8,9 @@ import { t } from '@/i18n';
 
 import './globals.css';
 
-// Static weights, as the prototypes load them; 900 is for the public site's headings.
 const figtree = Figtree({
   subsets: ['latin'],
-  weight: ['400', '500', '600', '700', '800', '900'],
+  weight: ['400', '500', '600', '700', '800'],
   variable: '--font-figtree',
   display: 'swap',
 });

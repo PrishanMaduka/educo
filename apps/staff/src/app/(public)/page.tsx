@@ -1,16 +1,13 @@
 import { publicSite } from '@quad/tokens';
 
-import { CircleSection } from './_components/CircleSection';
-import { DayBand } from './_components/DayBand';
+import { Circle } from './_components/Circle';
 import { Demo } from './_components/Demo';
 import { Footer } from './_components/Footer';
 import { Hero } from './_components/Hero';
-import { Ideas } from './_components/Ideas';
-import { Leaders } from './_components/Leaders';
-import { Strip } from './_components/Strip';
+import { More } from './_components/More';
+import { Ticker } from './_components/Ticker';
 import { TopBar } from './_components/TopBar';
-import { Trust } from './_components/Trust';
-import { WholeSchool } from './_components/WholeSchool';
+import { Wellbeing } from './_components/Wellbeing';
 import { SITE_ORIGIN } from './_lib/site';
 
 import type { ComingSoonLabels } from './_components/SignInEntry';
@@ -39,8 +36,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: publicSite.palette.light.canvas },
-    { media: '(prefers-color-scheme: dark)', color: publicSite.palette.dark.canvas },
+    { media: '(prefers-color-scheme: light)', color: publicSite.light['hero-bg'] },
+    { media: '(prefers-color-scheme: dark)', color: publicSite.dark['hero-bg'] },
   ],
 };
 
@@ -58,13 +55,13 @@ export default function LandingPage() {
     title: t('public.comingSoon.title'),
     body: t('public.comingSoon.body'),
     close: t('public.comingSoon.close'),
-    bookDemo: t('public.bookDemo'),
+    bookDemo: t('public.cta.school'),
   };
   return (
     <>
       <a
         href="#main"
-        className="absolute -top-[60px] left-4 z-50 rounded-input bg-ink px-4 py-2.5 font-extrabold text-canvas focus:top-3"
+        className="absolute -top-20 left-4 z-[60] rounded-xl bg-site-lime px-4 py-2.5 font-bold text-site-on-vivid no-underline focus:top-3"
       >
         {t('public.skip')}
       </a>
@@ -72,13 +69,10 @@ export default function LandingPage() {
       <TopBar prelaunch={prelaunch} theme={theme} comingSoon={comingSoon} />
       <main id="main">
         <Hero prelaunch={prelaunch} comingSoon={comingSoon} />
-        <Strip />
-        <CircleSection />
-        <DayBand />
-        <Ideas />
-        <Leaders />
-        <WholeSchool />
-        <Trust />
+        <Ticker />
+        <Circle />
+        <Wellbeing />
+        <More />
         <Demo />
       </main>
       <Footer />

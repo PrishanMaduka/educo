@@ -1,14 +1,28 @@
-import { QuadMark } from '@quad/tokens/logo';
+import { QuadLogo } from '@quad/tokens/logo';
 import { cn } from '@quad/ui';
 
-import { PublicMenu } from './PublicMenu';
+import { menuItem, PublicMenu } from './PublicMenu';
 import { SignInEntry, type ComingSoonLabels } from './SignInEntry';
-import { button, focusRing, wrap } from './styles';
+import { button, focusRing, onlyParent, onlySchool, wrap } from './styles';
 import { ThemeSwitch, type ThemeSwitchLabels } from './ThemeSwitch';
+import { ViewToggle } from './ViewToggle';
 
 import { t } from '@/i18n';
 
-/** Sticky top bar (spec 19 §1). At 900 px and below the section links and theme move into Menu. */
+/** "Modules" for schools, "In the app" for parents. */
+function MoreLabel() {
+  return (
+    <>
+      <span className={onlySchool}>{t('public.nav.modules')}</span>
+      <span className={onlyParent}>{t('public.nav.inTheApp')}</span>
+    </>
+  );
+}
+
+/**
+ * The top bar (spec 19): logo, section links and Sign in, the view switch, the theme, Menu at
+ * 1100 px and below, and Book a demo (Ask your school for parents). Sticky above 760 px.
+ */
 export function TopBar({
   prelaunch,
   theme,
@@ -20,56 +34,75 @@ export function TopBar({
 }) {
   const links = [
     { href: '#circle', label: t('public.nav.circle') },
-    { href: '#day', label: t('public.nav.day') },
-    { href: '#ideas', label: t('public.nav.ideas') },
-    { href: '#school', label: t('public.nav.school') },
-    { href: '#trust', label: t('public.nav.trust') },
+    { href: '#wellbeing', label: t('public.nav.wellbeing') },
+    { href: '#more', label: <MoreLabel /> },
   ];
   return (
-    <header className="sticky top-[env(safe-area-inset-top,0px)] z-20 border-b border-line/70 bg-canvas/86 backdrop-blur-md backdrop-saturate-[1.4]">
-      <div className={cn(wrap, 'flex h-[68px] items-center gap-2.5 max-[480px]:gap-1.5')}>
+    <header className="sticky top-0 z-30 bg-site-nav-bg backdrop-blur-[10px] max-[760px]:static">
+      <div
+        className={cn(
+          wrap,
+          'relative flex items-center gap-x-6 gap-y-3.5 py-3.5 max-[760px]:flex-wrap',
+        )}
+      >
         <a
           href="#top"
           aria-label={t('public.nav.home')}
-          className={cn(
-            'flex items-center gap-2.5 rounded-md text-[22px] font-black tracking-[-.02em] max-[480px]:gap-[7px] max-[480px]:text-[19px]',
-            focusRing,
-          )}
+          className={cn('mr-auto flex items-center rounded-md text-site-on-navy', focusRing)}
         >
-          <QuadMark
+          <QuadLogo
             variant="theme"
+            size={30}
             aria-hidden="true"
-            className="size-[34px] max-[480px]:size-[30px]"
+            className="block h-[30px] w-auto"
           />
-          {t('public.wordmark')}
         </a>
         <nav
           aria-label={t('public.nav.label')}
-          className="mr-3.5 ml-auto flex gap-[22px] max-[900px]:hidden"
+          className="flex gap-[22px] text-[15px] font-medium max-[1100px]:hidden"
         >
           {links.map((link) => (
             <a
               key={link.href}
               href={link.href}
               className={cn(
-                'rounded-sm text-[14.5px] font-bold text-ink-2 hover:text-ink',
+                'rounded-md text-site-on-navy-2 no-underline hover:text-site-on-navy',
                 focusRing,
               )}
             >
               {link.label}
             </a>
           ))}
+          <SignInEntry
+            label={t('public.signIn')}
+            look="nav"
+            prelaunch={prelaunch}
+            comingSoon={comingSoon}
+          />
         </nav>
-        <PublicMenu label={t('public.nav.menu')} links={links} theme={theme} />
-        <ThemeSwitch variant="icon" labels={theme} className="max-[900px]:hidden" />
-        <SignInEntry
-          label={t('public.signIn')}
-          look="nav"
-          prelaunch={prelaunch}
-          comingSoon={comingSoon}
+        <ViewToggle
+          label={t('public.view.label')}
+          labels={{ school: t('public.view.school'), parent: t('public.view.parent') }}
+          className="max-[760px]:order-5 max-[760px]:w-full"
         />
-        <a href="#demo" className={button({ size: 'nav' })}>
-          {t('public.bookDemo')}
+        <ThemeSwitch variant="icon" labels={theme} className="max-[760px]:hidden" />
+        <PublicMenu
+          label={t('public.nav.menu')}
+          links={links}
+          theme={theme}
+          signIn={
+            <SignInEntry
+              label={t('public.signIn')}
+              look="menu"
+              menuClassName={menuItem}
+              prelaunch={prelaunch}
+              comingSoon={comingSoon}
+            />
+          }
+        />
+        <a href="#demo" className={button({ size: 'sm' })}>
+          <span className={onlySchool}>{t('public.cta.school')}</span>
+          <span className={onlyParent}>{t('public.cta.parent')}</span>
         </a>
       </div>
     </header>
