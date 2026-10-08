@@ -95,7 +95,7 @@ To run a milestone in Claude Code, type `/build-milestone M3` (ids with a letter
 ## M1b Public site
 **Read:** 19, 05 (Staff portal sign-in), 08 (Public landing page), 03 (public-site tokens), 16 (Data residency).
 **Scope:**
-- The landing page at `/` from `design/landing.html`, section by section as in [19](19-public-site.md#page-structure): top bar, hero with the orbit and ticker, strip, Circle day band, leaders heatmap, Why Quad, modules, Inside Quad with light and dark screenshots, privacy, demo form, footer.
+- The landing page at `/` from `design/landing.html`, section by section as in [19](19-public-site.md#page-structure): top bar, hero with the illustrated orbit and ticker, strip, the circle explained, Circle day band, four ideas, leaders heatmap, modules on the campus illustration, privacy, demo form, footer, with the shared SVG illustration components (no screenshots, D29).
 - The sign-in dialog on the landing page (the M1 flow), `/#signin`, and **Open {school}** for signed-in visitors.
 - Demo requests: `POST /api/v1/public/demo-requests` with Turnstile, a 5 per hour per IP limit and a honeypot; `platform_leads`; the sales email and the requester's confirmation.
 - Legal pages `/legal/terms`, `/legal/privacy`, `/legal/dpa`, `/legal/subprocessors` (the D21 list), `/legal/cookies`.
