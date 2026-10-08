@@ -108,7 +108,8 @@ describe('db-bootstrap command', () => {
     expect(result.status).toBe(1);
     expect(result.stderr).toMatch(/db-bootstrap failed: .*DATABASE_ADMIN_HOST/);
     expect(result.stderr + result.stdout).not.toContain(password);
-  });
+    // A child process that loads tsx: slow under load (a full verify beside infra-check timed out at 5 s).
+  }, 30_000);
 });
 
 describe('seedRefusal', () => {
