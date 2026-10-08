@@ -13,13 +13,13 @@ variable "dns_role_arn" {
 
 variable "otel_exporter_endpoint" {
   type        = string
-  description = "OTEL_EXPORTER_OTLP_ENDPOINT for every service (the Grafana Cloud OTLP gateway); empty leaves tracing off."
+  description = "OTEL_EXPORTER_OTLP_ENDPOINT for every service (the Grafana Cloud OTLP gateway); empty leaves tracing off. CI passes the GitHub variable OTEL_EXPORTER_OTLP_ENDPOINT (ruling R-otel-var)."
   default     = ""
 }
 
 variable "desired_count" {
   type        = number
-  description = "Tasks per service when Terraform creates the services. The first apply passes 0, because no image is pushed yet. The services ignore later changes: the deploy workflow owns the count afterwards."
+  description = "Tasks per service. Terraform owns the count (ruling R-desired-count): the first apply passes 0, because no image is pushed yet, and a later apply at the default 1 scales the services up."
   default     = 1
 
   validation {

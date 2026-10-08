@@ -1,7 +1,7 @@
 ${
 # The staging overview dashboard (spec 18 M0b: "one starter dashboard"; D28). envs/staging renders
 # it with templatefile(). Inputs: name, region, alb_arn_suffix, target_groups (name to ARN suffix),
-# cluster_name, service_names, rds_instance_id, redis_replication_group_id and waf_web_acl_name.
+# cluster_name, service_names, rds_instance_id, redis_member_clusters and waf_web_acl_name.
 # Grafana dashboards follow when the Grafana Cloud account exists.
 jsonencode({
   widgets = [
@@ -132,11 +132,12 @@ jsonencode({
         title  = "Redis memory used (%)"
         region = region
         view   = "timeSeries"
+        stat   = "Average"
         period = 300
-        # Redis metrics are per member cluster (<group>-001, -002, …), so a search finds every node
-        # of the replication group, however many replicas it has.
+        # Redis metrics are per member cluster (<group>-001, -002, …): one line per member.
         metrics = [
-          [{ id = "redis", expression = "SEARCH('{AWS/ElastiCache,CacheClusterId} MetricName=\"DatabaseMemoryUsagePercentage\" CacheClusterId=\"${redis_replication_group_id}\"', 'Average', 300)", label = "" }],
+          for member in redis_member_clusters :
+          ["AWS/ElastiCache", "DatabaseMemoryUsagePercentage", "CacheClusterId", member, { label = member }]
         ]
       }
     },

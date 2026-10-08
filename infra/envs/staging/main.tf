@@ -3,17 +3,18 @@
 # Dependency order. data's key policy names the CloudFront distribution
 # (cloudfront_distribution_arns), while edge reads the public bucket from data. Terraform wires
 # module inputs and outputs one by one, so this is no cycle: the distribution depends on the
-# bucket's regional domain name only, the bucket does not depend on the data key's policy, and the
-# key policy waits for the distribution. The staging test applies the whole graph to prove it.
+# bucket's regional domain name only. The data key is created with its base policy, and a separate
+# aws_kms_key_policy adds the CloudFront statement, so only that policy waits for the distribution;
+# the key, and RDS, Redis and the secrets it encrypts, do not. The staging test applies the whole
+# graph to prove there is no cycle.
 #
 # First apply (README → first deploy, step 6): the CI roles do not exist yet, because this apply
 # creates them (outputs plan_role_arn and apply_role_arn). A staging administrator runs it, with
 # -var desired_count=0 because no image is pushed yet. Then those two ARNs go into bootstrap's
 # state_environments.staging and global's dns_reader_principal_arns and
-# dns_writer_principal_arns.staging, and the administrator's ARN comes out of both. The services
-# ignore later desired_count changes (the deploy workflow owns the count), so a second apply does
-# not scale them up: once the bootstrap images are pushed, the deploy workflow, or
-# `aws ecs update-service --desired-count 1`, does.
+# dns_writer_principal_arns.staging, and the administrator's ARN comes out of both. Ruling
+# R-desired-count: Terraform owns the count, so once the bootstrap images are pushed, an apply with
+# the default desired_count = 1 scales the services up; the deploy workflow never changes it.
 
 locals {
   name           = "quad-staging"
@@ -26,6 +27,22 @@ locals {
   # The DNS role lives in the tooling account, which also holds the Terraform state roles, so its
   # account id is the tooling account id. No account id is written into the repository.
   tooling_account_id = split(":", var.dns_role_arn)[4]
+
+  # The two tooling DNS roles (envs/global) that the app's plan and apply roles may assume.
+  dns_role_arns = {
+    read  = "arn:aws:iam::${local.tooling_account_id}:role/quad-dns-read"
+    write = "arn:aws:iam::${local.tooling_account_id}:role/quad-dns-records-${local.environment}"
+  }
+}
+
+# Plans pass the read role and applies the write role, and the tooling account id above comes from
+# whichever is given, so both must be the tooling account's own DNS roles: a role in another
+# account would point the plan and apply roles' state and DNS grants at that account.
+check "dns_role_is_a_tooling_dns_role" {
+  assert {
+    condition     = contains(values(local.dns_role_arns), var.dns_role_arn)
+    error_message = "dns_role_arn must be the tooling account's quad-dns-read (plans) or quad-dns-records-staging (applies) role; both must be in the same tooling account."
+  }
 }
 
 data "aws_route53_zone" "root" {

@@ -80,7 +80,8 @@
   - AWS roles: `AWS_STAGING_DEPLOY_ROLE_ARN`, `AWS_STAGING_PLAN_ROLE_ARN`, `AWS_STAGING_APPLY_ROLE_ARN`, `AWS_TOOLING_PLAN_ROLE_ARN`;
   - Terraform state and DNS (Task 8 fix round 1): `TF_STATE_BUCKET`, `TF_LOCK_TABLE`, `TF_STATE_KMS_KEY_ARN`, `TF_GLOBAL_STATE_READ_ROLE_ARN`, `TF_STAGING_STATE_READ_ROLE_ARN`, `TF_STAGING_STATE_RW_ROLE_ARN`, `TF_DNS_READ_ROLE_ARN`, `TF_STAGING_DNS_WRITE_ROLE_ARN`;
   - Sentry (public DSNs): `SENTRY_DSN_STAFF`, `SENTRY_DSN_CONSOLE`;
-  - store uploads: `IOS_UPLOAD_ENABLED`, `PLAY_UPLOAD_ENABLED`.
+  - store uploads: `IOS_UPLOAD_ENABLED`, `PLAY_UPLOAD_ENABLED`;
+  - observability (ruling R-otel-var, Task 13 review): `OTEL_EXPORTER_OTLP_ENDPOINT`, the Grafana Cloud OTLP gateway URL, which the staging plan and apply pass as `-var otel_exporter_endpoint` (empty leaves tracing off).
 
 **Terraform style**
 - Versions: `required_version = "1.16.5"`, `hashicorp/aws = "6.67.0"`, `hashicorp/random = "3.9.1"`, and no other providers.
@@ -1054,7 +1055,7 @@ Steps:
     - `image-ref --repo <url> --tag <sha>` resolves `repo@sha256:…` with `aws ecr describe-images`;
     - `register --family <f> --container <c> --image <ref> [--env K=V]` prints the new task definition ARN;
     - `run-task --family-arn <arn> --container <c>` reads `/quad/staging/deploy/{cluster,subnets,security_groups}`, runs `aws ecs run-task` and then `aws ecs wait tasks-stopped`, and exits 1 unless `taskOutcome` is ok;
-    - `update-service --service <s> --task-definition <arn>`;
+    - `update-service --service <s> --task-definition <arn>`, which runs `aws ecs update-service --task-definition <arn> --force-new-deployment` and never passes `--desired-count` (ruling R-desired-count, Task 13 review: Terraform owns the count);
     - `wait-stable --services a,b,…`.
   - **`ci.yml`:**
     - jobs `typecheck`, `lint`, `unit`, `codegen`, `api-integration` (Postgres and Redis service containers plus the roles SQL), `e2e-smoke` and `build`, which are the required checks from spec 17/20 (`pnpm audit` runs inside `unit`);
@@ -1080,8 +1081,8 @@ Steps:
       - `terraform-linters/setup-tflint@v4` (pinned version, `GITHUB_TOKEN`);
       - `pip install checkov==3.3.25`;
       - `QUAD_REQUIRE_INFRA_TOOLS=1 node scripts/infra-check.mjs`;
-    - job `plan`: `if: github.event_name == 'pull_request' && vars.AWS_STAGING_PLAN_ROLE_ARN != ''`. It runs OIDC, `init` with `-backend-config` from vars (`bucket`, `dynamodb_table`, `kms_key_id` = `vars.TF_STATE_KMS_KEY_ARN`, `assume_role` = `vars.TF_STAGING_STATE_READ_ROLE_ARN`), `terraform plan -refresh=false -lock=false -var dns_role_arn=${{ vars.TF_DNS_READ_ROLE_ARN }}`, and posts the plan as a PR comment. The trigger is `pull_request`, never `pull_request_target`. Ruling R-pr-plan (Task 12 review): every PR plan, of `envs/staging` and of `envs/global` (`AWS_TOOLING_PLAN_ROLE_ARN`), runs with `-refresh=false -lock=false`, because the plan roles explicitly deny `secretsmanager:GetSecretValue`, `ssm:GetParameter*`, `kms:Decrypt` and log reads, and a refresh would call them (a secret version refreshes through `GetSecretValue`). The PR comment says the plan was made without a refresh. Ruling R-origin-secret-state: PR plans read staging state through the state-read role, which includes the origin secret; this is accepted for staging and revisited in M12;
-    - job `apply`: `if: github.event_name == 'push' && github.ref == 'refs/heads/main' && vars.AWS_STAGING_APPLY_ROLE_ARN != ''`, `environment: infra-staging` (required reviewers), `terraform apply` from a fresh plan (with refresh, so drift shows up here, R-pr-plan), with `assume_role` = `vars.TF_STAGING_STATE_RW_ROLE_ARN` and `-var dns_role_arn=${{ vars.TF_STAGING_DNS_WRITE_ROLE_ARN }}`;
+    - job `plan`: `if: github.event_name == 'pull_request' && vars.AWS_STAGING_PLAN_ROLE_ARN != ''`. It runs OIDC, `init` with `-backend-config` from vars (`bucket`, `dynamodb_table`, `kms_key_id` = `vars.TF_STATE_KMS_KEY_ARN`, `assume_role` = `vars.TF_STAGING_STATE_READ_ROLE_ARN`), `terraform plan -refresh=false -lock=false -var dns_role_arn=${{ vars.TF_DNS_READ_ROLE_ARN }} -var otel_exporter_endpoint=${{ vars.OTEL_EXPORTER_OTLP_ENDPOINT }}`, and posts the plan as a PR comment. The trigger is `pull_request`, never `pull_request_target`. Ruling R-pr-plan (Task 12 review): every PR plan, of `envs/staging` and of `envs/global` (`AWS_TOOLING_PLAN_ROLE_ARN`), runs with `-refresh=false -lock=false`, because the plan roles explicitly deny `secretsmanager:GetSecretValue`, `ssm:GetParameter*`, `kms:Decrypt` and log reads, and a refresh would call them (a secret version refreshes through `GetSecretValue`). The PR comment says the plan was made without a refresh. Ruling R-origin-secret-state: PR plans read staging state through the state-read role, which includes the origin secret; this is accepted for staging and revisited in M12;
+    - job `apply`: `if: github.event_name == 'push' && github.ref == 'refs/heads/main' && vars.AWS_STAGING_APPLY_ROLE_ARN != ''`, `environment: infra-staging` (required reviewers), `terraform apply` from a fresh plan (with refresh, so drift shows up here, R-pr-plan), with `assume_role` = `vars.TF_STAGING_STATE_RW_ROLE_ARN` `-var dns_role_arn=${{ vars.TF_STAGING_DNS_WRITE_ROLE_ARN }}` and `-var otel_exporter_endpoint=${{ vars.OTEL_EXPORTER_OTLP_ENDPOINT }}` (ruling R-otel-var);
     - optional job `drift`: `schedule` (weekly) plus `workflow_dispatch`, `environment: infra-staging`, the apply role, `terraform plan -refresh-only -detailed-exitcode`, failing on drift (R-pr-plan).
 
 Steps:
@@ -1141,15 +1142,19 @@ Steps:
      5. Create the GitHub environments `staging` and `infra-staging`, both with required reviewers and deployment branch `main` only. The deploy role (trusted only from `staging` on `main`) can pass `migrate-exec` to `RunTask`, so it can reach the RDS master secret (D28); the environment protection is what limits it.
      6. The first staging apply, before the CI roles exist (they are created by this apply):
         - Add the staging administrator's exact Identity Center role ARN (copied as in step 3) to `state_environments.staging.apply_principal_arns` in bootstrap and to `dns_writer_principal_arns.staging` in global, and apply both roots.
-        - As that role: `terraform -chdir=infra/envs/staging init -backend-config bucket=<state_bucket> -backend-config dynamodb_table=<lock_table> -backend-config kms_key_id=<state_kms_key_arn> -backend-config 'assume_role={role_arn="<state_rw_role_arns.staging>"}'`, then `apply -var dns_role_arn=<dns_write_role_arns.staging>` with `app.desired_count=0`.
+        - As that role: `terraform -chdir=infra/envs/staging init -backend-config bucket=<state_bucket> -backend-config dynamodb_table=<lock_table> -backend-config kms_key_id=<state_kms_key_arn> -backend-config 'assume_role={role_arn="<state_rw_role_arns.staging>"}'`, then `apply -var dns_role_arn=<dns_write_role_arns.staging> -var desired_count=0`.
         - Once `quad-staging-plan` and `quad-staging-apply` exist and CI applies cleanly, remove the administrator ARN from both lists and apply bootstrap and global again.
      7. Put the Sentry DSNs and Grafana OTLP headers into `quad-staging/env/SENTRY_DSN` and `…/OTEL_EXPORTER_OTLP_HEADERS` with `aws secretsmanager put-secret-value`, keeping the JSON shape the task definitions read (Task 12): `{"api":"<dsn>","staff":"<dsn>","console":"<dsn>"}` (the worker uses `api`) and `{"value":"<headers>"}`. Then `terraform state rm 'module.app.aws_secretsmanager_secret_version.placeholder["SENTRY_DSN"]'` (and the same for `OTEL_EXPORTER_OTLP_HEADERS`), so Terraform can never write the placeholder over the real value, and force a new deployment of every service.
-     8. Set the GitHub variables named in Global Constraints from the Terraform outputs.
-     9. Push each image once with the tag `bootstrap` (`node scripts/docker-build.mjs <image> --tag <registry>/quad/<image>:bootstrap --push`; tags are immutable), because the first task definitions point at it. Then run `deploy-staging.yml` by hand, and apply staging again with `desired_count = 1`.
+     8. Set the GitHub variables named in Global Constraints from the Terraform outputs, including `OTEL_EXPORTER_OTLP_ENDPOINT` (the Grafana Cloud OTLP gateway URL; ruling R-otel-var). The staging plan and apply pass it as `-var otel_exporter_endpoint`.
+     9. Push each image once with the tag `bootstrap` (`node scripts/docker-build.mjs <image> --tag <registry>/quad/<image>:bootstrap --push`; tags are immutable), because the first task definitions point at it. Then apply staging again with the default `desired_count = 1`, which scales the services up (ruling R-desired-count: Terraform owns the count; the services ignore only `task_definition`), and run `deploy-staging.yml` by hand.
      9a. First-deploy checks (Task 12):
         - Fargate copied each image `VOLUME` into its ephemeral volume with the image's ownership: `aws ecs execute-command` is off, so check through the services: clamav becomes healthy without downloading `main.cvd` first (its log has no "Updating initial database"), and staff serves `/_next/image` without `EACCES`;
         - ECS injected an empty JSON-key value as an empty variable before the Sentry and OTLP secrets were set: the api, worker, staff and console tasks start, and their logs show Sentry and tracing off;
         - a plan that changes only tags replaces no `aws_secretsmanager_secret_version`.
+     9b. First-deploy checks (Task 13 review):
+        - `tags_all` on a real resource (for example `aws ec2 describe-vpcs` or `terraform state show module.network.aws_vpc.this`) has `env`, `owner`, `cost-centre` and `service`: the mocked tests cannot see the provider's default_tags merge;
+        - `TF_DNS_READ_ROLE_ARN` and `TF_STAGING_DNS_WRITE_ROLE_ARN` are both in the tooling account (the same account id). The staging root reads the tooling account id from whichever is passed, and its `check "dns_role_is_a_tooling_dns_role"` warns when the ARN is not that account's `quad-dns-read` or `quad-dns-records-staging`;
+        - the dashboard `quad-staging-overview` shows data in every widget (CloudWatch validates the body only on the first apply).
      10. Re-confirm the SES SNS subscription once the API is up (`aws sns list-subscriptions-by-topic`, then re-subscribe if it is pending).
      11. Send a test email to a mail-tester address and check that SPF, DKIM and DMARC pass.
      12. Run `node dist/sentry-test.js` as a one-off task and check Sentry.

@@ -66,8 +66,20 @@ override_resource {
   }
 }
 
+# Two members, so the dashboard test shows one Redis metric per member cluster.
+override_resource {
+  target = module.data.aws_elasticache_replication_group.this
+  values = {
+    arn                      = "arn:aws:elasticache:ap-south-1:123456789012:replicationgroup:quad-staging-redis"
+    id                       = "quad-staging-redis"
+    primary_endpoint_address = "master.quad-staging-redis.abcdef.aps1.cache.amazonaws.com"
+    member_clusters          = ["quad-staging-redis-002", "quad-staging-redis-001"]
+  }
+}
+
+# The plan role's DNS role in the example tooling account 111111111111 (envs/global).
 variables {
-  dns_role_arn = "arn:aws:iam::111111111111:role/quad-dns-records"
+  dns_role_arn = "arn:aws:iam::111111111111:role/quad-dns-read"
 }
 
 run "dashboard_shows_target_5xx" {
@@ -214,26 +226,25 @@ run "dashboard_charts_this_environment" {
       flatten([for widget in jsondecode(aws_cloudwatch_dashboard.overview.dashboard_body).widgets : [
         for metric in try(widget.properties.metrics, []) : [for part in metric : part if can(regex("^[A-Za-z0-9_]+$", part))]
       ]])
-    )) == jsonencode(["DatabaseMemoryUsagePercentage"])
-    error_message = "The dashboard must chart every starter metric by name, except Redis memory."
+    )) == jsonencode([])
+    error_message = "The dashboard must chart every starter metric by name."
   }
 
-  # Redis publishes per member cluster, so its widget searches the replication group's nodes.
+  # Redis publishes per member cluster, so the widget has one metric per member.
   assert {
-    condition = anytrue([
-      for widget in jsondecode(aws_cloudwatch_dashboard.overview.dashboard_body).widgets : anytrue([
-        for metric in try(widget.properties.metrics, []) :
-        strcontains(try(metric[0].expression, ""), "DatabaseMemoryUsagePercentage") && strcontains(try(metric[0].expression, ""), module.data.redis_replication_group_id)
-      ])
-    ])
-    error_message = "A search expression must chart this replication group's DatabaseMemoryUsagePercentage."
+    condition = jsonencode(sort(flatten([
+      for widget in jsondecode(aws_cloudwatch_dashboard.overview.dashboard_body).widgets : [
+        for metric in try(widget.properties.metrics, []) : metric[3]
+        if try(metric[0], "") == "AWS/ElastiCache" && try(metric[1], "") == "DatabaseMemoryUsagePercentage" && try(metric[2], "") == "CacheClusterId"
+      ]
+    ]))) == jsonencode(["quad-staging-redis-001", "quad-staging-redis-002"])
+    error_message = "The dashboard must chart DatabaseMemoryUsagePercentage for each Redis member cluster, by CacheClusterId."
   }
 
   assert {
     condition = (
       strcontains(aws_cloudwatch_dashboard.overview.dashboard_body, jsonencode(module.edge.alb_arn_suffix)) &&
       strcontains(aws_cloudwatch_dashboard.overview.dashboard_body, jsonencode(module.data.rds_instance_id)) &&
-      strcontains(aws_cloudwatch_dashboard.overview.dashboard_body, module.data.redis_replication_group_id) &&
       alltrue([for service in module.app.ecs_service_names_for_dashboard : strcontains(aws_cloudwatch_dashboard.overview.dashboard_body, jsonencode(service))]) &&
       alltrue([for suffix in values(module.edge.target_group_arn_suffixes) : strcontains(aws_cloudwatch_dashboard.overview.dashboard_body, jsonencode(suffix))])
     )
@@ -267,4 +278,48 @@ run "dns_role_arn_must_be_a_role" {
   }
 
   expect_failures = [var.dns_role_arn]
+}
+
+# The dashboard reads the region from the default provider, not a literal: with the provider's
+# region overridden, every widget but WAF's (us-east-1) follows it.
+run "dashboard_follows_the_provider_region" {
+  command = apply
+
+  override_data {
+    target = data.aws_region.current
+    values = { name = "eu-west-1", region = "eu-west-1" }
+  }
+
+  assert {
+    condition = alltrue([
+      for widget in jsondecode(aws_cloudwatch_dashboard.overview.dashboard_body).widgets :
+      widget.properties.region == "eu-west-1" if widget.type == "metric" && try(widget.properties.metrics[0][0], "") != "AWS/WAFV2"
+    ])
+    error_message = "Every regional widget must take the default provider's region."
+  }
+}
+
+run "the_apply_role_dns_role_passes_the_check" {
+  command = plan
+
+  variables {
+    dns_role_arn = "arn:aws:iam::111111111111:role/quad-dns-records-staging"
+  }
+
+  assert {
+    condition     = local.tooling_account_id == "111111111111"
+    error_message = "The write role names the same tooling account."
+  }
+}
+
+# The plan and apply DNS roles both live in the tooling account (envs/global), and the app's
+# plan and apply roles may assume only quad-dns-read and quad-dns-records-staging there.
+run "a_dns_role_outside_the_tooling_dns_roles_fails_the_check" {
+  command = plan
+
+  variables {
+    dns_role_arn = "arn:aws:iam::222222222222:role/quad-staging-admin"
+  }
+
+  expect_failures = [check.dns_role_is_a_tooling_dns_role]
 }
