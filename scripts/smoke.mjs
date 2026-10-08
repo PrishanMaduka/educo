@@ -6,6 +6,9 @@
 // X-Robots-Tag header on those four, the Socket.IO handshake, and (with --origin) that the load
 // balancer refuses a request that did not come through CloudFront. Prints one line per check and
 // exits 1 if any fails. It never sends the origin header, and it follows no redirects.
+// --origin is for manual use only: the ALB's security group admits only CloudFront's origin-facing
+// prefix list, so the check works only from inside the VPC or from an address in that list. From
+// anywhere else (a GitHub runner included) the request times out, so the deploy workflow omits it.
 import process from 'node:process';
 import { clearTimeout, setTimeout } from 'node:timers';
 import { fileURLToPath, URL } from 'node:url';

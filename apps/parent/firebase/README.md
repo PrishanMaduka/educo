@@ -27,7 +27,7 @@ The Android Gradle plugin picks the file from the flavor's source set. In M6, a
 build phase on the iOS Runner target copies the flavor's plist into the app.
 
 Locally, download the `quad-dev` files from the Firebase console into those
-paths. In CI, the `staging` files come from the GitHub `staging` environment
+paths. In CI, the `staging` files come from the GitHub `staging-stores` environment
 secrets as base64 (`GOOGLE_SERVICE_INFO_PLIST_B64` for iOS, which the
 `ios staging` lane writes; in M6, an Android equivalent written by
 `android staging_build`). See [fastlane/README.md](../fastlane/README.md).

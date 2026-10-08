@@ -117,7 +117,7 @@ Deploy access uses GitHub OIDC to assume an AWS role per environment; there are 
 - AWS Secrets Manager holds every secret listed in [02 → Environment variables](02-architecture.md#environment-variables); ECS injects them into tasks. Non-secret config is plain task environment.
 - KMS keys: one for RDS and S3, one for field-level encryption (TOTP secrets, safeguarding, medical notes, school gateway credentials).
 - Rotation: database passwords every 90 days (Secrets Manager rotation); `SESSION_SECRET`, `LINK_SIGNING_SECRET` and JWT keys support two active values (current and previous) so rotation does not sign everyone out. Runbook below.
-- App signing keys and store credentials live in GitHub environment secrets (the `staging` environment for staging builds, the `production` environment for releases), each with required reviewers and deployments from `main` only.
+- App signing keys and store credentials live in GitHub environment secrets: `staging-stores` for staging builds and `production` for releases, each with required reviewers and deployments from `main` only. The `staging` environment, which the staging deploy uses, allows `main` only and has no reviewers, so a merge to `main` deploys staging with no manual step (ruling R-env-approvals, D28); `infra-staging` (Terraform applies) keeps its reviewers.
 - Staging (M0b) generates database passwords, the Redis token and the session and link-signing secrets in Terraform as write-only values, never in state, and rotates them by raising a version (`infra/README.md` runbooks); Secrets Manager rotation arrives with production.
 
 ## Providers

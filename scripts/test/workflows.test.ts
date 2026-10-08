@@ -270,9 +270,21 @@ describe('deploy-staging.yml', () => {
       expect(job?.if).toContain(DEPLOY_GATE);
       expect(job?.if).toContain(GATE_OPEN);
       expect(needsOf(job)).toContain('gate');
-      expect(environmentOf(job)).toBe('staging');
+      // Ruling R-env-approvals: staging deploys with no manual step; smoke needs no AWS or secrets.
+      expect(environmentOf(job)).toBe(id === 'smoke' ? undefined : 'staging');
     },
   );
+
+  it('keeps the store secrets in staging-stores, the only environment with reviewers (R-env-approvals)', () => {
+    for (const [id, job] of Object.entries(deploy.jobs)) {
+      const usesSecrets = JSON.stringify(job).includes('secrets.');
+      if (environmentOf(job) === 'staging-stores') {
+        expect(['parent-ios', 'parent-android'], id).toContain(id);
+      } else {
+        expect(usesSecrets, id).toBe(false);
+      }
+    }
+  });
 
   it.each([
     ['parent-ios', 'IOS_UPLOAD_ENABLED', 'macos'],
@@ -284,7 +296,7 @@ describe('deploy-staging.yml', () => {
     expect(job.if).not.toContain('AWS_');
     // Only the gate: the lanes never wait for the AWS jobs.
     expect(needsOf(job)).toEqual(['gate']);
-    expect(environmentOf(job)).toBe('staging');
+    expect(environmentOf(job)).toBe('staging-stores');
     expect(job['runs-on']).toContain(os);
     expect(job.env?.BUILD_NUMBER).toBe('${{ github.run_number }}');
     expect(runs(job)).toMatch(/bundle exec fastlane (ios|android) staging/);
@@ -341,12 +353,14 @@ describe('deploy-staging.yml', () => {
     expect(script.indexOf('ecs-deploy.mjs wait-stable --expect')).toBeGreaterThan(firstUpdate);
   });
 
-  it('seeds staging, then smoke-tests it with retries through CloudFront and the origin', () => {
+  it('seeds staging, then smoke-tests it through CloudFront with retries', () => {
     expect(runs(deploy.jobs.seed)).toContain('APP_ENV=staging');
     const smoke = runs(deploy.jobs.smoke);
     expect(smoke).toContain(
-      'node scripts/smoke.mjs --web https://staging.quad-edu.com --console https://console.staging.quad-edu.com --origin https://origin.staging.quad-edu.com --expect-noindex',
+      'node scripts/smoke.mjs --web https://staging.quad-edu.com --console https://console.staging.quad-edu.com --expect-noindex',
     );
+    // The ALB admits only CloudFront's prefix list, so a runner cannot reach the origin (C1).
+    expect(smoke).not.toContain('--origin');
     expect(smoke).toMatch(/for attempt in/);
   });
 

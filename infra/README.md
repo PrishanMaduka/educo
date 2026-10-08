@@ -192,32 +192,50 @@ world-readable, and the protections below must exist before any role ARN becomes
      **Send write tokens to workflows from fork pull requests** off (and **Send secrets** off).
    - Never add a workflow triggered by `pull_request_target`: it runs fork code with this
      repository's token and secrets. `infra.yml` plans only on `pull_request` from this repository.
-3. **Environments** `staging` and `infra-staging`, each with **Required reviewers** and
-   **Deployment branches: main only** (a selected-branches rule for `main`). Without the branch
-   rule, a workflow file on any branch could ask for the environment. Get your user id with
-   `gh api users/<you> --jq .id`, then for each environment:
+3. **Environments** (ruling R-env-approvals). All three have **Deployment branches: main only** (a
+   selected-branches rule for `main`): without it, a workflow file on any branch could ask for the
+   environment.
+
+   | Environment | Used by | Required reviewers |
+   |---|---|---|
+   | `staging` | the deploy jobs (`build-push`, `migrate`, `deploy`, `seed`) | **none**, so a merge to `main` deploys staging with no manual step (spec 18 M0b Accept) |
+   | `staging-stores` | `parent-ios` and `parent-android`; holds the fastlane secrets (step 5.6) | yes |
+   | `infra-staging` | `infra.yml`'s `apply` and weekly `drift` | yes |
+
+   Get your user id with `gh api users/<you> --jq .id`, then:
    ```bash
-   for env in staging infra-staging; do
-     gh api --method PUT "repos/prishanmaduka/educo/environments/$env" --input - <<EOF
-   {"reviewers":[{"type":"User","id":<your id>}],
+   put_env() {  # $1 = environment, $2 = reviewers JSON array
+     gh api --method PUT "repos/prishanmaduka/educo/environments/$1" --input - <<EOF
+   {"reviewers":$2,
     "deployment_branch_policy":{"protected_branches":false,"custom_branch_policies":true}}
    EOF
-     gh api --method POST "repos/prishanmaduka/educo/environments/$env/deployment-branch-policies" \
+     gh api --method POST "repos/prishanmaduka/educo/environments/$1/deployment-branch-policies" \
        -f name=main -f type=branch
-   done
+   }
+   put_env staging '[]'
+   put_env staging-stores '[{"type":"User","id":<your id>}]'
+   put_env infra-staging '[{"type":"User","id":<your id>}]'
    ```
-   `infra-staging` guards the Terraform apply and the weekly drift check. `staging` guards the app
-   deploy and the store uploads, and also limits the deploy role's path to the database master
-   secret (it can pass `migrate-exec` to `RunTask`; [accepted risks](#9-accepted-risks-for-staging)).
-   With a single maintainer, leave "Prevent self-review" off, or nobody can approve.
-4. **Branch protection for `main`** (when you add it) requires the CI job names below. The old
-   "Verify and build" check no longer exists.
+   The smoke job uses no environment (it needs no AWS credentials or secrets). The deploy role's
+   path to the database master secret (it can pass `migrate-exec` to `RunTask`;
+   [accepted risks](#9-accepted-risks-for-staging)) is limited by `staging` being main-only and by
+   the branch protection below, which makes every change to `main` a reviewed pull request. With a
+   single maintainer, leave "Prevent self-review" off, or nobody can approve.
+4. **Branch protection for `main`**, before `AWS_STAGING_DEPLOY_ROLE_ARN` is set: changes reach
+   `main` only through pull requests with an approving review and the CI job names below (the old
+   "Verify and build" check no longer exists). Because `staging` has no reviewers, this protection
+   is what stands between a change and the deploy role.
    ```bash
    gh api --method PUT repos/prishanmaduka/educo/branches/main/protection --input - <<'EOF'
    {"required_status_checks":{"strict":true,"contexts":["typecheck","lint","unit","codegen","api-integration","e2e-smoke","build"]},
-    "enforce_admins":false,"required_pull_request_reviews":null,"restrictions":null}
+    "enforce_admins":true,
+    "required_pull_request_reviews":{"required_approving_review_count":1,"dismiss_stale_reviews":true},
+    "restrictions":null,"allow_force_pushes":false,"allow_deletions":false}
    EOF
    ```
+   GitHub does not let authors approve their own pull requests, so with a single maintainer use
+   `"required_approving_review_count":0` (pull requests and checks still required) until a second
+   maintainer exists, and record that as an open gap.
    `images`, `parent-build` and Infra's `checks` also run; add them if you want them required.
 5. **Variables.** Leave them unset until the step that produces each value, because every AWS job
    skips (and stays green) while its variable is empty. All are repository variables
@@ -252,8 +270,8 @@ world-readable, and the protections below must exist before any role ARN becomes
    gh variable set TF_STATE_BUCKET --body "$(terraform -chdir=infra/bootstrap output -raw state_bucket)"
    gh variable set TF_STAGING_STATE_RW_ROLE_ARN --body "$(terraform -chdir=infra/bootstrap output -json state_rw_role_arns | jq -r .staging)"
    ```
-6. **Environment secrets for fastlane** (`staging` environment only; `gh secret set <NAME> --env
-   staging`). The lanes read exactly these (`apps/parent/fastlane/README.md`):
+6. **Environment secrets for fastlane** (`staging-stores` environment only; `gh secret set <NAME>
+   --env staging-stores`). The lanes read exactly these (`apps/parent/fastlane/README.md`):
 
    | Secret | Lane | What it is |
    |---|---|---|
@@ -267,7 +285,8 @@ world-readable, and the protections below must exist before any role ARN becomes
    | `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD` | `android staging` | the keystore password, key alias and key password |
    | `PLAY_SERVICE_ACCOUNT_JSON` | `android staging` | the Play service account's JSON key (contents) |
 
-   For example `base64 -w0 AuthKey_<id>.p8 | gh secret set ASC_KEY_P8_B64 --env staging`.
+   For example `base64 -w0 AuthKey_<id>.p8 | gh secret set ASC_KEY_P8_B64 --env staging-stores`.
+   The `staging` environment holds no secrets.
 
 ### Step 6. First staging apply, with no services running (staging administrator)
 
@@ -351,8 +370,8 @@ db-bootstrap connects to RDS directly as the RDS-managed master user (ruling R-d
    check they become healthy in ECS → Clusters → `quad-staging` → Services.
 2. Set `AWS_STAGING_DEPLOY_ROLE_ARN` from the staging output `deploy_role_arn`.
 3. Run the deploy by hand from `main` (after CI has passed on that commit):
-   `gh workflow run deploy-staging.yml --ref main`, then approve it in the `staging` environment and
-   follow it with `gh run watch`. It builds and pushes the commit's images, runs db-bootstrap and
+   `gh workflow run deploy-staging.yml --ref main`, and follow it with `gh run watch` (the
+   `staging` environment needs no approval). It builds and pushes the commit's images, runs db-bootstrap and
    migrate, deploys every service, seeds and runs the smoke checks. From now on every green CI run
    on `main` deploys.
 
@@ -368,30 +387,28 @@ db-bootstrap connects to RDS directly as the RDS-managed master user (ruling R-d
    ```
    Paste the values from a file or a prompt, not from shell history (`history -d`, or a leading
    space with `HISTCONTROL=ignorespace`).
-2. Remove Terraform's placeholder versions from state, so no apply can write the empty placeholder
-   over the real value (as the staging administrator, still listed until step 13):
-   ```bash
-   terraform -chdir=infra/envs/staging state rm 'module.app.aws_secretsmanager_secret_version.placeholder["SENTRY_DSN"]'
-   terraform -chdir=infra/envs/staging state rm 'module.app.aws_secretsmanager_secret_version.placeholder["OTEL_EXPORTER_OTLP_HEADERS"]'
-   ```
-3. Set `OTEL_EXPORTER_OTLP_ENDPOINT` (if not set in 6c) and `SENTRY_DSN_STAFF` / `SENTRY_DSN_CONSOLE`,
+   Do not remove the placeholder versions from Terraform state: the next apply would create them
+   again, over the hand-set values. Their write-only value is sent only when
+   `secret_string_wo_version` changes, and it is fixed at `1`, so Terraform never writes it again
+   ([check](#placeholder-secrets-stay-untouched)).
+2. Set `OTEL_EXPORTER_OTLP_ENDPOINT` (if not set in 6c) and `SENTRY_DSN_STAFF` / `SENTRY_DSN_CONSOLE`,
    then let the next infra apply and app deploy pick them up.
-4. Force a new deployment of every service, because ECS reads secrets only when a task starts:
+3. Force a new deployment of every service, because ECS reads secrets only when a task starts:
    ```bash
    for s in api worker staff console clamav; do
      aws ecs update-service --cluster quad-staging --service "$s" --force-new-deployment > /dev/null
    done
    ```
-5. Send a test error from a one-off api task and check it arrives in the `quad-api` project
+4. Send a test error from a one-off api task and check it arrives in the `quad-api` project
    (`dist/sentry-test.js` fails unless Sentry accepted it):
    ```bash
    aws ecs run-task --cluster quad-staging --launch-type FARGATE --task-definition quad-staging-api \
      --network-configuration "awsvpcConfiguration={subnets=[$(node scripts/ecs-deploy.mjs setting --name subnets)],securityGroups=[$(node scripts/ecs-deploy.mjs setting --name security_groups)],assignPublicIp=DISABLED}" \
      --overrides '{"containerOverrides":[{"name":"api","command":["node","dist/sentry-test.js"]}]}'
    ```
-6. The parent app's staging DSN (`quad-parent`) goes in `apps/parent/env/staging.json` through a
+5. The parent app's staging DSN (`quad-parent`) goes in `apps/parent/env/staging.json` through a
    pull request (DSNs are public keys).
-7. Traces: check spans from `quad-api`, `quad-staff` and `quad-console` in Grafana. Spans carry
+6. Traces: check spans from `quad-api`, `quad-staff` and `quad-console` in Grafana. Spans carry
    `tenant_id` only from M1, when requests have a tenant.
 
 ### Step 11. Email (SES)
@@ -416,8 +433,9 @@ db-bootstrap connects to RDS directly as the RDS-managed master user (ruling R-d
 ### Step 12. Store builds
 
 Once the accounts in [section 5](#5-accounts-and-keys-to-create) and the step 5.6 secrets exist, set
-`IOS_UPLOAD_ENABLED=true` and/or `PLAY_UPLOAD_ENABLED=true`. The next deploy uploads to TestFlight
-and the Play internal track. Play uploads are drafts until the app's first release is published
+`IOS_UPLOAD_ENABLED=true` and/or `PLAY_UPLOAD_ENABLED=true`. On the next deploy, a `staging-stores`
+reviewer approves `parent-ios` and `parent-android`, which then upload to TestFlight and the Play
+internal track (the AWS deploy does not wait for them). Play uploads are drafts until the app's first release is published
 ([runbook](#play-draft-promotion)).
 
 ### Step 13. Remove the administrator's access to staging state and DNS
@@ -444,6 +462,14 @@ first deploy and record the result in the M0b pull request.
   refuses to start a task with an empty value, do not put a fake DSN in its place (the apps would
   try to send to it): record it and decide how to inject "unset" before M1.
 - **Bootstrap tag.** The services start from the `bootstrap` images and the deploy replaces them.
+- <a id="placeholder-secrets-stay-untouched"></a>**Placeholder secrets stay untouched.** The first
+  `apply (staging)` after step 10 plans no change to
+  `module.app.aws_secretsmanager_secret_version.placeholder["SENTRY_DSN"]` or
+  `…placeholder["OTEL_EXPORTER_OTLP_HEADERS"]` (the plan summary lists neither), and afterwards
+  `aws secretsmanager get-secret-value --secret-id quad-staging/env/SENTRY_DSN --query VersionStages`
+  still shows the hand-set version as `AWSCURRENT`. If a refresh would move `AWSCURRENT` back to the
+  placeholder version, stop and decide before applying (for example a `lifecycle` change in
+  `infra/modules/app/secrets.tf`); do not remove the resources from state, which would re-create them.
 
 **Terraform and state**
 - <a id="backend-assume_role-syntax"></a>**Backend `assume_role` syntax.** `init
@@ -494,7 +520,19 @@ first deploy and record the result in the M0b pull request.
   `awswaf:managed:aws:core-rule-set:SizeRestrictions_Body`: in WAF → Web ACLs → sampled requests, a
   >8 KB POST outside `/api/v1/` is blocked by `body-size`, and one under `/api/v1/` is not.
 - WAF metrics appear on the dashboard's "requests WAF blocked" widget.
-- `curl -sk https://origin.staging.quad-edu.com/` returns 403 `Forbidden` (no origin header).
+- **The ALB is reachable only through CloudFront.** From outside AWS, a direct request times out,
+  because the ALB's security group admits only CloudFront's origin-facing prefix list:
+  `curl --max-time 10 -sk https://origin.staging.quad-edu.com/` must fail with a timeout (exit 28),
+  not answer. Then check the listener in the API:
+  ```bash
+  alb=$(aws elbv2 describe-load-balancers --names quad-staging --query 'LoadBalancers[0].LoadBalancerArn' --output text)
+  listener=$(aws elbv2 describe-listeners --load-balancer-arn "$alb" --query "Listeners[?Port==\`443\`].ListenerArn" --output text)
+  aws elbv2 describe-rules --listener-arn "$listener" \
+    --query 'Rules[].{priority:Priority,default:IsDefault,action:Actions[0].FixedResponseConfig,header:Conditions[?Field==`http-header`].HttpHeaderConfig.HttpHeaderName}'
+  ```
+  The default rule's action is a fixed response 403 with the body `Forbidden`, and every other rule
+  has an `X-Quad-Origin-Secret` header condition. `pnpm smoke --origin` makes the same 403 check,
+  but only from inside the VPC or an address in that prefix list, so the deploy does not run it.
 
 **Data**
 - <a id="rds-bypassrls-for-quad_platform"></a>**RDS BYPASSRLS for `quad_platform`.** db-bootstrap
@@ -581,9 +619,10 @@ role's version (or the Redis version) and apply again, then run db-bootstrap and
   `staff`, `console`).
 - ECS reads secrets only at task start, so **every** secret change needs a new deployment of the
   services that read it.
-- `terraform state rm` of the placeholders (step 10.2) is done once. If the module is ever
-  re-created from scratch, Terraform writes the placeholder again: set the real value and remove the
-  two addresses from state again.
+- Never `terraform state rm` the placeholder versions: the next apply would re-create them over the
+  hand-set values. Their fixed `secret_string_wo_version = 1` keeps Terraform from writing them
+  again. If the module is ever re-created from scratch, Terraform writes the placeholder once more:
+  set the real value again with `put-secret-value`.
 
 ### Origin secret: zero-downtime rotation (three applies)
 
@@ -661,7 +700,7 @@ section 3.
 | match certificates repository | a private GitHub repository | `match appstore` once from a trusted machine (not read-only) to create the staging profile |
 | App Store Connect API key | App Store Connect → Users and Access → Keys | `ASC_KEY_ID`, `ASC_ISSUER_ID`, `ASC_KEY_P8_B64` |
 | Play upload key and service account | `keytool -genkeypair` locally; Google Cloud → service account with Play Console access | `ANDROID_*` secrets and `PLAY_SERVICE_ACCOUNT_JSON`; Play App Signing holds the app signing key |
-| GitHub `staging` environment secrets | step 5.6 | the fastlane credentials; AWS holds none of them |
+| GitHub `staging-stores` environment secrets | step 5.6 | the fastlane credentials; AWS holds none of them |
 
 ## 6. What CI does
 
@@ -756,4 +795,6 @@ Dockerfiles. CI on GitHub additionally ran tflint and a real Android staging bui
   reading staging state.
 - **The deploy role's path to the master secret.** It can pass `migrate-exec` to `RunTask` with a
   command override, so it can reach the RDS master secret. It is trusted only from the `staging`
-  environment on `main`, and both environments require reviewers and allow `main` only.
+  environment on `main`. `staging` has no reviewers (ruling R-env-approvals, so merges deploy
+  without a manual step), so the mitigation is that the environment allows `main` only and branch
+  protection (step 5.4) lets changes reach `main` only as reviewed pull requests with green checks.

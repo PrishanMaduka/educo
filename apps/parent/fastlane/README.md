@@ -30,7 +30,7 @@ Each build takes its store build number from `BUILD_NUMBER` when it is set (CI p
 ## Credentials
 
 Credentials come only from environment variables or match, never from git. In
-CI they are the GitHub `staging` environment secrets (spec 20); AWS holds none
+CI they are the GitHub `staging-stores` environment secrets (spec 20); AWS holds none
 of them. The files the lanes write are git-ignored (`apps/parent/.gitignore`).
 
 | Variable | Used by | What it is |
