@@ -140,8 +140,9 @@ locals {
         Sid    = "NoLogContents"
         Effect = "Deny"
         Action = [
-          "logs:GetLogEvents", "logs:FilterLogEvents", "logs:StartQuery", "logs:StartLiveTail",
-          "logs:Unmask", "rds:DownloadDBLogFilePortion", "rds:DownloadCompleteDBLogFile",
+          "logs:GetLogEvents", "logs:FilterLogEvents", "logs:StartQuery", "logs:GetQueryResults",
+          "logs:StartLiveTail", "logs:Unmask", "rds:DownloadDBLogFilePortion",
+          "rds:DownloadCompleteDBLogFile",
         ]
         Resource = ["*"]
       },

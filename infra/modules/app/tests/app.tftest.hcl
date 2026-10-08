@@ -603,7 +603,7 @@ run "plan_and_apply_roles_reach_state_through_the_tooling_roles" {
     condition = alltrue([
       for action in [
         "secretsmanager:GetSecretValue", "ssm:GetParameter*", "kms:Decrypt",
-        "logs:GetLogEvents", "logs:FilterLogEvents", "logs:StartQuery", "logs:StartLiveTail", "logs:Unmask",
+        "logs:GetLogEvents", "logs:FilterLogEvents", "logs:StartQuery", "logs:GetQueryResults", "logs:StartLiveTail", "logs:Unmask",
         "rds:DownloadDBLogFilePortion", "rds:DownloadCompleteDBLogFile",
         ] : anytrue([
           for s in jsondecode(aws_iam_role_policy.plan.policy).Statement : s.Effect == "Deny" && contains(flatten([s.Action]), action)
