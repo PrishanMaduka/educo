@@ -477,27 +477,27 @@ run "keys_rotate_and_are_administered_by_this_account" {
   }
 
   assert {
-    condition = alltrue([for k in [aws_kms_key.data, aws_kms_key.field] :
-    alltrue([for s in jsondecode(k.policy).Statement : s.Effect == "Allow"])])
+    condition = alltrue([for policy in [aws_kms_key_policy.data.policy, aws_kms_key.data.policy, aws_kms_key.field.policy] :
+    alltrue([for s in jsondecode(policy).Statement : s.Effect == "Allow"])])
     error_message = "The key policies must only allow."
   }
 
   assert {
-    condition = alltrue([for k in [aws_kms_key.data, aws_kms_key.field] :
-      alltrue([for s in jsondecode(k.policy).Statement :
+    condition = alltrue([for policy in [aws_kms_key_policy.data.policy, aws_kms_key.data.policy, aws_kms_key.field.policy] :
+      alltrue([for s in jsondecode(policy).Statement :
     s.Principal == { AWS = "arn:aws:iam::123456789012:root" } if can(s.Principal.AWS)])])
     error_message = "Only this account's root may administer the keys."
   }
 
   # Without distribution ARNs, CloudFront gets no statement at all.
   assert {
-    condition     = toset([for s in jsondecode(aws_kms_key.data.policy).Statement : s.Principal.Service if can(s.Principal.Service)]) == toset(["logs.ap-south-1.amazonaws.com"])
+    condition     = toset([for s in jsondecode(aws_kms_key_policy.data.policy).Statement : s.Principal.Service if can(s.Principal.Service)]) == toset(["logs.ap-south-1.amazonaws.com"])
     error_message = "Only CloudWatch Logs may use the data key as a service when no distribution is named."
   }
 
   # CloudWatch Logs may use the data key only for this database's log groups.
   assert {
-    condition = alltrue([for s in jsondecode(aws_kms_key.data.policy).Statement :
+    condition = alltrue([for s in jsondecode(aws_kms_key_policy.data.policy).Statement :
       s.Condition.ArnLike["kms:EncryptionContext:aws:logs:arn"] == "arn:aws:logs:ap-south-1:123456789012:log-group:/aws/rds/instance/quad-staging-db/*"
     if try(s.Principal.Service, "") == "logs.ap-south-1.amazonaws.com"])
     error_message = "CloudWatch Logs may use the data key only for the database's log groups."
@@ -518,12 +518,12 @@ run "cloudfront_decrypts_only_the_public_bucket_for_named_distributions" {
   }
 
   assert {
-    condition     = length([for s in jsondecode(aws_kms_key.data.policy).Statement : s if try(s.Principal.Service, "") == "cloudfront.amazonaws.com"]) == 1
+    condition     = length([for s in jsondecode(aws_kms_key_policy.data.policy).Statement : s if try(s.Principal.Service, "") == "cloudfront.amazonaws.com"]) == 1
     error_message = "A named distribution must get exactly one CloudFront statement."
   }
 
   assert {
-    condition = alltrue([for s in jsondecode(aws_kms_key.data.policy).Statement :
+    condition = alltrue([for s in jsondecode(aws_kms_key_policy.data.policy).Statement :
       s.Action == "kms:Decrypt" &&
       s.Condition.ArnEquals["aws:SourceArn"] == ["arn:aws:cloudfront::123456789012:distribution/EMOCKDISTRIBUTION"] &&
       s.Condition.StringEquals["kms:EncryptionContext:aws:s3:arn"] == "arn:aws:s3:::quad-staging-public"
@@ -532,8 +532,21 @@ run "cloudfront_decrypts_only_the_public_bucket_for_named_distributions" {
   }
 
   assert {
-    condition     = output.data_kms_key_policy == aws_kms_key.data.policy
-    error_message = "data_kms_key_policy must be the data key's policy, so the environment root can check the CloudFront statement."
+    condition     = output.data_kms_key_policy == aws_kms_key_policy.data.policy
+    error_message = "data_kms_key_policy must be the data key's effective policy, so the environment root can check the CloudFront statement."
+  }
+
+  # The key itself is created with the base policy only, so the key (and RDS, Redis, the buckets
+  # and the secrets it encrypts) never waits for the CloudFront distribution; the full policy,
+  # CloudFront statement included, is a separate aws_kms_key_policy on the same key.
+  assert {
+    condition = (
+      aws_kms_key_policy.data.key_id == aws_kms_key.data.key_id &&
+      length([for s in jsondecode(aws_kms_key.data.policy).Statement : s if try(s.Principal.Service, "") == "cloudfront.amazonaws.com"]) == 0 &&
+      jsonencode([for s in jsondecode(aws_kms_key.data.policy).Statement : s.Sid]) == jsonencode(["AccountAdministersTheKey", "LogsEncryptTheDatabaseLogGroupsOnly"]) &&
+      jsonencode([for s in jsondecode(aws_kms_key_policy.data.policy).Statement : s.Sid]) == jsonencode(["AccountAdministersTheKey", "LogsEncryptTheDatabaseLogGroupsOnly", "CloudFrontReadsThePublicBucket"])
+    )
+    error_message = "The data key must start with the base policy (account and logs), and aws_kms_key_policy.data must add the CloudFront statement to the same key."
   }
 }
 
@@ -556,6 +569,12 @@ run "outputs_for_the_app_edge_and_dashboard" {
       output.rds_instance_id == aws_db_instance.this.identifier && output.redis_replication_group_id == aws_elasticache_replication_group.this.id
     )
     error_message = "The database and Redis outputs must point at the module's resources."
+  }
+
+  # The dashboard charts Redis memory per member cluster (<group>-001, -002, …).
+  assert {
+    condition     = jsonencode(output.redis_member_clusters) == jsonencode(sort(tolist(aws_elasticache_replication_group.this.member_clusters))) && length(output.redis_member_clusters) >= 1
+    error_message = "redis_member_clusters must list the replication group's member clusters, sorted."
   }
 
   assert {

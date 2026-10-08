@@ -92,6 +92,7 @@ mock_resource "aws_elasticache_replication_group" {
   defaults = {
     arn                      = "arn:aws:elasticache:ap-south-1:123456789012:replicationgroup:mock-redis"
     primary_endpoint_address = "master.mock-redis.abcdef.aps1.cache.amazonaws.com"
+    member_clusters          = ["mock-redis-001"]
   }
 }
 

@@ -74,6 +74,11 @@ output "redis_replication_group_id" {
 }
 
 output "data_kms_key_policy" {
-  description = "The data key's policy (JSON), so the environment root can check that it names the CloudFront distribution."
-  value       = aws_kms_key.data.policy
+  description = "The data key's effective policy (JSON, aws_kms_key_policy.data), so the environment root can check that it names the CloudFront distribution."
+  value       = aws_kms_key_policy.data.policy
+}
+
+output "redis_member_clusters" {
+  description = "The replication group's member cluster ids (<group>-001, …), sorted; the dashboard charts Redis memory per member."
+  value       = sort(tolist(aws_elasticache_replication_group.this.member_clusters))
 }

@@ -25,21 +25,31 @@ locals {
     Resource  = "*"
   }
 
+  # The data key is created with the base statements only, so the key, and everything it
+  # encrypts, never waits for the CloudFront distribution that the edge module builds from the
+  # public bucket. aws_kms_key_policy.data then sets the full policy, CloudFront statement included.
+  data_key_base_statements = [
+    local.account_administers_the_key,
+    {
+      Sid       = "LogsEncryptTheDatabaseLogGroupsOnly"
+      Effect    = "Allow"
+      Principal = { Service = "logs.${local.region}.amazonaws.com" }
+      Action    = ["kms:Encrypt*", "kms:Decrypt*", "kms:ReEncrypt*", "kms:GenerateDataKey*", "kms:Describe*"]
+      Resource  = "*"
+      Condition = {
+        ArnLike = { "kms:EncryptionContext:aws:logs:arn" = "arn:${local.partition}:logs:${local.region}:${local.account_id}:log-group:/aws/rds/instance/${local.db_identifier}/*" }
+      }
+    },
+  ]
+
+  data_key_base_policy = jsonencode({
+    Version   = "2012-10-17"
+    Statement = local.data_key_base_statements
+  })
+
   data_key_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = concat([
-      local.account_administers_the_key,
-      {
-        Sid       = "LogsEncryptTheDatabaseLogGroupsOnly"
-        Effect    = "Allow"
-        Principal = { Service = "logs.${local.region}.amazonaws.com" }
-        Action    = ["kms:Encrypt*", "kms:Decrypt*", "kms:ReEncrypt*", "kms:GenerateDataKey*", "kms:Describe*"]
-        Resource  = "*"
-        Condition = {
-          ArnLike = { "kms:EncryptionContext:aws:logs:arn" = "arn:${local.partition}:logs:${local.region}:${local.account_id}:log-group:/aws/rds/instance/${local.db_identifier}/*" }
-        }
-      },
-    ], local.cloudfront_statements)
+    Version   = "2012-10-17"
+    Statement = concat(local.data_key_base_statements, local.cloudfront_statements)
   })
 
   # CloudFront reads the SSE-KMS public bucket through origin access control (edge module). The
@@ -68,9 +78,19 @@ resource "aws_kms_key" "data" {
   description             = "${var.name} data: RDS, S3, Secrets Manager and Redis"
   enable_key_rotation     = true
   deletion_window_in_days = 30
-  policy                  = local.data_key_policy
+  policy                  = local.data_key_base_policy
 
   tags = local.tags
+
+  # aws_kms_key_policy.data owns the policy after creation.
+  lifecycle {
+    ignore_changes = [policy]
+  }
+}
+
+resource "aws_kms_key_policy" "data" {
+  key_id = aws_kms_key.data.key_id
+  policy = local.data_key_policy
 }
 
 resource "aws_kms_alias" "data" {
