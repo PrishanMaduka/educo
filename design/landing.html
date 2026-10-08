@@ -11,36 +11,47 @@
 <script>
 /* Theme: follows the system unless the visitor chose one (quad_theme cookie, as in the apps). Runs before paint. */
 (() => { try { const m = document.cookie.match(/(?:^|; )quad_theme=(light|dark)/); if (m) document.documentElement.dataset.theme = m[1]; } catch (e) {} })();
+/* Prototype only: background palette A, B or C (localStorage, or ?palette=b for screenshots). Removed once a palette is chosen. */
+(() => { let p = new URLSearchParams(location.search).get('palette'); try { if (p) localStorage.setItem('quad_landing_palette', p); else p = localStorage.getItem('quad_landing_palette'); } catch (e) {} document.documentElement.dataset.palette = /^[abc]$/.test(p || '') ? p : 'a'; })();
 </script>
 <style>
 /* Layout: one 1120px column. Every section is carried by an inline SVG illustration drawn from the palette tokens,
    so the art follows light and dark mode. The one bold moment is the full-bleed indigo band: a school day in the circle. */
 :root{
-  --bg:#FAF8F5;--surface:#FFFFFF;--surface-2:#F4F1F8;--line:#E9E5EE;--ink:#1C1B2E;--ink-2:#4E4C63;--ink-3:#7D7A90;
+  --bg:#FBF6EC;--surface:#FFFDF8;--surface-2:#F4EDDF;--line:#E6DCC8;--wash-1:#E0EBD8;--wash-2:#FBE0CE;--ink:#1C1B2E;--ink-2:#4E4C63;--ink-3:#7D7A90;
   --coral:#DD4A42;--coral-soft:#FDE7E5;--indigo:#1F2559;--indigo-2:#3B4AA8;--lilac:#8B7CF6;--lilac-soft:#EEEAFE;--amber:#F2A93B;--amber-soft:#FDF1DC;--teal:#2BB0A0;--teal-soft:#DDF4F1;
   --coral-ink:#C23A33;--heat-ink:#1C1B2E;
   --band:#1F2559;--band-2:#2A3170;--band-ink:#F3F2FB;--band-ink-2:#C9C6EC;--band-line:#3A4285;
   /* Illustration tokens: skin tones, hair and school-uniform white (see spec 19 → Design tokens) */
-  --illo-skin-1:#C98B62;--illo-skin-2:#A96C45;--illo-skin-3:#8A5636;--illo-skin-4:#DCA67D;--illo-hair:#2B2230;--illo-hair-grey:#C9C4D2;--illo-white:#FFFFFF;--illo-face:#2B2230;
+  --illo-skin-1:#C98B62;--illo-skin-2:#A96C45;--illo-skin-3:#8A5636;--illo-skin-4:#DCA67D;--illo-hair:#2B2230;--illo-hair-grey:#C9C4D2;--illo-white:#FFFFFF;--illo-face:#2B2230;--illo-line:rgba(58,36,40,.62);--illo-sun:#F4B04A;
   --shadow:0 24px 50px -28px rgba(31,37,89,.45);
   --f-display:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
   --f-body:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
   --f-accent:"Fraunces",Georgia,"Times New Roman",serif;
   color-scheme:light}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#13142A;--surface:#1B1D3A;--surface-2:#22254A;--line:#2E3260;--ink:#F1F1FA;--ink-2:#C4C5DD;--ink-3:#9395B5;
+  --bg:#13142A;--surface:#1B1D3A;--surface-2:#22254A;--line:#2E3260;--wash-1:#1D2440;--wash-2:#2A1F35;--ink:#F1F1FA;--ink-2:#C4C5DD;--ink-3:#9395B5;
   --coral:#FF7A6E;--coral-soft:#3A2230;--indigo:#C9C4F5;--indigo-2:#7B8BF0;--lilac:#A99BFF;--lilac-soft:#262046;--amber:#F5BC5E;--amber-soft:#33291A;--teal:#4CC9B8;--teal-soft:#16302F;
   --coral-ink:#FF8F84;--heat-ink:#000000;
   --band:#0D0E22;--band-2:#181A38;--band-ink:#F3F2FB;--band-ink-2:#B8B6DC;--band-line:#2E3260;
-  --illo-skin-1:#B98058;--illo-skin-2:#9A6340;--illo-skin-3:#7E4F33;--illo-skin-4:#C99671;--illo-hair:#1B1622;--illo-hair-grey:#B3AEC0;--illo-white:#E6E4F0;--illo-face:#1B1622;
+  --illo-skin-1:#B98058;--illo-skin-2:#9A6340;--illo-skin-3:#7E4F33;--illo-skin-4:#C99671;--illo-hair:#1B1622;--illo-hair-grey:#B3AEC0;--illo-white:#E6E4F0;--illo-face:#1B1622;--illo-line:rgba(5,5,14,.7);--illo-sun:#F1E6C4;
   --shadow:0 24px 50px -28px rgba(0,0,0,.7);color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#13142A;--surface:#1B1D3A;--surface-2:#22254A;--line:#2E3260;--ink:#F1F1FA;--ink-2:#C4C5DD;--ink-3:#9395B5;
+  --bg:#13142A;--surface:#1B1D3A;--surface-2:#22254A;--line:#2E3260;--wash-1:#1D2440;--wash-2:#2A1F35;--ink:#F1F1FA;--ink-2:#C4C5DD;--ink-3:#9395B5;
   --coral:#FF7A6E;--coral-soft:#3A2230;--indigo:#C9C4F5;--indigo-2:#7B8BF0;--lilac:#A99BFF;--lilac-soft:#262046;--amber:#F5BC5E;--amber-soft:#33291A;--teal:#4CC9B8;--teal-soft:#16302F;
   --coral-ink:#FF8F84;--heat-ink:#000000;
   --band:#0D0E22;--band-2:#181A38;--band-ink:#F3F2FB;--band-ink-2:#B8B6DC;--band-line:#2E3260;
-  --illo-skin-1:#B98058;--illo-skin-2:#9A6340;--illo-skin-3:#7E4F33;--illo-skin-4:#C99671;--illo-hair:#1B1622;--illo-hair-grey:#B3AEC0;--illo-white:#E6E4F0;--illo-face:#1B1622;
+  --illo-skin-1:#B98058;--illo-skin-2:#9A6340;--illo-skin-3:#7E4F33;--illo-skin-4:#C99671;--illo-hair:#1B1622;--illo-hair-grey:#B3AEC0;--illo-white:#E6E4F0;--illo-face:#1B1622;--illo-line:rgba(5,5,14,.7);--illo-sun:#F1E6C4;
   --shadow:0 24px 50px -28px rgba(0,0,0,.7);color-scheme:dark}
+
+/* Background palettes (prototype only, pending the product owner's choice; spec 19). They change background, surface, wash and band variables only. */
+:root[data-palette="b"]{--bg:#EEF5FB;--surface:#FFFFFF;--surface-2:#E4EDF7;--line:#D2DEEC;--wash-1:#E8E3FA;--wash-2:#FAF0C8;--band:#1A2A5E;--band-2:#24387A;--band-line:#34498F;--band-ink-2:#CDD5F2}
+:root[data-palette="c"]{--bg:#EEF6EF;--surface:#FFFFFF;--surface-2:#E2EEE4;--line:#CFE1D3;--wash-1:#FBE3CC;--wash-2:#F8DDE2;--band:#163A2D;--band-2:#1F4A3A;--band-line:#2E5F4C;--band-ink-2:#C9E4D6}
+@media (prefers-color-scheme:dark){
+  :root[data-palette="b"]:not([data-theme="light"]){--bg:#0F1530;--surface:#172042;--surface-2:#1E2950;--line:#2A3866;--wash-1:#1E2452;--wash-2:#2A2A3C;--band:#080D24;--band-2:#131C3D;--band-line:#263463;--band-ink-2:#BCC6E8}
+  :root[data-palette="c"]:not([data-theme="light"]){--bg:#0F1A16;--surface:#16241F;--surface-2:#1D2F28;--line:#2A4037;--wash-1:#2A2219;--wash-2:#2B1C22;--band:#07110D;--band-2:#12221B;--band-line:#24382F;--band-ink-2:#B7D5C6}}
+:root[data-palette="b"][data-theme="dark"]{--bg:#0F1530;--surface:#172042;--surface-2:#1E2950;--line:#2A3866;--wash-1:#1E2452;--wash-2:#2A2A3C;--band:#080D24;--band-2:#131C3D;--band-line:#263463;--band-ink-2:#BCC6E8}
+:root[data-palette="c"][data-theme="dark"]{--bg:#0F1A16;--surface:#16241F;--surface-2:#1D2F28;--line:#2A4037;--wash-1:#2A2219;--wash-2:#2B1C22;--band:#07110D;--band-2:#12221B;--band-line:#24382F;--band-ink-2:#B7D5C6}
 
 *{box-sizing:border-box}
 html{scroll-behavior:smooth;scroll-padding-top:80px}
@@ -61,6 +72,12 @@ p{margin:0}
 .num{font-variant-numeric:tabular-nums}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 svg.ill{display:block;width:100%;height:auto;overflow:visible}
+.ill .night{opacity:0}
+:root[data-theme="dark"] .ill .night{opacity:1}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .ill .night{opacity:1}}
+.pal{height:36px;border-radius:999px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);font:700 13px var(--f-body);padding:0 8px;max-width:170px;cursor:pointer}
+.pal:focus-visible{outline:2.5px solid var(--coral);outline-offset:2px}
+.menu .pal-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 4px;font-weight:800;border-bottom:1px solid var(--line)}
 
 /* Buttons */
 .btn{display:inline-flex;align-items:center;gap:8px;height:48px;padding:0 22px;border-radius:999px;font:800 15.5px var(--f-body);text-decoration:none;border:1.5px solid transparent;cursor:pointer;transition:transform .15s,box-shadow .15s,background .2s;white-space:nowrap}
@@ -92,8 +109,9 @@ svg.ill{display:block;width:100%;height:auto;overflow:visible}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .theme-btn .moon{display:block}:root:not([data-theme="light"]) .theme-btn .sun{display:none}}
 .menu-btn{display:none}
 .menu{display:none}
-@media (max-width:900px){
+@media (max-width:1080px){
   .nav nav{display:none}
+  .nav .pal{display:none}
   .menu-btn{display:grid;margin-left:auto}
   .nav .theme-btn{display:none}
   .menu:not([hidden]){display:flex;flex-direction:column;position:absolute;left:0;right:0;top:68px;background:var(--bg);border-bottom:1px solid var(--line);padding:8px 16px 16px;box-shadow:var(--shadow)}
@@ -103,7 +121,7 @@ svg.ill{display:block;width:100%;height:auto;overflow:visible}
 @media (max-width:480px){.brand{font-size:19px;gap:7px}.brand .mk{width:30px;height:30px}.nav .wrap{gap:6px}.nav .btn{padding:0 13px;font-size:13.5px}}
 
 /* Hero */
-.hero{padding-block:48px 40px;position:relative}
+.hero{padding-block:48px 40px;position:relative;background:radial-gradient(640px 420px at 6% 8%,var(--wash-1),transparent 70%),radial-gradient(760px 560px at 86% 42%,var(--wash-2),transparent 70%)}
 .hero .wrap{display:grid;grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr);gap:32px;align-items:center}
 .hero h1{font-weight:900;font-size:clamp(44px,7vw,82px);line-height:.98;letter-spacing:-.04em;margin-top:16px}
 .hero h1 .serif{font-weight:600;color:var(--coral-ink);letter-spacing:-.03em}
@@ -150,7 +168,10 @@ section.sec{padding-block:96px}
 @media (max-width:820px){.sec-h{grid-template-columns:1fr}section.sec{padding-block:64px}}
 
 /* The circle, explained */
-.places{border-radius:28px;overflow:hidden;background:linear-gradient(180deg,color-mix(in srgb,var(--lilac) 10%,var(--surface)),color-mix(in srgb,var(--amber) 12%,var(--surface)));border:1px solid var(--line)}
+#circle{background:linear-gradient(180deg,var(--bg),var(--wash-1) 45%,var(--bg))}
+#school{background:linear-gradient(180deg,var(--bg),var(--wash-2) 40%,var(--bg))}
+.step .vig svg{overflow:hidden}
+.places{border-radius:28px;overflow:hidden;background:linear-gradient(180deg,color-mix(in srgb,var(--wash-1) 60%,var(--surface)),color-mix(in srgb,var(--wash-2) 70%,var(--surface)));border:1px solid var(--line)}
 .who-groups{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:28px;margin-top:36px}
 .who-groups h3{font-size:14px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2);display:flex;align-items:center;gap:10px;margin-bottom:14px}
 .who-groups h3 i{width:12px;height:12px;border-radius:50%;border:3px solid;display:inline-block}
@@ -221,7 +242,7 @@ section.sec{padding-block:96px}
 @media (max-width:900px){.lead{grid-template-columns:1fr}}
 
 /* Whole school */
-.campus{border-radius:28px;overflow:hidden;border:1px solid var(--line);background:linear-gradient(180deg,color-mix(in srgb,var(--teal) 10%,var(--surface)),color-mix(in srgb,var(--amber) 10%,var(--surface)))}
+.campus{border-radius:28px;overflow:hidden;border:1px solid var(--line);background:linear-gradient(180deg,color-mix(in srgb,var(--wash-1) 55%,var(--surface)),color-mix(in srgb,var(--wash-2) 55%,var(--surface)))}
 .mods{list-style:none;margin:20px 0 0;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
 .mods li{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:16px 18px;display:grid;grid-template-columns:30px minmax(0,1fr);gap:4px 12px;align-items:start;align-content:start}
 .mods .n{grid-row:span 2;width:30px;height:30px;border-radius:50%;background:var(--coral-ink);color:#fff;display:grid;place-items:center;font:900 14px var(--f-body)}
@@ -297,7 +318,8 @@ dialog.si::backdrop{background:rgba(19,20,42,.55);backdrop-filter:blur(3px)}
 <a class="skip" href="#main">Skip to main content</a>
 
 <!-- Shared illustration defs: the round portrait crop used by every person in the page -->
-<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><clipPath id="qClip" clipPathUnits="userSpaceOnUse"><circle cx="50" cy="50" r="46"/></clipPath></defs></svg>
+<!-- Storybook look: qInk gives each figure or object a wobbly, slightly uneven hand-drawn outline; qWob makes painted edges wobble; qGrain is a faint paper grain; qW-* are watercolour washes -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><clipPath id="qClip" clipPathUnits="userSpaceOnUse"><circle cx="50" cy="50" r="46"/></clipPath><filter id="qInk" x="-8%" y="-8%" width="116%" height="116%" color-interpolation-filters="sRGB"><feTurbulence type="fractalNoise" baseFrequency=".045" numOctaves="2" seed="4" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G" result="w"/><feMorphology in="w" operator="dilate" radius="1.5" result="d"/><feDisplacementMap in="d" in2="n" scale="2" xChannelSelector="G" yChannelSelector="B" result="d2"/><feFlood style="flood-color:var(--illo-line)" result="c"/><feComposite in="c" in2="d2" operator="in" result="o"/><feMerge><feMergeNode in="o"/><feMergeNode in="w"/></feMerge></filter><filter id="qWob" x="-4%" y="-6%" width="108%" height="112%"><feTurbulence type="fractalNoise" baseFrequency=".018" numOctaves="2" seed="9" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="7" xChannelSelector="R" yChannelSelector="G"/></filter><filter id="qGrain" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="1" seed="2" stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 .3  0 0 0 0 .2  0 0 0 0 .12  0 0 0 .55 -.14"/><feComposite in2="SourceAlpha" operator="in"/></filter><radialGradient id="qW-teal"><stop offset="0" style="stop-color:var(--teal);stop-opacity:.34"/><stop offset=".55" style="stop-color:var(--teal);stop-opacity:.15"/><stop offset="1" style="stop-color:var(--teal);stop-opacity:0"/></radialGradient><radialGradient id="qW-coral"><stop offset="0" style="stop-color:var(--coral);stop-opacity:.34"/><stop offset=".55" style="stop-color:var(--coral);stop-opacity:.15"/><stop offset="1" style="stop-color:var(--coral);stop-opacity:0"/></radialGradient><radialGradient id="qW-amber"><stop offset="0" style="stop-color:var(--amber);stop-opacity:.34"/><stop offset=".55" style="stop-color:var(--amber);stop-opacity:.15"/><stop offset="1" style="stop-color:var(--amber);stop-opacity:0"/></radialGradient><radialGradient id="qW-lilac"><stop offset="0" style="stop-color:var(--lilac);stop-opacity:.34"/><stop offset=".55" style="stop-color:var(--lilac);stop-opacity:.15"/><stop offset="1" style="stop-color:var(--lilac);stop-opacity:0"/></radialGradient><radialGradient id="qW-indigo-2"><stop offset="0" style="stop-color:var(--indigo-2);stop-opacity:.34"/><stop offset=".55" style="stop-color:var(--indigo-2);stop-opacity:.15"/><stop offset="1" style="stop-color:var(--indigo-2);stop-opacity:0"/></radialGradient></defs></svg>
 
 <header class="nav">
   <div class="wrap">
@@ -307,12 +329,14 @@ dialog.si::backdrop{background:rgba(19,20,42,.55);backdrop-filter:blur(3px)}
     </a>
     <nav aria-label="Sections"><a href="#circle">Quad Circle</a><a href="#day">A school day</a><a href="#ideas">Why Quad</a><a href="#school">Your whole school</a><a href="#trust">Privacy</a></nav>
     <button class="icon-btn menu-btn" type="button" aria-expanded="false" aria-controls="menu" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+    <select class="pal" data-palette-select aria-label="Background palette (prototype only)"><option value="a">Palette A · Morning paper</option><option value="b">Palette B · Sky blue</option><option value="c">Palette C · Garden</option></select>
     <button class="icon-btn theme-btn" type="button" data-theme-toggle aria-label="Switch to dark mode"><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></svg><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg></button>
     <button class="btn ghost" type="button" data-signin>Sign in</button><a class="btn primary" href="#demo">Book a demo</a>
   </div>
   <div class="menu" id="menu" hidden>
     <a href="#circle">Quad Circle</a><a href="#day">A school day</a><a href="#ideas">Why Quad</a><a href="#school">Your whole school</a><a href="#trust">Privacy</a>
     <button type="button" data-theme-toggle aria-label="Switch to dark mode">Dark mode</button>
+    <label class="pal-row">Palette <select class="pal" data-palette-select aria-label="Background palette (prototype only)"><option value="a">A · Morning paper</option><option value="b">B · Sky blue</option><option value="c">C · Garden</option></select></label>
   </div>
 </header>
 
@@ -484,7 +508,7 @@ dialog.si::backdrop{background:rgba(19,20,42,.55);backdrop-filter:blur(3px)}
   </section>
 
   <!-- 6 Your whole school -->
-  <section class="sec" id="school" aria-labelledby="schoolH" style="padding-top:0">
+  <section class="sec" id="school" aria-labelledby="schoolH">
     <div class="wrap">
       <div class="sec-h"><div><div class="eyebrow">Your whole school</div><h2 id="schoolH">Everything a school runs, <span class="serif">under one roof</span></h2></div><p>Turn on the modules you need. Year groups, terms and grading come from your curriculum, so Quad says Year 4, Grade 4 or Form 1 the way your school does.</p></div>
       <div class="campus"><svg class="ill" viewBox="0 0 1080 400" aria-hidden="true" data-ill="campus"></svg></div>
@@ -600,7 +624,7 @@ const Q = (() => {
     const mouthY = p.mous ? 47.4 : 45.6;
     let h = `<circle cx="34" cy="40" r="3.6" fill="${sk}"/><circle cx="66" cy="40" r="3.6" fill="${sk}"/><circle cx="50" cy="38" r="16.5" fill="${sk}"/>`
       + `<circle cx="44" cy="40" r="1.9" fill="${face}"/><circle cx="56" cy="40" r="1.9" fill="${face}"/>`
-      + `<circle cx="40" cy="45.2" r="2.6" fill="${v('coral')}" opacity=".22"/><circle cx="60" cy="45.2" r="2.6" fill="${v('coral')}" opacity=".22"/>`
+      + `<circle cx="40" cy="45.2" r="2.6" fill="${v('coral')}" opacity=".4"/><circle cx="60" cy="45.2" r="2.6" fill="${v('coral')}" opacity=".4"/>`
       + `<path d="M45.5 ${mouthY}Q50 ${mouthY + 3.8} 54.5 ${mouthY}" fill="none" stroke="${face}" stroke-width="1.7" stroke-linecap="round"/>` + front;
     if (p.mous) h += `<path d="M44.6 45.4Q50 42.6 55.4 45.4Q50 47 44.6 45.4Z" fill="${hr}"/>`;
     if (p.glasses) h += `<g fill="none" stroke="${face}" stroke-width="1.5"><circle cx="44" cy="40" r="4.6"/><circle cx="56" cy="40" r="4.6"/><path d="M48.6 40h2.8"/></g>`;
@@ -673,22 +697,23 @@ const Q = (() => {
   }
 
   // Place a 100-box drawing: (x, y) is its top centre, s its scale
-  const at = (x, y, s, inner, extra = '') => `<g transform="translate(${x} ${y}) scale(${s}) translate(-50 0)"${extra}>${inner}</g>`;
+  const ink = inner => `<g filter="url(#qInk)">${inner}</g>`;
+  const at = (x, y, s, inner, extra = '') => ink(`<g transform="translate(${x} ${y}) scale(${s}) translate(-50 0)"${extra}>${inner}</g>`);
   // Round portrait. ring/bg default to the school (indigo) or home (amber) side
   const PORTRAIT_BG = {jaya: 'lilac', perera: 'indigo-2', fernando: 'teal', herath: 'coral', dias: 'teal', silva: 'amber', sunethra: 'amber', dilhani: 'coral', ruwan: 'teal', kamala: 'amber', sunil: 'lilac', amaya: 'coral', kavindu: 'indigo-2', prishan: 'lilac', mendis: 'teal', nethmi: 'teal', rehan: 'amber'};
   function portrait(k, o = {}) {
     const bg = o.bg || tint(PORTRAIT_BG[k] || 'lilac', 26), ring = o.ring || v('surface');
     return `<circle cx="50" cy="50" r="50" fill="${ring}"/><circle cx="50" cy="50" r="46" fill="${bg}"/><g clip-path="url(#qClip)"><g transform="translate(-7 -1) scale(1.14)">${bust(k)}</g></g>`;
   }
-  const med = (k, x, y, r, o) => `<g transform="translate(${x - r} ${y - r}) scale(${r / 50})">${portrait(k, o)}</g>`;
+  const med = (k, x, y, r, o) => ink(`<g transform="translate(${x - r} ${y - r}) scale(${r / 50})">${portrait(k, o)}</g>`);
 
   // Small things
   const heart = (x, y, s, c = v('coral'), extra = '') => `<path transform="translate(${x} ${y}) scale(${s})" d="M0 -3C0 -9 -9 -10 -9 -3.5C-9 2 0 8 0 8S9 2 9 -3.5C9 -10 0 -9 0 -3Z" fill="${c}"${extra}/>`;
   const star = (x, y, r, c = v('amber'), extra = '') => `<path d="M${x} ${y - r}Q${x} ${y} ${x + r} ${y}Q${x} ${y} ${x} ${y + r}Q${x} ${y} ${x - r} ${y}Q${x} ${y} ${x} ${y - r}Z" fill="${c}"${extra}/>`;
-  const palm = (x, y, s, lean = 1) => `<g transform="translate(${x} ${y}) scale(${s * lean} ${s})"><path d="M0 0C-2 -40 4 -80 14 -112" fill="none" stroke="${mx(v('amber'), 55, '#6b3f1f')}" stroke-width="7" stroke-linecap="round"/>`
-    + `<g fill="${v('teal')}"><path d="M14 -112C-6 -122 -30 -116 -44 -98C-26 -106 -6 -108 14 -112Z"/><path d="M14 -112C34 -128 58 -124 70 -106C50 -112 32 -112 14 -112Z"/><path d="M14 -112C4 -136 18 -152 34 -156C26 -140 20 -126 14 -112Z"/><path d="M14 -112C-10 -112 -24 -96 -26 -78C-12 -94 0 -104 14 -112Z" opacity=".75"/><path d="M14 -112C36 -110 50 -92 50 -74C38 -92 26 -104 14 -112Z" opacity=".75"/></g><circle cx="16" cy="-108" r="4" fill="${mx(v('amber'), 55, '#6b3f1f')}"/></g>`;
-  const bush = (x, y, s, c = v('teal')) => `<g transform="translate(${x} ${y}) scale(${s})" fill="${c}"><circle cx="-14" cy="-8" r="12"/><circle cx="2" cy="-14" r="15"/><circle cx="17" cy="-7" r="11"/><rect x="-26" y="-10" width="54" height="10" rx="5"/></g>`;
-  const cloud = (x, y, s, op = 1, c = mx('#fff', 70, v('surface'))) => `<g transform="translate(${x} ${y}) scale(${s})" fill="${c}" opacity="${op}"><ellipse cx="0" cy="10" rx="50" ry="14"/><circle cx="-16" cy="2" r="17"/><circle cx="10" cy="-4" r="22"/><circle cx="34" cy="5" r="13"/></g>`;
+  const palm = (x, y, s, lean = 1) => `<g filter="url(#qInk)"><g transform="translate(${x} ${y}) scale(${s * lean} ${s})"><path d="M0 0C-2 -40 4 -80 14 -112" fill="none" stroke="${mx(v('amber'), 55, '#6b3f1f')}" stroke-width="7" stroke-linecap="round"/>`
+    + `<g fill="${v('teal')}"><path d="M14 -112C-6 -122 -30 -116 -44 -98C-26 -106 -6 -108 14 -112Z"/><path d="M14 -112C34 -128 58 -124 70 -106C50 -112 32 -112 14 -112Z"/><path d="M14 -112C4 -136 18 -152 34 -156C26 -140 20 -126 14 -112Z"/><path d="M14 -112C-10 -112 -24 -96 -26 -78C-12 -94 0 -104 14 -112Z" opacity=".75"/><path d="M14 -112C36 -110 50 -92 50 -74C38 -92 26 -104 14 -112Z" opacity=".75"/></g><circle cx="16" cy="-108" r="4" fill="${mx(v('amber'), 55, '#6b3f1f')}"/></g></g>`;
+  const bush = (x, y, s, c = v('teal')) => `<g filter="url(#qInk)"><g transform="translate(${x} ${y}) scale(${s})" fill="${c}"><circle cx="-14" cy="-8" r="12"/><circle cx="2" cy="-14" r="15"/><circle cx="17" cy="-7" r="11"/><rect x="-26" y="-10" width="54" height="10" rx="5"/></g></g>`;
+  const cloud = (x, y, s, op = 1, c = mx('#fff', 70, v('surface'))) => `<g filter="url(#qWob)"><g transform="translate(${x} ${y}) scale(${s})" fill="${c}" opacity="${op}"><ellipse cx="0" cy="10" rx="50" ry="14"/><circle cx="-16" cy="2" r="17"/><circle cx="10" cy="-4" r="22"/><circle cx="34" cy="5" r="13"/></g></g>`;
   const ring = (x, y, r, w, segs, base) => { // the day ring: [fromDeg, toDeg, colour, opacity]
     const pt = d => { const a = (d - 90) * Math.PI / 180; return [x + r * Math.cos(a), y + r * Math.sin(a)]; };
     return `<circle cx="${x}" cy="${y}" r="${r}" fill="none" stroke="${base}" stroke-width="${w}"/>` + segs.map(([f, t, c, o = 1]) => { const [x1, y1] = pt(f), [x2, y2] = pt(t); return `<path d="M${x1} ${y1}A${r} ${r} 0 ${t - f > 180 ? 1 : 0} 1 ${x2} ${y2}" fill="none" stroke="${c}" stroke-width="${w}" stroke-linecap="round" opacity="${o}"/>`; }).join('');
@@ -707,19 +732,34 @@ const Q = (() => {
       + `<circle cx="0" cy="-238" r="30" fill="${v('illo-white')}" stroke="${v('indigo-2')}" stroke-width="5"/><path d="M0 -238V-258M0 -238L13 -230" stroke="${v('indigo')}" stroke-width="4" stroke-linecap="round"/>`
       + `<path d="M-34 0V-76A34 34 0 0 1 34 -76V0Z" fill="${deep(v('indigo-2'))}"/><path d="M0 0V-108" stroke="${wall2}" stroke-width="3"/>`
       + `<path d="M0 -336V-388" stroke="${v('ink-3')}" stroke-width="4" stroke-linecap="round"/><path class="flag" d="M2 -386C16 -392 26 -380 40 -386V-362C26 -356 16 -368 2 -362Z" fill="${o.flag || v('lilac')}"/>`;
-    return `<g transform="translate(${x} ${y}) scale(${s})">${g}${o.extra || ''}</g>`;
+    return `<g filter="url(#qInk)"><g transform="translate(${x} ${y}) scale(${s})">${g}${o.extra || ''}</g></g>`;
   }
   // A home with a tiled roof. Origin at ground-centre, ~200 wide.
   function home(x, y, s, o = {}) {
     const wall = tint('amber', 24, v('illo-white')), roof = o.roof || v('amber');
     const lit = o.lit === false ? tint('indigo-2', 30) : v('amber');
-    return `<g transform="translate(${x} ${y}) scale(${s})"><rect x="-90" y="-110" width="180" height="110" rx="6" fill="${wall}"/><path d="M-108 -104L0 -176L108 -104Z" fill="${roof}"/><path d="M-92 -116H92M-68 -134H68M-44 -150H44" stroke="${deep(roof)}" stroke-width="2" opacity=".4"/>`
+    return `<g filter="url(#qInk)"><g transform="translate(${x} ${y}) scale(${s})"><rect x="-90" y="-110" width="180" height="110" rx="6" fill="${wall}"/><path d="M-108 -104L0 -176L108 -104Z" fill="${roof}"/><path d="M-92 -116H92M-68 -134H68M-44 -150H44" stroke="${deep(roof)}" stroke-width="2" opacity=".4"/>`
       + `<rect x="-22" y="-62" width="44" height="62" rx="5" fill="${tint('coral', 70, '#1C1B2E')}"/><circle cx="12" cy="-30" r="3" fill="${v('amber')}"/>`
       + `<rect x="-74" y="-80" width="38" height="34" rx="5" fill="${lit}"/><rect x="36" y="-80" width="38" height="34" rx="5" fill="${lit}"/>`
       + (o.lit === false ? '' : `<rect x="-74" y="-80" width="38" height="34" rx="5" fill="#fff" opacity=".18"/>`)
-      + `</g>`;
+      + `</g></g>`;
   }
-  const hills = (W, H, y, a, b) => `<path d="M0 ${y + 10}C${W * .18} ${y - 14} ${W * .36} ${y - 6} ${W * .52} ${y - 18}S${W * .82} ${y - 30} ${W} ${y - 12}V${H}H0Z" fill="${a}"/><path d="M0 ${y + 34}C${W * .22} ${y + 16} ${W * .46} ${y + 30} ${W * .66} ${y + 18}S${W * .9} ${y + 12} ${W} ${y + 22}V${H}H0Z" fill="${b}"/>`;
+  const hills = (W, H, y, a, b) => `<g filter="url(#qWob)"><path d="M0 ${y + 10}C${W * .18} ${y - 14} ${W * .36} ${y - 6} ${W * .52} ${y - 18}S${W * .82} ${y - 30} ${W} ${y - 12}V${H}H0Z" fill="${a}"/><path d="M0 ${y + 34}C${W * .22} ${y + 16} ${W * .46} ${y + 30} ${W * .66} ${y + 18}S${W * .9} ${y + 12} ${W} ${y + 22}V${H}H0Z" fill="${b}"/></g>`;
+
+  // Storybook details
+  const wood = mx(v('amber'), 55, '#6b3f1f');
+  const wash = (cx, cy, rx, ry, c) => `<ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="url(#qW-${c})"/>`;
+  const birds = (x, y, s = 1) => `<g transform="translate(${x} ${y}) scale(${s})" fill="none" stroke="${v('ink-3')}" stroke-width="2.2" stroke-linecap="round"><path d="M0 0q6-6 12 0q6-6 12 0"/><path d="M30 -14q5-5 10 0q5-5 10 0"/><path d="M6 -28q4-4 8 0q4-4 8 0"/></g>`;
+  const kite = (x, y, s = 1, c = v('coral')) => `<g class="bob d2"><path transform="translate(${x} ${y}) scale(${s})" d="M0 26q-12 14 4 26t-4 30" fill="none" stroke="${v('ink-3')}" stroke-width="1.8"/>`
+    + `<g transform="translate(${x} ${y}) scale(${s})" fill="${v('amber')}"><path d="M-2 40l-7-4v8ZM-2 40l7-4v8Z"/><path d="M2 62l-7-4v8ZM2 62l7-4v8Z" fill="${v('teal')}"/></g>`
+    + ink(`<g transform="translate(${x} ${y}) scale(${s})"><path d="M0 -22L16 0L0 26L-16 0Z" fill="${c}"/><path d="M0 -22L16 0H0Z" fill="#fff" opacity=".3"/><path d="M0 -22V26M-16 0H16" stroke="${v('illo-white')}" stroke-width="1.4" opacity=".7"/></g>`) + `</g>`;
+  const tuktuk = (x, y, s = 1) => ink(`<g transform="translate(${x} ${y}) scale(${s})"><path d="M-40 -34Q-40 -60 -14 -60H34Q50 -60 54 -42L57 -34Z" fill="${deep(v('teal'))}"/><path d="M-44 -34H60Q66 -34 66 -26V-10H-44Z" fill="${v('coral')}"/><path d="M28 -54H44L51 -36H28Z" fill="${tint('indigo-2', 30, v('illo-white'))}"/><path d="M-30 -54H14V-36H-30Z" fill="${tint('amber', 30, v('illo-white'))}"/><path d="M-44 -18H66" stroke="${v('amber')}" stroke-width="3"/><circle cx="-24" cy="-6" r="9" fill="${v('illo-face')}"/><circle cx="-24" cy="-6" r="3.5" fill="${v('ink-3')}"/><circle cx="50" cy="-6" r="9" fill="${v('illo-face')}"/><circle cx="50" cy="-6" r="3.5" fill="${v('ink-3')}"/><circle cx="64" cy="-28" r="3" fill="${v('amber')}"/></g>`);
+  const poya = (x, y, s = 1) => `<path d="M${x} ${y}V${y - 92 * s}" stroke="${v('ink-3')}" stroke-width="${3 * s}" stroke-linecap="round"/>` + ink(`<g transform="translate(${x + 2 * s} ${y - 90 * s}) scale(${s})">${[v('indigo-2'), v('amber'), v('coral'), v('illo-white'), mx(v('coral'), 50, v('amber'))].map((c, i) => `<rect x="${i * 9}" y="${i % 2}" width="9.4" height="30" fill="${c}"/>`).join('')}</g>`);
+  const tea = (x, y, w, h, c = tint('teal', 50), r = deep(v('teal'))) => `<g filter="url(#qWob)"><path d="M${x} ${y}Q${x + w / 2} ${y - h * 2} ${x + w} ${y}Z" fill="${c}"/>${[1, 2, 3, 4].map(k => `<path d="M${x + k * w * .1} ${y - 2}Q${x + w / 2} ${y - h * 2 + k * h * .42} ${x + w - k * w * .1} ${y - 2}" fill="none" stroke="${r}" stroke-width="4" stroke-dasharray="2 8" stroke-linecap="round" opacity=".5"/>`).join('')}</g>`;
+  const tree = (x, y, s = 1, c = v('teal')) => ink(`<g transform="translate(${x} ${y}) scale(${s})"><path d="M-5 0V-34h10V0Z" fill="${wood}"/><circle cy="-50" r="22" fill="${c}"/><circle cx="-16" cy="-38" r="15" fill="${c}"/><circle cx="16" cy="-40" r="16" fill="${c}"/><circle cx="-6" cy="-58" r="8" fill="#fff" opacity=".18"/></g>`);
+  const books = (x, y, s = 1) => ink(`<g transform="translate(${x} ${y}) scale(${s})"><rect x="-18" y="-10" width="36" height="10" rx="2" fill="${v('teal')}"/><rect x="-15" y="-19" width="32" height="9" rx="2" fill="${v('coral')}"/><rect x="-17" y="-27" width="30" height="8" rx="2" fill="${v('amber')}"/><path d="M-12 -5h24M-9 -14h20" stroke="${v('illo-white')}" stroke-width="1.2" opacity=".7"/></g>`);
+  const night = pts => `<g class="night">${pts.map(([x, y, r]) => star(x, y, r, '#fff', ' opacity=".85"')).join('')}</g>`;
+  const sun = (x, y, r) => wash(x, y, r * 2.8, r * 2.8, 'amber') + `<circle cx="${x}" cy="${y}" r="${r}" fill="var(--illo-sun)" filter="url(#qWob)"/>`;
 
   /* ── Scenes ── */
   const D = {};
@@ -735,7 +775,7 @@ const Q = (() => {
   D.hero = () => {
     let s = `<defs><radialGradient id="hg" cx="50%" cy="50%" r="50%"><stop offset="0" style="stop-color:${tint('coral', 16)}"/><stop offset=".45" style="stop-color:${tint('amber', 14)}"/><stop offset="1" style="stop-color:${tint('lilac', 14)}"/></radialGradient>`
       + `<path id="arcS" d="M${C - 290} ${C}A290 290 0 0 1 ${C + 290} ${C}"/><path id="arcF" d="M${C - 104} ${C}A104 104 0 0 1 ${C + 104} ${C}"/></defs>`
-      + `<circle cx="${C}" cy="${C}" r="306" fill="url(#hg)"/>`
+      + `<circle cx="${C}" cy="${C}" r="306" fill="url(#hg)" filter="url(#qWob)"/>` + wash(210, 210, 230, 200, 'amber') + wash(450, 450, 230, 200, 'teal') + wash(470, 170, 160, 140, 'lilac') + `<circle cx="${C}" cy="${C}" r="300" fill="#000" filter="url(#qGrain)" style="mix-blend-mode:multiply" opacity=".22"/>` + kite(64, 92, .95, v('teal')) + birds(528, 34, .9) + night([[60, 560, 4], [590, 600, 3], [600, 520, 4]])
       + `<text class="arc"><textPath href="#arcS" startOffset="50%" text-anchor="middle">AT SCHOOL</textPath></text>`
       + `<circle cx="${C}" cy="${C}" r="${RS}" fill="none" stroke="${tint('indigo-2', 45, 'transparent')}" stroke-width="2" stroke-dasharray="3 9" stroke-linecap="round"/>`
       + `<circle cx="${C}" cy="${C}" r="${RF}" fill="none" stroke="${tint('amber', 75, 'transparent')}" stroke-width="2.5" stroke-dasharray="3 9" stroke-linecap="round"/>`;
@@ -755,12 +795,12 @@ const Q = (() => {
   // The circle explained: school on the left, home on the right, Amaya on the path between, the circle drawn around them all
   D.places = () => {
     const W = 1080, H = 360;
-    let s = `<circle cx="930" cy="70" r="34" fill="${v('amber')}" opacity=".85"/>${cloud(200, 60, .9, .9)}${cloud(720, 52, .7, .8)}`
+    let s = wash(160, 80, 260, 140, 'lilac') + wash(900, 120, 260, 160, 'amber') + sun(930, 70, 32) + night([[120, 40, 4], [300, 30, 3], [620, 40, 4], [800, 90, 3], [1040, 40, 4]]) + `${cloud(200, 60, .9, .9)}${cloud(720, 52, .7, .8)}` + birds(600, 46) + tea(560, 262, 330, 70)
       + hills(W, H, 286, tint('teal', 26), tint('teal', 40))
       + `<path d="M300 340C420 300 470 330 540 312S680 300 790 336" fill="none" stroke="${tint('amber', 50)}" stroke-width="26" stroke-linecap="round"/>`
       + `<path d="M300 340C420 300 470 330 540 312S680 300 790 336" fill="none" stroke="${v('surface')}" stroke-width="3" stroke-dasharray="10 12" opacity=".8"/>`
       + school(220, 300, .52, {flag: v('coral')}) + palm(54, 300, .8) + bush(380, 300, .9)
-      + home(880, 300, .9, {roof: v('coral')}) + palm(1010, 304, .78, -1) + bush(770, 300, .8, tint('teal', 70));
+      + home(880, 300, .9, {roof: v('coral')}) + poya(782, 300, .8) + palm(1010, 304, .78, -1) + tree(110, 300, .9) + tuktuk(300, 352, .55) + bush(770, 300, .8, tint('teal', 70));
     // the circle around both places
     s += `<ellipse cx="545" cy="214" rx="510" ry="150" fill="none" stroke="${v('coral')}" stroke-width="3" stroke-dasharray="2 12" stroke-linecap="round" opacity=".75"/>`;
     // school people at the gate, family at the door
@@ -768,14 +808,14 @@ const Q = (() => {
       + at(746, 172, .76, full('dilhani', {L: 'wave'})) + at(690, 192, .66, full('kamala'));
     // Amaya walking the path, sparks between the two sides
     s += at(560, 186, .82, full('amaya', {bag: v('amber'), R: 'wave'}));
-    s += `<g class="bob">${heart(520, 150, 1.1)}</g><g class="bob d2">${heart(610, 136, .9, v('amber'))}</g><g class="bob d3">${star(470, 120, 9, v('lilac'))}</g><g class="bob">${star(650, 166, 7, v('teal'))}</g>`;
+    s += kite(470, 60, .9, v('coral')) + `<g class="bob">${heart(520, 150, 1.1)}</g><g class="bob d2">${heart(610, 136, .9, v('amber'))}</g><g class="bob d3">${star(470, 120, 9, v('lilac'))}</g><g class="bob">${star(650, 166, 7, v('teal'))}</g>`;
     return s;
   };
 
   // Band vignettes: 400 × 200 panels on the band colour
-  const panel = (inner, sky) => `<rect width="400" height="200" rx="20" fill="${sky || 'var(--band-2)'}"/><g clip-path="inset(0 round 20px)">${inner}</g>`;
+  const panel = (inner, sky) => `<rect width="400" height="200" rx="20" fill="${sky || 'var(--band-2)'}"/><g clip-path="inset(0 round 20px)">${wash(70, 30, 190, 120, 'lilac')}${wash(350, 190, 210, 100, 'teal')}${inner}</g>`;
   const bandHills = `<path d="M0 168C80 150 150 162 220 152S340 138 400 148V200H0Z" fill="${mx(v('teal'), 34, 'var(--band-2)')}"/><path d="M0 186C100 172 200 184 300 176S380 172 400 176V200H0Z" fill="${mx(v('teal'), 52, 'var(--band-2)')}"/>`;
-  D.vGate = () => panel(`<circle cx="330" cy="54" r="24" fill="${v('coral')}" opacity=".9"/><circle cx="330" cy="54" r="40" fill="${v('coral')}" opacity=".15"/>${bandHills}`
+  D.vGate = () => panel(`${wash(330, 54, 80, 70, 'coral')}<circle cx="330" cy="54" r="24" fill="${v('coral')}" opacity=".9" filter="url(#qWob)"/>${birds(230, 40, .8)}${bandHills}${tree(370, 168, .7)}`
     + `<rect x="40" y="58" width="22" height="118" rx="4" fill="${mx(v('amber'), 30, v('illo-white'))}"/><rect x="164" y="58" width="22" height="118" rx="4" fill="${mx(v('amber'), 30, v('illo-white'))}"/><path d="M40 70Q113 22 186 70" fill="none" stroke="${v('coral')}" stroke-width="10" stroke-linecap="round"/>`
     + `<g stroke="${mx(v('ink-3'), 70, 'var(--band-2)')}" stroke-width="3">${[78, 98, 128, 148].map(x => `<path d="M${x} 104V176"/>`).join('')}<path d="M62 112H164"/></g>`
     + at(116, 56, .8, full('amaya', {bag: v('amber'), R: 'wave'}))
@@ -790,7 +830,7 @@ const Q = (() => {
     + `<path d="M314 108C324 70 350 54 370 42" fill="none" stroke="${v('coral')}" stroke-width="2" stroke-dasharray="3 6" stroke-linecap="round"/>`
     + `<g class="bob">${heart(372, 36, 1.3)}</g>${star(346, 74, 6, v('amber'))}`);
   D.vGrandma = () => panel(`<rect x="230" y="22" width="140" height="96" rx="8" fill="${mx(v('lilac'), 20, 'var(--band-2)')}"/><path d="M230 96C260 70 290 82 310 66S350 62 370 74V118H230Z" fill="${mx(v('teal'), 55, 'var(--band-2)')}"/><path d="M230 108C270 92 320 104 370 92V118H230Z" fill="${mx(v('teal'), 75, 'var(--band-2)')}"/><circle cx="342" cy="44" r="10" fill="${v('amber')}"/><rect x="230" y="22" width="140" height="96" rx="8" fill="none" stroke="${mx(v('amber'), 55, '#6b3f1f')}" stroke-width="6"/><path d="M300 22V118" stroke="${mx(v('amber'), 55, '#6b3f1f')}" stroke-width="4"/>`
-    + `<rect x="0" y="170" width="400" height="30" fill="${mx(v('band-line'), 80, 'var(--band-2)')}"/>`
+    + tea(232, 118, 136, 22, mx(v('teal'), 70, 'var(--band-2)')) + `<rect x="0" y="170" width="400" height="30" fill="${mx(v('band-line'), 80, 'var(--band-2)')}"/>`
     + `<path d="M58 70Q58 48 80 48H172Q194 48 194 70V170H58Z" fill="${mx(v('coral'), 55, 'var(--band-2)')}"/>`
     + at(126, 30, 1.3, bust('kamala') + arm(P.kamala, 'R', 'phone')) + phoneAt(143, 148, 1.2)
     + `<rect x="46" y="118" width="26" height="62" rx="12" fill="${v('coral')}"/><rect x="180" y="118" width="26" height="62" rx="12" fill="${v('coral')}"/><rect x="200" y="140" width="46" height="8" rx="4" fill="${mx(v('amber'), 55, '#6b3f1f')}"/><path d="M212 148v30M234 148v30" stroke="${mx(v('amber'), 55, '#6b3f1f')}" stroke-width="4"/><path d="M212 124h20v10q0 6-6 6h-8q-6 0-6-6Z" fill="${v('illo-white')}"/><path d="M232 128q6 0 6 4t-6 4" fill="none" stroke="${v('illo-white')}" stroke-width="2.5"/><path d="M218 118q-3-6 0-10M226 118q-3-6 0-10" stroke="${v('band-ink-2')}" stroke-width="2" fill="none" stroke-linecap="round" opacity=".6"/>`
@@ -807,7 +847,7 @@ const Q = (() => {
     + at(84, 46, 1, bust('dilhani') + arm(P.dilhani, 'R', 'hold')) + at(176, 66, .92, bust('amaya') + arm(P.amaya, 'L', 'write', 1))
     + `<rect x="0" y="146" width="400" height="54" fill="${mx(v('amber'), 45, '#4a2c16')}"/><rect x="0" y="146" width="400" height="6" fill="#000" opacity=".12"/>`
     + `<g transform="rotate(-6 150 150)"><rect x="104" y="128" width="92" height="56" rx="5" fill="${v('illo-white')}"/><rect x="170" y="134" width="18" height="20" rx="2" fill="${v('coral')}" opacity=".85"/><path d="M114 142h40M114 152h46M114 162h34" stroke="${v('ink-3')}" stroke-width="2.5" stroke-linecap="round" opacity=".6"/><path d="M150 132V178" stroke="${v('ink-3')}" stroke-width="1" opacity=".4"/></g>`
-    + `<g transform="translate(320 160)"><circle r="18" fill="${v('teal')}"/><path d="M-8 0l5 5 10-11" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></g>`);
+    + books(360, 146, .9) + `<g transform="translate(320 160)"><circle r="18" fill="${v('teal')}"/><path d="M-8 0l5 5 10-11" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></g>`);
   D.vQuiet = () => panel(`<rect x="24" y="22" width="130" height="96" rx="8" fill="${mx(v('indigo'), 20, '#0b0c1e')}"/><circle cx="118" cy="52" r="16" fill="${mx('#fff', 85, v('lilac'))}"/><circle cx="126" cy="46" r="15" fill="${mx(v('indigo'), 20, '#0b0c1e')}"/>${[[44, 40], [70, 60], [56, 96], [96, 90], [140, 100]].map(([x, y], i) => star(x, y, 3 + (i % 2) * 1.5, '#fff', ' opacity=".8"')).join('')}<rect x="24" y="22" width="130" height="96" rx="8" fill="none" stroke="${mx(v('amber'), 55, '#6b3f1f')}" stroke-width="5"/>`
     + `<rect x="0" y="168" width="400" height="32" fill="${mx(v('band-line'), 80, 'var(--band-2)')}"/>`
     + `<path d="M150 124Q150 110 164 110H300Q314 110 314 124V176H150Z" fill="${mx(v('teal'), 55, 'var(--band-2)')}"/>`
@@ -825,17 +865,17 @@ const Q = (() => {
     + `<g class="bob">${star(200, 52, 9, v('amber'))}</g><g class="bob d2">${star(164, 68, 6, v('teal'))}</g><g class="bob d3">${star(238, 68, 6, v('lilac'))}</g>`);
 
   // Four ideas: 520 × 260
-  const room = (bg, floor) => `<rect width="520" height="260" fill="${bg}"/><rect y="206" width="520" height="54" fill="${floor}"/>`;
+  const room = (bg, floor, w1 = 'amber', w2 = 'lilac') => `<rect width="520" height="260" fill="${bg}"/>${wash(110, 70, 240, 150, w1)}${wash(440, 120, 220, 160, w2)}<g filter="url(#qWob)"><rect x="-20" y="206" width="560" height="70" fill="${floor}"/></g>`;
   D.story = () => room(tint('lilac', 12), tint('lilac', 22))
     + `<rect x="40" y="30" width="150" height="110" rx="10" fill="${tint('amber', 22)}"/><circle cx="116" cy="118" r="30" fill="${v('coral')}" opacity=".7"/><path d="M40 118C80 100 120 112 190 96V140H40Z" fill="${tint('teal', 50)}"/><rect x="40" y="30" width="150" height="110" rx="10" fill="none" stroke="${v('surface')}" stroke-width="6"/><path d="M115 30V140" stroke="${v('surface')}" stroke-width="4"/>`
-    + at(170, 92, 1.18, bust('prishan') + arm(P.prishan, 'R', 'hold'))
+    + birds(70, 60, .6) + at(170, 92, 1.18, bust('prishan') + arm(P.prishan, 'R', 'hold'))
     + `<rect x="20" y="196" width="480" height="14" rx="7" fill="${mx(v('amber'), 50, '#6b3f1f')}"/>`
     + `<g transform="translate(70 170)"><path d="M0 0h30v18q0 8-8 8h-14q-8 0-8-8Z" fill="${v('illo-white')}" stroke="${v('ink-3')}" stroke-width="1.2"/><path d="M30 4q9 0 9 7t-9 7" fill="none" stroke="${v('ink-3')}" stroke-width="2"/><path d="M9-6q-4-7 0-13M19-6q-4-7 0-13" fill="none" stroke="${v('ink-3')}" stroke-width="2" stroke-linecap="round" opacity=".5"/></g>`
     + `<g transform="translate(276 34) rotate(2)"><rect width="206" height="160" rx="14" fill="${v('surface')}" stroke="${v('line')}" stroke-width="2"/>`
     + `<g transform="translate(26 30)"><circle r="12" fill="${tint('amber', 40)}"/><path d="M-7 4h14M-4 4a4 4 0 0 1 8 0" fill="none" stroke="${v('amber')}" stroke-width="2.4" stroke-linecap="round"/></g><rect x="48" y="22" width="116" height="10" rx="5" fill="${v('ink-2')}" opacity=".85"/><rect x="48" y="38" width="84" height="7" rx="3.5" fill="${v('ink-3')}" opacity=".45"/>`
     + [[v('teal'), 140], [v('amber'), 120], [v('coral'), 130]].map(([c, w], i) => `<circle cx="28" cy="${76 + i * 26}" r="7" fill="${c}"/><rect x="44" y="${71 + i * 26}" width="${w}" height="9" rx="4.5" fill="${v('ink-3')}" opacity=".35"/>`).join('')
     + `</g><g class="bob">${star(470, 40, 10, v('amber'))}</g>`;
-  D.warn = () => room(tint('coral', 8), tint('coral', 16))
+  D.warn = () => room(tint('coral', 8), tint('coral', 16), 'coral', 'amber')
     + `<rect x="40" y="26" width="220" height="106" rx="8" fill="${mx(v('teal'), 40, '#16302F')}"/><rect x="40" y="26" width="220" height="106" rx="8" fill="none" stroke="${mx(v('amber'), 55, '#6b3f1f')}" stroke-width="6"/>`
     + `<path d="M60 60L100 56L140 62L170 82L196 104" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity=".85"/><path d="M196 104L236 66" fill="none" stroke="${v('amber')}" stroke-width="3" stroke-dasharray="4 7" stroke-linecap="round"/><circle cx="196" cy="104" r="6" fill="${v('coral')}"/><circle cx="236" cy="66" r="5" fill="${v('amber')}"/>`
     + at(86, 132, .78, bust('nethmi')) + at(176, 132, .78, bust('kavindu')) + at(266, 132, .78, bust('rehan'))
@@ -844,7 +884,7 @@ const Q = (() => {
     + at(400, 46, 1.04, full('mendis', {L: 'reach'}))
     + `<g transform="translate(330 64)"><path d="M-30 -22H30Q38 -22 38 -14V10Q38 18 30 18H-6L-18 30V18H-30Q-38 18 -38 10V-14Q-38 -22 -30 -22Z" fill="${v('surface')}" stroke="${v('line')}" stroke-width="2"/>${heart(0, -2, 1.3, v('coral'))}</g>`
     + `<path d="M232 150Q290 120 344 150" fill="none" stroke="${v('coral')}" stroke-width="2" stroke-dasharray="3 7" stroke-linecap="round"/>`;
-  D.ask = () => room(tint('teal', 8), tint('teal', 18))
+  D.ask = () => room(tint('teal', 8), tint('teal', 18), 'teal', 'lilac') + books(60, 214, 1.1)
     + at(110, 64, 1.3, bust('fernando') + arm(P.fernando, 'R', 'phone')) + phoneAt(124, 180, 1.3)
     + `<rect x="20" y="214" width="200" height="12" rx="6" fill="${mx(v('amber'), 50, '#6b3f1f')}"/>`
     + `<g transform="translate(190 52)"><path d="M-36 -26H36Q46 -26 46 -16V12Q46 22 36 22H-14L-30 36L-26 22H-36Q-46 22 -46 12V-16Q-46 -26 -36 -26Z" fill="${v('surface')}" stroke="${v('line')}" stroke-width="2"/><text x="0" y="8" text-anchor="middle" style="font:900 30px var(--f-display);fill:${v('teal')}">?</text></g>`
@@ -860,7 +900,7 @@ const Q = (() => {
       palm: `<path d="M0 14C0 4 2-4 6-10" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M6-10C-2-14-10-10-14-4C-6-8 0-9 6-10ZM6-10C14-16 22-12 24-6C16-10 10-10 6-10ZM6-10C4-18 10-22 14-22C10-16 8-13 6-10Z" fill="#fff"/>`,
       book: `<path d="M-14-8Q-7-12 0-8Q7-12 14-8V12Q7 8 0 12Q-7 8-14 12Z" fill="#fff"/><path d="M0-8V12" stroke="${v('indigo-2')}" stroke-width="1.5"/>`
     };
-    let s = room(tint('amber', 10), tint('amber', 20));
+    let s = room(tint('amber', 10), tint('amber', 20), 'coral', 'teal') + birds(40, 40, .8) + birds(430, 30, .7);
     s += `<g transform="translate(260 30)"><circle r="22" fill="${v('surface')}" stroke="${v('line')}" stroke-width="2"/><g transform="translate(-14 -14) scale(.44)"><rect x="9" y="9" width="21" height="21" rx="7" fill="var(--indigo)"/><rect x="34" y="9" width="21" height="21" rx="7" fill="var(--lilac)"/><rect x="9" y="34" width="21" height="21" rx="7" fill="var(--lilac)"/><rect x="34" y="34" width="21" height="21" rx="7" fill="var(--coral)"/></g></g>`;
     crests.forEach(([x, c, e]) => {
       s += `<path d="M260 52Q${(260 + x) / 2} 56 ${x} 62" fill="none" stroke="${v('ink-3')}" stroke-width="1.6" stroke-dasharray="3 6" stroke-linecap="round" opacity=".7"/>`;
@@ -873,7 +913,7 @@ const Q = (() => {
 
   // Leaders: a village of families; most windows lit with good news, two still waiting
   D.village = () => {
-    let s = `<circle cx="490" cy="40" r="18" fill="${v('amber')}" opacity=".8"/>${hills(560, 190, 150, tint('teal', 24), tint('teal', 38))}`;
+    let s = sun(490, 40, 18) + night([[60, 30, 3], [200, 20, 4], [330, 40, 3], [420, 18, 3]]) + birds(250, 40, .7) + tea(-20, 130, 300, 46) + tea(250, 128, 280, 40) + hills(560, 190, 150, tint('teal', 24), tint('teal', 38));
     const H = [[40, 132, 1], [104, 140, 1], [168, 130, 0], [232, 140, 1], [296, 132, 1], [360, 140, 1], [424, 130, 0], [74, 176, 1], [140, 182, 1], [206, 176, 1], [272, 182, 1], [338, 176, 1], [404, 182, 1]];
     H.forEach(([x, y, lit]) => { s += home(x, y, .26, {roof: lit ? v('coral') : v('ink-3'), lit: !!lit}); if (lit) s += `<circle cx="${x}" cy="${y - 20}" r="16" fill="${v('amber')}" opacity=".14"/>`; });
     s += `<g class="bob">${heart(104, 82, .8)}</g><g class="bob d2">${heart(296, 84, .7, v('amber'))}</g><g class="bob d3">${heart(206, 128, .7)}</g>`;
@@ -889,7 +929,7 @@ const Q = (() => {
     const inside = `<rect x="-208" y="-74" width="54" height="40" rx="6" fill="${v('surface')}"/><text x="-181" y="-46" text-anchor="middle" style="font:900 20px var(--f-body);fill:${v('teal')}">Rs</text>`
       + `<rect x="152" y="-74" width="54" height="40" rx="6" fill="${v('surface')}"/>${heart(179, -54, 1.1, v('coral'))}`
       + `<g fill="${v('illo-white')}"><rect x="116" y="-160" width="16" height="20" rx="2"/><rect x="174" y="-160" width="16" height="20" rx="2"/></g>`;
-    let s = `<circle cx="960" cy="70" r="30" fill="${v('amber')}" opacity=".85"/>${cloud(150, 70, .9, .9)}${cloud(780, 60, .6, .8)}`
+    let s = wash(180, 90, 300, 160, 'lilac') + sun(960, 70, 30) + night([[90, 40, 4], [260, 30, 3], [420, 60, 3], [820, 30, 4], [1030, 150, 3]]) + `${cloud(150, 70, .9, .9)}${cloud(780, 60, .6, .8)}` + birds(860, 110) + kite(330, 64, .9, v('lilac')) + tea(760, Y, 340, 60)
       + `<path d="M0 ${Y}H1080V400H0Z" fill="${tint('teal', 34)}"/><path d="M0 ${Y}C200 ${Y - 8} 400 ${Y + 4} 600 ${Y - 4}S900 ${Y - 8} 1080 ${Y}" fill="none" stroke="${tint('teal', 50)}" stroke-width="6"/>`
       + school(X, Y, S, {extra: inside});
     // gate (admissions) on the left
@@ -899,7 +939,7 @@ const Q = (() => {
     s += `<g transform="translate(-30 -18)"><rect x="840" y="272" width="96" height="64" rx="6" fill="${mx(v('amber'), 50, '#6b3f1f')}"/><rect x="848" y="280" width="80" height="48" rx="3" fill="${tint('amber', 30)}"/><rect x="856" y="286" width="26" height="18" fill="${v('illo-white')}"/><rect x="890" y="290" width="30" height="22" fill="${tint('lilac', 50)}"/><rect x="862" y="308" width="22" height="14" fill="${tint('teal', 50)}"/><path d="M856 336v26M920 336v26" stroke="${mx(v('amber'), 50, '#6b3f1f')}" stroke-width="5"/></g>`;
     s += `<g transform="translate(940 278)"><rect x="0" y="0" width="160" height="58" rx="12" fill="${v('amber')}"/>${[10, 44, 78, 112].map(x => `<rect x="${x}" y="9" width="26" height="20" rx="4" fill="${tint('indigo-2', 40)}"/>`).join('')}<path d="M0 40H160" stroke="${v('coral')}" stroke-width="4"/><circle cx="30" cy="60" r="11" fill="${v('illo-face')}"/><circle cx="112" cy="60" r="11" fill="${v('illo-face')}"/></g>`;
     // children in the yard
-    s += at(470, 268, .5, full('amaya', {R: 'wave'})) + at(516, 272, .48, full('kavindu')) + at(648, 268, .5, full('rehan', {L: 'wave'})) + palm(30, 348, .95) + bush(312, 344, .8) + bush(800, 346, .7, tint('teal', 70));
+    s += at(470, 268, .5, full('amaya', {R: 'wave'})) + at(516, 272, .48, full('kavindu')) + at(648, 268, .5, full('rehan', {L: 'wave'})) + palm(30, 348, .95) + tree(1050, Y, .9) + tuktuk(278, Y + 6, .5) + bush(312, 344, .8) + bush(800, 346, .7, tint('teal', 70));
     s += pin(1, [166, 196]) + pin(2, L(-230, -206)) + pin(3, L(0, -118)) + pin(4, L(52, -262)) + pin(5, L(170, -206)) + pin(6, L(179, -108)) + pin(7, L(-181, -108)) + pin(8, [858, 220]);
     return s;
   };
@@ -907,7 +947,7 @@ const Q = (() => {
   // Privacy: 260 × 150
   D.tWall = () => `<rect width="260" height="150" fill="${tint('indigo-2', 10)}"/><path d="M0 128H260V150H0Z" fill="${tint('teal', 30)}"/>`
     + `<rect x="34" y="40" width="192" height="100" rx="50" fill="none" stroke="${v('indigo-2')}" stroke-width="3" stroke-dasharray="2 8" stroke-linecap="round"/>`
-    + school(130, 128, .26, {flag: v('coral')})
+    + tree(36, 128, .5) + school(130, 128, .26, {flag: v('coral')})
     + `<g transform="translate(206 112)"><rect x="-14" y="-6" width="28" height="22" rx="5" fill="${v('amber')}"/><path d="M-8 -6V-12A8 8 0 0 1 8 -12V-6" fill="none" stroke="${v('amber')}" stroke-width="4"/><circle cy="4" r="3" fill="${v('illo-face')}"/></g>`
     + `<g opacity=".4">${school(-10, 128, .14)}${school(270, 128, .14)}</g>`;
   D.tConsent = () => `<rect width="260" height="150" fill="${tint('amber', 12)}"/><path d="M0 130H260V150H0Z" fill="${tint('amber', 26)}"/>`
@@ -919,7 +959,7 @@ const Q = (() => {
     + `<path d="M60 44H112L122 54H190V128H60Z" fill="${v('lilac')}"/><rect x="60" y="60" width="130" height="68" rx="6" fill="${tint('lilac', 70, '#fff')}"/>${heart(125, 92, 1.6, v('coral'))}`
     + `<g transform="translate(184 112)"><rect x="-18" y="-8" width="36" height="28" rx="6" fill="${v('amber')}"/><path d="M-10 -8V-16A10 10 0 0 1 10 -16V-8" fill="none" stroke="${v('amber')}" stroke-width="5"/><circle cy="4" r="3.5" fill="${v('illo-face')}"/><path d="M0 6v6" stroke="${v('illo-face')}" stroke-width="2.4"/></g>`
     + `<g transform="translate(218 44)"><circle r="16" fill="${v('surface')}" stroke="${v('line')}" stroke-width="1.5"/><path d="M-9 0Q0 -9 9 0Q0 9 -9 0Z" fill="none" stroke="${v('ink-2')}" stroke-width="2"/><circle r="3" fill="${v('ink-2')}"/></g><path d="M206 66h24M206 74h18" stroke="${v('ink-3')}" stroke-width="2.5" stroke-linecap="round" opacity=".6"/>`;
-  D.tLocal = () => `<rect width="260" height="150" fill="${tint('teal', 10)}"/>`
+  D.tLocal = () => `<rect width="260" height="150" fill="${tint('teal', 10)}"/>` + wash(130, 80, 120, 80, 'teal') + birds(20, 30, .6)
     + `<g transform="translate(70 4)"><path d="M50 8C44 8 42 14 44 20C46 30 38 42 34 58C28 82 34 104 50 118C64 128 84 122 92 104C100 84 92 62 80 46C70 32 58 22 55 12C54 9 52 8 50 8Z" fill="${v('teal')}"/>`
     + `<g transform="translate(62 70)"><path d="M0 18C-10 6 -14 -2 -14 -8A14 14 0 0 1 14 -8C14 -2 10 6 0 18Z" fill="${v('coral')}"/><circle cy="-8" r="5" fill="#fff"/></g></g>`
     + `<circle cx="132" cy="74" r="62" fill="none" stroke="${v('indigo-2')}" stroke-width="2" stroke-dasharray="2 8" stroke-linecap="round" opacity=".7"/>`
@@ -942,10 +982,11 @@ const Q = (() => {
   return {D, P, POS, C, portrait, svgWrap, bust};
 })();
 
-// Draw every illustration
+// Draw every illustration, with a faint paper grain over each scene
 document.querySelectorAll('svg[data-ill]').forEach(s => {
   const k = s.dataset.ill;
   s.insertAdjacentHTML('beforeend', k.startsWith('m:') ? Q.portrait(k.slice(2)) : Q.D[k]());
+  if (!/^(hero|i[A-Z]|tea|m:)/.test(k)) { const [, , w, h] = s.getAttribute('viewBox').split(' ').map(Number); s.insertAdjacentHTML('beforeend', `<rect width="${w}" height="${h}" rx="${k[0] === 'v' ? 20 : 0}" fill="#000" filter="url(#qGrain)" style="mix-blend-mode:multiply" opacity=".32"/>`); }
   if (!s.hasAttribute('role')) s.setAttribute('focusable', 'false');
 });
 
@@ -987,6 +1028,11 @@ document.querySelectorAll('svg[data-ill]').forEach(s => {
   const label = () => btns.forEach(b => { const t = dark() ? 'Switch to light mode' : 'Switch to dark mode'; b.setAttribute('aria-label', t); if (!b.querySelector('svg')) b.textContent = dark() ? 'Light mode' : 'Dark mode'; });
   btns.forEach(b => b.addEventListener('click', () => { root.dataset.theme = dark() ? 'light' : 'dark'; try { document.cookie = `quad_theme=${root.dataset.theme}; path=/; max-age=31536000; samesite=lax`; } catch (e) {} label(); }));
   label(); })();
+
+// Palette switcher (prototype only)
+(() => { const root = document.documentElement, sels = document.querySelectorAll('[data-palette-select]');
+  const set = v => { if (!/^[abc]$/.test(v)) v = 'a'; root.dataset.palette = v; sels.forEach(x => { x.value = v; }); try { localStorage.setItem('quad_landing_palette', v); } catch (e) {} };
+  sels.forEach(x => x.addEventListener('change', () => set(x.value))); sels.forEach(x => { x.value = root.dataset.palette; }); })();
 
 // Section menu at phone width
 (() => { const btn = document.querySelector('.menu-btn'), menu = document.getElementById('menu');
