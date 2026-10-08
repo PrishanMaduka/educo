@@ -450,5 +450,161 @@
   },
   "publicDemoMailNote": "Note",
   "publicFooterSample": "Sample school and families are fictional.",
-  "publicFooterCopyright": "© Quad"
+  "publicFooterCopyright": "© Quad",
+  "emailFromSchool": "{school} via Quad",
+  "@emailFromSchool": {
+    "placeholders": {
+      "school": {
+        "type": "Object"
+      }
+    }
+  },
+  "emailFromAccount": "Quad",
+  "emailGreetingNamed": "Hello {name},",
+  "@emailGreetingNamed": {
+    "placeholders": {
+      "name": {
+        "type": "Object"
+      }
+    }
+  },
+  "emailGreetingPlain": "Hello,",
+  "emailFooterSchool": "{school} sent you this email through Quad.",
+  "@emailFooterSchool": {
+    "placeholders": {
+      "school": {
+        "type": "Object"
+      }
+    }
+  },
+  "emailFooterAccount": "You’re getting this email because it’s about your Quad account.",
+  "emailStaffInviteSubject": "{inviter} invited you to {school} on Quad",
+  "@emailStaffInviteSubject": {
+    "placeholders": {
+      "inviter": {
+        "type": "Object"
+      },
+      "school": {
+        "type": "Object"
+      }
+    }
+  },
+  "emailStaffInviteBody": "{inviter} has invited you to join {school} on Quad. Accept the invitation to set up how you sign in.",
+  "@emailStaffInviteBody": {
+    "placeholders": {
+      "inviter": {
+        "type": "Object"
+      },
+      "school": {
+        "type": "Object"
+      }
+    }
+  },
+  "emailStaffInviteAction": "Accept the invitation",
+  "emailStaffInviteExpiry": "The link expires in {days, plural, one {{days} day} other {{days} days}}. If you weren’t expecting this invitation, you can ignore this email.",
+  "@emailStaffInviteExpiry": {
+    "placeholders": {
+      "days": {
+        "type": "num"
+      }
+    }
+  },
+  "emailPasswordResetSubject": "Reset your Quad password",
+  "emailPasswordResetBody": "We received a request to reset the password for your Quad account.",
+  "emailPasswordResetAction": "Choose a new password",
+  "emailPasswordResetExpiry": "The link works once and expires in {minutes, plural, one {{minutes} minute} other {{minutes} minutes}}. If you didn’t ask for this, ignore this email and your password stays the same.",
+  "@emailPasswordResetExpiry": {
+    "placeholders": {
+      "minutes": {
+        "type": "num"
+      }
+    }
+  },
+  "emailLockoutSubject": "Your Quad account is locked for {minutes, plural, one {{minutes} minute} other {{minutes} minutes}}",
+  "@emailLockoutSubject": {
+    "placeholders": {
+      "minutes": {
+        "type": "num"
+      }
+    }
+  },
+  "emailLockoutBody": "We locked your account after {attempts} sign-in attempts with the wrong password. You can try again in {minutes, plural, one {{minutes} minute} other {{minutes} minutes}}.",
+  "@emailLockoutBody": {
+    "placeholders": {
+      "attempts": {
+        "type": "Object"
+      },
+      "minutes": {
+        "type": "num"
+      }
+    }
+  },
+  "emailLockoutAdvice": "If this wasn’t you, reset your password once the lock ends to keep your account safe.",
+  "emailLockoutAction": "Reset your password",
+  "emailTwoStepReminderSubject": "{school} asks you to turn on two-step sign-in",
+  "@emailTwoStepReminderSubject": {
+    "placeholders": {
+      "school": {
+        "type": "Object"
+      }
+    }
+  },
+  "emailTwoStepReminderBody": "{school} asks everyone to protect their Quad account with two-step sign-in. It takes a minute, and you’ll need an authenticator app on your phone.",
+  "@emailTwoStepReminderBody": {
+    "placeholders": {
+      "school": {
+        "type": "Object"
+      }
+    }
+  },
+  "emailTwoStepReminderAction": "Turn on two-step sign-in",
+  "emailNewDeviceSubject": "New sign-in to your Quad account",
+  "emailNewDeviceBody": "Someone signed in to your Quad account from {device} on {when}.",
+  "@emailNewDeviceBody": {
+    "placeholders": {
+      "device": {
+        "type": "Object"
+      },
+      "when": {
+        "type": "Object"
+      }
+    }
+  },
+  "emailNewDeviceAdvice": "If this was you, there’s nothing to do. If it wasn’t, sign out of that device and change your password.",
+  "emailNewDeviceAction": "Review your sign-ins",
+  "emailOtpSubject": "{code} is your Quad sign-in code",
+  "@emailOtpSubject": {
+    "placeholders": {
+      "code": {
+        "type": "Object"
+      }
+    }
+  },
+  "emailOtpBody": "Enter this code in the Quad app to sign in: {code}",
+  "@emailOtpBody": {
+    "placeholders": {
+      "code": {
+        "type": "Object"
+      }
+    }
+  },
+  "emailOtpExpiry": "The code expires in {minutes, plural, one {{minutes} minute} other {{minutes} minutes}}. Don’t share it with anyone, including school staff.",
+  "@emailOtpExpiry": {
+    "placeholders": {
+      "minutes": {
+        "type": "num"
+      }
+    }
+  },
+  "smsOtp": "{code} is your Quad sign-in code. It expires in {minutes, plural, one {{minutes} minute} other {{minutes} minutes}}. Don’t share it with anyone.",
+  "@smsOtp": {
+    "placeholders": {
+      "code": {
+        "type": "Object"
+      },
+      "minutes": {
+        "type": "num"
+      }
+    }
+  }
 }

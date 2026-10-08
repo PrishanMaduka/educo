@@ -92,3 +92,10 @@ export class InvalidLinkError extends AppError {
     super('invalid_link', DEFAULT_MESSAGES.invalid_link, 400);
   }
 }
+
+/** 429: too many requests (spec 06 → Rate limits). The filter sends `Retry-After`. */
+export class RateLimitedError extends AppError {
+  constructor(readonly retryAfterSeconds: number) {
+    super('rate_limited', DEFAULT_MESSAGES.rate_limited, 429);
+  }
+}

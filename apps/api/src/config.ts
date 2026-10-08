@@ -371,6 +371,35 @@ function keyFormatRules(env: RawEnv): ConfigProblem[] {
 }
 
 /**
+ * In every environment: each chosen email provider has what it needs, and SMS stays on the log
+ * provider until live SMS ships (M6, OQ12). An unset `EMAIL_PROVIDER` is allowed: email then
+ * goes by SMTP when `SMTP_URL` is set and is otherwise off (`emailProviderOf`).
+ */
+function deliveryRules(env: RawEnv): ConfigProblem[] {
+  const problems: ConfigProblem[] = [];
+  const needs = (provider: string, names: readonly string[]): void => {
+    for (const name of names) {
+      if (blank(env[name]) === undefined) {
+        problems.push({
+          variable: name,
+          problem: `is missing (EMAIL_PROVIDER=${provider} needs it)`,
+        });
+      }
+    }
+  };
+  const emailProvider = blank(env.EMAIL_PROVIDER);
+  if (emailProvider === 'smtp') needs('smtp', ['SMTP_URL']);
+  if (emailProvider === 'ses') needs('ses', ['SES_REGION', 'EMAIL_FROM_DOMAIN']);
+  if (blank(env.SMS_PROVIDER) === 'live') {
+    problems.push({
+      variable: 'SMS_PROVIDER',
+      problem: 'must be log until live SMS ships (M6, OQ12)',
+    });
+  }
+  return problems;
+}
+
+/**
  * Parses the environment. Throws `ConfigError` listing every missing or invalid variable at
  * once, plus the production refusals (`DEV_FIXED_OTP` set, `CONSOLE_PASSWORD_LOGIN=true`).
  */
@@ -382,7 +411,7 @@ export function loadConfig(env: NodeJS.ProcessEnv): Config {
         variable: issue.path.join('.'),
         problem: describeIssue(issue),
       }));
-  problems.push(...keyFormatRules(env), ...environmentRules(env));
+  problems.push(...keyFormatRules(env), ...deliveryRules(env), ...environmentRules(env));
   if (problems.length > 0 || !parsed.success) {
     throw new ConfigError(problems);
   }

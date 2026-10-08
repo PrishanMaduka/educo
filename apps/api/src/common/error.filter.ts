@@ -4,7 +4,7 @@ import { ZodError } from 'zod';
 import { errorForLog } from '../observability/logger';
 import { NO_OP_REPORTER } from '../observability/sentry';
 
-import { AppError, DEFAULT_MESSAGES } from './errors';
+import { AppError, DEFAULT_MESSAGES, RateLimitedError } from './errors';
 import { fieldsFromZodError } from './zod.pipe';
 
 import type { ErrorReporter } from '../observability/sentry';
@@ -102,6 +102,9 @@ export function sendError(
   if (response.status >= 500) {
     logger.error({ error: errorForLog(error) }, 'Request failed with an unexpected error');
     reporter.capture(error);
+  }
+  if (error instanceof RateLimitedError) {
+    void reply.header('retry-after', String(error.retryAfterSeconds));
   }
   void reply.status(response.status).send(response.body);
 }

@@ -23,3 +23,7 @@ export const FIELD_CIPHER = Symbol('FIELD_CIPHER');
 export const BREACH_CHECK = Symbol('BREACH_CHECK');
 /** The parent access token keys (`JwtKeys`, EdDSA). */
 export const JWT_KEYS = Symbol('JWT_KEYS');
+/** The API's shared ioredis connection (`src/redis`): `@Inject(REDIS) redis: Redis`. */
+export const REDIS = Symbol('REDIS');
+/** Queues email and SMS (`DeliveryQueue`, BullMQ; tests may pass a recording fake). */
+export const DELIVERY = Symbol('DELIVERY');
