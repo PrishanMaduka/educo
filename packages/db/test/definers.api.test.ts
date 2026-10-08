@@ -59,6 +59,7 @@ const DEFINERS = [
   'end_support_session(bytea)',
   'tenant_by_embed_key(text)',
   'tenant_by_gateway_account(text, text)',
+  'current_support_visit(uuid)',
 ] as const;
 
 /** The tables `definer_read` opens to `quad_owner` (and only to it). */
@@ -712,6 +713,34 @@ describe('record_support_audit', () => {
       [[other.id, ended.id]],
     );
     expect(audit).toEqual([]);
+  });
+});
+
+describe('current_support_visit', () => {
+  it("names the Quad staff member of an active visit to the current school (the support banner)", async () => {
+    const support = await insertSupportSession(withPlatform, quadStaff.id, schoolA.id);
+    await expect(
+      withTenant(schoolA.id, (tx) => definers.currentSupportVisit(tx, support.id)),
+    ).resolves.toEqual({ platformUserName: quadStaff.name });
+  });
+
+  it('finds nothing for a visit to another school, an ended or expired visit, or without a school', async () => {
+    const other = await insertSupportSession(withPlatform, quadStaff.id, schoolB.id);
+    const ended = await insertSupportSession(withPlatform, quadStaff.id, schoolA.id, {
+      endedAt: new Date(),
+    });
+    const expired = await insertSupportSession(withPlatform, quadStaff.id, schoolA.id, {
+      expiresAt: new Date(Date.now() - 1000),
+    });
+    for (const visit of [other, ended, expired]) {
+      await expect(
+        withTenant(schoolA.id, (tx) => definers.currentSupportVisit(tx, visit.id)),
+      ).resolves.toBeNull();
+    }
+    const { rows } = await testDb().app.query(`select * from current_support_visit($1)`, [
+      other.id,
+    ]);
+    expect(rows).toEqual([]);
   });
 });
 

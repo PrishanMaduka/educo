@@ -20,7 +20,15 @@ export {
   FieldCipherError,
   createFieldCipher,
 } from './crypto/field-cipher';
-export type { DefinerCalls } from './definers';
+export type {
+  AccountSessionLookup,
+  AuthMembership,
+  DefinerCalls,
+  SessionLookup,
+  SupportSessionLookup,
+  SupportVisit,
+  TenantProfile,
+} from './definers';
 export { pingDatabase } from './ping';
 export type { SqlQueryable, TableClasses } from './rls';
 export {

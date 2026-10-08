@@ -50,6 +50,13 @@
       "when": 1791471327986,
       "tag": "0006_definers",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1791478379829,
+      "tag": "0007_current_support_visit",
+      "breakpoints": true
     }
   ]
 }

@@ -125,6 +125,11 @@ export interface MemberTwoStepStatus {
   readonly totpEnabled: boolean;
 }
 
+/** The support banner's "as {name} from Quad" (spec 05, Support access). */
+export interface SupportVisit {
+  readonly platformUserName: string;
+}
+
 /** `tenant_by_embed_key` (D16). A stub until M4: always null. */
 export interface EmbedKeyTenant {
   readonly tenantId: string;
@@ -183,6 +188,8 @@ export interface DefinerCalls {
   memberTwoStepStatus(tx: TenantTx, userIds: readonly string[]): Promise<MemberTwoStepStatus[]>;
   /** Revokes the member's sessions and refresh families in the current school only. */
   revokeMemberSessions(tx: TenantTx, userId: string): Promise<void>;
+  /** Who from Quad is in an active support visit to the current school; null otherwise. */
+  currentSupportVisit(tx: TenantTx, supportSessionId: string): Promise<SupportVisit | null>;
 }
 
 // Row shapes as `pg` returns them through the `quad_app` pool (timestamps as Date, arrays parsed).
@@ -438,14 +445,15 @@ export function createDefinerCalls(pool: pg.Pool): DefinerCalls {
     },
 
     ensureAccountForEmail: async (tx, email) => {
-      const { rows } = await tx.execute<{ id: string }>(
+      const { rows } = await tx.execute<{ id: string | null }>(
         sql`select id from ensure_account_for_email(${email})`,
       );
-      const [row] = rows;
-      if (!row) {
+      // `RETURN QUERY SELECT v_id` gives a row even when no id was found, so check the id itself.
+      const id = rows[0]?.id;
+      if (typeof id !== 'string') {
         throw new UnexpectedDefinerRowError('ensure_account_for_email');
       }
-      return row.id;
+      return id;
     },
 
     memberTwoStepStatus: async (tx, userIds) => {
@@ -460,6 +468,14 @@ export function createDefinerCalls(pool: pg.Pool): DefinerCalls {
 
     revokeMemberSessions: async (tx, userId) => {
       await tx.execute(sql`select revoke_member_sessions(${userId})`);
+    },
+
+    currentSupportVisit: async (tx, supportSessionId) => {
+      const { rows } = await tx.execute<{ platform_user_name: string }>(
+        sql`select platform_user_name from current_support_visit(${supportSessionId})`,
+      );
+      const [row] = rows;
+      return row ? { platformUserName: row.platform_user_name } : null;
     },
   };
 }
