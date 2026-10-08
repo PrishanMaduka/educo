@@ -25,7 +25,9 @@ runs:
     - uses: actions/setup-node@v4
       with:
         node-version-file: .nvmrc
-        cache: pnpm
+        # Only jobs that install use the pnpm store. Without an install the store folder never
+        # exists, and on a cache miss setup-node's post step fails trying to save it.
+        cache: ${{ inputs.install == 'true' && 'pnpm' || '' }}
 
     - if: inputs.java == 'true'
       uses: actions/setup-java@v4
