@@ -35,7 +35,7 @@ Platform tables have no RLS policy and are reached only from console routes and 
 | `template_stages` | id, template_id, position, name, ages, color, default_sections, years text[] |
 | `template_qualifications` | id, template_id, year_label, name |
 | `grading_scales` | id, name, bands jsonb (`[{label:'A*', min:90}, …]`) |
-| `platform_users` | id, name, email (unique), role enum(`owner`,`admin`,`support`,`billing`,`readonly`), totp_secret_enc, status, last_sign_in_at |
+| `platform_users` | id, name, email (unique), role enum(`owner`,`admin`,`support`,`billing`,`readonly`), password_hash, totp_secret_enc, totp_enabled, totp_last_step, status, locked_until, last_sign_in_at |
 | `platform_audit` | id, actor_platform_user_id, action, target_type, target_id, tenant_id (nullable), ip, user_agent, meta jsonb, at |
 | `support_sessions` | id, platform_user_id, tenant_id, reason, started_at, ended_at |
 | `school_health_snapshots` | id, tenant_id, date, staff_weekly_active_pct, parent_app_pct, admin_last_sign_in_at, open_tickets, seats_used_pct, payment_status, score, level enum(`thriving`,`watch`,`at_risk`,`paused`) |

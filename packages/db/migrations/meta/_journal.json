@@ -92,6 +92,13 @@
       "when": 1791523411881,
       "tag": "0012_drop_sso",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1791525929691,
+      "tag": "0013_platform_user_totp_step_and_lock",
+      "breakpoints": true
     }
   ]
 }
