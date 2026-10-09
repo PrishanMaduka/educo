@@ -884,6 +884,11 @@ Steps:
 - deactivate and sign out everywhere: `revoke_member_sessions`, then drop those sessions from the Redis session cache;
 - role and permission writes (`POST`/`PATCH`/`DELETE /roles`, `PUT /roles/:id/permissions`, a role change on `PATCH /users/:id`) delete the tenant's permission cache keys (Task 12).
 
+**Permission cache and role integrity (Task 12 review, fix round 1):**
+- Every role or permission write moves `roles.updated_at` and calls `PermissionsService.invalidateTenant`. Make the bump structural with a migration: a trigger that sets `roles.updated_at = clock_timestamp()` on every `roles` update, and statement-level triggers (one per event, with transition tables) on `role_permissions` and `role_sensitive` that bump the roles they touch. Test that a matrix write with no explicit bump is seen on the next request.
+- Only staff memberships may hold roles: add a database check or trigger so a `user_roles` row can only name a `users` row with `kind = 'staff'` (Task 12 already ignores any other in `PermissionsService`). Test the refusal.
+- A role change on `PATCH /users/:id` (and deactivation) clears that member's role preview (`sessions.preview_role_id` and `preview_sample_user_id`) in this school and drops the cached sessions (`invalidateMember`). Task 12 already ignores a preview once the member lacks `users.manage`; clearing it ends the read-only state too.
+
 **Endpoints.** Each has four tests: happy; 400; 403 for a `teacher` session (wrong role) and `preview_read_only`; cross-tenant (B's user or role id gives 404, lists omit A). All are audited per spec 05 through `AuditService`. Business-rule refusals are 422 (spec 06 Conventions) with the codes below.
 
 | Route | Permission | Behaviour and extra tests |
@@ -1153,6 +1158,7 @@ Commit `feat(staff): identifier-first sign-in page and signed-link pages`.
 **Behaviour:**
 - Items are hidden by `pageAccess` and plan modules.
 - Switch school calls `POST /auth/select-school` and reloads `/app` (spec 05).
+- While a role preview is on, Switch school is a write and the API refuses it (`preview_read_only`, Task 12), so the profile menu offers **Back to my view** first (it calls `DELETE /me/role-preview`) and only then Switch school.
 - Sign out goes to `/sign-in`.
 - The support banner shows the spec 05 copy, is fixed, uses `role="status"`, and has **Exit to platform**.
 - The preview banner reads "Previewing as {role} · {sample person}" with **Back to my view** (spec 08).
