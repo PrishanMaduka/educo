@@ -18,6 +18,8 @@ import 'package:quad_api/src/model/password_sign_in_input.dart';
 import 'package:quad_api/src/model/select_school_input.dart';
 import 'package:quad_api/src/model/sign_in_membership_list.dart';
 import 'package:quad_api/src/model/sign_in_result.dart';
+import 'package:quad_api/src/model/sso_start_input.dart';
+import 'package:quad_api/src/model/sso_start_result.dart';
 import 'package:quad_api/src/model/totp_verify_input.dart';
 
 class AuthApi {
@@ -511,6 +513,154 @@ _bodyData=jsonEncode(selectSchoolInput);
     );
 
     return _response;
+  }
+
+  /// The provider returns here; the API checks the sign-in and redirects to /sign-in?step&#x3D;&lt;next step&gt;
+  /// 
+  ///
+  /// Parameters:
+  /// * [provider] 
+  /// * [code] 
+  /// * [state] 
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
+  ///
+  /// Returns a [Future]
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<void>> apiV1AuthSsoProviderCallbackGet({ 
+    required String provider,
+    required String code,
+    required String state,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/api/v1/auth/sso/{provider}/callback'.replaceAll('{' r'provider' '}', provider.toString());
+    final _options = Options(
+      method: r'GET',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[],
+        ...?extra,
+      },
+      validateStatus: validateStatus,
+    );
+
+    final _queryParameters = <String, dynamic>{
+      r'code': code,
+      r'state': state,
+    };
+
+    final _response = await _dio.request<Object>(
+      _path,
+      options: _options,
+      queryParameters: _queryParameters,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    return _response;
+  }
+
+  /// Start single sign-on with Google or Microsoft: the provider URL to open, with PKCE (sets a short-lived state cookie)
+  /// 
+  ///
+  /// Parameters:
+  /// * [provider] 
+  /// * [ssoStartInput] 
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
+  ///
+  /// Returns a [Future] containing a [Response] with a [SsoStartResult] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<SsoStartResult>> apiV1AuthSsoProviderStartPost({ 
+    required String provider,
+    required SsoStartInput ssoStartInput,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/api/v1/auth/sso/{provider}/start'.replaceAll('{' r'provider' '}', provider.toString());
+    final _options = Options(
+      method: r'POST',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[],
+        ...?extra,
+      },
+      contentType: 'application/json',
+      validateStatus: validateStatus,
+    );
+
+    dynamic _bodyData;
+
+    try {
+_bodyData=jsonEncode(ssoStartInput);
+    } catch(error, stackTrace) {
+      throw DioException(
+         requestOptions: _options.compose(
+          _dio.options,
+          _path,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    final _response = await _dio.request<Object>(
+      _path,
+      data: _bodyData,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    SsoStartResult? _responseData;
+
+    try {
+final rawData = _response.data;
+_responseData = rawData == null ? null : deserialize<SsoStartResult, SsoStartResult>(rawData, 'SsoStartResult', growable: true);
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return Response<SsoStartResult>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
   }
 
   /// Check the authenticator or recovery code at the two-step step (needs X-CSRF-Token)

@@ -41,6 +41,8 @@ export 'package:quad_api/src/model/sign_in_membership_list.dart';
 export 'package:quad_api/src/model/sign_in_membership_list_items_inner.dart';
 export 'package:quad_api/src/model/sign_in_result.dart';
 export 'package:quad_api/src/model/sns_envelope.dart';
+export 'package:quad_api/src/model/sso_start_input.dart';
+export 'package:quad_api/src/model/sso_start_result.dart';
 export 'package:quad_api/src/model/totp_setup_input.dart';
 export 'package:quad_api/src/model/totp_setup_result.dart';
 export 'package:quad_api/src/model/totp_verify_input.dart';

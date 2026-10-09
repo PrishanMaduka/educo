@@ -33,6 +33,8 @@ doc/SignInMembershipList.md
 doc/SignInMembershipListItemsInner.md
 doc/SignInResult.md
 doc/SnsEnvelope.md
+doc/SsoStartInput.md
+doc/SsoStartResult.md
 doc/TotpSetupInput.md
 doc/TotpSetupResult.md
 doc/TotpVerifyInput.md
@@ -76,6 +78,8 @@ lib/src/model/sign_in_membership_list.dart
 lib/src/model/sign_in_membership_list_items_inner.dart
 lib/src/model/sign_in_result.dart
 lib/src/model/sns_envelope.dart
+lib/src/model/sso_start_input.dart
+lib/src/model/sso_start_result.dart
 lib/src/model/totp_setup_input.dart
 lib/src/model/totp_setup_result.dart
 lib/src/model/totp_verify_input.dart
@@ -110,6 +114,8 @@ test/sign_in_membership_list_items_inner_test.dart
 test/sign_in_membership_list_test.dart
 test/sign_in_result_test.dart
 test/sns_envelope_test.dart
+test/sso_start_input_test.dart
+test/sso_start_result_test.dart
 test/totp_setup_input_test.dart
 test/totp_setup_result_test.dart
 test/totp_verify_input_test.dart

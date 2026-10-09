@@ -24,6 +24,8 @@ import 'package:quad_api/src/model/sign_in_membership_list.dart';
 import 'package:quad_api/src/model/sign_in_membership_list_items_inner.dart';
 import 'package:quad_api/src/model/sign_in_result.dart';
 import 'package:quad_api/src/model/sns_envelope.dart';
+import 'package:quad_api/src/model/sso_start_input.dart';
+import 'package:quad_api/src/model/sso_start_result.dart';
 import 'package:quad_api/src/model/totp_setup_input.dart';
 import 'package:quad_api/src/model/totp_setup_result.dart';
 import 'package:quad_api/src/model/totp_verify_input.dart';
@@ -98,6 +100,10 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return SignInResult.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'SnsEnvelope':
           return SnsEnvelope.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'SsoStartInput':
+          return SsoStartInput.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'SsoStartResult':
+          return SsoStartResult.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'TotpSetupInput':
           return TotpSetupInput.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'TotpSetupResult':

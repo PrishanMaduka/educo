@@ -16,6 +16,8 @@ Method | HTTP request | Description
 [**apiV1AuthPasswordResetPost**](AuthApi.md#apiv1authpasswordresetpost) | **POST** /api/v1/auth/password/reset | Set a new password with a reset link; signs out every device
 [**apiV1AuthSelectSchoolPost**](AuthApi.md#apiv1authselectschoolpost) | **POST** /api/v1/auth/select-school | Open one of your schools; rotates the session (needs X-CSRF-Token)
 [**apiV1AuthSignOutPost**](AuthApi.md#apiv1authsignoutpost) | **POST** /api/v1/auth/sign-out | Sign out of every school on this device (needs X-CSRF-Token)
+[**apiV1AuthSsoProviderCallbackGet**](AuthApi.md#apiv1authssoprovidercallbackget) | **GET** /api/v1/auth/sso/{provider}/callback | The provider returns here; the API checks the sign-in and redirects to /sign-in?step&#x3D;&lt;next step&gt;
+[**apiV1AuthSsoProviderStartPost**](AuthApi.md#apiv1authssoproviderstartpost) | **POST** /api/v1/auth/sso/{provider}/start | Start single sign-on with Google or Microsoft: the provider URL to open, with PKCE (sets a short-lived state cookie)
 [**apiV1AuthTotpVerifyPost**](AuthApi.md#apiv1authtotpverifypost) | **POST** /api/v1/auth/totp/verify | Check the authenticator or recovery code at the two-step step (needs X-CSRF-Token)
 
 
@@ -290,6 +292,93 @@ No authorization required
 ### HTTP request headers
 
  - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **apiV1AuthSsoProviderCallbackGet**
+> apiV1AuthSsoProviderCallbackGet(provider, code, state)
+
+The provider returns here; the API checks the sign-in and redirects to /sign-in?step=<next step>
+
+### Example
+```dart
+import 'package:quad_api/api.dart';
+
+final api = QuadApi().getAuthApi();
+final String provider = provider_example; // String | 
+final String code = code_example; // String | 
+final String state = state_example; // String | 
+
+try {
+    api.apiV1AuthSsoProviderCallbackGet(provider, code, state);
+} catch on DioException (e) {
+    print('Exception when calling AuthApi->apiV1AuthSsoProviderCallbackGet: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **provider** | **String**|  | 
+ **code** | **String**|  | 
+ **state** | **String**|  | 
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **apiV1AuthSsoProviderStartPost**
+> SsoStartResult apiV1AuthSsoProviderStartPost(provider, ssoStartInput)
+
+Start single sign-on with Google or Microsoft: the provider URL to open, with PKCE (sets a short-lived state cookie)
+
+### Example
+```dart
+import 'package:quad_api/api.dart';
+
+final api = QuadApi().getAuthApi();
+final String provider = provider_example; // String | 
+final SsoStartInput ssoStartInput = ; // SsoStartInput | 
+
+try {
+    final response = api.apiV1AuthSsoProviderStartPost(provider, ssoStartInput);
+    print(response);
+} catch on DioException (e) {
+    print('Exception when calling AuthApi->apiV1AuthSsoProviderStartPost: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **provider** | **String**|  | 
+ **ssoStartInput** | [**SsoStartInput**](SsoStartInput.md)|  | 
+
+### Return type
+
+[**SsoStartResult**](SsoStartResult.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
  - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)

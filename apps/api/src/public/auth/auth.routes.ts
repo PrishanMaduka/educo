@@ -7,6 +7,10 @@ import {
   SelectSchoolInput,
   SignInMembershipList,
   SignInResult,
+  SsoCallbackQuery,
+  SsoProviderParams,
+  SsoStartInput,
+  SsoStartResult,
   TotpVerifyInput,
 } from '@quad/contracts';
 
@@ -23,6 +27,8 @@ const Memberships = named('SignInMembershipList', SignInMembershipList);
 const SelectSchool = named('SelectSchoolInput', SelectSchoolInput);
 const Forgot = named('PasswordForgotInput', PasswordForgotInput);
 const Reset = named('PasswordResetInput', PasswordResetInput);
+const SsoStart = named('SsoStartInput', SsoStartInput);
+const SsoUrl = named('SsoStartResult', SsoStartResult);
 
 /** Staff sign-in (spec 05, spec 06 Me and auth). Tenant-less: the school is never an input. */
 export const authRoutes: readonly ApiRoute[] = [
@@ -46,6 +52,26 @@ export const authRoutes: readonly ApiRoute[] = [
     request: { body: PasswordSignIn },
     responses: { 200: { description: 'The next sign-in step', schema: Next } },
     errors: [400, 401, 403, 429],
+  },
+  {
+    method: 'post',
+    path: '/auth/sso/{provider}/start',
+    summary:
+      'Start single sign-on with Google or Microsoft: the provider URL to open, with PKCE (sets a short-lived state cookie)',
+    tags: ['auth'],
+    request: { params: SsoProviderParams, body: SsoStart },
+    responses: { 200: { description: 'Open this URL to sign in', schema: SsoUrl } },
+    errors: [400, 403, 429, 503],
+  },
+  {
+    method: 'get',
+    path: '/auth/sso/{provider}/callback',
+    summary:
+      'The provider returns here; the API checks the sign-in and redirects to /sign-in?step=<next step>',
+    tags: ['auth'],
+    request: { params: SsoProviderParams, query: SsoCallbackQuery },
+    responses: { 302: { description: 'Redirects to the next sign-in step' } },
+    errors: [400, 401, 403, 429, 503],
   },
   {
     method: 'post',

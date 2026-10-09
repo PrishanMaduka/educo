@@ -56,6 +56,20 @@ void main() {
       // TODO
     });
 
+    // The provider returns here; the API checks the sign-in and redirects to /sign-in?step=<next step>
+    //
+    //Future apiV1AuthSsoProviderCallbackGet(String provider, String code, String state) async
+    test('test apiV1AuthSsoProviderCallbackGet', () async {
+      // TODO
+    });
+
+    // Start single sign-on with Google or Microsoft: the provider URL to open, with PKCE (sets a short-lived state cookie)
+    //
+    //Future<SsoStartResult> apiV1AuthSsoProviderStartPost(String provider, SsoStartInput ssoStartInput) async
+    test('test apiV1AuthSsoProviderStartPost', () async {
+      // TODO
+    });
+
     // Check the authenticator or recovery code at the two-step step (needs X-CSRF-Token)
     //
     //Future<SignInResult> apiV1AuthTotpVerifyPost(TotpVerifyInput totpVerifyInput) async

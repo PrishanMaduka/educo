@@ -1,9 +1,20 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { accounts, and, credentials, eq, gt, isNull, sql, trustedDevices, users } from '@quad/db';
+import {
+  accounts,
+  and,
+  credentials,
+  eq,
+  gt,
+  identities,
+  isNull,
+  sql,
+  trustedDevices,
+  users,
+} from '@quad/db';
 
 import { TENANT_DB } from '../../tokens';
 
-import type { AccountStatus } from '@quad/contracts';
+import type { AccountStatus, SsoProvider } from '@quad/contracts';
 import type { AccountTx, QuadTenantDb } from '@quad/db';
 
 /** The account fields sign-in needs once the account is known. */
@@ -32,6 +43,20 @@ const NO_CREDENTIALS: CredentialRow = {
   recoveryCodesHash: [],
   passwordChangedAt: null,
 };
+
+/** A school's SSO settings (`current_tenant_profile`, D24). */
+export interface SchoolSso {
+  readonly ssoDomain: string | null;
+  readonly google: boolean;
+  readonly microsoft: boolean;
+}
+
+/**
+ * What linking an SSO login did: a new `identities` row, the row the account already had, or a
+ * refusal because the login belongs to another account or the account has another login of
+ * that provider.
+ */
+export type IdentityLink = 'linked' | 'reused' | 'conflict';
 
 /** Only a time step later than the last one accepted (RFC 6238 §5.2), so a replay loses a race. */
 const laterStep = (step: number) =>
@@ -252,6 +277,52 @@ export class AuthRepository {
       .where(eq(users.id, userId))
       .returning({ name: users.name });
     return row?.name ?? null;
+  }
+
+  /**
+   * Links the provider's `subject` to the account on its first SSO sign-in (spec 05 step 2).
+   * Account RLS shows only this account's rows, and the unique `(provider, subject)` decides the
+   * rest: an insert that finds the subject taken (by another account, or by a concurrent first
+   * sign-in of this one) inserts nothing, and the account's own row is read again. One login per
+   * provider per account: a second subject is a conflict, never a second link.
+   */
+  async linkIdentity(
+    accountId: string,
+    provider: SsoProvider,
+    subject: string,
+    email: string,
+  ): Promise<IdentityLink> {
+    return this.db.withAccount(accountId, async (tx) => {
+      const own = () =>
+        tx
+          .select({ subject: identities.subject })
+          .from(identities)
+          .where(and(eq(identities.accountId, accountId), eq(identities.provider, provider)));
+      const existing = await own();
+      if (existing.length > 0) {
+        return existing.some((row) => row.subject === subject) ? 'reused' : 'conflict';
+      }
+      const inserted = await tx
+        .insert(identities)
+        .values({ accountId, provider, subject, email })
+        .onConflictDoNothing({ target: [identities.provider, identities.subject] })
+        .returning({ id: identities.id });
+      if (inserted.length > 0) return 'linked';
+      return (await own()).some((row) => row.subject === subject) ? 'reused' : 'conflict';
+    });
+  }
+
+  /** A school's SSO settings, read in that school; null when it has no profile. */
+  async schoolSso(tenantId: string): Promise<SchoolSso | null> {
+    const profile = await this.db.withTenant(tenantId, (tx) =>
+      this.db.definers.currentTenantProfile(tx),
+    );
+    if (profile === null) return null;
+    return {
+      ssoDomain: profile.ssoDomain,
+      google: profile.ssoGoogle,
+      microsoft: profile.ssoMicrosoft,
+    };
   }
 
   /** Runs `fn` in one transaction scoped to the account (and the school, when given). */

@@ -202,12 +202,13 @@ export class SignInService {
   /**
    * `auth.sign_in_failed` in every school where the account is active staff (OQ11), written off
    * the response path so its cost (one transaction per school) says nothing about the account.
-   * An error is logged, never thrown. Unknown emails are never audited.
+   * An error is logged, never thrown. Unknown emails are never audited. SSO refusals of a known
+   * account use it too (`sso_refused`).
    */
-  private auditFailureLater(
+  auditFailureLater(
     accountId: string,
     client: SignInClient,
-    reason: 'wrong_password' | 'wrong_code',
+    reason: 'wrong_password' | 'wrong_code' | 'sso_refused',
   ): void {
     setImmediate(() => {
       this.accountAudit

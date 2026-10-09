@@ -73,6 +73,8 @@ Class | Method | HTTP request | Description
 [*AuthApi*](doc/AuthApi.md) | [**apiV1AuthPasswordResetPost**](doc/AuthApi.md#apiv1authpasswordresetpost) | **POST** /api/v1/auth/password/reset | Set a new password with a reset link; signs out every device
 [*AuthApi*](doc/AuthApi.md) | [**apiV1AuthSelectSchoolPost**](doc/AuthApi.md#apiv1authselectschoolpost) | **POST** /api/v1/auth/select-school | Open one of your schools; rotates the session (needs X-CSRF-Token)
 [*AuthApi*](doc/AuthApi.md) | [**apiV1AuthSignOutPost**](doc/AuthApi.md#apiv1authsignoutpost) | **POST** /api/v1/auth/sign-out | Sign out of every school on this device (needs X-CSRF-Token)
+[*AuthApi*](doc/AuthApi.md) | [**apiV1AuthSsoProviderCallbackGet**](doc/AuthApi.md#apiv1authssoprovidercallbackget) | **GET** /api/v1/auth/sso/{provider}/callback | The provider returns here; the API checks the sign-in and redirects to /sign-in?step&#x3D;&lt;next step&gt;
+[*AuthApi*](doc/AuthApi.md) | [**apiV1AuthSsoProviderStartPost**](doc/AuthApi.md#apiv1authssoproviderstartpost) | **POST** /api/v1/auth/sso/{provider}/start | Start single sign-on with Google or Microsoft: the provider URL to open, with PKCE (sets a short-lived state cookie)
 [*AuthApi*](doc/AuthApi.md) | [**apiV1AuthTotpVerifyPost**](doc/AuthApi.md#apiv1authtotpverifypost) | **POST** /api/v1/auth/totp/verify | Check the authenticator or recovery code at the two-step step (needs X-CSRF-Token)
 [*HealthApi*](doc/HealthApi.md) | [**apiV1HealthLiveGet**](doc/HealthApi.md#apiv1healthliveget) | **GET** /api/v1/health/live | The process is up
 [*HealthApi*](doc/HealthApi.md) | [**apiV1HealthReadyGet**](doc/HealthApi.md#apiv1healthreadyget) | **GET** /api/v1/health/ready | Postgres and Redis answer
@@ -113,6 +115,8 @@ Class | Method | HTTP request | Description
  - [SignInMembershipListItemsInner](doc/SignInMembershipListItemsInner.md)
  - [SignInResult](doc/SignInResult.md)
  - [SnsEnvelope](doc/SnsEnvelope.md)
+ - [SsoStartInput](doc/SsoStartInput.md)
+ - [SsoStartResult](doc/SsoStartResult.md)
  - [TotpSetupInput](doc/TotpSetupInput.md)
  - [TotpSetupResult](doc/TotpSetupResult.md)
  - [TotpVerifyInput](doc/TotpVerifyInput.md)

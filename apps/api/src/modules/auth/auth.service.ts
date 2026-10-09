@@ -1,4 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { emailDomainOf } from '@quad/domain';
 
 import { AuditService } from '../../common/audit/audit.service';
 import { ForbiddenError } from '../../common/errors';
@@ -41,8 +42,7 @@ export class AuthService {
    * answer (spec 05 step 1, Review Focus #1).
    */
   async identify(email: string): Promise<IdentifyResult> {
-    const domain = email.slice(email.lastIndexOf('@') + 1);
-    const sso = await this.db.definers.ssoMethodsForDomain(domain);
+    const sso = await this.db.definers.ssoMethodsForDomain(emailDomainOf(email));
     const methods: SignInMethod[] = [
       ...(sso.google ? (['sso:google'] as const) : []),
       ...(sso.microsoft ? (['sso:microsoft'] as const) : []),
