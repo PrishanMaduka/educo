@@ -170,6 +170,22 @@ describe('POST /platform/tenants/:id/support-session', () => {
     expect(await supportRows(school.id)).toEqual([]);
   });
 
+  it('refuses control characters in the reason but keeps line breaks', async () => {
+    const school = await insertSchool(db());
+    const quad = await consoleAs('support');
+    for (const reason of ['Fixing the\u0000import', 'Fixing the\rimport', 'Fixing\u001b[31m it']) {
+      const response = await open(quad.browser, school.id, { reason });
+      expect(response.statusCode).toBe(400);
+      expect(codeOf(response)).toBe('validation');
+      expect(response.json<{ fields?: Record<string, unknown> }>().fields).toHaveProperty('reason');
+    }
+    expect(await supportRows(school.id)).toEqual([]);
+
+    const multiLine = 'The school asked for help.\nTheir invitations bounce.';
+    expect((await open(quad.browser, school.id, { reason: multiLine })).statusCode).toBe(200);
+    expect((await supportRows(school.id)).map((visit) => visit.reason)).toEqual([multiLine]);
+  });
+
   it.each(['billing', 'readonly'] as const)(
     'answers 403 forbidden to a %s user, and opens nothing',
     async (role) => {

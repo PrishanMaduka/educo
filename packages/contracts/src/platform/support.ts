@@ -16,6 +16,12 @@ import { TenantStatus } from '../enums';
 export const SUPPORT_REASON_MIN = 10;
 export const SUPPORT_REASON_MAX = 500;
 
+/**
+ * Any control character but the line feed (Unicode `Cc`: C0, DEL and C1). The reason is shown in
+ * the console and written to `platform_audit`, so it keeps line breaks and nothing else unseen.
+ */
+const CONTROL_EXCEPT_LINE_FEED = /[^\P{Cc}\n]/u;
+
 /** `:id` of `/platform/tenants/:id/…`: a school's id. */
 export const TenantIdParams = z.object({ id: IdSchema });
 export type TenantIdParams = z.infer<typeof TenantIdParams>;
@@ -31,6 +37,9 @@ export const SupportSessionCreateInput = z
       })
       .max(SUPPORT_REASON_MAX, {
         message: `Keep the reason to ${SUPPORT_REASON_MAX} characters or fewer.`,
+      })
+      .refine((reason) => !CONTROL_EXCEPT_LINE_FEED.test(reason), {
+        message: 'Write the reason as plain text; line breaks are fine.',
       }),
   })
   .strict();

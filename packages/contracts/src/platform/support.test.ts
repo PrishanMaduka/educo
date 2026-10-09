@@ -40,6 +40,20 @@ describe('SupportSessionCreateInput (POST /platform/tenants/:id/support-session)
     expect(pathOf(SupportSessionCreateInput.safeParse(input))).toEqual(path);
   });
 
+  it('keeps line breaks in the reason', () => {
+    expect(SupportSessionCreateInput.parse({ reason: 'Line one here\nline two' }).reason).toBe(
+      'Line one here\nline two',
+    );
+  });
+
+  it.each(['\u0000', '\t', '\r', '\u001b', '\u007f', '\u0085', '\u009f'])(
+    'refuses the control character %j inside the reason',
+    (control) => {
+      const result = SupportSessionCreateInput.safeParse({ reason: `A good${control}reason here` });
+      expect(pathOf(result)).toEqual(['reason']);
+    },
+  );
+
   it('answers with the single-use link into the staff portal', () => {
     expect(SupportSessionLink.parse({ url: 'https://quad-edu.com/sign-in/support/a.b' })).toEqual({
       url: 'https://quad-edu.com/sign-in/support/a.b',
