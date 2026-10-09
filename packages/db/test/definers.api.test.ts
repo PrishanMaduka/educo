@@ -394,6 +394,21 @@ describe('sso_methods_for_domain', () => {
     await expect(definers.ssoMethodsForDomain('unknown.test')).resolves.toEqual(none);
     await expect(definers.ssoMethodsForDomain('gone.test')).resolves.toEqual(none);
   });
+
+  it("returns a suspended school's providers, so SSO-only staff can reach its notice (D32)", async () => {
+    const paused = await insertTenant(withPlatform, {
+      status: 'suspended',
+      suspendReason: 'Unpaid invoice',
+    });
+    await testDb().platform.query(
+      `insert into tenant_security (tenant_id, sso_microsoft, sso_domain) values ($1, true, 'paused.test')`,
+      [paused.id],
+    );
+    await expect(definers.ssoMethodsForDomain('paused.test')).resolves.toEqual({
+      google: false,
+      microsoft: true,
+    });
+  });
 });
 
 describe('auth_sign_in_rules', () => {
@@ -717,7 +732,7 @@ describe('record_support_audit', () => {
 });
 
 describe('current_support_visit', () => {
-  it("names the Quad staff member of an active visit to the current school (the support banner)", async () => {
+  it('names the Quad staff member of an active visit to the current school (the support banner)', async () => {
     const support = await insertSupportSession(withPlatform, quadStaff.id, schoolA.id);
     await expect(
       withTenant(schoolA.id, (tx) => definers.currentSupportVisit(tx, support.id)),

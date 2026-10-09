@@ -64,6 +64,13 @@
       "when": 1791507844139,
       "tag": "0008_credentials_totp_last_step",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1791510222814,
+      "tag": "0009_sso_methods_suspended",
+      "breakpoints": true
     }
   ]
 }
