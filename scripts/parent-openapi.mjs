@@ -6,11 +6,13 @@
 export const PARENT_TAGS = ['health', 'auth', 'me'];
 
 /**
- * The tags kept out of the parent client: the console, provider webhooks and the API description.
+ * The tags kept out of the parent client: the console, provider webhooks, the API description and
+ * `staff` (staff portal only: `GET /me/permissions` and Preview a role, Task 12; an operation is
+ * kept only when every one of its tags is a parent tag).
  * Every tag must be in one list or the other (fix round 2): a new area's tag fails
  * `pnpm api:client` until someone decides whether the parent app may call it.
  */
-export const EXCLUDED_TAGS = ['platform', 'webhooks', 'meta'];
+export const EXCLUDED_TAGS = ['platform', 'webhooks', 'meta', 'staff'];
 
 /**
  * @typedef {{
