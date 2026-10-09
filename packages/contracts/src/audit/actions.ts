@@ -41,5 +41,13 @@ export const PlatformAuditAction = z.enum([
   'tenant.renamed',
   'support_session.started',
   'support_session.ended',
+  // Console sign-in (Task 10): the password step, the session opening, a wrong password or code,
+  // a new authenticator started and turned on, and signing out. Never a secret or a code.
+  'auth.password_accepted',
+  'auth.sign_in',
+  'auth.sign_in_failed',
+  'auth.two_step_setup_started',
+  'auth.two_step_enabled',
+  'auth.sign_out',
 ]);
 export type PlatformAuditAction = z.infer<typeof PlatformAuditAction>;
