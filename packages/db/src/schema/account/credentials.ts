@@ -11,7 +11,7 @@ export const credentials = pgTable('credentials', {
   accountId: uuid('account_id')
     .primaryKey()
     .references(() => accounts.id),
-  /** Argon2id; null for people who sign in only by SSO or OTP. */
+  /** Argon2id; null for people who sign in only with a one-time code (parents). */
   passwordHash: text('password_hash'),
   /** Encrypted with the field cipher. */
   totpSecretEnc: text('totp_secret_enc'),

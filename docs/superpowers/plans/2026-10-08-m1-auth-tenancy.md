@@ -26,7 +26,7 @@
 - API:
   - `@node-rs/argon2` (Argon2id);
   - `otplib` (TOTP);
-  - `openid-client` (Task 8 only; removed with the SSO code, D37);
+  - `openid-client` (Task 8 only; removed with the SSO code in `5c9b64a`, D37);
   - `jose` (EdDSA JWT);
   - `nodemailer` (SMTP to Mailpit; SES adapter stubbed to the same interface);
   - `@fastify/cookie`.
@@ -103,7 +103,7 @@
 
 **Configuration**
 - A new variable goes into the spec 02 table, `.env.example` (same order) and `apps/api/src/config.ts` (or `NOT_READ_BY_THE_API`) in one commit, in the task that first uses it. The parity tests enforce it.
-- `DEV_FIXED_OTP` stays refused at boot in production (already in `config.ts`; keep the test). `CONSOLE_PASSWORD_LOGIN` and its refusal go with the D37 SSO removal, because password sign-in is the only console sign-in.
+- `DEV_FIXED_OTP` stays refused at boot in production (already in `config.ts`; keep the test). `CONSOLE_PASSWORD_LOGIN` and its refusal went with the D37 SSO removal (`e28641c`), because password sign-in is the only console sign-in.
 
 **Decision log (D32)**
 - Task 1 adds the D32 row skeleton to `docs/spec/02-architecture.md` (D28 style: a summary sentence and a `<ul>` per area: Tables and lookups, Signed links, Sessions, Crypto, Access, Configuration, Testing, Pre-launch).
@@ -141,7 +141,7 @@
 ## Review Focus
 
 1. **Account enumeration.**
-   - `POST /auth/identify` returns a byte-identical body and the same status for an unknown email and a known one at the same domain (until the D37 follow-up removes the route; then `POST /auth/password` carries this check).
+   - `POST /auth/password` gives a wrong password and an unknown email the same 401 body (`POST /auth/identify` carried this check until the D37 removal, `5c9b64a`, took the route out).
    - `POST /auth/password/forgot` and `POST /auth/otp/request` answer 202 either way.
    - Timing is equalised with a dummy Argon2 verify.
    - Task 7 and Task 9 own the tests.
@@ -645,7 +645,7 @@ Steps:
 
 ### Task 8: Google and Microsoft SSO (OIDC with PKCE), mocked in tests
 
-> **Removed by owner decision D37; code removal follows Task 9.** The owner chose work email sign-in only (2026-10-09). The task below was built and is kept as history. After Task 9, a separate change removes its code and database objects as D37 lists them (a new migration; `0009` and `0010` stay). Later tasks no longer depend on it.
+> **Removed by owner decision D37.** The owner chose work email sign-in only (2026-10-09). The task below was built and is kept as history. After Task 9 its code and database objects were removed as D37 lists them, with `POST /auth/identify` and the SSO variables: `5c9b64a`, `e28641c` and `6612504` (migration `0012_drop_sso`; `0009` and `0010` stay). Later tasks no longer depend on it.
 
 **Files:**
 - Create:

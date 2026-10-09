@@ -55,8 +55,9 @@ export const sessions = pgTable(
     refreshGeneration: integer('refresh_generation').notNull().default(0),
     keepSignedIn: boolean('keep_signed_in').notNull().default(false),
     /**
-     * The first factor this staff session signed in with (password or an SSO provider), for the
-     * `auth.sign_in` audit once it opens a school (0010, Task 8). Null for mobile and console.
+     * The first factor this staff session signed in with (only `password` since 0012, D37), for
+     * the `auth.sign_in` audit once it opens a school (0010). Null for mobile and console, and for
+     * a session from before 0010 or one that signed in with SSO before 0012.
      */
     signInMethod: signInMethod('sign_in_method'),
     previewRoleId: uuid('preview_role_id'),
