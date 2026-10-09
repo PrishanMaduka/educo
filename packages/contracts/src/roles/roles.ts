@@ -81,33 +81,6 @@ const RoleName = z
 const RoleDescription = z.string().trim().max(300, { message: 'Use at most 300 characters' });
 
 /**
- * `POST /roles`: a custom role. It starts from `baseRoleKey` (any role of the school, whose
- * matrix and sensitive keys it copies) or from nothing (`null`, "Blank").
- */
-export const RoleCreateInput = z
-  .object({
-    name: RoleName,
-    description: RoleDescription.optional(),
-    color: HexColor,
-    scope: RoleScope,
-    baseRoleKey: z.string().min(1).max(64).nullable(),
-  })
-  .strict();
-export type RoleCreateInput = z.infer<typeof RoleCreateInput>;
-
-/** `PATCH /roles/:id`: any of the name, description, colour and scope of a custom role. */
-export const RoleUpdateInput = z
-  .object({
-    name: RoleName.optional(),
-    description: RoleDescription.nullable().optional(),
-    color: HexColor.optional(),
-    scope: RoleScope.optional(),
-  })
-  .strict()
-  .refine((input) => Object.keys(input).length > 0, { message: 'Change at least one thing' });
-export type RoleUpdateInput = z.infer<typeof RoleUpdateInput>;
-
-/**
  * `PUT /roles/:id/permissions`: the whole matrix (a module left out is no access) and the
  * sensitive keys, each once. The API normalises every row (`normaliseRow`).
  */
@@ -124,3 +97,33 @@ export const RolePermissionsInput = z
   })
   .strict();
 export type RolePermissionsInput = z.infer<typeof RolePermissionsInput>;
+
+/**
+ * `POST /roles`: a custom role. It starts from `baseRoleKey` (any role of the school, whose
+ * matrix and sensitive keys it copies) or from nothing (`null`, "Blank"). With `permissions`, the
+ * role is created with that grant instead, checked as `PUT …/permissions` checks it, in the same
+ * transaction, so a refused grant creates no role (D48).
+ */
+export const RoleCreateInput = z
+  .object({
+    name: RoleName,
+    description: RoleDescription.optional(),
+    color: HexColor,
+    scope: RoleScope,
+    baseRoleKey: z.string().min(1).max(64).nullable(),
+    permissions: RolePermissionsInput.optional(),
+  })
+  .strict();
+export type RoleCreateInput = z.infer<typeof RoleCreateInput>;
+
+/** `PATCH /roles/:id`: any of the name, description, colour and scope of a custom role. */
+export const RoleUpdateInput = z
+  .object({
+    name: RoleName.optional(),
+    description: RoleDescription.nullable().optional(),
+    color: HexColor.optional(),
+    scope: RoleScope.optional(),
+  })
+  .strict()
+  .refine((input) => Object.keys(input).length > 0, { message: 'Change at least one thing' });
+export type RoleUpdateInput = z.infer<typeof RoleUpdateInput>;

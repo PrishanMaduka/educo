@@ -15,7 +15,13 @@ export {
   type CommandItem,
   type CommandPaletteProps,
 } from './components/CommandPalette';
-export { Drawer, Stepper, type DrawerProps, type StepperProps } from './components/Drawer';
+export {
+  Drawer,
+  DrawerClose,
+  Stepper,
+  type DrawerProps,
+  type StepperProps,
+} from './components/Drawer';
 export { EmptyState, type EmptyStateProps } from './components/EmptyState';
 export { GreetingScene, type GreetingSceneProps } from './components/GreetingScene';
 export { IconButton, type IconButtonProps } from './components/IconButton';
@@ -58,6 +64,7 @@ export {
 export { Tooltip, type TooltipProps } from './components/Tooltip';
 export { avatarPalette, avatarTone, initialsOf, type AvatarTone } from './lib/avatar';
 export { cn } from './lib/cn';
+export { useLeaveGuard } from './lib/use-leave-guard';
 export { formatDate, type DateStyle } from './format/date';
 export { formatMoney, type Money } from './format/money';
 export { formatRelative } from './format/relative';

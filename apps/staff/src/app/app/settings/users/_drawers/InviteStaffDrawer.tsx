@@ -2,7 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { StaffInviteInput } from '@quad/contracts';
-import { Button, Drawer, Select, Textarea } from '@quad/ui';
+import { Button, Drawer, DrawerClose, Select, Textarea } from '@quad/ui';
 import { Send, UserPlus } from 'lucide-react';
 import { useEffect } from 'react';
 import { Controller, useForm } from 'react-hook-form';
@@ -75,18 +75,21 @@ export function InviteStaffDrawer({ open, onOpenChange, roles, invite }: InviteS
     const error = formState.errors.emails;
     if (error === undefined) return undefined;
     if (error.message !== undefined && error.message !== '') return error.message;
-    // An address the contract refuses is reported at its index.
+    // Each address the contract refuses is reported at its index; name them all.
     const typed = splitEmails(form.getValues('emails'));
     // The array's own errors sit at numeric keys beside `message` and `type`.
     const entries: [string, unknown][] = Object.entries(error);
-    const first = entries.find(([key]) => /^\d+$/.test(key));
-    if (first === undefined) return undefined;
-    const [index, issue] = first;
-    const message =
-      typeof issue === 'object' && issue !== null && 'message' in issue
-        ? String(issue.message)
-        : '';
-    return t('users.invite.addressError', { email: typed[Number(index)] ?? '', message });
+    const named = entries
+      .filter(([key]) => /^\d+$/.test(key))
+      .sort(([a], [b]) => Number(a) - Number(b))
+      .map(([index, issue]) => {
+        const message =
+          typeof issue === 'object' && issue !== null && 'message' in issue
+            ? String(issue.message)
+            : '';
+        return t('users.invite.addressError', { email: typed[Number(index)] ?? '', message });
+      });
+    return named.length > 0 ? named.join(' ') : undefined;
   })();
 
   return (
@@ -96,17 +99,14 @@ export function InviteStaffDrawer({ open, onOpenChange, roles, invite }: InviteS
       title={t('users.invite.title')}
       subtitle={t('users.invite.subtitle')}
       icon={UserPlus}
-      dirty={formState.isDirty && !formState.isSubmitSuccessful}
+      // A refused invite keeps what was typed, so closing still asks; a sent one closes the
+      // drawer itself, which never asks.
+      dirty={formState.isDirty}
       footer={
         <>
-          <Button
-            variant="secondary"
-            onClick={() => {
-              onOpenChange(false);
-            }}
-          >
-            {t('common.cancel')}
-          </Button>
+          <DrawerClose asChild>
+            <Button variant="secondary">{t('common.cancel')}</Button>
+          </DrawerClose>
           <Button type="submit" form="invite-staff" icon={Send} disabled={formState.isSubmitting}>
             {t('users.invite.send')}
           </Button>

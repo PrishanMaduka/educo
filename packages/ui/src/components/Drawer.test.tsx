@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
-import { Drawer, type DrawerProps } from './Drawer';
+import { Drawer, DrawerClose, type DrawerProps } from './Drawer';
 
 function Harness(props: Partial<DrawerProps> & { onClose?: () => void }) {
   const [open, setOpen] = useState(false);
@@ -86,6 +86,26 @@ describe('Drawer', () => {
     render(<Harness width="wide" />);
     await user.click(screen.getByRole('button', { name: 'Open drawer' }));
     expect(screen.getByRole('dialog').className).toContain('sm:w-[760px]');
+  });
+
+  it('asks before a footer Cancel closes it with unsaved changes', async () => {
+    const user = userEvent.setup();
+    const onClose = vi.fn();
+    render(
+      <Harness
+        dirty
+        onClose={onClose}
+        footer={
+          <DrawerClose asChild>
+            <button type="button">Cancel</button>
+          </DrawerClose>
+        }
+      />,
+    );
+    await user.click(screen.getByRole('button', { name: 'Open drawer' }));
+    await user.click(screen.getByRole('button', { name: 'Cancel' }));
+    expect(screen.getByText('Discard changes?')).toBeInTheDocument();
+    expect(onClose).not.toHaveBeenCalled();
   });
 
   it('asks before closing when there are unsaved changes', async () => {

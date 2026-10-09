@@ -1,6 +1,7 @@
+import { useQueryClient } from '@tanstack/react-query';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { fake, resetFake } from '../../../../../../test/fake-api';
 
@@ -129,16 +130,36 @@ const PROPS: UsersRolesProps = {
   canPreview: true,
 };
 
+/** Reads the roles again, as another tab's save or a window focus would. */
+function ReadRolesAgain() {
+  const queries = useQueryClient();
+  return (
+    <button
+      type="button"
+      onClick={() => {
+        void queries.invalidateQueries({ queryKey: ['roles'] });
+      }}
+    >
+      Read roles again
+    </button>
+  );
+}
+
 function renderPage(props: Partial<UsersRolesProps> = {}) {
   return render(
     <Providers>
       <UsersRoles {...PROPS} {...props} />
+      <ReadRolesAgain />
     </Providers>,
   );
 }
 
 const table = () => within(screen.getByRole('table', { name: 'Staff accounts' }));
 const rowOf = (name: string) => table().getByRole('row', { name: new RegExp(name) });
+
+afterEach(() => {
+  vi.restoreAllMocks();
+});
 
 beforeEach(() => {
   resetFake({
@@ -217,9 +238,22 @@ describe('Users & roles: People', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Deactivate' }));
     const drawer = await screen.findByRole('dialog', { name: 'Deactivate Nadeesha Jayasinghe?' });
     expect(fake.requests.some((request) => request.key.startsWith('PATCH'))).toBe(false);
+    fake.answers['GET /api/v1/users'] = {
+      status: 200,
+      body: {
+        ...STAFF,
+        items: [AMAYA, { ...NADEESHA, status: 'deactivated' }, PRISHAN],
+      },
+    };
     await userEvent.click(
       within(drawer).getByRole('button', { name: 'Deactivate Nadeesha Jayasinghe' }),
     );
+    // The menu button went with the row's old actions: focus moves to Reactivate, not the page.
+    await waitFor(() => {
+      expect(
+        within(rowOf('Nadeesha Jayasinghe')).getByRole('button', { name: 'Reactivate' }),
+      ).toHaveFocus();
+    });
     expect(
       await screen.findByText('Nadeesha Jayasinghe can no longer sign in'),
     ).toBeInTheDocument();
@@ -289,6 +323,41 @@ describe('Users & roles: Invite staff', () => {
     expect(fake.requests.some((request) => request.key === 'POST /api/v1/users/invite')).toBe(
       false,
     );
+  });
+
+  it('names every address the contract refuses, not just the first', async () => {
+    const drawer = await openInvite();
+    await userEvent.type(
+      within(drawer).getByLabelText('Email addresses'),
+      'first-bad ok@x.lk second-bad',
+    );
+    await userEvent.click(within(drawer).getByRole('button', { name: 'Send invites' }));
+    expect(
+      await within(drawer).findByText(
+        'first-bad: Enter a valid email address second-bad: Enter a valid email address',
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it('still asks before closing after the school refuses the invite', async () => {
+    resetFake({
+      ...fake.answers,
+      'POST /api/v1/users/invite': {
+        status: 409,
+        body: { code: 'already_member', message: 'This person is already a member of staff here.' },
+      },
+    });
+    const drawer = await openInvite();
+    await userEvent.type(
+      within(drawer).getByLabelText('Email addresses'),
+      'old@colombo-intl.local',
+    );
+    await userEvent.click(within(drawer).getByRole('button', { name: 'Send invites' }));
+    expect(
+      await within(drawer).findByText('This person is already a member of staff here.'),
+    ).toBeInTheDocument();
+    await userEvent.click(within(drawer).getByRole('button', { name: 'Cancel' }));
+    expect(await screen.findByText('Discard changes?')).toBeInTheDocument();
   });
 
   it('names each address the school refuses', async () => {
@@ -364,6 +433,65 @@ describe('Users & roles: Roles & permissions', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Discard' }));
     expect(screen.queryByText('Unsaved changes to Bursar')).toBeNull();
     expect(within(matrix).getByRole('checkbox', { name: 'View in Admissions' })).not.toBeChecked();
+  });
+
+  it('keeps unsaved changes when People is chosen, and says to save or discard first', async () => {
+    renderPage({ initialTab: 'roles', initialRoleId: BURSAR.id });
+    const matrix = await screen.findByRole('table', { name: 'What Bursar can do' });
+    await userEvent.click(within(matrix).getByRole('checkbox', { name: 'View in Admissions' }));
+    await userEvent.click(screen.getByRole('tab', { name: 'People' }));
+    expect(screen.getByText('Save or discard your changes first')).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: 'Roles & permissions' })).toHaveAttribute(
+      'aria-selected',
+      'true',
+    );
+    expect(
+      within(screen.getByRole('table', { name: 'What Bursar can do' })).getByRole('checkbox', {
+        name: 'View in Admissions',
+      }),
+    ).toBeChecked();
+  });
+
+  it('keeps unsaved changes when the roles are read again', async () => {
+    renderPage({ initialTab: 'roles', initialRoleId: BURSAR.id });
+    const matrix = await screen.findByRole('table', { name: 'What Bursar can do' });
+    await userEvent.click(within(matrix).getByRole('checkbox', { name: 'View in Admissions' }));
+    const reads = () => fake.requests.filter((request) => request.key === 'GET /api/v1/roles');
+    const before = reads().length;
+    // Someone was given the role meanwhile: a new role object, with the same grant.
+    fake.answers['GET /api/v1/roles'] = {
+      status: 200,
+      body: { ...ROLES, items: [ADMIN, TEACHER, { ...BURSAR, memberCount: 1 }] },
+    };
+    await userEvent.click(screen.getByRole('button', { name: 'Read roles again' }));
+    await waitFor(() => {
+      expect(reads().length).toBe(before + 1);
+    });
+    expect(screen.getByText('Unsaved changes to Bursar')).toBeInTheDocument();
+    expect(
+      within(screen.getByRole('table', { name: 'What Bursar can do' })).getByRole('checkbox', {
+        name: 'View in Admissions',
+      }),
+    ).toBeChecked();
+  });
+
+  it('asks before New role or a reload leaves unsaved changes', async () => {
+    const confirm = vi.spyOn(window, 'confirm').mockReturnValue(false);
+    renderPage({ initialTab: 'roles', initialRoleId: BURSAR.id });
+    const matrix = await screen.findByRole('table', { name: 'What Bursar can do' });
+    const unload = () => {
+      const event = new Event('beforeunload', { cancelable: true });
+      window.dispatchEvent(event);
+      return event.defaultPrevented;
+    };
+    expect(unload()).toBe(false);
+    await userEvent.click(within(matrix).getByRole('checkbox', { name: 'View in Admissions' }));
+    expect(unload()).toBe(true);
+    await userEvent.click(screen.getByRole('link', { name: 'New role' }));
+    expect(confirm).toHaveBeenCalledWith(
+      'You have unsaved changes. Leave this page and lose them?',
+    );
+    expect(screen.getByText('Unsaved changes to Bursar')).toBeInTheDocument();
   });
 
   it('locks a sensitive key the admin does not hold', async () => {

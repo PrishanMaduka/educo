@@ -73,6 +73,20 @@ describe('RoleCreateInput (POST /roles)', () => {
     expect(RoleCreateInput.safeParse({ ...input, baseRoleKey: null }).success).toBe(true);
   });
 
+  it('may carry the whole grant, so the role is created with it in one step (Task 21 fix)', () => {
+    const row = { view: true, create: false, edit: false, delete: false, approve: false };
+    const permissions = { matrix: { sis: row }, sensitive: ['medical'] };
+    expect(RoleCreateInput.safeParse({ ...input, permissions }).success).toBe(true);
+    expect(
+      pathOf(
+        RoleCreateInput.safeParse({
+          ...input,
+          permissions: { matrix: {}, sensitive: ['medical', 'medical'] },
+        }),
+      ),
+    ).toEqual(['permissions', 'sensitive', 1]);
+  });
+
   it.each([
     [{ name: '  ' }, ['name']],
     [{ name: 'x'.repeat(61) }, ['name']],

@@ -1214,6 +1214,7 @@
   "uiActionMenuLabel": "More actions",
   "commonCancel": "Cancel",
   "commonTryAgain": "Try again",
+  "commonLeaveUnsaved": "You have unsaved changes. Leave this page and lose them?",
   "usersStory": "{staff, plural, one {{staff} member of staff} other {{staff} staff}} · {without, plural, =0 {everyone uses two-step sign-in} one {{without} hasn’t turned on two-step sign-in} other {{without} haven’t turned on two-step sign-in}}",
   "@usersStory": {
     "placeholders": {

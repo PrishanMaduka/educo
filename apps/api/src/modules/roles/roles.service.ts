@@ -97,6 +97,18 @@ async function refuseOwnRole(
   }
 }
 
+/** The 422 when a grant names modules outside the school's plan, each named on its row. */
+function refuseOutsidePlan(outsidePlan: readonly PermissionModule[]): void {
+  if (outsidePlan.length === 0) return;
+  throw new BusinessRuleError(
+    'module_not_in_plan',
+    formatMessage('error.moduleNotInPlan'),
+    Object.fromEntries(
+      outsidePlan.map((module) => [`matrix.${module}`, formatMessage('error.moduleNotInPlan')]),
+    ),
+  );
+}
+
 /** The 403 when a role would give a sensitive key the granter does not hold (spec 08). */
 function refuseUnheldKeys(): never {
   throw new ForbiddenError('forbidden', formatMessage('error.users.sensitiveNotHeld'));
@@ -154,7 +166,11 @@ export class RolesService {
     return { role, grant: grant ?? { matrix: {}, sensitive: [] } };
   }
 
-  /** `POST /roles`: a custom role copying its base role's matrix (in the plan) and keys. */
+  /**
+   * `POST /roles`: a custom role copying its base role's matrix (in the plan) and keys, or, with
+   * `permissions`, created with that grant: checked as `PUT …/permissions` checks it (422 outside
+   * the plan, 403 for keys the granter lacks) in the same transaction, so a refusal creates nothing.
+   */
   async create(
     auth: RequestAuth,
     access: RequestAccess,
@@ -164,10 +180,23 @@ export class RolesService {
     const actor = auditActorOf(schoolOf(auth), ip);
     const role = await this.db.withTenant(actor.tenantId, async (tx) => {
       const base = input.baseRoleKey === null ? null : await this.baseGrant(tx, input.baseRoleKey);
-      if (!canGrant(sensitiveKeysOf(access.permissions), [], base?.sensitive ?? [])) {
+      const planModules = await this.planModulesIn(tx);
+      const sent = input.permissions;
+      let grant: StoredRoleGrant;
+      if (sent === undefined) {
+        grant = storedOf(
+          planMatrix(base?.matrix ?? {}, planModules).granted,
+          base?.sensitive ?? [],
+        );
+      } else {
+        const { granted, outsidePlan } = planMatrix(sent.matrix, planModules);
+        refuseOutsidePlan(outsidePlan);
+        grant = storedOf(granted, sent.sensitive);
+      }
+      // A new role holds nothing yet, so every key in the final grant is one being given.
+      if (!canGrant(sensitiveKeysOf(access.permissions), [], grant.sensitive)) {
         refuseUnheldKeys();
       }
-      const { granted } = planMatrix(base?.matrix ?? {}, await this.planModulesIn(tx));
       const id = await this.repository.insert(tx, actor.tenantId, {
         key: `custom_${randomBytes(6).toString('hex')}`,
         name: input.name,
@@ -176,12 +205,7 @@ export class RolesService {
         scope: input.scope,
         baseRoleKey: input.baseRoleKey,
       });
-      await this.repository.replaceGrant(
-        tx,
-        actor.tenantId,
-        id,
-        storedOf(granted, base?.sensitive ?? []),
-      );
+      await this.repository.replaceGrant(tx, actor.tenantId, id, grant);
       await this.record(tx, actor, 'role.created', id, { baseRoleKey: input.baseRoleKey });
       return this.roleIn(tx, id);
     });
@@ -252,18 +276,7 @@ export class RolesService {
       refuseSystem(current);
       await refuseOwnRole(this.repository, tx, actor, roleId);
       const { granted, outsidePlan } = planMatrix(input.matrix, await this.planModulesIn(tx));
-      if (outsidePlan.length > 0) {
-        throw new BusinessRuleError(
-          'module_not_in_plan',
-          formatMessage('error.moduleNotInPlan'),
-          Object.fromEntries(
-            outsidePlan.map((module) => [
-              `matrix.${module}`,
-              formatMessage('error.moduleNotInPlan'),
-            ]),
-          ),
-        );
-      }
+      refuseOutsidePlan(outsidePlan);
       // `current` comes from the database, never from the request (Task 11 ruling).
       const stored = (await this.permissions.roleGrantsIn(tx, [current])).get(roleId);
       if (

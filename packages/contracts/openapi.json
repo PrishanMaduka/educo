@@ -2634,6 +2634,286 @@
             ],
             "minLength": 1,
             "maxLength": 64
+          },
+          "permissions": {
+            "type": "object",
+            "properties": {
+              "matrix": {
+                "type": "object",
+                "properties": {
+                  "admissions": {
+                    "type": "object",
+                    "properties": {
+                      "view": {
+                        "type": "boolean"
+                      },
+                      "create": {
+                        "type": "boolean"
+                      },
+                      "edit": {
+                        "type": "boolean"
+                      },
+                      "delete": {
+                        "type": "boolean"
+                      },
+                      "approve": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "view",
+                      "create",
+                      "edit",
+                      "delete",
+                      "approve"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "crm": {
+                    "type": "object",
+                    "properties": {
+                      "view": {
+                        "type": "boolean"
+                      },
+                      "create": {
+                        "type": "boolean"
+                      },
+                      "edit": {
+                        "type": "boolean"
+                      },
+                      "delete": {
+                        "type": "boolean"
+                      },
+                      "approve": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "view",
+                      "create",
+                      "edit",
+                      "delete",
+                      "approve"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "sis": {
+                    "type": "object",
+                    "properties": {
+                      "view": {
+                        "type": "boolean"
+                      },
+                      "create": {
+                        "type": "boolean"
+                      },
+                      "edit": {
+                        "type": "boolean"
+                      },
+                      "delete": {
+                        "type": "boolean"
+                      },
+                      "approve": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "view",
+                      "create",
+                      "edit",
+                      "delete",
+                      "approve"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "attendance": {
+                    "type": "object",
+                    "properties": {
+                      "view": {
+                        "type": "boolean"
+                      },
+                      "create": {
+                        "type": "boolean"
+                      },
+                      "edit": {
+                        "type": "boolean"
+                      },
+                      "delete": {
+                        "type": "boolean"
+                      },
+                      "approve": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "view",
+                      "create",
+                      "edit",
+                      "delete",
+                      "approve"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "lms": {
+                    "type": "object",
+                    "properties": {
+                      "view": {
+                        "type": "boolean"
+                      },
+                      "create": {
+                        "type": "boolean"
+                      },
+                      "edit": {
+                        "type": "boolean"
+                      },
+                      "delete": {
+                        "type": "boolean"
+                      },
+                      "approve": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "view",
+                      "create",
+                      "edit",
+                      "delete",
+                      "approve"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "fees": {
+                    "type": "object",
+                    "properties": {
+                      "view": {
+                        "type": "boolean"
+                      },
+                      "create": {
+                        "type": "boolean"
+                      },
+                      "edit": {
+                        "type": "boolean"
+                      },
+                      "delete": {
+                        "type": "boolean"
+                      },
+                      "approve": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "view",
+                      "create",
+                      "edit",
+                      "delete",
+                      "approve"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "finance": {
+                    "type": "object",
+                    "properties": {
+                      "view": {
+                        "type": "boolean"
+                      },
+                      "create": {
+                        "type": "boolean"
+                      },
+                      "edit": {
+                        "type": "boolean"
+                      },
+                      "delete": {
+                        "type": "boolean"
+                      },
+                      "approve": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "view",
+                      "create",
+                      "edit",
+                      "delete",
+                      "approve"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "transport": {
+                    "type": "object",
+                    "properties": {
+                      "view": {
+                        "type": "boolean"
+                      },
+                      "create": {
+                        "type": "boolean"
+                      },
+                      "edit": {
+                        "type": "boolean"
+                      },
+                      "delete": {
+                        "type": "boolean"
+                      },
+                      "approve": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "view",
+                      "create",
+                      "edit",
+                      "delete",
+                      "approve"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "settings": {
+                    "type": "object",
+                    "properties": {
+                      "view": {
+                        "type": "boolean"
+                      },
+                      "create": {
+                        "type": "boolean"
+                      },
+                      "edit": {
+                        "type": "boolean"
+                      },
+                      "delete": {
+                        "type": "boolean"
+                      },
+                      "approve": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "view",
+                      "create",
+                      "edit",
+                      "delete",
+                      "approve"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "additionalProperties": false
+              },
+              "sensitive": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "safeguarding",
+                    "medical",
+                    "finance_reports",
+                    "export_data"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "matrix",
+              "sensitive"
+            ],
+            "additionalProperties": false
           }
         },
         "required": [

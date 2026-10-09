@@ -93,6 +93,12 @@ export interface DrawerProps {
   discardLabel?: string;
 }
 
+/**
+ * Closes the drawer it sits in the way Escape does, so a dirty drawer asks "Discard changes?"
+ * first. Wrap a footer Cancel in it (`asChild`), instead of setting `open` from its click.
+ */
+export const DrawerClose = Dialog.Close;
+
 /** Right-side form drawer: Escape closes, focus is trapped and returns to the opener. */
 export function Drawer({
   open,

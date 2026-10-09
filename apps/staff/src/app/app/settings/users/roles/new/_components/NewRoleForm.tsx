@@ -14,6 +14,7 @@ import {
   PermissionMatrix,
   Select,
   Textarea,
+  useLeaveGuard,
   useToast,
 } from '@quad/ui';
 import { ArrowLeft, Check, ShieldAlert } from 'lucide-react';
@@ -64,7 +65,7 @@ const SCOPE_COPY: Record<RoleScope, { label: MessageKey; hint: MessageKey }> = {
 const BLANK = 'blank';
 
 /** The form's fields: the contract's, with Start from as the select gives it. */
-const NewRoleFields = RoleCreateInput.omit({ baseRoleKey: true }).extend({
+const NewRoleFields = RoleCreateInput.omit({ baseRoleKey: true, permissions: true }).extend({
   baseRoleKey: z.string().min(1),
 });
 type NewRoleFieldsInput = z.input<typeof NewRoleFields>;
@@ -109,9 +110,9 @@ export interface NewRoleFormProps {
 }
 
 /**
- * New role (spec 08 role builder; prototype `ukRolePage(ctx, null)`). Creating copies the chosen
- * role's matrix and keys on the server (`POST /roles`); any change made here is then saved with
- * `PUT /roles/:id/permissions`, and the Roles tab opens on the new role.
+ * New role (spec 08 role builder; prototype `ukRolePage(ctx, null)`). One `POST /roles` creates
+ * the role with the grant shown here, or nothing when it is refused (the form stays, with the
+ * draft); then the Roles tab opens on the new role. Leaving with anything entered asks first.
  */
 export function NewRoleForm({ held }: NewRoleFormProps) {
   const roles = useRoles();
@@ -155,11 +156,16 @@ function Builder({
     },
   });
   const { control, register, handleSubmit, setError, formState } = form;
+  const startDraft = startRole ? draftOf(startRole) : EMPTY;
+  // Once created, the page is left on purpose.
+  const [created, setCreated] = useState(false);
+  const entered = formState.isDirty || isDirty(draft, startDraft);
+  useLeaveGuard(entered && !created, t('common.leaveUnsaved'));
 
   const submit = handleSubmit(async (values) => {
-    let created: Role;
+    let role: Role;
     try {
-      created = await unwrap(
+      role = await unwrap(
         staffApi().POST('/api/v1/roles', {
           body: {
             name: values.name,
@@ -169,31 +175,21 @@ function Builder({
             color: values.color,
             scope: values.scope,
             baseRoleKey: values.baseRoleKey === BLANK ? null : values.baseRoleKey,
+            permissions: permissionsBody(draft, outsidePlan),
           },
         }),
       );
     } catch (error) {
+      // Nothing was created: the form keeps what was entered, and says why.
       const name = fieldError(error, 'name');
       if (name !== undefined) setError('name', { message: name });
       else toast.show(actionMessageFor(error, (key) => t(key)));
       return;
     }
-    // The server copied the base role; save what was changed here on top of it.
-    if (isDirty(draft, created)) {
-      try {
-        await unwrap(
-          staffApi().PUT('/api/v1/roles/{id}/permissions', {
-            params: { path: { id: created.id } },
-            body: permissionsBody(draft, outsidePlan),
-          }),
-        );
-      } catch (error) {
-        toast.show(actionMessageFor(error, (key) => t(key)));
-      }
-    }
+    setCreated(true);
     await refresh();
-    toast.show(t('roles.toast.created', { role: created.name }));
-    router.push(usersHref('roles', created.id));
+    toast.show(t('roles.toast.created', { role: role.name }));
+    router.push(usersHref('roles', role.id));
   });
 
   return (

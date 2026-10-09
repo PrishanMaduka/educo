@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest';
 
-import { draftOf, isDirty, permissionsBody, sensitiveLocked, toggleCell } from './role-draft';
+import {
+  draftFor,
+  draftOf,
+  hasUnsaved,
+  isDirty,
+  permissionsBody,
+  sensitiveLocked,
+  toggleCell,
+} from './role-draft';
 
 import type { Role, RoleMatrix } from '@quad/contracts';
 
@@ -79,5 +87,28 @@ describe('isDirty and the sensitive keys', () => {
     const both: Role = { ...role, sensitive: ['medical', 'safeguarding'] };
     expect(isDirty({ ...draftOf(both), sensitive: ['safeguarding', 'medical'] }, both)).toBe(false);
     expect(isDirty({ ...draftOf(role), sensitive: [] }, role)).toBe(true);
+  });
+});
+
+describe('an unsaved edit, kept by role id', () => {
+  const edited = toggleCell(draftOf(role), 'fees', 'view', true);
+  const edit = { roleId: role.id, draft: edited };
+
+  it('survives a fresh read of the same role (a new object)', () => {
+    const reread: Role = { ...role, memberCount: 1 };
+    expect(draftFor(edit, reread)).toBe(edited);
+    expect(hasUnsaved(edit, [reread])).toBe(true);
+  });
+
+  it('belongs to its own role only', () => {
+    const other: Role = { ...role, id: '0190a000-0000-7000-8000-0000000000c2' };
+    expect(draftFor(edit, other)).toEqual(draftOf(other));
+  });
+
+  it('is nothing once it matches the role, or for a built-in role, or a role gone', () => {
+    expect(hasUnsaved(null, [role])).toBe(false);
+    expect(hasUnsaved(edit, [{ ...role, matrix: edited.matrix }])).toBe(false);
+    expect(hasUnsaved(edit, [{ ...role, system: true }])).toBe(false);
+    expect(hasUnsaved(edit, [])).toBe(false);
   });
 });

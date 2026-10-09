@@ -175,6 +175,7 @@ describe('POST /roles', () => {
     [{ ...createBody, name: '' }],
     [{ ...createBody, color: 'green' }],
     [{ ...createBody, baseRoleKey: 'no_such_role' }],
+    [{ ...createBody, permissions: { matrix: {}, sensitive: ['secrets'] } }],
   ])('answers 400 validation for %j', async (body) => {
     const { admin } = await arrange();
     const response = await as(admin)('POST', '/roles', body);
@@ -196,6 +197,67 @@ describe('POST /roles', () => {
     await setPreview(db(), admin.session.id, school.roles.finance);
     expect((await as(admin)('POST', '/roles', createBody)).json()).toMatchObject({
       code: 'preview_read_only',
+    });
+  });
+
+  it('creates the role with the grant it is sent, in one step, audited once (Task 21 fix)', async () => {
+    const { school, admin } = await arrange();
+    const response = await as(admin)('POST', '/roles', {
+      ...createBody,
+      baseRoleKey: 'counsellor',
+      permissions: { matrix: { fees: { ...VIEW, edit: true }, sis: VIEW }, sensitive: [] },
+    });
+    expect(response.statusCode).toBe(201);
+    const role = Role.parse(response.json());
+    expect(role.baseRoleKey).toBe('counsellor');
+    // The counsellor's attendance row and medical key are not copied: the grant sent is the role's.
+    expect(await storedGrant(role.id)).toEqual({
+      matrix: { fees: '10100', sis: '10000' },
+      sensitive: [],
+    });
+    expect(await auditIn('role.created', school.id)).toHaveLength(1);
+  });
+
+  it('checks the grant it is sent: 422 outside the plan and 403 for unheld keys, and creates nothing', async () => {
+    const { school, admin } = await arrange(['sis']);
+    const before = await db().platform.query(
+      'select count(*)::int as n from roles where tenant_id = $1',
+      [school.id],
+    );
+    const outside = await as(admin)('POST', '/roles', {
+      ...createBody,
+      permissions: { matrix: { transport: VIEW }, sensitive: [] },
+    });
+    expect(outside.statusCode).toBe(422);
+    expect(outside.json()).toMatchObject({ code: 'module_not_in_plan' });
+
+    const manager = await keylessManager(school);
+    const unheld = await as(manager)('POST', '/roles', {
+      ...createBody,
+      baseRoleKey: null,
+      permissions: { matrix: {}, sensitive: ['medical'] },
+    });
+    expect(unheld.statusCode).toBe(403);
+    const after = await db().platform.query(
+      'select count(*)::int as n from roles where tenant_id = $1',
+      [school.id],
+    );
+    // keylessManager added one custom role; the refused creates added none.
+    expect(after.rows[0]).toEqual({ n: (before.rows[0] as { n: number }).n + 1 });
+  });
+
+  it('lets a manager start from a role with keys they lack when the grant they send drops them', async () => {
+    const { school } = await arrange();
+    const manager = await keylessManager(school);
+    const response = await as(manager)('POST', '/roles', {
+      ...createBody,
+      baseRoleKey: 'admin',
+      permissions: { matrix: { sis: VIEW }, sensitive: [] },
+    });
+    expect(response.statusCode).toBe(201);
+    expect(await storedGrant(Role.parse(response.json()).id)).toEqual({
+      matrix: { sis: '10000' },
+      sensitive: [],
     });
   });
 

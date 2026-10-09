@@ -30,6 +30,21 @@ export interface PeopleTabProps {
 }
 
 /**
+ * After a deactivation the row's menu button is gone (its actions changed), so focus moves to the
+ * row's first action (Reactivate) instead of falling to the page. It waits a tick, for the drawer
+ * to finish handing focus back. Of the table row and the phone card, the one on screen wins.
+ */
+function focusRowActions(memberId: string): void {
+  window.setTimeout(() => {
+    const groups = Array.from(
+      document.querySelectorAll<HTMLElement>(`[data-member-actions="${memberId}"]`),
+    );
+    const shown = groups.find((group) => group.getClientRects().length > 0) ?? groups[0];
+    shown?.querySelector<HTMLElement>('button:not(:disabled)')?.focus();
+  }, 0);
+}
+
+/**
  * People (spec 08; prototype `V.users` people tab): Preview a role, then search, role chips and
  * the staff with their row actions.
  */
@@ -211,6 +226,7 @@ export function PeopleTab({
             {
               onSuccess: () => {
                 setConfirming(false);
+                focusRowActions(member.id);
               },
             },
           );

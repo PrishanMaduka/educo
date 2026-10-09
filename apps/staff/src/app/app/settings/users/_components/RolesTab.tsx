@@ -2,16 +2,15 @@
 
 import { Card, EmptyState, PermissionMatrix, useToast } from '@quad/ui';
 import { ShieldAlert } from 'lucide-react';
-import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { isAction, isModule, matrixColumns, matrixRows } from './matrix-labels';
-import { draftOf, isDirty, permissionsBody, toggleCell, toggleSensitive } from './role-draft';
+import { draftFor, hasUnsaved, permissionsBody, toggleCell, toggleSensitive } from './role-draft';
 import { RolesList } from './RolesList';
 import { SaveBar } from './SaveBar';
 import { SensitiveSwitches } from './SensitiveSwitches';
 
-import type { RoleDraft } from './role-draft';
+import type { RoleDraft, RoleEdit } from './role-draft';
 import type { UsersActions } from './use-users-data';
 import type { Role, RoleList, SensitiveKey } from '@quad/contracts';
 
@@ -22,6 +21,9 @@ export interface RolesTabProps {
   /** The sensitive keys the signed-in admin holds (spec 08: no giving others). */
   held: readonly SensitiveKey[];
   actions: UsersActions;
+  /** The unsaved edit, kept by the page so a tab change or a fresh read does not lose it. */
+  edit: RoleEdit | null;
+  onEdit: (edit: RoleEdit | null) => void;
 }
 
 /**
@@ -29,13 +31,18 @@ export interface RolesTabProps {
  * role's module × action matrix and sensitive access. Built-in roles are locked; a custom role is
  * edited in place, with a sticky save bar while anything is unsaved.
  */
-export function RolesTab({ roles, selectedId, onSelect, held, actions }: RolesTabProps) {
+export function RolesTab({
+  roles,
+  selectedId,
+  onSelect,
+  held,
+  actions,
+  edit,
+  onEdit,
+}: RolesTabProps) {
   const { t } = useTranslation();
   const toast = useToast();
   const role = roles.items.find((item) => item.id === selectedId) ?? roles.items[0];
-  // The draft belongs to the role as it was read: choosing another role, or a fresh read after a
-  // save, starts again from what the API says.
-  const [edit, setEdit] = useState<{ readonly base: Role; readonly draft: RoleDraft } | null>(null);
 
   if (role === undefined) {
     return (
@@ -44,11 +51,11 @@ export function RolesTab({ roles, selectedId, onSelect, held, actions }: RolesTa
       </Card>
     );
   }
-  const draft = edit?.base === role ? edit.draft : draftOf(role);
+  const draft = draftFor(edit, role);
   const setDraft = (next: RoleDraft) => {
-    setEdit({ base: role, draft: next });
+    onEdit({ roleId: role.id, draft: next });
   };
-  const dirty = !role.system && isDirty(draft, role);
+  const dirty = hasUnsaved(edit, roles.items);
   const choose = (next: Role) => {
     if (next.id === role.id) return;
     if (dirty) {
@@ -104,14 +111,19 @@ export function RolesTab({ roles, selectedId, onSelect, held, actions }: RolesTa
           roleName={role.name}
           saving={actions.savePermissions.isPending}
           onDiscard={() => {
-            setDraft(draftOf(role));
+            onEdit(null);
             toast.show(t('roles.toast.discarded'));
           }}
           onSave={() => {
-            actions.savePermissions.mutate({
-              role,
-              body: permissionsBody(draft, roles.outsidePlan),
-            });
+            actions.savePermissions.mutate(
+              { role, body: permissionsBody(draft, roles.outsidePlan) },
+              {
+                // After the roles are read again, so the saved grant shows with no flicker.
+                onSuccess: () => {
+                  onEdit(null);
+                },
+              },
+            );
           }}
         />
       ) : null}

@@ -57,9 +57,16 @@ export function ToastProvider({
 
   const show = useCallback(
     (message: string) => {
+      // The same message twice in a row (a double click, or a guard refusing twice) shows once,
+      // for the full time from the repeat.
+      const showing = current.current.find((toast) => toast.message === message);
+      if (showing !== undefined) {
+        clearTimeout(timers.current.get(showing.id));
+        timers.current.delete(showing.id);
+      }
       nextId.current += 1;
       const id = nextId.current;
-      const next = [...current.current, { id, message }];
+      const next = [...current.current.filter((toast) => toast !== showing), { id, message }];
       const kept = next.slice(-MAX_VISIBLE);
       for (const dropped of next.slice(0, next.length - kept.length)) {
         clearTimeout(timers.current.get(dropped.id));

@@ -656,6 +656,7 @@
   "ui.actionMenu.label": "More actions",
   "common.cancel": "Cancel",
   "common.tryAgain": "Try again",
+  "common.leaveUnsaved": "You have unsaved changes. Leave this page and lose them?",
   "users.story": "{staff, plural, one {# member of staff} other {# staff}} · {without, plural, =0 {everyone uses two-step sign-in} one {# hasn’t turned on two-step sign-in} other {# haven’t turned on two-step sign-in}}",
   "users.tabs.label": "Users & roles sections",
   "users.tab.people": "People",

@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, buttonVariants, Card, EmptyState, Tabs } from '@quad/ui';
+import { Button, buttonVariants, Card, EmptyState, Tabs, useLeaveGuard, useToast } from '@quad/ui';
 import { PageHead } from '@quad/ui/shell';
 import { Plus, ShieldAlert, UserPlus } from 'lucide-react';
 import Link from 'next/link';
@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next';
 import { InviteStaffDrawer } from '../_drawers/InviteStaffDrawer';
 
 import { PeopleTab } from './PeopleTab';
+import { hasUnsaved, type RoleEdit } from './role-draft';
 import { RolesTab } from './RolesTab';
 import { useRoles, useStaff, useUsersActions, type StaffFilter } from './use-users-data';
 
@@ -60,10 +61,15 @@ export function UsersRoles({
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<StaffFilter>({ q: '', roleId: null });
   const [inviting, setInviting] = useState(false);
+  const [edit, setEdit] = useState<RoleEdit | null>(null);
+  const toast = useToast();
   const staff = useStaff(filter);
   const roles = useRoles();
   const actions = useUsersActions();
   const shell = useShellActions();
+  // A role's unsaved changes stay until saved or discarded: the tabs wait, and leaving asks.
+  const unsaved = hasUnsaved(edit, roles.data?.items ?? []);
+  useLeaveGuard(unsaved, t('common.leaveUnsaved'));
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -146,6 +152,10 @@ export function UsersRoles({
         label={t('users.tabs.label')}
         value={tab}
         onValueChange={(value) => {
+          if (unsaved) {
+            toast.show(t('roles.toast.saveFirst'));
+            return;
+          }
           show(value === 'roles' ? 'roles' : 'people', roleId);
         }}
         tabs={[
@@ -194,6 +204,8 @@ export function UsersRoles({
                   }}
                   held={held}
                   actions={actions}
+                  edit={edit}
+                  onEdit={setEdit}
                 />
               ),
           },

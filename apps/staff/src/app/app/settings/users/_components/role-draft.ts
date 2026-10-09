@@ -13,6 +13,27 @@ export function draftOf(role: Pick<Role, 'matrix' | 'sensitive'>): RoleDraft {
   return { matrix: role.matrix, sensitive: role.sensitive };
 }
 
+/**
+ * The unsaved edit of one custom role, kept by the role's id: reading the roles again (a new
+ * role object) or changing tabs keeps it until it is saved or discarded.
+ */
+export interface RoleEdit {
+  readonly roleId: string;
+  readonly draft: RoleDraft;
+}
+
+/** What the matrix shows for a role: its unsaved edit, or what the API says it has. */
+export function draftFor(edit: RoleEdit | null, role: Role): RoleDraft {
+  return edit?.roleId === role.id ? edit.draft : draftOf(role);
+}
+
+/** Whether the edit still differs from its role as read now (a built-in role never does). */
+export function hasUnsaved(edit: RoleEdit | null, roles: readonly Role[]): boolean {
+  if (edit === null) return false;
+  const role = roles.find((item) => item.id === edit.roleId);
+  return role !== undefined && !role.system && isDirty(edit.draft, role);
+}
+
 /** One box clicked, by the matrix rules in `@quad/domain` (`normaliseRow`). */
 export function toggleCell(
   draft: RoleDraft,
@@ -33,7 +54,7 @@ export function toggleSensitive(draft: RoleDraft, key: SensitiveKey, on: boolean
 }
 
 /** Whether the draft differs from what the role has now. */
-export function isDirty(draft: RoleDraft, role: Pick<Role, 'matrix' | 'sensitive'>): boolean {
+export function isDirty(draft: RoleDraft, role: RoleDraft): boolean {
   const rowsDiffer = PermissionModule.options.some(
     (module) => JSON.stringify(draft.matrix[module]) !== JSON.stringify(role.matrix[module]),
   );

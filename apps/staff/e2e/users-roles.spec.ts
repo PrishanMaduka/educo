@@ -212,6 +212,13 @@ test.describe('Users & roles, as the school admin', () => {
 
     await saved.getByRole('checkbox', { name: 'View in Fees & invoicing' }).click();
     await expect(page.getByText(`Unsaved changes to ${name}`)).toBeVisible();
+    // Unsaved changes hold the page: People waits until they are saved or discarded.
+    await page.getByRole('tab', { name: 'People' }).click();
+    await expect(page.getByText('Save or discard your changes first')).toBeVisible();
+    await expect(page.getByRole('tab', { name: 'Roles & permissions' })).toHaveAttribute(
+      'aria-selected',
+      'true',
+    );
     await page.getByRole('button', { name: 'Save changes' }).click();
     await expect(page.getByText(`Permissions for ${name} saved`)).toBeVisible();
     await expect(page.getByText(`Unsaved changes to ${name}`)).toHaveCount(0);

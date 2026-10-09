@@ -55,6 +55,19 @@ describe('Toast', () => {
     expect(screen.getByText('three')).toBeInTheDocument();
   });
 
+  it('shows a message once while it is already showing, and for the full time from the repeat', () => {
+    setup(['Save first', 'Save first']);
+    expect(screen.getAllByText('Save first')).toHaveLength(1);
+    act(() => {
+      vi.advanceTimersByTime(2000);
+      screen.getByRole('button', { name: 'fire' }).click();
+    });
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+    expect(screen.getAllByText('Save first')).toHaveLength(1);
+  });
+
   it('removes each toast after 2.8 seconds', () => {
     setup(['saved']);
     act(() => {

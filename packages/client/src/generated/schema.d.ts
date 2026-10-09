@@ -4074,6 +4074,74 @@ export interface components {
             /** @enum {string} */
             scope: "school" | "campus" | "own_classes";
             baseRoleKey: string | null;
+            permissions?: {
+                matrix: {
+                    admissions?: {
+                        view: boolean;
+                        create: boolean;
+                        edit: boolean;
+                        delete: boolean;
+                        approve: boolean;
+                    };
+                    crm?: {
+                        view: boolean;
+                        create: boolean;
+                        edit: boolean;
+                        delete: boolean;
+                        approve: boolean;
+                    };
+                    sis?: {
+                        view: boolean;
+                        create: boolean;
+                        edit: boolean;
+                        delete: boolean;
+                        approve: boolean;
+                    };
+                    attendance?: {
+                        view: boolean;
+                        create: boolean;
+                        edit: boolean;
+                        delete: boolean;
+                        approve: boolean;
+                    };
+                    lms?: {
+                        view: boolean;
+                        create: boolean;
+                        edit: boolean;
+                        delete: boolean;
+                        approve: boolean;
+                    };
+                    fees?: {
+                        view: boolean;
+                        create: boolean;
+                        edit: boolean;
+                        delete: boolean;
+                        approve: boolean;
+                    };
+                    finance?: {
+                        view: boolean;
+                        create: boolean;
+                        edit: boolean;
+                        delete: boolean;
+                        approve: boolean;
+                    };
+                    transport?: {
+                        view: boolean;
+                        create: boolean;
+                        edit: boolean;
+                        delete: boolean;
+                        approve: boolean;
+                    };
+                    settings?: {
+                        view: boolean;
+                        create: boolean;
+                        edit: boolean;
+                        delete: boolean;
+                        approve: boolean;
+                    };
+                };
+                sensitive: ("safeguarding" | "medical" | "finance_reports" | "export_data")[];
+            };
         };
         RoleUpdateInput: {
             name?: string;
