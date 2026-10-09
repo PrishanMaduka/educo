@@ -454,7 +454,7 @@ td.r,th.r{text-align:right}
 .bk span{color:var(--ink-3)}
 .agenda .ag{display:flex;gap:10px;align-items:center;padding:10px 18px;border-bottom:1px solid var(--line);font-size:13px}
 .agenda .ag:last-child{border-bottom:0}
-.agenda .ag.done{opacity:.55}.agenda .ag.cur{background:var(--brand-soft)}
+.agenda .ag.done{color:var(--ink-3)}.agenda .ag.done b{color:var(--ink-2)}.agenda .ag.cur{background:var(--brand-soft)}
 .agenda .ag>i{width:8px;height:8px;border-radius:50%;flex:none}
 .load .lr{display:grid;grid-template-columns:10px 1fr auto;gap:6px 10px;align-items:center;padding:9px 18px;font-size:13px}
 .load .lr .bar{grid-column:2/-1;height:4px}
@@ -708,7 +708,7 @@ button.st-sec:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg)}
 .in-unit{position:relative}.in-unit .input{padding-left:34px}.in-unit::before{content:attr(data-u);position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--ink-3);font-weight:700;font-size:12.5px;pointer-events:none}
 @media (max-width:900px){.gw-grid{grid-template-columns:1fr}.ex-day{grid-template-columns:1fr}.bl-line{grid-template-columns:1fr 1fr}.bl-line b{grid-column:1/-1}}
 
-/* ===== Shared layer: indigo rail, coral actions, lilac highlights, pill controls ===== */
+/* ===== Shared layer (from the first look; the design-system layers below restyle it): pill controls, cards, tables ===== */
 :root{--vine:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='14' viewBox='0 0 56 14'%3E%3Cg fill='none' stroke='%23C9973B' stroke-width='1.3' stroke-linecap='round'%3E%3Cpath d='M0 7c7 0 7-5 14-5s7 5 14 5 7 5 14 5 7-5 14-5'/%3E%3Cpath d='M14 2c-2 2-1 4 1 4M42 12c2-2 1-4-1-4'/%3E%3C/g%3E%3Cg fill='%23C9973B'%3E%3Ccircle cx='28' cy='7' r='1.6'/%3E%3Cpath d='M7 9.5c1.3 1 1.3 3.2 0 4.2-1.3-1-1.3-3.2 0-4.2zM35 .3c1.3 1 1.3 3.2 0 4.2-1.3-1-1.3-3.2 0-4.2z'/%3E%3C/g%3E%3C/svg%3E")}
 body{font-size:14.5px}
 .vine{display:none;height:14px;background:var(--vine) repeat-x left center/56px 14px;opacity:var(--vine-o)}
@@ -1087,6 +1087,152 @@ button[data-auth="show"]{min-height:24px;padding:3px 6px}
 .perm th,.perm td{text-align:center}
 .perm td:first-child,.perm th:first-child{text-align:left}
 
+/* TODO move to system: local tokens the shared files don't have yet.
+   --on-fill   text and icons on a filled status or chart colour (good, bad, warn, info, c1–c5): white in light mode,
+               navy in dark mode, where those fills are light. */
+:root{--on-fill:#ffffff}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--on-fill:#101632}
+}
+:root[data-theme="dark"]{--on-fill:#101632}
+/* end TODO */
+
+/* ===== Rollout: every other screen on the app design system (design/system.html) =====
+   Colour-coded things (subjects, stages, houses) use the chart tokens c1–c5 as a dot, bar or edge and keep their words in ink,
+   so text never depends on a category colour for contrast. */
+
+/* Shared bits */
+.support{background:var(--navy);color:var(--on-navy)}
+.support button{border-radius:999px}
+.seg button.on.P, .seg button.on.A, .seg button.on.L, .seg button.on.E{color:var(--on-fill)}
+.pev td.mine{color:var(--on-fill)}
+.ad-steps li.done i{color:var(--brand-ink)}
+.badge-now{color:var(--on-fill)}
+.bl-strip i{color:var(--on-fill)}
+.bl-strip i.l{color:var(--brand-ink)}
+.card-h .pill.t-amber.plain{color:var(--on-fill)}
+.uk-sw::after{background:var(--surface)}
+.uk-sw.on::after, .uk-sw[aria-checked="true"]::after{background:var(--brand-ink)}
+.drawer-b a:not(.btn), .card-b p a:not(.btn), .muted a:not(.btn), p a:not(.btn){text-decoration:underline;text-underline-offset:2px;text-decoration-thickness:1px}
+.empty{color:var(--ink-3)}
+.empty b{color:var(--ink)}
+.kcard{border-radius:16px;box-shadow:var(--shadow-sm)}
+.col{border-radius:20px;background:var(--surface-2)}
+.col-h .n{background:var(--surface);border-color:var(--line);font-weight:800}
+.legend span{color:var(--ink-2)}
+.timeline div::before{border-color:var(--brand-fill);background:var(--surface)}
+.list .li time{color:var(--ink-3)}
+/* Subjects: a dot in the subject colour, the name in ink */
+.subj-tag{display:inline-flex;align-items:center;gap:6px;background:var(--surface-2);color:var(--ink);border:1px solid var(--line);font-weight:700}
+.subj-tag::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--c);flex:none}
+.ls-ic, .tl-top .ls-ic{color:var(--on-fill)}
+/* Timetable lesson cards: a tinted card with a coloured top edge, rooms as neutral chips */
+.ls{background:color-mix(in srgb, var(--c) 9%, var(--surface));border:1px solid color-mix(in srgb, var(--c) 22%, var(--line));border-top:3px solid var(--c);border-radius:14px}
+.ls b{color:var(--ink)}
+.ls-meta{color:var(--ink-2)}
+.ls-meta .room{color:var(--ink);background:var(--surface);border:1px solid color-mix(in srgb, var(--c) 30%, var(--line));font-weight:700}
+.ls.past{opacity:1;filter:none;background:var(--surface-2);border-color:var(--line);border-top-color:var(--line-strong)}
+.ls.past .ls-ic{background:var(--line-strong);color:var(--ink-2)}
+.ls.now{box-shadow:0 0 0 2px var(--c), var(--shadow)}
+.ls.free{border-top-width:1px}
+.tt2 .dh{border-radius:14px}
+.tt2 .brk{border-radius:12px;color:var(--ink-2)}
+.ls-hero{background:var(--navy);color:var(--on-navy);border-radius:28px 0 0 0}
+.ls-hero h2{color:var(--on-navy)}
+.ls-hero .muted, .ls-hero small{color:var(--on-navy-2)}
+.ls-hero .ls-ic.big{background:var(--c);color:var(--on-fill)}
+.ls-hero .iconbtn{background:var(--navy-2);border-color:var(--navy-line);color:var(--on-navy)}
+:root[data-theme="dark"] .ls-hero{background:var(--navy-2)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .ls-hero{background:var(--navy-2)}
+}
+@media (max-width: 600px){.ls-hero{border-radius:0}
+}
+/* My teaching: a navy story card like Today, then the day as a timeline */
+.teach-hero{background:var(--navy);color:var(--on-navy);border-radius:var(--r-lg);padding:26px 28px;box-shadow:var(--shadow)}
+:root[data-theme="dark"] .teach-hero{background:var(--navy-2);box-shadow:inset 0 0 0 1px var(--navy-line)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .teach-hero{background:var(--navy-2);box-shadow:inset 0 0 0 1px var(--navy-line)}
+}
+.teach-hero small{color:var(--on-navy-3);opacity:1;font-weight:800;letter-spacing:0.1em}
+.teach-hero b{font:800 28px/1.1 var(--f-display);letter-spacing:-0.03em;color:var(--on-navy)}
+.teach-hero span{color:var(--on-navy-2);opacity:1}
+.teach-hero > div:first-child b::after{content:"";display:block;width:64px;height:6px;border-radius:6px;background:var(--lime);margin-top:10px}
+.teach-stats div{background:var(--navy-2);border:1px solid var(--navy-line);border-radius:16px}
+.teach-stats b{font:800 24px var(--f-display);color:var(--on-navy)}
+.teach-stats small{color:var(--on-navy-2)}
+.tl.past{opacity:1}
+.tl.past .tl-b{border-left-color:var(--line-strong)}
+.tl.past .tl-t, .tl.past .tl-t small, .tl.past .tl-top b{color:var(--ink-3)}
+.tl.past .ls-ic{background:var(--surface-3);color:var(--ink-2)}
+.tl-t small{color:var(--ink-3)}
+.tl.now .tl-b{background:color-mix(in srgb, var(--c) 8%, var(--surface))}
+.wk-h{border-radius:999px;padding:6px 12px}
+.wk-d.today .wk-h small{color:var(--brand-ink)}
+.wk-l{border-radius:12px}
+.fp-row.quiet{background:color-mix(in srgb, var(--lime-soft) 40%, var(--surface))}
+/* Courses */
+.course{border-radius:var(--r)}
+.course .cover{height:auto;min-height:88px;gap:10px;color:var(--ink);background:color-mix(in srgb, var(--c) 12%, var(--surface));border-bottom:1px solid var(--line);position:relative}
+.course .cover::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--c)}
+.course .cover small{opacity:1;color:var(--ink-2);font-weight:700}
+.course .cover b{font:800 19px var(--f-display);letter-spacing:-0.02em}
+/* Exams */
+.ex-s{border-radius:var(--r)}
+.ex-p{border-radius:12px;background:color-mix(in srgb, var(--c) 8%, var(--surface));border:1px solid var(--line);border-left:4px solid var(--c)}
+.ex-p:hover{border-color:var(--field-line);border-left-color:var(--c)}
+.ex-d b{font:800 18px var(--f-display)}
+/* Family connection heatmap: the shared heat tokens, none → a lot */
+.cx-c{border-radius:12px;border-color:transparent}
+.cx-c.h0{background:var(--heat-0);color:var(--heat-0-ink)}
+.cx-c.h1{background:var(--heat-1);color:var(--heat-1-ink)}
+.cx-c.h2{background:var(--heat-2);color:var(--heat-2-ink)}
+.cx-c.h3{background:var(--heat-3);color:var(--heat-3-ink)}
+.cx-c small{color:inherit;opacity:1}
+.cx-c:hover{border-color:var(--ink)}
+.cx-leg i{display:none}
+.cx-leg .sw{display:inline-block;width:22px;height:12px;border-radius:4px}
+/* Academic year */
+.yr-line{margin-top:16px}
+.yr-term{background:var(--surface-2);color:var(--ink);border:1px solid var(--line);border-radius:14px}
+.yr-term b{color:var(--ink)}
+.yr-term.cur{background:var(--brand-soft);border-color:color-mix(in srgb, var(--brand-text) 35%, transparent)}
+.yr-bar i{opacity:1;border-radius:8px 8px 3px 3px}
+.rl-opt.on{border-color:var(--brand-text)}
+/* Pastoral and reports */
+.house .hd{border-radius:50%}
+.rep-row{border-radius:12px}
+.rep-g{border-radius:999px}
+/* Finance */
+.coa .amt{font-variant-numeric:tabular-nums}
+/* Inbox */
+.msg{border-radius:18px 18px 18px 6px}
+.msg.me{border-radius:18px 18px 6px 18px}
+.thread.on, .thread[aria-current="true"]{background:var(--brand-soft)}
+/* Sign-in: Quad before anyone knows the school (navy, lime and the logo); the school's colour comes after */
+.auth-art{background:var(--navy)}
+.auth-art::before{content:"";position:absolute;width:520px;height:520px;right:-180px;bottom:-200px;border-radius:50%;background:radial-gradient( closest-side, color-mix(in srgb, var(--lime) 30%, transparent), transparent );pointer-events:none}
+.auth-art::after{opacity:0.6}
+.auth-brand .auth-wordmark{height:34px;width:auto;display:block}
+.auth-quote h2{font:800 clamp(34px, 4vw, 52px)/1.02 var(--f-display);letter-spacing:-0.04em;color:var(--on-navy)}
+.auth-quote h2 em{font-style:normal;background:var(--lime);color:var(--navy);border-radius:999px;padding:0 0.24em;display:inline-block;transform:rotate(-2deg)}
+.auth-quote p{color:var(--on-navy-2)}
+.auth-stats div{background:var(--navy-2);border:1px solid var(--navy-line);border-radius:18px}
+.auth-stats b{color:var(--lime)}
+.auth-stats span{color:var(--on-navy-2)}
+.auth-panel{background:var(--canvas)}
+.auth-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow);padding:32px}
+.auth-card h1{font:800 30px/1.1 var(--f-display);letter-spacing:-0.03em}
+.auth-or{color:var(--ink-3)}
+.auth-or span{color:var(--ink-2)}
+.auth .linkbtn{color:var(--brand-text)}
+.auth .btn.primary{background:var(--brand-fill);border-color:var(--brand-fill);color:var(--brand-ink)}
+.auth .btn.primary:hover{background:var(--brand-fill-strong);border-color:var(--brand-fill-strong)}
+.auth .checkrow input, .auth input[type="checkbox"]{accent-color:var(--ink)}
+.auth-foot{color:var(--ink-3)}
+.auth-card{width:min(440px,100%)}
+.ad-head{background:var(--surface)}
+@media (max-width:600px){.teach-stats{width:100%}.teach-stats div{flex:1;min-width:0;padding:10px}.teach-stats b{font-size:18px}}
+@media (max-width: 860px){.auth-card{padding:22px;border-radius:var(--r)}
+.auth-quote h2{font-size:32px}
+}
 </style>
 </head>
 <body>
@@ -1116,7 +1262,7 @@ button[data-auth="show"]{min-height:24px;padding:3px 6px}
 </div>
 
 <div class="scrim" id="scrim" data-act="closeAll"></div>
-<aside class="drawer" id="drawer" aria-hidden="true"></aside>
+<aside class="drawer" id="drawer" aria-hidden="true" inert></aside>
 <div class="modal" id="modal" role="dialog" aria-modal="true"></div>
 <div class="cmdk" id="cmdk"><input id="cmdkInput" placeholder="Type a page, student or invoice…" autocomplete="off"><ul id="cmdkList"></ul></div>
 <div class="notif" id="notif"></div>
@@ -1179,14 +1325,14 @@ const bigM = v => moneyM(v * 1e6);
 
 /* ---------- Academic structure: curriculum, stages and year groups set by the platform when the school was created ---------- */
 const ACAD_DEFAULT = {curr: {id:'cambridge', name:'Cambridge International', short:'Cambridge', grading:'A* to U', quals:[['Year 6','Cambridge Primary Checkpoint'],['Year 9','Lower Secondary Checkpoint'],['Year 11','IGCSE'],['Year 13','International A Level']]},
-  stages: [{name:'Early Years (EYFS)', ages:'3–5', years:['Playgroup','Nursery','Reception'], color:'#8B7CF6', sections:2}, {name:'Junior School', ages:'5–11', years:['Year 1','Year 2','Year 3','Year 4','Year 5','Year 6'], color:'#2BB0A0', sections:2},
-    {name:'Senior School', ages:'11–16', years:['Year 7','Year 8','Year 9','Year 10','Year 11'], color:'#DD4A42', sections:2}, {name:'Sixth Form', ages:'16–18', years:['Year 12','Year 13'], color:'#8B7CF6', sections:2}]};
+  stages: [{name:'Early Years (EYFS)', ages:'3–5', years:['Playgroup','Nursery','Reception'], color:'#4048B8', sections:2}, {name:'Junior School', ages:'5–11', years:['Year 1','Year 2','Year 3','Year 4','Year 5','Year 6'], color:'#4E8A12', sections:2},
+    {name:'Senior School', ages:'11–16', years:['Year 7','Year 8','Year 9','Year 10','Year 11'], color:'#E0478A', sections:2}, {name:'Sixth Form', ages:'16–18', years:['Year 12','Year 13'], color:'#1F8ACF', sections:2}]};
 function loadAcad() { try { const s = JSON.parse(localStorage.getItem('quad-school') || 'null'); if (s && s.acad && s.acad.stages && s.acad.stages.some(x => x.on !== false && x.years && x.years.length)) return s.acad; } catch (e) {} return ACAD_DEFAULT; }
 const ACAD = loadAcad();
 const STG = []; const LV = [];
 ACAD.stages.filter(x => x.on !== false && x.years && x.years.length).forEach(x => { const si = STG.length, from = LV.length + 1;
-  x.years.forEach(y => LV.push({label: y, stage: x.name, si, color: x.color || '#DD4A42', sections: Math.max(1, Math.min(10, +x.sections || 2)), ages: x.ages}));
-  STG.push({name: x.name, ages: x.ages, color: x.color || '#DD4A42', from, to: LV.length, sections: Math.max(1, Math.min(10, +x.sections || 2))}); });
+  x.years.forEach(y => LV.push({label: y, stage: x.name, si, color: x.color || '#4048B8', sections: Math.max(1, Math.min(10, +x.sections || 2)), ages: x.ages}));
+  STG.push({name: x.name, ages: x.ages, color: x.color || '#4048B8', from, to: LV.length, sections: Math.max(1, Math.min(10, +x.sections || 2))}); });
 const GRADE_BANDS = STG.map(x => [x.name, x.from, x.to, x.color]);
 const LV_BASE = Math.max(0, LV.findIndex(x => /(^|\D)1$/.test(x.label)));   // index of the first year group numbered 1
 const lvL = n => Math.max(1, Math.min(LV.length, LV_BASE + n));                // sample data written as grade n → this school's year group
@@ -1475,13 +1621,13 @@ V.attendance = () => {
 };
 
 const COURSES = [
-  ['Mathematics','Grade 10 · Mr. Haddad','#DD4A42',72,4,128],['Physics','Grade 10 · Mr. Tanaka','#3B4AA8',64,2,96],['English Literature','Grade 10 · Ms. Reyes','#8B7CF6',81,3,128],
-  ['ICT','Grade 10 · Mrs. Fischer','#2BB0A0',58,1,64],['History','Grade 10 · Mr. Evans','#F2A93B',69,2,96],['Art & Design','Grade 10 · Ms. Dubois','#D9578C',77,0,64]
+  ['Mathematics','Grade 10 · Mr. Haddad','var(--c2)',72,4,128],['Physics','Grade 10 · Mr. Tanaka','var(--c3)',64,2,96],['English Literature','Grade 10 · Ms. Reyes','var(--c1)',81,3,128],
+  ['ICT','Grade 10 · Mrs. Fischer','var(--c5)',58,1,64],['History','Grade 10 · Mr. Evans','var(--c4)',69,2,96],['Art & Design','Grade 10 · Ms. Dubois','var(--c1)',77,0,64]
 ];
 V.lms = () => {
   const t = curTab('lms', 'courses');
   let body = '';
-  if (t === 'courses') body = `<div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(260px,1fr))">${COURSES.map(([n, by, c, prog, due, stu]) => `<div class="card course" data-act="toast" data-msg="Opening ${n} course space"><div class="cover" style="background:${c}"><small>${by}</small><b>${n}</b></div><div class="cb">
+  if (t === 'courses') body = `<div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(260px,1fr))">${COURSES.map(([n, by, c, prog, due, stu]) => `<div class="card course" data-act="toast" data-msg="Opening ${n} course space"><div class="cover" style="--c:${c}"><small>${by}</small><b>${n}</b></div><div class="cb">
     <div style="display:flex;justify-content:space-between"><span>Syllabus covered</span><b class="num" style="color:var(--ink)">${prog}%</b></div><div class="bar"><i style="width:${prog}%;background:${c}"></i></div>
     <div style="display:flex;gap:14px"><span>${ic('file',13)} ${due} due this week</span><span>${ic('student',13)} ${stu} learners</span></div></div></div>`).join('')}</div>`;
   else if (t === 'assignments') body = `<div class="card"><div class="tbl-wrap"><table><thead><tr><th>Assignment</th><th>Course</th><th>Due</th><th>Submissions</th><th>Status</th><th></th></tr></thead><tbody>
@@ -1616,7 +1762,7 @@ V.users = () => {
 const UK = { tab:'profile', draft:null, draftKey:null, dirty:false, ctx:null, user:null, q:'' };
 const UK_DEPTS = ['Leadership','Primary','Secondary','Finance office','Admissions office','Student services','Front office','IT'];
 const UK_CLASSES = [...new Set([4, 5, 7, 8, 9, 10, 11, 12].map((n, i) => { const g = lvL(n), sx = ttSecs(g); return clsName(g, sx[i % sx.length]); }))];
-const UK_COLORS = ['#DD4A42','#178276','#3B4AA8','#7A68E8','#C2457E','#E5534B','#2C3370','#5B6BD0'];
+const UK_COLORS = ['#E0478A','#1B7F53','#4048B8','#1F8ACF','#D9640B','#C4234A','#101632','#4E8A12'];
 const UK_SENSITIVE = [
   ['export','Export data','Download student, staff or finance records as spreadsheets'],
   ['medical','See medical and safeguarding notes','Allergies, health conditions and counsellor notes'],
@@ -1648,7 +1794,7 @@ const ukRoleOf = (ctx, id) => ctx.roles().find(r => r.id === id) || {id, n:id, d
 const ukEffective = (ctx, u) => { const P = ctx.perms(), out = {}; [u.role, ...u._p.extraRoles].forEach(rid => { const p = P[rid]; if (!p) return; ctx.mods.forEach(([m]) => { out[m] = (out[m] || [0,0,0,0,0]).map((v, j) => v || (p[m] ? p[m][j] : 0)); }); }); return out; };
 const ukField = (key, label, val, type='text', extra='') => `<div class="field"><label for="ukf_${key}">${label}</label><input class="input" id="ukf_${key}" data-ukf="${key}" type="${type}" value="${esc(val)}" ${extra}></div>`;
 const ukSelect = (key, label, val, opts) => `<div class="field"><label for="ukf_${key}">${label}</label><select class="input" id="ukf_${key}" data-ukf="${key}">${opts.map(o => { const [v, l] = Array.isArray(o) ? o : [o, o]; return `<option value="${esc(v)}" ${v===val?'selected':''}>${esc(l)}</option>`; }).join('')}</select></div>`;
-const ukSw = (on, attrs) => `<button class="uk-sw ${on?'on':''}" role="switch" aria-checked="${on}" ${attrs}></button>`;
+const ukSw = (on, attrs) => `<button class="uk-sw ${on?'on':''}" role="switch" aria-checked="${!!on}" ${attrs}></button>`;
 
 /* ----- User profile page ----- */
 function ukProfilePage(ctx, u) {
@@ -1676,7 +1822,7 @@ function ukProfilePage(ctx, u) {
   else if (t === 'access') { const eff = ukEffective(ctx, u), roles = ctx.roles();
     body = `<div class="grid g-2-1"><section class="card"><div class="card-h"><h2>What ${esc(p.display)} can do</h2><span class="muted" style="font-size:12.5px">Combined from all roles below</span></div>
       <div class="tbl-wrap"><table class="perm"><thead><tr><th>Module</th>${ctx.acts.map(a => `<th>${a}</th>`).join('')}</tr></thead><tbody>
-      ${ctx.mods.map(([m, n]) => `<tr><td><b style="font-weight:600">${n}</b></td>${ctx.acts.map((a, j) => `<td>${eff[m] && eff[m][j] ? `<span style="color:var(--good)" aria-label="Allowed">${ic('check',16)}</span>` : '<span class="muted" aria-label="Not allowed">–</span>'}</td>`).join('')}</tr>`).join('')}
+      ${ctx.mods.map(([m, n]) => `<tr><td><b style="font-weight:600">${n}</b></td>${ctx.acts.map((a, j) => `<td>${eff[m] && eff[m][j] ? `<span style="color:var(--good)" role="img" aria-label="Allowed">${ic('check',16)}</span>` : '<span class="muted" role="img" aria-label="Not allowed">–</span>'}</td>`).join('')}</tr>`).join('')}
       </tbody></table></div></section>
       <div style="display:flex;flex-direction:column;gap:20px;min-width:0">
       <section class="card"><div class="card-h"><h2>Roles</h2></div><div class="card-b" style="display:flex;flex-direction:column;gap:14px">
@@ -1873,7 +2019,11 @@ const AUTH = {step:'signin', email:'', cfg:null, sso:''};
 const G_ICON = '<svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>';
 const MS_ICON = '<svg width="16" height="16" viewBox="0 0 21 21" aria-hidden="true"><path fill="#F25022" d="M1 1h9v9H1z"/><path fill="#7FBA00" d="M11 1h9v9h-9z"/><path fill="#00A4EF" d="M1 11h9v9H1z"/><path fill="#FFB900" d="M11 11h9v9h-9z"/></svg>';
 function authSignedIn(key) { try { return sessionStorage.getItem('quad-auth-' + key) === '1'; } catch (e) { return true; } }
-function authOpen(cfg) { AUTH.cfg = cfg; AUTH.step = 'signin'; const a = document.getElementById('auth'); a.hidden = false; a.classList.remove('leave'); authRender(); }
+/* Before sign-in nobody knows the school yet: the sign-in screens wear Quad's own lime, whatever the school's colour */
+function authBrand() { let el = document.getElementById('quad-auth-brand'); if (!el) { el = document.createElement('style'); el.id = 'quad-auth-brand'; document.head.appendChild(el); }
+  const L = QuadBrand.deriveBrand(QuadBrand.DEFAULT, 'light'), D = QuadBrand.deriveBrand(QuadBrand.DEFAULT, 'dark');
+  el.textContent = `#auth{${QuadBrand.vars(L)}}@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) #auth{${QuadBrand.vars(D)}}}:root[data-theme="dark"] #auth{${QuadBrand.vars(D)}}`; }
+function authOpen(cfg) { authBrand(); AUTH.cfg = cfg; AUTH.step = 'signin'; const a = document.getElementById('auth'); a.hidden = false; a.classList.remove('leave'); authRender(); }
 function authRender() {
   const c = AUTH.cfg, a = document.getElementById('auth'), st = AUTH.step; let f = '';
   if (st === 'signin') f = `<h1>${c.title}</h1><p class="muted">${c.sub}</p>
@@ -1953,8 +2103,8 @@ const schoolAuth = () => ({
   key:'school', title:'Sign in to Quad', sub:'One sign-in for every school on Quad. We’ll open your school once you’re signed in.', email:'emma.nakamura@greenfield.example', emailLabel:'Work email', sso:['Google Workspace','Microsoft 365'],
   below:`<p class="muted small">Teaching at more than one school? Try <b>omar.haddad@quad.local</b> to see the school picker.<br>Parents and guardians: use the <a href="parent.html">Quad parent app</a> on your phone.</p>`,
   foot:`quad-edu.com · Protected by two-step sign-in`,
-  art:() => `<div class="auth-brand"><div class="auth-logo q"><svg viewBox="0 0 30 30" aria-hidden="true"><path d="M0 10A10 10 0 0 1 10 0A3.5 3.5 0 0 1 13.5 3.5V10A3.5 3.5 0 0 1 10 13.5H3.5A3.5 3.5 0 0 1 0 10Z" fill="#59C3FF"/><path d="M0 10A10 10 0 0 1 10 0A3.5 3.5 0 0 1 13.5 3.5V10A3.5 3.5 0 0 1 10 13.5H3.5A3.5 3.5 0 0 1 0 10Z" fill="#FF6FAE" transform="translate(30 0) scale(-1 1)"/><path d="M0 10A10 10 0 0 1 10 0A3.5 3.5 0 0 1 13.5 3.5V10A3.5 3.5 0 0 1 10 13.5H3.5A3.5 3.5 0 0 1 0 10Z" fill="#C8F169" transform="translate(0 30) scale(1 -1)"/><path d="M0 10A10 10 0 0 1 10 0A3.5 3.5 0 0 1 13.5 3.5V10A3.5 3.5 0 0 1 10 13.5H3.5A3.5 3.5 0 0 1 0 10Z" fill="#FF9B45" transform="translate(30 30) scale(-1 -1)"/></svg></div><div><b>Quad</b><small>quad-edu.com</small></div></div>
-    <div class="auth-quote"><h2>Every school. One address.</h2><p>Sign in with your work email. Quad finds your school and opens it with your school’s own name, logo and colours.</p></div>
+  art:() => `<div class="auth-brand"><img class="auth-wordmark" src="brand/quad-logo-white.svg" alt="Quad"></div>
+    <div class="auth-quote"><h2>Every school. <em>One address.</em></h2><p>Sign in with your work email. Quad finds your school and opens it with your school’s own name, logo and colours.</p></div>
     <div class="auth-stats"><div><b>1</b><span>sign-in for all your schools</span></div><div><b>2-step</b><span>protection for staff</span></div><div><b>Your</b><span>school’s branding inside</span></div></div>`,
   done:() => { if (AUTH.step !== 'school') toast(`Signed in to ${SCHOOL.name}`); }
 });
@@ -2043,14 +2193,14 @@ function appDrawer(id) {
 /* ---------- Timetable ---------- */
 /* Subject library: colour, icon, default teacher and room */
 const SUBJ_LIB = {
-  'Mathematics':['#DD4A42','fin','Mr. Haddad','Room 12'], 'English':['#8B7CF6','book','Ms. Reyes','Room 4'], 'Home language':['#E5534B','msg','Mme. Moreau','Room 6'], 'Mandarin':['#8B7CF6','msg','Sr. Ortega','Room 7'],
-  'Science':['#0891B2','settings','Ms. Lopez','Lab 1'], 'Physics':['#3B4AA8','settings','Mr. Tanaka','Lab 2'], 'Chemistry':['#0D9488','alert','Dr. Ibrahim','Lab 3'], 'Biology':['#16A34A','heart','Ms. Kim','Lab 4'],
-  'Combined Maths':['#B83A33','fin','Mr. Walsh','Room 14'], 'ICT':['#2BB0A0','grid','Mrs. Fischer','ICT lab'], 'History':['#F2A93B','file','Mr. Evans','Room 9'], 'Geography':['#35B8C9','home','Ms. Jensen','Room 10'],
-  'Environmental studies':['#2BB0A0','star','Mrs. Rossi','Room 2'], 'Art & Design':['#D9578C','star','Ms. Dubois','Studio'], 'Music':['#E06A9A','heart','Mr. Fernández','Music room'], 'Physical Ed.':['#2BB0A0','heart','Coach Tanaka','Sports hall'],
-  'Religion':['#F2A93B','book','Mr. Grant','Room 3'], 'Global Perspectives':['#0F766E','home','','Room 8'], 'French':['#3B4AA8','msg','','Room 5'], 'Spanish':['#EA580C','msg','','Room 5'], 'Computer Science':['#0D9488','grid','','ICT lab'],
-  'PSHE':['#F2A93B','heart','','Room 3'], 'Language & Literature':['#8B7CF6','book','','Room 4'], 'Language Acquisition':['#3B4AA8','msg','','Room 5'], 'Individuals & Societies':['#F2A93B','home','','Room 9'], 'Units of inquiry':['#2BB0A0','star','','Room 2'],
-  'Design':['#E06A9A','settings','','Design lab'], 'Theory of Knowledge':['#7A68E8','book','','Room 15'], 'General Paper':['#8B7CF6','file','','Room 15'], 'English Language Arts':['#8B7CF6','book','','Room 4'], 'Social Studies':['#F2A93B','home','','Room 9'],
-  'Literacy':['#8B7CF6','book','','Nest'], 'Numeracy':['#DD4A42','fin','','Nest'], 'Understanding the world':['#2BB0A0','home','','Nest'], 'Creative play':['#D9578C','star','','Studio'], 'Physical play':['#2BB0A0','heart','','Play area'], 'Business studies':['#7A68E8','fee','Mr. Park','Room 11'], 'Free study':['#64748B','book','Library staff','Library']
+  'Mathematics':['var(--c2)','fin','Mr. Haddad','Room 12'], 'English':['var(--c1)','book','Ms. Reyes','Room 4'], 'Home language':['var(--c4)','msg','Mme. Moreau','Room 6'], 'Mandarin':['var(--c3)','msg','Sr. Ortega','Room 7'],
+  'Science':['var(--c3)','settings','Ms. Lopez','Lab 1'], 'Physics':['var(--c2)','settings','Mr. Tanaka','Lab 2'], 'Chemistry':['var(--c5)','alert','Dr. Ibrahim','Lab 3'], 'Biology':['var(--c5)','heart','Ms. Kim','Lab 4'],
+  'Combined Maths':['var(--c2)','fin','Mr. Walsh','Room 14'], 'ICT':['var(--c3)','grid','Mrs. Fischer','ICT lab'], 'History':['var(--c4)','file','Mr. Evans','Room 9'], 'Geography':['var(--c3)','home','Ms. Jensen','Room 10'],
+  'Environmental studies':['var(--c5)','star','Mrs. Rossi','Room 2'], 'Art & Design':['var(--c1)','star','Ms. Dubois','Studio'], 'Music':['var(--c1)','heart','Mr. Fernández','Music room'], 'Physical Ed.':['var(--c5)','heart','Coach Tanaka','Sports hall'],
+  'Religion':['var(--c4)','book','Mr. Grant','Room 3'], 'Global Perspectives':['var(--c5)','home','','Room 8'], 'French':['var(--c2)','msg','','Room 5'], 'Spanish':['var(--c4)','msg','','Room 5'], 'Computer Science':['var(--c3)','grid','','ICT lab'],
+  'PSHE':['var(--c4)','heart','','Room 3'], 'Language & Literature':['var(--c1)','book','','Room 4'], 'Language Acquisition':['var(--c2)','msg','','Room 5'], 'Individuals & Societies':['var(--c4)','home','','Room 9'], 'Units of inquiry':['var(--c5)','star','','Room 2'],
+  'Design':['var(--c1)','settings','','Design lab'], 'Theory of Knowledge':['var(--c2)','book','','Room 15'], 'General Paper':['var(--c1)','file','','Room 15'], 'English Language Arts':['var(--c1)','book','','Room 4'], 'Social Studies':['var(--c4)','home','','Room 9'],
+  'Literacy':['var(--c1)','book','','Nest'], 'Numeracy':['var(--c2)','fin','','Nest'], 'Understanding the world':['var(--c5)','home','','Nest'], 'Creative play':['var(--c4)','star','','Studio'], 'Physical play':['var(--c5)','heart','','Play area'], 'Business studies':['var(--c2)','fee','Mr. Park','Room 11'], 'Free study':['var(--ink-3)','book','Library staff','Library']
 };
 /* Bell schedules: lessons (L) and breaks (B) with durations; times are worked out from the start time */
 const L = dur => ({t:'L', dur}), B = (label, dur, duty) => ({t:'B', label, dur, duty});
@@ -2089,7 +2239,7 @@ const toMin = t => +t.slice(0, 2) * 60 + +t.slice(3, 5);
 function bellPeriods(b) { let m = toMin(b.start), n = 0; return b.rows.map(r => { const s = m; m += +r.dur || 0; return r.t === 'L' ? ['P' + (++n), hm(s), hm(m)] : ['brk', hm(s), hm(m), r.label, r.duty]; }); }
 const bellLessons = b => b.rows.filter(r => r.t === 'L').length;
 const bellSummary = b => { const p = bellPeriods(b), br = b.rows.length - bellLessons(b); return `${bellLessons(b)} lessons · ${br} break${br === 1 ? '' : 's'} · ${p.length ? p[0][1] + '–' + p[p.length - 1][2] : ''}`; };
-function ttSubj(g, k, cls) { const r = gSubj(g).find(x => x.k === k), lib = SUBJ_LIB[k] || ['#64748B','book','',''];
+function ttSubj(g, k, cls) { const r = gSubj(g).find(x => x.k === k), lib = SUBJ_LIB[k] || ['var(--ink-3)','book','',''];
   return [lib[0], (cls ? taOf(cls, k) : '') || (cls ? 'Unassigned' : r ? r.t : lib[2]), lib[1], r ? r.r : lib[3]]; }
 const ttReset = g => { Object.keys(S.tt || {}).forEach(k => { if (k.startsWith(yl(g) + ' –')) delete S.tt[k]; }); Object.keys(S.ttSub || {}).forEach(k => { if (k.startsWith(yl(g) + ' –')) delete S.ttSub[k]; }); };
 const TT_DAYS = [['Mon','5 Oct'],['Tue','6 Oct'],['Wed','7 Oct'],['Thu','8 Oct'],['Fri','9 Oct']];
@@ -2154,7 +2304,7 @@ V.timetable = () => {
   <div class="tt2-wrap"><div class="card tbl-wrap"><div class="tt2 ${edit ? 'edit' : ''}">${cells}</div></div>
     <aside class="tt2-side"><section class="card agenda"><div class="card-h"><h2>Today · Monday</h2><span class="muted num" style="font-size:12px">09:41</span></div>${agenda}</section>
       <section class="card load"><div class="card-h"><h2>${esc(yl(gr))} subjects</h2><button class="linkbtn" data-act="ttSubjects">Edit</button></div>${subj.map(({k, n}) => `<div class="lr"><i style="width:10px;height:10px;border-radius:3px;background:${ttSubj(gr, k)[0]}"></i><span>${esc(k)}</span><b class="num">${counts[k] || 0}${counts[k] !== n ? `<small class="muted"> / ${n}</small>` : ''}</b><div class="bar"><i style="width:${(counts[k] || 0) / mx * 100}%;background:${ttSubj(gr, k)[0]}"></i></div></div>`).join('')}
-        ${counts['Free study'] && !subj.some(x => x.k === 'Free study') ? `<div class="lr muted"><i style="width:10px;height:10px;border-radius:3px;background:#64748B"></i><span>Free study (unplanned)</span><b class="num">${counts['Free study']}</b></div>` : ''}
+        ${counts['Free study'] && !subj.some(x => x.k === 'Free study') ? `<div class="lr muted"><i style="width:10px;height:10px;border-radius:3px;background:var(--ink-3)"></i><span>Free study (unplanned)</span><b class="num">${counts['Free study']}</b></div>` : ''}
         <div class="lr-foot">${planned} of ${slots} periods planned</div></section></aside></div>`;
 };
 function ttLessonDrawer(d, p) {
@@ -2228,7 +2378,7 @@ V.staffing = () => {
       <div class="tbl-wrap"><table><thead><tr><th>Teacher</th><th>Subjects</th><th>Teaches</th><th>Responsibilities</th><th style="width:150px">Periods a week</th></tr></thead><tbody>
       ${rows.map(x => { const l = teacherLoad(x.name), grades = [...new Set(l.rows.map(r => gradeOfCls(r.cls)))].sort((a, b2) => a - b2);
         return `<tr class="click" data-act="openTeacher" data-id="${x.id}"><td><div class="who">${avatar(x.name,'sm')}<div><b>${esc(x.name)}</b><small>${x.primary ? 'Class teacher model' : 'Subject teacher'}</small></div></div></td>
-        <td><div class="chips">${x.subjects.map(k => `<span class="subj-tag" style="--c:${(SUBJ_LIB[k] || ['#64748B'])[0]}">${esc(k)}</span>`).join('')}</div></td>
+        <td><div class="chips">${x.subjects.map(k => `<span class="subj-tag" style="--c:${(SUBJ_LIB[k] || ['var(--ink-3)'])[0]}">${esc(k)}</span>`).join('')}</div></td>
         <td class="muted" style="font-size:12.5px">${l.rows.length ? `${new Set(l.rows.map(r => r.cls)).size} class${new Set(l.rows.map(r => r.cls)).size > 1 ? 'es' : ''} · ${esc(grades.length > 2 ? ylRange(grades[0], grades[grades.length - 1]) : ylList(grades))}` : '<span class="pill t-amber plain">No lessons</span>'}</td>
         <td><div class="chips">${roleChips(x.name) || '<span class="muted">—</span>'}</div></td><td>${loadBar(l.total, x.max)}</td></tr>`; }).join('') || `<tr><td colspan="5" class="muted" style="text-align:center;padding:30px">No teachers match.</td></tr>`}</tbody></table></div></div>`;
   } else if (t === 'classes') {
@@ -2261,7 +2411,7 @@ function teacherDrawer() {
       <div class="st-load ${total > d.max ? 'over' : ''}"><div><b>${total} of ${d.max} periods a week</b><span>${total > d.max ? `${total - d.max} over the limit` : `${d.max - total} free periods`}</span></div>${loadBar(total, d.max)}</div>
       <div class="field"><label>Subjects ${esc(t.name.split(' ')[0])} can teach</label><div class="chips">${Object.keys(SUBJ_LIB).filter(k => k !== 'Free study').map(k => `<button type="button" class="chip ${d.subjects.has(k) ? 'on' : ''}" data-act="tSubj" data-k="${esc(k)}" aria-pressed="${d.subjects.has(k)}">${esc(k)}</button>`).join('')}</div></div>
       <div class="field"><label>Lessons</label>
-        <div class="st-rows">${d.rows.map((r, i) => `<div class="st-row" style="--c:${(SUBJ_LIB[r.k] || ['#64748B'])[0]}"><i></i><b>${esc(r.cls)}</b><span>${esc(r.k)}</span><span class="num muted">${r.n}/wk</span>${r.from ? `<small class="pill t-violet plain">from ${esc(r.from)}</small>` : '<small></small>'}<button type="button" class="iconbtn" data-act="tRowRm" data-i="${i}" aria-label="Remove ${esc(r.k)} in ${esc(r.cls)}">${ic('x',14)}</button></div>`).join('') || '<div class="muted" style="padding:10px 0">No lessons yet.</div>'}</div>
+        <div class="st-rows">${d.rows.map((r, i) => `<div class="st-row" style="--c:${(SUBJ_LIB[r.k] || ['var(--ink-3)'])[0]}"><i></i><b>${esc(r.cls)}</b><span>${esc(r.k)}</span><span class="num muted">${r.n}/wk</span>${r.from ? `<small class="pill t-violet plain">from ${esc(r.from)}</small>` : '<small></small>'}<button type="button" class="iconbtn" data-act="tRowRm" data-i="${i}" aria-label="Remove ${esc(r.k)} in ${esc(r.cls)}">${ic('x',14)}</button></div>`).join('') || '<div class="muted" style="padding:10px 0">No lessons yet.</div>'}</div>
         <div class="st-add"><select class="input" id="tAddG" aria-label="${GL.one}">${Array.from({length:LV.length}, (_, i) => i + 1).map(x => `<option value="${x}" ${x === g ? 'selected' : ''}>${esc(yl(x))}</option>`).join('')}</select>
           <select class="input" id="tAddC" aria-label="Class">${ttSecs(g).map(x => `<option>${esc(clsName(g, x))}</option>`).join('')}</select>
           <select class="input" id="tAddK" aria-label="Subject">${gradeSubj.map(x => { const cur = ST.ta[`${clsName(g, ttSecs(g)[0])}|${x.k}`]; return `<option value="${esc(x.k)}" ${d.subjects.has(x.k) ? '' : ''}>${esc(x.k)} · ${x.n}/wk${d.subjects.has(x.k) ? '' : ' (not in subjects)'}</option>`; }).join('')}</select>
@@ -2298,7 +2448,7 @@ function classDrawer() {
     <div class="drawer-b" id="clsForm">
       <div class="field"><label for="cCt">Class teacher</label><select class="input" id="cCt"><option value="">No class teacher</option><optgroup label="Teaches this class">${inClass.map(n => `<option ${n === d.ct ? 'selected' : ''}>${esc(n)}</option>`).join('')}</optgroup><optgroup label="Other teachers">${ST.teachers.filter(t => !inClass.includes(t.name)).map(t => `<option ${t.name === d.ct ? 'selected' : ''}>${esc(t.name)}</option>`).join('')}</optgroup></select>
         <small class="muted" id="cCtNote">${d.ct && ctOf(d.ct) && ctOf(d.ct) !== d.cls ? `${esc(d.ct)} is class teacher of ${esc(ctOf(d.ct))} now and will move to this class.` : 'Takes registration, writes reports and is the parents’ first contact.'}</small></div>
-      <div class="field"><label>Subject teachers</label><div class="st-rows">${subj.map(x => `<div class="st-row cls" style="--c:${(SUBJ_LIB[x.k] || ['#64748B'])[0]}"><i></i><b>${esc(x.k)}</b><span class="num muted">${x.n}/wk</span><select class="input" data-ct="${esc(x.k)}" aria-label="${esc(x.k)} teacher">${opts(x.k, d.ta[x.k])}</select></div>`).join('')}</div></div>
+      <div class="field"><label>Subject teachers</label><div class="st-rows">${subj.map(x => `<div class="st-row cls" style="--c:${(SUBJ_LIB[x.k] || ['var(--ink-3)'])[0]}"><i></i><b>${esc(x.k)}</b><span class="num muted">${x.n}/wk</span><select class="input" data-ct="${esc(x.k)}" aria-label="${esc(x.k)} teacher">${opts(x.k, d.ta[x.k])}</select></div>`).join('')}</div></div>
       <p class="muted small" style="margin:0">Changes show in the timetable straight away. Teachers and parents of ${esc(d.cls)} are told when you save.</p>
       <div class="err-msg" id="cErr"></div>
     </div>
@@ -2354,7 +2504,7 @@ V.pastoral = () => {
     const houses = HOUSES.map(h => [h, PAST.beh.filter(b => b.type === 'house' && stuOf(b.sid).house === h).reduce((a, b) => a + b.pts, 0)]).sort((a, b) => b[1] - a[1]), mx = Math.max(...houses.map(h => h[1]), 1);
     body = `<div class="grid g-2-1"><div class="card"><div class="toolbar"><select class="input inline" data-filter="behT" aria-label="Type" data-dd-ic="star"><option value="all">All types</option>${BEH_TYPES.map(([k, l]) => `<option value="${k}" data-n="${PAST.beh.filter(b => b.type === k).length}" ${ft === k ? 'selected' : ''}>${l}</option>`).join('')}</select><span class="muted" style="margin-left:auto;font-size:12.5px">${rows.length} entries · last two weeks</span></div>
       <div class="tbl-wrap"><table><thead><tr><th>Student</th><th>Type</th><th>Reason</th><th class="r">Points</th><th>By</th><th>Date</th></tr></thead><tbody>${rows.map(b => { const st = stuOf(b.sid); return `<tr class="click" data-act="openBeh" data-id="${b.id}"><td><div class="who">${avatar(st.name,'sm')}<div><b>${esc(st.name)}</b><small>${esc(st.cls)}</small></div></div></td><td>${b.pts > 0 ? `<span class="pill t-green plain">${BEH_TYPES.find(x => x[0] === b.type)[1]}</span>` : `<span class="pill ${b.type === 'detention' ? 't-red' : 't-amber'} plain">${BEH_TYPES.find(x => x[0] === b.type)[1]}</span>`}</td><td>${esc(b.cat)}</td><td class="r num"><b style="color:${b.pts > 0 ? 'var(--good)' : 'var(--bad)'}">${b.pts > 0 ? '+' : ''}${b.pts}</b></td><td class="muted">${esc(b.by)}</td><td class="num muted">${dShort(b.date)}</td></tr>`; }).join('')}</tbody></table></div></div>
-      <section class="card"><div class="card-h"><h2>House points</h2><span class="muted" style="font-size:12px">This term</span></div><div style="padding:6px 18px 18px;display:flex;flex-direction:column;gap:12px">${houses.map(([h, n], i) => `<div class="house"><span class="hd" style="background:${['#2BB0A0','#DD4A42','#D9578C','#8B7CF6'][HOUSES.indexOf(h)]}"></span><b>${h}</b>${i === 0 ? '<span class="pill t-green plain">Leading</span>' : ''}<span class="num" style="margin-left:auto;font-weight:800">${n}</span><div class="bar" style="grid-column:1/-1"><i style="width:${n / mx * 100}%;background:${['#2BB0A0','#DD4A42','#D9578C','#8B7CF6'][HOUSES.indexOf(h)]}"></i></div></div>`).join('')}</div></section></div>`; }
+      <section class="card"><div class="card-h"><h2>House points</h2><span class="muted" style="font-size:12px">This term</span></div><div style="padding:6px 18px 18px;display:flex;flex-direction:column;gap:12px">${houses.map(([h, n], i) => `<div class="house"><span class="hd" style="background:${['var(--c5)','var(--c1)','var(--c3)','var(--c4)'][HOUSES.indexOf(h)]}"></span><b>${h}</b>${i === 0 ? '<span class="pill t-green plain">Leading</span>' : ''}<span class="num" style="margin-left:auto;font-weight:800">${n}</span><div class="bar" style="grid-column:1/-1"><i style="width:${n / mx * 100}%;background:${['var(--c5)','var(--c1)','var(--c3)','var(--c4)'][HOUSES.indexOf(h)]}"></i></div></div>`).join('')}</div></section></div>`; }
   else if (t === 'medical') body = `<div class="grid g-2-1"><div class="card"><div class="card-h"><h2>Medical conditions</h2><span class="muted" style="font-size:12px">${PAST.med.length} students</span></div><div class="tbl-wrap"><table><thead><tr><th>Student</th><th>Condition</th><th>Severity</th><th>Medication</th><th>Care plan review</th></tr></thead><tbody>${PAST.med.map((m, i) => { const st = stuOf(m.sid), due = m.plan < '2026-11-05'; return `<tr class="click" data-act="openMed" data-i="${i}"><td><div class="who">${avatar(st.name,'sm')}<div><b>${esc(st.name)}</b><small>${esc(st.cls)}</small></div></div></td><td>${esc(m.cond)}</td><td>${sevPill(m.sev)}</td><td class="muted" style="font-size:12.5px">${esc(m.meds)}</td><td class="num">${due ? `<span class="pill t-amber plain">Due ${dShort(m.plan)}</span>` : dShort(m.plan)}</td></tr>`; }).join('')}</tbody></table></div></div>
     <section class="card"><div class="card-h"><h2>Sick bay today</h2><button class="btn sm primary" data-act="newVisit">${ic('plus',14)}Log visit</button></div><div class="needs">${PAST.visits.map(v => { const st = stuOf(v.sid); return `<div class="need"><span>${ic('heart',16)}</span><div><b>${esc(st.name)} · ${v.t}</b><small>${esc(v.c)} · ${esc(v.tr)}</small><small>${esc(v.out)}${v.notified ? ' · parents told' : ''}</small></div></div>`; }).join('')}</div></section></div>`;
   else { body = `<div class="sg-lock"><span>${ic('shield',18)}</span><div><b>Restricted to the safeguarding team</b><small>${PAST.access.map(a => `${esc(a[0])} (${esc(a[1])})`).join(' · ')}. Every view is recorded.</small></div></div>
@@ -2469,7 +2619,7 @@ V.exams = () => {
     <div class="ex-series">${EXAMS.series.map(x => { const c = examClashes(x); return `<button class="card ex-s ${x.id === se.id ? 'on' : ''}" data-act="exPick" data-id="${x.id}"><span class="eyebrow">${x.kind}</span><b>${esc(x.name)}</b><small>${ylList(x.years)} · ${x.papers.length} papers</small><span>${x.published ? '<span class="pill t-green plain">Published</span>' : '<span class="pill plain">Draft</span>'}${c.clash.size ? ` <span class="pill t-red plain">${c.clash.size} clashes</span>` : ''}</span></button>`; }).join('')}</div>
     ${clash.size || full.length ? `<div class="tt2-hint warn">${ic('alert',16)}<span>${clash.size ? `${clash.size} papers clash: the same year group has two papers in one session. ` : ''}${full.length ? `${full.map(k => k.split('|')[0] + ' on ' + dShort(k.split('|')[1]) + ' ' + k.split('|')[2]).join(', ')} ${full.length > 1 ? 'are' : 'is'} over capacity.` : ''}</span></div>` : ''}
     <div class="card"><div class="toolbar"><select class="input inline" data-filter="exY" aria-label="${GL.one}" data-dd-ic="student"><option value="all">${GL.all}</option>${se.years.map(g => `<option value="${g}" ${+fy === g ? 'selected' : ''}>${esc(yl(g))}</option>`).join('')}</select><span class="muted" style="margin-left:auto;font-size:12.5px">${show.length} papers · ${dates.length} days</span></div>
-      <div class="ex-cal">${dates.map(d => { const day = show.filter(p => p.date === d); if (!day.length) return ''; return `<div class="ex-day"><div class="ex-d"><b>${dShort(d).split(' ')[0]}</b><span class="num">${dShort(d).split(' ').slice(1).join(' ')}</span></div>${['AM', 'PM'].map(ss => `<div class="ex-sess"><small>${ss === 'AM' ? 'Morning · 08:30' : 'Afternoon · 12:30'}</small>${day.filter(p => p.sess === ss).map(p => `<button class="ex-p ${clash.has(p.id) ? 'clash' : ''}" style="--c:${(SUBJ_LIB[p.subj] || ['#64748B'])[0]}" data-act="openPaper" data-id="${p.id}"><b>${esc(p.subj)}</b><span>${esc(p.paper)} · ${esc(yl(p.g))}</span><small>${Math.floor(p.dur / 60)}h${p.dur % 60 ? ' ' + p.dur % 60 + 'm' : ''} · ${esc(p.room)} · ${p.cand}</small></button>`).join('') || '<span class="muted" style="font-size:12px">—</span>'}</div>`).join('')}</div>`; }).join('')}</div></div>`;
+      <div class="ex-cal">${dates.map(d => { const day = show.filter(p => p.date === d); if (!day.length) return ''; return `<div class="ex-day"><div class="ex-d"><b>${dShort(d).split(' ')[0]}</b><span class="num">${dShort(d).split(' ').slice(1).join(' ')}</span></div>${['AM', 'PM'].map(ss => `<div class="ex-sess"><small>${ss === 'AM' ? 'Morning · 08:30' : 'Afternoon · 12:30'}</small>${day.filter(p => p.sess === ss).map(p => `<button class="ex-p ${clash.has(p.id) ? 'clash' : ''}" style="--c:${(SUBJ_LIB[p.subj] || ['var(--ink-3)'])[0]}" data-act="openPaper" data-id="${p.id}"><b>${esc(p.subj)}</b><span>${esc(p.paper)} · ${esc(yl(p.g))}</span><small>${Math.floor(p.dur / 60)}h${p.dur % 60 ? ' ' + p.dur % 60 + 'm' : ''} · ${esc(p.room)} · ${p.cand}</small></button>`).join('') || '<span class="muted" style="font-size:12px">—</span>'}</div>`).join('')}</div>`; }).join('')}</div></div>`;
 };
 function paperDrawer(p, isNew) {
   const se = EXAMS.series.find(x => x.id === S.exSel) || EXAMS.series[0];
@@ -2479,7 +2629,7 @@ function paperDrawer(p, isNew) {
       <div class="field"><label for="xp_p">Paper</label><input class="input" id="xp_p" value="${esc(p.paper)}"></div><div class="field"><label for="xp_d">Date</label><input class="input" id="xp_d" type="date" value="${p.date}"></div>
       <div class="field"><label for="xp_ss">Session</label><select class="input" id="xp_ss"><option value="AM" ${p.sess === 'AM' ? 'selected' : ''}>Morning · 08:30</option><option value="PM" ${p.sess === 'PM' ? 'selected' : ''}>Afternoon · 12:30</option></select></div>
       <div class="field"><label for="xp_du">Length (minutes)</label><input class="input" id="xp_du" type="number" min="30" max="240" step="15" value="${p.dur}"></div>
-      <div class="field"><label for="xp_r">Room</label><select class="input" id="xp_r">${Object.keys(examCap).map(r => `<option ${r === p.room ? 'selected' : ''}>${r}</option>`).join('')}</select></div><div class="field"><label>Candidates</label><input class="input" value="${p.cand}" disabled></div></div>
+      <div class="field"><label for="xp_r">Room</label><select class="input" id="xp_r">${Object.keys(examCap).map(r => `<option ${r === p.room ? 'selected' : ''}>${r}</option>`).join('')}</select></div><div class="field"><label for="xp_cand">Candidates</label><input class="input" id="xp_cand" value="${p.cand}" disabled></div></div>
       <div class="err-msg" id="xpErr"></div></div>
     <div class="drawer-f">${isNew ? '' : `<button class="btn ghost danger" data-act="paperDel" data-id="${p.id}" style="margin-right:auto">Remove paper</button>`}<button class="btn" data-act="closeAll">Cancel</button><button class="btn primary" data-act="paperSave" data-id="${p.id}" data-new="${isNew ? 1 : ''}">${isNew ? 'Add paper' : 'Save'}</button></div>`);
 }
@@ -2615,7 +2765,7 @@ function repStudentDrawer(cls, nm) {
   formDrawer(`${head(`Report · ${esc(nm)}`, `${esc(cls)} · ${REP.cycle} · ${i + 1} of ${names.length}`)}
     <div class="drawer-b"><div class="pd-grid rep-grid" id="repForm"><div style="display:flex;flex-direction:column;gap:12px;min-width:0">
       ${locked ? `<div class="tt2-hint">${ic('alert',16)}<span>This report is ${R.status}. Reopen the class to make changes.</span></div>` : ''}
-      ${sub.map(({k}) => { const v = x.subj[k], c = (SUBJ_LIB[k] || ['#64748B'])[0]; return `<section class="rep-subj" style="--c:${c}"><div class="rep-sh"><b>${esc(k)}</b><small class="muted">${esc(taOf(cls, k) || 'Unassigned')}</small>
+      ${sub.map(({k}) => { const v = x.subj[k], c = (SUBJ_LIB[k] || ['var(--ink-3)'])[0]; return `<section class="rep-subj" style="--c:${c}"><div class="rep-sh"><b>${esc(k)}</b><small class="muted">${esc(taOf(cls, k) || 'Unassigned')}</small>
         <input class="input num" type="number" min="0" max="100" data-rf="${esc(k)}|m" value="${v.m}" aria-label="${esc(k)} mark" placeholder="Mark" ${locked ? 'disabled' : ''}><span class="rep-g" data-rg="${esc(k)}">${v.m === '' ? '–' : gradeFor(+v.m)}</span>
         <select class="input" data-rf="${esc(k)}|e" aria-label="${esc(k)} effort" ${locked ? 'disabled' : ''}><option value="">Effort</option>${EFFORT.map((e, j) => `<option value="${j}" ${v.e === j || v.e === String(j) ? 'selected' : ''}>${e}</option>`).join('')}</select></div>
         <textarea class="input" rows="2" data-rf="${esc(k)}|c" placeholder="Comment for ${esc(first)}" aria-label="${esc(k)} comment" ${locked ? 'disabled' : ''}>${esc(v.c)}</textarea>
@@ -2648,7 +2798,7 @@ V.year = () => {
   const counts = yearCounts(), pub = allClasses().filter(c => repOf(c).status === 'published').length;
   return `${pageHead('Settings', 'Academic year', `${esc(ACAD.curr.name)} · ${LV.length} ${GL.few} · ${allClasses().length} classes`, `<button class="btn primary" data-act="rollStart">${ic('arrow',16)}Start year-end rollover</button>`)}
     <section class="card yr-hero"><div class="yr-h"><div><div class="eyebrow">Current year</div><h2>${YEAR.cur}</h2></div>${YEAR.rolled ? '<span class="pill t-green plain">Rolled over</span>' : '<span class="pill t-blue plain">In progress</span>'}</div>
-      <div class="yr-line">${YEAR.terms.map(([n, a, b]) => { const w = (new Date(b) - new Date(a)) / (s1 - s0) * 100; return `<div class="yr-term" style="flex:${w}"><b>${n}</b><small>${fmtD(a)} – ${fmtD(b)}</small></div>`; }).join('')}<i class="yr-now" style="left:${pct}%"><span>Today</span></i></div></section>
+      <div class="yr-line">${YEAR.terms.map(([n, a, b]) => { const w = (new Date(b) - new Date(a)) / (s1 - s0) * 100; return `<div class="yr-term${today >= new Date(a).getTime() && today <= new Date(b).getTime() + 864e5 ? ' cur' : ''}" style="flex:${w}"><b>${n}</b><small>${fmtD(a)} – ${fmtD(b)}</small></div>`; }).join('')}<i class="yr-now" style="left:${pct}%"><span>Today</span></i></div></section>
     <div class="grid g-2-1"><section class="card"><div class="card-h"><h2>Students by ${GL.one.toLowerCase()}</h2><span class="muted" style="font-size:12px">${counts.reduce((a, b) => a + b, 0)} students</span></div>
       <div class="yr-bars">${LV.map((x, i) => `<div class="yr-bar" style="--c:${x.color}" title="${esc(x.label)} · ${counts[i]}"><i style="height:${counts[i] / Math.max(...counts) * 100}%"></i><small>${esc(x.label.replace(/^(Year|Grade) /, ''))}</small></div>`).join('')}</div>
       <div class="legend" style="padding:0 18px 16px">${STG.map(x => `<span><i style="background:${x.color}"></i>${esc(x.name)}</span>`).join('')}</div></section>
@@ -2661,7 +2811,7 @@ const ROLL_STEPS = ['New year', 'Promotion', 'Classes & staff', 'Fees & records'
 function rollDrawer() {
   const w = S.roll, st = w.step, counts = yearCounts();
   let body = '';
-  if (st === 0) body = `<div class="form-grid"><div class="field"><label for="rl_name">New academic year</label><input class="input" id="rl_name" value="${esc(w.name)}"></div><div class="field"><label>Curriculum</label><input class="input" value="${esc(ACAD.curr.name)}" disabled></div></div>
+  if (st === 0) body = `<div class="form-grid"><div class="field"><label for="rl_name">New academic year</label><input class="input" id="rl_name" value="${esc(w.name)}"></div><div class="field"><label for="rl_curr">Curriculum</label><input class="input" id="rl_curr" value="${esc(ACAD.curr.name)}" disabled></div></div>
       <div class="field"><label>Terms</label>${w.terms.map((t, i) => `<div class="rl-term"><b>${t[0]}</b><input class="input" type="date" data-rt="${i}|1" value="${t[1]}" aria-label="${t[0]} starts"><span class="muted">to</span><input class="input" type="date" data-rt="${i}|2" value="${t[2]}" aria-label="${t[0]} ends"></div>`).join('')}</div>
       <div class="field"><label>Checks</label>${rollChecks().map(([ok, t]) => `<div class="checkrow">${ok ? `<span style="color:var(--good)">${ic('check',16)}</span>` : `<span style="color:var(--warn)">${ic('alert',16)}</span>`}<span>${t}</span></div>`).join('')}<small class="muted">Warnings don’t stop the rollover.</small></div>`;
   else if (st === 1) { const intake = apps.filter(a => a.stage === 'enrolled').length;
@@ -2768,7 +2918,7 @@ function sjMeter() {
   const d = S.subDraft, slots = bellLessons(gBell(d.g)) * 5, used = d.rows.reduce((a, r) => a + (+r.n || 0), 0), diff = slots - used;
   const st = diff < 0 ? 'over' : diff > 0 ? 'under' : 'ok';
   return `<div class="sj-meter ${st}" id="sjMeter"><div class="sj-top"><b>${used} of ${slots} periods a week</b><span>${st === 'ok' ? `${ic('check',14)}Every period is planned` : st === 'under' ? `${diff} period${diff > 1 ? 's' : ''} left · shown as free study` : `${-diff} too many · remove lessons or add periods in Bell times`}</span></div>
-    <div class="sj-bar">${d.rows.filter(r => r.n > 0).map(r => `<i style="flex:${r.n};background:${(SUBJ_LIB[r.k] || ['#64748B'])[0]}" title="${esc(r.k)} · ${r.n}"></i>`).join('')}${diff > 0 ? `<i class="gap" style="flex:${diff}"></i>` : ''}</div></div>`;
+    <div class="sj-bar">${d.rows.filter(r => r.n > 0).map(r => `<i style="flex:${r.n};background:${(SUBJ_LIB[r.k] || ['var(--ink-3)'])[0]}" title="${esc(r.k)} · ${r.n}"></i>`).join('')}${diff > 0 ? `<i class="gap" style="flex:${diff}"></i>` : ''}</div></div>`;
 }
 function subjDrawer() {
   const d = S.subDraft, b = gBell(d.g), per = bellLessons(b), lib = Object.keys(SUBJ_LIB).filter(k => !d.rows.some(r => r.k === k));
@@ -2778,7 +2928,7 @@ function subjDrawer() {
     <div class="drawer-b" id="subjForm">
       ${sjMeter()}
       <div class="sj-list"><div class="sj-h"><span></span><span>Subject</span><span>Lessons a week</span><span>Teachers by class</span><span>Room</span><span></span></div>
-      ${d.rows.map((r, i) => { const [c, icn] = SUBJ_LIB[r.k] || ['#64748B','book']; return `<div class="sj-row" style="--c:${c}"><span class="ls-ic">${ic(icn,13)}</span><b>${esc(r.k)}</b>
+      ${d.rows.map((r, i) => { const [c, icn] = SUBJ_LIB[r.k] || ['var(--ink-3)','book']; return `<div class="sj-row" style="--c:${c}"><span class="ls-ic">${ic(icn,13)}</span><b>${esc(r.k)}</b>
         <div class="stepper"><button type="button" data-act="sjN" data-i="${i}" data-d="-1" aria-label="Fewer ${esc(r.k)} lessons">−</button><input class="input num" type="number" min="0" max="20" data-sr="${i}|n" value="${r.n}" aria-label="${esc(r.k)} lessons a week"><button type="button" data-act="sjN" data-i="${i}" data-d="1" aria-label="More ${esc(r.k)} lessons">+</button></div>
         <span class="sj-tch">${r.k === 'Free study' ? 'Library staff' : (stBuild(), ttSecs(d.g).map(x => { const n = ST.ta[`${clsName(d.g, x)}|${r.k}`]; return `<span title="${esc(x)}">${n ? esc(n) : '<em>Unassigned</em>'}</span>`; }).join(''))}</span><input class="input" data-sr="${i}|r" value="${esc(r.r)}" aria-label="${esc(r.k)} room">
         <button type="button" class="iconbtn" data-act="sjRm" data-i="${i}" aria-label="Remove ${esc(r.k)}">${ic('x',14)}</button></div>`; }).join('') || '<div class="muted" style="padding:14px">No subjects yet. Add one below.</div>'}
@@ -2816,7 +2966,7 @@ function bellDrawer() {
   const d = S.bellDraft, p = bellPeriods(d), total = d.rows.reduce((a, r) => a + (+r.dur || 0), 0);
   formDrawer(`${head(d.isNew ? 'New bell schedule' : `Bell schedule · ${esc(d.name)}`, 'Lessons, intervals and their times for one school day')}
     <div class="drawer-b" id="bellForm">
-      <div class="field"><label>Schedules</label><div class="chips">${BELLS.map(x => `<button type="button" class="chip ${x.id === d.id ? 'on' : ''}" data-act="blPick" data-id="${x.id}">${esc(x.name)}<span class="n">${bellGrades(x.id).length ? 'Gr ' + bellGrades(x.id).join(', ') : 'unused'}</span></button>`).join('')}${d.isNew ? `<button type="button" class="chip on">${esc(d.name || 'New schedule')}</button>` : ''}<button type="button" class="chip" data-act="blNew">${ic('plus',12)} New from this</button></div></div>
+      <div class="field"><label>Schedules</label><div class="chips">${BELLS.map(x => `<button type="button" class="chip ${x.id === d.id ? 'on' : ''}" data-act="blPick" data-id="${x.id}">${esc(x.name)}<span class="n">${bellGrades(x.id).length ? esc(ylList(bellGrades(x.id))) : 'unused'}</span></button>`).join('')}${d.isNew ? `<button type="button" class="chip on">${esc(d.name || 'New schedule')}</button>` : ''}<button type="button" class="chip" data-act="blNew">${ic('plus',12)} New from this</button></div></div>
       <div class="form-grid"><div class="field"><label for="bl_name">Name</label><input class="input" id="bl_name" value="${esc(d.name)}" placeholder="e.g. Primary half day"></div><div class="field"><label for="bl_start">First bell</label><input class="input" id="bl_start" type="time" value="${d.start}" step="300"></div></div>
       <div class="bl-sum" id="blSum"><b>${bellSummary(d)}</b><span>${Math.floor(total / 60)} h ${total % 60} min</span></div>
       <div class="bl-strip" id="blStrip" aria-hidden="true">${bellStrip(d)}</div>
@@ -2920,8 +3070,15 @@ document.addEventListener('mousedown', e => { if (DD.pop && !DD.pop.contains(e.t
 window.addEventListener('resize', ddClose);
 document.addEventListener('scroll', e => { if (DD.pop && !DD.pop.contains(e.target) && Date.now() - DD.at > 400) ddClose(); }, true);
 
+/* Regions that scroll sideways on a phone can be reached and scrolled with the keyboard */
+function scrollRegions() { document.querySelectorAll('#view .tbl-wrap, #view .wk, #view .threads, #view .pe-wrap, #view .cx-wrap, #view .tt2-scroll').forEach(el => {
+  const scrolls = el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1;
+  if (!scrolls) { if (el.dataset.sr) { el.removeAttribute('tabindex'); el.removeAttribute('role'); el.removeAttribute('aria-label'); delete el.dataset.sr; } return; }
+  if (el.hasAttribute('tabindex')) return;
+  const h = el.closest('section, .card')?.querySelector('h2, h3'); el.tabIndex = 0; el.setAttribute('role', 'region'); el.setAttribute('aria-label', (h ? h.textContent.trim() : document.querySelector('#view h1')?.textContent.trim() || 'Table') + ', scrolls'); el.dataset.sr = '1'; }); }
+addEventListener('resize', () => { clearTimeout(scrollRegions.t); scrollRegions.t = setTimeout(scrollRegions, 200); });
 function afterRender() {
-  ddClose(); ddEnhance(); rvAfter();
+  ddClose(); ddEnhance(); rvAfter(); scrollRegions();
   if (S.route === 'timetable') ttBindDrag();
   bindSearch('appSearch'); bindSearch('stfSearch'); bindSearch('stuSearch'); bindSearch('usrSearch');
   if (S.route === 'lms' && curTab('lms','courses') === 'gradebook') recalcGB();
@@ -2962,7 +3119,7 @@ function moveApp(id, stage) {
 
 /* ---------- Overlays ---------- */
 const scrim = document.getElementById('scrim'), drawer = document.getElementById('drawer'), modal = document.getElementById('drawer');
-function openDrawer(html, cls = '') { html = acadText(html); drawer.className = 'drawer ' + cls; drawer.innerHTML = html; drawer.classList.add('on'); scrim.classList.add('on'); drawer.setAttribute('aria-hidden','false'); }
+function openDrawer(html, cls = '') { html = acadText(html); drawer.className = 'drawer ' + cls; drawer.innerHTML = html; drawer.classList.add('on'); scrim.classList.add('on'); drawer.setAttribute('aria-hidden','false'); drawer.inert = false; }
 const FORM_META = [['Log behaviour','star','Pastoral care'],['Behaviour entry','star','Pastoral care'],['Medical ·','heart','Pastoral care'],['Log sick bay','heart','Pastoral care'],['Safeguarding ·','shield','Safeguarding'],['Record a concern','shield','Safeguarding'],['Report staff absence','crm','Staff cover'],['New parents','cal','Evenings & forms'],['Form ·','file','Evenings & forms'],['New form','file','Evenings & forms'],['Exam paper','file','Exams'],['New exam paper','file','Exams'],['Billing run','fee','Fees & invoicing'],['Reports ·','file','Reports'],['Report ·','file','Reports'],['Year-end rollover','cal','Academic year'],['Register','check','My teaching'],['Marks & comments','file','My teaching'],['Teacher','crm','Teachers & classes'],['Class ·','student','Teachers & classes'],['Section','grid','Teachers & classes'],['Subjects','book','Timetable'],['Bell schedule','cal','Timetable'],['New bell schedule','cal','Timetable'],['New application','admit','Admissions'],['Record payment','fee','Fees & invoicing'],['New journal entry','fin','Accounting'],['Add lead','crm','CRM & leads'],['New broadcast','send','Communications'],['Generate invoices','file','Fees & invoicing'],['Invite staff','crm','Users & roles'],['INV-','fee','Invoice'],['Interested in Grade','crm','Lead']];
 /* Form drawers: look up an icon and section label from the form's title */
 function formDrawer(html, cls = '') {
@@ -2979,7 +3136,7 @@ function formDrawer(html, cls = '') {
   if (!S.noFocus) setTimeout(() => { const f = drawer.querySelector('.drawer-b input:not([type=checkbox]):not([type=file]):not([type=radio]),.drawer-b select,.drawer-b textarea'); if (f) f.focus(); }, 120);
 }
 function openModal(html, cls = '') { formDrawer(html, cls); }
-function closeAll() { [drawer, modal, scrim, document.getElementById('cmdk'), document.getElementById('notif')].forEach(e => e.classList.remove('on')); drawer.setAttribute('aria-hidden','true'); }
+function closeAll() { [drawer, modal, scrim, document.getElementById('cmdk'), document.getElementById('notif')].forEach(e => e.classList.remove('on')); drawer.setAttribute('aria-hidden','true'); drawer.inert = true; }
 const head = (title, sub='') => `<div class="drawer-h"><div style="flex:1;min-width:0"><h2>${title}</h2>${sub?`<div class="muted" style="font-size:12.5px">${sub}</div>`:''}</div><button class="iconbtn" data-act="closeAll" aria-label="Close">${ic('x',16)}</button></div>`;
 function toast(msg) { msg = acadText(msg); const t = document.createElement('div'); t.className = 'toast'; t.innerHTML = `${ic('check',16)}${esc(msg)}`; const box = document.getElementById('toasts'); box.appendChild(t); while (box.children.length > 2) box.firstChild.remove(); setTimeout(() => t.remove(), 2800); }
 
@@ -3017,11 +3174,11 @@ function paymentModal(no) {
 function journalModal() {
   openModal(`${head('New journal entry', 'Debits must equal credits before you can post')}<div class="drawer-b"><div class="field"><label for="j_memo">Memo</label><input class="input" id="j_memo" value="Sports day equipment purchase"></div>
   <div class="tbl-wrap"><table><thead><tr><th>Account</th><th class="r">Debit</th><th class="r">Credit</th></tr></thead><tbody>
-  <tr><td><select class="input" id="j_a1"><option>5310 Teaching materials</option><option>5420 Utilities</option><option>5100 Salaries – teaching</option></select></td><td><input class="input num jd" type="number" value="145000" style="text-align:right"></td><td><input class="input num jc" type="number" value="0" style="text-align:right"></td></tr>
-  <tr><td><select class="input" id="j_a2"><option>2100 Accounts payable</option><option>1110 Bank – Operating</option></select></td><td><input class="input num jd" type="number" value="0" style="text-align:right"></td><td><input class="input num jc" type="number" value="140000" style="text-align:right"></td></tr>
+  <tr><td><select class="input" id="j_a1" aria-label="Account, line 1"><option>5310 Teaching materials</option><option>5420 Utilities</option><option>5100 Salaries – teaching</option></select></td><td><input class="input num jd" type="number" value="1450" step="0.01" aria-label="Debit, line 1" style="text-align:right"></td><td><input class="input num jc" type="number" value="0" step="0.01" aria-label="Credit, line 1" style="text-align:right"></td></tr>
+  <tr><td><select class="input" id="j_a2" aria-label="Account, line 2"><option>2100 Accounts payable</option><option>1110 Bank – Operating</option></select></td><td><input class="input num jd" type="number" value="0" step="0.01" aria-label="Debit, line 2" style="text-align:right"></td><td><input class="input num jc" type="number" value="1400" step="0.01" aria-label="Credit, line 2" style="text-align:right"></td></tr>
   </tbody></table></div><div id="jBal" style="font-weight:700"></div></div>
   <div class="drawer-f"><button class="btn" data-act="closeAll">Cancel</button><button class="btn primary" id="jPost" data-act="postJournal">Post entry</button></div>`);
-  const upd = () => { const d = [...document.querySelectorAll('.jd')].reduce((a, i) => a + (+i.value||0), 0), c = [...document.querySelectorAll('.jc')].reduce((a, i) => a + (+i.value||0), 0);
+  const upd = () => { const d = [...document.querySelectorAll('.jd')].reduce((a, i) => a + Math.round((+i.value||0) * 100), 0), c = [...document.querySelectorAll('.jc')].reduce((a, i) => a + Math.round((+i.value||0) * 100), 0);
     const ok = d === c && d > 0; document.getElementById('jBal').innerHTML = ok ? `<span class="pill t-green">Balanced · ${money(d)}</span>` : `<span class="pill t-red">Out of balance by ${money(Math.abs(d - c))}</span>`; document.getElementById('jPost').disabled = !ok; document.getElementById('jPost').style.opacity = ok ? 1 : .5; };
   modal.querySelectorAll('.jd,.jc').forEach(i => i.oninput = upd); upd();
 }
@@ -3211,7 +3368,7 @@ const ACT = {
     if (!name) { err.textContent = 'Type or pick a subject to add.'; inp.focus(); return; }
     const k = Object.keys(SUBJ_LIB).find(x => x.toLowerCase() === name.toLowerCase()) || name;
     if (S.subDraft.rows.some(r => r.k === k)) { err.textContent = `${k} is already on the list.`; inp.focus(); return; }
-    if (!SUBJ_LIB[k]) SUBJ_LIB[k] = [['#0EA5E9','#E11D48','#7A68E8','#059669','#D97706'][Object.keys(SUBJ_LIB).length % 5], 'book', '', ''];
+    if (!SUBJ_LIB[k]) SUBJ_LIB[k] = [['var(--c3)','var(--c1)','var(--c2)','var(--c5)','var(--c4)'][Object.keys(SUBJ_LIB).length % 5], 'book', '', ''];
     S.subDraft.rows.push({k, n: 2, t: SUBJ_LIB[k][2], r: SUBJ_LIB[k][3]}); keepScroll(subjDrawer); const b = drawer.querySelector('.drawer-b'); b.scrollTop = b.scrollHeight; },
   sjCopy: () => { subjSync(); const g = +document.getElementById('sjCopy').value; S.subDraft.rows = gSubj(g).map(r => ({...r})); keepScroll(subjDrawer); toast(`Copied ${esc(yl(g))}’s subjects. Adjust them, then save.`); },
   sjAlso: el => { subjSync(); const g = +el.dataset.g, a = S.subDraft.also; a.has(g) ? a.delete(g) : a.add(g); keepScroll(subjDrawer); },
@@ -3290,7 +3447,7 @@ const ACT = {
     <label class="checkrow"><input type="checkbox" checked> Apply sibling discounts and scholarships automatically</label></div><div class="drawer-f"><button class="btn" data-act="closeAll">Cancel</button><button class="btn primary" data-act="doGen">Create 1,248 drafts</button></div>`),
   doGen: () => { closeAll(); toast('1,248 draft invoices created for Term 2'); },
   newJournal: journalModal,
-  postJournal: () => { const d = [...document.querySelectorAll('.jd')].reduce((a, i) => a + (+i.value||0), 0);
+  postJournal: () => { const d = [...document.querySelectorAll('.jd')].reduce((a, i) => a + Math.round((+i.value||0) * 100), 0);
     S.journal.unshift({no:'JE-2026-0' + (413 + S.journal.length - 5), date:'2026-10-05', memo: document.getElementById('j_memo').value, dr: document.getElementById('j_a1').value, cr: document.getElementById('j_a2').value, amt: d}); closeAll(); S.tab.fin = 'journal'; route(); toast('Journal entry posted'); },
   mark: el => { S.register[el.dataset.id] = el.dataset.val; const seg = el.parentElement; seg.querySelectorAll('button').forEach(b => b.className = b === el ? 'on ' + b.dataset.val : '');
     const roster = students.slice(0, 18); ['P','A','L','E'].forEach(k => document.getElementById('cnt-' + k).textContent = roster.filter(s => S.register[s.id] === k).length); },
@@ -3539,7 +3696,7 @@ function aqAnswer(raw) { const q = raw.toLowerCase(); sigBuild(); const yr = aqY
   if (/how many|students|enrol/.test(q)) return `<p>${students.length > 0 ? '1,248' : 0} students are enrolled across ${YL().length} year groups, ${esc(ylRange(1, LV.length))}.</p>${aqActs([aqGo('students', 'Open students')])}${aqFrom('Student records')}`;
   return `<p>I can answer questions about this school’s records. Try one of these:</p><ul class="aq-list"><li>Who needs attention in a year group</li><li>Attendance, fees, cover, exams or admissions</li><li>A student or teacher by name</li><li>“Draft a letter about …”</li></ul>`; }
 function aqRender() { const box = document.getElementById('aqMsgs'); if (!box) return;
-  box.innerHTML = `<div class="aq-m bot"><p><b>Hello Emma.</b> Ask me anything about ${esc(SCHOOL.name)}: students, attendance, fees, cover, exams. I’ll show where each answer comes from.</p></div>${AQ.msgs.length ? '' : `<div class="aq-sugg">${AQ_SUGG.map(s => `<button data-act="aqAsk" data-q="${esc(acadText(s))}">${esc(acadText(s))}</button>`).join('')}</div>`}${AQ.msgs.map(m => `<div class="aq-m ${m.me ? 'me' : 'bot'}">${m.me ? esc(m.t) : m.t}</div>`).join('')}${AQ.busy ? '<div class="aq-m bot typing" aria-label="Thinking"><i></i><i></i><i></i></div>' : ''}`;
+  box.innerHTML = `<div class="aq-m bot"><p><b>Hello Emma.</b> Ask me anything about ${esc(SCHOOL.name)}: students, attendance, fees, cover, exams. I’ll show where each answer comes from.</p></div>${AQ.msgs.length ? '' : `<div class="aq-sugg">${AQ_SUGG.map(s => `<button data-act="aqAsk" data-q="${esc(acadText(s))}">${esc(acadText(s))}</button>`).join('')}</div>`}${AQ.msgs.map(m => `<div class="aq-m ${m.me ? 'me' : 'bot'}">${m.me ? esc(m.t) : m.t}</div>`).join('')}${AQ.busy ? '<div class="aq-m bot typing" role="status" aria-label="Thinking"><i></i><i></i><i></i></div>' : ''}`;
   box.scrollTop = box.scrollHeight; }
 function aqAsk(q) { q = q.trim(); if (!q || AQ.busy) return; AQ.msgs.push({me: true, t: q}); AQ.busy = true; aqRender();
   setTimeout(() => { AQ.busy = false; let a; try { a = acadText(aqAnswer(q)); } catch (e) { a = '<p>Sorry, I couldn’t work that out. Try asking another way.</p>'; } AQ.msgs.push({t: a}); aqRender(); }, 650); }
@@ -3756,14 +3913,14 @@ V.connect = () => { const by = connBuild(), cs = Object.keys(by), N = cs.reduce(
   const secs = SECTION_NAMES.slice(0, Math.max(...LV.map(x => x.sections)));
   const miss = cs.flatMap(c => by[c].rows.filter(x => x.quiet).map(x => ({...x, cls: c, g: gradeOfCls(c)}))).filter(x => (fg === 'all' || x.g == fg) && (!fc || x.cls === fc)).sort((a, b) => (b.pos == null ? 99 : b.pos) - (a.pos == null ? 99 : a.pos));
   const done = S.connDone || {}, shown = S.filter.connAll ? miss : miss.slice(0, 10);
-  const cell = c => { const x = by[c], p = connPct(x), on = fc === c; return `<button class="cx-c ${on ? 'on' : ''}" style="background:color-mix(in srgb,var(--c5) ${Math.round(Math.max(0, p - 40) / 60 * 62)}%,var(--surface-2))" data-act="connCell" data-c="${esc(c)}" aria-pressed="${on}" aria-label="${esc(c)}: ${p}% of ${x.n} families heard something positive">${p}%<small>${x.n - x.k ? `${x.n - x.k} not yet` : 'all'}</small></button>`; };
+  const cell = c => { const x = by[c], p = connPct(x), on = fc === c; return `<button class="cx-c h${p >= 95 ? 3 : p >= 85 ? 2 : p >= 70 ? 1 : 0} ${on ? 'on' : ''}" data-act="connCell" data-c="${esc(c)}" aria-pressed="${on}" aria-label="${esc(c)}: ${p}% of ${x.n} families heard something positive">${p}%<small>${x.n - x.k ? `${x.n - x.k} not yet` : 'all'}</small></button>`; };
   return `${pageHead('Relationships', 'Family connection', '', `<button class="btn" data-act="go" data-to="inbox">${ic('moon', 16)}Quiet hours</button>`)}
   <section class="card story"><div class="story-t"><span class="local">Last two weeks</span><p><b>${K.toLocaleString('en-US')} of ${N.toLocaleString('en-US')} families heard something positive in the last two weeks.</b> ${(N - K).toLocaleString('en-US')} haven’t yet, most of them in ${low.map(esc).join(' and ')}. A friendly reminder to the class teacher, or a short note from the office, is usually all it takes.</p></div>${morningArt('sm')}</section>
   <div class="grid g-kpi">${kpi('heart', 't-green', 'Families reached', `${Math.round(K / N * 100)}%`, `${K.toLocaleString('en-US')} of ${N.toLocaleString('en-US')} heard something good`)}${kpi('star', 't-violet', 'Positive moments', M.toLocaleString('en-US'), 'shared by teachers in two weeks')}${kpi('msg', 't-blue', 'Families replied', `${Math.round(R / N * 100)}%`, 'said thanks or loved a moment')}${kpi('people', 't-amber', 'Every family reached', `${all100} of ${cs.length}`, 'classes where nobody was missed')}</div>
   <section class="card" aria-labelledby="cxH"><div class="card-h"><h2 id="cxH">Families who heard something positive, by class</h2>${fc ? `<button class="btn sm" data-act="connCell" data-c="">Show every class</button>` : ''}</div>
     <div class="cx-wrap"><table class="cx-heat"><caption class="sr-only">Share of families in each class who heard something positive in the last two weeks</caption><thead><tr><th scope="col">${GL.one}</th>${secs.map(x => `<th scope="col">${esc(x)}</th>`).join('')}</tr></thead>
       <tbody>${LV.map((l, i) => `<tr><th scope="row">${esc(l.label)}</th>${secs.map(sec => { const c = clsName(i + 1, sec); return `<td>${by[c] ? cell(c) : ''}</td>`; }).join('')}</tr>`).join('')}</tbody></table></div>
-    <div class="cx-leg"><span>Fewer</span><i aria-hidden="true"></i><span>All families</span><small class="muted">Select a class to see its families below</small></div></section>
+    <div class="cx-leg"><span>Fewer</span>${[0, 1, 2, 3].map(k => `<span class="sw" style="background:var(--heat-${k})" aria-hidden="true"></span>`).join('')}<span>All families</span><span class="muted">(under 70%, 70%, 85%, 95% or more)</span><small class="muted">Select a class to see its families below</small></div></section>
   <section class="card" aria-labelledby="cxN"><div class="card-h"><h2 id="cxN">Families not reached</h2><span class="pill t-amber plain">${miss.length}</span></div>
     <div class="toolbar"><select class="input inline" data-filter="connG" aria-label="${GL.one}" data-dd-ic="student"><option value="all">${GL.all}</option>${YL().map((l, i) => `<option value="${i + 1}" ${fg == i + 1 ? 'selected' : ''}>${esc(l)}</option>`).join('')}</select>${fc ? `<span class="chip on">${esc(fc)}</span>` : ''}</div>
     <div class="cx-list">${shown.map(x => { const key = x.cls + '|' + x.name, st = done[key], ct = ST.ct[x.cls] || 'the class teacher';
