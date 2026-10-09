@@ -1,6 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { sensitivePermissionKey } from '@quad/contracts';
+import { HIDDEN_FROM_SUPPORT } from '@quad/domain';
 
 import { TENANT_DB } from '../../tokens';
 import { PermissionsService } from '../access/permissions.service';
@@ -9,7 +10,7 @@ import { ForbiddenError } from '../errors';
 import { requestAuthOf, schoolOf } from '../session/request-auth';
 
 import { CanMarker } from './can.decorator';
-import { HIDDEN_FROM_SUPPORT, SensitiveMarker } from './sensitive.decorator';
+import { SensitiveMarker } from './sensitive.decorator';
 
 import type { RequestAccess } from '../access/permissions.service';
 import type { RequestAuth } from '../session/request-auth';

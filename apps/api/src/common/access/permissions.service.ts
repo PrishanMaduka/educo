@@ -7,6 +7,7 @@ import {
   PlanModule,
   SensitiveKey,
   SystemRoleKey,
+  USERS_MANAGE,
 } from '@quad/contracts';
 import { effectivePermissions, rowOf, systemRoleMatrix } from '@quad/domain';
 import { z } from 'zod';
@@ -121,25 +122,33 @@ export class PermissionsService {
 
   /** The access of `auth`, read now (`POST /me/role-preview` answers with the new preview's). */
   async of(auth: SchoolRequestAuth): Promise<RequestAccess> {
-    const userId = auth.kind === 'support' ? null : auth.userId;
+    // Only a staff browser session acts through roles: the parent app's tokens are not
+    // role-based, and a support visit has no membership (fix round 1, I1).
+    const userId = auth.kind === 'web' ? auth.userId : null;
     const previewRoleId = auth.kind === 'web' ? auth.previewRoleId : null;
+    // A support visit, or a member session tied to one: the support set, never safeguarding or
+    // medical (spec 05). One value for the permissions and for `@Sensitive` (M2).
+    const support =
+      auth.kind === 'support' || (auth.kind === 'web' && auth.supportSessionId !== null);
     const stamp = await this.repository.stamp(auth.tenantId, userId, previewRoleId);
     if (stamp.profile === null) throw new UnauthorizedError();
     const planModules = stamp.profile.modules.flatMap((module) => {
       const parsed = PlanModule.safeParse(module);
       return parsed.success ? [parsed.data] : [];
     });
-    const support = auth.kind === 'support';
     const inPlay = [...stamp.roles, ...(stamp.preview === null ? [] : [stamp.preview])];
     const grants = await this.grantsOf(auth.tenantId, inPlay);
     const grantOf = (role: AccessRole): RoleGrant =>
       grants.get(role.id) ?? { matrix: {}, sensitive: [] };
-    const permissions = effectivePermissions({
-      roles: stamp.roles.map(grantOf),
-      planModules,
-      support,
-      ...(stamp.preview === null ? {} : { preview: grantOf(stamp.preview) }),
-    });
+    const roles = stamp.roles.map(grantOf);
+    const own = effectivePermissions({ roles, planModules, support });
+    // A preview counts only while the member may still preview (users.manage, fix round 1 I2);
+    // otherwise they act as themselves, and the session stays read-only until they end it.
+    const preview = stamp.preview !== null && own.has(USERS_MANAGE) ? stamp.preview : null;
+    const permissions =
+      preview === null
+        ? own
+        : effectivePermissions({ roles, planModules, support, preview: grantOf(preview) });
     const primary = stamp.roles.find((role) => role.primary) ?? stamp.roles[0];
     return {
       tenantId: auth.tenantId,
@@ -147,9 +156,8 @@ export class PermissionsService {
       suspendReason: stamp.profile.suspendReason,
       planModules,
       permissions,
-      scope: stamp.preview?.scope ?? primary?.scope ?? 'school',
-      // A member session tied to a visit counts as support for @Sensitive too (spec 05).
-      support: support || (auth.kind === 'web' && auth.supportSessionId !== null),
+      scope: preview?.scope ?? primary?.scope ?? 'school',
+      support,
       previewRoleId: stamp.preview?.id ?? null,
     };
   }
@@ -194,11 +202,14 @@ export class PermissionsService {
       .reduce((max, at) => (at > max ? at : max), 0n);
     const key = `${KEY_PREFIX}:${tenantId}:${hashOf(ids.join(','))}:${lastChange}`;
 
+    // `undefined` is a failed read (Redis down), `null` a miss.
     const raw = await this.cacheSafely('read', () => this.redis.get(key));
     const hit = typeof raw === 'string' ? parseGrants(raw) : null;
     if (hit !== null && ids.every((id) => hit.has(id))) return hit;
 
     const grants = await this.repository.grants(tenantId, ids);
+    // After a failed read, a write would only wait for Redis to fail again (fix round 1, M3).
+    if (raw === undefined) return grants;
     const index = indexKey(tenantId);
     await this.cacheSafely('write', () =>
       this.redis

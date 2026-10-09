@@ -1,6 +1,10 @@
+import { randomBytes } from 'node:crypto';
+
 import { MePermissions } from '@quad/contracts';
 import { describe, expect, it } from 'vitest';
 
+import { SessionRepository } from '../../src/common/session/session.repository';
+import { TENANT_DB } from '../../src/tokens';
 import { RecordingDelivery } from '../fakes/delivery';
 import { RecordingOtpSends } from '../fakes/otp-sends';
 import {
@@ -24,6 +28,7 @@ import { bearer, insertParentMember, insertPhoneAccount, signedInParent } from '
 
 import type { SchoolSeed, SessionSeed } from '../helpers/identity';
 import type { PlanModule } from '@quad/contracts';
+import type { QuadTenantDb } from '@quad/db';
 
 const delivery = new RecordingDelivery();
 const otpSends = new RecordingOtpSends(delivery);
@@ -308,5 +313,53 @@ describe('DELETE /me/role-preview', () => {
 
     expect((await previewColumns(inA.session.id))?.preview_role_id).toBe(finance);
     expect((await previewColumns(inB.session.id))?.preview_role_id).toBeNull();
+  });
+});
+
+describe('a preview and Switch school (fix round 1, M6)', () => {
+  it('refuses Switch school while previewing (Back to my view comes first)', async () => {
+    const a = await school();
+    const b = await school();
+    const admin = await staffAs(a, 'admin');
+    await signedInMember(db(), b, { accountId: admin.accountId });
+    const finance = await insertSystemRole(db(), a.id, 'finance');
+    await setPreview(db(), admin.session.id, finance);
+
+    const response = await new Browser(app).post(
+      '/auth/select-school',
+      { tenantId: b.id },
+      { headers: sessionHeaders(admin.session) },
+    );
+    expect(response.statusCode).toBe(403);
+    expect(response.json()).toMatchObject({ code: 'preview_read_only' });
+  });
+
+  it('clears the preview whenever the session rotates to another school (rotateIn)', async () => {
+    const a = await school();
+    const b = await school();
+    const admin = await staffAs(a, 'admin');
+    const inB = await signedInMember(db(), b, { accountId: admin.accountId });
+    const finance = await insertSystemRole(db(), a.id, 'finance');
+    await setPreview(db(), admin.session.id, finance);
+
+    const tenantDb = app().get<QuadTenantDb>(TENANT_DB);
+    const rotated = await tenantDb.withAccount(admin.accountId, (tx) =>
+      app()
+        .get(SessionRepository)
+        .rotateIn(tx, admin.session.id, admin.session.tokenHash, {
+          stage: 'active',
+          tenantId: b.id,
+          userId: inB.userId,
+          tokenHash: randomBytes(32),
+          at: new Date(),
+          expiresAt: new Date(Date.now() + 60 * 60 * 1000),
+        }),
+    );
+
+    expect(rotated).toBe(true);
+    expect(await previewColumns(admin.session.id)).toEqual({
+      preview_role_id: null,
+      preview_sample_user_id: null,
+    });
   });
 });

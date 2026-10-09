@@ -32,9 +32,10 @@ describe('the permission cache with Redis down (D32: read Postgres, never grant 
     expect(refused.statusCode).toBe(403);
     expect(refused.json()).toMatchObject({ code: 'forbidden' });
 
-    expect(lines).toContainEqual(
-      expect.objectContaining({ metric: 'permission_cache_unavailable' }),
-    );
+    const cacheFailures = lines.filter((line) => line.metric === 'permission_cache_unavailable');
+    expect(cacheFailures).toContainEqual(expect.objectContaining({ operation: 'read' }));
+    // A read that failed (rather than missed) skips the write: one Redis wait per request.
+    expect(cacheFailures).not.toContainEqual(expect.objectContaining({ operation: 'write' }));
     // Every Redis call waits for its failure (about 2 s each), so this test takes a while.
   }, 60_000);
 });

@@ -56,6 +56,9 @@ export class RolePreviewService {
     const person = staffSession(auth);
     const actor = auditActorOf(schoolOf(person), ip);
     const sampleUserId = input.sampleUserId ?? null;
+    // Dropped before and after the change (fix round 1, M5): a request that read the old session
+    // meanwhile cannot leave it cached for 30 s.
+    await this.sessionCache.invalidateToken(person.tokenHash);
     await this.db.withAccount(person.accountId, { tenantId: person.tenantId }, async (tx) => {
       const role = await this.repository.previewRole(tx, input.roleId);
       if (role === null) throw new NotFoundError();
@@ -80,7 +83,6 @@ export class RolePreviewService {
         { sampleUserId },
       );
     });
-    // The cached session still says "no preview" for up to 30 s otherwise.
     await this.sessionCache.invalidateToken(person.tokenHash);
     const previewing = {
       ...person,
@@ -94,6 +96,7 @@ export class RolePreviewService {
   async end(auth: RequestAuth, ip: string): Promise<void> {
     const person = staffSession(auth);
     const actor = auditActorOf(schoolOf(person), ip);
+    await this.sessionCache.invalidateToken(person.tokenHash);
     await this.db.withAccount(person.accountId, { tenantId: person.tenantId }, async (tx) => {
       const cleared = await this.sessions.setPreviewIn(
         tx,

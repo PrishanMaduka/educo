@@ -1,5 +1,15 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { eq, inArray, rolePermissions, roleSensitive, roles, sql, userRoles } from '@quad/db';
+import {
+  and,
+  eq,
+  inArray,
+  rolePermissions,
+  roleSensitive,
+  roles,
+  sql,
+  userRoles,
+  users,
+} from '@quad/db';
 
 import { TENANT_DB } from '../../tokens';
 
@@ -90,11 +100,15 @@ export class PermissionsRepository {
   }
 
   private memberRoles(tx: TenantTx, userId: string): Promise<AccessRole[]> {
-    return tx
-      .select({ ...roleColumns, primary: userRoles.primary })
-      .from(userRoles)
-      .innerJoin(roles, eq(roles.id, userRoles.roleId))
-      .where(eq(userRoles.userId, userId));
+    return (
+      tx
+        .select({ ...roleColumns, primary: userRoles.primary })
+        .from(userRoles)
+        .innerJoin(roles, eq(roles.id, userRoles.roleId))
+        // Only a staff membership holds roles (fix round 1, I1; Task 13 adds the database check).
+        .innerJoin(users, eq(users.id, userRoles.userId))
+        .where(and(eq(userRoles.userId, userId), eq(users.kind, 'staff')))
+    );
   }
 
   private async role(tx: TenantTx, roleId: string): Promise<AccessRole | null> {

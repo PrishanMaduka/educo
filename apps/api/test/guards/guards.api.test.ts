@@ -159,22 +159,41 @@ describe('@Can (spec 05: any of its keys)', () => {
     expect(response.json()).toMatchObject({ code: 'forbidden' });
   });
 
-  it("reads a token's permissions from the current roles, never from its rh claim (D32)", async () => {
+  it("never gives a parent token a staff role's permissions, even with a user_roles row (D32)", async () => {
     const at = await school();
     const account = await insertPhoneAccount(db());
-    const userId = await insertParentMember(db(), at.id, account.id, 'guardian');
+    const guardianId = await insertParentMember(db(), at.id, account.id, 'guardian');
     const roleId = await insertCustomRole(db(), at.id, { matrix: { fees: '10000' } });
-    await assignRole(db(), at.id, userId, roleId);
+    // A row Task 13's check will forbid: a guardian membership holding a staff role.
+    await assignRole(db(), at.id, guardianId, roleId);
+    const staff = await signedInMember(db(), at);
+    await assignRole(db(), at.id, staff.userId, roleId);
     const pair = await signedInParent(app, otpSends, account.phone);
-    const fees = () =>
-      new Browser(app).get('/probe/guards/fees', { headers: bearer(pair.accessToken) });
 
-    expect((await fees()).statusCode).toBe(200);
-    await db().platform.query('delete from user_roles where user_id = $1', [userId]);
-    // The token (and its roles hash) is unchanged and still valid; the grant is gone at once.
-    const after = await fees();
-    expect(after.statusCode).toBe(403);
-    expect(after.json()).toMatchObject({ code: 'forbidden' });
+    const parent = await new Browser(app).get('/probe/guards/fees', {
+      headers: bearer(pair.accessToken),
+    });
+    expect(parent.statusCode).toBe(403);
+    expect(parent.json()).toMatchObject({ code: 'forbidden' });
+    // The positive control: a staff session holding the same role gets in.
+    expect((await as(staff.session).get('/probe/guards/fees')).statusCode).toBe(200);
+  });
+
+  it('gives a member session tied to a support visit the support set: no safeguarding, whatever its roles', async () => {
+    const at = await school();
+    const admin = await staffAs(at, 'admin');
+    const { visit } = await supportIn(at);
+    await db().platform.query('update sessions set support_session_id = $2 where id = $1', [
+      admin.session.id,
+      visit.id,
+    ]);
+
+    expect((await as(admin.session).get('/probe/guards/safeguarding')).statusCode).toBe(403);
+    const keys = MePermissions.parse((await as(admin.session).get('/me/permissions')).json()).keys;
+    expect(keys).not.toContain('sensitive.safeguarding');
+    expect(keys).not.toContain('sensitive.medical');
+    // The positive control: the support set keeps export_data and users.manage.
+    expect(keys).toEqual(expect.arrayContaining(['sensitive.export_data', 'users.manage']));
   });
 });
 
@@ -423,6 +442,21 @@ describe('Preview a role (spec 06: every non-GET is 403 preview_read_only)', () 
     const permissions = await as(lead.session).get('/me/permissions');
     expect(permissions.json()).toMatchObject({ preview: { roleId: previewed } });
     expect(MePermissions.parse(permissions.json()).keys).not.toContain('sensitive.safeguarding');
+  });
+
+  it('stops applying a preview once the member loses users.manage, and stays read-only', async () => {
+    const at = await school();
+    const lead = await staffWith(at, { matrix: { settings: '11111', sis: '10000' } });
+    const previewed = await insertCustomRole(db(), at.id, { matrix: { fees: '10000' } });
+    await setPreview(db(), lead.session.id, previewed);
+    expect((await as(lead.session).get('/probe/guards/fees')).statusCode).toBe(200);
+
+    await db().platform.query('delete from user_roles where user_id = $1', [lead.userId]);
+
+    const fees = await as(lead.session).get('/probe/guards/fees');
+    expect(fees.statusCode).toBe(403);
+    const write = await as(lead.session).post('/probe/guards/write');
+    expect(write.json()).toMatchObject({ code: 'preview_read_only' });
   });
 
   it('keeps a key the admin holds when the previewed role has it too', async () => {
