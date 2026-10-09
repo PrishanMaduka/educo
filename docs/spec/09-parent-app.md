@@ -1,6 +1,8 @@
 # 09 Parent app
 
-App: `apps/parent` (Flutter, Dart 3; packages in [02](02-architecture.md#parent-app-flutter)). Prototype: `design/parent.html` (shown in a phone frame, with a side panel of simulation controls that are **not** part of the product).
+App: `apps/parent` (Flutter, Dart 3; packages in [02](02-architecture.md#parent-app-flutter)). Prototype: `design/parent.html` (shown in a phone frame, with a side panel of simulation controls that are **not** part of the product), on the app design system in [03](03-design-system.md) (D34). Renders: `docs/screenshots/redesign/parent-*.png`.
+
+**Sample data.** The prototype uses the international sample cast from [D34](02-architecture.md#decision-log) (Greenfield International School, Priya and Daniel Patel, Maya and Leo, Ms. Okafor). Some examples below still use the earlier names (Amaya, Kavindu, Dilhani, Ms. Jayasinghe, Colombo International School, Poya days); read them through the mapping in D34.
 
 There is **one Quad parent app** for every school, listed in the stores as **"Quad – School & Family"** (bundle id `com.quadedu.parent`). It is not white-labelled. The app opens Quad-branded and takes on the school's logo, colour and name once the parent signs in.
 
@@ -11,13 +13,15 @@ There is **one Quad parent app** for every school, listed in the stores as **"Qu
 - **Fast.** Home loads from one call (`GET /family/home`) and is cached for offline use. It refreshes on pull-down and on realtime events.
 
 ## Navigation
-Tab bar: **Home**, **Circle** (unread moments badge), **Payments** (due badge), **Messages** (unread badge), **More**. The active tab is a coral pill with a small dot. Children's profiles are under More and in the "Profiles" chip after the child switcher on Home.
+Tab bar: **Home**, **Circle** (unread moments badge), **Payments** (due badge), **Messages** (unread badge), **More**. The active tab is a pill in the school colour (`brand-fill`) around the icon, with the label in `ink`; badges are pink with navy text ([03](03-design-system.md#parent-tab-bar)). Children's profiles are under More and in the "Profiles" chip after the child switcher on Home.
+
+The five tabs follow `design/parent.html`. The `system.html` sample shows four tabs (Today, Circle, Ask, Pay); which one ships is awaiting the owner (D34), and until then this spec's five tabs stand.
 
 ## Start-up
-1. **Splash.** First launch: Quad-branded (the Quad mark on the indigo background, no school). Later launches: the remembered school's logo, colour and name with "powered by Quad", read from the cached branding of the last school used. The native splash (set at build time) is always the Quad mark; the school splash is drawn by Flutter as soon as the cache is read.
+1. **Splash.** First launch: Quad-branded (the Quad mark on Quad navy, no school). Later launches: the remembered school's logo, colour and name with "powered by Quad", read from the cached branding of the last school used. The native splash (set at build time) is always the Quad mark; the school splash is drawn by Flutter as soon as the cache is read.
 2. **Lock screen** (returning users with biometrics on): "Welcome back", Face ID or fingerprint, and "Use passcode". It is shown at launch and when the app returns after more than 5 minutes in the background.
 3. **Sign-in** (first time, Quad-branded; flow and rules in [05](05-auth-tenancy-rbac.md#parent-app)):
-   - **Welcome:** the Quad mark, "Welcome to Quad", "Attendance, results, fees and messages for your children, in one app.", **Sign in** and **I have an invite code**.
+   - **Welcome** (Quad-branded, the same for every school): Quad navy with the Quad logo, the flat illustrated circle of people from the landing page (sample cast faces with doodles; [03](03-design-system.md#illustration-and-avatars)), the headline "Hear the **good** stuff first." with "good" on a pink pill, "Attendance, results, fees and messages for your children, in one app.", **Sign in** (a pink button with navy text), **I have an invite code** (outlined on navy) and "Your school's name and colours appear once you're signed in." The sign-in steps that follow are Quad-branded too (navy and pink).
    - **Phone:** a country-code picker and the mobile number, **Send code**, and "Use email instead".
    - **Code:** 6 boxes with auto-advance, paste and SMS autofill (`one-time-code`), "It works for 10 minutes", and resend after 30 s.
    - **Found you:** "You're signed in. Welcome, Dilhani. We found 2 children at Colombo International School." with the children's avatars. From here the app uses the school's branding. With several schools, the school picker (logo, name, children) comes first.
@@ -26,7 +30,7 @@ Tab bar: **Home**, **Circle** (unread moments badge), **Payments** (due badge), 
 
 ## Home
 Order from top to bottom:
-1. **Greeting header:** no card or illustration: a small time-of-day icon (sunrise, sun, sunset or moon; see [03](03-design-system.md#the-greeting-section-time-of-day)) with the date, "Good morning / afternoon / evening, {first name}" on one line (22 px), and the notifications bell on the right.
+1. **Greeting header:** no card or illustration: a small time-of-day icon (sunrise, sun, sunset or moon, on a round tint; see [03](03-design-system.md#the-greeting-section-time-of-day)) with the date as an uppercase eyebrow, then "Good morning / afternoon / evening, {first name}" on one line (Bricolage Grotesque 800, 27 px). On the right: the **Ask Quad** button (a 40 px round navy button with a lime spark, the same in every school, labelled "Ask Quad") and the notifications bell (a pink dot when there is something new).
 2. **Stories:** round tiles (Sports, STEM lab, Lunch, Principal, Art week). Tapping one opens full-screen slides: tap to advance, hold to pause, swipe down to close, double-tap or the heart button for a heart (`POST /family/stories/:id/heart`), and "Reply to the school" (sent to the office as a message).
 3. **Child switcher:** small pills (24 px avatar and first name) and a round Profiles icon button at the end of the row.
 4. **{child}'s day** (the day ring, see [12](12-moments-messaging.md#the-day-as-it-happens)): a ring of today's lessons from the start to the end of the school day, done lessons solid and upcoming ones faded, a "now" hand and event dots (arrived, registered, moment, lunch, bus). Beside it a LIVE headline ("Two of seven lessons done") and a sentence ("Arrived 07:42, registered present and a moment from Ms. Jayasinghe"); under it "Right now: Science with Ms. Fernando". Tap → **Day** screen: the larger ring, "So far today" timeline, and "Still to come".
@@ -43,7 +47,7 @@ Order from top to bottom:
 
 Moments and the "Improving" good news are not on Home; they live in the Circle tab and on How {child} is doing.
 
-A floating round Ask Quad button sits at the bottom right and never covers content.
+Ask Quad opens from the button in the greeting header, from its row in More, and with the `/` key where a keyboard is attached. There is no floating button. It opens as a bottom sheet in Quad navy and lime; the parent's own questions take the school colour ([11](11-ask-quad.md)).
 
 ## Circle tab
 The tab opens with a segmented control: **Moments · People · Learning**. The Moments segment shows its own unseen count when another segment is open. Moments are marked seen only while the Moments segment is showing. Specification of the parts: [12](12-moments-messaging.md#quad-circle).
@@ -65,7 +69,7 @@ The tab opens with a segmented control: **Moments · People · Learning**. The M
 
 ### People
 - Child chips, then a sentence: "Seven people look after Amaya at school, and three at home."
-- The orbit: the child in the centre, family on the inner ring (amber), school on the outer ring (indigo). Each node can be tapped. The SVG has a label naming everyone; the lists below are the accessible equivalent.
+- The orbit: the child in the centre (orange), family on the inner ring (pink), school on the outer ring (teachers sky, care staff lime), following the category colours in [03](03-design-system.md#colour-rules), with a legend. Real people show their photo or initials. Each node can be tapped. The SVG has a label naming everyone; the lists below are the accessible equivalent.
 - **At school:** name, role, and the "working on" line. Tap → **person screen** (role, working on with {child}, reply hours, their recent moments for this child; **Message**, **Say thanks**, **Ask for a 10-minute chat**).
 - **Ask for a 10-minute chat** opens a sheet "A 10-minute chat with {name}" ("{role} · in person at school or by phone. Pick a time that suits you.") with day headings and time buttons. Slot rules (computed by the API, `GET …/chat-slots`):
   - 10-minute slots inside the person's office hours (`staff_office_hours`; default 15:00–16:00) on the next 5 school days, skipping holidays, the teacher's lessons and cover, and their cover absences;
@@ -136,7 +140,7 @@ Threads with teachers and offices: unread first, a new message to a staff member
 ## More
 - A profile card with the guardian and child chips.
 - **Children:** My children (profiles), How {child} is doing for each child, Circle.
-- **School life:** Ask Quad, parents' evening, forms, exams, trips & bookings.
+- **School life:** Ask Quad (also on the `/` key and in the Home header), parents' evening, forms, exams, trips & bookings.
 - **Information:** school calendar, news, staff directory.
 - **Account:**
   - **Contact details:** mobile, email and home address with **Submit changes**. "The school office reviews changes before they reach student records." Pending changes show "Waiting for the school" until approved. A new mobile or email also needs a code sent to it (see [05](05-auth-tenancy-rbac.md#account-edge-cases));
