@@ -1,13 +1,12 @@
 import { z } from 'zod';
 
+import { HexColor } from '../common/color';
 import { IdSchema } from '../common/ids';
 import { paginated } from '../common/pagination';
 import { IsoDateTimeSchema } from '../common/time';
 import { ThemeChoice } from '../enums';
 
 import { Greeting } from './greeting';
-
-const HexColor = z.string().regex(/^#[0-9A-Fa-f]{6}$/, { message: 'must be a hex colour' });
 
 /**
  * The school's brand colours, computed by the API with `deriveBrand` from `@quad/tokens`

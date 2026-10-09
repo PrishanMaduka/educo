@@ -7,7 +7,10 @@ import { z } from 'zod';
  * (401) for a wrong email or password, `account_locked` (403) after the lockout rule,
  * `invalid_code` (400) for a wrong two-step or recovery code, `two_step_required` (403) and
  * `preview_read_only` (403, Task 12) for a write while previewing a role, and `unavailable` (503)
- * when sign-in cannot reach the lockout counter (it fails closed).
+ * when sign-in cannot reach the lockout counter (it fails closed). Users & roles (Task 13) adds
+ * three business-rule codes (422): `last_admin` (the school's last active admin cannot be demoted
+ * or deactivated), `system_role_locked` (a system role cannot be changed or deleted) and
+ * `already_member` (an invited address already belongs to a member of the school).
  */
 export const ErrorCode = z.enum([
   'validation',
@@ -22,6 +25,9 @@ export const ErrorCode = z.enum([
   'clash',
   'in_use',
   'business_rule',
+  'last_admin',
+  'system_role_locked',
+  'already_member',
   'app_update_required',
   'invalid_link',
   'invalid_credentials',

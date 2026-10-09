@@ -60,6 +60,7 @@ const DEFINERS = [
   'tenant_by_gateway_account(text, text)',
   'current_support_visit(uuid)',
   'refresh_family(uuid)',
+  'clear_member_preview(uuid)',
 ] as const;
 
 /** The tables `definer_read` opens to `quad_owner` (and only to it). */
@@ -934,6 +935,79 @@ describe('revoke_member_sessions', () => {
     });
     await withTenant(schoolA.id, (tx) => definers.revokeMemberSessions(tx, outsiderInB.id));
     expect(await revokedById([session.id])).toEqual(new Map([[session.id, false]]));
+  });
+});
+
+describe("clear_member_preview (Task 13: a role change ends the member's role preview)", () => {
+  async function previewOf(sessionId: string) {
+    const rows = await platformRows<{
+      preview_role_id: string | null;
+      preview_sample_user_id: string | null;
+    }>('select preview_role_id, preview_sample_user_id from sessions where id = $1', [sessionId]);
+    return rows[0];
+  }
+
+  it("under A clears the member's previews in A only, and leaves B's", async () => {
+    const member = await insertAccount(withAccount);
+    const inA = await insertUser(withTenant, schoolA.id, member.id);
+    const inB = await insertUser(withTenant, schoolB.id, member.id);
+    const roleA = await insertRole(withTenant, schoolA.id);
+    const roleB = await insertRole(withTenant, schoolB.id);
+    const sessionA = await insertSession(withAccount, member.id, {
+      stage: 'active',
+      activeTenantId: schoolA.id,
+      activeUserId: inA.id,
+      previewRoleId: roleA.id,
+      previewSampleUserId: colleagueInA.id,
+    });
+    const sessionB = await insertSession(withAccount, member.id, {
+      stage: 'active',
+      activeTenantId: schoolB.id,
+      activeUserId: inB.id,
+      previewRoleId: roleB.id,
+    });
+
+    await withTenant(schoolA.id, (tx) => definers.clearMemberPreview(tx, inA.id));
+
+    expect(await previewOf(sessionA.id)).toEqual({
+      preview_role_id: null,
+      preview_sample_user_id: null,
+    });
+    expect(await previewOf(sessionB.id)).toEqual({
+      preview_role_id: roleB.id,
+      preview_sample_user_id: null,
+    });
+  });
+
+  it("does nothing under A for B's user id", async () => {
+    const role = await insertRole(withTenant, schoolB.id);
+    const session = await insertSession(withAccount, outsider.id, {
+      stage: 'active',
+      activeTenantId: schoolB.id,
+      activeUserId: outsiderInB.id,
+      previewRoleId: role.id,
+    });
+    await withTenant(schoolA.id, (tx) => definers.clearMemberPreview(tx, outsiderInB.id));
+    expect(await previewOf(session.id)).toMatchObject({ preview_role_id: role.id });
+  });
+
+  it('refuses without app.tenant_id', async () => {
+    const refused = await failure(
+      testDb().app.query('select clear_member_preview($1)', [personInA.id]),
+    );
+    expect(refused).toMatchObject({ code: '42501' });
+  });
+
+  it("leaves the caller's app.account_id as it was", async () => {
+    const value = await withTenant(schoolA.id, async (tx) => {
+      await tx.execute(sql`select set_config('app.account_id', ${person.id}, true)`);
+      await definers.clearMemberPreview(tx, colleagueInA.id);
+      const { rows } = await tx.execute<{ value: string }>(
+        sql`select current_setting('app.account_id', true) as value`,
+      );
+      return rows[0]?.value;
+    });
+    expect(value).toBe(person.id);
   });
 });
 

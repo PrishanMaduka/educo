@@ -72,30 +72,33 @@ export class PermissionsRepository {
   }
 
   /** The stored matrices and sensitive keys of `roleIds` (custom roles). */
-  async grants(tenantId: string, roleIds: readonly string[]): Promise<Map<string, StoredGrant>> {
+  grants(tenantId: string, roleIds: readonly string[]): Promise<Map<string, StoredGrant>> {
+    return this.db.withTenant(tenantId, (tx) => this.grantsIn(tx, roleIds));
+  }
+
+  /** `grants` in the caller's transaction (a role write decides on what it reads there). */
+  async grantsIn(tx: TenantTx, roleIds: readonly string[]): Promise<Map<string, StoredGrant>> {
     const grants = new Map<string, StoredGrant>(
       roleIds.map((id) => [id, { matrix: {}, sensitive: [] }]),
     );
     if (roleIds.length === 0) return grants;
-    await this.db.withTenant(tenantId, async (tx) => {
-      const rows = await tx
-        .select({
-          roleId: rolePermissions.roleId,
-          module: rolePermissions.module,
-          actions: rolePermissions.actions,
-        })
-        .from(rolePermissions)
-        .where(inArray(rolePermissions.roleId, [...roleIds]));
-      for (const row of rows) {
-        const grant = grants.get(row.roleId);
-        if (grant) grant.matrix[row.module] = row.actions;
-      }
-      const keys = await tx
-        .select({ roleId: roleSensitive.roleId, key: roleSensitive.key })
-        .from(roleSensitive)
-        .where(inArray(roleSensitive.roleId, [...roleIds]));
-      for (const row of keys) grants.get(row.roleId)?.sensitive.push(row.key);
-    });
+    const rows = await tx
+      .select({
+        roleId: rolePermissions.roleId,
+        module: rolePermissions.module,
+        actions: rolePermissions.actions,
+      })
+      .from(rolePermissions)
+      .where(inArray(rolePermissions.roleId, [...roleIds]));
+    for (const row of rows) {
+      const grant = grants.get(row.roleId);
+      if (grant) grant.matrix[row.module] = row.actions;
+    }
+    const keys = await tx
+      .select({ roleId: roleSensitive.roleId, key: roleSensitive.key })
+      .from(roleSensitive)
+      .where(inArray(roleSensitive.roleId, [...roleIds]));
+    for (const row of keys) grants.get(row.roleId)?.sensitive.push(row.key);
     return grants;
   }
 
@@ -105,7 +108,7 @@ export class PermissionsRepository {
         .select({ ...roleColumns, primary: userRoles.primary })
         .from(userRoles)
         .innerJoin(roles, eq(roles.id, userRoles.roleId))
-        // Only a staff membership holds roles (fix round 1, I1; Task 13 adds the database check).
+        // Only a staff membership holds roles (fix round 1, I1); migration 0015 enforces it too.
         .innerJoin(users, eq(users.id, userRoles.userId))
         .where(and(eq(userRoles.userId, userId), eq(users.kind, 'staff')))
     );

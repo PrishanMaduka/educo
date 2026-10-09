@@ -1187,6 +1187,1467 @@
           "name",
           "role"
         ]
+      },
+      "StaffList": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "email": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "invited",
+                    "active",
+                    "deactivated"
+                  ]
+                },
+                "role": {
+                  "type": [
+                    "object",
+                    "null"
+                  ],
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name"
+                  ]
+                },
+                "twoStepOn": {
+                  "type": "boolean"
+                },
+                "lastSignInAt": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "format": "date-time"
+                },
+                "inviteSentAt": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "email",
+                "status",
+                "role",
+                "twoStepOn",
+                "lastSignInAt",
+                "inviteSentAt"
+              ]
+            }
+          },
+          "nextCursor": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "summary": {
+            "type": "object",
+            "properties": {
+              "staff": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "withoutTwoStep": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "staff",
+              "withoutTwoStep"
+            ]
+          }
+        },
+        "required": [
+          "items",
+          "nextCursor",
+          "summary"
+        ]
+      },
+      "StaffInviteResult": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "email": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "invited",
+                    "active",
+                    "deactivated"
+                  ]
+                },
+                "role": {
+                  "type": [
+                    "object",
+                    "null"
+                  ],
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name"
+                  ]
+                },
+                "twoStepOn": {
+                  "type": "boolean"
+                },
+                "lastSignInAt": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "format": "date-time"
+                },
+                "inviteSentAt": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "email",
+                "status",
+                "role",
+                "twoStepOn",
+                "lastSignInAt",
+                "inviteSentAt"
+              ]
+            }
+          }
+        },
+        "required": [
+          "items"
+        ]
+      },
+      "StaffInviteInput": {
+        "type": "object",
+        "properties": {
+          "emails": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 254,
+              "format": "email"
+            },
+            "minItems": 1,
+            "maxItems": 50
+          },
+          "roleId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "emails",
+          "roleId"
+        ],
+        "additionalProperties": false
+      },
+      "StaffMember": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "invited",
+              "active",
+              "deactivated"
+            ]
+          },
+          "role": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "name"
+            ]
+          },
+          "twoStepOn": {
+            "type": "boolean"
+          },
+          "lastSignInAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "inviteSentAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "email",
+          "status",
+          "role",
+          "twoStepOn",
+          "lastSignInAt",
+          "inviteSentAt"
+        ]
+      },
+      "StaffUpdateInput": {
+        "type": "object",
+        "properties": {
+          "roleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "deactivated"
+            ]
+          }
+        },
+        "additionalProperties": false
+      },
+      "InviteDetails": {
+        "type": "object",
+        "properties": {
+          "school": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "emailMasked": {
+            "type": "string"
+          },
+          "needsPassword": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "school",
+          "name",
+          "emailMasked",
+          "needsPassword"
+        ]
+      },
+      "InviteAcceptInput": {
+        "type": "object",
+        "properties": {
+          "password": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          }
+        },
+        "additionalProperties": false
+      },
+      "RoleList": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "key": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "color": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "pattern": "^#[0-9A-Fa-f]{6}$"
+                },
+                "system": {
+                  "type": "boolean"
+                },
+                "scope": {
+                  "type": "string",
+                  "enum": [
+                    "school",
+                    "campus",
+                    "own_classes"
+                  ]
+                },
+                "baseRoleKey": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "memberCount": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "pageCount": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "home": {
+                  "type": "string",
+                  "enum": [
+                    "dashboard",
+                    "my_teaching",
+                    "admissions",
+                    "crm",
+                    "communications",
+                    "family_connection",
+                    "evenings_forms",
+                    "students",
+                    "early_warning",
+                    "attendance",
+                    "pastoral",
+                    "courses",
+                    "timetable",
+                    "teachers_classes",
+                    "staff_cover",
+                    "exams",
+                    "reports",
+                    "fees",
+                    "accounting",
+                    "routes",
+                    "pickup",
+                    "academic_year",
+                    "users_roles",
+                    "school_settings"
+                  ]
+                },
+                "matrix": {
+                  "type": "object",
+                  "properties": {
+                    "admissions": {
+                      "type": "object",
+                      "properties": {
+                        "view": {
+                          "type": "boolean"
+                        },
+                        "create": {
+                          "type": "boolean"
+                        },
+                        "edit": {
+                          "type": "boolean"
+                        },
+                        "delete": {
+                          "type": "boolean"
+                        },
+                        "approve": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "view",
+                        "create",
+                        "edit",
+                        "delete",
+                        "approve"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "crm": {
+                      "type": "object",
+                      "properties": {
+                        "view": {
+                          "type": "boolean"
+                        },
+                        "create": {
+                          "type": "boolean"
+                        },
+                        "edit": {
+                          "type": "boolean"
+                        },
+                        "delete": {
+                          "type": "boolean"
+                        },
+                        "approve": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "view",
+                        "create",
+                        "edit",
+                        "delete",
+                        "approve"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "sis": {
+                      "type": "object",
+                      "properties": {
+                        "view": {
+                          "type": "boolean"
+                        },
+                        "create": {
+                          "type": "boolean"
+                        },
+                        "edit": {
+                          "type": "boolean"
+                        },
+                        "delete": {
+                          "type": "boolean"
+                        },
+                        "approve": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "view",
+                        "create",
+                        "edit",
+                        "delete",
+                        "approve"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "attendance": {
+                      "type": "object",
+                      "properties": {
+                        "view": {
+                          "type": "boolean"
+                        },
+                        "create": {
+                          "type": "boolean"
+                        },
+                        "edit": {
+                          "type": "boolean"
+                        },
+                        "delete": {
+                          "type": "boolean"
+                        },
+                        "approve": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "view",
+                        "create",
+                        "edit",
+                        "delete",
+                        "approve"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "lms": {
+                      "type": "object",
+                      "properties": {
+                        "view": {
+                          "type": "boolean"
+                        },
+                        "create": {
+                          "type": "boolean"
+                        },
+                        "edit": {
+                          "type": "boolean"
+                        },
+                        "delete": {
+                          "type": "boolean"
+                        },
+                        "approve": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "view",
+                        "create",
+                        "edit",
+                        "delete",
+                        "approve"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "fees": {
+                      "type": "object",
+                      "properties": {
+                        "view": {
+                          "type": "boolean"
+                        },
+                        "create": {
+                          "type": "boolean"
+                        },
+                        "edit": {
+                          "type": "boolean"
+                        },
+                        "delete": {
+                          "type": "boolean"
+                        },
+                        "approve": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "view",
+                        "create",
+                        "edit",
+                        "delete",
+                        "approve"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "finance": {
+                      "type": "object",
+                      "properties": {
+                        "view": {
+                          "type": "boolean"
+                        },
+                        "create": {
+                          "type": "boolean"
+                        },
+                        "edit": {
+                          "type": "boolean"
+                        },
+                        "delete": {
+                          "type": "boolean"
+                        },
+                        "approve": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "view",
+                        "create",
+                        "edit",
+                        "delete",
+                        "approve"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "transport": {
+                      "type": "object",
+                      "properties": {
+                        "view": {
+                          "type": "boolean"
+                        },
+                        "create": {
+                          "type": "boolean"
+                        },
+                        "edit": {
+                          "type": "boolean"
+                        },
+                        "delete": {
+                          "type": "boolean"
+                        },
+                        "approve": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "view",
+                        "create",
+                        "edit",
+                        "delete",
+                        "approve"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "settings": {
+                      "type": "object",
+                      "properties": {
+                        "view": {
+                          "type": "boolean"
+                        },
+                        "create": {
+                          "type": "boolean"
+                        },
+                        "edit": {
+                          "type": "boolean"
+                        },
+                        "delete": {
+                          "type": "boolean"
+                        },
+                        "approve": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "view",
+                        "create",
+                        "edit",
+                        "delete",
+                        "approve"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "admissions",
+                    "crm",
+                    "sis",
+                    "attendance",
+                    "lms",
+                    "fees",
+                    "finance",
+                    "transport",
+                    "settings"
+                  ]
+                },
+                "sensitive": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "safeguarding",
+                      "medical",
+                      "finance_reports",
+                      "export_data"
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "id",
+                "key",
+                "name",
+                "description",
+                "color",
+                "system",
+                "scope",
+                "baseRoleKey",
+                "memberCount",
+                "pageCount",
+                "home",
+                "matrix",
+                "sensitive"
+              ]
+            }
+          },
+          "nextCursor": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "items",
+          "nextCursor"
+        ]
+      },
+      "Role": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "key": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "color": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^#[0-9A-Fa-f]{6}$"
+          },
+          "system": {
+            "type": "boolean"
+          },
+          "scope": {
+            "type": "string",
+            "enum": [
+              "school",
+              "campus",
+              "own_classes"
+            ]
+          },
+          "baseRoleKey": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "memberCount": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "pageCount": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "home": {
+            "type": "string",
+            "enum": [
+              "dashboard",
+              "my_teaching",
+              "admissions",
+              "crm",
+              "communications",
+              "family_connection",
+              "evenings_forms",
+              "students",
+              "early_warning",
+              "attendance",
+              "pastoral",
+              "courses",
+              "timetable",
+              "teachers_classes",
+              "staff_cover",
+              "exams",
+              "reports",
+              "fees",
+              "accounting",
+              "routes",
+              "pickup",
+              "academic_year",
+              "users_roles",
+              "school_settings"
+            ]
+          },
+          "matrix": {
+            "type": "object",
+            "properties": {
+              "admissions": {
+                "type": "object",
+                "properties": {
+                  "view": {
+                    "type": "boolean"
+                  },
+                  "create": {
+                    "type": "boolean"
+                  },
+                  "edit": {
+                    "type": "boolean"
+                  },
+                  "delete": {
+                    "type": "boolean"
+                  },
+                  "approve": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "view",
+                  "create",
+                  "edit",
+                  "delete",
+                  "approve"
+                ],
+                "additionalProperties": false
+              },
+              "crm": {
+                "type": "object",
+                "properties": {
+                  "view": {
+                    "type": "boolean"
+                  },
+                  "create": {
+                    "type": "boolean"
+                  },
+                  "edit": {
+                    "type": "boolean"
+                  },
+                  "delete": {
+                    "type": "boolean"
+                  },
+                  "approve": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "view",
+                  "create",
+                  "edit",
+                  "delete",
+                  "approve"
+                ],
+                "additionalProperties": false
+              },
+              "sis": {
+                "type": "object",
+                "properties": {
+                  "view": {
+                    "type": "boolean"
+                  },
+                  "create": {
+                    "type": "boolean"
+                  },
+                  "edit": {
+                    "type": "boolean"
+                  },
+                  "delete": {
+                    "type": "boolean"
+                  },
+                  "approve": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "view",
+                  "create",
+                  "edit",
+                  "delete",
+                  "approve"
+                ],
+                "additionalProperties": false
+              },
+              "attendance": {
+                "type": "object",
+                "properties": {
+                  "view": {
+                    "type": "boolean"
+                  },
+                  "create": {
+                    "type": "boolean"
+                  },
+                  "edit": {
+                    "type": "boolean"
+                  },
+                  "delete": {
+                    "type": "boolean"
+                  },
+                  "approve": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "view",
+                  "create",
+                  "edit",
+                  "delete",
+                  "approve"
+                ],
+                "additionalProperties": false
+              },
+              "lms": {
+                "type": "object",
+                "properties": {
+                  "view": {
+                    "type": "boolean"
+                  },
+                  "create": {
+                    "type": "boolean"
+                  },
+                  "edit": {
+                    "type": "boolean"
+                  },
+                  "delete": {
+                    "type": "boolean"
+                  },
+                  "approve": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "view",
+                  "create",
+                  "edit",
+                  "delete",
+                  "approve"
+                ],
+                "additionalProperties": false
+              },
+              "fees": {
+                "type": "object",
+                "properties": {
+                  "view": {
+                    "type": "boolean"
+                  },
+                  "create": {
+                    "type": "boolean"
+                  },
+                  "edit": {
+                    "type": "boolean"
+                  },
+                  "delete": {
+                    "type": "boolean"
+                  },
+                  "approve": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "view",
+                  "create",
+                  "edit",
+                  "delete",
+                  "approve"
+                ],
+                "additionalProperties": false
+              },
+              "finance": {
+                "type": "object",
+                "properties": {
+                  "view": {
+                    "type": "boolean"
+                  },
+                  "create": {
+                    "type": "boolean"
+                  },
+                  "edit": {
+                    "type": "boolean"
+                  },
+                  "delete": {
+                    "type": "boolean"
+                  },
+                  "approve": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "view",
+                  "create",
+                  "edit",
+                  "delete",
+                  "approve"
+                ],
+                "additionalProperties": false
+              },
+              "transport": {
+                "type": "object",
+                "properties": {
+                  "view": {
+                    "type": "boolean"
+                  },
+                  "create": {
+                    "type": "boolean"
+                  },
+                  "edit": {
+                    "type": "boolean"
+                  },
+                  "delete": {
+                    "type": "boolean"
+                  },
+                  "approve": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "view",
+                  "create",
+                  "edit",
+                  "delete",
+                  "approve"
+                ],
+                "additionalProperties": false
+              },
+              "settings": {
+                "type": "object",
+                "properties": {
+                  "view": {
+                    "type": "boolean"
+                  },
+                  "create": {
+                    "type": "boolean"
+                  },
+                  "edit": {
+                    "type": "boolean"
+                  },
+                  "delete": {
+                    "type": "boolean"
+                  },
+                  "approve": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "view",
+                  "create",
+                  "edit",
+                  "delete",
+                  "approve"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "admissions",
+              "crm",
+              "sis",
+              "attendance",
+              "lms",
+              "fees",
+              "finance",
+              "transport",
+              "settings"
+            ]
+          },
+          "sensitive": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "safeguarding",
+                "medical",
+                "finance_reports",
+                "export_data"
+              ]
+            }
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "name",
+          "description",
+          "color",
+          "system",
+          "scope",
+          "baseRoleKey",
+          "memberCount",
+          "pageCount",
+          "home",
+          "matrix",
+          "sensitive"
+        ]
+      },
+      "RoleCreateInput": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 60
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 300
+          },
+          "color": {
+            "type": "string",
+            "pattern": "^#[0-9A-Fa-f]{6}$"
+          },
+          "scope": {
+            "type": "string",
+            "enum": [
+              "school",
+              "campus",
+              "own_classes"
+            ]
+          },
+          "baseRoleKey": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 1,
+            "maxLength": 64
+          }
+        },
+        "required": [
+          "name",
+          "color",
+          "scope",
+          "baseRoleKey"
+        ],
+        "additionalProperties": false
+      },
+      "RoleUpdateInput": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 60
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 300
+          },
+          "color": {
+            "type": "string",
+            "pattern": "^#[0-9A-Fa-f]{6}$"
+          },
+          "scope": {
+            "type": "string",
+            "enum": [
+              "school",
+              "campus",
+              "own_classes"
+            ]
+          }
+        },
+        "additionalProperties": false
+      },
+      "RolePermissionsInput": {
+        "type": "object",
+        "properties": {
+          "matrix": {
+            "type": "object",
+            "properties": {
+              "admissions": {
+                "type": "object",
+                "properties": {
+                  "view": {
+                    "type": "boolean"
+                  },
+                  "create": {
+                    "type": "boolean"
+                  },
+                  "edit": {
+                    "type": "boolean"
+                  },
+                  "delete": {
+                    "type": "boolean"
+                  },
+                  "approve": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "view",
+                  "create",
+                  "edit",
+                  "delete",
+                  "approve"
+                ],
+                "additionalProperties": false
+              },
+              "crm": {
+                "type": "object",
+                "properties": {
+                  "view": {
+                    "type": "boolean"
+                  },
+                  "create": {
+                    "type": "boolean"
+                  },
+                  "edit": {
+                    "type": "boolean"
+                  },
+                  "delete": {
+                    "type": "boolean"
+                  },
+                  "approve": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "view",
+                  "create",
+                  "edit",
+                  "delete",
+                  "approve"
+                ],
+                "additionalProperties": false
+              },
+              "sis": {
+                "type": "object",
+                "properties": {
+                  "view": {
+                    "type": "boolean"
+                  },
+                  "create": {
+                    "type": "boolean"
+                  },
+                  "edit": {
+                    "type": "boolean"
+                  },
+                  "delete": {
+                    "type": "boolean"
+                  },
+                  "approve": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "view",
+                  "create",
+                  "edit",
+                  "delete",
+                  "approve"
+                ],
+                "additionalProperties": false
+              },
+              "attendance": {
+                "type": "object",
+                "properties": {
+                  "view": {
+                    "type": "boolean"
+                  },
+                  "create": {
+                    "type": "boolean"
+                  },
+                  "edit": {
+                    "type": "boolean"
+                  },
+                  "delete": {
+                    "type": "boolean"
+                  },
+                  "approve": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "view",
+                  "create",
+                  "edit",
+                  "delete",
+                  "approve"
+                ],
+                "additionalProperties": false
+              },
+              "lms": {
+                "type": "object",
+                "properties": {
+                  "view": {
+                    "type": "boolean"
+                  },
+                  "create": {
+                    "type": "boolean"
+                  },
+                  "edit": {
+                    "type": "boolean"
+                  },
+                  "delete": {
+                    "type": "boolean"
+                  },
+                  "approve": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "view",
+                  "create",
+                  "edit",
+                  "delete",
+                  "approve"
+                ],
+                "additionalProperties": false
+              },
+              "fees": {
+                "type": "object",
+                "properties": {
+                  "view": {
+                    "type": "boolean"
+                  },
+                  "create": {
+                    "type": "boolean"
+                  },
+                  "edit": {
+                    "type": "boolean"
+                  },
+                  "delete": {
+                    "type": "boolean"
+                  },
+                  "approve": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "view",
+                  "create",
+                  "edit",
+                  "delete",
+                  "approve"
+                ],
+                "additionalProperties": false
+              },
+              "finance": {
+                "type": "object",
+                "properties": {
+                  "view": {
+                    "type": "boolean"
+                  },
+                  "create": {
+                    "type": "boolean"
+                  },
+                  "edit": {
+                    "type": "boolean"
+                  },
+                  "delete": {
+                    "type": "boolean"
+                  },
+                  "approve": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "view",
+                  "create",
+                  "edit",
+                  "delete",
+                  "approve"
+                ],
+                "additionalProperties": false
+              },
+              "transport": {
+                "type": "object",
+                "properties": {
+                  "view": {
+                    "type": "boolean"
+                  },
+                  "create": {
+                    "type": "boolean"
+                  },
+                  "edit": {
+                    "type": "boolean"
+                  },
+                  "delete": {
+                    "type": "boolean"
+                  },
+                  "approve": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "view",
+                  "create",
+                  "edit",
+                  "delete",
+                  "approve"
+                ],
+                "additionalProperties": false
+              },
+              "settings": {
+                "type": "object",
+                "properties": {
+                  "view": {
+                    "type": "boolean"
+                  },
+                  "create": {
+                    "type": "boolean"
+                  },
+                  "edit": {
+                    "type": "boolean"
+                  },
+                  "delete": {
+                    "type": "boolean"
+                  },
+                  "approve": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "view",
+                  "create",
+                  "edit",
+                  "delete",
+                  "approve"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "additionalProperties": false
+          },
+          "sensitive": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "safeguarding",
+                "medical",
+                "finance_reports",
+                "export_data"
+              ]
+            }
+          }
+        },
+        "required": [
+          "matrix",
+          "sensitive"
+        ],
+        "additionalProperties": false
       }
     },
     "parameters": {}
@@ -2656,6 +4117,1101 @@
             }
           },
           "429": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/users": {
+      "get": {
+        "summary": "Staff accounts with role, status, two-step and last sign-in, and the summary (users.manage)",
+        "tags": [
+          "users",
+          "staff"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": false,
+            "name": "cursor",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200,
+              "default": 50
+            },
+            "required": false,
+            "name": "limit",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "invited",
+                "active",
+                "deactivated"
+              ]
+            },
+            "required": false,
+            "name": "status",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": false,
+            "name": "roleId",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "required": false,
+            "name": "q",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A page of staff",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StaffList"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/users/invite": {
+      "post": {
+        "summary": "Invite 1 to 50 people by email with a role; an address already here is 422 already_member (needs X-CSRF-Token)",
+        "tags": [
+          "users",
+          "staff"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StaffInviteInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The invited members",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StaffInviteResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/users/{id}": {
+      "patch": {
+        "summary": "Change a member’s role, or deactivate or reactivate them; never yourself, never the last admin (needs X-CSRF-Token)",
+        "tags": [
+          "users",
+          "staff"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StaffUpdateInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The member",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StaffMember"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/users/{id}/remind-two-step": {
+      "post": {
+        "summary": "Email the member to turn on two-step sign-in (409 when it is on)",
+        "tags": [
+          "users",
+          "staff"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Email the member to turn on two-step sign-in (409 when it is on)"
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/users/{id}/reset-password": {
+      "post": {
+        "summary": "Email the member a single-use link to choose a new password",
+        "tags": [
+          "users",
+          "staff"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Email the member a single-use link to choose a new password"
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/users/{id}/sign-out-everywhere": {
+      "post": {
+        "summary": "Sign the member out of every device in this school",
+        "tags": [
+          "users",
+          "staff"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Sign the member out of every device in this school"
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/users/{id}/resend-invite": {
+      "post": {
+        "summary": "Send a pending invitation again with a new link; the old link stops working",
+        "tags": [
+          "users",
+          "staff"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Send a pending invitation again with a new link; the old link stops working"
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/invites/{token}": {
+      "get": {
+        "summary": "A staff invitation: the school, the name, the masked address and whether a password is needed (signed link)",
+        "tags": [
+          "auth",
+          "staff"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2048
+            },
+            "required": true,
+            "name": "token",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The invitation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InviteDetails"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/invites/{token}/accept": {
+      "post": {
+        "summary": "Accept a staff invitation: a new account chooses its password and is signed in; an existing account must be signed in (signed link)",
+        "tags": [
+          "auth",
+          "staff"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2048
+            },
+            "required": true,
+            "name": "token",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InviteAcceptInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The next sign-in step",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "next": {
+                      "type": "string",
+                      "enum": [
+                        "two_step",
+                        "two_step_setup",
+                        "choose_school",
+                        "no_school",
+                        "done"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "next"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/roles": {
+      "get": {
+        "summary": "Every role of the school with its members, pages, home page and matrix (users.manage or settings.view)",
+        "tags": [
+          "roles",
+          "staff"
+        ],
+        "responses": {
+          "200": {
+            "description": "The roles",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoleList"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a custom role from another role's permissions, or from none (users.manage; needs X-CSRF-Token)",
+        "tags": [
+          "roles",
+          "staff"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RoleCreateInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The new role",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Role"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/roles/{id}": {
+      "patch": {
+        "summary": "Change a custom role's name, description, colour or scope; a built-in role is 422 system_role_locked (needs X-CSRF-Token)",
+        "tags": [
+          "roles",
+          "staff"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RoleUpdateInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The role",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Role"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete a custom role nobody holds or previews (409 in_use otherwise; needs X-CSRF-Token)",
+        "tags": [
+          "roles",
+          "staff"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The role is deleted"
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/roles/{id}/permissions": {
+      "put": {
+        "summary": "Replace a custom role's matrix and sensitive keys: rows in the plan only, keys you hold yourself (needs X-CSRF-Token)",
+        "tags": [
+          "roles",
+          "staff"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RolePermissionsInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The role",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Role"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "422": {
             "description": "Error",
             "content": {
               "application/json": {

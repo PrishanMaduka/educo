@@ -66,6 +66,10 @@ export async function createApp(
       requestIdFrom(request.headers['x-request-id']),
     requestIdHeader: false,
     trustProxy: trustHops(config.TRUST_PROXY_HOPS),
+    // Signed-link tokens travel in paths (`/auth/invites/:token`, Task 13): about 200 characters,
+    // over Fastify's default 100 (a 414). Twice the contracts' 2048 limit, so a longer token
+    // still reaches its schema and gets the usual 400 `validation`.
+    routerOptions: { maxParamLength: 4096 },
   });
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule.forRoot(config, logger, options.overrides, options.reporter),

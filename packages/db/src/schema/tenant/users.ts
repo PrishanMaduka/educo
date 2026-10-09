@@ -37,6 +37,11 @@ export const users = pgTable(
     locale: text('locale'),
     theme: themeChoice('theme').notNull().default('system'),
     lastSignInAt: timestamp('last_sign_in_at', { withTimezone: true }),
+    /**
+     * When the latest staff invitation was sent (Task 13, D32): an invite link signed before it
+     * is refused, so Resend invite retires the old link, and the list shows "Invite sent …".
+     */
+    inviteSentAt: timestamp('invite_sent_at', { withTimezone: true }),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true })
       .notNull()

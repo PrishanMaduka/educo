@@ -11,7 +11,7 @@ import type { Clock } from '../../../tokens';
 import type { QuadTenantDb } from '@quad/db';
 
 /** The reset link's lifetime in minutes, for the email (spec 05 step 6: 30 minutes). */
-const RESET_LINK_MINUTES = (SIGNED_LINK_RULES.password_reset.ttlSeconds ?? 0) / 60;
+export const RESET_LINK_MINUTES = (SIGNED_LINK_RULES.password_reset.ttlSeconds ?? 0) / 60;
 const JOB_ID_PREFIX = 'password-reset-request.';
 
 export interface PasswordResetRequestDeps {

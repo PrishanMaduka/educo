@@ -99,6 +99,20 @@
       "when": 1791525929691,
       "tag": "0013_platform_user_totp_step_and_lock",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1791539007856,
+      "tag": "0014_users_invite_sent_at",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1791539009108,
+      "tag": "0015_role_integrity",
+      "breakpoints": true
     }
   ]
 }

@@ -70,4 +70,14 @@ export type { EffectivePermissionsInput } from './access/effective-permissions';
 export { HIDDEN_FROM_SUPPORT, effectivePermissions } from './access/effective-permissions';
 export { isPageVisible, pageAccess } from './access/page-access';
 export { roleHome } from './access/role-home';
-export { canGrant } from './access/grant-checks';
+export { canGrant, sensitiveKeysOf } from './access/grant-checks';
+export type { PlannedMatrix } from './access/matrix-plan';
+export { planMatrix } from './access/matrix-plan';
+export { maskEmail, nameFromEmail } from './people/email-name';
+export type {
+  StaffAction,
+  StaffActionRefusal,
+  StaffChange,
+  StaffChangeRefusal,
+} from './access/staff-changes';
+export { staffActionRefusal, staffChangeRefusal } from './access/staff-changes';

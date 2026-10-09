@@ -1,36 +1,21 @@
 import { Inject, Injectable } from '@nestjs/common';
-import {
-  MAX_PASSWORD_LENGTH,
-  MIN_PASSWORD_LENGTH,
-  checkPasswordPolicy,
-  signedLinkIssuedAt,
-} from '@quad/domain';
+import { MIN_PASSWORD_LENGTH, signedLinkIssuedAt } from '@quad/domain';
 
 import { PasswordHasher } from '../../common/crypto/passwords';
 import { SignedLinks } from '../../common/crypto/signed-links';
-import { formatMessage } from '../../common/delivery/templates/render';
-import { InvalidLinkError, ValidationError } from '../../common/errors';
+import { InvalidLinkError } from '../../common/errors';
 import { SessionRepository } from '../../common/session/session.repository';
 import { SessionService } from '../../common/session/session.service';
 import { AccountAudit } from '../../modules/auth/account-audit.service';
 import { AuthRepository } from '../../modules/auth/auth.repository';
 import { LockoutService } from '../../modules/auth/lockout.service';
+import { assertNewPassword } from '../../modules/auth/new-password';
 import { BREACH_CHECK, CLOCK, TENANT_DB } from '../../tokens';
 
 import type { BreachCheck } from '../../common/crypto/breach-check';
 import type { Clock } from '../../tokens';
 import type { PasswordResetInput } from '@quad/contracts';
 import type { QuadTenantDb } from '@quad/db';
-import type { PasswordPolicyReason } from '@quad/domain';
-
-function policyMessage(reason: PasswordPolicyReason, minLength: number): string {
-  switch (reason) {
-    case 'too_short':
-      return formatMessage('error.password.tooShort', { min: minLength });
-    case 'too_long':
-      return formatMessage('error.password.tooLong', { max: MAX_PASSWORD_LENGTH });
-  }
-}
 
 /**
  * `POST /auth/password/reset` (spec 05 step 6), a tenant-less entry point (D16): the signed link
@@ -98,12 +83,6 @@ export class PasswordResetService {
   private async checkPassword(accountId: string, password: string): Promise<void> {
     const rules = await this.db.definers.authSignInRules(accountId);
     const minLength = Math.max(MIN_PASSWORD_LENGTH, ...rules.map((rule) => rule.passwordMinLength));
-    const [reason] = checkPasswordPolicy(password, { minLength });
-    if (reason !== undefined) {
-      throw new ValidationError({ password: policyMessage(reason, minLength) });
-    }
-    if (await this.breachCheck.isBreached(password)) {
-      throw new ValidationError({ password: formatMessage('error.password.breached') });
-    }
+    await assertNewPassword(password, minLength, this.breachCheck);
   }
 }

@@ -2,6 +2,7 @@ import { MePermissions } from '@quad/contracts';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { PermissionsService } from '../../src/common/access/permissions.service';
+import { REDIS } from '../../src/tokens';
 import { RecordingDelivery } from '../fakes/delivery';
 import { RecordingOtpSends } from '../fakes/otp-sends';
 import {
@@ -13,7 +14,6 @@ import {
   setPreview,
   setRoleMatrix,
   suspendSchool,
-  touchRole,
 } from '../helpers/access';
 import { Browser } from '../helpers/browser';
 import { useDatabaseApp } from '../helpers/database-app';
@@ -31,6 +31,7 @@ import { GuardsProbeModule } from './probe.module';
 import type { CustomRole } from '../helpers/access';
 import type { SchoolSeed, SessionSeed } from '../helpers/identity';
 import type { PlanModule } from '@quad/contracts';
+import type { Redis } from 'ioredis';
 
 const NOW = Date.UTC(2026, 9, 9, 3, 30, 1);
 let clock = NOW;
@@ -159,13 +160,15 @@ describe('@Can (spec 05: any of its keys)', () => {
     expect(response.json()).toMatchObject({ code: 'forbidden' });
   });
 
-  it("never gives a parent token a staff role's permissions, even with a user_roles row (D32)", async () => {
+  it('never gives a parent token a staff role: the database refuses the user_roles row (0015)', async () => {
     const at = await school();
     const account = await insertPhoneAccount(db());
     const guardianId = await insertParentMember(db(), at.id, account.id, 'guardian');
     const roleId = await insertCustomRole(db(), at.id, { matrix: { fees: '10000' } });
-    // A row Task 13's check will forbid: a guardian membership holding a staff role.
-    await assignRole(db(), at.id, guardianId, roleId);
+    // Task 12 filtered such a row out; Task 13 makes it impossible to write at all.
+    await expect(assignRole(db(), at.id, guardianId, roleId)).rejects.toThrow(
+      /only a staff membership can hold a role/,
+    );
     const staff = await signedInMember(db(), at);
     await assignRole(db(), at.id, staff.userId, roleId);
     const pair = await signedInParent(app, otpSends, account.phone);
@@ -466,29 +469,41 @@ describe('Preview a role (spec 06: every non-GET is 403 preview_read_only)', () 
 });
 
 describe('the permission cache (spec 05: 30 s, keyed by school, roles and their last change)', () => {
-  it('serves a cached matrix until the role changes (the positive control for the next tests)', async () => {
+  /**
+   * Overwrites the school's cached matrices with `matrix` for `roleId`, keeping their expiry: a
+   * stale entry, as a write that neither moved `roles.updated_at` nor invalidated would leave. The
+   * 0015 triggers make such a write impossible, so the stale entry is planted.
+   */
+  async function plantStaleEntry(tenantId: string, roleId: string, matrix: Record<string, string>) {
+    const redis = app().get<Redis>(REDIS);
+    const keys = await redis.smembers(`quad:perms:idx:${tenantId}`);
+    expect(keys.length).toBeGreaterThan(0);
+    const stale = JSON.stringify({ [roleId]: { matrix, sensitive: [] } });
+    for (const key of keys) await redis.set(key, stale, 'KEEPTTL');
+  }
+
+  it('serves the cached matrix while nothing changes (the positive control for the next tests)', async () => {
     const at = await school();
     const member = await staffWith(at, { matrix: { fees: '10000' } });
     expect((await as(member.session).get('/probe/guards/fees')).statusCode).toBe(200);
-    // A matrix row changed behind the API's back: no bump, no invalidation.
-    await setRoleMatrix(db(), at.id, member.roleId, { sis: '10000' });
-    expect((await as(member.session).get('/probe/guards/fees')).statusCode).toBe(200);
+    await plantStaleEntry(at.id, member.roleId, { sis: '10000' });
+    expect((await as(member.session).get('/probe/guards/fees')).statusCode).toBe(403);
   });
 
-  it('sees a role change on the next request: the matrix changes and roles.updated_at moves', async () => {
+  it('sees a matrix write with no explicit bump on the next request (the 0015 triggers)', async () => {
     const at = await school();
     const member = await staffWith(at, { matrix: { fees: '10000' } });
     expect((await as(member.session).get('/probe/guards/fees')).statusCode).toBe(200);
+    // Rows only: no update of roles and no invalidation.
     await setRoleMatrix(db(), at.id, member.roleId, { sis: '10000' });
-    await touchRole(db(), member.roleId);
     expect((await as(member.session).get('/probe/guards/fees')).statusCode).toBe(403);
   });
 
-  it("sees a change on the next request once the school's keys are dropped (invalidateTenant)", async () => {
+  it("sees the database again once the school's keys are dropped (invalidateTenant)", async () => {
     const at = await school();
-    const member = await staffWith(at, { matrix: { sis: '10000' } });
-    expect((await as(member.session).get('/probe/guards/fees')).statusCode).toBe(403);
-    await setRoleMatrix(db(), at.id, member.roleId, { fees: '10000' });
+    const member = await staffWith(at, { matrix: { fees: '10000' } });
+    expect((await as(member.session).get('/probe/guards/fees')).statusCode).toBe(200);
+    await plantStaleEntry(at.id, member.roleId, { sis: '10000' });
     await app().get(PermissionsService).invalidateTenant(at.id);
     expect((await as(member.session).get('/probe/guards/fees')).statusCode).toBe(200);
   });
@@ -515,8 +530,8 @@ describe('the permission cache (spec 05: 30 s, keyed by school, roles and their 
     const b = await school();
     const inB = await staffWith(b, { matrix: { fees: '10000' } });
     expect((await as(inB.session).get('/probe/guards/fees')).statusCode).toBe(200);
-    await setRoleMatrix(db(), b.id, inB.roleId, { sis: '10000' });
+    await plantStaleEntry(b.id, inB.roleId, { sis: '10000' });
     await app().get(PermissionsService).invalidateTenant(a.id);
-    expect((await as(inB.session).get('/probe/guards/fees')).statusCode).toBe(200);
+    expect((await as(inB.session).get('/probe/guards/fees')).statusCode).toBe(403);
   });
 });

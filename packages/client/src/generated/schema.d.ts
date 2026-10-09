@@ -1719,6 +1719,1061 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/users": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Staff accounts with role, status, two-step and last sign-in, and the summary (users.manage) */
+        get: {
+            parameters: {
+                query?: {
+                    cursor?: string;
+                    limit?: number;
+                    status?: "invited" | "active" | "deactivated";
+                    roleId?: string;
+                    q?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description A page of staff */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["StaffList"];
+                    };
+                };
+                /** @description Error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/users/invite": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Invite 1 to 50 people by email with a role; an address already here is 422 already_member (needs X-CSRF-Token) */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["StaffInviteInput"];
+                };
+            };
+            responses: {
+                /** @description The invited members */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["StaffInviteResult"];
+                    };
+                };
+                /** @description Error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/users/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Change a member’s role, or deactivate or reactivate them; never yourself, never the last admin (needs X-CSRF-Token) */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["StaffUpdateInput"];
+                };
+            };
+            responses: {
+                /** @description The member */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["StaffMember"];
+                    };
+                };
+                /** @description Error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
+    "/api/v1/users/{id}/remind-two-step": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Email the member to turn on two-step sign-in (409 when it is on) */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Email the member to turn on two-step sign-in (409 when it is on) */
+                202: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/users/{id}/reset-password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Email the member a single-use link to choose a new password */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Email the member a single-use link to choose a new password */
+                202: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/users/{id}/sign-out-everywhere": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Sign the member out of every device in this school */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Sign the member out of every device in this school */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/users/{id}/resend-invite": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Send a pending invitation again with a new link; the old link stops working */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Send a pending invitation again with a new link; the old link stops working */
+                202: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/invites/{token}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** A staff invitation: the school, the name, the masked address and whether a password is needed (signed link) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    token: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description The invitation */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["InviteDetails"];
+                    };
+                };
+                /** @description Error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/invites/{token}/accept": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Accept a staff invitation: a new account chooses its password and is signed in; an existing account must be signed in (signed link) */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    token: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["InviteAcceptInput"];
+                };
+            };
+            responses: {
+                /** @description The next sign-in step */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {string} */
+                            next: "two_step" | "two_step_setup" | "choose_school" | "no_school" | "done";
+                        };
+                    };
+                };
+                /** @description Error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/roles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Every role of the school with its members, pages, home page and matrix (users.manage or settings.view) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description The roles */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["RoleList"];
+                    };
+                };
+                /** @description Error */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        /** Create a custom role from another role's permissions, or from none (users.manage; needs X-CSRF-Token) */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["RoleCreateInput"];
+                };
+            };
+            responses: {
+                /** @description The new role */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Role"];
+                    };
+                };
+                /** @description Error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/roles/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete a custom role nobody holds or previews (409 in_use otherwise; needs X-CSRF-Token) */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description The role is deleted */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        /** Change a custom role's name, description, colour or scope; a built-in role is 422 system_role_locked (needs X-CSRF-Token) */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["RoleUpdateInput"];
+                };
+            };
+            responses: {
+                /** @description The role */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Role"];
+                    };
+                };
+                /** @description Error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
+    "/api/v1/roles/{id}/permissions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Replace a custom role's matrix and sensitive keys: rows in the plan only, keys you hold yourself (needs X-CSRF-Token) */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["RolePermissionsInput"];
+                };
+            };
+            responses: {
+                /** @description The role */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Role"];
+                    };
+                };
+                /** @description Error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1991,6 +3046,339 @@ export interface components {
             name: string;
             /** @enum {string} */
             role: "owner" | "admin" | "support" | "billing" | "readonly";
+        };
+        StaffList: {
+            items: {
+                /** Format: uuid */
+                id: string;
+                name: string;
+                email: string | null;
+                /** @enum {string} */
+                status: "invited" | "active" | "deactivated";
+                role: {
+                    /** Format: uuid */
+                    id: string;
+                    name: string;
+                } | null;
+                twoStepOn: boolean;
+                /** Format: date-time */
+                lastSignInAt: string | null;
+                /** Format: date-time */
+                inviteSentAt: string | null;
+            }[];
+            nextCursor: string | null;
+            summary: {
+                staff: number;
+                withoutTwoStep: number;
+            };
+        };
+        StaffInviteResult: {
+            items: {
+                /** Format: uuid */
+                id: string;
+                name: string;
+                email: string | null;
+                /** @enum {string} */
+                status: "invited" | "active" | "deactivated";
+                role: {
+                    /** Format: uuid */
+                    id: string;
+                    name: string;
+                } | null;
+                twoStepOn: boolean;
+                /** Format: date-time */
+                lastSignInAt: string | null;
+                /** Format: date-time */
+                inviteSentAt: string | null;
+            }[];
+        };
+        StaffInviteInput: {
+            emails: string[];
+            /** Format: uuid */
+            roleId: string;
+        };
+        StaffMember: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            email: string | null;
+            /** @enum {string} */
+            status: "invited" | "active" | "deactivated";
+            role: {
+                /** Format: uuid */
+                id: string;
+                name: string;
+            } | null;
+            twoStepOn: boolean;
+            /** Format: date-time */
+            lastSignInAt: string | null;
+            /** Format: date-time */
+            inviteSentAt: string | null;
+        };
+        StaffUpdateInput: {
+            /** Format: uuid */
+            roleId?: string;
+            /** @enum {string} */
+            status?: "active" | "deactivated";
+        };
+        InviteDetails: {
+            school: string;
+            name: string;
+            emailMasked: string;
+            needsPassword: boolean;
+        };
+        InviteAcceptInput: {
+            password?: string;
+        };
+        RoleList: {
+            items: {
+                /** Format: uuid */
+                id: string;
+                key: string;
+                name: string;
+                description: string | null;
+                color: string | null;
+                system: boolean;
+                /** @enum {string} */
+                scope: "school" | "campus" | "own_classes";
+                baseRoleKey: string | null;
+                memberCount: number;
+                pageCount: number;
+                /** @enum {string} */
+                home: "dashboard" | "my_teaching" | "admissions" | "crm" | "communications" | "family_connection" | "evenings_forms" | "students" | "early_warning" | "attendance" | "pastoral" | "courses" | "timetable" | "teachers_classes" | "staff_cover" | "exams" | "reports" | "fees" | "accounting" | "routes" | "pickup" | "academic_year" | "users_roles" | "school_settings";
+                matrix: {
+                    admissions: {
+                        view: boolean;
+                        create: boolean;
+                        edit: boolean;
+                        delete: boolean;
+                        approve: boolean;
+                    };
+                    crm: {
+                        view: boolean;
+                        create: boolean;
+                        edit: boolean;
+                        delete: boolean;
+                        approve: boolean;
+                    };
+                    sis: {
+                        view: boolean;
+                        create: boolean;
+                        edit: boolean;
+                        delete: boolean;
+                        approve: boolean;
+                    };
+                    attendance: {
+                        view: boolean;
+                        create: boolean;
+                        edit: boolean;
+                        delete: boolean;
+                        approve: boolean;
+                    };
+                    lms: {
+                        view: boolean;
+                        create: boolean;
+                        edit: boolean;
+                        delete: boolean;
+                        approve: boolean;
+                    };
+                    fees: {
+                        view: boolean;
+                        create: boolean;
+                        edit: boolean;
+                        delete: boolean;
+                        approve: boolean;
+                    };
+                    finance: {
+                        view: boolean;
+                        create: boolean;
+                        edit: boolean;
+                        delete: boolean;
+                        approve: boolean;
+                    };
+                    transport: {
+                        view: boolean;
+                        create: boolean;
+                        edit: boolean;
+                        delete: boolean;
+                        approve: boolean;
+                    };
+                    settings: {
+                        view: boolean;
+                        create: boolean;
+                        edit: boolean;
+                        delete: boolean;
+                        approve: boolean;
+                    };
+                };
+                sensitive: ("safeguarding" | "medical" | "finance_reports" | "export_data")[];
+            }[];
+            nextCursor: string | null;
+        };
+        Role: {
+            /** Format: uuid */
+            id: string;
+            key: string;
+            name: string;
+            description: string | null;
+            color: string | null;
+            system: boolean;
+            /** @enum {string} */
+            scope: "school" | "campus" | "own_classes";
+            baseRoleKey: string | null;
+            memberCount: number;
+            pageCount: number;
+            /** @enum {string} */
+            home: "dashboard" | "my_teaching" | "admissions" | "crm" | "communications" | "family_connection" | "evenings_forms" | "students" | "early_warning" | "attendance" | "pastoral" | "courses" | "timetable" | "teachers_classes" | "staff_cover" | "exams" | "reports" | "fees" | "accounting" | "routes" | "pickup" | "academic_year" | "users_roles" | "school_settings";
+            matrix: {
+                admissions: {
+                    view: boolean;
+                    create: boolean;
+                    edit: boolean;
+                    delete: boolean;
+                    approve: boolean;
+                };
+                crm: {
+                    view: boolean;
+                    create: boolean;
+                    edit: boolean;
+                    delete: boolean;
+                    approve: boolean;
+                };
+                sis: {
+                    view: boolean;
+                    create: boolean;
+                    edit: boolean;
+                    delete: boolean;
+                    approve: boolean;
+                };
+                attendance: {
+                    view: boolean;
+                    create: boolean;
+                    edit: boolean;
+                    delete: boolean;
+                    approve: boolean;
+                };
+                lms: {
+                    view: boolean;
+                    create: boolean;
+                    edit: boolean;
+                    delete: boolean;
+                    approve: boolean;
+                };
+                fees: {
+                    view: boolean;
+                    create: boolean;
+                    edit: boolean;
+                    delete: boolean;
+                    approve: boolean;
+                };
+                finance: {
+                    view: boolean;
+                    create: boolean;
+                    edit: boolean;
+                    delete: boolean;
+                    approve: boolean;
+                };
+                transport: {
+                    view: boolean;
+                    create: boolean;
+                    edit: boolean;
+                    delete: boolean;
+                    approve: boolean;
+                };
+                settings: {
+                    view: boolean;
+                    create: boolean;
+                    edit: boolean;
+                    delete: boolean;
+                    approve: boolean;
+                };
+            };
+            sensitive: ("safeguarding" | "medical" | "finance_reports" | "export_data")[];
+        };
+        RoleCreateInput: {
+            name: string;
+            description?: string;
+            color: string;
+            /** @enum {string} */
+            scope: "school" | "campus" | "own_classes";
+            baseRoleKey: string | null;
+        };
+        RoleUpdateInput: {
+            name?: string;
+            description?: string | null;
+            color?: string;
+            /** @enum {string} */
+            scope?: "school" | "campus" | "own_classes";
+        };
+        RolePermissionsInput: {
+            matrix: {
+                admissions?: {
+                    view: boolean;
+                    create: boolean;
+                    edit: boolean;
+                    delete: boolean;
+                    approve: boolean;
+                };
+                crm?: {
+                    view: boolean;
+                    create: boolean;
+                    edit: boolean;
+                    delete: boolean;
+                    approve: boolean;
+                };
+                sis?: {
+                    view: boolean;
+                    create: boolean;
+                    edit: boolean;
+                    delete: boolean;
+                    approve: boolean;
+                };
+                attendance?: {
+                    view: boolean;
+                    create: boolean;
+                    edit: boolean;
+                    delete: boolean;
+                    approve: boolean;
+                };
+                lms?: {
+                    view: boolean;
+                    create: boolean;
+                    edit: boolean;
+                    delete: boolean;
+                    approve: boolean;
+                };
+                fees?: {
+                    view: boolean;
+                    create: boolean;
+                    edit: boolean;
+                    delete: boolean;
+                    approve: boolean;
+                };
+                finance?: {
+                    view: boolean;
+                    create: boolean;
+                    edit: boolean;
+                    delete: boolean;
+                    approve: boolean;
+                };
+                transport?: {
+                    view: boolean;
+                    create: boolean;
+                    edit: boolean;
+                    delete: boolean;
+                    approve: boolean;
+                };
+                settings?: {
+                    view: boolean;
+                    create: boolean;
+                    edit: boolean;
+                    delete: boolean;
+                    approve: boolean;
+                };
+            };
+            sensitive: ("safeguarding" | "medical" | "finance_reports" | "export_data")[];
         };
     };
     responses: never;

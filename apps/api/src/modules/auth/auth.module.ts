@@ -36,7 +36,8 @@ import type { Logger } from 'pino';
  * and parent sign-in with a code (`./otp`) and its tokens (`./tokens`): the services live here,
  * the tenant-less controllers in `src/public/auth` and `src/public/signed-links` (ruling F14),
  * and `POST /me/totp` from `modules/me/totp.controller.ts`. Tests may replace the Forgot
- * password and sign-in code queues.
+ * password and sign-in code queues. Global, exporting the sign-in steps and the account reads, so
+ * accepting a staff invitation (`UsersModule`, OQ9) continues sign-in the same way.
  */
 @Module({})
 export class AuthModule {
@@ -46,6 +47,8 @@ export class AuthModule {
   ): DynamicModule {
     return {
       module: AuthModule,
+      global: true,
+      exports: [SignInService, AuthRepository],
       controllers: [AuthController, OtpController, PasswordResetController, TotpController],
       providers: [
         AccountAudit,

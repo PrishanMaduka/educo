@@ -83,6 +83,21 @@
     }
   },
   "errorPasswordBreached": "This password has appeared in a data breach. Choose a different one.",
+  "errorUsersNotYourself": "You can’t change your own role or deactivate yourself. Ask another admin.",
+  "errorUsersLastAdmin": "The school needs at least one active admin. Make someone else an admin first.",
+  "errorUsersAcceptInviteFirst": "They become active when they accept their invitation.",
+  "errorUsersAlreadyMember": "This person is already a member of staff here.",
+  "errorUsersTwoStepOn": "They already use two-step sign-in.",
+  "errorUsersNotActive": "This only works for someone who can sign in now.",
+  "errorUsersNotInvited": "Only a pending invitation can be sent again.",
+  "errorUsersNoEmail": "We don’t have an email address for them.",
+  "errorUsersSensitiveNotHeld": "You can’t give access to sensitive data you don’t have yourself.",
+  "errorRolesSystemLocked": "Built-in roles can’t be changed or deleted, so the school can’t lock itself out.",
+  "errorRolesInUse": "Someone still has this role, or an admin is previewing it. Give them another role first.",
+  "errorRolesBaseNotFound": "Choose a role of this school to start from.",
+  "errorInviteChoosePassword": "Choose a password to finish setting up your account.",
+  "errorInviteSignInFirst": "Sign in with the account this invitation is for, then open the link again.",
+  "errorInviteOtherAccount": "This invitation is for a different account. Sign out and sign in with the invited address.",
   "uiFilterClear": "Clear {label}",
   "@uiFilterClear": {
     "placeholders": {

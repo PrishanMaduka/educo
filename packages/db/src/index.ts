@@ -53,10 +53,13 @@ export { uuidv7 } from './uuid';
 export {
   and,
   asc,
+  count,
   desc,
   eq,
+  exists,
   gt,
   gte,
+  ilike,
   inArray,
   isNotNull,
   isNull,

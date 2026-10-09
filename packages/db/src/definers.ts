@@ -186,6 +186,8 @@ export interface DefinerCalls {
   memberTwoStepStatus(tx: TenantTx, userIds: readonly string[]): Promise<MemberTwoStepStatus[]>;
   /** Revokes the member's sessions and refresh families in the current school only. */
   revokeMemberSessions(tx: TenantTx, userId: string): Promise<void>;
+  /** Ends the member's role preview on their sessions in the current school only (Task 13). */
+  clearMemberPreview(tx: TenantTx, userId: string): Promise<void>;
   /** Who from Quad is in an active support visit to the current school; null otherwise. */
   currentSupportVisit(tx: TenantTx, supportSessionId: string): Promise<SupportVisit | null>;
 }
@@ -460,6 +462,10 @@ export function createDefinerCalls(pool: pg.Pool): DefinerCalls {
 
     revokeMemberSessions: async (tx, userId) => {
       await tx.execute(sql`select revoke_member_sessions(${userId})`);
+    },
+
+    clearMemberPreview: async (tx, userId) => {
+      await tx.execute(sql`select clear_member_preview(${userId})`);
     },
 
     currentSupportVisit: async (tx, supportSessionId) => {

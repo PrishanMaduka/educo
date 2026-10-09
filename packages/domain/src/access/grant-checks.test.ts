@@ -2,7 +2,7 @@ import { SensitiveKey } from '@quad/contracts';
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
 
-import { canGrant } from './grant-checks';
+import { canGrant, sensitiveKeysOf } from './grant-checks';
 
 const arbKeys = fc.subarray([...SensitiveKey.options]);
 
@@ -41,5 +41,21 @@ describe('canGrant (spec 08: a school admin cannot give a sensitive key they do 
         expect(canGrant(granter, current, current.slice(1))).toBe(true);
       }),
     );
+  });
+});
+
+describe('sensitiveKeysOf (the granter’s keys, from their effective permissions)', () => {
+  it('lists the sensitive keys among the permission keys, in SensitiveKey order', () => {
+    const perms = new Set([
+      'sensitive.export_data',
+      'fees.view',
+      'sensitive.medical',
+      'users.manage',
+    ] as const);
+    expect(sensitiveKeysOf(perms)).toEqual(['medical', 'export_data']);
+  });
+
+  it('is empty without any', () => {
+    expect(sensitiveKeysOf(new Set(['sis.view'] as const))).toEqual([]);
   });
 });

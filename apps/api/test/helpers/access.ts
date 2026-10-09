@@ -35,7 +35,10 @@ export async function insertCustomRole(
   return id;
 }
 
-/** Replaces a role's matrix rows and sensitive keys, leaving `roles.updated_at` alone. */
+/**
+ * Replaces a role's matrix rows and sensitive keys, with no update of `roles`: the 0015 triggers
+ * still move `roles.updated_at` (Task 13).
+ */
 export async function setRoleMatrix(
   db: TestDatabase,
   tenantId: string,
@@ -57,14 +60,6 @@ export async function setRoleMatrix(
       [tenantId, roleId, key],
     );
   }
-}
-
-/** Moves `roles.updated_at` on, as every role or matrix write does (spec 05 cache key). */
-export async function touchRole(db: TestDatabase, roleId: string): Promise<void> {
-  await db.platform.query(
-    `update roles set updated_at = greatest(now(), updated_at + interval '1 millisecond') where id = $1`,
-    [roleId],
-  );
 }
 
 /** A system role of the school (`admin`, `teacher`, …): its permissions are the fixed defaults. */

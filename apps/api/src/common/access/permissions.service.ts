@@ -22,6 +22,7 @@ import { PermissionsRepository } from './permissions.repository';
 import type { AccessRole, StoredGrant } from './permissions.repository';
 import type { RequestAuth } from '../session/request-auth';
 import type { PermissionKey, RoleScope, TenantStatus } from '@quad/contracts';
+import type { TenantTx } from '@quad/db';
 import type { PermissionRow, RoleGrant } from '@quad/domain';
 import type { FastifyRequest } from 'fastify';
 import type { Redis } from 'ioredis';
@@ -50,6 +51,9 @@ export interface RequestAccess {
   readonly previewRoleId: string | null;
 }
 
+/** What deciding a role's grant needs: system roles take their fixed defaults. */
+export type GrantedRole = Pick<AccessRole, 'id' | 'key' | 'system'>;
+
 /** A request in a school: everything `RequestAccess` is computed from (never request input). */
 export type SchoolRequestAuth = RequestAuth & { readonly tenantId: string };
 
@@ -60,6 +64,14 @@ const CachedGrants = z.record(
     sensitive: z.array(SensitiveKey),
   }),
 );
+
+/** The plan modules a school profile lists, ignoring any this API does not know. */
+export function planModulesOf(modules: readonly string[]): PlanModule[] {
+  return modules.flatMap((module) => {
+    const parsed = PlanModule.safeParse(module);
+    return parsed.success ? [parsed.data] : [];
+  });
+}
 
 /** The first 22 base64url characters of SHA-256, as the parent tokens' `rh` (D32). */
 const hashOf = (value: string) =>
@@ -78,7 +90,7 @@ function toGrant(stored: StoredGrant): RoleGrant {
  * A system role's permissions are fixed (spec 05): its defaults come from `systemRoleMatrix`,
  * never from rows a write could change. Any other role reads its stored matrix.
  */
-function systemKeyOf(role: AccessRole): SystemRoleKey | null {
+function systemKeyOf(role: GrantedRole): SystemRoleKey | null {
   if (!role.system) return null;
   const parsed = SystemRoleKey.safeParse(role.key);
   return parsed.success ? parsed.data : null;
@@ -132,10 +144,7 @@ export class PermissionsService {
       auth.kind === 'support' || (auth.kind === 'web' && auth.supportSessionId !== null);
     const stamp = await this.repository.stamp(auth.tenantId, userId, previewRoleId);
     if (stamp.profile === null) throw new UnauthorizedError();
-    const planModules = stamp.profile.modules.flatMap((module) => {
-      const parsed = PlanModule.safeParse(module);
-      return parsed.success ? [parsed.data] : [];
-    });
+    const planModules = planModulesOf(stamp.profile.modules);
     const inPlay = [...stamp.roles, ...(stamp.preview === null ? [] : [stamp.preview])];
     const grants = await this.grantsOf(auth.tenantId, inPlay);
     const grantOf = (role: AccessRole): RoleGrant =>
@@ -172,6 +181,24 @@ export class PermissionsService {
       const keys = await this.redis.smembers(index);
       await this.redis.del(index, ...keys);
     });
+  }
+
+  /**
+   * The grants of `roles` read in the caller's transaction (Users & roles, Task 13): system roles
+   * from their fixed defaults, custom ones from their stored rows, never from the cache, so a
+   * write (`canGrant`, the role list) decides on what the database holds now.
+   */
+  async roleGrantsIn(tx: TenantTx, roles: readonly GrantedRole[]): Promise<Map<string, RoleGrant>> {
+    const grants = new Map<string, RoleGrant>();
+    const custom: string[] = [];
+    for (const role of roles) {
+      const key = systemKeyOf(role);
+      if (key === null) custom.push(role.id);
+      else grants.set(role.id, systemRoleMatrix(key));
+    }
+    const stored = await this.repository.grantsIn(tx, custom);
+    for (const [id, grant] of stored) grants.set(id, toGrant(grant));
+    return grants;
   }
 
   /** Every role's grant: system roles from their fixed defaults, custom ones from the cache or Postgres. */

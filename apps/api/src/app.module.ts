@@ -11,6 +11,7 @@ import { DatabaseModule } from './database/database.module';
 import { HealthModule } from './health/health.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { MeModule } from './modules/me/me.module';
+import { UsersModule } from './modules/users/users.module';
 import { OpenApiController } from './openapi/openapi.controller';
 import { PlatformModule } from './platform/platform.module';
 import { RealtimeModule } from './realtime/realtime.module';
@@ -74,6 +75,7 @@ export class AppModule {
         SesWebhookModule.register(overrides.snsFetchers),
         AuthModule.register(overrides.passwordResets, overrides.otpSends),
         MeModule,
+        UsersModule,
         ...(overrides.testModules ?? []),
       ],
       controllers: [OpenApiController],
