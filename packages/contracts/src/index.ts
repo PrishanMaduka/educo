@@ -28,3 +28,4 @@ export * from './access/staff-pages';
 export * from './users/users';
 export * from './users/invites';
 export * from './roles/roles';
+export * from './school/school';
