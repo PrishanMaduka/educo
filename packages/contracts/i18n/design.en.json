@@ -7,6 +7,8 @@
   "dark": "Dark",
   "sample.save": "Save changes",
   "sample.cancel": "Cancel",
+  "sample.leaveGuard": "Hold this page as if it had unsaved changes",
+  "sample.leaveGuardMessage": "You have unsaved changes. Leave this page and lose them?",
   "sample.addStudent": "Add a student",
   "sample.remove": "Remove student",
   "sample.edit": "Edit details",

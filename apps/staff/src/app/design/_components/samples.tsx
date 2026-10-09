@@ -13,6 +13,7 @@ import {
   cn,
   CommandPalette,
   Drawer,
+  DrawerClose,
   DropdownFilter,
   EmptyState,
   formatDate,
@@ -37,6 +38,7 @@ import {
   Textarea,
   Tooltip,
   usePetalBurst,
+  useLeaveGuard,
   useToast,
   type TableColumn,
 } from '@quad/ui';
@@ -312,6 +314,7 @@ function DrawerSample() {
   const { t } = useTranslation(DESIGN_NS);
   const stepLabels = useStepLabels();
   const [open, setOpen] = useState(false);
+  const [dirty, setDirty] = useState(false);
   return (
     <>
       <Button
@@ -324,7 +327,11 @@ function DrawerSample() {
       </Button>
       <Drawer
         open={open}
-        onOpenChange={setOpen}
+        onOpenChange={(next) => {
+          setOpen(next);
+          if (!next) setDirty(false);
+        }}
+        dirty={dirty}
         eyebrow={t('sample.drawerEyebrow')}
         title={t('sample.addStudent')}
         icon={UserPlus}
@@ -332,14 +339,10 @@ function DrawerSample() {
         step={0}
         footer={
           <>
-            <Button
-              variant="ghost"
-              onClick={() => {
-                setOpen(false);
-              }}
-            >
-              {t('sample.cancel')}
-            </Button>
+            {/* DrawerClose: Cancel closes the way Escape does, so a dirty drawer asks first. */}
+            <DrawerClose asChild>
+              <Button variant="ghost">{t('sample.cancel')}</Button>
+            </DrawerClose>
             <Button
               onClick={() => {
                 setOpen(false);
@@ -352,10 +355,24 @@ function DrawerSample() {
       >
         <Stack>
           <p className="m-0 text-ink-2">{t('sample.drawerBody')}</p>
-          <Input label={t('sample.studentName')} />
+          <Input
+            label={t('sample.studentName')}
+            onChange={(event) => {
+              setDirty(event.target.value !== '');
+            }}
+          />
         </Stack>
       </Drawer>
     </>
+  );
+}
+
+function LeaveGuardSample() {
+  const { t } = useTranslation(DESIGN_NS);
+  const [holding, setHolding] = useState(false);
+  useLeaveGuard(holding, t('sample.leaveGuardMessage'));
+  return (
+    <Switch label={t('sample.leaveGuard')} checked={holding} onCheckedChange={setHolding} />
   );
 }
 
@@ -705,6 +722,7 @@ export const STYLE_GUIDE: readonly StyleGuideEntry[] = [
   { name: 'DropdownFilter', Sample: DropdownFilterSample },
   { name: 'CommandPalette', Sample: CommandPaletteSample },
   { name: 'Drawer', Sample: DrawerSample },
+  { name: 'DrawerClose', Sample: DrawerSample },
   { name: 'Stepper', Sample: StepperSample },
   { name: 'EmptyState', Sample: EmptyStateSample },
   { name: 'GreetingScene', Sample: GreetingSceneSample },
@@ -730,6 +748,7 @@ export const STYLE_GUIDE: readonly StyleGuideEntry[] = [
   { name: 'avatarTone', Sample: AvatarToneSample },
   { name: 'initialsOf', Sample: InitialsOfSample },
   { name: 'cn', Sample: CnSample },
+  { name: 'useLeaveGuard', Sample: LeaveGuardSample },
   { name: 'formatDate', Sample: FormatDateSample },
   { name: 'formatMoney', Sample: FormatMoneySample },
   { name: 'formatRelative', Sample: FormatRelativeSample },

@@ -13,6 +13,9 @@ export default mergeConfig(
       environment: 'jsdom',
       setupFiles: ['./vitest.setup.ts'],
       css: false,
+      // Whole-page component tests type into many fields; under \`pnpm verify\`, which runs every
+      // package at once, they take 5–7 s. The same budget as the API tests (15 s).
+      testTimeout: 15_000,
     },
   }),
 );
