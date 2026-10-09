@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Everyone signs in at one domain. Staff use identifier-first sign-in at `quad-edu.com/sign-in` (password, TOTP, Google and Microsoft SSO, forgot password, lockout, **Choose a school**). Quad staff sign in to the console. Parents sign in to the Flutter app with an OTP, then JWT with refresh rotation and biometric unlock. Every tenant table has FORCE RLS. Every route is guarded by `@Can`/`@Module`. School admins manage **Users & roles**, the **School settings** shell and the **Audit** view, and can **Preview a role**. Quad support enters a school only through a reasoned, logged, 60-minute support session with a banner. Journeys 17, 18, 19, 42, 43 (web and enquiry parts) and 50 are green in `pnpm verify`.
+**Goal:** Everyone signs in at one domain. Staff use identifier-first sign-in at `quad-edu.com/sign-in` (work email and password, TOTP, forgot password, lockout, **Choose a school**; no Google or Microsoft sign-in, D37). Quad staff sign in to the console with email, password and TOTP. Parents sign in to the Flutter app with an OTP, then JWT with refresh rotation and biometric unlock. Every tenant table has FORCE RLS. Every route is guarded by `@Can`/`@Module`. School admins manage **Users & roles**, the **School settings** shell and the **Audit** view, and can **Preview a role**. Quad support enters a school only through a reasoned, logged, 60-minute support session with a banner. Journeys 17, 18, 19, 42, 43 (web and enquiry parts) and 50 are green in `pnpm verify`.
 
 **Architecture:**
 - **Database.** Migrations `0003`–`0006` add three classes of table:
@@ -26,8 +26,8 @@
 - API:
   - `@node-rs/argon2` (Argon2id);
   - `otplib` (TOTP);
-  - `openid-client` (OIDC with PKCE);
-  - `jose` (EdDSA JWT and the fake OIDC issuer in tests);
+  - `openid-client` (Task 8 only; removed with the SSO code, D37);
+  - `jose` (EdDSA JWT);
   - `nodemailer` (SMTP to Mailpit; SES adapter stubbed to the same interface);
   - `@fastify/cookie`.
 - Web: `qrcode` (the TOTP QR, rendered client-side); `@quad/client` and `@tanstack/react-query` in `apps/staff` and `apps/console`.
@@ -103,7 +103,7 @@
 
 **Configuration**
 - A new variable goes into the spec 02 table, `.env.example` (same order) and `apps/api/src/config.ts` (or `NOT_READ_BY_THE_API`) in one commit, in the task that first uses it. The parity tests enforce it.
-- `CONSOLE_PASSWORD_LOGIN=true` and `DEV_FIXED_OTP` stay refused at boot in production (already in `config.ts`; keep the tests).
+- `DEV_FIXED_OTP` stays refused at boot in production (already in `config.ts`; keep the test). `CONSOLE_PASSWORD_LOGIN` and its refusal go with the D37 SSO removal, because password sign-in is the only console sign-in.
 
 **Decision log (D32)**
 - Task 1 adds the D32 row skeleton to `docs/spec/02-architecture.md` (D28 style: a summary sentence and a `<ul>` per area: Tables and lookups, Signed links, Sessions, Crypto, Access, Configuration, Testing, Pre-launch).
@@ -141,7 +141,7 @@
 ## Review Focus
 
 1. **Account enumeration.**
-   - `POST /auth/identify` returns a byte-identical body and the same status for an unknown email and a known one at the same domain.
+   - `POST /auth/identify` returns a byte-identical body and the same status for an unknown email and a known one at the same domain (until the D37 follow-up removes the route; then `POST /auth/password` carries this check).
    - `POST /auth/password/forgot` and `POST /auth/otp/request` answer 202 either way.
    - Timing is equalised with a dummy Argon2 verify.
    - Task 7 and Task 9 own the tests.
@@ -645,6 +645,8 @@ Steps:
 
 ### Task 8: Google and Microsoft SSO (OIDC with PKCE), mocked in tests
 
+> **Removed by owner decision D37; code removal follows Task 9.** The owner chose work email sign-in only (2026-10-09). The task below was built and is kept as history. After Task 9, a separate change removes its code and database objects as D37 lists them (a new migration; `0009` and `0010` stay). Later tasks no longer depend on it.
+
 **Files:**
 - Create:
   - `apps/api/src/public/auth/sso.controller.ts` (tenant-less);
@@ -738,42 +740,33 @@ Steps:
   - `packages/contracts/src/platform/auth.ts`;
   - `apps/api/test/platform/auth.api.test.ts`.
 - Modify:
-  - `apps/api/src/config.ts` and `apps/api/test/config.test.ts` (`CONSOLE_GOOGLE_HD` must be `quad-edu.com` when `APP_ENV=production`);
-  - `.env.example` (`CONSOLE_GOOGLE_HD=quad.local`);
   - `docs/spec/02-architecture.md` (D32 bullet).
 
 Every controller in `apps/api/src/platform/**` is marked `@PlatformController()` (Task 6), so the global `AuthGuard` skips it and `PlatformSessionGuard` owns it.
 
 **Endpoints** (accepted only with the console cookie; D28 ruling R-console-realtime):
 - `POST /platform/auth/password` `{email, password}`:
-  - always registered (so the OpenAPI document does not depend on the environment); returns 404 `not_found` at runtime when `CONSOLE_PASSWORD_LOGIN` is not `true`;
-  - looks up active `platform_users`;
+  - the only console first factor, in every environment (D37: no Google Workspace sign-in);
+  - looks up active `platform_users`; an unknown, deactivated or wrong-password sign-in gets the same 401 and a `platform_audit` failure;
   - leads to the TOTP step.
-- `POST /platform/auth/sso/google/start` and `GET /platform/auth/sso/google/callback`:
-  - require `hd` = `CONSOLE_GOOGLE_HD`, an email whose domain equals `CONSOLE_GOOGLE_HD` (production `quad-edu.com`, spec 05; `quad.local` in `.env.example` and the e2e stack), and a `platform_users` row with status active;
-  - refuse anything else with 403 and a `platform_audit` failure.
 - `POST /platform/auth/totp/verify`, and `POST /platform/auth/totp/setup` (TOTP is mandatory, spec 07; first sign-in sets it up).
 - `POST /platform/auth/sign-out` (`@PlatformRole()`, any role).
-- `GET /platform/me` (`@PlatformRole()`, any role: name, role, the `passwordLogin` flag for the sign-in page).
-- `GET /platform/auth/methods`: `{password: boolean, google: true}`, so the console only offers the password form when the flag is on (journey 42).
+- `GET /platform/me` (`@PlatformRole()`, any role: name and role).
 
 Every sign-in and failure is written to `platform_audit` through `PlatformAuditService` (spec 05). The session is `kind='console'` with 8 h idle. `@PlatformRole(...)` guards platform routes (spec 05 roles).
 
 **Tests** (four per endpoint):
-- each of the seven routes has a happy path, a 400 `validation`, a 401 or 403, and "the console cookie of platform user A never acts as B";
-- password + TOTP works when the flag is true;
-- `/platform/auth/password` is 404 when the flag is false, and the route is in the OpenAPI document either way;
-- Google with `hd` `gmail.com`, or an email outside `CONSOLE_GOOGLE_HD`, gives 403;
+- each of the five routes has a happy path, a 400 `validation`, a 401 or 403, and "the console cookie of platform user A never acts as B";
+- password + TOTP works;
+- an unknown email, a deactivated platform user and a wrong password get the same 401;
 - a staff `quad_sid` cookie never authenticates a `/platform` route, and a console cookie never authenticates `/auth`, `/me` or `/users`;
 - a `readonly` platform user is 403 on an owner-only probe route;
-- the config refuses `CONSOLE_GOOGLE_HD` other than `quad-edu.com` with `APP_ENV=production`.
-- The boot refusal of `CONSOLE_PASSWORD_LOGIN=true` with `APP_ENV=production` stays covered in `config.test.ts` (Accept).
 
-**D32** (append under Configuration): `CONSOLE_GOOGLE_HD` is `quad.local` locally and in the e2e stack, and must be `quad-edu.com` in production; the console password route is always registered and answers 404 when the flag is off.
+**D32** (append under Sessions): console sign-in is email, password and TOTP in every environment (D37).
 
-Steps: test first, implement, `pnpm api:client`, append the D32 bullet, then `pnpm --filter @quad/api test && pnpm --filter @quad/api test:api -- platform && pnpm codegen:check`. Commit `feat(console): console sign-in with Workspace SSO, password flag and TOTP`.
+Steps: test first, implement, `pnpm api:client`, append the D32 bullet, then `pnpm --filter @quad/api test && pnpm --filter @quad/api test:api -- platform && pnpm codegen:check`. Commit `feat(console): console sign-in with email, password and TOTP`.
 
-**Acceptance:** Accept "`CONSOLE_PASSWORD_LOGIN=true` is refused at boot when `APP_ENV=production`". Journey 42 API side.
+**Acceptance:** Accept "`DEV_FIXED_OTP` is refused at boot when `APP_ENV=production`" (already covered in `config.test.ts`). Journey 42 API side.
 
 ## Phase 4: RBAC and guards
 
@@ -920,7 +913,7 @@ Steps: test first, implement, `pnpm api:client`, append the D32 bullets, then `p
   - `apps/api/test/school/*.api.test.ts`.
 
 **Endpoints (four tests each):**
-- `GET /school` [`@Can('settings.view')`] → `{ name, shortName, officeEmail, officePhone, address, timeZone (read-only), smsSenderId, smsSenderStatus, branding: {color, logoUrl} (read-only), signIn: {sso, twoStep, passwordMinLength, sessionHours, ipAllowlist} (read-only: "Managed by Quad"), summary }`.
+- `GET /school` [`@Can('settings.view')`] → `{ name, shortName, officeEmail, officePhone, address, timeZone (read-only), smsSenderId, smsSenderStatus, branding: {color, logoUrl} (read-only), signIn: {twoStep, passwordMinLength, sessionHours, ipAllowlist} (read-only: "Managed by Quad"), summary }`.
 - `PATCH /school` [`@Can('settings.edit')`] `{name?, officeEmail?, officePhone?, address?, smsSenderId?}`:
   - the name goes through `update_current_tenant_name`;
   - time zone, logo, colour and sign-in rules are not accepted (08 wins over 06; OQ19);
@@ -1018,12 +1011,11 @@ The Playwright specs in Tasks 19–23 and the journeys in Task 26 need seeded ac
 - `quad_owner` is `NOBYPASSRLS` and FORCE RLS filters it, so inside the seed transaction the seed runs `set_config('app.tenant_id', <school>, true)` before each school's tenant rows and `set_config('app.account_id', <account>, true)` before each account's rows.
 - **Platform:**
   - `owner@quad.local` (owner; password from `SEED_PASSWORD`; TOTP on; local code `000000`);
-  - `support@quad.local` (support role, for the support journey).
-  - Both match `CONSOLE_GOOGLE_HD=quad.local` locally, so the fake Google sign-in works for them (Task 10).
+  - `support@quad.local` (support role, for the support journey; password from `SEED_PASSWORD`, TOTP on).
 - **Colombo International School:**
   - branding `#DD4A42`;
   - all modules;
-  - security: `two_step: staff`, `sso_google: true`, `sso_domain: colombo-intl.local` (exercises SSO with the fake issuer);
+  - security: `two_step: staff`;
   - `school_settings` defaults;
   - the seven system roles.
 - **Kandy Hill Academy:**
@@ -1055,11 +1047,10 @@ Commit `feat(db): seed platform users, school access settings, roles and the sam
 **Files:**
 - Create:
   - `scripts/e2e-stack.mjs`:
-    - takes a port parameter (default `:4000`; journey 42's second stack uses `:4001`);
+    - takes a port parameter (default `:4000`);
     - creates a fresh database `quad_e2e_<pid>` as admin;
     - migrates and seeds it (Task 17);
-    - starts `apps/api/dist/main.js` and `dist/worker.js` on that port with that `DATABASE_URL`, Mailpit SMTP, `OIDC_FAKE_ISSUER_URL`, `CONSOLE_GOOGLE_HD=quad.local`, `APP_ENV=local` and `DEV_FIXED_OTP=000000` (no fake-clock variable: expired tokens come from a test helper that signs a past `exp`);
-    - starts `scripts/fake-oidc.mjs`;
+    - starts `apps/api/dist/main.js` and `dist/worker.js` on that port with that `DATABASE_URL`, Mailpit SMTP, `APP_ENV=local` and `DEV_FIXED_OTP=000000` (no fake-clock variable: expired tokens come from a test helper that signs a past `exp`);
     - waits for `/health/ready`;
     - drops the database on exit;
     - has its own test (`scripts/test/e2e-stack.test.ts`);
@@ -1087,12 +1078,12 @@ All tasks in this phase follow `quad-web-screen`, with the prototype open side b
 
 ### Task 19: `/sign-in` and the signed-link pages
 
-**Prototype:** `design/admin.html` `authRender` / `schoolAuth` (art panel and card), restructured identifier-first (spec wins, OQ15). Copy comes from the prototype where the spec is silent: "Sign in to Quad", "One sign-in for every school on Quad…", "Two-step sign-in", "Trust this device for 30 days", "Use a recovery code", "Reset your password", "Check your inbox", "Choose a school", "Remember my choice on this device".
+**Prototype:** `design/admin.html` `authRender` / `schoolAuth` (art panel and card), restructured identifier-first (spec wins, OQ15), with no Google or Microsoft buttons (D37). Copy comes from the prototype where the spec is silent: "Sign in to Quad", "One sign-in for every school on Quad…", "Two-step sign-in", "Trust this device for 30 days", "Use a recovery code", "Reset your password", "Check your inbox", "Choose a school", "Remember my choice on this device".
 
 **Files:**
 - Create:
   - `apps/staff/src/app/(auth)/layout.tsx` (app tokens, `QueryClientProvider`, Quad-branded art panel);
-  - `apps/staff/src/app/(auth)/sign-in/page.tsx` and `_components/{IdentifyStep,PasswordStep,SsoButtons,TwoStepStep,TwoStepSetup,RecoveryCodes,ChooseSchool,NoSchool,ForgotStep,CheckInbox,AuthCard}.tsx`;
+  - `apps/staff/src/app/(auth)/sign-in/page.tsx` and `_components/{EmailStep,PasswordStep,TwoStepStep,TwoStepSetup,RecoveryCodes,ChooseSchool,NoSchool,ForgotStep,CheckInbox,AuthCard}.tsx`;
   - `packages/ui/src/components/OtpBoxes.tsx` with its test (shared: the console uses it in Task 23);
   - `(auth)/sign-in/reset/[token]/page.tsx`, `(auth)/sign-in/invite/[token]/page.tsx`, `(auth)/sign-in/support/[token]/page.tsx`;
   - `apps/staff/src/lib/{api.ts,session.ts}`;
@@ -1107,7 +1098,7 @@ All tasks in this phase follow `quad-web-screen`, with the prototype open side b
   - `docs/spec/02-architecture.md` (D32 bullets).
 
 **Behaviour:**
-- Identify, then SSO buttons and/or a password field, then two-step (or setup with QR and 10 recovery codes), then Choose a school (logo or monogram, name, "your role"; none gives the spec 05 message), then "Opening {school}…", then `next` or `/app`.
+- Work email, then password, then two-step (or setup with QR and 10 recovery codes), then Choose a school (logo or monogram, name, "your role"; none gives the spec 05 message), then "Opening {school}…", then `next` or `/app`.
 - Errors come from `{code, fields}`, with no account hints.
 - The lockout copy names the 15 minutes.
 - `quad_last_school` shows "Welcome back to {school}" without preselecting anything (spec 05).
@@ -1116,7 +1107,8 @@ All tasks in this phase follow `quad-web-screen`, with the prototype open side b
 **Tests:**
 - component tests for the step machine and `OtpBoxes` paste;
 - Playwright:
-  - identify, then password, then `000000`, lands in `/app`;
+  - email, then password, then `000000`, lands in `/app`;
+  - no Google or Microsoft button appears (D37);
   - a wrong password shows the error;
   - forgot shows "Check your inbox";
   - a tampered reset link shows "This link isn't valid any more" with no school name;
@@ -1229,7 +1221,7 @@ Commit `feat(staff): School settings General, sign-in rules and the audit view`.
 
 **Files:**
 - Create:
-  - `apps/console/src/app/sign-in/page.tsx` (Google Workspace button; the email and password form only when `GET /platform/auth/methods` says so; then TOTP or setup, with `OtpBoxes` from `packages/ui`);
+  - `apps/console/src/app/sign-in/page.tsx` (email and password, with no Google Workspace button (D37); then TOTP or setup, with `OtpBoxes` from `packages/ui`);
   - `apps/console/src/app/(console)/schools/page.tsx` (a minimal list from `GET /platform/tenants`);
   - `_drawers/OpenAsSchoolAdminDrawer.tsx` (a required reason with a hint, a button "Open {school} as school admin", which opens the returned URL);
   - `apps/console/src/app/(console)/audit/page.tsx` (filters, table, CSV);
@@ -1328,9 +1320,9 @@ They run against the Task 18 stack and the Task 17 seed.
   - the admin changes the role to Front desk, and after reload the teacher's menu changes;
   - deactivating the teacher makes their next request redirect to `/sign-in`.
 - **42:**
-  - with `CONSOLE_PASSWORD_LOGIN=true`, `owner@quad.local` signs in with password and `000000`;
-  - a second stack on `:4001`, started with the flag off, shows only **Continue with Google Workspace**, and the fake Google (`owner@quad.local`, matching `CONSOLE_GOOGLE_HD=quad.local`) + TOTP works;
-  - a fake account `someone@gmail.com` is refused.
+  - `owner@quad.local` signs in with email, password and `000000`, and the page has no Google or Microsoft button (D37);
+  - a wrong TOTP code is refused;
+  - `someone@gmail.com`, which is not a platform user, gets the same message as a wrong password.
 - **43 (M1 part):**
   - a reset link from Mailpit works once and is refused the second time;
   - forged, expired (a token signed with a past `exp` by the `signed-token.ts` helper), wrong-purpose and tampered tokens are refused, and the page shows no school name;
@@ -1380,7 +1372,7 @@ Steps:
   - the D16 table row for the support session redemption (`redeem_support_session`, `end_support_session`);
   - 02:137 (the `auth_memberships` columns `short_name`, `user_id`, `suspended`, `suspend_reason`, and the tenant status set including `suspended`);
   - 02:276 (`FIELD_ENCRYPTION_KEY` required until M12): Task 4 already made this edit; confirm it.
-  - The variables table needs nothing here: `OIDC_FAKE_ISSUER_URL` came with Task 8 and `API_INTERNAL_URL` with Task 20.
+  - The variables table needs nothing here: `API_INTERNAL_URL` came with Task 20, and the SSO variables leave with the D37 removal.
 - `docs/spec/04-data-model.md`:
   - account tables and RLS;
   - the new columns (`accounts.locked_until`, `credentials.password_changed_at`, `sessions.*`, `platform_users.password_hash` and `totp_enabled`, `support_sessions.expires_at`, `school_settings.address` and `sms_sender_status`, `audit_log.support_session_id`);
@@ -1478,7 +1470,7 @@ Commit `docs: M1 decisions, spec updates and progress`.
 21. **Seed two-step rules.** **Recommend:** CIS `staff` (journey 19 then sets up two-step); KHA `admins`. Ruwan therefore always uses TOTP (strictest wins).
 
 Spec and prototype conflicts noted (spec wins):
-- The prototype asks for email and password on one form, with SSO buttons always shown. Spec 05 is identifier-first.
+- The prototype asks for email and password on one form. Spec 05 is identifier-first. (The prototype's SSO buttons were removed by D37.)
 - The prototype's "Open as school admin" and "Sign in as" take no reason. D22 and spec 05 always need one.
 - The prototype's parent welcome is school-branded. D13 makes it Quad-branded.
 - Journey 17 says "opens Sign in on the landing page". In M1 that is the non-prelaunch link to `/app`, then `/sign-in`, and the dialog arrives in M1b.
@@ -1516,8 +1508,8 @@ Spec and prototype conflicts noted (spec wins):
   - system role defaults (counsellor with `medical`) [11];
   - scope enforcement deferred to M3/M5 [11];
   - the API computes the school brand palette with `@quad/tokens` `deriveBrand` (a new allowed `apps/api` → `@quad/tokens` import, colour maths only) [6].
-- **Configuration:** `OIDC_FAKE_ISSUER_URL` (local only) [8]; `CONSOLE_GOOGLE_HD` (`quad.local` locally, `quad-edu.com` in production) and the always-registered console password route [10]; `API_INTERNAL_URL` [20]; the enquiry stub, with the captcha in M4 [13]; pinned dependency versions [each installing task].
-- **Testing:** the e2e stack (fresh database per run, a port parameter, API, worker, fake issuer, Mailpit) and the CI `e2e-smoke` services [18].
+- **Configuration:** `OIDC_FAKE_ISSUER_URL` (local only) [8; removed by D37]; `API_INTERNAL_URL` [20]; the enquiry stub, with the captcha in M4 [13]; pinned dependency versions [each installing task].
+- **Testing:** the e2e stack (fresh database per run, a port parameter, API, worker, Mailpit) and the CI `e2e-smoke` services [18].
 - **Pre-launch:** `/sign-in` and `/app` stay out of the static export; `checkExport` enforces it [19].
 
 ## Risks and size
@@ -1527,7 +1519,6 @@ Spec and prototype conflicts noted (spec wins):
 - Candidates to move to M2 if it runs long, in this order: the staff New role page, the console Audit log page, `GET /me/sessions`.
 
 **Cannot run offline here**
-- **Real Google, Microsoft and Workspace OIDC.** Every test uses the fake issuer (spec 18: "mocked in tests"). Real client registration and redirect URIs need the owner's Google Cloud and Entra setup. Recorded in `infra/README.md`.
 - **SMS.** Notify.lk and Twilio are not exercised; M1 uses the log sink. Live delivery, spend caps and the captcha are M6.
 - **Push.** Not in M1 ("Allow notifications?" is M6).
 - **Email.** Mailpit only; SES needs staging and production access.
