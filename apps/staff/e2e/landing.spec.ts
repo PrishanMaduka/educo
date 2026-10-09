@@ -341,7 +341,7 @@ test.describe('landing page', () => {
     await page.keyboard.press('Enter');
     await expect(menu).toHaveAttribute('aria-expanded', 'true');
     await expect(
-      page.getByRole('link', { name: 'Wellbeing' }).filter({ visible: true }),
+      page.locator('header').getByRole('link', { name: 'Wellbeing' }).filter({ visible: true }),
     ).toBeVisible();
     await page.keyboard.press('Escape');
     await expect(menu).toHaveAttribute('aria-expanded', 'false');
