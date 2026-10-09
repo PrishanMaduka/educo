@@ -178,5 +178,6 @@ function bearerAuthOf(family: CachedFamily, claims: BearerClaims): BearerAuth | 
     tenantId: family.tenantId,
     userId: family.userId,
     membershipKind: family.membershipKind,
+    expiresAt: claims.exp,
   };
 }

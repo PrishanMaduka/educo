@@ -152,12 +152,19 @@ describe('POST /auth/otp/request (spec 05 parent app step 3)', () => {
     await insertParentMember(db(), school.id, staff.id, 'staff');
     const disabled = await insertPhoneAccount(db(), { status: 'disabled' });
     await insertParentMember(db(), school.id, disabled.id);
-    for (const phone of [staff.phone, disabled.phone]) {
+    const deactivated = await insertPhoneAccount(db());
+    const formerUser = await insertParentMember(db(), school.id, deactivated.id);
+    await db().platform.query(`update users set status = 'deactivated' where id = $1`, [
+      formerUser,
+    ]);
+    for (const phone of [staff.phone, disabled.phone, deactivated.phone]) {
       expect((await request({ phone })).statusCode).toBe(202);
     }
     await deliver();
     expect(smsTo(staff.phone)).toEqual([]);
     expect(smsTo(disabled.phone)).toEqual([]);
+    // A guardian whose only membership is deactivated is no longer a parent here (m2).
+    expect(smsTo(deactivated.phone)).toEqual([]);
   });
 
   it.each([

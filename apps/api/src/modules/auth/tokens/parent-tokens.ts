@@ -86,16 +86,27 @@ export class ParentTokens {
     return next.token;
   }
 
-  /** The 15-minute access token for `membership` in the family `sessionId`. */
-  accessToken(accountId: string, membership: TokenMembership, sessionId: string): Promise<string> {
-    return this.accessTokens.signTenant({
-      membershipId: membership.userId,
-      accountId,
-      tenantId: membership.tenantId,
-      kind: membership.kind,
-      rolesHash: rolesHashOf(membership.roleNames),
-      sessionId,
-    });
+  /**
+   * The 15-minute access token for `membership` in the family `sessionId`, never later than
+   * `notAfter` (Unix seconds) when given.
+   */
+  accessToken(
+    accountId: string,
+    membership: TokenMembership,
+    sessionId: string,
+    notAfter?: number,
+  ): Promise<string> {
+    return this.accessTokens.signTenant(
+      {
+        membershipId: membership.userId,
+        accountId,
+        tenantId: membership.tenantId,
+        kind: membership.kind,
+        rolesHash: rolesHashOf(membership.roleNames),
+        sessionId,
+      },
+      notAfter,
+    );
   }
 
   /** The 5-minute token that only chooses a school (OQ20). */

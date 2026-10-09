@@ -52,8 +52,13 @@ export class AccessTokens {
     return new AccessTokens(keys, issuer, now, kid, verifiers);
   }
 
-  signTenant(subject: TenantTokenSubject): Promise<string> {
+  /**
+   * A school token for 15 minutes, or until `notAfter` (Unix seconds) when that is sooner: a
+   * switch keeps the expiry of the token that asked for it, so switching never extends a token.
+   */
+  signTenant(subject: TenantTokenSubject, notAfter?: number): Promise<string> {
     const issuedAt = this.nowSeconds();
+    const expiresAt = Math.min(issuedAt + ACCESS_TOKEN_MINUTES * 60, notAfter ?? Infinity);
     return this.sign(
       {
         scope: 'tenant',
@@ -65,7 +70,7 @@ export class AccessTokens {
         sid: subject.sessionId,
       },
       issuedAt,
-      issuedAt + ACCESS_TOKEN_MINUTES * 60,
+      expiresAt,
     );
   }
 

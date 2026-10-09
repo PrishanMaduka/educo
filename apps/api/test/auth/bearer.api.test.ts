@@ -503,6 +503,27 @@ describe('POST /auth/select-school with a bearer token (OQ20, the kind rule)', (
       expect((await familyRow(db(), sessionId)).revoked_at).toBeNull();
     });
 
+    it('never extends a token: A→B→A→B keeps the first token’s expiry, and the chain dies there (N1)', async () => {
+      const { a, b, inA } = await inTwoSchools();
+      const firstExp = claimsOf(inA.accessToken).exp;
+      expect(firstExp).toBe(NOW / 1000 + 15 * 60);
+      let token = inA.accessToken;
+      for (const [minutes, school] of [
+        [5, b.id],
+        [10, a.id],
+        [14, b.id],
+      ] as const) {
+        clock = NOW + minutes * MINUTE;
+        const response = await post('/auth/select-school', token, { tenantId: school });
+        expect(response.statusCode).toBe(200);
+        token = response.json<{ accessToken: string }>().accessToken;
+        expect(claimsOf(token)).toMatchObject({ tid: school, exp: firstExp });
+      }
+      clock = NOW + 15 * MINUTE;
+      expect((await get('/me', token)).statusCode).toBe(401);
+      expect((await post('/auth/select-school', token, { tenantId: a.id })).statusCode).toBe(401);
+    });
+
     it('answers 400 for the school the token is already in', async () => {
       const { a, inA } = await inTwoSchools();
       const response = await post('/auth/select-school', inA.accessToken, { tenantId: a.id });

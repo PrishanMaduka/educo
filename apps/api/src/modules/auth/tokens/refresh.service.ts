@@ -16,6 +16,7 @@ import { ParentTokens } from './parent-tokens';
 import { isCurrentSecret } from './refresh-token';
 
 import type { TokenMembership } from './parent-tokens';
+import type { PresentedRefreshToken } from './refresh-token';
 import type { LockedFamily } from '../../../common/session/family.repository';
 import type { Clock } from '../../../tokens';
 import type { TokenPair } from '@quad/contracts';
@@ -31,8 +32,14 @@ export const REFRESH_FAMILY_LIMIT = { limit: 10, windowSeconds: 60 } as const;
 
 /** How a refresh ended inside its transaction (the 401 is thrown only after the commit). */
 type RefreshResult =
-  | { readonly outcome: 'rotated'; readonly token: string; readonly membership: TokenMembership }
-  | { readonly outcome: 'reused'; readonly family: LockedFamily }
+  | {
+      readonly outcome: 'rotated';
+      readonly accountId: string;
+      readonly token: string;
+      readonly membership: TokenMembership;
+    }
+  | { readonly outcome: 'reused'; readonly accountId: string; readonly family: LockedFamily }
+  | { readonly outcome: 'moved' }
   | { readonly outcome: 'refused' };
 
 /**
@@ -65,17 +72,40 @@ export class RefreshService {
     // A forged token never reaches the limit or the database: its family id is not trusted.
     if (!presented.issued) throw new UnauthorizedError();
     await this.countRefresh(presented.sessionId);
+    // A switch can move the family between the school lookup and the row lock; the refresh
+    // then reads the school again once instead of failing (fix round 2).
+    let result = await this.attempt(presented);
+    if (result.outcome === 'moved') result = await this.attempt(presented);
+    if (result.outcome === 'reused') {
+      await this.bearer.invalidateFamily(presented.sessionId);
+      this.logger.warn(
+        { metric: 'refresh_token_reused' },
+        'A rotated-out refresh token came back; its family is revoked',
+      );
+      await this.auditReuse(result.accountId, result.family);
+    }
+    if (result.outcome !== 'rotated') throw new UnauthorizedError();
+    const accessToken = await this.tokens.accessToken(
+      result.accountId,
+      result.membership,
+      presented.sessionId,
+    );
+    return { accessToken, refreshToken: result.token };
+  }
+
+  /** One try: find the family's account and school, then decide under the row lock. */
+  private async attempt(presented: PresentedRefreshToken): Promise<RefreshResult> {
     const owner = await this.db.definers.refreshFamily(presented.sessionId);
-    if (owner === null) throw new UnauthorizedError();
+    if (owner === null) return { outcome: 'refused' };
     const now = new Date(this.now());
-    const result = await this.repository.inAccount(
+    return this.repository.inAccount(
       owner.accountId,
       owner.tenantId,
       async (tx): Promise<RefreshResult> => {
         const family = await this.families.lockFamilyIn(tx, presented.sessionId);
-        if (family?.stage !== 'active' || family.tenantId !== owner.tenantId) {
-          return { outcome: 'refused' };
-        }
+        if (family?.stage !== 'active') return { outcome: 'refused' };
+        // Switched to another school since the lookup: this transaction is scoped to the old one.
+        if (family.tenantId !== owner.tenantId) return { outcome: 'moved' };
         const outcome = refreshOutcome({
           currentGeneration: family.generation,
           presentedGeneration: presented.generation,
@@ -86,30 +116,15 @@ export class RefreshService {
         });
         if (outcome === 'reuse') {
           await this.sessionRows.revokeIn(tx, owner.accountId, family.id);
-          return { outcome: 'reused', family };
+          return { outcome: 'reused', accountId: owner.accountId, family };
         }
         if (outcome === 'refuse') return { outcome: 'refused' };
         const membership = await this.liveMembershipIn(tx, owner.accountId, family);
         if (membership === null) return { outcome: 'refused' };
         const token = await this.tokens.moveIn(tx, family, membership, now);
-        return { outcome: 'rotated', token, membership };
+        return { outcome: 'rotated', accountId: owner.accountId, token, membership };
       },
     );
-    if (result.outcome === 'reused') {
-      await this.bearer.invalidateFamily(presented.sessionId);
-      this.logger.warn(
-        { metric: 'refresh_token_reused' },
-        'A rotated-out refresh token came back; its family is revoked',
-      );
-      await this.auditReuse(owner.accountId, result.family);
-    }
-    if (result.outcome !== 'rotated') throw new UnauthorizedError();
-    const accessToken = await this.tokens.accessToken(
-      owner.accountId,
-      result.membership,
-      presented.sessionId,
-    );
-    return { accessToken, refreshToken: result.token };
   }
 
   /**

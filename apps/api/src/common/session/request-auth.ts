@@ -71,6 +71,8 @@ export interface BearerAuth {
   readonly userId: string | null;
   /** Guardian or relative in that school; null while choosing one. */
   readonly membershipKind: ParentMembershipKind | null;
+  /** The token's own `exp` (Unix seconds): a switch never gives a later one (fix round 2). */
+  readonly expiresAt: number;
 }
 
 /** Who is making a request: the staff cookie, a support visit, or the parent app's token. */

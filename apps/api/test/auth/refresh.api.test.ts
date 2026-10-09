@@ -130,6 +130,43 @@ describe('POST /auth/refresh (spec 05: rotating refresh families)', () => {
     }
   });
 
+  it('rotates into the new school when a switch commits while the refresh waits (retries once, m1)', async () => {
+    const { pair, sessionId, account } = await parentFamily();
+    const other = await insertSchool(db(), { name: 'Kandy Hill Academy' });
+    const otherUser = await insertParentMember(db(), other.id, account.id);
+    // Hold the family so the refresh has read its school (A) and then waits on the row lock,
+    // while the "switch" moves the family to B and commits.
+    const blocker = await db().platform.connect();
+    try {
+      await blocker.query('begin');
+      await blocker.query('select 1 from sessions where id = $1 for update', [sessionId]);
+      const racing = refresh({ refreshToken: pair.refreshToken });
+      await vi.waitFor(
+        async () => {
+          const { rows } = await db().platform.query<{ blocked: number }>(
+            `select count(*)::int as blocked from pg_stat_activity
+             where datname = current_database() and cardinality(pg_blocking_pids(pid)) > 0`,
+          );
+          expect(rows[0]?.blocked).toBe(1);
+        },
+        { timeout: 5000 },
+      );
+      await blocker.query(
+        'update sessions set active_tenant_id = $2, active_user_id = $3 where id = $1',
+        [sessionId, other.id, otherUser],
+      );
+      await blocker.query('commit');
+
+      const response = await racing;
+
+      expect(response.statusCode).toBe(200);
+      expect(claimsOf(TokenPair.parse(response.json()).accessToken).tid).toBe(other.id);
+      expect((await familyRow(db(), sessionId)).revoked_at).toBeNull();
+    } finally {
+      blocker.release();
+    }
+  });
+
   it('refuses a family older than 60 days with 401 (it still rotates on day 59)', async () => {
     const { pair } = await parentFamily();
     clock = NOW + 59 * DAY;

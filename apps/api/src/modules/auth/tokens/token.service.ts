@@ -153,7 +153,14 @@ export class TokenService {
       },
     );
     await this.bearer.invalidateFamily(auth.sessionId);
-    const accessToken = await this.tokens.accessToken(auth.accountId, membership, auth.sessionId);
+    // A switch keeps the presenting token's expiry (N1): a stolen token cannot be kept alive
+    // by switching back and forth. The first choice opens the family with a fresh 15 minutes.
+    const accessToken = await this.tokens.accessToken(
+      auth.accountId,
+      membership,
+      auth.sessionId,
+      refreshToken === null ? auth.expiresAt : undefined,
+    );
     return refreshToken === null ? { accessToken } : { accessToken, refreshToken };
   }
 
