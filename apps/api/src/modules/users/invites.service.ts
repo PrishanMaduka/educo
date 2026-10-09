@@ -17,6 +17,7 @@ import {
   BusinessRuleError,
   ForbiddenError,
   InvalidLinkError,
+  InvariantError,
   NotFoundError,
   UnauthorizedError,
   ValidationError,
@@ -181,7 +182,7 @@ export class InvitesService {
         const ids: string[] = [];
         for (const [index, email] of input.emails.entries()) {
           const accountId = accountIds[index];
-          if (accountId === undefined) throw new Error('An address has no account.');
+          if (accountId === undefined) throw new InvariantError('An address has no account.');
           const invited = {
             accountId,
             name: nameFromEmail(email),
@@ -384,7 +385,7 @@ export class InvitesService {
       );
       await this.repository.setInviteSent(tx, userId, { at, nonce });
       const member = await this.repository.member(tx, userId);
-      if (member === null) throw new Error('The invited membership is not visible.');
+      if (member === null) throw new InvariantError('The invited membership is not visible.');
       invites.push({ member, token });
     }
     const school = await this.users.schoolSenderIn(tx);

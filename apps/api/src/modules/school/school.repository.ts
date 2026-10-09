@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { eq, schoolSettings } from '@quad/db';
 
+import { InvariantError } from '../../common/errors';
+
 import type { SchoolSettings, TenantTx } from '@quad/db';
 import type { SchoolProfileValues } from '@quad/domain';
 
@@ -47,7 +49,7 @@ export class SchoolRepository {
       .from(schoolSettings)
       .where(eq(schoolSettings.tenantId, tenantId));
     const [row] = options.forUpdate ? await query.for('update') : await query;
-    if (row === undefined) throw new Error('The school settings row was not written.');
+    if (row === undefined) throw new InvariantError('The school settings row was not written.');
     return row;
   }
 
@@ -63,7 +65,7 @@ export class SchoolRepository {
       .set({ ...values, updatedBy })
       .where(eq(schoolSettings.tenantId, tenantId))
       .returning(COLUMNS);
-    if (row === undefined) throw new Error('The school settings row was not updated.');
+    if (row === undefined) throw new InvariantError('The school settings row was not updated.');
     return row;
   }
 }

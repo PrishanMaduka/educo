@@ -16,6 +16,8 @@ import {
   users,
 } from '@quad/db';
 
+import { InvariantError } from '../../common/errors';
+
 import type { MembershipStatus, StaffListQuery, SystemRoleKey } from '@quad/contracts';
 import type { TenantTx } from '@quad/db';
 
@@ -229,7 +231,7 @@ export class UsersRepository {
         inviteSentAt: member.at,
       })
       .returning({ id: users.id });
-    if (row === undefined) throw new Error('The membership row was not written.');
+    if (row === undefined) throw new InvariantError('The membership row was not written.');
     await this.setRole(tx, tenantId, row.id, member.roleId);
     return row.id;
   }
@@ -260,7 +262,9 @@ export class UsersRepository {
       })
       .where(and(eq(users.id, userId), eq(users.kind, 'staff'), isNotNull(users.deletedAt)))
       .returning({ id: users.id });
-    if (reinstated.length === 0) throw new Error('Only a removed staff membership is reinstated.');
+    if (reinstated.length === 0) {
+      throw new InvariantError('Only a removed staff membership is reinstated.');
+    }
     await this.setRole(tx, tenantId, userId, member.roleId);
   }
 

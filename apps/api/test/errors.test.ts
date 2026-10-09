@@ -9,6 +9,7 @@ import {
   BusinessRuleError,
   ConflictError,
   ForbiddenError,
+  InvariantError,
   NotFoundError,
   ValidationError,
 } from '../src/common/errors';
@@ -113,6 +114,22 @@ describe('toErrorResponse', () => {
     expect(response).toEqual({
       status: 500,
       body: { code: 'internal', message: 'Something went wrong on our side. Please try again.' },
+    });
+  });
+
+  it('answers a broken invariant with 500 internal, and logs which invariant it was', () => {
+    const { lines, logger } = captureLogs();
+    const reply = { status: vi.fn().mockReturnThis(), send: vi.fn().mockReturnThis() };
+    const error = new InvariantError('The school settings row was not written.');
+    expect(error).not.toBeInstanceOf(AppError);
+    expect(toErrorResponse(error)).toEqual({
+      status: 500,
+      body: { code: 'internal', message: 'Something went wrong on our side. Please try again.' },
+    });
+    sendError(error, reply as unknown as FastifyReply, logger);
+    expect(lines[0]).toMatchObject({
+      level: 'error',
+      error: { type: 'InvariantError', message: 'The school settings row was not written.' },
     });
   });
 
