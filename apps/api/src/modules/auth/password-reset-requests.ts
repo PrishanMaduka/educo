@@ -44,6 +44,16 @@ export function passwordResetJobIds(sessionSecret: string): (email: string) => s
     `password-reset-request.${createHmac('sha256', key).update(email, 'utf8').digest('base64url')}`;
 }
 
+/**
+ * Like the delivery jobs (five tries over about 15 minutes, gone once done), except that a job
+ * that fails for good is removed at once too: the job id is fixed per address, so a failed job
+ * kept for a day would make BullMQ ignore that address's next requests, and it holds the email.
+ */
+export const PASSWORD_RESET_REQUEST_JOB_OPTIONS = {
+  ...DELIVERY_JOB_OPTIONS,
+  removeOnFail: true,
+} as const;
+
 /** `PasswordResetRequests` on BullMQ, sharing the API's Redis connection. */
 export class BullPasswordResetRequests implements PasswordResetRequests, BeforeApplicationShutdown {
   private queue: Queue | undefined;
@@ -51,6 +61,8 @@ export class BullPasswordResetRequests implements PasswordResetRequests, BeforeA
   constructor(
     private readonly redis: Redis,
     private readonly onError: (error: Error) => void,
+    /** BullMQ key prefix; tests use their own so a local worker never sees their jobs. */
+    private readonly prefix?: string,
   ) {}
 
   async request(job: PasswordResetRequest): Promise<void> {
@@ -58,7 +70,7 @@ export class BullPasswordResetRequests implements PasswordResetRequests, BeforeA
     await this.queue.add(
       PASSWORD_RESET_REQUEST_QUEUE,
       PasswordResetRequestJob.parse({ email: job.email }),
-      { ...DELIVERY_JOB_OPTIONS, jobId: job.jobId },
+      { ...PASSWORD_RESET_REQUEST_JOB_OPTIONS, jobId: job.jobId },
     );
   }
 
@@ -69,7 +81,10 @@ export class BullPasswordResetRequests implements PasswordResetRequests, BeforeA
   }
 
   private createQueue(): Queue {
-    const queue = new Queue(PASSWORD_RESET_REQUEST_QUEUE, { connection: this.redis });
+    const queue = new Queue(PASSWORD_RESET_REQUEST_QUEUE, {
+      connection: this.redis,
+      ...(this.prefix === undefined ? {} : { prefix: this.prefix }),
+    });
     queue.on('error', this.onError);
     return queue;
   }

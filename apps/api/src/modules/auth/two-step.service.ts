@@ -13,7 +13,8 @@ import {
   UnauthorizedError,
 } from '../../common/errors';
 import { hashSessionToken, newSessionToken } from '../../common/session/cookies';
-import { CLOCK, CONFIG, FIELD_CIPHER } from '../../tokens';
+import { errorForLog } from '../../observability/logger';
+import { CLOCK, CONFIG, FIELD_CIPHER, LOGGER } from '../../tokens';
 
 import { AccountAudit } from './account-audit.service';
 import { AuthRepository } from './auth.repository';
@@ -26,6 +27,7 @@ import type { Config } from '../../config';
 import type { Clock } from '../../tokens';
 import type { TotpSetupInput, TotpSetupResult, TotpVerifyInput } from '@quad/contracts';
 import type { FieldCipher } from '@quad/db';
+import type { Logger } from 'pino';
 
 /** Spec 05 step 4: "Trust this device for 30 days". */
 export const TRUSTED_DEVICE_DAYS = 30;
@@ -59,6 +61,7 @@ export class TwoStepService {
     @Inject(FIELD_CIPHER) private readonly cipher: FieldCipher,
     @Inject(CONFIG) private readonly config: Config,
     @Inject(CLOCK) private readonly now: Clock,
+    @Inject(LOGGER) private readonly logger: Logger,
   ) {}
 
   /** `POST /auth/totp/verify` at stage `two_step`. */
@@ -180,11 +183,19 @@ export class TwoStepService {
     if (!(await this.repository.enableTotp(person.accountId, sealed, match.step, hashes))) {
       throw new InvalidCodeError();
     }
-    await this.accountAudit.recordInStaffSchools(
-      person.accountId,
-      client.ip,
-      'auth.two_step_enabled',
-    );
+    // Two-step is on now: the person must get the codes, so a failed audit is logged, not thrown.
+    try {
+      await this.accountAudit.recordInStaffSchools(
+        person.accountId,
+        client.ip,
+        'auth.two_step_enabled',
+      );
+    } catch (error) {
+      this.logger.warn(
+        { metric: 'two_step_audit_failed', error: errorForLog(error) },
+        'A new authenticator could not be audited',
+      );
+    }
     return recoveryCodes;
   }
 

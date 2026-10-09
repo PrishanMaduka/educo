@@ -1,8 +1,9 @@
 import { TotpSetupResult } from '@quad/contracts';
 import { createFieldCipher } from '@quad/db';
 import { generateSecret } from 'otplib';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { AccountAudit } from '../../src/modules/auth/account-audit.service';
 import { localEnv } from '../env';
 import { RecordingDelivery } from '../fakes/delivery';
 import { Browser, setCookie } from '../helpers/browser';
@@ -329,6 +330,24 @@ describe('POST /me/totp (set up an authenticator)', () => {
     const again = new Browser(app);
     await again.post('/auth/password', { email: account.email, password: account.password });
     expect((await again.post('/auth/totp/verify', { code })).statusCode).toBe(400);
+  });
+
+  it('still gives the recovery codes (200) when the enrolment audit fails after the commit', async () => {
+    const { account, browser } = await atSetup();
+    const started = TotpSetupResult.parse((await browser.post('/me/totp', {})).json());
+    const audit = vi
+      .spyOn(app().get(AccountAudit), 'recordInStaffSchools')
+      .mockRejectedValue(new Error('The audit log is unavailable'));
+    try {
+      const response = await browser.post('/me/totp', {
+        code: await totpCode(secretFrom(started.otpauthUri ?? ''), clock),
+      });
+      expect(response.statusCode).toBe(200);
+      expect(TotpSetupResult.parse(response.json()).recoveryCodes).toHaveLength(10);
+      expect(audit).toHaveBeenCalledWith(account.id, browser.ip, 'auth.two_step_enabled');
+    } finally {
+      audit.mockRestore();
+    }
   });
 
   it('refuses a code from another secret with 400 invalid_code', async () => {
