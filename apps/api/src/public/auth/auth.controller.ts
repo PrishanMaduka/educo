@@ -1,6 +1,5 @@
 import { Body, Controller, Get, HttpCode, Inject, Post, Req, Res } from '@nestjs/common';
 import {
-  IdentifyInput,
   PasswordForgotInput,
   PasswordSignInInput,
   SelectSchoolInput,
@@ -31,12 +30,7 @@ import {
 
 import type { RequestAuth } from '../../common/session/request-auth';
 import type { Config } from '../../config';
-import type {
-  IdentifyResult,
-  SignInMembershipList,
-  SelectSchoolTokens,
-  SignInResult,
-} from '@quad/contracts';
+import type { SignInMembershipList, SelectSchoolTokens, SignInResult } from '@quad/contracts';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
 /** Spec 05: per-email limits on top of the per-IP sign-in bucket (ruling F65). */
@@ -62,16 +56,6 @@ export class AuthController {
     private readonly tokens: TokenService,
     @Inject(CONFIG) private readonly config: Config,
   ) {}
-
-  @Post('identify')
-  @Public()
-  @HttpCode(200)
-  @RateLimit(PER_EMAIL)
-  identify(
-    @Body(new ZodValidationPipe(IdentifyInput)) body: IdentifyInput,
-  ): Promise<IdentifyResult> {
-    return this.auth.identify(body.email);
-  }
 
   @Post('password')
   @Public()

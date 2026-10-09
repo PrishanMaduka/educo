@@ -52,7 +52,7 @@ export interface SessionPlace {
   readonly userId: string | null;
 }
 
-/** A new staff browser session (`POST /auth/password`, the SSO callback). */
+/** A new staff browser session (`POST /auth/password`). */
 export interface NewWebSession extends SessionPlace {
   readonly accountId: string;
   readonly tokenHash: Buffer;

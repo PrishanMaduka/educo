@@ -28,8 +28,6 @@ export const AuditAction = z.enum([
   'support_session.started',
   'support_session.ended',
   'audit.exported',
-  // A first SSO sign-in linked a Google or Microsoft login to the account (Task 8).
-  'auth.sso_linked',
 ]);
 export type AuditAction = z.infer<typeof AuditAction>;
 

@@ -8,7 +8,6 @@ export * from './health';
 export * from './permissions';
 export * from './auth/signed-link';
 export * from './auth/sign-in';
-export * from './auth/sso';
 export * from './auth/totp';
 export * from './auth/otp';
 export * from './auth/tokens';

@@ -328,6 +328,18 @@ describe('POST /auth/password (spec 05 step 3)', () => {
     expect((await browser.get('/me')).statusCode).toBe(401);
   });
 
+  it('answers 429 after 20 calls a minute from one IP (spec 06)', async () => {
+    const browser = new Browser(app);
+    for (let call = 1; call <= 20; call += 1) {
+      const response = await signIn(browser, { email: freshEmail(), password: 'whatever it is' });
+      expect(response.statusCode).toBe(401);
+    }
+    const refused = await signIn(browser, { email: freshEmail(), password: 'whatever it is' });
+    expect(refused.statusCode).toBe(429);
+    expect(refused.json()).toMatchObject({ code: 'rate_limited' });
+    expect(refused.headers['retry-after']).toBeDefined();
+  });
+
   it('answers 429 after 10 tries in 15 minutes for one email, from any IP', async () => {
     const email = freshEmail();
     for (let call = 1; call <= 10; call += 1) {

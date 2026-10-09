@@ -1,6 +1,4 @@
 import {
-  IdentifyInput,
-  IdentifyResult,
   OtpRequestInput,
   OtpVerifyInput,
   OtpVerifyResult,
@@ -11,11 +9,7 @@ import {
   SelectSchoolInput,
   SignInMembershipList,
   SignInResult,
-  SsoCallbackQueryFields,
-  SsoProviderParams,
-  SsoStartInput,
   SelectSchoolTokens,
-  SsoStartResult,
   TokenPair,
   TotpVerifyInput,
 } from '@quad/contracts';
@@ -24,8 +18,6 @@ import { named } from '../../openapi/registry';
 
 import type { ApiRoute } from '../../openapi/registry';
 
-const Identify = named('IdentifyInput', IdentifyInput);
-const Methods = named('IdentifyResult', IdentifyResult);
 const PasswordSignIn = named('PasswordSignInInput', PasswordSignInInput);
 const Next = named('SignInResult', SignInResult);
 const TotpVerify = named('TotpVerifyInput', TotpVerifyInput);
@@ -33,8 +25,6 @@ const Memberships = named('SignInMembershipList', SignInMembershipList);
 const SelectSchool = named('SelectSchoolInput', SelectSchoolInput);
 const Forgot = named('PasswordForgotInput', PasswordForgotInput);
 const Reset = named('PasswordResetInput', PasswordResetInput);
-const SsoStart = named('SsoStartInput', SsoStartInput);
-const SsoUrl = named('SsoStartResult', SsoStartResult);
 const OtpRequest = named('OtpRequestInput', OtpRequestInput);
 const OtpVerify = named('OtpVerifyInput', OtpVerifyInput);
 const OtpResult = named('OtpVerifyResult', OtpVerifyResult);
@@ -49,50 +39,12 @@ const SchoolTokens = named('SelectSchoolTokens', SelectSchoolTokens);
 export const authRoutes: readonly ApiRoute[] = [
   {
     method: 'post',
-    path: '/auth/identify',
-    summary:
-      'The sign-in methods for a work email (the same answer whether or not it has an account)',
-    tags: ['auth'],
-    request: { body: Identify },
-    responses: {
-      200: { description: 'SSO for the email’s domain, then password', schema: Methods },
-    },
-    errors: [400, 429],
-  },
-  {
-    method: 'post',
     path: '/auth/password',
     summary: 'Sign in with email and password; sets the session cookies and says what comes next',
     tags: ['auth'],
     request: { body: PasswordSignIn },
     responses: { 200: { description: 'The next sign-in step', schema: Next } },
     errors: [400, 401, 403, 429],
-  },
-  {
-    method: 'post',
-    path: '/auth/sso/{provider}/start',
-    summary:
-      'Start single sign-on with Google or Microsoft: the provider URL to open, with PKCE (sets a short-lived state cookie)',
-    tags: ['auth'],
-    request: { params: SsoProviderParams, body: SsoStart },
-    responses: { 200: { description: 'Open this URL to sign in', schema: SsoUrl } },
-    errors: [400, 403, 429, 503],
-  },
-  {
-    method: 'get',
-    path: '/auth/sso/{provider}/callback',
-    summary:
-      'The provider returns here; the API checks the sign-in and always redirects back to /sign-in',
-    tags: ['auth'],
-    request: { params: SsoProviderParams, query: SsoCallbackQueryFields },
-    responses: {
-      302: { description: 'Signed in: redirects to /sign-in?step=<next step>' },
-      303: {
-        description:
-          'Refused: redirects to /sign-in?error=<sso_unfinished | sso_refused | account_locked | sso_cancelled>',
-      },
-    },
-    errors: [429],
   },
   {
     method: 'post',

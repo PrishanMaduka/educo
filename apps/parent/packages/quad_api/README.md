@@ -49,13 +49,12 @@ import 'package:quad_api/quad_api.dart';
 
 
 final api = QuadApi().getAuthApi();
-final IdentifyInput identifyInput = ; // IdentifyInput | 
 
 try {
-    final response = await api.apiV1AuthIdentifyPost(identifyInput);
+    final response = await api.apiV1AuthMembershipsGet();
     print(response);
 } catch on DioException (e) {
-    print("Exception when calling AuthApi->apiV1AuthIdentifyPost: $e\n");
+    print("Exception when calling AuthApi->apiV1AuthMembershipsGet: $e\n");
 }
 
 ```
@@ -66,7 +65,6 @@ All URIs are relative to *http://localhost*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
-[*AuthApi*](doc/AuthApi.md) | [**apiV1AuthIdentifyPost**](doc/AuthApi.md#apiv1authidentifypost) | **POST** /api/v1/auth/identify | The sign-in methods for a work email (the same answer whether or not it has an account)
 [*AuthApi*](doc/AuthApi.md) | [**apiV1AuthMembershipsGet**](doc/AuthApi.md#apiv1authmembershipsget) | **GET** /api/v1/auth/memberships | The schools you can open (Choose a school, Switch school)
 [*AuthApi*](doc/AuthApi.md) | [**apiV1AuthOtpRequestPost**](doc/AuthApi.md#apiv1authotprequestpost) | **POST** /api/v1/auth/otp/request | Send a 6-digit sign-in code to a mobile number or email (the same answer whether or not it is known)
 [*AuthApi*](doc/AuthApi.md) | [**apiV1AuthOtpVerifyPost**](doc/AuthApi.md#apiv1authotpverifypost) | **POST** /api/v1/auth/otp/verify | Check the code: signs in to your one school, asks you to choose among several, or says you were not found
@@ -76,8 +74,6 @@ Class | Method | HTTP request | Description
 [*AuthApi*](doc/AuthApi.md) | [**apiV1AuthRefreshPost**](doc/AuthApi.md#apiv1authrefreshpost) | **POST** /api/v1/auth/refresh | Swap the refresh token for a new pair; an old refresh token signs the device out everywhere it was copied
 [*AuthApi*](doc/AuthApi.md) | [**apiV1AuthSelectSchoolPost**](doc/AuthApi.md#apiv1authselectschoolpost) | **POST** /api/v1/auth/select-school | Open one of your schools. Staff: rotates the session cookie (needs X-CSRF-Token). Parent app: the select_school token gets both tokens; a school token switches and gets only the new access token (the refresh token stays)
 [*AuthApi*](doc/AuthApi.md) | [**apiV1AuthSignOutPost**](doc/AuthApi.md#apiv1authsignoutpost) | **POST** /api/v1/auth/sign-out | Sign out: the staff session for every school (needs X-CSRF-Token), or the parent app’s token family on this device
-[*AuthApi*](doc/AuthApi.md) | [**apiV1AuthSsoProviderCallbackGet**](doc/AuthApi.md#apiv1authssoprovidercallbackget) | **GET** /api/v1/auth/sso/{provider}/callback | The provider returns here; the API checks the sign-in and always redirects back to /sign-in
-[*AuthApi*](doc/AuthApi.md) | [**apiV1AuthSsoProviderStartPost**](doc/AuthApi.md#apiv1authssoproviderstartpost) | **POST** /api/v1/auth/sso/{provider}/start | Start single sign-on with Google or Microsoft: the provider URL to open, with PKCE (sets a short-lived state cookie)
 [*AuthApi*](doc/AuthApi.md) | [**apiV1AuthTotpVerifyPost**](doc/AuthApi.md#apiv1authtotpverifypost) | **POST** /api/v1/auth/totp/verify | Check the authenticator or recovery code at the two-step step (needs X-CSRF-Token)
 [*HealthApi*](doc/HealthApi.md) | [**apiV1HealthLiveGet**](doc/HealthApi.md#apiv1healthliveget) | **GET** /api/v1/health/live | The process is up
 [*HealthApi*](doc/HealthApi.md) | [**apiV1HealthReadyGet**](doc/HealthApi.md#apiv1healthreadyget) | **GET** /api/v1/health/ready | Postgres and Redis answer
@@ -95,8 +91,6 @@ Class | Method | HTTP request | Description
  - [ErrorBody](doc/ErrorBody.md)
  - [HealthLive](doc/HealthLive.md)
  - [HealthReady](doc/HealthReady.md)
- - [IdentifyInput](doc/IdentifyInput.md)
- - [IdentifyResult](doc/IdentifyResult.md)
  - [Me](doc/Me.md)
  - [MeGreeting](doc/MeGreeting.md)
  - [MeMembershipsInner](doc/MeMembershipsInner.md)
@@ -124,8 +118,6 @@ Class | Method | HTTP request | Description
  - [SignInMembershipListItemsInner](doc/SignInMembershipListItemsInner.md)
  - [SignInResult](doc/SignInResult.md)
  - [SnsEnvelope](doc/SnsEnvelope.md)
- - [SsoStartInput](doc/SsoStartInput.md)
- - [SsoStartResult](doc/SsoStartResult.md)
  - [TokenPair](doc/TokenPair.md)
  - [TotpSetupInput](doc/TotpSetupInput.md)
  - [TotpSetupResult](doc/TotpSetupResult.md)

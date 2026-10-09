@@ -1,6 +1,6 @@
 import type { SignInNext } from '@quad/contracts';
 
-/** What the API knows after the password (or SSO) step, before a session is in a school. */
+/** What the API knows after the password step, before a session is in a school. */
 export interface SignInFacts {
   /** The account has a confirmed authenticator. */
   readonly totpEnabled: boolean;

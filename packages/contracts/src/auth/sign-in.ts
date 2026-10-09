@@ -4,8 +4,8 @@ import { IdSchema } from '../common/ids';
 import { MeBrand } from '../me/me';
 
 /**
- * Staff sign-in (spec 05 → Staff portal; spec 06 → Me and auth). Identifier first: the work
- * email, then a method, then two-step and the school.
+ * Staff sign-in (spec 05 → Staff portal; spec 06 → Me and auth). Identifier first: the page asks
+ * for the work email, then the password (D37: the only staff method), then two-step and the school.
  */
 
 /** A work email, trimmed and lower-cased, so two spellings are one address. */
@@ -26,17 +26,9 @@ const TypedPassword = z
   .min(1, { message: 'Enter your password' })
   .max(1024, { message: 'That password is too long' });
 
-/** `POST /auth/identify`. */
-export const IdentifyInput = z.object({ email: SignInEmail });
-export type IdentifyInput = z.infer<typeof IdentifyInput>;
-
 /** A way to sign in: a school's SSO for the email's domain, or a password. */
 export const SignInMethod = z.enum(['sso:google', 'sso:microsoft', 'password']);
 export type SignInMethod = z.infer<typeof SignInMethod>;
-
-/** The same shape whether or not the account exists (no account enumeration). */
-export const IdentifyResult = z.object({ methods: z.array(SignInMethod).min(1) });
-export type IdentifyResult = z.infer<typeof IdentifyResult>;
 
 /** `POST /auth/password`. */
 export const PasswordSignInInput = z.object({

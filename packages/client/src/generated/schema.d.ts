@@ -500,64 +500,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/auth/identify": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** The sign-in methods for a work email (the same answer whether or not it has an account) */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["IdentifyInput"];
-                };
-            };
-            responses: {
-                /** @description SSO for the email’s domain, then password */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["IdentifyResult"];
-                    };
-                };
-                /** @description Error */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-                /** @description Error */
-                429: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/v1/auth/password": {
         parameters: {
             query?: never;
@@ -628,141 +570,6 @@ export interface paths {
                 };
             };
         };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/auth/sso/{provider}/start": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Start single sign-on with Google or Microsoft: the provider URL to open, with PKCE (sets a short-lived state cookie) */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    provider: "google" | "microsoft";
-                };
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["SsoStartInput"];
-                };
-            };
-            responses: {
-                /** @description Open this URL to sign in */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["SsoStartResult"];
-                    };
-                };
-                /** @description Error */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-                /** @description Error */
-                403: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-                /** @description Error */
-                429: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-                /** @description Error */
-                503: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/auth/sso/{provider}/callback": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** The provider returns here; the API checks the sign-in and always redirects back to /sign-in */
-        get: {
-            parameters: {
-                query?: {
-                    code?: string;
-                    state?: string;
-                    error?: string;
-                    error_description?: string;
-                };
-                header?: never;
-                path: {
-                    provider: "google" | "microsoft";
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Signed in: redirects to /sign-in?step=<next step> */
-                302: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-                /** @description Refused: redirects to /sign-in?error=<sso_unfinished | sso_refused | account_locked | sso_cancelled> */
-                303: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-                /** @description Error */
-                429: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -1469,13 +1276,6 @@ export interface components {
         TotpSetupInput: {
             code?: string;
         };
-        IdentifyResult: {
-            methods: ("sso:google" | "sso:microsoft" | "password")[];
-        };
-        IdentifyInput: {
-            /** Format: email */
-            email: string;
-        };
         SignInResult: {
             /** @enum {string} */
             next: "two_step" | "two_step_setup" | "choose_school" | "no_school" | "done";
@@ -1484,16 +1284,6 @@ export interface components {
             /** Format: email */
             email: string;
             password: string;
-            /** @default false */
-            keepSignedIn: boolean;
-        };
-        SsoStartResult: {
-            /** Format: uri */
-            url: string;
-        };
-        SsoStartInput: {
-            /** Format: email */
-            email: string;
             /** @default false */
             keepSignedIn: boolean;
         };

@@ -2,8 +2,6 @@ import { describe, expect, it } from 'vitest';
 
 import {
   ErrorCode,
-  IdentifyInput,
-  IdentifyResult,
   PasswordForgotInput,
   PasswordResetInput,
   PasswordSignInInput,
@@ -32,33 +30,16 @@ describe('error codes for sign-in (spec 05, Task 7)', () => {
   });
 });
 
-describe('IdentifyInput', () => {
-  it('trims and lower-cases the work email', () => {
-    expect(IdentifyInput.parse({ email: '  Prishan.Maduka@Colombo-Intl.Local ' })).toEqual({
-      email: 'prishan.maduka@colombo-intl.local',
-    });
-  });
-
-  it.each([{}, { email: '' }, { email: 'not-an-email' }, { email: `${'a'.repeat(250)}@x.lk` }])(
-    'refuses %j at email',
-    (input) => {
-      expect(pathOf(IdentifyInput.safeParse(input))).toEqual(['email']);
-    },
-  );
-});
-
-describe('IdentifyResult', () => {
-  it('accepts password, with SSO first when a school offers it', () => {
-    expect(IdentifyResult.safeParse({ methods: ['password'] }).success).toBe(true);
-    expect(IdentifyResult.safeParse({ methods: ['sso:google', 'password'] }).success).toBe(true);
-  });
-
-  it('refuses an unknown method', () => {
-    expect(pathOf(IdentifyResult.safeParse({ methods: ['magic'] }))).toEqual(['methods', 0]);
-  });
-});
-
 describe('PasswordSignInInput', () => {
+  it('trims and lower-cases the work email', () => {
+    expect(
+      PasswordSignInInput.parse({
+        email: '  Prishan.Maduka@Colombo-Intl.Local ',
+        password: 'correct horse',
+      }).email,
+    ).toBe('prishan.maduka@colombo-intl.local');
+  });
+
   it('defaults Keep me signed in to off', () => {
     expect(
       PasswordSignInInput.parse({ email: 'a@b.lk', password: 'correct horse' }).keepSignedIn,

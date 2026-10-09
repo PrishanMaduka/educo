@@ -50,7 +50,6 @@
   "error.notYourSchool": "You can’t open that school with this account.",
   "error.authenticatorExists": "You already have an authenticator app set up.",
   "error.signInUnavailable": "We can’t sign you in right now. Try again in a minute.",
-  "error.ssoNotOffered": "Your school doesn’t use this sign-in for your email. Sign in with your password instead.",
   "error.invalidSignInCode": "That code didn’t work. Check the latest code we sent you, or ask for a new one.",
   "error.alreadyInSchool": "You’re already in this school.",
   "error.phoneNotAccepted": "Enter a Sri Lankan mobile number, like +94 77 123 4567.",

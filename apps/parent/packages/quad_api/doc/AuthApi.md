@@ -9,7 +9,6 @@ All URIs are relative to *http://localhost*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**apiV1AuthIdentifyPost**](AuthApi.md#apiv1authidentifypost) | **POST** /api/v1/auth/identify | The sign-in methods for a work email (the same answer whether or not it has an account)
 [**apiV1AuthMembershipsGet**](AuthApi.md#apiv1authmembershipsget) | **GET** /api/v1/auth/memberships | The schools you can open (Choose a school, Switch school)
 [**apiV1AuthOtpRequestPost**](AuthApi.md#apiv1authotprequestpost) | **POST** /api/v1/auth/otp/request | Send a 6-digit sign-in code to a mobile number or email (the same answer whether or not it is known)
 [**apiV1AuthOtpVerifyPost**](AuthApi.md#apiv1authotpverifypost) | **POST** /api/v1/auth/otp/verify | Check the code: signs in to your one school, asks you to choose among several, or says you were not found
@@ -19,51 +18,8 @@ Method | HTTP request | Description
 [**apiV1AuthRefreshPost**](AuthApi.md#apiv1authrefreshpost) | **POST** /api/v1/auth/refresh | Swap the refresh token for a new pair; an old refresh token signs the device out everywhere it was copied
 [**apiV1AuthSelectSchoolPost**](AuthApi.md#apiv1authselectschoolpost) | **POST** /api/v1/auth/select-school | Open one of your schools. Staff: rotates the session cookie (needs X-CSRF-Token). Parent app: the select_school token gets both tokens; a school token switches and gets only the new access token (the refresh token stays)
 [**apiV1AuthSignOutPost**](AuthApi.md#apiv1authsignoutpost) | **POST** /api/v1/auth/sign-out | Sign out: the staff session for every school (needs X-CSRF-Token), or the parent app’s token family on this device
-[**apiV1AuthSsoProviderCallbackGet**](AuthApi.md#apiv1authssoprovidercallbackget) | **GET** /api/v1/auth/sso/{provider}/callback | The provider returns here; the API checks the sign-in and always redirects back to /sign-in
-[**apiV1AuthSsoProviderStartPost**](AuthApi.md#apiv1authssoproviderstartpost) | **POST** /api/v1/auth/sso/{provider}/start | Start single sign-on with Google or Microsoft: the provider URL to open, with PKCE (sets a short-lived state cookie)
 [**apiV1AuthTotpVerifyPost**](AuthApi.md#apiv1authtotpverifypost) | **POST** /api/v1/auth/totp/verify | Check the authenticator or recovery code at the two-step step (needs X-CSRF-Token)
 
-
-# **apiV1AuthIdentifyPost**
-> IdentifyResult apiV1AuthIdentifyPost(identifyInput)
-
-The sign-in methods for a work email (the same answer whether or not it has an account)
-
-### Example
-```dart
-import 'package:quad_api/api.dart';
-
-final api = QuadApi().getAuthApi();
-final IdentifyInput identifyInput = ; // IdentifyInput | 
-
-try {
-    final response = api.apiV1AuthIdentifyPost(identifyInput);
-    print(response);
-} catch on DioException (e) {
-    print('Exception when calling AuthApi->apiV1AuthIdentifyPost: $e\n');
-}
-```
-
-### Parameters
-
-Name | Type | Description  | Notes
-------------- | ------------- | ------------- | -------------
- **identifyInput** | [**IdentifyInput**](IdentifyInput.md)|  | 
-
-### Return type
-
-[**IdentifyResult**](IdentifyResult.md)
-
-### Authorization
-
-No authorization required
-
-### HTTP request headers
-
- - **Content-Type**: application/json
- - **Accept**: application/json
-
-[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **apiV1AuthMembershipsGet**
 > SignInMembershipList apiV1AuthMembershipsGet()
@@ -418,97 +374,6 @@ No authorization required
 ### HTTP request headers
 
  - **Content-Type**: Not defined
- - **Accept**: application/json
-
-[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-
-# **apiV1AuthSsoProviderCallbackGet**
-> apiV1AuthSsoProviderCallbackGet(provider, code, state, error, errorDescription)
-
-The provider returns here; the API checks the sign-in and always redirects back to /sign-in
-
-### Example
-```dart
-import 'package:quad_api/api.dart';
-
-final api = QuadApi().getAuthApi();
-final String provider = provider_example; // String | 
-final String code = code_example; // String | 
-final String state = state_example; // String | 
-final String error = error_example; // String | 
-final String errorDescription = errorDescription_example; // String | 
-
-try {
-    api.apiV1AuthSsoProviderCallbackGet(provider, code, state, error, errorDescription);
-} catch on DioException (e) {
-    print('Exception when calling AuthApi->apiV1AuthSsoProviderCallbackGet: $e\n');
-}
-```
-
-### Parameters
-
-Name | Type | Description  | Notes
-------------- | ------------- | ------------- | -------------
- **provider** | **String**|  | 
- **code** | **String**|  | [optional] 
- **state** | **String**|  | [optional] 
- **error** | **String**|  | [optional] 
- **errorDescription** | **String**|  | [optional] 
-
-### Return type
-
-void (empty response body)
-
-### Authorization
-
-No authorization required
-
-### HTTP request headers
-
- - **Content-Type**: Not defined
- - **Accept**: application/json
-
-[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-
-# **apiV1AuthSsoProviderStartPost**
-> SsoStartResult apiV1AuthSsoProviderStartPost(provider, ssoStartInput)
-
-Start single sign-on with Google or Microsoft: the provider URL to open, with PKCE (sets a short-lived state cookie)
-
-### Example
-```dart
-import 'package:quad_api/api.dart';
-
-final api = QuadApi().getAuthApi();
-final String provider = provider_example; // String | 
-final SsoStartInput ssoStartInput = ; // SsoStartInput | 
-
-try {
-    final response = api.apiV1AuthSsoProviderStartPost(provider, ssoStartInput);
-    print(response);
-} catch on DioException (e) {
-    print('Exception when calling AuthApi->apiV1AuthSsoProviderStartPost: $e\n');
-}
-```
-
-### Parameters
-
-Name | Type | Description  | Notes
-------------- | ------------- | ------------- | -------------
- **provider** | **String**|  | 
- **ssoStartInput** | [**SsoStartInput**](SsoStartInput.md)|  | 
-
-### Return type
-
-[**SsoStartResult**](SsoStartResult.md)
-
-### Authorization
-
-No authorization required
-
-### HTTP request headers
-
- - **Content-Type**: application/json
  - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)

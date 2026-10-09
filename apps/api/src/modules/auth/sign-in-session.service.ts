@@ -45,7 +45,7 @@ export interface StepSession {
   readonly tokenHash: Buffer;
 }
 
-/** Where a sign-in stands after a first factor (password or SSO) or the two-step code. */
+/** Where a sign-in stands after the password or the two-step code. */
 export interface SignInState {
   readonly accountId: string;
   /** Null right after the password: no session exists yet. */
@@ -53,7 +53,7 @@ export interface SignInState {
   /** From the password step; a continuing session keeps its own. */
   readonly keepSignedIn: boolean;
   /**
-   * The first factor (password or an SSO provider), required for a new session (`session` null);
+   * The first factor (the password; D37), required for a new session (`session` null);
    * a continuing session keeps its own. The `auth.sign_in` audit names it.
    */
   readonly method?: SignInMethod;

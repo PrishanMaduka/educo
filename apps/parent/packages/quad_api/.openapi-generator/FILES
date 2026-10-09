@@ -8,8 +8,6 @@ doc/ErrorBody.md
 doc/HealthApi.md
 doc/HealthLive.md
 doc/HealthReady.md
-doc/IdentifyInput.md
-doc/IdentifyResult.md
 doc/Me.md
 doc/MeApi.md
 doc/MeGreeting.md
@@ -39,8 +37,6 @@ doc/SignInMembershipList.md
 doc/SignInMembershipListItemsInner.md
 doc/SignInResult.md
 doc/SnsEnvelope.md
-doc/SsoStartInput.md
-doc/SsoStartResult.md
 doc/TokenPair.md
 doc/TotpSetupInput.md
 doc/TotpSetupResult.md
@@ -62,8 +58,6 @@ lib/src/deserialize.dart
 lib/src/model/error_body.dart
 lib/src/model/health_live.dart
 lib/src/model/health_ready.dart
-lib/src/model/identify_input.dart
-lib/src/model/identify_result.dart
 lib/src/model/me.dart
 lib/src/model/me_greeting.dart
 lib/src/model/me_memberships_inner.dart
@@ -91,8 +85,6 @@ lib/src/model/sign_in_membership_list.dart
 lib/src/model/sign_in_membership_list_items_inner.dart
 lib/src/model/sign_in_result.dart
 lib/src/model/sns_envelope.dart
-lib/src/model/sso_start_input.dart
-lib/src/model/sso_start_result.dart
 lib/src/model/token_pair.dart
 lib/src/model/totp_setup_input.dart
 lib/src/model/totp_setup_result.dart
@@ -103,8 +95,6 @@ test/error_body_test.dart
 test/health_api_test.dart
 test/health_live_test.dart
 test/health_ready_test.dart
-test/identify_input_test.dart
-test/identify_result_test.dart
 test/me_api_test.dart
 test/me_greeting_test.dart
 test/me_memberships_inner_test.dart
@@ -134,8 +124,6 @@ test/sign_in_membership_list_items_inner_test.dart
 test/sign_in_membership_list_test.dart
 test/sign_in_result_test.dart
 test/sns_envelope_test.dart
-test/sso_start_input_test.dart
-test/sso_start_result_test.dart
 test/token_pair_test.dart
 test/totp_setup_input_test.dart
 test/totp_setup_result_test.dart

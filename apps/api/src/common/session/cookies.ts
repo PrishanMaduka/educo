@@ -20,8 +20,6 @@ export interface CookieNames {
   readonly csrf: string;
   /** "Trust this device for 30 days" after two-step (spec 05). */
   readonly trustedDevice: string;
-  /** The signed SSO state, PKCE verifier and nonce between start and callback (Task 8). */
-  readonly ssoState: string;
 }
 
 /**
@@ -44,7 +42,6 @@ export function cookieNames(appEnv: AppEnv): CookieNames {
     consoleSession: `${prefix}quad_console_sid`,
     csrf: `${prefix}quad_csrf`,
     trustedDevice: `${prefix}quad_trusted`,
-    ssoState: `${prefix}quad_sso`,
   };
 }
 
@@ -136,26 +133,4 @@ export function setLastSchoolCookie(
 /** Forgets the remembered school ("Remember my choice" left off). */
 export function clearLastSchoolCookie(reply: FastifyReply, appEnv: AppEnv): void {
   void reply.clearCookie(LAST_SCHOOL_COOKIE, csrfCookieOptions(appEnv));
-}
-
-/**
- * The SSO state cookie (Task 8): HttpOnly and `SameSite=Lax`, so the browser sends it on the
- * provider's top-level redirect back to the callback, and short-lived.
- */
-export function setSsoStateCookie(
-  reply: FastifyReply,
-  appEnv: AppEnv,
-  value: string,
-  maxAgeSeconds: number,
-): void {
-  void reply.setCookie(
-    cookieNames(appEnv).ssoState,
-    value,
-    sessionCookieOptions(appEnv, maxAgeSeconds),
-  );
-}
-
-/** Drops the SSO state cookie: the callback uses it once, whatever the outcome. */
-export function clearSsoStateCookie(reply: FastifyReply, appEnv: AppEnv): void {
-  void reply.clearCookie(cookieNames(appEnv).ssoState, sessionCookieOptions(appEnv));
 }

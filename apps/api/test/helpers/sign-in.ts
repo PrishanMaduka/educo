@@ -82,32 +82,18 @@ export function totpCode(secret: string, nowMs: number): Promise<string> {
   return generate({ secret, epoch: Math.floor(nowMs / 1000) });
 }
 
-/** Sets a school's two-step rule (and, optionally, its SSO domain). */
+/** Sets a school's two-step rule and password minimum. */
 export async function setSignInRules(
   db: TestDatabase,
   tenantId: string,
-  rules: {
-    readonly twoStep?: TwoStepRule;
-    readonly ssoDomain?: string;
-    readonly ssoGoogle?: boolean;
-    readonly ssoMicrosoft?: boolean;
-    readonly passwordMinLength?: number;
-  },
+  rules: { readonly twoStep?: TwoStepRule; readonly passwordMinLength?: number },
 ): Promise<void> {
   await db.platform.query(
-    `insert into tenant_security (tenant_id, two_step, sso_domain, sso_google, sso_microsoft, password_min_length)
-     values ($1, $2, $3, $4, $5, $6)
-     on conflict (tenant_id) do update set two_step = excluded.two_step, sso_domain = excluded.sso_domain,
-       sso_google = excluded.sso_google, sso_microsoft = excluded.sso_microsoft,
+    `insert into tenant_security (tenant_id, two_step, password_min_length)
+     values ($1, $2, $3)
+     on conflict (tenant_id) do update set two_step = excluded.two_step,
        password_min_length = excluded.password_min_length`,
-    [
-      tenantId,
-      rules.twoStep ?? 'off',
-      rules.ssoDomain ?? null,
-      rules.ssoGoogle ?? false,
-      rules.ssoMicrosoft ?? false,
-      rules.passwordMinLength ?? 10,
-    ],
+    [tenantId, rules.twoStep ?? 'off', rules.passwordMinLength ?? 10],
   );
 }
 

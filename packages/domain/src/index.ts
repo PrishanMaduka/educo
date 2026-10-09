@@ -38,8 +38,6 @@ export {
 } from './auth/lockout';
 export type { TwoStepResult, TwoStepRow } from './auth/two-step-rule';
 export { strictestTwoStep } from './auth/two-step-rule';
-export type { SsoAdmissionInput, SsoClaims, SsoSchool } from './auth/sso-admission';
-export { emailDomainOf, providerVouchesForEmail, ssoAdmits } from './auth/sso-admission';
 export type { RandomBytes } from './auth/recovery-codes';
 export {
   RECOVERY_CODE_COUNT,

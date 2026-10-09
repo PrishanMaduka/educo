@@ -7,7 +7,6 @@ import {
   desc,
   eq,
   gt,
-  identities,
   isNull,
   roles,
   sql,
@@ -18,7 +17,7 @@ import {
 
 import { TENANT_DB } from '../../tokens';
 
-import type { AccountStatus, MembershipKind, MembershipStatus, SsoProvider } from '@quad/contracts';
+import type { AccountStatus, MembershipKind, MembershipStatus } from '@quad/contracts';
 import type { AccountTx, QuadTenantDb } from '@quad/db';
 
 /** The account fields sign-in needs once the account is known. */
@@ -57,20 +56,6 @@ export interface TokenMember {
   /** Primary role first, then by name (as `auth_memberships` lists them). */
   readonly roleNames: readonly string[];
 }
-
-/** A school's SSO settings (`current_tenant_profile`, D24). */
-export interface SchoolSso {
-  readonly ssoDomain: string | null;
-  readonly google: boolean;
-  readonly microsoft: boolean;
-}
-
-/**
- * What linking an SSO login did: a new `identities` row, the row the account already had, or a
- * refusal because the login belongs to another account or the account has another login of
- * that provider.
- */
-export type IdentityLink = 'linked' | 'reused' | 'conflict';
 
 /** Only a time step later than the last one accepted (RFC 6238 §5.2), so a replay loses a race. */
 const laterStep = (step: number) =>
@@ -317,55 +302,6 @@ export class AuthRepository {
       .orderBy(desc(userRoles.primary), asc(roles.name));
     const { deletedAt, ...member } = row;
     return { ...member, deleted: deletedAt !== null, roleNames: held.map((role) => role.name) };
-  }
-
-  /**
-   * Links the provider's `subject` to the account on its first SSO sign-in (spec 05 step 2).
-   * Account RLS shows only this account's rows, and two unique pairs decide the rest (0010):
-   * `(provider, subject)` and `(account_id, provider)`. An insert that hits either inserts
-   * nothing, and the account's own row is read again: the same subject (a concurrent first
-   * sign-in) is reused, anything else is a conflict. One login per provider per account: a
-   * second subject is a conflict, never a second link.
-   */
-  async linkIdentity(
-    accountId: string,
-    provider: SsoProvider,
-    subject: string,
-    email: string,
-  ): Promise<IdentityLink> {
-    return this.db.withAccount(accountId, async (tx) => {
-      const own = () =>
-        tx
-          .select({ subject: identities.subject })
-          .from(identities)
-          .where(and(eq(identities.accountId, accountId), eq(identities.provider, provider)));
-      const existing = await own();
-      if (existing.length > 0) {
-        return existing.some((row) => row.subject === subject) ? 'reused' : 'conflict';
-      }
-      const inserted = await tx
-        .insert(identities)
-        .values({ accountId, provider, subject, email })
-        // Either unique pair: (provider, subject) taken by any account, or (account, provider)
-        // taken by a concurrent first sign-in of this account with another subject.
-        .onConflictDoNothing()
-        .returning({ id: identities.id });
-      if (inserted.length > 0) return 'linked';
-      return (await own()).some((row) => row.subject === subject) ? 'reused' : 'conflict';
-    });
-  }
-
-  /** A school's SSO settings, read in that school; null when it has no profile. */
-  async schoolSso(tenantId: string): Promise<SchoolSso | null> {
-    const profile = await this.db.withTenant(tenantId, (tx) =>
-      this.db.definers.currentTenantProfile(tx),
-    );
-    if (profile === null) return null;
-    return {
-      ssoDomain: profile.ssoDomain,
-      google: profile.ssoGoogle,
-      microsoft: profile.ssoMicrosoft,
-    };
   }
 
   /** Runs `fn` in one transaction scoped to the account (and the school, when given). */

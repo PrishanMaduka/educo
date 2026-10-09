@@ -7,13 +7,6 @@ void main() {
   final instance = QuadApi().getAuthApi();
 
   group(AuthApi, () {
-    // The sign-in methods for a work email (the same answer whether or not it has an account)
-    //
-    //Future<IdentifyResult> apiV1AuthIdentifyPost(IdentifyInput identifyInput) async
-    test('test apiV1AuthIdentifyPost', () async {
-      // TODO
-    });
-
     // The schools you can open (Choose a school, Switch school)
     //
     //Future<SignInMembershipList> apiV1AuthMembershipsGet() async
@@ -74,20 +67,6 @@ void main() {
     //
     //Future apiV1AuthSignOutPost() async
     test('test apiV1AuthSignOutPost', () async {
-      // TODO
-    });
-
-    // The provider returns here; the API checks the sign-in and always redirects back to /sign-in
-    //
-    //Future apiV1AuthSsoProviderCallbackGet(String provider, { String code, String state, String error, String errorDescription }) async
-    test('test apiV1AuthSsoProviderCallbackGet', () async {
-      // TODO
-    });
-
-    // Start single sign-on with Google or Microsoft: the provider URL to open, with PKCE (sets a short-lived state cookie)
-    //
-    //Future<SsoStartResult> apiV1AuthSsoProviderStartPost(String provider, SsoStartInput ssoStartInput) async
-    test('test apiV1AuthSsoProviderStartPost', () async {
       // TODO
     });
 

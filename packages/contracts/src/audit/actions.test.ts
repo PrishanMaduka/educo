@@ -27,7 +27,6 @@ describe('audit action keys', () => {
       'support_session.started',
       'support_session.ended',
       'audit.exported',
-      'auth.sso_linked',
     ]);
   });
 

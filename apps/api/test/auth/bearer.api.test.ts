@@ -328,7 +328,7 @@ describe('relative tokens reach only refresh and sign-out in M1 (D32)', () => {
     const { pair } = await relative();
     const checked: string[] = [];
     for (const route of API_ROUTES) {
-      const url = route.path.replace('{provider}', 'google').replace(/\{\w+\}/g, randomUUID());
+      const url = route.path.replace(/\{\w+\}/g, randomUUID());
       const method = route.method.toUpperCase() as 'GET' | 'POST' | 'PATCH' | 'DELETE';
       if (`${method} ${url}` === 'POST /auth/sign-out') continue;
       const anonymous = await new Browser(app).request(method, url);
