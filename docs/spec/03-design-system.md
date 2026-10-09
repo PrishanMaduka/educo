@@ -181,8 +181,12 @@ A school picks one colour in the console (Branding). Inside its staff portal, an
 - **Top bar:** sticky and translucent cream (`canvas` at 86% with a blur) with a `line` bottom border. It holds the collapse button, search (a pill on `surface-2` with a Ctrl K hint), the **Ask Quad** pill (`navy-card`, cream text, a lime spark and a `/` hint), the academic year picker (staff), the theme toggle, notifications (a pink dot for new) and the profile menu.
 - **Content:** max width 1480 px, 24 px padding (16 px on phones), 20 px gaps.
 
-### Story card and the greeting section (time of day)
+### Story card
+
 - Every page opens with a **story card**: navy (`navy-card`), `r-lg` corners, cream text. An eyebrow, a Bricolage headline with one lime-highlighted word, one or two sentences with the key numbers in bold, and two or three actions. The primary action on navy uses `rail-active`, and secondary actions are outlined in `navy-line`.
+
+### The greeting section (time of day)
+
 - **Greeting and scene follow the time of day**, in the school's time zone on the web and the phone's time in the parent app:
 
 | Period | Hours | Words | Scene |
@@ -228,7 +232,7 @@ A small flat illustration (faces or doodles) or icon, a Bricolage title, one war
 - Toasts are `inverse` pills at the bottom centre with a lime check circle, and say what happened ("Plan saved for Leo"). At most two are shown at a time, for 2.8 s each.
 - A petal burst (lime, pink, indigo and green petals: `gold`, `c1`, `c2`, `c5`) marks good moments: a payment completed, cover complete, a plan created, a school going live, birthday wishes sent, or a thank-you sent. There is no burst with reduced motion.
 
-### Charts and progress
+### Charts
 - Bars and lines use `c1`–`c5`. The grid is faint (`line`), the latest point is labelled, the target line is dashed `ink-2`, and tooltips show exact values. Every tick label is a value the chart actually reaches.
 - Progress bars are 10 px pills on `surface-2` with a `line` inset, filled `c5` (or the status colour when they show a state).
 - Sparklines in early-warning cards: 64×24, with the end point marked; `bad` for falling and `good` for rising.
