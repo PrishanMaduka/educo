@@ -37,9 +37,20 @@
       ]
     },
     "e2e": {
-      "dependsOn": ["build"],
+      "dependsOn": ["build", "@quad/api#build"],
       "cache": false,
-      "passThroughEnv": ["CI", "PLAYWRIGHT_BROWSERS_PATH", "QUAD_SCREENSHOTS"],
+      "passThroughEnv": [
+        "CI",
+        "PLAYWRIGHT_BROWSERS_PATH",
+        "QUAD_SCREENSHOTS",
+        "DATABASE_URL",
+        "DATABASE_PLATFORM_URL",
+        "DATABASE_OWNER_URL",
+        "DATABASE_ADMIN_URL",
+        "REDIS_URL",
+        "SMTP_URL",
+        "MAILPIT_URL"
+      ],
       "outputs": ["playwright-report/**"]
     },
     "tokens:build": {

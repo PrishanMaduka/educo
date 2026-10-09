@@ -62,4 +62,30 @@ describe('@quad/config', () => {
       reuseExistingServer: false,
     });
   });
+
+  it('starts no API stack unless the specs need it', () => {
+    expect(Array.isArray(defineWebAppConfig({ port: 3000 }).webServer)).toBe(false);
+  });
+
+  it('starts the e2e stack on :4000 before next start when the specs need the API', () => {
+    const config = defineWebAppConfig({ port: 3000, stack: true });
+    expect(Array.isArray(config.webServer)).toBe(true);
+    const [stack, next] = config.webServer as unknown[];
+    expect(stack).toMatchObject({
+      url: 'http://localhost:4000/api/v1/health/ready',
+      reuseExistingServer: false,
+      // SIGTERM and a wait, never an immediate kill: the stack drops its database on the way out.
+      gracefulShutdown: { signal: 'SIGTERM' },
+    });
+    expect((stack as { command: string }).command).toMatch(/e2e-stack\.mjs" --port 4000$/);
+    expect(next).toMatchObject({ command: 'pnpm exec next start --port 3000', port: 3000 });
+    expect(config.use?.stackPort).toBe(4000);
+  });
+
+  it('takes the stack port, so a second app can run its stack on :4001', () => {
+    const config = defineWebAppConfig({ port: 3001, stack: { port: 4001 } });
+    const [stack] = config.webServer as unknown[];
+    expect(stack).toMatchObject({ url: 'http://localhost:4001/api/v1/health/ready' });
+    expect(config.use?.stackPort).toBe(4001);
+  });
 });

@@ -9,6 +9,9 @@
         "$TURBO_ROOT$/infra/.terraform-version",
         "$TURBO_ROOT$/infra/**/versions.tf"
       ]
+    },
+    "test:api": {
+      "dependsOn": ["^build", "@quad/api#build"]
     }
   }
 }

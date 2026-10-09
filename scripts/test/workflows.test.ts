@@ -179,6 +179,21 @@ describe('ci.yml', () => {
     expect(Object.keys(job.services ?? {}).sort()).toEqual(['mailpit', 'postgres', 'redis']);
   });
 
+  it('gives e2e-smoke the same Postgres, Redis and Mailpit as api-integration, for the e2e stack', () => {
+    type WithServices = Job & { services?: Record<string, unknown> };
+    const e2e = ci.jobs['e2e-smoke'] as WithServices;
+    const integration = ci.jobs['api-integration'] as WithServices;
+    expect(Object.keys(e2e.services ?? {}).sort()).toEqual(['mailpit', 'postgres', 'redis']);
+    expect(e2e.services).toEqual(integration.services);
+    // The stack connects as the admin role to create and drop its own database.
+    expect(e2e.env).toEqual(integration.env);
+    expect(e2e.env?.DATABASE_ADMIN_URL).toMatch(/^postgres:\/\/postgres:/);
+    const script = runs(e2e);
+    expect(script).toContain('docker/postgres/init/01-roles.sql');
+    expect(script).toContain('node scripts/check-services.mjs');
+    expect(script.indexOf('check-services')).toBeLessThan(script.indexOf('pnpm e2e'));
+  });
+
   it('fails Flutter checks instead of skipping them wherever Flutter runs', () => {
     for (const id of ['typecheck', 'lint', 'unit', 'codegen', 'parent-build']) {
       expect(ci.jobs[id]?.env?.QUAD_REQUIRE_FLUTTER, id).toBe('1');

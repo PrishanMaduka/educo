@@ -151,13 +151,61 @@ jobs:
       - name: API integration tests
         run: pnpm test:api
 
+  # Specs that need the API run against the e2e stack (scripts/e2e-stack.mjs, D32): a fresh
+  # database per run on these services, the API and worker, and Mailpit.
   e2e-smoke:
     name: e2e-smoke
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:16.4
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: quad
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d quad"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+      redis:
+        image: redis:7.4-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 12
+      # The stack's worker sends the journeys' emails here; the specs read them from its API.
+      mailpit:
+        image: axllent/mailpit:v1.20
+        ports:
+          - 1025:1025
+          - 8025:8025
+        options: >-
+          --health-cmd "/mailpit readyz"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 12
+    env:
+      DATABASE_URL: postgres://quad_app:quad_app@localhost:5432/quad
+      DATABASE_PLATFORM_URL: postgres://quad_platform:quad_platform@localhost:5432/quad
+      DATABASE_OWNER_URL: postgres://quad_owner:quad_owner@localhost:5432/quad
+      DATABASE_ADMIN_URL: postgres://postgres:postgres@localhost:5432/quad
+      REDIS_URL: redis://localhost:6379
     steps:
       - uses: actions/checkout@v4
+      - name: Create the database roles
+        env:
+          PGPASSWORD: postgres
+        run: psql -h localhost -U postgres -d quad -v ON_ERROR_STOP=1 -f docker/postgres/init/01-roles.sql
       - uses: ./.github/actions/setup
+      - name: Postgres, Redis and Mailpit are reachable
+        run: node scripts/check-services.mjs
       - name: Install the Playwright browser
         run: pnpm --filter @quad/staff exec playwright install --with-deps chromium
       - name: End-to-end smoke tests

@@ -11,7 +11,10 @@
     "./vitest": "./vitest/preset.ts",
     "./prettier": "./prettier.cjs",
     "./playwright": "./playwright/preset.ts",
-    "./playwright/checks": "./playwright/checks.ts"
+    "./playwright/checks": "./playwright/checks.ts",
+    "./playwright/stack": "./playwright/stack.ts",
+    "./playwright/mailpit": "./playwright/mailpit.ts",
+    "./playwright/signed-token": "./playwright/signed-token.ts"
   },
   "scripts": {
     "test": "vitest run",

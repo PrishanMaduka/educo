@@ -8,4 +8,10 @@ export default [
     files: ['test/**/*.api.test.ts'],
     rules: { 'quad/no-raw-db-client': 'off' },
   },
+  {
+    // The e2e stack creates and drops its own run's database as the admin role (Task 18, D32), on
+    // the maintenance database; it never reads tenant rows.
+    files: ['e2e-stack.mjs'],
+    rules: { 'quad/no-raw-db-client': 'off' },
+  },
 ];
