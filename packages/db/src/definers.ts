@@ -99,6 +99,8 @@ export interface TenantProfile {
   readonly passwordMinLength: number;
   readonly sessionHours: number;
   readonly ipAllowlist: readonly string[];
+  /** ISO 3166-1 alpha-2: the school's defaults, its phone country among them, come from it (D35). */
+  readonly country: string;
 }
 
 /** A single-use signed-link nonce (D16). */
@@ -257,6 +259,7 @@ type ProfileRow = {
   password_min_length: number;
   session_hours: number;
   ip_allowlist: string[];
+  country: string;
 };
 
 class UnexpectedDefinerRowError extends Error {
@@ -428,6 +431,7 @@ export function createDefinerCalls(pool: pg.Pool): DefinerCalls {
         passwordMinLength: row.password_min_length,
         sessionHours: row.session_hours,
         ipAllowlist: row.ip_allowlist,
+        country: row.country,
       };
     },
 

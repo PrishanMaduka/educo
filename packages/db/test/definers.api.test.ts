@@ -659,9 +659,20 @@ describe('current_tenant_profile', () => {
       passwordMinLength: 12,
       sessionHours: 8,
       ipAllowlist: [],
+      country: 'LK',
     });
     const nameInB = await withTenant(schoolB.id, (tx) => definers.currentTenantProfile(tx));
     expect(nameInB).toMatchObject({ name: 'Kandy Test School', modules: ['crm'] });
+  });
+
+  it('gives each school its own country, for its phone numbers (D35, Task 14)', async () => {
+    const elsewhere = await insertTenant(withPlatform, { country: 'AE', timeZone: 'Asia/Dubai' });
+    const [inA, inElsewhere] = [
+      await withTenant(schoolA.id, (tx) => definers.currentTenantProfile(tx)),
+      await withTenant(elsewhere.id, (tx) => definers.currentTenantProfile(tx)),
+    ];
+    expect(inA?.country).toBe('LK');
+    expect(inElsewhere).toMatchObject({ country: 'AE', timeZone: 'Asia/Dubai' });
   });
 
   it('returns no row without app.tenant_id', async () => {
@@ -686,6 +697,7 @@ describe('current_tenant_profile', () => {
       'password_min_length',
       'session_hours',
       'ip_allowlist',
+      'country',
     ]);
   });
 });

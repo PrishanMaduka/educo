@@ -127,6 +127,13 @@
       "when": 1791544113903,
       "tag": "0017_member_lookups_and_role_lock",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1791546713092,
+      "tag": "0018_current_tenant_profile_country",
+      "breakpoints": true
     }
   ]
 }
