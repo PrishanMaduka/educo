@@ -23,7 +23,7 @@ describe('GreetingScene', () => {
 
   it('draws stars only at night', () => {
     const night = render(<GreetingScene period="night" />);
-    expect(night.container.querySelectorAll('.gs-star')).toHaveLength(12);
+    expect(night.container.querySelectorAll('.gs-star')).toHaveLength(7);
     night.unmount();
     const morning = render(<GreetingScene period="morning" />);
     expect(morning.container.querySelectorAll('.gs-star')).toHaveLength(0);
@@ -32,34 +32,39 @@ describe('GreetingScene', () => {
   it('draws the period elements', () => {
     const q = (p: GreetingPeriod, sel: string) =>
       render(<GreetingScene period={p} />).container.querySelectorAll(sel).length;
-    expect(q('morning', 'path[d^="M842 92"]')).toBe(1); // birds
-    expect(q('afternoon', 'ellipse')).toBe(3); // clouds
-    expect(q('afternoon', 'circle[stroke-dasharray]')).toBe(1); // dotted halo
-    expect(q('evening', 'clipPath')).toBe(1);
-    expect(q('night', 'mask')).toBe(1);
+    expect(q('morning', 'path[d^="M330 120"]')).toBe(1); // birds
+    expect(q('morning', 'path[d^="M0 -20L14 0"]')).toBe(1); // kite
+    expect(q('afternoon', 'rect[rx="11"]')).toBe(2); // clouds
+    expect(q('afternoon', 'circle[stroke-dasharray]')).toBe(1); // dashed ring
+    expect(q('evening', 'path[d^="M560 70"]')).toBe(1); // heart
+    expect(q('night', 'path.gs-body[d^="M34.71"]')).toBe(1); // crescent
+  });
+
+  it('is flat: solid fills, no gradients, masks, clips or opacity layers', () => {
+    for (const period of periods) {
+      const { container, unmount } = render(<GreetingScene period={period} />);
+      expect(
+        container.querySelector('linearGradient, radialGradient, mask, clipPath, defs'),
+      ).toBeNull();
+      expect(container.querySelector('[opacity], [fill-opacity], [stroke-opacity]')).toBeNull();
+      expect(container.querySelectorAll('.gs-body')).toHaveLength(1);
+      unmount();
+    }
   });
 
   it('colours from CSS variables, never hex', () => {
     for (const period of periods) {
       const { container, unmount } = render(<GreetingScene period={period} />);
-      expect(container.innerHTML).toMatch(/var\(--quad-c[1-5]\)/);
-      expect(container.innerHTML).toContain('var(--quad-surface)');
-      expect(container.innerHTML).toContain('color-mix(');
+      expect(container.innerHTML).toMatch(/var\(--quad-(c[1-5]|rail)\)/);
       expect(container.innerHTML).not.toMatch(/#[0-9a-fA-F]{3,6}\b/);
+      expect(container.innerHTML).not.toContain('color-mix(');
       unmount();
     }
   });
 
-  it('gives every instance its own gradient, mask and clip ids', () => {
-    const { container } = render(
-      <>
-        <GreetingScene period="night" />
-        <GreetingScene period="night" />
-      </>,
-    );
-    const ids = [...container.querySelectorAll('[id]')].map((el) => el.id);
-    expect(ids.length).toBeGreaterThan(0);
-    expect(new Set(ids).size).toBe(ids.length);
-    for (const id of ids) expect(container.innerHTML).toContain(`#${id})`);
+  it('leaves the left half of the view box empty, so the card colour shows through', () => {
+    const { container } = render(<GreetingScene period="morning" />);
+    expect(container.querySelector('svg > g')).toHaveAttribute('transform', 'translate(600 20)');
+    expect(container.querySelector('svg > rect')).toBeNull();
   });
 });
