@@ -61,6 +61,11 @@ describe('SupportSessionCreateInput (POST /platform/tenants/:id/support-session)
     ['U+2060 word joiner', '\u2060'],
     ['U+FEFF byte order mark', '\ufeff'],
     ['U+00AD soft hyphen', '\u00ad'],
+    // Unicode tag characters spell subdivision flags (England: U+1F3F4 then gbeng and the cancel tag).
+    [
+      'the tag characters of a subdivision flag',
+      '\u{1f3f4}\u{e0067}\u{e0062}\u{e0065}\u{e006e}\u{e0067}\u{e007f}',
+    ],
   ])('refuses the invisible format character %s inside the reason', (_name, format) => {
     const result = SupportSessionCreateInput.safeParse({ reason: `A good${format}reason here` });
     expect(pathOf(result)).toEqual(['reason']);
