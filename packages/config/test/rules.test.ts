@@ -500,3 +500,57 @@ tester.run('quad/no-cli-import', cliRule, {
     },
   ],
 });
+
+const openRule = quad.rules['no-with-open-outside-otp'];
+const open = [{ messageId: 'open' as const }];
+
+tester.run('quad/no-with-open-outside-otp', openRule, {
+  valid: [
+    {
+      code: 'await this.db.withOpen((tx) => tx.select());',
+      filename: repo('apps/api/src/modules/auth/otp/otp.repository.ts'),
+    },
+    {
+      code: "import type { OpenTx } from '@quad/db';",
+      filename: repo('apps/api/src/modules/auth/otp/otp.repository.ts'),
+    },
+    {
+      code: "import { createOpenRunner } from './open';",
+      filename: repo('packages/db/src/db.ts'),
+    },
+    { code: 'await this.db.withTenant(id, (tx) => tx);', filename: repo('apps/api/src/x.ts') },
+    { code: 'const withOpenings = 1;', filename: repo('apps/api/src/x.ts') },
+  ],
+  invalid: [
+    {
+      code: 'await this.db.withOpen((tx) => tx.select());',
+      filename: repo('apps/api/src/modules/auth/tokens/x.ts'),
+      errors: open,
+    },
+    {
+      code: 'await db?.withOpen(fn);',
+      filename: repo('apps/api/src/common/x.ts'),
+      errors: open,
+    },
+    {
+      code: "const run = db['withOpen'];",
+      filename: repo('apps/api/src/common/x.ts'),
+      errors: open,
+    },
+    {
+      code: "import type { OpenTx } from '@quad/db';",
+      filename: repo('apps/api/src/modules/me/x.ts'),
+      errors: open,
+    },
+    {
+      code: "import { type OpenRunner, withTenant } from '@quad/db';",
+      filename: repo('apps/staff/src/x.ts'),
+      errors: open,
+    },
+    {
+      code: 'const { withOpen } = db;',
+      filename: repo('apps/api/src/x.ts'),
+      errors: open,
+    },
+  ],
+});

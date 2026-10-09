@@ -61,6 +61,7 @@ export default tseslint.config(
     rules: {
       'quad/no-cli-import': 'error',
       'quad/no-raw-db-client': 'error',
+      'quad/no-with-open-outside-otp': 'error',
       'quad/no-with-platform-outside-platform': 'error',
     },
   },
