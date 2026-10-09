@@ -4,6 +4,7 @@ import {
   PermissionModule,
   Role,
   RoleCreateInput,
+  RoleList,
   RolePermissionsInput,
   RoleUpdateInput,
 } from '../index';
@@ -43,6 +44,18 @@ describe('Role (GET /roles)', () => {
     [{ matrix: { ...fullMatrix, fees: undefined } }, ['matrix', 'fees']],
   ])('refuses %j at its path', (change, path) => {
     expect(pathOf(Role.safeParse({ ...role, ...change }))).toEqual(path);
+  });
+});
+
+describe('RoleList (GET /roles)', () => {
+  it("names the matrix rows outside the school's plan, so the editor shows them Not in plan", () => {
+    const list = { items: [], nextCursor: null, outsidePlan: ['transport'] };
+    expect(RoleList.safeParse(list).success).toBe(true);
+    expect(pathOf(RoleList.safeParse({ ...list, outsidePlan: ['parent'] }))).toEqual([
+      'outsidePlan',
+      0,
+    ]);
+    expect(pathOf(RoleList.safeParse({ items: [], nextCursor: null }))).toEqual(['outsidePlan']);
   });
 });
 

@@ -16,7 +16,7 @@ export function Checkbox({ label, id, className, ...rest }: CheckboxProps) {
   const generated = useId();
   const controlId = id ?? generated;
   return (
-    <span className="inline-flex items-center gap-2">
+    <span className="relative inline-flex items-center gap-2">
       <RadixCheckbox.Root
         id={controlId}
         className={cn(

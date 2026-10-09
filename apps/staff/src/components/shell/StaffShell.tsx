@@ -1,5 +1,6 @@
 'use client';
 
+import { useToast } from '@quad/ui';
 import { AppShell, type ShellNavGroup } from '@quad/ui/shell';
 import {
   ArrowLeftRight,
@@ -40,9 +41,11 @@ import { switchSchoolMenu } from './SwitchSchoolMenu';
 import { useShellActions } from './use-shell-actions';
 import { ViewAsPicker } from './ViewAsPicker';
 
+import type { MessageKey } from '@/i18n';
 import type { Me, MeBrand, MePermissions, StaffPageId } from '@quad/contracts';
 
 import { useShellLabels } from '@/i18n/client';
+import { portalNoticeFrom, type PortalNotice } from '@/lib/session';
 
 /** Each page's icon (spec 03 side bar icons; lucide stands in for the drawings until D40 lands). */
 const ICONS: Record<StaffPageId, LucideIcon> = {
@@ -86,6 +89,34 @@ export function schoolBrandStyle(brand: MeBrand): CSSProperties {
   };
 }
 
+/** The sentence for each portal notice: fixed copy, never text from the address. */
+const NOTICE_COPY: Record<PortalNotice, MessageKey> = {
+  preview_failed: 'shell.notice.previewFailed',
+};
+
+/**
+ * The fixed notice a reload asked for (`?notice=`, `portalNoticeFrom`), shown once as a toast;
+ * the flag then leaves the address, so a refresh does not repeat it.
+ */
+function usePortalNotice() {
+  const { t } = useTranslation();
+  const toast = useToast();
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    const notice = portalNoticeFrom(url.searchParams.get('notice'));
+    if (notice === null) return;
+    url.searchParams.delete('notice');
+    window.history.replaceState(
+      window.history.state,
+      '',
+      `${url.pathname}${url.search}${url.hash}`,
+    );
+    toast.show(t(NOTICE_COPY[notice]));
+    // Once per page load.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+}
+
 /** Puts the brand on <html> too, so menus and toasts in portals (outside the shell) share it. */
 function useBrandOnRoot(brand: MeBrand) {
   useEffect(() => {
@@ -119,6 +150,7 @@ export function StaffShell({ me, permissions, children }: StaffShellProps) {
   const router = useRouter();
   const actions = useShellActions();
   useBrandOnRoot(me.school.brand);
+  usePortalNotice();
 
   const groups: ShellNavGroup[] = visibleNav(permissions.pages).map(({ group, pages }) => ({
     id: group,

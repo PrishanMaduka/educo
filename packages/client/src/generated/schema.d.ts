@@ -3831,6 +3831,7 @@ export interface components {
                 lastSignInAt: string | null;
                 /** Format: date-time */
                 inviteSentAt: string | null;
+                you: boolean;
             }[];
             nextCursor: string | null;
             summary: {
@@ -3856,6 +3857,7 @@ export interface components {
                 lastSignInAt: string | null;
                 /** Format: date-time */
                 inviteSentAt: string | null;
+                you: boolean;
             }[];
         };
         StaffInviteInput: {
@@ -3880,6 +3882,7 @@ export interface components {
             lastSignInAt: string | null;
             /** Format: date-time */
             inviteSentAt: string | null;
+            you: boolean;
         };
         StaffUpdateInput: {
             /** Format: uuid */
@@ -3980,6 +3983,7 @@ export interface components {
                 sensitive: ("safeguarding" | "medical" | "finance_reports" | "export_data")[];
             }[];
             nextCursor: string | null;
+            outsidePlan: ("admissions" | "crm" | "sis" | "attendance" | "lms" | "fees" | "finance" | "transport" | "settings")[];
         };
         Role: {
             /** Format: uuid */

@@ -4,7 +4,7 @@ import { StaffPageId } from '../access/staff-pages';
 import { HexColor } from '../common/color';
 import { IdSchema } from '../common/ids';
 import { paginated } from '../common/pagination';
-import { RoleScope, SensitiveKey } from '../enums';
+import { PermissionModule, RoleScope, SensitiveKey } from '../enums';
 
 /**
  * Users & roles → Roles & permissions (spec 05 Roles; spec 08): the school's system and custom
@@ -65,8 +65,12 @@ export const Role = z.object({
 });
 export type Role = z.infer<typeof Role>;
 
-/** `GET /roles`: every role of the school, system roles first, then by name (one page). */
-export const RoleList = paginated(Role);
+/**
+ * `GET /roles`: every role of the school, system roles first, then by name (one page), and the
+ * matrix rows whose plan module the school lacks, in matrix order: the editor shows them
+ * "Not in plan" and `PUT /roles/:id/permissions` refuses them (spec 05, Plan and module guard).
+ */
+export const RoleList = paginated(Role).extend({ outsidePlan: z.array(PermissionModule) });
 export type RoleList = z.infer<typeof RoleList>;
 
 const RoleName = z

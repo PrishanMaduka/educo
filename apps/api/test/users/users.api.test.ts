@@ -114,8 +114,12 @@ describe('GET /users', () => {
       twoStepOn: false,
       lastSignInAt: '2026-10-08T08:05:00.000Z',
       inviteSentAt: null,
+      you: false,
     });
-    expect(list.items.find((item) => item.id === admin.userId)?.twoStepOn).toBe(true);
+    expect(list.items.find((item) => item.id === admin.userId)).toMatchObject({
+      twoStepOn: true,
+      you: true,
+    });
     expect(list.items.find((item) => item.id === invitedId)).toMatchObject({
       status: 'invited',
       role: null,

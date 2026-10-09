@@ -385,5 +385,19 @@ test.describe('Preview a role', () => {
     await expect(page).toHaveURL('/app');
     await expect(title(page, GREETING)).toBeVisible();
     await expect(page.getByText('Previewing as')).toHaveCount(0);
+
+    // The Preview a role card on Users & roles (Task 21) does the same from the page, in this
+    // same session (no second password call).
+    await page.goto('/app/settings/users');
+    const card = page.getByRole('region', { name: 'Preview a role' });
+    await expect(card.getByText(/· opens on My teaching$/).first()).toBeVisible();
+    await card.getByRole('button', { name: 'Preview as Finance officer' }).click();
+    await expect(page).toHaveURL('/app');
+    const financeBanner = page
+      .getByRole('status')
+      .filter({ hasText: 'Previewing as Finance officer' });
+    await expect(financeBanner).toBeVisible();
+    await financeBanner.getByRole('button', { name: 'Back to my view' }).click();
+    await expect(page.getByText('Previewing as')).toHaveCount(0);
   });
 });

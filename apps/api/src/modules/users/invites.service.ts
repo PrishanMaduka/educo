@@ -205,7 +205,7 @@ export class InvitesService {
       }),
     );
     await this.send(sending, at);
-    return { items: sending.invites.map(({ member }) => toStaffMember(member, false)) };
+    return { items: sending.invites.map(({ member }) => toStaffMember(member, false, null)) };
   }
 
   /** `POST /users/:id/resend-invite`: a new link for a pending invitation; older ones stop. */

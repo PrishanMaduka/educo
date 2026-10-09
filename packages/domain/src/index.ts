@@ -74,7 +74,7 @@ export { isPageVisible, pageAccess } from './access/page-access';
 export { roleHome } from './access/role-home';
 export { canGrant, sensitiveKeysOf } from './access/grant-checks';
 export type { PlannedMatrix } from './access/matrix-plan';
-export { planMatrix } from './access/matrix-plan';
+export { modulesOutsidePlan, planMatrix } from './access/matrix-plan';
 export { maskEmail, nameFromEmail } from './people/email-name';
 export type {
   StaffAction,

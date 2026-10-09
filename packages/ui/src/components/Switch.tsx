@@ -15,7 +15,7 @@ export function Switch({ label, id, className, ...rest }: SwitchProps) {
   const generated = useId();
   const controlId = id ?? generated;
   return (
-    <div className="inline-flex items-center gap-2.5">
+    <div className="relative inline-flex items-center gap-2.5">
       <RadixSwitch.Root
         id={controlId}
         className={cn(

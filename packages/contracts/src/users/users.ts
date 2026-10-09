@@ -36,6 +36,8 @@ export const StaffMember = z.object({
   lastSignInAt: IsoDateTimeSchema.nullable(),
   /** When the latest invitation was sent ("Invite sent 2 days ago"); null once never invited. */
   inviteSentAt: IsoDateTimeSchema.nullable(),
+  /** The signed-in person's own row: nobody changes their own role or status (spec 08). */
+  you: z.boolean(),
 });
 export type StaffMember = z.infer<typeof StaffMember>;
 

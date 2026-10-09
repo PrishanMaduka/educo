@@ -1,6 +1,7 @@
 'use client';
 
 import {
+  ActionMenu,
   Avatar,
   avatarPalette,
   avatarTone,
@@ -16,12 +17,14 @@ import {
   EmptyState,
   formatDate,
   formatMoney,
+  formatRelative,
   GreetingScene,
   IconButton,
   initialsOf,
   Input,
   Kpi,
   OtpBoxes,
+  PermissionMatrix,
   PetalBurstProvider,
   Pill,
   Segmented,
@@ -79,6 +82,61 @@ function Row({ children }: { children: ReactNode }) {
 
 function Stack({ children }: { children: ReactNode }) {
   return <div className="flex flex-col gap-3">{children}</div>;
+}
+
+function ActionMenuSample() {
+  const { t } = useTranslation(DESIGN_NS);
+  const toast = useToast();
+  const name = SAMPLE_STUDENTS[0].name;
+  return (
+    <ActionMenu
+      label={t('sample.actionMenu', { name })}
+      items={[
+        {
+          id: 'reset',
+          label: t('sample.resetPassword'),
+          onSelect: () => {
+            toast.show(t('sample.resetPassword'));
+          },
+        },
+        {
+          id: 'deactivate',
+          label: t('sample.deactivate'),
+          tone: 'danger',
+          onSelect: () => {
+            toast.show(t('sample.deactivate'));
+          },
+        },
+      ]}
+    />
+  );
+}
+
+function PermissionMatrixSample() {
+  const { t } = useTranslation(DESIGN_NS);
+  const [value, setValue] = useState<Record<string, Record<string, boolean>>>({
+    fees: { view: true, create: false, edit: false },
+    sis: { view: true, create: true, edit: false },
+  });
+  return (
+    <PermissionMatrix
+      caption={t('sample.matrixCaption')}
+      columns={[
+        { id: 'view', label: t('sample.matrixView') },
+        { id: 'create', label: t('sample.matrixCreate') },
+        { id: 'edit', label: t('sample.matrixEdit') },
+      ]}
+      rows={[
+        { id: 'fees', label: t('sample.matrixFees') },
+        { id: 'sis', label: t('sample.matrixRecords') },
+        { id: 'transport', label: t('sample.matrixTransport'), notInPlan: true },
+      ]}
+      value={value}
+      onToggle={(module, action, checked) => {
+        setValue((current) => ({ ...current, [module]: { ...current[module], [action]: checked } }));
+      }}
+    />
+  );
 }
 
 function AvatarSample() {
@@ -599,6 +657,22 @@ function FormatDateSample() {
   );
 }
 
+function FormatRelativeSample() {
+  const now = new Date(SAMPLE_DATE);
+  const hoursAgo = (hours: number) => new Date(now.getTime() - hours * 3_600_000);
+  return (
+    <Stack>
+      {[0.5, 5, 30, 24 * 9].map((hours) => (
+        <Result
+          key={hours}
+          input={`formatRelative(${String(hours)} hours before now, now, '${SAMPLE_TIME_ZONE}')`}
+          output={formatRelative(hoursAgo(hours), now, SAMPLE_TIME_ZONE)}
+        />
+      ))}
+    </Stack>
+  );
+}
+
 function FormatMoneySample() {
   return (
     <Stack>
@@ -621,6 +695,7 @@ export interface StyleGuideEntry {
 
 /** One entry per value export of @quad/ui, in the order of packages/ui/src/index.ts. */
 export const STYLE_GUIDE: readonly StyleGuideEntry[] = [
+  { name: 'ActionMenu', Sample: ActionMenuSample },
   { name: 'Avatar', Sample: AvatarSample },
   { name: 'Button', Sample: ButtonSample },
   { name: 'buttonVariants', Sample: ButtonVariantsSample },
@@ -639,6 +714,7 @@ export const STYLE_GUIDE: readonly StyleGuideEntry[] = [
   { name: 'PetalBurstProvider', Sample: PetalBurstSample },
   { name: 'usePetalBurst', Sample: PetalBurstSample },
   { name: 'OtpBoxes', Sample: OtpBoxesSample },
+  { name: 'PermissionMatrix', Sample: PermissionMatrixSample },
   { name: 'Pill', Sample: PillSample },
   { name: 'Segmented', Sample: SegmentedSample },
   { name: 'Select', Sample: SelectSample },
@@ -656,4 +732,5 @@ export const STYLE_GUIDE: readonly StyleGuideEntry[] = [
   { name: 'cn', Sample: CnSample },
   { name: 'formatDate', Sample: FormatDateSample },
   { name: 'formatMoney', Sample: FormatMoneySample },
+  { name: 'formatRelative', Sample: FormatRelativeSample },
 ];

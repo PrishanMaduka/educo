@@ -37,3 +37,14 @@ export function planMatrix(
   }
   return { granted, outsidePlan };
 }
+
+/**
+ * The matrix rows whose plan module the school lacks, in matrix order (spec 05, Permission
+ * matrix: such a row is shown "Not in plan" and grants nothing). Settings is in every plan.
+ */
+export function modulesOutsidePlan(planModules: readonly PlanModule[]): PermissionModule[] {
+  return PermissionModule.options.filter((module) => {
+    const plan = PERMISSION_MODULE_PLAN[module];
+    return plan !== null && !planModules.includes(plan);
+  });
+}

@@ -106,7 +106,7 @@ export class UsersService {
 
   /** `GET /users`: a page of staff and the school's story summary. */
   list(auth: RequestAuth, query: StaffListQuery): Promise<StaffList> {
-    const { tenantId } = schoolOf(auth);
+    const { tenantId, userId } = schoolOf(auth);
     const after = decodeCursor(StaffKeyset, query.cursor);
     return this.db.withTenant(tenantId, async (tx) => {
       const page = pageOf(await this.repository.list(tx, query, after), query.limit, (last) => ({
@@ -117,7 +117,7 @@ export class UsersService {
       const active = counted.filter((member) => member.status === 'active').map((m) => m.id);
       const twoStep = await this.twoStepOf(tx, [...page.items.map((row) => row.id), ...active]);
       return {
-        items: page.items.map((row) => toStaffMember(row, twoStep.get(row.id) === true)),
+        items: page.items.map((row) => toStaffMember(row, twoStep.get(row.id) === true, userId)),
         nextCursor: page.nextCursor,
         summary: {
           staff: counted.length,
@@ -203,7 +203,7 @@ export class UsersService {
         if (updated === null) throw new NotFoundError();
         const twoStep = await this.twoStepOf(tx, [userId]);
         return {
-          member: toStaffMember(updated, twoStep.get(userId) === true),
+          member: toStaffMember(updated, twoStep.get(userId) === true, actor.userId),
           accountId: target.accountId,
           roleChanges,
           statusChanges,

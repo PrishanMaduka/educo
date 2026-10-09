@@ -93,6 +93,13 @@ describe('GET /roles', () => {
     expect(bursar?.matrix.fees).toEqual({ ...WORK, delete: true, approve: true });
     expect(bursar?.matrix.sis).toEqual(NONE);
     expect(list.items.find((role) => role.key === 'admin')?.pageCount).toBe(24);
+    expect(list.outsidePlan).toEqual([]);
+  });
+
+  it("names the matrix rows outside the school's plan (Not in plan)", async () => {
+    const { admin } = await arrange(['admissions', 'crm', 'sis', 'lms', 'fees', 'parent']);
+    const list = RoleList.parse((await as(admin)('GET', '/roles')).json());
+    expect(list.outsidePlan).toEqual(['finance', 'transport']);
   });
 
   it('lets a principal (settings.view, any-of) read the roles, but not a teacher (403)', async () => {

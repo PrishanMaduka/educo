@@ -57,5 +57,15 @@
   "sample.toast": "Changes saved",
   "sample.result": "Result",
   "sample.otpLabel": "6-digit code",
-  "sample.otpDigit": "Digit {position} of {count}"
+  "sample.otpDigit": "Digit {position} of {count}",
+  "sample.actionMenu": "More actions for {name}",
+  "sample.resetPassword": "Reset password",
+  "sample.deactivate": "Deactivate",
+  "sample.matrixCaption": "What a teacher can do",
+  "sample.matrixFees": "Fees & invoicing",
+  "sample.matrixRecords": "Student records",
+  "sample.matrixTransport": "Transport",
+  "sample.matrixView": "View",
+  "sample.matrixCreate": "Create",
+  "sample.matrixEdit": "Edit"
 }

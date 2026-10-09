@@ -7,6 +7,7 @@ import {
   bitsOf,
   canGrant,
   effectivePermissions,
+  modulesOutsidePlan,
   normaliseRow,
   pageAccess,
   planMatrix,
@@ -128,7 +129,7 @@ export class RolesService {
       const items = rows.map((row) =>
         this.toRole(row, grants.get(row.id), counts.get(row.id) ?? 0, planModules),
       );
-      return { items, nextCursor: null };
+      return { items, nextCursor: null, outsidePlan: modulesOutsidePlan(planModules) };
     });
   }
 

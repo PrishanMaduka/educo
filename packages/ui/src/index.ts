@@ -1,3 +1,4 @@
+export { ActionMenu, type ActionMenuItem, type ActionMenuProps } from './components/ActionMenu';
 export { Avatar, type AvatarProps } from './components/Avatar';
 export { Button, buttonVariants, type ButtonProps } from './components/Button';
 export { Card, type CardProps } from './components/Card';
@@ -28,6 +29,13 @@ export {
   type PetalOrigin,
 } from './components/PetalBurst';
 export { OtpBoxes, type OtpBoxesProps } from './components/OtpBoxes';
+export {
+  PermissionMatrix,
+  type PermissionMatrixColumn,
+  type PermissionMatrixProps,
+  type PermissionMatrixRow,
+  type PermissionMatrixValue,
+} from './components/PermissionMatrix';
 export { Pill, type PillProps } from './components/Pill';
 export {
   Segmented,
@@ -52,3 +60,4 @@ export { avatarPalette, avatarTone, initialsOf, type AvatarTone } from './lib/av
 export { cn } from './lib/cn';
 export { formatDate, type DateStyle } from './format/date';
 export { formatMoney, type Money } from './format/money';
+export { formatRelative } from './format/relative';

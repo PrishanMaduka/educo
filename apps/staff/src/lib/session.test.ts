@@ -6,6 +6,7 @@ import {
   lastSchoolFrom,
   safeNext,
   signInAgainPath,
+  portalNoticeFrom,
   signInNoticeFrom,
   signInPathFor,
 } from './session';
@@ -116,6 +117,18 @@ describe('signInNoticeFrom', () => {
   it('ignores anything else, so no query text ever reaches the page', () => {
     for (const raw of [undefined, '', 'Two_Step', '<b>hi</b>', ['two_step'], 'two_step ']) {
       expect(signInNoticeFrom(raw)).toBeNull();
+    }
+  });
+});
+
+describe('portalNoticeFrom', () => {
+  it('knows the failed-preview notice the shell reloads with', () => {
+    expect(portalNoticeFrom('preview_failed')).toBe('preview_failed');
+  });
+
+  it('ignores anything else, so no query text ever reaches the page', () => {
+    for (const raw of [null, undefined, '', 'Preview_failed', '<b>hi</b>', 'two_step']) {
+      expect(portalNoticeFrom(raw)).toBeNull();
     }
   });
 });

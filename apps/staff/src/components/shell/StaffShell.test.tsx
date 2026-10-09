@@ -100,6 +100,23 @@ beforeEach(() => {
 });
 
 describe('StaffShell', () => {
+  it('shows the fixed failed-preview notice after the reload, then drops it from the address', async () => {
+    window.history.replaceState(null, '', '/app?notice=preview_failed');
+    renderShell();
+    expect(
+      await screen.findByText('We couldn’t open that preview, so you’re back in your own view.'),
+    ).toBeInTheDocument();
+    expect(window.location.search).toBe('');
+  });
+
+  it('shows nothing for a notice it does not know', () => {
+    window.history.replaceState(null, '', '/app?notice=%3Cb%3Ehi%3C%2Fb%3E');
+    renderShell();
+    expect(screen.queryByText('<b>hi</b>')).toBeNull();
+    expect(screen.queryByText(/couldn’t open that preview/)).toBeNull();
+    window.history.replaceState(null, '', '/app');
+  });
+
   it('lists only the pages the role opens, in their groups, under the school’s name', () => {
     renderShell();
     const rail = screen.getByRole('complementary', { name: 'Side bar' });

@@ -35,3 +35,21 @@ describe('Checkbox', () => {
     expect(screen.getByRole('checkbox', { name: 'Select all' })).toBePartiallyChecked();
   });
 });
+
+describe('Checkbox and Switch inside a form', () => {
+  // Radix adds a hidden, absolutely placed input beside the control inside a <form>. Its box must
+  // be positioned, or the input escapes a scrolling table and widens the page (Task 21, 390 px).
+  it('keep the hidden form input inside a positioned wrapper', () => {
+    const { container } = render(
+      <form>
+        <Checkbox aria-label="View in Fees" checked={false} onCheckedChange={() => {}} />
+        <Switch aria-label="Export data" checked={false} onCheckedChange={() => {}} />
+      </form>,
+    );
+    const hidden = container.querySelectorAll('input[aria-hidden="true"]');
+    expect(hidden).toHaveLength(2);
+    for (const input of Array.from(hidden)) {
+      expect(input.parentElement?.className).toMatch(/(^|\s)relative(\s|$)/);
+    }
+  });
+});

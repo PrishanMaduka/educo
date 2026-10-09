@@ -61,6 +61,7 @@ describe('StaffList', () => {
     twoStepOn: false,
     lastSignInAt: '2026-10-08T08:05:00.000Z',
     inviteSentAt: null,
+    you: false,
   };
 
   it('is a page of members with the story summary', () => {
@@ -75,6 +76,16 @@ describe('StaffList', () => {
       summary: { staff: 1, withoutTwoStep: 0 },
     };
     expect(pathOf(StaffList.safeParse(list))).toEqual(['items', 0, 'status']);
+  });
+
+  it('says which row is the signed-in person (Task 21: their own role and status are locked)', () => {
+    const { you: _you, ...withoutYou } = member;
+    const list = {
+      items: [withoutYou],
+      nextCursor: null,
+      summary: { staff: 1, withoutTwoStep: 0 },
+    };
+    expect(pathOf(StaffList.safeParse(list))).toEqual(['items', 0, 'you']);
   });
 });
 

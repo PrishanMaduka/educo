@@ -51,7 +51,7 @@ describe('useShellActions: Switch school', () => {
 });
 
 describe('useShellActions: View as', () => {
-  it('reloads the portal when the old preview ended but the new one failed', async () => {
+  it('reloads the portal with the fixed notice, not a toast, when the old preview ended but the new one failed', async () => {
     resetFake({
       'DELETE /api/v1/me/role-preview': { status: 204 },
       'GET /api/v1/users': { status: 500, body: { code: 'internal', message: 'x' } },
@@ -64,19 +64,20 @@ describe('useShellActions: View as', () => {
         previewing: true,
       });
     });
-    expect(
-      await screen.findByText('Something went wrong on our side. Try again in a moment.'),
-    ).toBeInTheDocument();
+    // The reload carries the reason (a fixed notice); a toast now would vanish with the page.
     await waitFor(() => {
-      expect(openPage).toHaveBeenCalledWith('/app');
+      expect(openPage).toHaveBeenCalledWith('/app?notice=preview_failed');
     });
+    expect(
+      screen.queryByText('Something went wrong on our side. Try again in a moment.'),
+    ).toBeNull();
     expect(fake.requests.map((request) => request.key)).toEqual([
       'DELETE /api/v1/me/role-preview',
       'GET /api/v1/users',
     ]);
   });
 
-  it('reloads the portal when the old preview ended but starting the new one was refused', async () => {
+  it('reloads the portal with the fixed notice when the old preview ended but the new one was refused', async () => {
     resetFake({
       'DELETE /api/v1/me/role-preview': { status: 204 },
       'POST /api/v1/me/role-preview': { status: 403, body: { code: 'forbidden', message: 'x' } },
@@ -90,7 +91,7 @@ describe('useShellActions: View as', () => {
       });
     });
     await waitFor(() => {
-      expect(openPage).toHaveBeenCalledWith('/app');
+      expect(openPage).toHaveBeenCalledWith('/app?notice=preview_failed');
     });
   });
 

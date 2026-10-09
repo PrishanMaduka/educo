@@ -1197,5 +1197,338 @@
   "inviteExistingLede": "You already have a Quad account. Sign in with it to accept.",
   "inviteExistingSubmit": "Sign in to accept",
   "supportOpeningTitle": "Opening the school…",
-  "supportOpeningLede": "Starting your support visit. Everything you do is logged in the school’s audit log."
+  "supportOpeningLede": "Starting your support visit. Everything you do is logged in the school’s audit log.",
+  "uiMatrixModule": "Module",
+  "uiMatrixNotInPlan": "Not in plan",
+  "uiMatrixCell": "{action} in {module}",
+  "@uiMatrixCell": {
+    "placeholders": {
+      "action": {
+        "type": "Object"
+      },
+      "module": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiActionMenuLabel": "More actions",
+  "commonCancel": "Cancel",
+  "commonTryAgain": "Try again",
+  "usersStory": "{staff, plural, one {{staff} member of staff} other {{staff} staff}} · {without, plural, =0 {everyone uses two-step sign-in} one {{without} hasn’t turned on two-step sign-in} other {{without} haven’t turned on two-step sign-in}}",
+  "@usersStory": {
+    "placeholders": {
+      "staff": {
+        "type": "num"
+      },
+      "without": {
+        "type": "num"
+      }
+    }
+  },
+  "usersTabsLabel": "Users & roles sections",
+  "usersTabPeople": "People",
+  "usersTabRoles": "Roles & permissions",
+  "usersInviteOpen": "Invite staff",
+  "usersSearchLabel": "Search name or email",
+  "usersFilterLabel": "Show people with the role",
+  "usersFilterEveryone": "Everyone",
+  "usersTableCaption": "Staff accounts",
+  "usersColPerson": "Person",
+  "usersColRole": "Role",
+  "usersColTwoStep": "Two-step sign-in",
+  "usersColLastActive": "Last active",
+  "usersColStatus": "Status",
+  "usersColActions": "Actions",
+  "usersRoleLabel": "Role for {name}",
+  "@usersRoleLabel": {
+    "placeholders": {
+      "name": {
+        "type": "Object"
+      }
+    }
+  },
+  "usersRoleNone": "No role",
+  "usersTwoStepOn": "On",
+  "usersTwoStepOff": "Off",
+  "usersRemindButton": "Remind",
+  "usersRemindLabel": "Remind {name} to turn on two-step sign-in",
+  "@usersRemindLabel": {
+    "placeholders": {
+      "name": {
+        "type": "Object"
+      }
+    }
+  },
+  "usersLastActiveNever": "Never signed in",
+  "usersLastActiveInviteSent": "Invite sent {when}",
+  "@usersLastActiveInviteSent": {
+    "placeholders": {
+      "when": {
+        "type": "Object"
+      }
+    }
+  },
+  "usersStateActive": "Active",
+  "usersStateInvited": "Invited",
+  "usersStateDeactivated": "Deactivated",
+  "usersYou": "You",
+  "usersActionsLabel": "More actions for {name}",
+  "@usersActionsLabel": {
+    "placeholders": {
+      "name": {
+        "type": "Object"
+      }
+    }
+  },
+  "usersActionResetPassword": "Reset password",
+  "usersActionSignOutEverywhere": "Sign out everywhere",
+  "usersActionDeactivate": "Deactivate",
+  "usersActionReactivate": "Reactivate",
+  "usersActionResendInvite": "Resend invite",
+  "usersToastReminded": "Reminder sent to {name} to turn on two-step sign-in",
+  "@usersToastReminded": {
+    "placeholders": {
+      "name": {
+        "type": "Object"
+      }
+    }
+  },
+  "usersToastResetSent": "Reset link sent to {email}",
+  "@usersToastResetSent": {
+    "placeholders": {
+      "email": {
+        "type": "Object"
+      }
+    }
+  },
+  "usersToastSignedOut": "{name} is signed out everywhere",
+  "@usersToastSignedOut": {
+    "placeholders": {
+      "name": {
+        "type": "Object"
+      }
+    }
+  },
+  "usersToastDeactivated": "{name} can no longer sign in",
+  "@usersToastDeactivated": {
+    "placeholders": {
+      "name": {
+        "type": "Object"
+      }
+    }
+  },
+  "usersToastReactivated": "{name} can sign in again",
+  "@usersToastReactivated": {
+    "placeholders": {
+      "name": {
+        "type": "Object"
+      }
+    }
+  },
+  "usersToastReinvited": "{name} is invited again. Resend the invite so they can join.",
+  "@usersToastReinvited": {
+    "placeholders": {
+      "name": {
+        "type": "Object"
+      }
+    }
+  },
+  "usersToastResent": "Invite resent to {email}",
+  "@usersToastResent": {
+    "placeholders": {
+      "email": {
+        "type": "Object"
+      }
+    }
+  },
+  "usersToastRoleChanged": "{name} is now {role}",
+  "@usersToastRoleChanged": {
+    "placeholders": {
+      "name": {
+        "type": "Object"
+      },
+      "role": {
+        "type": "Object"
+      }
+    }
+  },
+  "usersToastInvited": "Invite sent to {count, plural, one {{count} person} other {{count} people}}",
+  "@usersToastInvited": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "usersFooter": "{count, plural, one {{count} person} other {{count} people}} shown",
+  "@usersFooter": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "usersMore": "Show more people",
+  "usersEmptyTitle": "No one matches",
+  "usersEmptyBody": "Try another name or email, or choose Everyone.",
+  "usersLoading": "Loading staff",
+  "usersLoadFailed": "We couldn’t load the staff list.",
+  "usersInviteTitle": "Invite staff",
+  "usersInviteSubtitle": "They’ll get an email to set up their account.",
+  "usersInviteEmails": "Email addresses",
+  "usersInviteEmailsHint": "Separate addresses with commas, spaces or new lines.",
+  "usersInviteRole": "Role",
+  "usersInviteSend": "Send invites",
+  "usersInviteAddressError": "{email}: {message}",
+  "@usersInviteAddressError": {
+    "placeholders": {
+      "email": {
+        "type": "Object"
+      },
+      "message": {
+        "type": "Object"
+      }
+    }
+  },
+  "usersDeactivateTitle": "Deactivate {name}?",
+  "@usersDeactivateTitle": {
+    "placeholders": {
+      "name": {
+        "type": "Object"
+      }
+    }
+  },
+  "usersDeactivateBody": "They’re signed out of this school on every device straight away, and can’t sign in again until you reactivate them. Their records stay.",
+  "usersDeactivateConfirm": "Deactivate {name}",
+  "@usersDeactivateConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "Object"
+      }
+    }
+  },
+  "previewCardTitle": "Preview a role",
+  "previewCardSubtitle": "See the portal exactly as each role sees it. Nothing changes for them.",
+  "previewCardDetail": "{count, plural, one {{count} page} other {{count} pages}} · opens on {home}",
+  "@previewCardDetail": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      },
+      "home": {
+        "type": "Object"
+      }
+    }
+  },
+  "previewCardButton": "Preview as {role}",
+  "@previewCardButton": {
+    "placeholders": {
+      "role": {
+        "type": "Object"
+      }
+    }
+  },
+  "rolesStory": "Choose what each role can see and change.",
+  "rolesNew": "New role",
+  "rolesListLabel": "Roles",
+  "rolesMembers": "{count, plural, one {{count} person} other {{count} people}}",
+  "@rolesMembers": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "rolesSystemNote": "Built-in role. Its permissions can’t be changed, so the school can’t lock itself out.",
+  "rolesCustomNote": "Tick what this role can do in each module. Changes apply at the next page load.",
+  "rolesMatrixCaption": "What {role} can do",
+  "@rolesMatrixCaption": {
+    "placeholders": {
+      "role": {
+        "type": "Object"
+      }
+    }
+  },
+  "rolesMatrixHint": "Ticking Create, Edit, Delete or Approve also ticks View. Unticking View clears the row.",
+  "rolesActionView": "View",
+  "rolesActionCreate": "Create",
+  "rolesActionEdit": "Edit",
+  "rolesActionDelete": "Delete",
+  "rolesActionApprove": "Approve",
+  "rolesModuleAdmissions": "Admissions",
+  "rolesModuleCrm": "CRM & communications",
+  "rolesModuleSis": "Student records",
+  "rolesModuleAttendance": "Attendance",
+  "rolesModuleLms": "LMS & gradebook",
+  "rolesModuleFees": "Fees & invoicing",
+  "rolesModuleFinance": "Accounting",
+  "rolesModuleTransport": "Transport",
+  "rolesModuleSettings": "Settings & users",
+  "rolesSensitiveTitle": "Sensitive access",
+  "rolesSensitiveSubtitle": "Off unless you turn it on. Every use is written to the audit log.",
+  "rolesSensitiveSafeguarding": "See safeguarding notes",
+  "rolesSensitiveSafeguardingHint": "Safeguarding concerns and what was done about them",
+  "rolesSensitiveMedical": "See medical notes",
+  "rolesSensitiveMedicalHint": "Allergies, health conditions and medication",
+  "rolesSensitiveFinanceReports": "See finance reports",
+  "rolesSensitiveFinanceReportsHint": "Income, debt and payroll reports in accounting",
+  "rolesSensitiveExportData": "Export data",
+  "rolesSensitiveExportDataHint": "Download student, staff or finance records as spreadsheets",
+  "rolesSensitiveNotHeld": "You don’t have this yourself, so you can’t give it.",
+  "rolesSaveBarUnsaved": "Unsaved changes to {role}",
+  "@rolesSaveBarUnsaved": {
+    "placeholders": {
+      "role": {
+        "type": "Object"
+      }
+    }
+  },
+  "rolesSaveBarDiscard": "Discard",
+  "rolesSaveBarSave": "Save changes",
+  "rolesToastSaved": "Permissions for {role} saved",
+  "@rolesToastSaved": {
+    "placeholders": {
+      "role": {
+        "type": "Object"
+      }
+    }
+  },
+  "rolesToastDiscarded": "Changes discarded",
+  "rolesToastCreated": "{role} created",
+  "@rolesToastCreated": {
+    "placeholders": {
+      "role": {
+        "type": "Object"
+      }
+    }
+  },
+  "rolesToastSaveFirst": "Save or discard your changes first",
+  "rolesNewPageBack": "Roles & permissions",
+  "rolesNewPageIntro": "A role is a set of permissions you give to a group of staff. You can change it later.",
+  "rolesFormLookTitle": "Name and look",
+  "rolesFormScopeTitle": "Where it applies",
+  "rolesFormPermissionsTitle": "Permissions",
+  "rolesFormName": "Role name",
+  "rolesFormNamePlaceholder": "For example, Head of Year",
+  "rolesFormDescription": "What is this role for?",
+  "rolesFormDescriptionPlaceholder": "For example, leads a year group: sees all students in the year and contacts parents",
+  "rolesFormColor": "Colour",
+  "rolesFormStartFrom": "Start from",
+  "rolesFormBlank": "Blank (no permissions)",
+  "rolesFormCreate": "Create role",
+  "rolesColorC1": "Coral",
+  "rolesColorC2": "Indigo",
+  "rolesColorC3": "Violet",
+  "rolesColorC4": "Amber",
+  "rolesColorC5": "Teal",
+  "rolesColorGood": "Green",
+  "rolesColorInfo": "Purple",
+  "rolesColorGold": "Gold",
+  "rolesScopeSchool": "Whole school",
+  "rolesScopeSchoolHint": "Everything in every campus, within the permissions below.",
+  "rolesScopeCampus": "Selected campuses",
+  "rolesScopeCampusHint": "Only students, staff and money in the campuses they work in.",
+  "rolesScopeOwnClasses": "Their own classes",
+  "rolesScopeOwnClassesHint": "Only the classes each person teaches. Best for teaching roles.",
+  "shellNoticePreviewFailed": "We couldn’t open that preview, so you’re back in your own view."
 }

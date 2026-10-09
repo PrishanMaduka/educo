@@ -19,6 +19,13 @@ import { openPage } from '@/lib/navigate';
  */
 const SIGN_IN_AGAIN = '/sign-in?next=%2Fapp&notice=two_step';
 
+/**
+ * Back to the portal after View as ended the old preview but could not start the new one. The
+ * shell reads `notice=preview_failed` after the reload and says why, in a fixed sentence
+ * (`portalNoticeFrom`), so the reason outlives the reload.
+ */
+const PREVIEW_FAILED = '/app?notice=preview_failed';
+
 export interface PreviewChoice {
   readonly roleId: string;
   /** A role scoped to its own classes (a teacher) previews one sample member's classes. */
@@ -107,10 +114,11 @@ export function useShellActions() {
     onSuccess: (permissions) => {
       openPage(hrefOf(permissions.home));
     },
-    // The old preview is already over on the server, so the page reloads without its banner.
+    // The old preview is already over on the server, so the page reloads without its banner and
+    // says why; otherwise the toast says it and the page stays.
     onError: (error) => {
-      fail(error);
-      if (previewEnded.current) openPage('/app');
+      if (previewEnded.current) openPage(PREVIEW_FAILED);
+      else fail(error);
     },
   });
 

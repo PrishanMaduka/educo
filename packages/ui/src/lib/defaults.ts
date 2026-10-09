@@ -19,6 +19,10 @@ export const uiText = {
   'ui.table.selectAll': 'Select all rows',
   'ui.table.selectRow': 'Select {label}',
   'ui.toast.region': 'Notifications',
+  'ui.matrix.module': 'Module',
+  'ui.matrix.notInPlan': 'Not in plan',
+  'ui.matrix.cell': '{action} in {module}',
+  'ui.actionMenu.label': 'More actions',
 } as const;
 
 export type UiTextKey = keyof typeof uiText;

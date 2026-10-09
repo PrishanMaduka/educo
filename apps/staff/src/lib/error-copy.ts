@@ -46,3 +46,23 @@ export function messageFor(error: unknown, translate: (key: MessageKey) => strin
   }
   return translate(errorKeyFor(error));
 }
+
+/** Statuses whose API message is written for the person (spec 06): a refused change, in plain English. */
+const SPOKEN_STATUSES: ReadonlySet<number> = new Set([403, 409, 422]);
+
+/**
+ * A toast for a refused change in the portal (Users & roles and later pages): the API's own
+ * sentence for a 403, 409 or 422 ("The school needs at least one active admin…"), which en.json
+ * gives the API, and the code's fixed copy otherwise (a preview, a server error).
+ */
+export function actionMessageFor(error: unknown, translate: (key: MessageKey) => string): string {
+  if (
+    error instanceof ApiError &&
+    SPOKEN_STATUSES.has(error.status) &&
+    error.code !== 'preview_read_only' &&
+    error.message !== ''
+  ) {
+    return error.message;
+  }
+  return messageFor(error, translate);
+}

@@ -85,3 +85,15 @@ export type SignInNotice = 'two_step';
 export function signInNoticeFrom(raw: unknown): SignInNotice | null {
   return raw === 'two_step' ? 'two_step' : null;
 }
+
+/** A fixed notice the portal shows once after a reload (`?notice=`). */
+export type PortalNotice = 'preview_failed';
+
+/**
+ * The portal's `?notice=`: only a known value, so the shell shows one of its own fixed sentences
+ * and never text from the query. View as sends `preview_failed` when it ended the old preview but
+ * could not start the new one, so the reload says why the person is back in their own view.
+ */
+export function portalNoticeFrom(raw: unknown): PortalNotice | null {
+  return raw === 'preview_failed' ? 'preview_failed' : null;
+}

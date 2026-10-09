@@ -1528,6 +1528,9 @@
                     "null"
                   ],
                   "format": "date-time"
+                },
+                "you": {
+                  "type": "boolean"
                 }
               },
               "required": [
@@ -1538,7 +1541,8 @@
                 "role",
                 "twoStepOn",
                 "lastSignInAt",
-                "inviteSentAt"
+                "inviteSentAt",
+                "you"
               ]
             }
           },
@@ -1636,6 +1640,9 @@
                     "null"
                   ],
                   "format": "date-time"
+                },
+                "you": {
+                  "type": "boolean"
                 }
               },
               "required": [
@@ -1646,7 +1653,8 @@
                 "role",
                 "twoStepOn",
                 "lastSignInAt",
-                "inviteSentAt"
+                "inviteSentAt",
+                "you"
               ]
             }
           }
@@ -1738,6 +1746,9 @@
               "null"
             ],
             "format": "date-time"
+          },
+          "you": {
+            "type": "boolean"
           }
         },
         "required": [
@@ -1748,7 +1759,8 @@
           "role",
           "twoStepOn",
           "lastSignInAt",
-          "inviteSentAt"
+          "inviteSentAt",
+          "you"
         ]
       },
       "StaffUpdateInput": {
@@ -2189,11 +2201,29 @@
               "string",
               "null"
             ]
+          },
+          "outsidePlan": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "admissions",
+                "crm",
+                "sis",
+                "attendance",
+                "lms",
+                "fees",
+                "finance",
+                "transport",
+                "settings"
+              ]
+            }
           }
         },
         "required": [
           "items",
-          "nextCursor"
+          "nextCursor",
+          "outsidePlan"
         ]
       },
       "Role": {
