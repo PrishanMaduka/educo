@@ -129,6 +129,9 @@ const ConfigSchema = z.object({
   STORE_REVIEW_PHONE: opt(
     z.string().regex(/^\+[1-9]\d{6,14}$/, { message: 'must be an E.164 phone number' }),
   ),
+  // The fake OIDC issuer (scripts/fake-oidc.mjs) used instead of Google and Microsoft by staff
+  // and console SSO; local only (D32), refused in `environmentRules`.
+  OIDC_FAKE_ISSUER_URL: opt(httpUrl),
 
   // Files
   S3_ENDPOINT: opt(httpUrl),
@@ -337,6 +340,9 @@ function environmentRules(env: RawEnv): ConfigProblem[] {
   const session = blank(env.SESSION_SECRET);
   if (typeof session === 'string' && session === blank(env.LINK_SIGNING_SECRET)) {
     problems.push({ variable: 'LINK_SIGNING_SECRET', problem: 'must differ from SESSION_SECRET' });
+  }
+  if (blank(env.OIDC_FAKE_ISSUER_URL) !== undefined) {
+    problems.push({ variable: 'OIDC_FAKE_ISSUER_URL', problem: 'must not be set outside local' });
   }
   for (const name of ['DATABASE_URL', 'DATABASE_PLATFORM_URL'] as const) {
     const url = env[name] ?? '';

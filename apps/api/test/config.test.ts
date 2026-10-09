@@ -224,6 +224,24 @@ describe('loadConfig', () => {
     expect(() => loadConfig(productionEnv({ CONSOLE_PASSWORD_LOGIN: 'false' }))).not.toThrow();
   });
 
+  it('accepts OIDC_FAKE_ISSUER_URL locally, as an http(s) URL', () => {
+    const url = 'http://127.0.0.1:4455';
+    expect(loadConfig(localEnv({ OIDC_FAKE_ISSUER_URL: url })).OIDC_FAKE_ISSUER_URL).toBe(url);
+    expect(loadConfig(localEnv()).OIDC_FAKE_ISSUER_URL).toBeUndefined();
+    expect(configErrorOf(localEnv({ OIDC_FAKE_ISSUER_URL: 'not a url' })).problems).toEqual([
+      { variable: 'OIDC_FAKE_ISSUER_URL', problem: 'must be an http(s) URL' },
+    ]);
+  });
+
+  it.each(['staging', 'production'])('refuses OIDC_FAKE_ISSUER_URL in %s (D32)', (appEnv) => {
+    const error = configErrorOf(
+      productionEnv({ APP_ENV: appEnv, OIDC_FAKE_ISSUER_URL: 'http://127.0.0.1:4455' }),
+    );
+    expect(error.problems).toEqual([
+      { variable: 'OIDC_FAKE_ISSUER_URL', problem: 'must not be set outside local' },
+    ]);
+  });
+
   it('allows the local-only flags in staging', () => {
     const config = loadConfig(
       productionEnv({
