@@ -15,6 +15,7 @@ import {
   setSchoolStatus,
   signedInMember,
 } from '../helpers/identity';
+import { CONSOLE_SID, insertConsoleSession, insertConsoleUser } from '../helpers/platform';
 
 import { AccessProbeModule } from './probe.module';
 
@@ -65,9 +66,15 @@ describe('the global AuthGuard', () => {
   });
 
   it('leaves a @PlatformController() class to its own guard', async () => {
-    // A live staff session would satisfy AuthGuard; PlatformSessionGuard (Task 10) owns the route
-    // instead and reads only the console cookie, so it answers 401. (A route without a marker
-    // no longer starts the API at all: test/routes-guarded.test.ts, Task 12 fix round 1.)
+    // A console session with no staff cookie gets in: AuthGuard, which would ask for a staff
+    // session, stays out of the way, and PlatformSessionGuard (Task 10) reads the console cookie.
+    const consoleUser = await insertConsoleUser(db());
+    const consoleSession = await insertConsoleSession(db(), consoleUser.id);
+    const allowed = await request('GET', '/platform/probe', {
+      cookie: `${CONSOLE_SID}=${consoleSession.token}`,
+    });
+    expect(allowed.statusCode).toBe(200);
+    // And a live staff session does not count there.
     const school = await insertSchool(db());
     const { session } = await signedInMember(db(), school);
     const response = await request('GET', '/platform/probe', sessionHeaders(session));

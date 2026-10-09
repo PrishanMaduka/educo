@@ -92,6 +92,22 @@ describe('isolation by path: /api/v1/platform/* is always the console’s', () =
     ).rejects.toBeInstanceOf(ForbiddenError);
   });
 
+  it('AuthGuard leaves a @PlatformController() class to its own guard, even on a school path', async () => {
+    const fromRequest = vi.fn();
+    const authenticator = { fromRequest } as unknown as RequestAuthenticator;
+    const guard = new AuthGuard(new Reflector(), authenticator, csrf);
+    await expect(guard.canActivate(contextOf('http', consoleTarget))).resolves.toBe(true);
+    expect(fromRequest).not.toHaveBeenCalled();
+  });
+
+  it('PlatformSessionGuard refuses @PlatformRole on a school path over HTTP (403)', async () => {
+    const { guard, authenticate } = platformGuard();
+    await expect(guard.canActivate(contextOf('http', roleOnHandler))).rejects.toBeInstanceOf(
+      ForbiddenError,
+    );
+    expect(authenticate).not.toHaveBeenCalled();
+  });
+
   it('PlatformSessionGuard leaves a school path without console markers alone', async () => {
     const { guard, authenticate } = platformGuard();
     await expect(guard.canActivate(contextOf('http', plain))).resolves.toBe(true);
