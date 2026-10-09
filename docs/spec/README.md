@@ -18,7 +18,7 @@ This folder is the end-to-end specification for building Quad, a multi-tenant sc
 |---|---|---|
 | 01 | [Product](01-product.md) | Vision, people, the three apps, glossary, scope and non-goals |
 | 02 | [Architecture](02-architecture.md) | Stack, monorepo layout, tenancy and database roles, environments and paths, local development, repository bootstrap (scripts, Turborepo, Docker, environment variables), decision log |
-| 03 | [Design system](03-design-system.md) | Tokens, type, logo, components, page patterns, the morning scene, motion, accessibility |
+| 03 | [Design system](03-design-system.md) | The app design system from `design/system.html`: tokens (light and dark), the school brand colour, type, shape, colour rules, illustration and avatars, logo, page patterns, the greeting scenes, components, motion, accessibility |
 | 04 | [Data model](04-data-model.md) | Every entity, field and relation, tenancy columns, indexes |
 | 05 | [Auth, tenancy and permissions](05-auth-tenancy-rbac.md) | Sign-in flows, sessions, roles, the permission matrix, support access, audit |
 | 06 | [API and realtime](06-api-and-events.md) | REST conventions, endpoint list, webhooks, realtime events, background jobs |
@@ -45,4 +45,4 @@ This folder is the end-to-end specification for building Quad, a multi-tenant sc
 - Money is stored as integer minor units (cents) with an ISO 4217 currency code. Shown as `Rs 310,000` for LKR.
 - Dates are stored in UTC; school-local times use the school's IANA time zone (default `Asia/Colombo`).
 - "Year group" means a grade or year (Year 4, Grade 9, MYP 2). "Class" means a section within it (Year 4 – Emerald). "Stage" is a group of year groups (Junior School).
-- Sample names in examples (Colombo International School, Amaya Perera, Dilhani Perera) are fictional and come from the prototypes.
+- Sample data: names in examples are fictional and come from the prototypes. Since the app redesign ([D34](02-architecture.md#decision-log)) the prototypes use an international sample set (Greenfield International School in USD, St. Clare's Academy in GBP, Emma Nakamura, Grace Okafor, the Patels with Maya and Leo). Older examples in these specs still use the earlier names (Colombo International School, Amaya Perera, Dilhani Perera); read them through the mapping in D34. The seeds and seeded accounts are renamed in a later task.
