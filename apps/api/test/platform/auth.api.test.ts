@@ -8,10 +8,17 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { PasswordHasher } from '../../src/common/crypto/passwords';
 import { TotpCodes } from '../../src/common/crypto/totp';
+import { InvalidCodeError } from '../../src/common/errors';
+import { hashSessionToken } from '../../src/common/session/cookies';
+import { CsrfTokens } from '../../src/common/session/csrf';
 import { buildOpenApiDocument } from '../../src/openapi/document';
 import { PlatformAuditService } from '../../src/platform/audit/platform-audit.service';
+import { ConsoleSessions } from '../../src/platform/auth/console-sessions.service';
+import { ConsoleSignInFailures } from '../../src/platform/auth/console-sign-in-failures';
 import { PlatformAuthRepository } from '../../src/platform/auth/platform-auth.repository';
-import { FIELD_CIPHER, REDIS } from '../../src/tokens';
+import { PlatformAuthService } from '../../src/platform/auth/platform-auth.service';
+import { PLATFORM_DB } from '../../src/platform/tokens';
+import { CONFIG, FIELD_CIPHER, REDIS } from '../../src/tokens';
 import { RecordingDelivery } from '../fakes/delivery';
 import { RecordingOtpSends } from '../fakes/otp-sends';
 import { setCookie } from '../helpers/browser';
@@ -38,9 +45,11 @@ import { freshEmail, malformedEmail } from '../helpers/sign-in';
 
 import { PlatformProbeModule } from './probe.module';
 
+import type { Config } from '../../src/config';
+import type { ConsoleAuth } from '../../src/platform/auth/console-auth';
 import type { Browser } from '../helpers/browser';
 import type { ConsoleUser } from '../helpers/platform';
-import type { FieldCipher } from '@quad/db';
+import type { FieldCipher, QuadPlatformDb } from '@quad/db';
 import type { Redis } from 'ioredis';
 
 const STEP = 30_000;
@@ -322,6 +331,23 @@ describe('POST /platform/auth/password (spec 05 → Platform console)', () => {
       [user.id],
     );
     expect(rows[0]?.revoked).toBe(1);
+    expect(await platformAuditRows(db(), 'auth.sign_out', user.id)).toEqual([
+      expect.objectContaining({
+        actor_platform_user_id: user.id,
+        meta: { reason: 'signed_in_again' },
+      }),
+    ]);
+  });
+
+  it('revokes nothing when a password sent with an existing console cookie is wrong', async () => {
+    const user = await insertConsoleUser(db());
+    const browser = await signInToConsole(app, user, clock);
+
+    const wrong = await password(browser, { ...user, password: 'not the password' });
+
+    expect(wrong.statusCode).toBe(401);
+    expect((await browser.get('/platform/me')).statusCode).toBe(200);
+    expect(await platformAuditRows(db(), 'auth.sign_out', user.id)).toEqual([]);
   });
 
   it('never caches a sign-in answer (M3)', async () => {
@@ -442,9 +468,38 @@ describe('POST /platform/auth/totp/verify', () => {
       code: await totpCode(secretOf(user), clock),
     });
     expect(response.statusCode).toBe(401);
+    // A second try with the same step session: refused again, but audited only once, because
+    // the refusal ended the session.
+    const again = await browser.post('/platform/auth/totp/verify', { code: '123456' });
+    expect(again.statusCode).toBe(401);
     expect(await platformAuditRows(db(), 'auth.sign_in_failed', user.id)).toEqual([
       expect.objectContaining({ actor_platform_user_id: null, meta: { reason: 'deactivated' } }),
     ]);
+    const { rows } = await db().platform.query<{ revoked: boolean }>(
+      'select revoked_at is not null as revoked from sessions where platform_user_id = $1',
+      [user.id],
+    );
+    expect(rows).toEqual([{ revoked: true }]);
+  });
+
+  it('treats an expired step session as signed out, before it looks at the user', async () => {
+    const expired = await atPasswordStep();
+    const live = await atPasswordStep();
+    for (const user of [expired.user, live.user]) {
+      await db().platform.query(`update platform_users set status = 'disabled' where id = $1`, [
+        user.id,
+      ]);
+    }
+    // The live session is the positive control: it is audited as deactivated.
+    expect(
+      (await live.browser.post('/platform/auth/totp/verify', { code: '123456' })).statusCode,
+    ).toBe(401);
+    expect(await platformAuditRows(db(), 'auth.sign_in_failed', live.user.id)).toHaveLength(1);
+    clock += 15 * 60 * 1000;
+    expect(
+      (await expired.browser.post('/platform/auth/totp/verify', { code: '123456' })).statusCode,
+    ).toBe(401);
+    expect(await platformAuditRows(db(), 'auth.sign_in_failed', expired.user.id)).toEqual([]);
   });
 
   it('locks the user after five wrong codes (403 next, locked_until set), and audits the code tried while locked', async () => {
@@ -816,6 +871,48 @@ describe('the console routes in the API description (M13)', () => {
 
 describe('DEV_FIXED_OTP on the console (local only, D32)', () => {
   const fixed = useDatabaseApp({ DEV_FIXED_OTP: '000000' }, { overrides: { now: () => clock } });
+
+  /** The same service as the app's, but configured as staging (the app cannot boot as staging here). */
+  function serviceAs(appEnv: Config['APP_ENV']): PlatformAuthService {
+    const made = fixed.app();
+    const config = { ...made.get<Config>(CONFIG), APP_ENV: appEnv };
+    return new PlatformAuthService(
+      made.get<QuadPlatformDb>(PLATFORM_DB),
+      made.get(PlatformAuthRepository),
+      made.get(PlatformAuditService),
+      made.get(ConsoleSignInFailures),
+      made.get(PasswordHasher),
+      made.get(TotpCodes),
+      made.get(CsrfTokens),
+      made.get<FieldCipher>(FIELD_CIPHER),
+      config,
+      () => clock,
+    );
+  }
+
+  /** A console user at the code step on the fixed-code app, and their session. */
+  async function codeStep(): Promise<ConsoleAuth> {
+    const user = await insertConsoleUser(fixed.db());
+    const browser = consoleBrowser(fixed.app);
+    expect((await password(browser, user)).json()).toEqual({ next: 'two_step' });
+    const auth = await fixed
+      .app()
+      .get(ConsoleSessions)
+      .authenticate(hashSessionToken(String(browser.cookies.get(CONSOLE_SID))));
+    if (auth === null) throw new Error('No console session.');
+    return auth;
+  }
+
+  it('refuses the fixed code with APP_ENV=staging, even though DEV_FIXED_OTP is set', async () => {
+    const client = { ip: '10.0.0.1', userAgent: null };
+    await expect(
+      serviceAs('staging').verifyTotp(await codeStep(), { code: '000000' }, client),
+    ).rejects.toBeInstanceOf(InvalidCodeError);
+    // The positive control: the same call configured as local opens the console.
+    await expect(
+      serviceAs('local').verifyTotp(await codeStep(), { code: '000000' }, client),
+    ).resolves.toMatchObject({ next: 'done' });
+  });
 
   it('opens the console with the fixed code at the code step', async () => {
     const user = await insertConsoleUser(fixed.db());

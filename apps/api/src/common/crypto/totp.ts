@@ -23,6 +23,11 @@ export interface TotpMatch {
 export class TotpCodes {
   constructor(@Inject(CONFIG) private readonly config: Config) {}
 
+  /** `DEV_FIXED_OTP`: what staff two-step accepts (local and staging; refused in production). */
+  get devFixedCode(): string | undefined {
+    return this.config.DEV_FIXED_OTP;
+  }
+
   /** A new base32 secret. */
   newSecret(): string {
     return generateSecret();
@@ -35,15 +40,16 @@ export class TotpCodes {
 
   /**
    * Whether `code` is the authenticator's code within one step of `now` and after `lastStep`:
-   * the step it matched, `{ step: null }` for the fixed code, or null for no match. `fixedCode`
-   * is `DEV_FIXED_OTP` unless the caller narrows it (the console passes `consoleFixedCode`).
+   * the step it matched, `{ step: null }` for the fixed code, or null for no match. The caller
+   * names the fixed code it accepts, if any (no default, so undefined always means none): staff
+   * two-step passes `devFixedCode`, the console `consoleFixedCode`.
    */
   async match(
     secret: string,
     code: string,
     now: Date,
     lastStep: number | null,
-    fixedCode: string | undefined = this.config.DEV_FIXED_OTP,
+    fixedCode: string | undefined,
   ): Promise<TotpMatch | null> {
     if (fixedCode !== undefined && code === fixedCode) return { step: null };
     const result = await verify({

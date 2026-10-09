@@ -33,23 +33,30 @@ export class ConsoleSessions implements ConsoleSessionLookup {
   ) {}
 
   /**
-   * The console session a cookie hash names, at any stage, or null. A sign-in step whose user was
-   * deactivated or locked meanwhile is a refused sign-in, so with `client` (HTTP) it is audited.
+   * The console session a cookie hash names, at any stage, or null. A live sign-in step whose user
+   * was deactivated or locked meanwhile is a refused sign-in: with `client` (HTTP) it is audited
+   * and revoked together.
    */
   async authenticate(tokenHash: Buffer, client?: ConsoleClient): Promise<ConsoleAuth | null> {
     const row = await this.db.withPlatform((tx) => this.repository.sessionByToken(tx, tokenHash));
     if (row === null) return null;
+    // Expiry first: an ended session is simply signed out, whoever its user is now.
+    const now = new Date(this.now());
+    if (now.getTime() >= row.expiresAt.getTime()) return null;
+    const idle =
+      row.stage === 'active' &&
+      sessionExpiry({ kind: 'console', lastSeenAt: row.lastSeenAt, now }).expired;
+    if (idle) return null;
     if (row.status !== 'active') {
+      // A sign-in step whose user was deactivated or locked meanwhile is a refused sign-in: it is
+      // audited and ends at once, so a retry is not audited again.
       if (row.stage !== 'active' && client !== undefined) {
         const reason = row.status === 'locked' ? 'locked' : 'deactivated';
-        await this.failures.refused(row.platformUserId, reason, client);
+        await this.failures.refused(row.platformUserId, reason, client, { id: row.sessionId, now });
       }
       return null;
     }
-    const now = new Date(this.now());
-    if (now.getTime() >= row.expiresAt.getTime()) return null;
     if (row.stage === 'active') {
-      if (sessionExpiry({ kind: 'console', lastSeenAt: row.lastSeenAt, now }).expired) return null;
       if (now.getTime() - row.lastSeenAt.getTime() >= TOUCH_INTERVAL_MS) {
         const { expiresAt } = sessionExpiry({ kind: 'console', lastSeenAt: now, now });
         await this.db.withPlatform((tx) =>

@@ -8,6 +8,7 @@ import { robotsTagFor } from '@quad/contracts/web-env';
 import { AppModule } from './app.module';
 import { AppErrorFilter, sendError } from './common/error.filter';
 import { UnsupportedMediaTypeError } from './common/errors';
+import { isNoStoreRoute } from './common/no-store';
 import { requestIdFrom, runWithRequestContext } from './common/request-context';
 import { PinoNestLogger, createLogger } from './observability/logger';
 import { API_ROUTES } from './openapi/document';
@@ -48,8 +49,6 @@ function trustHops(hops: number): false | ((address: string, hop: number) => boo
 /** The one route that takes a `text/plain` body: SNS posts its JSON that way (D28 follow-up). */
 const TEXT_PLAIN_ROUTE = `POST ${API_PREFIX}/webhooks/ses`;
 const TEXT_PLAIN = /^\s*text\/plain\s*(?:;|$)/i;
-/** Routes whose answers may carry a session step, a TOTP secret or recovery codes. */
-const NO_STORE_ROUTE = /^\/api\/v1\/(?:auth\/|platform\/auth\/|me\/totp$)/;
 
 /**
  * Builds and initialises the API (Nest on Fastify) with the `/api/v1` prefix, the request
@@ -106,7 +105,7 @@ export async function createApp(
   // Sign-in answers, TOTP secrets and recovery codes are never stored by a browser or a proxy
   // (Task 10 fix round 1, M3): every /auth, /platform/auth and /me/totp response, errors included.
   fastify.addHook('onSend', (request, reply, payload, done) => {
-    if (NO_STORE_ROUTE.test(request.routeOptions.url ?? '')) {
+    if (isNoStoreRoute(request.routeOptions.url)) {
       void reply.header('cache-control', 'no-store');
     }
     done(null, payload);

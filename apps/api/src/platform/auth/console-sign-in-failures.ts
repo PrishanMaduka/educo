@@ -80,22 +80,30 @@ export class ConsoleSignInFailures {
     if (lockedUntil !== null) await this.counter.clear(subject);
   }
 
-  /** A refusal that is not counted (a locked or deactivated user): audited only. */
+  /**
+   * A refusal that is not counted (a locked or deactivated user): audited only. With
+   * `endingSession`, that sign-in step session is revoked in the same transaction, so a retry
+   * finds no session and is not audited again.
+   */
   async refused(
     userId: string | null,
     reason: ConsoleFailureReason,
     client: ConsoleClient,
+    endingSession?: { readonly id: string; readonly now: Date },
   ): Promise<void> {
-    await this.db.withPlatform((tx) =>
-      this.audit.record(tx, {
+    await this.db.withPlatform(async (tx) => {
+      if (endingSession !== undefined) {
+        await this.repository.revokeSession(tx, endingSession.id, endingSession.now);
+      }
+      await this.audit.record(tx, {
         actorPlatformUserId: null,
         action: 'auth.sign_in_failed',
         target: userId === null ? null : { type: 'platform_user', id: userId },
         ip: client.ip,
         userAgent: client.userAgent,
         meta: { reason },
-      }),
-    );
+      });
+    });
   }
 
   /** Forgets the failures once every factor has passed. */

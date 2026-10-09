@@ -1,5 +1,7 @@
 import { Reflector } from '@nestjs/core';
 
+import { API_PREFIX_PATTERN } from '../api-prefix';
+
 /** Read by `AuthGuard`, which leaves these classes to `PlatformSessionGuard` (Task 10). */
 export const PlatformControllerMarker = Reflector.createDecorator<true>();
 
@@ -14,7 +16,7 @@ export const PlatformController = (): ClassDecorator => PlatformControllerMarker
  * `@PlatformController()`, and `consoleRouteProblems` refuses to start the API when the two
  * disagree, so a school controller can never serve a console path or the reverse.
  */
-export const PLATFORM_PATH = /^\/api\/v1\/platform(?:\/|$)/;
+export const PLATFORM_PATH = new RegExp(`^${API_PREFIX_PATTERN}/platform(?:/|$)`);
 
 /** True for a route template under `/api/v1/platform/`. */
 export function isPlatformPath(url: string | undefined): boolean {

@@ -169,6 +169,7 @@ export class TwoStepService {
       code,
       new Date(this.now()),
       credentials.totpLastStep,
+      this.totp.devFixedCode,
     );
     if (match === null) throw new InvalidCodeError();
     const recoveryCodes = generateRecoveryCodes((length) => randomBytes(length));
@@ -201,7 +202,13 @@ export class TwoStepService {
     const credentials = await this.repository.credentials(accountId);
     if (!credentials.totpEnabled || credentials.totpSecretEnc === null) return false;
     const secret = await this.cipher.decrypt(credentials.totpSecretEnc);
-    const match = await this.totp.match(secret, code, now, credentials.totpLastStep);
+    const match = await this.totp.match(
+      secret,
+      code,
+      now,
+      credentials.totpLastStep,
+      this.totp.devFixedCode,
+    );
     if (match === null) return false;
     return match.step === null || this.repository.acceptTotpStep(accountId, match.step);
   }
