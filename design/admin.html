@@ -38,7 +38,7 @@ h3{font-size:14px;font-family:var(--f-body);font-weight:700}
 .nav a svg{flex:none;opacity:.9}
 .nav a span{overflow:hidden;text-overflow:ellipsis}
 .nav .count{flex:none;margin-left:auto;font-size:11px;padding:1px 7px;border-radius:20px}
-.app.collapsed .nav-label,.app.collapsed .nav a span,.app.collapsed .nav .count,.app.collapsed .brand div,.app.collapsed .rail-foot div{display:none}
+.app.collapsed .nav-label,.app.collapsed .nav a>span:not(.nav-badge):not(.tenant-logo),.app.collapsed .nav .count,.app.collapsed .brand>div:last-child,.app.collapsed .rail-foot div{display:none}
 .app.collapsed .nav a{justify-content:center}
 .rail-foot{padding:12px 14px;display:flex;align-items:center;gap:10px}
 .main{min-width:0;display:flex;flex-direction:column}
@@ -266,7 +266,7 @@ td.r,th.r{text-align:right}
   .app,.app.collapsed{grid-template-columns:1fr}
   .rail{position:fixed;left:0;top:0;bottom:0;width:264px;transform:translateX(-100%);transition:transform .25s}
   .app.mobile-open .rail{transform:none}
-  .app.collapsed .nav-label,.app.collapsed .nav a span,.app.collapsed .nav .count,.app.collapsed .brand div,.app.collapsed .rail-foot div{display:revert}
+  .app.collapsed .nav-label,.app.collapsed .nav a>span:not(.nav-badge):not(.tenant-logo),.app.collapsed .nav .count,.app.collapsed .brand>div:last-child,.app.collapsed .rail-foot div{display:revert}
   .menu-btn{display:grid}
   .collapse-btn,.me div,.yearpick,.search kbd{display:none}
   .top{padding:10px 16px}
@@ -939,7 +939,7 @@ h2{font-size:17px;letter-spacing:-0.015em}
 .brand b{font:800 16px/1.15 var(--f-display);letter-spacing:-0.02em;color:var(--rail-ink);white-space:normal}
 .brand small{color:var(--rail-ink-2);font-weight:600}
 .nav-label{font-size:11px;font-weight:800;letter-spacing:0.1em;color:var(--rail-ink-2);opacity:1;padding:0 12px 6px}
-.nav a{border-radius:999px;padding:8px 12px;font-weight:600;font-size:14px;color:var(--rail-ink)}
+.nav a{border-radius:999px;padding:3px 12px 3px 4px;gap:10px;min-height:38px;font-weight:600;font-size:14px;color:var(--rail-ink)}
 .nav a:hover{background:var(--rail-2);color:var(--rail-ink)}
 .nav a.on{background:var(--rail-active);color:var(--rail-active-ink);box-shadow:none;font-weight:700}
 .nav a.on svg{opacity:1}
@@ -947,6 +947,12 @@ h2{font-size:17px;letter-spacing:-0.015em}
 .nav a.on .count{margin-right:0;background:var(--rail-active-ink);color:var(--rail-active)}
 .nav .count{background:rgba(255, 255, 255, 0.12);color:var(--rail-ink);font-weight:800}
 .rail-foot{border-top:1px solid var(--rail-line)}
+/* side bar icons: soft badges (D40). Each item's own drawing (system/nav-icons.js) in a 32 px navy circle, drawn in its
+   section colour (--nav-*, never the school colour). The selected item keeps the school-colour pill; its badge turns navy. */
+.nav-badge{width:32px;height:32px;border-radius:50%;flex:none;display:grid;place-items:center;background:var(--rail-2);box-shadow:inset 0 0 0 1px var(--rail-line);color:var(--nav-sc)}
+.nav .nav-badge svg{opacity:1}
+.nav a.on .nav-badge{background:var(--navy);box-shadow:none}
+@media (min-width:901px){.app.collapsed .nav a{padding:3px 0}}
 /* top bar: translucent cream */
  .top{background:color-mix(in srgb, var(--canvas) 86%, transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
 .iconbtn{border-radius:999px;border:1.5px solid var(--line);background:var(--surface)}
@@ -1235,7 +1241,7 @@ button[data-auth="show"]{min-height:24px;padding:3px 6px}
     <div class="brand"><div class="logo"><svg viewBox="0 0 30 30" width="64%" height="64%" aria-hidden="true"><path d="M0 10A10 10 0 0 1 10 0A3.5 3.5 0 0 1 13.5 3.5V10A3.5 3.5 0 0 1 10 13.5H3.5A3.5 3.5 0 0 1 0 10Z" fill="#59C3FF"/><path d="M0 10A10 10 0 0 1 10 0A3.5 3.5 0 0 1 13.5 3.5V10A3.5 3.5 0 0 1 10 13.5H3.5A3.5 3.5 0 0 1 0 10Z" fill="#FF6FAE" transform="translate(30 0) scale(-1 1)"/><path d="M0 10A10 10 0 0 1 10 0A3.5 3.5 0 0 1 13.5 3.5V10A3.5 3.5 0 0 1 10 13.5H3.5A3.5 3.5 0 0 1 0 10Z" fill="#C8F169" transform="translate(0 30) scale(1 -1)"/><path d="M0 10A10 10 0 0 1 10 0A3.5 3.5 0 0 1 13.5 3.5V10A3.5 3.5 0 0 1 10 13.5H3.5A3.5 3.5 0 0 1 0 10Z" fill="#FF9B45" transform="translate(30 30) scale(-1 -1)"/></svg></div><div><b>Quad</b><small>Greenfield International School</small></div></div>
     <div class="vine" aria-hidden="true"></div>
     <nav class="nav" id="nav"></nav>
-    <div class="rail-foot"><div class="av sm" style="background:var(--pink)">EN</div><div style="font-size:12px;min-width:0"><b style="color:#fff;display:block">Emma Nakamura</b><span style="color:var(--rail-ink-2)">Super admin</span></div><button class="iconbtn sw" data-act="switchSchool" id="swSchool" hidden aria-label="Switch school" title="Switch school"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M7 7h11l-3-3M17 17H6l3 3"/></svg></button><button class="iconbtn so" data-act="signOut" aria-label="Sign out" title="Sign out"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
+    <div class="rail-foot"><div class="av sm" style="background:var(--pink)">EN</div><div style="font-size:12px;min-width:0"><b style="color:#fff;display:block">Emma Nakamura</b><span style="color:var(--rail-ink-2)">Super admin</span></div><button class="iconbtn sw" data-act="switchSchool" id="swSchool" hidden aria-label="Switch school" title="Switch school" data-nav-icon="switch" data-nav-size="16"></button><button class="iconbtn so" data-act="signOut" aria-label="Sign out" title="Sign out" data-nav-icon="signout" data-nav-size="16"></button></div>
   </aside>
   <div class="main">
     <header class="top">
@@ -1263,10 +1269,12 @@ button[data-auth="show"]{min-height:24px;padding:3px 6px}
 <div class="toasts" id="toasts"></div>
 
 <script src="system/brand.js"></script>
+<script src="system/nav-icons.js"></script>
 <script src="system/faces.js"></script>
 <script src="brand/greeting/scenes.js"></script>
 <script>
 /* ---------- Icons ---------- */
+QuadNavIcons.fill(); // the side bar footer buttons; nav items draw their badges in renderNav()
 const P = {
   home:'<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
   admit:'<path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="M10 17l5-5-5-5M15 12H3"/>',
@@ -1419,20 +1427,21 @@ const S = {
 try { const t = localStorage.getItem('quad-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
 
 /* ---------- Navigation ---------- */
+// Each group has its section colour (D40); each item has its own drawing from system/nav-icons.js.
 const NAV = [
-  {g:'Overview', items:[['dashboard','Dashboard','home'],['teach','My teaching','cal']]},
-  {g:'Pre-admission', items:[['admissions','Admissions pipeline','admit', apps.filter(a=>a.stage!=='enrolled').length]]},
-  {g:'Relationships', items:[['crm','CRM & leads','crm'],['inbox','Communications','msg', 2],['events','Evenings & forms','cal']]},
-  {g:'Student information', items:[['students','Students','student'],['attendance','Attendance','check'],['pastoral','Pastoral care','heart']]},
-  {g:'Learning', items:[['lms','Courses & gradebook','book'],['timetable','Timetable','cal'],['staffing','Teachers & classes','crm'],['cover','Staff cover','crm'],['exams','Exams','file'],['reports','Reports','file']]},
-  {g:'Finance', items:[['fees','Fees & invoicing','fee'],['finance','Accounting','fin']]},
-  {g:'Settings', items:[['year','Academic year','cal'],['users','Users & roles','shield']]}
+  {g:'Overview', c:'lime', items:[['dashboard','Dashboard','home'],['teach','My teaching','teach']]},
+  {g:'Pre-admission', c:'orange', items:[['admissions','Admissions pipeline','funnel', apps.filter(a=>a.stage!=='enrolled').length]]},
+  {g:'Relationships', c:'pink', items:[['crm','CRM & leads','target'],['inbox','Communications','chat', 2],['events','Evenings & forms','clip']]},
+  {g:'Student information', c:'sky', items:[['students','Students','cap'],['attendance','Attendance','register'],['pastoral','Pastoral care','care']]},
+  {g:'Learning', c:'violet', items:[['lms','Courses & gradebook','book'],['timetable','Timetable','grid'],['staffing','Teachers & classes','board'],['cover','Staff cover','swap'],['exams','Exams','exam'],['reports','Reports','chart']]},
+  {g:'Finance', c:'lime', items:[['fees','Fees & invoicing','card'],['finance','Accounting','calc']]},
+  {g:'Settings', c:'mist', items:[['year','Academic year','year'],['users','Users & roles','shield']]}
 ];
 function renderNav() {
   const base = S.route.split('-')[0];
   const active = base === 'student' ? 'students' : base === 'user' || base === 'role' ? 'users' : base;
   document.getElementById('nav').innerHTML = NAV.map(g => ({...g, items: g.items.filter(([k]) => rvCan(k))})).filter(g => g.items.length).map(g => `<div class="nav-group"><div class="nav-label">${g.g}</div>${g.items.map(([k,l,i,c]) =>
-    `<a href="#${k}" class="${active===k?'on':''}" title="${l}">${ic(i)}<span>${l}</span>${c?`<em class="count">${c}</em>`:''}</a>`).join('')}</div>`).join('');
+    `<a href="#${k}" class="${active===k?'on':''}" title="${l}">${QuadNavIcons.badge(i, g.c)}<span>${l}</span>${c?`<em class="count">${c}</em>`:''}</a>`).join('')}</div>`).join('');
 }
 
 /* ---------- Charts ---------- */
@@ -3914,7 +3923,7 @@ V.connect = () => { const by = connBuild(), cs = Object.keys(by), N = cs.reduce(
         <div class="cx-acts">${st ? `<span class="pill t-green plain">${ic('check', 12)}${st === 'remind' ? 'Reminder sent' : 'Note sent'}</span>` : `<button class="btn sm" data-act="connRemind" data-k="${esc(key)}" data-ct="${esc(ct)}" data-kid="${esc(x.first)}">Remind ${esc(ct.split(' ')[0])}</button><button class="btn sm ghost" data-act="connNote" data-k="${esc(key)}" data-kid="${esc(x.name)}" data-c="${esc(x.cls)}">Send a note from the office</button>`}</div></div>`; }).join('') || `<div class="empty"><b>Every family here has heard something good</b><p class="muted">Nothing to follow up for these filters.</p></div>`}</div>
     ${miss.length > shown.length ? `<div class="tbl-foot"><button class="btn sm" data-act="filter" data-key="connAll" data-val="1">Show all ${miss.length} families</button></div>` : ''}
     <div class="fp-foot">${ic('heart', 14)}<span>This view is about families, not a league table of teachers. It counts moments, never ranks staff, and doesn’t use safeguarding, medical or early warning records.</span></div></section>`; };
-NAV[2].items.splice(2, 0, ['connect', 'Family connection', 'people']);
+NAV[2].items.splice(2, 0, ['connect', 'Family connection', 'family']);
 
 Object.assign(ACT, {
   fpAll: () => { S.fpAll = true; const y = scrollY; route(); scrollTo(0, y); },

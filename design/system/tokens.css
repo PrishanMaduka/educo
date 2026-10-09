@@ -15,6 +15,9 @@
   /* Navy: the side bar, hero cards and the parent welcome. The same in both themes. */
   --navy:#101632; --navy-2:#1D2550; --navy-line:#2F3870; --on-navy:#F7F5F0; --on-navy-2:#C9CBE0; --on-navy-3:#A9ACC8;
   --rail:#101632; --rail-2:#1D2550; --rail-line:#2A3266; --rail-ink:#F7F5F0; --rail-ink-2:#A9ACC8;
+  /* Side bar section colours (D40): the icon colour in each item's badge. Quad's palette, never the school colour, and
+     the same in both themes (the bar stays navy). Each is 5.4:1 or more on rail-2 and on navy in both themes. */
+  --nav-lime:var(--lime); --nav-orange:var(--orange); --nav-pink:var(--pink); --nav-sky:var(--sky); --nav-violet:#8C93FF; --nav-mist:var(--on-navy-2);
   /* School brand (default: Quad lime). Use --brand / --brand-fill behind --brand-ink, and --brand-text for text and icons. */
   --brand:#C8F169; --brand-fill:#C8F169; --brand-ink:#101632; --brand-strong:#D0F37E; --brand-fill-strong:#D0F37E;
   --brand-text:#5E7131; --brand-soft:#F6FDE7; --brand-raw:#C8F169; --rail-active:#C8F169; --rail-active-ink:#101632;

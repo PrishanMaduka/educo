@@ -40,6 +40,11 @@ p{margin:0}
 .side nav a:hover{background:var(--rail-2)}
 .side nav a.on{background:var(--rail-active);color:var(--rail-active-ink)}
 .side nav a svg{width:18px;height:18px;flex:none;opacity:.9}
+.side nav.sample-nav a{gap:10px;padding:3px 12px 3px 4px;min-height:38px}
+/* Side bar icons: soft badges (D40), drawn by system/nav-icons.js */
+.nav-badge{width:32px;height:32px;border-radius:50%;flex:none;display:grid;place-items:center;background:var(--rail-2);box-shadow:inset 0 0 0 1px var(--rail-line);color:var(--nav-sc)}
+.side nav .nav-badge svg{width:19px;height:19px;opacity:1}
+.side nav a.on .nav-badge{background:var(--navy);box-shadow:none}
 .side nav .count{margin-left:auto;font-size:11.5px;font-weight:800;background:rgba(255,255,255,.12);border-radius:var(--r-pill);padding:1px 8px}
 .side .foot{margin-top:auto;border-top:1px solid var(--rail-line);padding:14px 10px 0;display:flex;gap:10px;align-items:center;font-size:12.5px;color:var(--rail-ink-2)}
 .side .foot b{color:var(--rail-ink);display:block;font-size:13px}
@@ -631,7 +636,7 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.92em;bac
         <div class="grid2">
           <div class="mini-shell">
             <div class="side" aria-label="Sample side bar"><div class="logo"><span style="width:30px;height:30px;border-radius:9px;background:var(--rail-active);color:var(--rail-active-ink);display:grid;place-items:center;font:800 12px var(--f-display)">GI</span><div><b style="font-size:15px">Greenfield</b><small>Staff portal</small></div></div>
-              <nav><a href="#nav" class="on"><svg aria-hidden="true"><use href="#i-home"/></svg><span>Today</span></a><a href="#nav"><svg aria-hidden="true"><use href="#i-users"/></svg><span>Students</span><span class="count">1,248</span></a><a href="#nav"><svg aria-hidden="true"><use href="#i-cal"/></svg><span>Timetable</span></a><a href="#nav"><svg aria-hidden="true"><use href="#i-chat"/></svg><span>Messages</span><span class="count">2</span></a></nav></div>
+              <nav class="sample-nav"><a href="#nav" class="on"><span data-nav-badge="home" data-nav-colour="lime"></span><span>Today</span></a><a href="#nav"><span data-nav-badge="cap" data-nav-colour="sky"></span><span>Students</span><span class="count">1,248</span></a><a href="#nav"><span data-nav-badge="grid" data-nav-colour="violet"></span><span>Timetable</span></a><a href="#nav"><span data-nav-badge="chat" data-nav-colour="pink"></span><span>Messages</span><span class="count">2</span></a></nav></div>
             <div><div class="topbar"><div class="search"><svg aria-hidden="true"><use href="#i-search"/></svg><span>Search</span><kbd>Ctrl K</kbd></div><button class="askq"><span class="spark"><svg aria-hidden="true"><use href="#i-spark"/></svg></span>Ask Quad</button><button class="iconbtn" aria-label="Notifications, 3 new"><svg aria-hidden="true"><use href="#i-bell"/></svg><span class="dot"></span></button></div>
               <div style="padding:18px"><p class="eyebrow">Students</p><p style="font:800 26px/1.1 var(--f-display);letter-spacing:-.025em;margin-top:4px">1,248 students</p><p class="note" style="margin-top:6px">94.6% in school today.</p></div></div>
           </div>
@@ -716,7 +721,9 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.92em;bac
 
 <script src="system/brand.js"></script>
 <script src="system/faces.js"></script>
+<script src="system/nav-icons.js"></script>
 <script>
+document.querySelectorAll('[data-nav-badge]').forEach(el => { el.outerHTML = QuadNavIcons.badge(el.dataset.navBadge, el.dataset.navColour); });
 const $ = id => document.getElementById(id);
 const {face, doodle, initials} = QuadFaces;
 const css = n => getComputedStyle(document.documentElement).getPropertyValue('--' + n).trim();
@@ -741,6 +748,7 @@ const GROUPS = [
   ['Surfaces and lines', 'Cream canvas, white cards. surface-2 is for table heads and quiet fills; surface-3 for pressed states.', [['canvas', 'Page background'], ['surface', 'Cards, drawers, inputs'], ['surface-2', 'Table heads, quiet fills'], ['surface-3', 'Pressed, selected'], ['line', 'Card borders, rows'], ['line-strong', 'Dividers, button and chip outlines'], ['field-line', 'Input, checkbox and radio edges, 3:1'], ['switch-off', 'A switch that is off, 3:1']]],
   ['Text', 'All three pass 4.5:1 on canvas, surface and surface-2.', [['ink', 'Headings, body'], ['ink-2', 'Secondary text'], ['ink-3', 'Captions, labels']]],
   ['Navy and the side bar', 'The same navy as the landing page. The bar stays navy for every school.', [['navy', 'Story cards, toasts'], ['navy-2', 'Raised on navy'], ['rail', 'Side bar'], ['rail-2', 'Side bar hover'], ['rail-ink', 'Side bar text'], ['rail-ink-2', 'Side bar labels'], ['rail-active', 'Active item (brand)'], ['navy-card', 'Navy that lifts in dark'], ['inverse', 'Toasts, tooltips'], ['on-inverse', 'Text on inverse']]],
+  ['Side bar sections', 'The icon colour in each side bar badge (D40). Quad’s palette, never the school colour; the same in both themes.', [['nav-lime', 'Overview, Finance'], ['nav-orange', 'Pre-admission'], ['nav-pink', 'Relationships'], ['nav-sky', 'Student information'], ['nav-violet', 'Learning'], ['nav-mist', 'Settings']]],
   ['School brand (live)', 'Derived from the colour picked under School brand. Text never uses brand-fill.', [['brand-raw', 'The school’s colour as saved'], ['brand-fill', 'Buttons, active tab'], ['brand-ink', 'Text on brand-fill'], ['brand-fill-strong', 'Hover'], ['brand-text', 'Links, icons, selected text'], ['brand-soft', 'Selected rows, tiles']]],
   ['Accents', 'The four petals. For categories, people and illustrations, never for status. Text sits on the -soft tint in the -ink colour.', [['lime', 'Care, highlights'], ['lime-soft', 'Tint'], ['lime-ink', 'Text on tint'], ['pink', 'Family, parents'], ['pink-soft', 'Tint'], ['pink-ink', 'Text on tint'], ['sky', 'Teaching'], ['sky-soft', 'Tint'], ['sky-ink', 'Text on tint'], ['orange', 'Students, children'], ['orange-soft', 'Tint'], ['orange-ink', 'Text on tint']]],
   ['Status', 'Only for state. Always with a word or an icon. Text 4.5:1 on its -soft and on cards.', [['good', 'Present, paid, done'], ['good-soft', ''], ['warn', 'Late, due soon'], ['warn-soft', ''], ['bad', 'Absent, overdue, errors'], ['bad-soft', ''], ['info', 'Invited, new, tips'], ['info-soft', ''], ['on-fill', 'Text on a filled status colour']]],
