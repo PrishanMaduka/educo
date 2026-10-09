@@ -6,6 +6,7 @@ import { PreAuth } from '../../src/common/guards/pre-auth.decorator';
 import { Public } from '../../src/common/guards/public.decorator';
 import { currentRequestContext } from '../../src/common/request-context';
 import { setSessionCookies } from '../../src/common/session/cookies';
+import { PlatformRole } from '../../src/platform/auth/platform-roles.decorator';
 import { CONFIG } from '../../src/tokens';
 
 import type { Config } from '../../src/config';
@@ -15,12 +16,6 @@ import type { FastifyReply } from 'fastify';
 @Controller('probe')
 class AccessProbeController {
   constructor(@Inject(CONFIG) private readonly config: Config) {}
-
-  /** No marker: like a `@Can` route, it needs an active session. */
-  @Get('unmarked')
-  unmarked(): { ok: true } {
-    return { ok: true };
-  }
 
   @Get('public')
   @Public()
@@ -34,6 +29,21 @@ class AccessProbeController {
     return { ok: true };
   }
 
+  /** Sets the staff cookies the way sign-in (Task 7) will. */
+  @Post('cookies')
+  @Public()
+  cookies(@Res({ passthrough: true }) reply: FastifyReply): { ok: true } {
+    setSessionCookies(reply, this.config.APP_ENV, { token: 'token', csrf: 'csrf' });
+    return { ok: true };
+  }
+}
+
+/**
+ * Self-scoped probes (`@Authenticated` is only for `/me*` and a few auth routes; the route walk
+ * refuses it elsewhere, Task 12 fix round 1).
+ */
+@Controller('me/probe')
+class SelfProbeController {
   @Post('choose')
   @Authenticated({ alsoAtStages: ['choose_school'] })
   choose(): { ok: true } {
@@ -62,14 +72,6 @@ class AccessProbeController {
     const context = currentRequestContext();
     return { accountId: context?.accountId, kind: context?.kind };
   }
-
-  /** Sets the staff cookies the way sign-in (Task 7) will. */
-  @Post('cookies')
-  @Public()
-  cookies(@Res({ passthrough: true }) reply: FastifyReply): { ok: true } {
-    setSessionCookies(reply, this.config.APP_ENV, { token: 'token', csrf: 'csrf' });
-    return { ok: true };
-  }
 }
 
 /** A console controller: `AuthGuard` leaves it alone (`PlatformSessionGuard` owns it, Task 10). */
@@ -77,10 +79,11 @@ class AccessProbeController {
 @Controller('platform/probe')
 class PlatformProbeController {
   @Get()
+  @PlatformRole()
   get(): { ok: true } {
     return { ok: true };
   }
 }
 
-@Module({ controllers: [AccessProbeController, PlatformProbeController] })
+@Module({ controllers: [AccessProbeController, SelfProbeController, PlatformProbeController] })
 export class AccessProbeModule {}

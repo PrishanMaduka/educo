@@ -5,7 +5,8 @@ import { PlatformRole } from '../../src/platform/auth/platform-roles.decorator';
 
 /**
  * Test-only console routes behind the real guards (`AppOverrides.testModules`), so the OpenAPI
- * document and the app are unchanged: an owner-only route, and a route with no marker.
+ * document and the app are unchanged: an owner-only route. Routes with no marker, or with
+ * `@PlatformRole` on a school controller, no longer start the API (`test/routes-guarded.test.ts`).
  */
 @PlatformController()
 @Controller('platform/probe')
@@ -15,23 +16,7 @@ class PlatformRoleProbeController {
   owner(): { ok: true } {
     return { ok: true };
   }
-
-  /** No marker: deny by default, whatever the role. */
-  @Get('unmarked')
-  unmarked(): { ok: true } {
-    return { ok: true };
-  }
 }
 
-/** `@PlatformRole` on a school controller is a mistake: it must never let a staff session in. */
-@Controller('probe/platform-role')
-class MisplacedPlatformRoleController {
-  @Get()
-  @PlatformRole()
-  misplaced(): { ok: true } {
-    return { ok: true };
-  }
-}
-
-@Module({ controllers: [PlatformRoleProbeController, MisplacedPlatformRoleController] })
+@Module({ controllers: [PlatformRoleProbeController] })
 export class PlatformProbeModule {}

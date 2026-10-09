@@ -831,28 +831,9 @@ describe('@PlatformRole (spec 05 → Platform roles; deny by default)', () => {
     expect((await owner.get('/platform/probe/owner')).statusCode).toBe(200);
   });
 
-  it('refuses a console route with no marker, even for the owner', async () => {
-    const owner = await signInToConsole(app, await insertConsoleUser(db()), clock);
-    expect((await owner.get('/platform/probe/unmarked')).statusCode).toBe(403);
-  });
-
   it('answers 401 on a role route at a sign-in step', async () => {
     const { browser } = await atPasswordStep({ totp: false });
     expect((await browser.get('/platform/probe/owner')).statusCode).toBe(401);
-  });
-
-  it('never lets a staff session through @PlatformRole on a school route', async () => {
-    const school = await insertSchool(db());
-    const { session } = await signedInMember(db(), school);
-    const response = await app()
-      .getHttpAdapter()
-      .getInstance()
-      .inject({
-        method: 'GET',
-        url: '/api/v1/probe/platform-role',
-        headers: sessionHeaders(session),
-      });
-    expect(response.statusCode).toBe(403);
   });
 });
 

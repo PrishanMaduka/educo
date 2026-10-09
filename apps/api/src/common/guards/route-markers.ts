@@ -2,28 +2,29 @@ import { RequestMethod } from '@nestjs/common';
 import { METHOD_METADATA, PATH_METADATA } from '@nestjs/common/constants';
 import { MetadataScanner, Reflector } from '@nestjs/core';
 
-import { AuthenticatedMarker } from '../../src/common/guards/authenticated.decorator';
-import { CanMarker } from '../../src/common/guards/can.decorator';
-import { PlanModuleMarker } from '../../src/common/guards/module.decorator';
-import { PlatformControllerMarker } from '../../src/common/guards/platform-controller.decorator';
-import { PreAuthMarker } from '../../src/common/guards/pre-auth.decorator';
-import { AllowDuringPreviewMarker } from '../../src/common/guards/preview-read-only.guard';
-import { PublicMarker } from '../../src/common/guards/public.decorator';
-import { RelativeAccessMarker } from '../../src/common/guards/relative-access.decorator';
-import { SensitiveMarker } from '../../src/common/guards/sensitive.decorator';
-import { AllowWhileSuspendedMarker } from '../../src/common/guards/tenant-status.guard';
 import {
   DuringConsoleSignInMarker,
   PlatformRoleMarker,
-} from '../../src/platform/auth/platform-roles.decorator';
+} from '../../platform/auth/platform-roles.decorator';
+
+import { AuthenticatedMarker } from './authenticated.decorator';
+import { CanMarker } from './can.decorator';
+import { PlanModuleMarker } from './module.decorator';
+import { PlatformControllerMarker } from './platform-controller.decorator';
+import { PreAuthMarker } from './pre-auth.decorator';
+import { AllowDuringPreviewMarker } from './preview-read-only.guard';
+import { PublicMarker } from './public.decorator';
+import { RelativeAccessMarker } from './relative-access.decorator';
+import { SensitiveMarker } from './sensitive.decorator';
+import { AllowWhileSuspendedMarker } from './tenant-status.guard';
 
 import type { Type } from '@nestjs/common';
 
 /**
  * The route walk (Task 12, ruling F02): every route of the app with the markers it carries, read
  * from the controllers' metadata the way the guards read it, and the rules those markers must
- * keep. Shared by `routes-guarded.test.ts`, which runs it on the real app and on rogue
- * controllers (its positive control).
+ * keep. `AccessModule` refuses to start the API when any route breaks one (fix round 1, M1), and
+ * `test/routes-guarded.test.ts` runs it on the real app and on rogue controllers.
  */
 
 /** The five access markers: every route carries exactly one. */

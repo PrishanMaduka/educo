@@ -5,6 +5,7 @@ import pino from 'pino';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { createApp } from '../../src/app';
+import { Public } from '../../src/common/guards/public.decorator';
 import { loadConfig } from '../../src/config';
 import { API_ROUTES } from '../../src/openapi/document';
 import { localEnv } from '../env';
@@ -61,7 +62,9 @@ describe('a console cookie on school routes (D28 ruling R-console-realtime)', ()
 
 @Controller('platform/rogue')
 class RogueSchoolController {
+  // Marked, so only the console rule (not the route walk) refuses it.
   @Get()
+  @Public()
   get(): { ok: true } {
     return { ok: true };
   }

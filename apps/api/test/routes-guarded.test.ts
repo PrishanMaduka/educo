@@ -1,20 +1,24 @@
-import { Controller, Delete, Get, Post } from '@nestjs/common';
+import { Controller, Delete, Get, Module, Post } from '@nestjs/common';
 import { DiscoveryService } from '@nestjs/core';
+import pino from 'pino';
 import { describe, expect, it } from 'vitest';
 
+import { createApp } from '../src/app';
 import { Authenticated } from '../src/common/guards/authenticated.decorator';
 import { Can } from '../src/common/guards/can.decorator';
 import { PlatformController } from '../src/common/guards/platform-controller.decorator';
 import { AllowDuringPreview } from '../src/common/guards/preview-read-only.guard';
 import { Public } from '../src/common/guards/public.decorator';
 import { RelativeAccess } from '../src/common/guards/relative-access.decorator';
+import { routeProblems, walkRoutes } from '../src/common/guards/route-markers';
 import { Sensitive } from '../src/common/guards/sensitive.decorator';
 import { AllowWhileSuspended } from '../src/common/guards/tenant-status.guard';
+import { loadConfig } from '../src/config';
 import { API_ROUTES } from '../src/openapi/document';
 import { PlatformRole } from '../src/platform/auth/platform-roles.decorator';
 
 import { CLOSED_PORTS, useTestApp } from './app';
-import { routeProblems, walkRoutes } from './helpers/route-walk';
+import { localEnv } from './env';
 
 import type { Type } from '@nestjs/common';
 
@@ -144,5 +148,53 @@ describe('the route walk itself', () => {
       ).toBe(true);
     }
     expect(problems).toHaveLength(expected.length);
+  });
+});
+
+@Controller('rogue/boot')
+class UnmarkedController {
+  @Get()
+  unmarked(): void {}
+}
+
+@Module({ controllers: [UnmarkedController] })
+class UnmarkedModule {}
+
+@Controller('rogue/role')
+class MisplacedRoleController {
+  @Get()
+  @PlatformRole()
+  misplaced(): void {}
+}
+
+@Module({ controllers: [MisplacedRoleController] })
+class MisplacedRoleModule {}
+
+@PlatformController()
+@Controller('platform/rogue-boot')
+class UnmarkedConsoleController {
+  @Get()
+  unmarked(): void {}
+}
+
+@Module({ controllers: [UnmarkedConsoleController] })
+class UnmarkedConsoleModule {}
+
+describe('the route walk at boot (fix round 1, M1)', () => {
+  const boot = (testModule: Type) =>
+    createApp(loadConfig(localEnv(CLOSED_PORTS)), {
+      logger: pino({ level: 'silent' }),
+      overrides: { testModules: [testModule] },
+    }).then(async (made) => {
+      await made.close();
+      return 'started';
+    });
+
+  it.each([
+    [UnmarkedModule, 'GET /rogue/boot (UnmarkedController.unmarked) carries 0 access markers'],
+    [MisplacedRoleModule, 'has @PlatformRole outside a console controller'],
+    [UnmarkedConsoleModule, 'GET /platform/rogue-boot (UnmarkedConsoleController.unmarked)'],
+  ])('refuses to start with %o', async (testModule, problem) => {
+    await expect(boot(testModule)).rejects.toThrow(problem);
   });
 });

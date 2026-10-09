@@ -179,7 +179,7 @@ describe('cookie names and attributes (spec 05, ruling F63)', () => {
       staging()
         .getHttpAdapter()
         .getInstance()
-        .inject({ method: 'GET', url: '/api/v1/probe/context/any-stage', headers: { cookie } });
+        .inject({ method: 'GET', url: '/api/v1/me/probe/context/any-stage', headers: { cookie } });
 
     const hosted = await probe(`__Host-quad_sid=${token}`);
     expect(hosted.statusCode).toBe(200);

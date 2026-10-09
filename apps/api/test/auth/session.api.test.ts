@@ -64,19 +64,14 @@ describe('the global AuthGuard', () => {
     expect((await request('GET', '/probe/public')).statusCode).toBe(200);
   });
 
-  it('needs an active session on a route without a marker (the @Can default)', async () => {
-    expect((await request('GET', '/probe/unmarked')).statusCode).toBe(401);
+  it('leaves a @PlatformController() class to its own guard', async () => {
+    // A live staff session would satisfy AuthGuard; PlatformSessionGuard (Task 10) owns the route
+    // instead and reads only the console cookie, so it answers 401. (A route without a marker
+    // no longer starts the API at all: test/routes-guarded.test.ts, Task 12 fix round 1.)
     const school = await insertSchool(db());
     const { session } = await signedInMember(db(), school);
-    expect((await request('GET', '/probe/unmarked', sessionHeaders(session))).statusCode).toBe(200);
-  });
-
-  it('leaves a @PlatformController() class to its own guard', async () => {
-    // Without a session AuthGuard would answer 401; PlatformSessionGuard (Task 10) owns the
-    // route instead, and refuses it for having no console access marker (deny by default).
-    const response = await request('GET', '/platform/probe');
-    expect(response.statusCode).toBe(403);
-    expect(response.json()).toMatchObject({ code: 'forbidden' });
+    const response = await request('GET', '/platform/probe', sessionHeaders(session));
+    expect(response.statusCode).toBe(401);
   });
 
   it('lets a sign-in step through @PreAuth only at its stage, and never to an active route', async () => {
@@ -100,14 +95,16 @@ describe('the global AuthGuard', () => {
     expect((await request('POST', '/probe/two-step', sessionHeaders(choosing))).statusCode).toBe(
       401,
     );
-    expect((await request('POST', '/probe/choose', sessionHeaders(choosing))).statusCode).toBe(201);
+    expect((await request('POST', '/me/probe/choose', sessionHeaders(choosing))).statusCode).toBe(
+      201,
+    );
     expect((await getMe(sessionHeaders(choosing))).statusCode).toBe(401);
   });
 
   it('fills the request context from the session, never from the request', async () => {
     const school = await insertSchool(db());
     const { accountId, userId, session } = await signedInMember(db(), school);
-    const response = await request('GET', '/probe/context', {
+    const response = await request('GET', '/me/probe/context', {
       ...sessionHeaders(session),
       'x-tenant-id': '00000000-0000-4000-8000-000000000000',
     });
@@ -315,7 +312,7 @@ describe('support visits (ruling R-support-token)', () => {
       school: { id: school.id },
       support: { schoolName: school.name, platformUserName: 'Ruwan Mendis' },
     });
-    const context = await request('GET', '/probe/context', sessionHeaders(visit));
+    const context = await request('GET', '/me/probe/context', sessionHeaders(visit));
     expect(context.json()).toMatchObject({
       tenantId: school.id,
       userId: null,
