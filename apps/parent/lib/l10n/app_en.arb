@@ -1531,5 +1531,167 @@
   "rolesScopeCampusHint": "Only students, staff and money in the campuses they work in.",
   "rolesScopeOwnClasses": "Their own classes",
   "rolesScopeOwnClassesHint": "Only the classes each person teaches. Best for teaching roles.",
-  "shellNoticePreviewFailed": "We couldn’t open that preview, so you’re back in your own view."
+  "shellNoticePreviewFailed": "We couldn’t open that preview, so you’re back in your own view.",
+  "schoolSettingsTabsLabel": "School settings sections",
+  "schoolSettingsTabGeneral": "General",
+  "schoolSettingsTabSignIn": "Sign-in",
+  "schoolSettingsTabAudit": "Audit",
+  "schoolSettingsLoading": "Loading the school’s settings…",
+  "schoolSettingsLoadFailed": "We couldn’t load the school’s settings.",
+  "schoolSettingsSummaryAskQuadOn": "Ask Quad is on.",
+  "schoolSettingsSummaryAskQuadOff": "Ask Quad is off.",
+  "schoolSettingsSummaryQuietHours": "{weekends, select, yes {Quiet hours are {from}–{until} and weekends.} other {Quiet hours are {from}–{until}.}}",
+  "@schoolSettingsSummaryQuietHours": {
+    "placeholders": {
+      "weekends": {
+        "type": "String"
+      },
+      "from": {
+        "type": "Object"
+      },
+      "until": {
+        "type": "Object"
+      }
+    }
+  },
+  "schoolSettingsSummaryQuietHoursOff": "Quiet hours are off.",
+  "schoolSettingsNeedsTitle": "What needs doing",
+  "schoolSettingsNeedAddOfficeEmail": "Add an office email, so replies to the school’s emails reach the office.",
+  "schoolSettingsNeedAddOfficeEmailAction": "Add an office email",
+  "schoolSettingsNeedSmsSenderPending": "Your SMS sender ID {senderId} is waiting for approval. Texts go out as QUAD until then.",
+  "@schoolSettingsNeedSmsSenderPending": {
+    "placeholders": {
+      "senderId": {
+        "type": "Object"
+      }
+    }
+  },
+  "schoolSettingsGeneralDetails": "School details",
+  "schoolSettingsGeneralName": "School name",
+  "schoolSettingsGeneralOfficeEmail": "Office email",
+  "schoolSettingsGeneralOfficeEmailHint": "Replies to the school’s emails come here.",
+  "schoolSettingsGeneralOfficePhone": "Office phone",
+  "schoolSettingsGeneralAddress": "Address",
+  "schoolSettingsGeneralMessages": "Text messages",
+  "schoolSettingsGeneralSmsSenderId": "SMS sender ID",
+  "schoolSettingsGeneralSmsSenderHint": "3 to 11 letters and numbers. Quad asks the networks to approve it, and texts go out as QUAD until then.",
+  "schoolSettingsGeneralSmsStatusRequested": "Waiting for approval",
+  "schoolSettingsGeneralSmsStatusApproved": "Approved",
+  "schoolSettingsGeneralSetByQuad": "Set by Quad",
+  "schoolSettingsGeneralSetByQuadHint": "Ask support to change these.",
+  "schoolSettingsGeneralTimeZone": "Time zone",
+  "schoolSettingsGeneralLogo": "Logo",
+  "schoolSettingsGeneralNoLogo": "No logo yet. The side bar shows {initials}.",
+  "@schoolSettingsGeneralNoLogo": {
+    "placeholders": {
+      "initials": {
+        "type": "Object"
+      }
+    }
+  },
+  "schoolSettingsGeneralColour": "Colour",
+  "schoolSettingsGeneralViewOnly": "You can see these details. Ask a school admin to change them.",
+  "schoolSettingsGeneralUnsaved": "Unsaved changes to the school’s details",
+  "schoolSettingsGeneralDiscard": "Discard changes",
+  "schoolSettingsGeneralSave": "Save school details",
+  "schoolSettingsToastSaved": "School details saved",
+  "schoolSettingsSignInTitle": "Sign-in rules",
+  "schoolSettingsSignInManaged": "Managed by Quad. Ask support to change them.",
+  "schoolSettingsSignInTwoStep": "Two-step sign-in",
+  "schoolSettingsSignInTwoStepOff": "Not required",
+  "schoolSettingsSignInTwoStepAdmins": "Required for school admins",
+  "schoolSettingsSignInTwoStepStaff": "Required for all staff",
+  "schoolSettingsSignInTwoStepAll": "Required for everyone",
+  "schoolSettingsSignInPassword": "Password length",
+  "schoolSettingsSignInPasswordValue": "At least {count} characters",
+  "@schoolSettingsSignInPasswordValue": {
+    "placeholders": {
+      "count": {
+        "type": "Object"
+      }
+    }
+  },
+  "schoolSettingsSignInSession": "Session length",
+  "schoolSettingsSignInSessionValue": "{hours, plural, one {Signed out after {hours} hour} other {Signed out after {hours} hours}}",
+  "@schoolSettingsSignInSessionValue": {
+    "placeholders": {
+      "hours": {
+        "type": "num"
+      }
+    }
+  },
+  "schoolSettingsSignInIpAllowlist": "Allowed IP addresses",
+  "schoolSettingsSignInIpAny": "Any address",
+  "schoolSettingsAuditTitle": "Audit log",
+  "schoolSettingsAuditFilters": "Filter the audit log",
+  "schoolSettingsAuditFilterPerson": "Person",
+  "schoolSettingsAuditFilterAction": "Action",
+  "schoolSettingsAuditFilterWhen": "When",
+  "schoolSettingsAuditRangeToday": "Today",
+  "schoolSettingsAuditRangeLast7": "Last 7 days",
+  "schoolSettingsAuditRangeLast30": "Last 30 days",
+  "schoolSettingsAuditRangeLast90": "Last 90 days",
+  "schoolSettingsAuditClearFilters": "Clear filters",
+  "schoolSettingsAuditGroupSignIn": "Sign-in",
+  "schoolSettingsAuditGroupStaff": "Staff",
+  "schoolSettingsAuditGroupRoles": "Roles",
+  "schoolSettingsAuditGroupSchool": "School",
+  "schoolSettingsAuditActionAuthSignIn": "Signed in",
+  "schoolSettingsAuditActionAuthSignInFailed": "Could not sign in",
+  "schoolSettingsAuditActionAuthSignOut": "Signed out",
+  "schoolSettingsAuditActionAuthPasswordReset": "Reset their password",
+  "schoolSettingsAuditActionAuthTwoStepEnabled": "Turned on two-step sign-in",
+  "schoolSettingsAuditActionUserInvited": "Invited staff",
+  "schoolSettingsAuditActionUserInviteAccepted": "Accepted an invitation",
+  "schoolSettingsAuditActionUserRoleChanged": "Changed a role",
+  "schoolSettingsAuditActionUserDeactivated": "Deactivated staff",
+  "schoolSettingsAuditActionUserReactivated": "Reactivated staff",
+  "schoolSettingsAuditActionUserTwoStepReminded": "Reminded about two-step sign-in",
+  "schoolSettingsAuditActionUserPasswordResetSent": "Sent a password reset link",
+  "schoolSettingsAuditActionUserSignedOutEverywhere": "Signed someone out everywhere",
+  "schoolSettingsAuditActionRoleCreated": "Created a role",
+  "schoolSettingsAuditActionRoleUpdated": "Changed a role’s details",
+  "schoolSettingsAuditActionRoleDeleted": "Deleted a role",
+  "schoolSettingsAuditActionRolePermissionsChanged": "Changed what a role can do",
+  "schoolSettingsAuditActionRolePreviewStarted": "Started a role preview",
+  "schoolSettingsAuditActionRolePreviewEnded": "Ended a role preview",
+  "schoolSettingsAuditActionSettingsUpdated": "Changed School settings",
+  "schoolSettingsAuditActionSupportSessionStarted": "Quad support visit started",
+  "schoolSettingsAuditActionSupportSessionEnded": "Quad support visit ended",
+  "schoolSettingsAuditActionAuditExported": "Exported the audit log",
+  "schoolSettingsAuditActionSensitiveAccessed": "Viewed sensitive records",
+  "schoolSettingsAuditExport": "Export CSV",
+  "schoolSettingsAuditExported": "Audit log exported",
+  "schoolSettingsAuditTable": "Audit log entries",
+  "schoolSettingsAuditColWhen": "When",
+  "schoolSettingsAuditColWho": "Who",
+  "schoolSettingsAuditColWhat": "What",
+  "schoolSettingsAuditQuadSupport": "Quad support",
+  "schoolSettingsAuditSystem": "System",
+  "schoolSettingsAuditOpen": "Open the details of {summary}",
+  "@schoolSettingsAuditOpen": {
+    "placeholders": {
+      "summary": {
+        "type": "Object"
+      }
+    }
+  },
+  "schoolSettingsAuditEmpty": "Nothing recorded yet",
+  "schoolSettingsAuditEmptyFiltered": "Nothing matches these filters",
+  "schoolSettingsAuditShowMore": "Show more entries",
+  "schoolSettingsAuditLoadFailed": "We couldn’t load the audit log.",
+  "schoolSettingsAuditDetailEyebrow": "Audit entry",
+  "schoolSettingsAuditDetailWhen": "When",
+  "schoolSettingsAuditDetailWho": "Who",
+  "schoolSettingsAuditDetailAction": "Action",
+  "schoolSettingsAuditDetailIp": "IP address",
+  "schoolSettingsAuditDetailNoIp": "Not recorded",
+  "schoolSettingsAuditDetailViaSupport": "Done by Quad support during a support visit. The school isn’t told which member of the Quad team it was.",
+  "schoolSettingsAuditDetailChanges": "What changed",
+  "schoolSettingsAuditDetailField": "Field",
+  "schoolSettingsAuditDetailBefore": "Before",
+  "schoolSettingsAuditDetailAfter": "After",
+  "schoolSettingsAuditDetailNone": "None",
+  "schoolSettingsAuditDetailDetails": "Details",
+  "schoolSettingsAuditDetailClose": "Back to the log"
 }

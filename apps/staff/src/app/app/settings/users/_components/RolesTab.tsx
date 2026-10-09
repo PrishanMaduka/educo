@@ -7,12 +7,13 @@ import { useTranslation } from 'react-i18next';
 import { isAction, isModule, matrixColumns, matrixRows } from './matrix-labels';
 import { draftFor, hasUnsaved, permissionsBody, toggleCell, toggleSensitive } from './role-draft';
 import { RolesList } from './RolesList';
-import { SaveBar } from './SaveBar';
 import { SensitiveSwitches } from './SensitiveSwitches';
 
 import type { RoleDraft, RoleEdit } from './role-draft';
 import type { UsersActions } from './use-users-data';
 import type { Role, RoleList, SensitiveKey } from '@quad/contracts';
+
+import { SaveBar } from '@/components/SaveBar';
 
 export interface RolesTabProps {
   roles: RoleList;
@@ -108,7 +109,9 @@ export function RolesTab({
       </Card>
       {dirty ? (
         <SaveBar
-          roleName={role.name}
+          message={t('roles.saveBar.unsaved', { role: role.name })}
+          discardLabel={t('roles.saveBar.discard')}
+          saveLabel={t('roles.saveBar.save')}
           saving={actions.savePermissions.isPending}
           onDiscard={() => {
             onEdit(null);
