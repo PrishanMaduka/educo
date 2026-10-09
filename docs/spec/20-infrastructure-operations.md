@@ -186,7 +186,7 @@ Deploy access uses GitHub OIDC to assume an AWS role per environment; there are 
 
 ## Support intake
 
-- **In-app Help:** staff portal (profile menu → Help) and parent app (More → Help) open a short form (topic, message, optional screenshot) that creates a `support_tickets` row with the tenant, reporter, app version and page. Parents' tickets go to the school first (Communications inbox); the school can escalate to Quad.
+- **In-app Help:** staff portal (profile menu → Help) and parent app (Profile → Help) open a short form (topic, message, optional screenshot) that creates a `support_tickets` row with the tenant, reporter, app version and page. Parents' tickets go to the school first (Communications inbox); the school can escalate to Quad.
 - **Email:** `support@quad-edu.com` (Google Workspace) is forwarded to an inbound address processed by the worker, which matches the sender to an account and creates or updates a `support_tickets` row.
 - **Console:** Support tickets view (list by status and school, assign, reply by email, link to the school page). Open tickets feed school health ([10](10-early-warning.md#schools-console)).
 

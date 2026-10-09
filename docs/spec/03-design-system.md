@@ -243,7 +243,7 @@ The staff Family connection heatmap uses `heat-0` (pink, no contact) to `heat-3`
 
 ### Ask Quad
 - **Staff and console:** the top-bar pill and a floating pill at the bottom right, both `navy-card` with cream text and a lime spark, the same in every school. The floating pill moves up 92 px when a sticky save bar is shown, and is hidden while the panel is open.
-- **Parent app:** a 40 px round navy button with a lime spark in the **Home (Today) header**, next to notifications, the same in every school. There is no floating button. Ask Quad is also a row in More and opens with the `/` key where a keyboard is attached. The panel is a navy-and-lime bottom sheet; the parent's own messages take the school colour (`brand-fill`).
+- **Parent app:** a 40 px round navy button with a lime spark in the **Today header**, next to the messages button and notifications, the same in every school. There is no floating button. Ask Quad is also a row in Profile and opens with the `/` key where a keyboard is attached. The panel is a navy-and-lime bottom sheet; the parent's own messages take the school colour (`brand-fill`).
 
 ### Public landing page
 Reference: `design/landing.html`. The public site is specified in [19](19-public-site.md#design-tokens-to-add) and speaks the same language as the apps (navy, cream, lime, pink, sky and orange, Bricolage Grotesque, flat avatars). Its `site-*` tokens stay public-only and are not used in the apps; the apps use the tokens in this document.

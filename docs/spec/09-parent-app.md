@@ -8,29 +8,32 @@ There is **one Quad parent app** for every school, listed in the stores as **"Qu
 
 ## Principles
 - **Display only.** The app shows what the API computes (summaries, levels, totals, grades). It never recalculates business rules.
-- **One login for every child.** A child switcher appears on screens that are about one child (chips, plus a swipe on the Home card).
+- **One login for every child.** A child switcher appears on screens that are about one child (chips, plus a swipe on the Today card).
 - **Story first.** Each screen opens with one plain sentence ("Amaya's average is 87%, 6 points above her class. Strongest in Art and Mathematics."), then one main element, then grouped cards.
-- **Fast.** Home loads from one call (`GET /family/home`) and is cached for offline use. It refreshes on pull-down and on realtime events.
+- **Fast.** Today loads from one call (`GET /family/home`) and is cached for offline use. It refreshes on pull-down and on realtime events.
 
 ## Navigation
-Tab bar: **Home**, **Circle** (unread moments badge), **Payments** (due badge), **Messages** (unread badge), **More**. The active tab is a pill in the school colour (`brand-fill`) around the icon, with the label in `ink`; badges are pink with navy text ([03](03-design-system.md#parent-tab-bar)). Children's profiles are under More and in the "Profiles" chip after the child switcher on Home.
+Tab bar, four tabs (owner decision, D35): **Today** (the screen earlier specs call Home; it still loads from `GET /family/home`), **Circle** (unread moments badge), **Pay** (due badge) and **Profile**. The active tab is a pill in the school colour (`brand-fill`) around the icon, with the label in `ink`; badges are pink with navy text ([03](03-design-system.md#parent-tab-bar)).
 
-The five tabs follow `design/parent.html`. The `system.html` sample shows four tabs (Today, Circle, Ask, Pay); which one ships is awaiting the owner (D34), and until then this spec's five tabs stand.
+- **Messages is not a tab.** It opens from the messages button in the Today header (with the unread badge), next to Ask Quad and notifications, and from the top of Profile. The screen itself is unchanged ([Messages](#messages)).
+- **Profile replaces More** and keeps everything More had: children and family, the calendar, news, the staff directory, contact details, settings, the school switch and sign-out ([Profile](#profile)).
+- Children's profiles are under Profile and in the "Profiles" chip after the child switcher on Today.
+- Where other specs say parent "Home", "More" or the "Messages tab", read Today, Profile and the messages button.
 
 ## Start-up
 1. **Splash.** First launch: Quad-branded (the Quad mark on Quad navy, no school). Later launches: the remembered school's logo, colour and name with "powered by Quad", read from the cached branding of the last school used. The native splash (set at build time) is always the Quad mark; the school splash is drawn by Flutter as soon as the cache is read.
 2. **Lock screen** (returning users with biometrics on): "Welcome back", Face ID or fingerprint, and "Use passcode". It is shown at launch and when the app returns after more than 5 minutes in the background.
 3. **Sign-in** (first time, Quad-branded; flow and rules in [05](05-auth-tenancy-rbac.md#parent-app)):
    - **Welcome** (Quad-branded, the same for every school): Quad navy with the Quad logo, the flat illustrated circle of people from the landing page (sample cast faces with doodles; [03](03-design-system.md#illustration-and-avatars)), the headline "Hear the **good** stuff first." with "good" on a pink pill, "Attendance, results, fees and messages for your children, in one app.", **Sign in** (a pink button with navy text), **I have an invite code** (outlined on navy) and "Your school's name and colours appear once you're signed in." The sign-in steps that follow are Quad-branded too (navy and pink).
-   - **Phone:** a country-code picker and the mobile number, **Send code**, and "Use email instead".
+   - **Phone:** the country code and the mobile number, **Send code**, and "Use email instead". Only Sri Lankan numbers (`+94`) are accepted for now (OQ12); more countries are added only by owner decision (D35), and the country list is data so adding one needs no app release.
    - **Code:** 6 boxes with auto-advance, paste and SMS autofill (`one-time-code`), "It works for 10 minutes", and resend after 30 s.
    - **Found you:** "You're signed in. Welcome, Dilhani. We found 2 children at Colombo International School." with the children's avatars. From here the app uses the school's branding. With several schools, the school picker (logo, name, children) comes first.
    - **Unlock with Face ID?** (Turn on Face ID / Not now), then **Allow notifications?** (the system prompt, preceded by one sentence on what the school sends).
 4. **Invite code:** a QR scanner with "Paste your invite link instead". A valid invite shows "{school} invited {name}" and continues at the phone step with the number filled in.
 
-## Home
+## Today
 Order from top to bottom:
-1. **Greeting header:** no card or illustration: a small time-of-day icon (sunrise, sun, sunset or moon, on a round tint; see [03](03-design-system.md#the-greeting-section-time-of-day)) with the date as an uppercase eyebrow, then "Good morning / afternoon / evening, {first name}" on one line (Bricolage Grotesque 800, 27 px). On the right: the **Ask Quad** button (a 40 px round navy button with a lime spark, the same in every school, labelled "Ask Quad") and the notifications bell (a pink dot when there is something new).
+1. **Greeting header:** no card or illustration: a small time-of-day icon (sunrise, sun, sunset or moon, on a round tint; see [03](03-design-system.md#the-greeting-section-time-of-day)) with the date as an uppercase eyebrow, then "Good morning / afternoon / evening, {first name}" on one line (Bricolage Grotesque 800, 27 px). On the right, three round buttons: **Ask Quad** (40 px, navy with a lime spark, the same in every school, labelled "Ask Quad"), **Messages** (with the unread count as a badge, labelled "Messages, {n} unread") and the notifications bell (a pink dot when there is something new).
 2. **Stories:** round tiles (Sports, STEM lab, Lunch, Principal, Art week). Tapping one opens full-screen slides: tap to advance, hold to pause, swipe down to close, double-tap or the heart button for a heart (`POST /family/stories/:id/heart`), and "Reply to the school" (sent to the office as a message).
 3. **Child switcher:** small pills (24 px avatar and first name) and a round Profiles icon button at the end of the row.
 4. **{child}'s day** (the day ring, see [12](12-moments-messaging.md#the-day-as-it-happens)): a ring of today's lessons from the start to the end of the school day, done lessons solid and upcoming ones faded, a "now" hand and event dots (arrived, registered, moment, lunch, bus). Beside it a LIVE headline ("Two of seven lessons done") and a sentence ("Arrived 07:42, registered present and a moment from Ms. Jayasinghe"); under it "Right now: Science with Ms. Fernando". Tap → **Day** screen: the larger ring, "So far today" timeline, and "Still to come".
@@ -45,9 +48,9 @@ Order from top to bottom:
 10. **School news:** a horizontal scroll of cards; each opens the article.
 11. "Updated at {time} · pull down to refresh".
 
-Moments and the "Improving" good news are not on Home; they live in the Circle tab and on How {child} is doing.
+Moments and the "Improving" good news are not on Today; they live in the Circle tab and on How {child} is doing.
 
-Ask Quad opens from the button in the greeting header, from its row in More, and with the `/` key where a keyboard is attached. There is no floating button. It opens as a bottom sheet in Quad navy and lime; the parent's own questions take the school colour ([11](11-ask-quad.md)).
+Ask Quad opens from the button in the greeting header, from its row in Profile, and with the `/` key where a keyboard is attached. There is no floating button. It opens as a bottom sheet in Quad navy and lime; the parent's own questions take the school colour ([11](11-ask-quad.md)).
 
 ## Circle tab
 The tab opens with a segmented control: **Moments · People · Learning**. The Moments segment shows its own unseen count when another segment is open. Moments are marked seen only while the Moments segment is showing. Specification of the parts: [12](12-moments-messaging.md#quad-circle).
@@ -104,17 +107,18 @@ Each one opens with a one-sentence summary and works for both children.
 | How {child} is doing | A summary | Attendance meter, learning by subject with trend, homework, behaviour, wellbeing; plain-language status for each |
 
 ## Payments
+The **Pay** tab.
 - Total due with Pay now; invoices (due, paid); trips with consent and cost; payment history with receipts.
 - **Pay sheet** (bottom sheet):
-  - Shows the invoice and the amount (full, or a part payment if the school allows it). The methods shown follow the school's payment settings: card via PayHere (saved card or add card/wallet), Stripe for international cards, Apple Pay or Google Pay where the school's gateway supports them, bank transfer (shows the details and a reference), and "Pay in 3 instalments".
+  - Shows the invoice and the amount (full, or a part payment if the school allows it). The methods shown follow the school's payment settings. Parents see generic names, **Card** (a saved card, or add a card), **Apple Pay / Google Pay** where the school's gateway supports them, **Bank transfer** (shows the details and a reference) and "Pay in 3 instalments", never the gateway's name. The gateway behind them (PayHere, Stripe or another adapter) is configured per school ([13](13-fees-payments-finance.md), D35).
   - The parent confirms with **slide to pay** and Face ID, and sees a success state with confetti and a receipt.
   - The handshake with the gateway is in [Payments handshake](#payments-handshake).
-- **Canteen wallet** (per child, from Home quick actions): "{child} has {balance} on their canteen card – about {n} days of lunches.", the balance with a bar ("Running low – a top-up would help this week"), **Top up** amounts (500, 1,000, 2,000, 5,000; minimum 1,000 unless the school sets lower) paid through the school's gateway exactly like an invoice, a **daily spending limit** slider (200–2,000 in steps of 50, saved with `PUT /family/wallet/limit`), **Today's lunch** from the canteen menu, and recent purchases. Balance changes arrive live (`wallet.updated`).
+- **Canteen wallet** (per child, from Today's quick actions): "{child} has {balance} on their canteen card – about {n} days of lunches.", the balance with a bar ("Running low – a top-up would help this week"), **Top up** amounts (500, 1,000, 2,000, 5,000; minimum 1,000 unless the school sets lower) paid through the school's gateway exactly like an invoice, a **daily spending limit** slider (200–2,000 in steps of 50, saved with `PUT /family/wallet/limit`), **Today's lunch** from the canteen menu, and recent purchases. Balance changes arrive live (`wallet.updated`).
 
 ## Messages
-Threads with teachers and offices: unread first, a new message to a staff member from the child's contacts or the directory, quick replies, "Seen" receipts and a typing indicator. Swipe a thread for **Mark read / unread**, **Mute** (for a day, a week or until turned back on; muted threads get no push) and **Archive** (moves it to "Archived" at the bottom of the list; a new message brings it back). Under the composer, a quiet-hours line (see [12](12-moments-messaging.md#good-relationships-by-design)). A school bulletins section is included.
+Opened from the messages button in the Today header and from the top of Profile (not a tab). Threads with teachers and offices: unread first, a new message to a staff member from the child's contacts or the directory, quick replies, "Seen" receipts and a typing indicator. Swipe a thread for **Mark read / unread**, **Mute** (for a day, a week or until turned back on; muted threads get no push) and **Archive** (moves it to "Archived" at the bottom of the list; a new message brings it back). Under the composer, a quiet-hours line (see [12](12-moments-messaging.md#good-relationships-by-design)). A school bulletins section is included.
 
-## School life (from More and from to-dos)
+## School life (from Profile and from to-dos)
 - **Parents' evening:**
   - Shows the event details, then one card per teacher who teaches the child, each with time-slot buttons.
   - Taken slots are disabled. You can book only one slot per teacher and never two at the same time.
@@ -137,10 +141,12 @@ Threads with teachers and offices: unread first, a new message to a staff member
 - **News:** a featured story and "Earlier" list; each opens the **article screen** (cover image, tag, date, title, lead paragraph, body, and "More news").
 - **Staff directory:** "Message the right person directly. Most staff reply within the school day.", a search box, and rows for the child's teachers, the principal and the offices (finance, admissions, sick bay, transport desk) with their role and hours. Tapping a row starts or opens a thread.
 
-## More
+## Profile
+The fourth tab. It replaces More and keeps everything More had.
 - A profile card with the guardian and child chips.
-- **Children:** My children (profiles), How {child} is doing for each child, Circle.
-- **School life:** Ask Quad (also on the `/` key and in the Home header), parents' evening, forms, exams, trips & bookings.
+- **Messages** at the top, with the unread count.
+- **Children and family:** My children (profiles), How {child} is doing for each child, Circle (people and family).
+- **School life:** Ask Quad (also on the `/` key and in the Today header), parents' evening, forms, exams, trips & bookings.
 - **Information:** school calendar, news, staff directory.
 - **Account:**
   - **Contact details:** mobile, email and home address with **Submit changes**. "The school office reviews changes before they reach student records." Pending changes show "Waiting for the school" until approved. A new mobile or email also needs a code sent to it (see [05](05-auth-tenancy-rbac.md#account-edge-cases));
@@ -163,7 +169,7 @@ Every link exists in two forms: the custom scheme `quad://…` (used in push pay
 
 | Path (after `quad://` or `https://quad-edu.com/p/`) | Opens |
 |---|---|
-| `home` | Home |
+| `home` | Today |
 | `moments/{momentId}` | Circle → Moments, scrolled to the moment |
 | `circle/people?child={id}`, `circle/learning?child={id}` | Circle → People or Learning |
 | `circle/recap/{week}?child={id}` | Last week with {child} |
@@ -175,7 +181,7 @@ Every link exists in two forms: the custom scheme `quad://…` (used in push pay
 | `reports/{cycleId}?child={id}` | Reports, with that report open |
 | `attendance?child={id}&date={date}` | Attendance, on that day |
 | `bus/{routeId}` | Bus |
-| `pay/{invoiceId}` | Payments, with the pay sheet open |
+| `pay/{invoiceId}` | Pay, with the pay sheet open |
 | `payments/{paymentId}` | Payment result and receipt |
 | `wallet?child={id}` | Canteen wallet |
 | `trips/{tripId}` | Trips & bookings |
@@ -186,7 +192,7 @@ Every link exists in two forms: the custom scheme `quad://…` (used in push pay
 | `pickup/{passToken}` | A shared pickup pass (today only) |
 
 ## Offline and performance
-- Cache Home, the timetable, the last 50 moments, messages and invoices (Riverpod providers backed by a `drift` SQLite cache). Show "Updated at …" and an offline banner.
+- Cache Today, the timetable, the last 50 moments, messages and invoices (Riverpod providers backed by a `drift` SQLite cache). Show "Updated at …" and an offline banner.
 - Payments, bookings and form signing need a connection; queue nothing for them.
 - Images: thumbnails at 2× the display size, served as WebP or AVIF from the CDN.
 

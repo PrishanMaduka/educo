@@ -31,7 +31,7 @@ All routes are served from `https://quad-edu.com/api/v1` (the same origin as the
 - `POST /public/enquiry/:embedKey` (rate-limited, captcha) → `tenant_by_embed_key` → creates a lead or applicant
 - `POST /webhooks/payhere`, `POST /webhooks/stripe` (signature verified first, then `tenant_by_gateway_account`; idempotent on the gateway event id)
 - `POST /webhooks/ses` (SES bounce and complaint events from SNS, sent as `text/plain`, body at most 300 KB; first checked: topic pinned to `SES_SNS_TOPIC_ARN`, `SigningCertURL` exactly `https://sns.<topic region>.amazonaws.com/SimpleNotificationService-<32 hex>.pem`, signature version 2 against that single, currently valid certificate, and a one-hour replay window; then `record_email_suppression`, which never replaces a `manual` entry; no tenant; 200 `{status: 'ok'}`, 403 `forbidden` for anything unverified, 400 `validation` for a body that is not JSON, 413 for a larger body. See [20](20-infrastructure-operations.md))
-- `GET /calendar/:token.ics` (a signed calendar-feed token; see [09](09-parent-app.md#school-life-from-more-and-from-to-dos))
+- `GET /calendar/:token.ics` (a signed calendar-feed token; see [09](09-parent-app.md#school-life-from-profile-and-from-to-dos))
 
 ### Platform (console)
 - `GET /platform/overview` → counts, MRR series (6M/12M), plan mix, system status, needs-you-today list, activity feed

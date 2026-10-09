@@ -88,6 +88,7 @@ Tables `moments` (with `skill`), `learning_posts`, `learning_tries`, `family_cir
 Tables `moments`, `moment_reactions` and `moment_reads` (see [04](04-data-model.md#communication-t)). Events `moment.created` and `moment.reaction.created`. Push category `moments` ("Ms. Jayasinghe shared a moment of Amaya").
 
 ## Messages
+- In the parent app, Messages is not a tab: it opens from the messages button (with the unread badge) in the Today header and from the top of Profile ([09](09-parent-app.md#navigation), D35).
 - Threads between guardians and staff, or between guardians and an office (Finance Office, Admissions).
 - A parent can start a thread with the class teacher, the child's subject teachers, or an office.
 - A teacher can start one with the guardians of a student in their classes.
@@ -117,7 +118,7 @@ The cost of SMS is shown before sending (`POST /broadcasts/preview`), at the sch
 | `messages` | new message | push |
 | `events` | booking opens, form to sign, report ready, exam timetable published | push |
 
-- Guardians control each category in More, Notifications, plus **SMS backup** (`guardians.sms_backup`), which also sends `absence` alerts and urgent broadcasts by SMS. The prototype groups the switches differently; these seven categories win. The school can mark a broadcast "urgent", which overrides the preferences.
+- Guardians control each category in Profile → Notifications, plus **SMS backup** (`guardians.sms_backup`), which also sends `absence` alerts and urgent broadcasts by SMS. The prototype groups the switches differently; these seven categories win. The school can mark a broadcast "urgent", which overrides the preferences.
 - Push uses Firebase Cloud Messaging (HTTP v1 API via `firebase-admin` in the API), with one Firebase project per environment (`quad-dev`, `quad-staging`, `quad-prod`); iOS delivery goes through APNs with an APNs auth key uploaded to each Firebase project. A token that FCM reports as unregistered is removed.
 - Every notification is also stored in `notifications` for the in-app list.
 - The quiet hours rule applies to staff pushes, not to guardians.
