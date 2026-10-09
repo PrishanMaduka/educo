@@ -1059,7 +1059,9 @@ try { const t = localStorage.getItem('quad-parent-theme'); if (t) document.docum
 const kid = () => KIDS[S.kid];
 /* Flat initials: an accent circle with navy initials (chart colours map to the nearest accent; the school colour keeps its own ink) */
 const AVMAP = {'var(--c1)':'var(--pink)','var(--c2)':'var(--sky)','var(--c3)':'var(--sky)','var(--c4)':'var(--orange)','var(--c5)':'var(--lime)','var(--info)':'var(--sky)','var(--good)':'var(--lime)','var(--warn)':'var(--orange)','var(--gold)':'var(--lime)'};
-const av = (n, c, cls='') => `<div class="av ${cls}" style="${c === 'var(--brand)' ? '--avc:var(--brand-fill);color:var(--brand-ink)' : `--avc:${AVMAP[c] || c}`}">${n.split(' ').map(w=>w[0]).slice(0,2).join('')}</div>`;
+/* First and last initial, without a title: "Ms. Grace Okafor" is GO (the same rule as initials() in system/faces.js) */
+const avInit = n => { const t = String(n).replace(/^(Mr|Mrs|Ms|Miss|Dr|Coach|Nurse)\.?\s+/i, '').trim().split(/\s+/).filter(Boolean); return ((t[0] || '?')[0] + (t.length > 1 ? t[t.length - 1][0] : '')).toUpperCase(); };
+const av = (n, c, cls='') => `<div class="av ${cls}" style="${c === 'var(--brand)' ? '--avc:var(--brand-fill);color:var(--brand-ink)' : `--avc:${AVMAP[c] || c}`}">${avInit(n)}</div>`;
 const kidSwitch = (prof) => `<div class="kids" role="group" aria-label="Choose child">${KIDS.map((k, i) => `<button class="kid ${i===S.kid?'on':''}" data-act="kid" data-i="${i}" aria-pressed="${i===S.kid}">${av(k.name, k.color, 'xs')}${k.first}</button>`).join('')}${prof ? `<button class="kid kid-all" data-act="push" data-to="children" aria-label="Profiles" title="Profiles">${ic('kids',16)}</button>` : ''}</div>`;
 const pill = (t, tone) => `<span class="pill ${tone}">${t}</span>`;
 const row = (icon, tone, title, sub, right='', act='', extra='') => `<button class="row" ${act}>${icon?`<div class="ico ${tone}">${ic(icon,19)}</div>`:''}<div class="m"><b>${title}</b>${sub?`<small>${sub}</small>`:''}</div>${right?`<div class="r">${right}</div>`:''}${extra}<span class="chev">${ic('chev',18)}</span></button>`;
@@ -1077,10 +1079,10 @@ const STORIES = [
   /* Each story wears one accent (categories, never status): the row's circle, the viewer's glow and its icon */
   {name:'Sports', icon:'trophy', acc:'sky', slides:[
     {t:'Six golds in the pool', p:'Our Under-14 swimmers won the city inter-school championship on Saturday.', d:['star', 'lime']},
-    {t:'A new meet record', p:'Grade 9’s 4 × 50 m relay team touched in 2:04.31.', d:['sun', 'orange']}]},
+    {t:'A new meet record', p:'Year 9’s 4 × 50 m relay team touched in 2:04.31.', d:['sun', 'orange']}]},
   {name:'STEM lab', icon:'chart', acc:'lime', slides:[
     {t:'The STEM lab is open', p:'Robotics kits, 3D printers and an electronics bench for Grades 6–13.', d:['kite', 'orange']},
-    {t:'First build: line-following robots', p:'Grade 7 had theirs racing round the track by Friday.', d:['plane', 'sky']}]},
+    {t:'First build: line-following robots', p:'Year 7 had theirs racing round the track by Friday.', d:['plane', 'sky']}]},
   {name:'Lunch', icon:'food', acc:'orange', slides:[
     {t:'Today’s lunch', p:'Chicken pasta or vegetable curry with rice, garden salad, and apple crumble for dessert.', d:['heart', 'pink']}]},
   {name:'Head', icon:'user', acc:'pink', slides:[
@@ -1525,7 +1527,7 @@ SCR.home = () => {
   ${sec('Quick links')}
   <div class="qa">${qa.map(([to, t, i, l]) => `<button data-act="push" data-to="${to}"><span class="i ${FA[to] || t}">${ic(i,22)}</span>${l}</button>`).join('')}</div>
   ${sec('Coming up', 'Calendar', 'data-act="push" data-to="calendar"')}
-  <div class="card">${[['08','Oct','Parent–teacher meeting','Grade 4 · 4:00 pm · Main hall'],['18','Oct','Open day','All day · Campus tours'],['23','Oct','Museum field trip','Grade 4 · consent needed'],['26','Oct','Half-term · school closed','26–30 Oct · back on Mon 2 Nov','off']].map(([d,m,t,s,c]) => `<div class="row event"><div class="date ${c||''}"><b>${d}</b><small>${m}</small></div><div class="m"><b>${t}</b><small>${s}</small></div></div>`).join('')}</div>
+  <div class="card">${[['08','Oct','Parent–teacher meeting','Year 4 · 4:00 pm · Main hall'],['18','Oct','Open day','All day · Campus tours'],['23','Oct','Museum field trip','Year 4 · consent needed'],['26','Oct','Half-term · school closed','26–30 Oct · back on Mon 2 Nov','off']].map(([d,m,t,s,c]) => `<div class="row event"><div class="date ${c||''}"><b>${d}</b><small>${m}</small></div><div class="m"><b>${t}</b><small>${s}</small></div></div>`).join('')}</div>
   ${sec('School news', 'See all', 'data-act="push" data-to="news"')}
   <div class="hscroll">${NEWS.map((n, i) => newsCard(n, i)).join('')}</div>
   <p class="upd" id="upd">Updated ${S.updated} · pull down to refresh</p><div style="height:44px" aria-hidden="true"></div>` };
@@ -1847,7 +1849,7 @@ SCR.news = () => ({ title:'News', body: `${sum(`${cap(numWord(NEWS.length))} sto
 SCR.article = (p) => { const i = +p.i || 0, n = NEWS[i]; return { title:'News', body: `<article class="card news art"><div class="img">${momArt(n.art)}<span class="tag">${n.tag}</span></div><div class="tx"><small>${n.d} · ${esc(SCHOOL.short)}</small><h2>${n.t}</h2><p class="lead">${n.body}</p><p>${n.more}</p></div></article>
   ${secX('More news')}<div class="card list">${NEWS.map((x, j) => j === i ? '' : `<button class="it" data-act="push" data-to="article" data-i="${j}"><span class="nthumb">${momArt(x.art)}</span><div class="tx"><b>${x.t}</b><small>${x.d}</small></div></button>`).join('')}</div>` }; };
 SCR.directory = () => ({ title:'Staff directory', body: `${sum('Message the right person directly. Most staff reply within the school day.')}<input class="input" id="dirSearch" placeholder="Search staff or department" aria-label="Search staff"><div class="card" id="dirList">${dirRows('')}</div>` });
-const STAFF = [['Ms. Emma Nakamura','Head of school'],['Ms. Grace Okafor','Grade 4 class teacher'],['Mr. Omar Haddad','Grade 9 form tutor · Mathematics'],['Finance Office','Fees, invoices and receipts'],['Admissions Office','Enquiries and enrolment'],['Sick bay','School nurse · 8 am – 3 pm'],['Transport desk','Bus routes and changes']];
+const STAFF = [['Ms. Emma Nakamura','Head of school'],['Ms. Grace Okafor','Year 4 class teacher'],['Mr. Omar Haddad','Year 9 form tutor · Mathematics'],['Finance Office','Fees, invoices and receipts'],['Admissions Office','Enquiries and enrolment'],['Sick bay','School nurse · 8 am – 3 pm'],['Transport desk','Bus routes and changes']];
 const dirRows = q => STAFF.filter(s => (s[0] + s[1]).toLowerCase().includes(q.toLowerCase())).map(([n, r]) => `<button class="row" data-act="toast" data-msg="Message started with ${esc(n)}">${av(n,avc(n),'sm')}<div class="m"><b>${n}</b><small>${r}</small></div><span style="color:var(--brand-text)">${ic('msg',18)}</span></button>`).join('') || '<div class="pad" style="color:var(--ink-3)">No staff match that search.</div>';
 SCR.contact = () => ({ title:'Contact details', body: `${sum('Keep these up to date so the school can always reach you.')}<form id="contactForm" class="card pad absf">
   <div class="field"><label for="c_ph">Mobile</label><input class="input" id="c_ph" type="tel" value="+1 415 555 0134"></div>
