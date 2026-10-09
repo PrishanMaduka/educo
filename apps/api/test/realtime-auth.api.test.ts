@@ -6,6 +6,7 @@ import { hashSessionToken, newSessionToken } from '../src/common/session/cookies
 import { RealtimeService, originAllowed, roomsFor } from '../src/realtime/realtime.service';
 import { CONSOLE_SESSIONS } from '../src/tokens';
 
+import { RecordingDelivery } from './fakes/delivery';
 import { useDatabaseApp } from './helpers/database-app';
 import {
   insertAccount,
@@ -16,6 +17,12 @@ import {
   sessionHeaders,
   signedInMember,
 } from './helpers/identity';
+import {
+  insertParentMember,
+  insertPhoneAccount,
+  signInByPhone,
+  signedInParent,
+} from './helpers/parent';
 
 import type { ConsoleSessionLookup } from '../src/common/session/request-auth';
 import type { Socket } from 'socket.io-client';
@@ -37,9 +44,10 @@ const fakeConsoleSessions: ConsoleSessionLookup = {
 })
 class FakeConsoleSessionsModule {}
 
+const delivery = new RecordingDelivery();
 const { db, app } = useDatabaseApp(
   {},
-  { listen: true, overrides: { testModules: [FakeConsoleSessionsModule] } },
+  { listen: true, overrides: { testModules: [FakeConsoleSessionsModule], delivery } },
 );
 
 const WEB = 'http://localhost:3000';
@@ -56,13 +64,14 @@ function url(): string {
   return `http://127.0.0.1:${String(address.port)}`;
 }
 
-/** Connects like a browser (Origin and cookie) or the parent app (neither). */
-function connect(headers: Record<string, string>): Socket {
+/** Connects like a browser (Origin and cookie) or the parent app (no Origin; `auth.token`). */
+function connect(headers: Record<string, string>, token?: string): Socket {
   const socket = io(url(), {
     path: '/socket.io',
     transports: ['websocket'],
     extraHeaders: headers,
     reconnection: false,
+    ...(token === undefined ? {} : { auth: { token } }),
   });
   opened.push(socket);
   return socket;
@@ -161,6 +170,43 @@ describe('Socket.IO handshake (spec 06 → Realtime, D28 follow-up)', () => {
   });
 });
 
+describe("the parent app's access token in auth.token (Task 9)", () => {
+  it("joins only user:{id} for a guardian: never the school's staff room", async () => {
+    const school = await insertSchool(db());
+    const account = await insertPhoneAccount(db());
+    const userId = await insertParentMember(db(), school.id, account.id, 'guardian');
+    const pair = await signedInParent(app, delivery, account.phone);
+    const socket = connect({}, pair.accessToken);
+    await connected(socket);
+    const events = received(socket, 'probe');
+    realtime().emitTo(`tenant:${school.id}`, 'probe', { to: 'tenant' });
+    realtime().emitTo(`user:${userId}`, 'probe', { to: 'user' });
+    expect(await events).toEqual([{ to: 'user' }]);
+  });
+
+  it("joins nothing with a relative's token, a select_school token or a forged token", async () => {
+    const school = await insertSchool(db());
+    const relative = await insertPhoneAccount(db());
+    const relativeId = await insertParentMember(db(), school.id, relative.id, 'relative');
+    const relativePair = await signedInParent(app, delivery, relative.phone);
+    const chooser = await insertPhoneAccount(db());
+    const chooserId = await insertParentMember(db(), school.id, chooser.id, 'guardian');
+    await insertParentMember(db(), (await insertSchool(db())).id, chooser.id, 'guardian');
+    const choosing = await signInByPhone(app, delivery, chooser.phone);
+    const sockets = [
+      connect({}, relativePair.accessToken),
+      connect({}, String(choosing.accessToken)),
+      connect({}, `${relativePair.accessToken.slice(0, -2)}xx`),
+    ];
+    await Promise.all(sockets.map(connected));
+    const events = sockets.map((socket) => received(socket, 'probe'));
+    realtime().emitTo(`tenant:${school.id}`, 'probe', { to: 'tenant' });
+    realtime().emitTo(`user:${relativeId}`, 'probe', { to: 'relative' });
+    realtime().emitTo(`user:${chooserId}`, 'probe', { to: 'chooser' });
+    expect(await Promise.all(events)).toEqual([[], [], []]);
+  });
+});
+
 describe('roomsFor and originAllowed', () => {
   it('names the rooms of each kind of socket', () => {
     expect(roomsFor(null)).toEqual([]);
@@ -170,6 +216,7 @@ describe('roomsFor and originAllowed', () => {
       'tenant:t',
       'user:u',
     ]);
+    expect(roomsFor({ kind: 'parent', userId: 'u' })).toEqual(['user:u']);
   });
 
   it('allows the two Quad origins and no Origin, and nothing else', () => {

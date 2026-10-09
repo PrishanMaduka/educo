@@ -2,19 +2,23 @@ import { Inject, Injectable } from '@nestjs/common';
 import {
   accounts,
   and,
+  asc,
   credentials,
+  desc,
   eq,
   gt,
   identities,
   isNull,
+  roles,
   sql,
   trustedDevices,
+  userRoles,
   users,
 } from '@quad/db';
 
 import { TENANT_DB } from '../../tokens';
 
-import type { AccountStatus, SsoProvider } from '@quad/contracts';
+import type { AccountStatus, MembershipKind, MembershipStatus, SsoProvider } from '@quad/contracts';
 import type { AccountTx, QuadTenantDb } from '@quad/db';
 
 /** The account fields sign-in needs once the account is known. */
@@ -43,6 +47,16 @@ const NO_CREDENTIALS: CredentialRow = {
   recoveryCodesHash: [],
   passwordChangedAt: null,
 };
+
+/** A membership as a parent token needs it: whose it is, what it is, and its roles. */
+export interface TokenMember {
+  readonly accountId: string;
+  readonly kind: MembershipKind;
+  readonly status: MembershipStatus;
+  readonly deleted: boolean;
+  /** Primary role first, then by name (as `auth_memberships` lists them). */
+  readonly roleNames: readonly string[];
+}
 
 /** A school's SSO settings (`current_tenant_profile`, D24). */
 export interface SchoolSso {
@@ -277,6 +291,32 @@ export class AuthRepository {
       .where(eq(users.id, userId))
       .returning({ name: users.name });
     return row?.name ?? null;
+  }
+
+  /**
+   * The membership a refresh family is in, read in the transaction's school (RLS limits it to
+   * `app.tenant_id`); null when it is not there.
+   */
+  async tokenMemberIn(tx: AccountTx, userId: string): Promise<TokenMember | null> {
+    const [row] = await tx
+      .select({
+        accountId: users.accountId,
+        kind: users.kind,
+        status: users.status,
+        deletedAt: users.deletedAt,
+      })
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1);
+    if (row === undefined) return null;
+    const held = await tx
+      .select({ name: roles.name })
+      .from(userRoles)
+      .innerJoin(roles, and(eq(roles.tenantId, userRoles.tenantId), eq(roles.id, userRoles.roleId)))
+      .where(eq(userRoles.userId, userId))
+      .orderBy(desc(userRoles.primary), asc(roles.name));
+    const { deletedAt, ...member } = row;
+    return { ...member, deleted: deletedAt !== null, roleNames: held.map((role) => role.name) };
   }
 
   /**

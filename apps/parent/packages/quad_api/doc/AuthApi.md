@@ -11,11 +11,14 @@ Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**apiV1AuthIdentifyPost**](AuthApi.md#apiv1authidentifypost) | **POST** /api/v1/auth/identify | The sign-in methods for a work email (the same answer whether or not it has an account)
 [**apiV1AuthMembershipsGet**](AuthApi.md#apiv1authmembershipsget) | **GET** /api/v1/auth/memberships | The schools you can open (Choose a school, Switch school)
+[**apiV1AuthOtpRequestPost**](AuthApi.md#apiv1authotprequestpost) | **POST** /api/v1/auth/otp/request | Send a 6-digit sign-in code to a mobile number or email (the same answer whether or not it is known)
+[**apiV1AuthOtpVerifyPost**](AuthApi.md#apiv1authotpverifypost) | **POST** /api/v1/auth/otp/verify | Check the code: signs in to your one school, asks you to choose among several, or says you were not found
 [**apiV1AuthPasswordForgotPost**](AuthApi.md#apiv1authpasswordforgotpost) | **POST** /api/v1/auth/password/forgot | Email a password reset link (the same answer whether or not the account exists)
 [**apiV1AuthPasswordPost**](AuthApi.md#apiv1authpasswordpost) | **POST** /api/v1/auth/password | Sign in with email and password; sets the session cookies and says what comes next
 [**apiV1AuthPasswordResetPost**](AuthApi.md#apiv1authpasswordresetpost) | **POST** /api/v1/auth/password/reset | Set a new password with a reset link; signs out every device
-[**apiV1AuthSelectSchoolPost**](AuthApi.md#apiv1authselectschoolpost) | **POST** /api/v1/auth/select-school | Open one of your schools; rotates the session (needs X-CSRF-Token)
-[**apiV1AuthSignOutPost**](AuthApi.md#apiv1authsignoutpost) | **POST** /api/v1/auth/sign-out | Sign out of every school on this device (needs X-CSRF-Token)
+[**apiV1AuthRefreshPost**](AuthApi.md#apiv1authrefreshpost) | **POST** /api/v1/auth/refresh | Swap the refresh token for a new pair; an old refresh token signs the device out everywhere it was copied
+[**apiV1AuthSelectSchoolPost**](AuthApi.md#apiv1authselectschoolpost) | **POST** /api/v1/auth/select-school | Open one of your schools. Staff: rotates the session cookie (needs X-CSRF-Token). Parent app: with the select_school or a school token, returns the new pair
+[**apiV1AuthSignOutPost**](AuthApi.md#apiv1authsignoutpost) | **POST** /api/v1/auth/sign-out | Sign out: the staff session for every school (needs X-CSRF-Token), or the parent app’s token family on this device
 [**apiV1AuthSsoProviderCallbackGet**](AuthApi.md#apiv1authssoprovidercallbackget) | **GET** /api/v1/auth/sso/{provider}/callback | The provider returns here; the API checks the sign-in and always redirects back to /sign-in
 [**apiV1AuthSsoProviderStartPost**](AuthApi.md#apiv1authssoproviderstartpost) | **POST** /api/v1/auth/sso/{provider}/start | Start single sign-on with Google or Microsoft: the provider URL to open, with PKCE (sets a short-lived state cookie)
 [**apiV1AuthTotpVerifyPost**](AuthApi.md#apiv1authtotpverifypost) | **POST** /api/v1/auth/totp/verify | Check the authenticator or recovery code at the two-step step (needs X-CSRF-Token)
@@ -95,6 +98,87 @@ No authorization required
 ### HTTP request headers
 
  - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **apiV1AuthOtpRequestPost**
+> apiV1AuthOtpRequestPost(otpRequestInput)
+
+Send a 6-digit sign-in code to a mobile number or email (the same answer whether or not it is known)
+
+### Example
+```dart
+import 'package:quad_api/api.dart';
+
+final api = QuadApi().getAuthApi();
+final OtpRequestInput otpRequestInput = ; // OtpRequestInput | 
+
+try {
+    api.apiV1AuthOtpRequestPost(otpRequestInput);
+} catch on DioException (e) {
+    print('Exception when calling AuthApi->apiV1AuthOtpRequestPost: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **otpRequestInput** | [**OtpRequestInput**](OtpRequestInput.md)|  | 
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **apiV1AuthOtpVerifyPost**
+> OtpVerifyResult apiV1AuthOtpVerifyPost(otpVerifyInput)
+
+Check the code: signs in to your one school, asks you to choose among several, or says you were not found
+
+### Example
+```dart
+import 'package:quad_api/api.dart';
+
+final api = QuadApi().getAuthApi();
+final OtpVerifyInput otpVerifyInput = ; // OtpVerifyInput | 
+
+try {
+    final response = api.apiV1AuthOtpVerifyPost(otpVerifyInput);
+    print(response);
+} catch on DioException (e) {
+    print('Exception when calling AuthApi->apiV1AuthOtpVerifyPost: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **otpVerifyInput** | [**OtpVerifyInput**](OtpVerifyInput.md)|  | 
+
+### Return type
+
+[**OtpVerifyResult**](OtpVerifyResult.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
  - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
@@ -220,10 +304,51 @@ No authorization required
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
-# **apiV1AuthSelectSchoolPost**
-> apiV1AuthSelectSchoolPost(selectSchoolInput)
+# **apiV1AuthRefreshPost**
+> TokenPair apiV1AuthRefreshPost(refreshInput)
 
-Open one of your schools; rotates the session (needs X-CSRF-Token)
+Swap the refresh token for a new pair; an old refresh token signs the device out everywhere it was copied
+
+### Example
+```dart
+import 'package:quad_api/api.dart';
+
+final api = QuadApi().getAuthApi();
+final RefreshInput refreshInput = ; // RefreshInput | 
+
+try {
+    final response = api.apiV1AuthRefreshPost(refreshInput);
+    print(response);
+} catch on DioException (e) {
+    print('Exception when calling AuthApi->apiV1AuthRefreshPost: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **refreshInput** | [**RefreshInput**](RefreshInput.md)|  | 
+
+### Return type
+
+[**TokenPair**](TokenPair.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **apiV1AuthSelectSchoolPost**
+> TokenPair apiV1AuthSelectSchoolPost(selectSchoolInput)
+
+Open one of your schools. Staff: rotates the session cookie (needs X-CSRF-Token). Parent app: with the select_school or a school token, returns the new pair
 
 ### Example
 ```dart
@@ -233,7 +358,8 @@ final api = QuadApi().getAuthApi();
 final SelectSchoolInput selectSchoolInput = ; // SelectSchoolInput | 
 
 try {
-    api.apiV1AuthSelectSchoolPost(selectSchoolInput);
+    final response = api.apiV1AuthSelectSchoolPost(selectSchoolInput);
+    print(response);
 } catch on DioException (e) {
     print('Exception when calling AuthApi->apiV1AuthSelectSchoolPost: $e\n');
 }
@@ -247,7 +373,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-void (empty response body)
+[**TokenPair**](TokenPair.md)
 
 ### Authorization
 
@@ -263,7 +389,7 @@ No authorization required
 # **apiV1AuthSignOutPost**
 > apiV1AuthSignOutPost()
 
-Sign out of every school on this device (needs X-CSRF-Token)
+Sign out: the staff session for every school (needs X-CSRF-Token), or the parent app’s token family on this device
 
 ### Example
 ```dart

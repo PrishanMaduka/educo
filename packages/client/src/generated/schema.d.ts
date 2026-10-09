@@ -908,7 +908,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Open one of your schools; rotates the session (needs X-CSRF-Token) */
+        /** Open one of your schools. Staff: rotates the session cookie (needs X-CSRF-Token). Parent app: with the select_school or a school token, returns the new pair */
         post: {
             parameters: {
                 query?: never;
@@ -922,7 +922,16 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description Signed in to the school */
+                /** @description Parent app (bearer): the tokens for the school */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["TokenPair"];
+                    };
+                };
+                /** @description Staff (cookie): signed in to the school */
                 204: {
                     headers: {
                         [name: string]: unknown;
@@ -982,7 +991,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Sign out of every school on this device (needs X-CSRF-Token) */
+        /** Sign out: the staff session for every school (needs X-CSRF-Token), or the parent app’s token family on this device */
         post: {
             parameters: {
                 query?: never;
@@ -1010,6 +1019,196 @@ export interface paths {
                 };
                 /** @description Error */
                 403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/otp/request": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Send a 6-digit sign-in code to a mobile number or email (the same answer whether or not it is known) */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["OtpRequestInput"];
+                };
+            };
+            responses: {
+                /** @description A code is on its way; it works for 10 minutes */
+                202: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/otp/verify": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Check the code: signs in to your one school, asks you to choose among several, or says you were not found */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["OtpVerifyInput"];
+                };
+            };
+            responses: {
+                /** @description What the code found */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["OtpVerifyResult"];
+                    };
+                };
+                /** @description Error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/refresh": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Swap the refresh token for a new pair; an old refresh token signs the device out everywhere it was copied */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["RefreshInput"];
+                };
+            };
+            responses: {
+                /** @description The new access and refresh tokens */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["TokenPair"];
+                    };
+                };
+                /** @description Error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                401: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -1323,11 +1522,54 @@ export interface components {
                 suspendReason: string | null;
             }[];
         };
+        TokenPair: {
+            accessToken: string;
+            refreshToken: string;
+        };
         SelectSchoolInput: {
             /** Format: uuid */
             tenantId: string;
             /** @default false */
             remember: boolean;
+        };
+        OtpRequestInput: {
+            phone?: string;
+            /** Format: email */
+            email?: string;
+        };
+        OtpVerifyResult: {
+            /** @enum {string} */
+            status: "signed_in" | "choose_school" | "not_found";
+            firstName?: string;
+            memberships: {
+                /** Format: uuid */
+                tenantId: string;
+                name: string;
+                shortName: string;
+                /** Format: uri */
+                logoUrl: string | null;
+                brand: {
+                    color: string;
+                    fill: string;
+                    fillDark: string;
+                    ink: string;
+                };
+                suspended: boolean;
+                suspendReason: string | null;
+                /** @enum {string} */
+                kind: "guardian" | "relative";
+            }[];
+            accessToken?: string;
+            refreshToken?: string;
+        };
+        OtpVerifyInput: {
+            phone?: string;
+            /** Format: email */
+            email?: string;
+            code: string;
+        };
+        RefreshInput: {
+            refreshToken: string;
         };
         PasswordForgotInput: {
             /** Format: email */

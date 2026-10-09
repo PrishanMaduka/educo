@@ -3,7 +3,7 @@ import { Reflector } from '@nestjs/core';
 import { trace } from '@opentelemetry/api';
 
 import { tagSpanWithTenant } from '../../observability/tenant-span-processor';
-import { CsrfError, UnauthorizedError } from '../errors';
+import { CsrfError, ForbiddenError, UnauthorizedError } from '../errors';
 import { currentRequestContext } from '../request-context';
 import { CSRF_HEADER, CsrfTokens, needsCsrfToken } from '../session/csrf';
 import { RequestAuthenticator, attachRequestAuth } from '../session/request-auth';
@@ -12,6 +12,7 @@ import { AuthenticatedMarker } from './authenticated.decorator';
 import { PlatformControllerMarker } from './platform-controller.decorator';
 import { PreAuthMarker } from './pre-auth.decorator';
 import { PublicMarker } from './public.decorator';
+import { RelativeAccessMarker } from './relative-access.decorator';
 
 import type { AuthenticatedOptions } from './authenticated.decorator';
 import type { RequestAuth } from '../session/request-auth';
@@ -28,13 +29,16 @@ type Access =
 /**
  * The global guard (spec 05, rulings F02, F09, F39): every route needs an active session unless
  * it is `@Public()`, `@PreAuth(...)` at a matching stage, or in a `@PlatformController()` class
- * (`PlatformSessionGuard` owns those). It then checks the double-submit CSRF token on
- * cookie-authenticated writes (before Task 12's preview guard, ruling F42), and fills the
- * request context and the active span from the session, never from request input.
+ * (`PlatformSessionGuard` owns those). The session is the staff cookie, or the parent app's
+ * bearer token when the request has an Authorization header. It then checks the double-submit
+ * CSRF token on cookie-authenticated writes (before Task 12's preview guard, ruling F42; bearer
+ * requests are exempt), and fills the request context and the active span from the session,
+ * never from request input.
  *
  * 401 means no session, or one that is revoked or expired, whose membership is deactivated or
  * whose school is deleted. A suspended school is not a 401: `TenantStatusGuard` (Task 12)
- * answers 403 `school_suspended`.
+ * answers 403 `school_suspended`. A relative's token gets 403 on every route without
+ * `@RelativeAccess()` (D32), before its stage is looked at.
  */
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -57,10 +61,17 @@ export class AuthGuard implements CanActivate {
 
     const request = context.switchToHttp().getRequest<FastifyRequest>();
     const auth = await this.authenticator.fromRequest(request);
-    if (auth === null || !allows(access, auth)) {
+    if (auth === null) {
+      throw new UnauthorizedError();
+    }
+    if (isRelative(auth) && !this.reachesRelatives(context)) {
+      throw new ForbiddenError();
+    }
+    if (!allows(access, auth)) {
       throw new UnauthorizedError();
     }
     if (
+      auth.via === 'cookie' &&
       needsCsrfToken(request.method) &&
       !this.csrf.verify(auth.tokenHash, request.headers[CSRF_HEADER])
     ) {
@@ -70,6 +81,15 @@ export class AuthGuard implements CanActivate {
     fillRequestContext(auth);
     tagSpanWithTenant(trace.getActiveSpan(), auth.tenantId);
     return true;
+  }
+
+  private reachesRelatives(context: ExecutionContext): boolean {
+    return (
+      this.reflector.getAllAndOverride<true | undefined>(RelativeAccessMarker.KEY, [
+        context.getHandler(),
+        context.getClass(),
+      ]) === true
+    );
   }
 
   private accessOf(context: ExecutionContext): Access {
@@ -95,7 +115,15 @@ export class AuthGuard implements CanActivate {
   }
 }
 
-/** Whether the session's sign-in stage fits the route. Support visits are always `active`. */
+/** A relative's token (family circle): it reaches only `@RelativeAccess()` routes (D32). */
+function isRelative(auth: RequestAuth): boolean {
+  return auth.kind === 'mobile' && auth.membershipKind === 'relative';
+}
+
+/**
+ * Whether the session's sign-in stage fits the route. Support visits are always `active`; the
+ * sign-in steps before two-step is done (`@PreAuth`) are the staff cookie's only.
+ */
 function allows(access: Exclude<Access, { kind: 'public' }>, auth: RequestAuth): boolean {
   if (access.kind === 'pre_auth') {
     return auth.kind === 'web' && access.stages.includes(auth.stage);
@@ -110,10 +138,14 @@ function fillRequestContext(auth: RequestAuth): void {
   if (context === undefined) return;
   context.tenantId = auth.tenantId;
   context.kind = auth.kind;
-  context.supportSessionId = auth.supportSessionId;
+  context.supportSessionId = auth.kind === 'mobile' ? null : auth.supportSessionId;
   if (auth.kind === 'web') {
     context.accountId = auth.accountId;
     context.userId = auth.userId;
     context.previewRoleId = auth.previewRoleId;
+  }
+  if (auth.kind === 'mobile') {
+    context.accountId = auth.accountId;
+    context.userId = auth.userId;
   }
 }

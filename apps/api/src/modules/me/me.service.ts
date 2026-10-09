@@ -9,11 +9,12 @@ import { CLOCK, TENANT_DB } from '../../tokens';
 
 import { MeRepository } from './me.repository';
 
-import type { PersonAuth, RequestAuth } from '../../common/session/request-auth';
+import type { AccountAuth, PersonAuth, RequestAuth } from '../../common/session/request-auth';
 import type { Clock } from '../../tokens';
 import type {
   Me,
   MeMembership,
+  MembershipKind,
   MePerson,
   MePreview,
   MeUpdateInput,
@@ -27,7 +28,7 @@ function supportPerson(name: string, profile: TenantProfile): MePerson {
 }
 
 /** A support visit has no account or membership: it cannot change one or list its devices. */
-function personOnly(auth: RequestAuth): PersonAuth {
+function personOnly(auth: RequestAuth): AccountAuth {
   if (auth.kind === 'support') {
     throw new ForbiddenError(
       'forbidden',
@@ -53,8 +54,7 @@ export class MeService {
 
   async get(auth: RequestAuth): Promise<Me> {
     const { tenantId } = schoolOf(auth);
-    const memberships =
-      auth.kind === 'web' ? await this.otherMemberships(auth.accountId, tenantId) : [];
+    const memberships = auth.kind === 'support' ? [] : await this.otherMemberships(auth, tenantId);
     return this.db.withTenant(tenantId, async (tx) => {
       const profile = await this.db.definers.currentTenantProfile(tx);
       if (profile === null) {
@@ -109,11 +109,16 @@ export class MeService {
     return this.sessions.revokeOwn(personOnly(auth), sessionId);
   }
 
-  /** The person's other active staff memberships, for Switch school. */
-  private async otherMemberships(accountId: string, tenantId: string): Promise<MeMembership[]> {
-    const memberships = await this.db.definers.authMemberships(accountId);
+  /**
+   * The person's other active memberships, for Switch school: staff ones for the staff cookie,
+   * guardian and relative ones for the parent app's token (the kind rule, D32).
+   */
+  private async otherMemberships(auth: AccountAuth, tenantId: string): Promise<MeMembership[]> {
+    const kinds: readonly MembershipKind[] =
+      auth.kind === 'web' ? ['staff'] : ['guardian', 'relative'];
+    const memberships = await this.db.definers.authMemberships(auth.accountId);
     return memberships
-      .filter((membership) => membership.kind === 'staff' && membership.tenantId !== tenantId)
+      .filter((membership) => kinds.includes(membership.kind) && membership.tenantId !== tenantId)
       .map((membership) => ({
         tenantId: membership.tenantId,
         name: membership.tenantName,
@@ -126,7 +131,7 @@ export class MeService {
 
   private async memberPerson(
     tx: TenantTx,
-    auth: PersonAuth,
+    auth: AccountAuth,
     profile: TenantProfile,
   ): Promise<MePerson> {
     const member = auth.userId === null ? null : await this.repository.member(tx, auth.userId);

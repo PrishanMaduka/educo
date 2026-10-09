@@ -59,6 +59,8 @@
   "errorAuthenticatorExists": "You already have an authenticator app set up.",
   "errorSignInUnavailable": "We can’t sign you in right now. Try again in a minute.",
   "errorSsoNotOffered": "Your school doesn’t use this sign-in for your email. Sign in with your password instead.",
+  "errorInvalidSignInCode": "That code didn’t work. Check the latest code we sent you, or ask for a new one.",
+  "errorPhoneNotAccepted": "Enter a Sri Lankan mobile number: +94 and 9 digits, without the 0 at the start.",
   "errorPasswordTooShort": "Use at least {min, plural, one {{min} character} other {{min} characters}}.",
   "@errorPasswordTooShort": {
     "placeholders": {

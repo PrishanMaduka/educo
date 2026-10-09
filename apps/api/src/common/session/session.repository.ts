@@ -3,12 +3,19 @@ import { and, desc, eq, gt, isNull, sessions, sql, users } from '@quad/db';
 
 import { TENANT_DB } from '../../tokens';
 
-import type { MembershipStatus, SessionKind, SessionStage, SignInMethod } from '@quad/contracts';
+import type {
+  MembershipKind,
+  MembershipStatus,
+  SessionKind,
+  SessionStage,
+  SignInMethod,
+} from '@quad/contracts';
 import type { AccountTx, QuadTenantDb, SessionLookup, TenantProfile } from '@quad/db';
 
 /** The membership a session points at, as far as the guard needs it. */
 export interface SessionMember {
   readonly accountId: string;
+  readonly kind: MembershipKind;
   readonly status: MembershipStatus;
   readonly deleted: boolean;
 }
@@ -80,12 +87,22 @@ export class SessionRepository {
         return { member: null, profile };
       }
       const [row] = await tx
-        .select({ accountId: users.accountId, status: users.status, deletedAt: users.deletedAt })
+        .select({
+          accountId: users.accountId,
+          kind: users.kind,
+          status: users.status,
+          deletedAt: users.deletedAt,
+        })
         .from(users)
         .where(eq(users.id, userId))
         .limit(1);
       const member = row
-        ? { accountId: row.accountId, status: row.status, deleted: row.deletedAt !== null }
+        ? {
+            accountId: row.accountId,
+            kind: row.kind,
+            status: row.status,
+            deleted: row.deletedAt !== null,
+          }
         : null;
       return { member, profile };
     });

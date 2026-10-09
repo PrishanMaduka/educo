@@ -3,37 +3,34 @@ import { IdSchema, SessionStage } from '@quad/contracts';
 import { sessionExpiry } from '@quad/domain';
 import { z } from 'zod';
 
-import { errorForLog } from '../../observability/logger';
 import { CLOCK, LOGGER, REDIS } from '../../tokens';
 import { NotFoundError } from '../errors';
 import { decodeCursor, pageOf } from '../pagination/cursor';
 
+import { BearerSessions } from './bearer-sessions';
+import {
+  INDEX_SECONDS,
+  Instant,
+  SESSION_CACHE_SECONDS,
+  accountIndexKey,
+  cacheSafely,
+  entryKey,
+  indexedKey,
+  memberIndexKey,
+} from './session-cache';
 import { SessionRepository } from './session.repository';
 
-import type { PersonAuth, RequestAuth } from './request-auth';
+import type { AccountAuth, RequestAuth } from './request-auth';
 import type { Clock } from '../../tokens';
 import type { PageQuery, SessionSummaryList } from '@quad/contracts';
 import type { AccountSessionLookup, SupportSessionLookup } from '@quad/db';
 import type { Redis } from 'ioredis';
 import type { Logger } from 'pino';
 
-/** Spec 05 / D32: a resolved session is cached in Redis for 30 s. */
-export const SESSION_CACHE_SECONDS = 30;
-/** The index sets outlive the entries they list, so an entry is never left unindexed. */
-const INDEX_SECONDS = 2 * SESSION_CACHE_SECONDS;
+export { SESSION_CACHE_SECONDS } from './session-cache';
+
 /** `last_seen_at` is written at most this often per session (the idle timeout is in hours). */
 export const TOUCH_INTERVAL_MS = 5 * 60 * 1000;
-
-const KEY_PREFIX = 'quad:session';
-const entryKey = (tokenHash: Buffer) => `${KEY_PREFIX}:${tokenHash.toString('hex')}`;
-const memberIndexKey = (accountId: string, tenantId: string | null) =>
-  `${KEY_PREFIX}:idx:m:${accountId}:${tenantId ?? '-'}`;
-const accountIndexKey = (accountId: string) => `${KEY_PREFIX}:idx:a:${accountId}`;
-
-const Instant = z
-  .string()
-  .datetime()
-  .transform((value) => new Date(value));
 
 /**
  * What is cached per cookie hash: the session as `session_by_token` returned it, after the
@@ -87,6 +84,7 @@ const SessionCursor = z.object({
 export class SessionService {
   constructor(
     private readonly repository: SessionRepository,
+    private readonly bearer: BearerSessions,
     @Inject(REDIS) private readonly redis: Redis,
     @Inject(CLOCK) private readonly now: Clock,
     @Inject(LOGGER) private readonly logger: Logger,
@@ -116,7 +114,7 @@ export class SessionService {
 
   /** Drops one cookie's cache entry (sign-out, `DELETE /me/sessions/:id`, support exit). */
   async invalidateToken(tokenHash: Buffer): Promise<void> {
-    await this.safely('invalidate', () => this.redis.del(entryKey(tokenHash)));
+    await cacheSafely(this.logger, 'invalidate', () => this.redis.del(entryKey(tokenHash)));
   }
 
   /**
@@ -133,7 +131,7 @@ export class SessionService {
   }
 
   /** `GET /me/sessions`: the person's own live sessions, newest first. */
-  async listOwn(auth: PersonAuth, query: PageQuery): Promise<SessionSummaryList> {
+  async listOwn(auth: AccountAuth, query: PageQuery): Promise<SessionSummaryList> {
     const after = decodeCursor(SessionCursor, query.cursor);
     const rows = await this.repository.listOwn(
       auth.accountId,
@@ -159,14 +157,14 @@ export class SessionService {
    * `DELETE /me/sessions/:id`: signs one of the person's own devices out, at once (the cache
    * entry goes too). 404 for an id that is not one of their live sessions.
    */
-  async revokeOwn(auth: PersonAuth, sessionId: string): Promise<{ readonly current: boolean }> {
+  async revokeOwn(auth: AccountAuth, sessionId: string): Promise<{ readonly current: boolean }> {
     const revoked = await this.repository.revokeOwn(auth.accountId, sessionId);
     if (revoked === undefined) {
       throw new NotFoundError();
     }
-    if (revoked.tokenHash !== null) {
-      await this.invalidateToken(revoked.tokenHash);
-    }
+    // A browser session is cached by its cookie, a phone's refresh family by its id.
+    if (revoked.tokenHash === null) await this.bearer.invalidateFamily(sessionId);
+    else await this.invalidateToken(revoked.tokenHash);
     return { current: sessionId === auth.sessionId };
   }
 
@@ -267,7 +265,7 @@ export class SessionService {
   }
 
   private async readCache(tokenHash: Buffer): Promise<CachedSession | null> {
-    const raw = await this.safely('read', () => this.redis.get(entryKey(tokenHash)));
+    const raw = await cacheSafely(this.logger, 'read', () => this.redis.get(entryKey(tokenHash)));
     if (typeof raw !== 'string') {
       return null;
     }
@@ -293,31 +291,16 @@ export class SessionService {
         transaction.sadd(index, hex).expire(index, INDEX_SECONDS);
       }
     }
-    await this.safely('write', () => transaction.exec());
+    await cacheSafely(this.logger, 'write', () => transaction.exec());
   }
 
   private async dropIndexed(indexKey: string): Promise<void> {
-    await this.safely('invalidate', async () => {
-      const hashes = await this.redis.smembers(indexKey);
-      const keys = hashes.map((hex) => `${KEY_PREFIX}:${hex}`);
+    await cacheSafely(this.logger, 'invalidate', async () => {
+      // Cookie hashes in hex, and `f:<id>` for refresh families.
+      const members = await this.redis.smembers(indexKey);
+      const keys = members.map(indexedKey);
       await this.redis.del(indexKey, ...keys);
     });
-  }
-
-  /**
-   * Runs a cache command; if Redis fails, logs `session_cache_unavailable` and carries on with
-   * Postgres. A failed invalidation leaves an entry for at most `SESSION_CACHE_SECONDS`.
-   */
-  private async safely<T>(operation: string, command: () => Promise<T>): Promise<T | undefined> {
-    try {
-      return await command();
-    } catch (error) {
-      this.logger.warn(
-        { metric: 'session_cache_unavailable', operation, error: errorForLog(error) },
-        'Session cache skipped: Redis did not answer',
-      );
-      return undefined;
-    }
   }
 }
 

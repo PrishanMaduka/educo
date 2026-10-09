@@ -4,7 +4,9 @@ import { APP_GUARD } from '@nestjs/core';
 import { CONFIG } from '../../tokens';
 import { AuthGuard } from '../guards/auth.guard';
 
+import { BearerSessions } from './bearer-sessions';
 import { CsrfTokens } from './csrf';
+import { FamilyRepository } from './family.repository';
 import { RequestAuthenticator } from './request-auth';
 import { SessionRepository } from './session.repository';
 import { SessionService } from './session.service';
@@ -12,7 +14,8 @@ import { SessionService } from './session.service';
 import type { Config } from '../../config';
 
 /**
- * Server-side sessions and the global `AuthGuard` (spec 05; D32). Imported before the area
+ * Server-side sessions, the parent app's refresh families (`BearerSessions`, Task 9) and the
+ * global `AuthGuard` (spec 05; D32). Imported before the area
  * modules, so `AuthGuard` is the first global guard: Task 12's tenant-status, preview and
  * permission guards run after it, on a request it has authenticated.
  */
@@ -21,6 +24,8 @@ import type { Config } from '../../config';
   providers: [
     SessionRepository,
     SessionService,
+    FamilyRepository,
+    BearerSessions,
     RequestAuthenticator,
     {
       provide: CsrfTokens,
@@ -29,6 +34,13 @@ import type { Config } from '../../config';
     },
     { provide: APP_GUARD, useClass: AuthGuard },
   ],
-  exports: [SessionService, SessionRepository, RequestAuthenticator, CsrfTokens],
+  exports: [
+    SessionService,
+    SessionRepository,
+    FamilyRepository,
+    BearerSessions,
+    RequestAuthenticator,
+    CsrfTokens,
+  ],
 })
 export class SessionModule {}

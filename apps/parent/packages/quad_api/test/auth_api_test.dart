@@ -21,6 +21,20 @@ void main() {
       // TODO
     });
 
+    // Send a 6-digit sign-in code to a mobile number or email (the same answer whether or not it is known)
+    //
+    //Future apiV1AuthOtpRequestPost(OtpRequestInput otpRequestInput) async
+    test('test apiV1AuthOtpRequestPost', () async {
+      // TODO
+    });
+
+    // Check the code: signs in to your one school, asks you to choose among several, or says you were not found
+    //
+    //Future<OtpVerifyResult> apiV1AuthOtpVerifyPost(OtpVerifyInput otpVerifyInput) async
+    test('test apiV1AuthOtpVerifyPost', () async {
+      // TODO
+    });
+
     // Email a password reset link (the same answer whether or not the account exists)
     //
     //Future apiV1AuthPasswordForgotPost(PasswordForgotInput passwordForgotInput) async
@@ -42,14 +56,21 @@ void main() {
       // TODO
     });
 
-    // Open one of your schools; rotates the session (needs X-CSRF-Token)
+    // Swap the refresh token for a new pair; an old refresh token signs the device out everywhere it was copied
     //
-    //Future apiV1AuthSelectSchoolPost(SelectSchoolInput selectSchoolInput) async
+    //Future<TokenPair> apiV1AuthRefreshPost(RefreshInput refreshInput) async
+    test('test apiV1AuthRefreshPost', () async {
+      // TODO
+    });
+
+    // Open one of your schools. Staff: rotates the session cookie (needs X-CSRF-Token). Parent app: with the select_school or a school token, returns the new pair
+    //
+    //Future<TokenPair> apiV1AuthSelectSchoolPost(SelectSchoolInput selectSchoolInput) async
     test('test apiV1AuthSelectSchoolPost', () async {
       // TODO
     });
 
-    // Sign out of every school on this device (needs X-CSRF-Token)
+    // Sign out: the staff session for every school (needs X-CSRF-Token), or the parent app’s token family on this device
     //
     //Future apiV1AuthSignOutPost() async
     test('test apiV1AuthSignOutPost', () async {

@@ -51,6 +51,8 @@
   "error.authenticatorExists": "You already have an authenticator app set up.",
   "error.signInUnavailable": "We can’t sign you in right now. Try again in a minute.",
   "error.ssoNotOffered": "Your school doesn’t use this sign-in for your email. Sign in with your password instead.",
+  "error.invalidSignInCode": "That code didn’t work. Check the latest code we sent you, or ask for a new one.",
+  "error.phoneNotAccepted": "Enter a Sri Lankan mobile number: +94 and 9 digits, without the 0 at the start.",
   "error.password.tooShort": "Use at least {min, plural, one {# character} other {# characters}}.",
   "error.password.tooLong": "Use {max} characters or fewer.",
   "error.password.breached": "This password has appeared in a data breach. Choose a different one.",

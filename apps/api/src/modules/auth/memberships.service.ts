@@ -5,8 +5,19 @@ import { UnauthorizedError } from '../../common/errors';
 import { TENANT_DB } from '../../tokens';
 
 import type { RequestAuth } from '../../common/session/request-auth';
-import type { SignInMembership, SignInMembershipList } from '@quad/contracts';
+import type {
+  ParentMembership,
+  ParentMembershipKind,
+  SignInMembership,
+  SignInMembershipList,
+} from '@quad/contracts';
 import type { AuthMembership, QuadTenantDb } from '@quad/db';
+
+/** A guardian or relative membership: what bearer tokens are for (the kind rule, D32). */
+export type ParentAuthMembership = AuthMembership & { readonly kind: ParentMembershipKind };
+
+export const isParentKind = (kind: string): kind is ParentMembershipKind =>
+  kind === 'guardian' || kind === 'relative';
 
 /**
  * The schools a person may open with the staff cookie (spec 05 step 5): their active staff
@@ -22,6 +33,17 @@ export class MembershipsService {
   async staffMemberships(accountId: string): Promise<AuthMembership[]> {
     const memberships = await this.db.definers.authMemberships(accountId);
     return memberships.filter((membership) => membership.kind === 'staff');
+  }
+
+  /**
+   * The account's guardian and relative memberships, by school name: the only ones the parent
+   * app's tokens list and accept (the kind rule, D32). Staff memberships are never among them.
+   */
+  async parentMemberships(accountId: string): Promise<ParentAuthMembership[]> {
+    const memberships = await this.db.definers.authMemberships(accountId);
+    return memberships.filter((membership): membership is ParentAuthMembership =>
+      isParentKind(membership.kind),
+    );
   }
 
   /** `GET /auth/memberships`: the signed-in account's own schools, never another's. */
@@ -43,5 +65,19 @@ export function toSignInMembership(membership: AuthMembership): SignInMembership
     roleNames: [...membership.roleNames],
     suspended: membership.suspended,
     suspendReason: membership.suspendReason,
+  };
+}
+
+export function toParentMembership(membership: ParentAuthMembership): ParentMembership {
+  const school = toSignInMembership(membership);
+  return {
+    tenantId: school.tenantId,
+    name: school.name,
+    shortName: school.shortName,
+    logoUrl: school.logoUrl,
+    brand: school.brand,
+    kind: membership.kind,
+    suspended: school.suspended,
+    suspendReason: school.suspendReason,
   };
 }

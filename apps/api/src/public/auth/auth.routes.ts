@@ -1,9 +1,13 @@
 import {
   IdentifyInput,
   IdentifyResult,
+  OtpRequestInput,
+  OtpVerifyInput,
+  OtpVerifyResult,
   PasswordForgotInput,
   PasswordResetInput,
   PasswordSignInInput,
+  RefreshInput,
   SelectSchoolInput,
   SignInMembershipList,
   SignInResult,
@@ -11,6 +15,7 @@ import {
   SsoProviderParams,
   SsoStartInput,
   SsoStartResult,
+  TokenPair,
   TotpVerifyInput,
 } from '@quad/contracts';
 
@@ -29,8 +34,16 @@ const Forgot = named('PasswordForgotInput', PasswordForgotInput);
 const Reset = named('PasswordResetInput', PasswordResetInput);
 const SsoStart = named('SsoStartInput', SsoStartInput);
 const SsoUrl = named('SsoStartResult', SsoStartResult);
+const OtpRequest = named('OtpRequestInput', OtpRequestInput);
+const OtpVerify = named('OtpVerifyInput', OtpVerifyInput);
+const OtpResult = named('OtpVerifyResult', OtpVerifyResult);
+const Refresh = named('RefreshInput', RefreshInput);
+const Pair = named('TokenPair', TokenPair);
 
-/** Staff sign-in (spec 05, spec 06 Me and auth). Tenant-less: the school is never an input. */
+/**
+ * Staff and parent sign-in (spec 05, spec 06 Me and auth). Tenant-less: the school is never an
+ * input, except the choice among the person's own schools on select-school.
+ */
 export const authRoutes: readonly ApiRoute[] = [
   {
     method: 'post',
@@ -99,19 +112,54 @@ export const authRoutes: readonly ApiRoute[] = [
   {
     method: 'post',
     path: '/auth/select-school',
-    summary: 'Open one of your schools; rotates the session (needs X-CSRF-Token)',
+    summary:
+      'Open one of your schools. Staff: rotates the session cookie (needs X-CSRF-Token). Parent app: with the select_school or a school token, returns the new pair',
     tags: ['auth'],
     request: { body: SelectSchool },
-    responses: { 204: { description: 'Signed in to the school' } },
+    responses: {
+      200: { description: 'Parent app (bearer): the tokens for the school', schema: Pair },
+      204: { description: 'Staff (cookie): signed in to the school' },
+    },
     errors: [400, 401, 403, 429],
   },
   {
     method: 'post',
     path: '/auth/sign-out',
-    summary: 'Sign out of every school on this device (needs X-CSRF-Token)',
+    summary:
+      'Sign out: the staff session for every school (needs X-CSRF-Token), or the parent app’s token family on this device',
     tags: ['auth'],
     responses: { 204: { description: 'Signed out' } },
     errors: [401, 403, 429],
+  },
+  {
+    method: 'post',
+    path: '/auth/otp/request',
+    summary:
+      'Send a 6-digit sign-in code to a mobile number or email (the same answer whether or not it is known)',
+    tags: ['auth'],
+    request: { body: OtpRequest },
+    responses: { 202: { description: 'A code is on its way; it works for 10 minutes' } },
+    errors: [400, 429],
+  },
+  {
+    method: 'post',
+    path: '/auth/otp/verify',
+    summary:
+      'Check the code: signs in to your one school, asks you to choose among several, or says you were not found',
+    tags: ['auth'],
+    request: { body: OtpVerify },
+    responses: { 200: { description: 'What the code found', schema: OtpResult } },
+    errors: [400, 403, 429],
+  },
+  {
+    method: 'post',
+    path: '/auth/refresh',
+    summary:
+      'Swap the refresh token for a new pair; an old refresh token signs the device out everywhere it was copied',
+    tags: ['auth'],
+    request: { body: Refresh },
+    responses: { 200: { description: 'The new access and refresh tokens', schema: Pair } },
+    errors: [400, 401, 429],
   },
   {
     method: 'post',

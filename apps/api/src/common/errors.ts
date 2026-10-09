@@ -146,10 +146,13 @@ export class AccountLockedError extends AppError {
   }
 }
 
-/** 400 for a two-step or recovery code that does not match (it counts toward the lockout). */
+/**
+ * 400 for a code that does not match: a two-step or recovery code (it counts toward the lockout),
+ * or a parent's sign-in code, which says so in its message.
+ */
 export class InvalidCodeError extends AppError {
-  constructor() {
-    super('invalid_code', formatMessage('error.invalidCode'), 400);
+  constructor(message: string = formatMessage('error.invalidCode')) {
+    super('invalid_code', message, 400);
   }
 }
 

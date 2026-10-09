@@ -2,15 +2,18 @@ import fastifyCookie from '@fastify/cookie';
 import { Inject, Injectable, Optional, createParamDecorator } from '@nestjs/common';
 
 import { CONFIG, CONSOLE_SESSIONS } from '../../tokens';
+import { AccessTokens } from '../crypto/access-tokens';
 import { UnauthorizedError } from '../errors';
 
+import { bearerTokenOf } from './bearer';
+import { BearerSessions } from './bearer-sessions';
 import { cookieNames, hashSessionToken, isSessionTokenShape } from './cookies';
 import { SessionService } from './session.service';
 
 import type { CookieNames } from './cookies';
 import type { Config } from '../../config';
 import type { ExecutionContext } from '@nestjs/common';
-import type { SessionStage } from '@quad/contracts';
+import type { ParentMembershipKind, SessionStage } from '@quad/contracts';
 import type { FastifyRequest } from 'fastify';
 
 /**
@@ -51,8 +54,30 @@ export interface SupportAuth {
   readonly tokenHash: Buffer;
 }
 
-/** Who is making a request. Task 9 adds the parent app's bearer token. */
-export type RequestAuth = PersonAuth | SupportAuth;
+/**
+ * The parent app's access token (spec 05 Parent app step 5; D32): a refresh family (a mobile
+ * `sessions` row) of the account, in a school with a guardian or relative membership there, or
+ * still choosing one (the `select_school` token, OQ20). Never a staff membership (the kind rule).
+ */
+export interface BearerAuth {
+  readonly kind: 'mobile';
+  readonly via: 'bearer';
+  /** The refresh family. */
+  readonly sessionId: string;
+  readonly accountId: string;
+  readonly stage: Extract<SessionStage, 'choose_school' | 'active'>;
+  readonly tenantId: string | null;
+  /** The membership (`users.id`) in that school. */
+  readonly userId: string | null;
+  /** Guardian or relative in that school; null while choosing one. */
+  readonly membershipKind: ParentMembershipKind | null;
+}
+
+/** Who is making a request: the staff cookie, a support visit, or the parent app's token. */
+export type RequestAuth = PersonAuth | SupportAuth | BearerAuth;
+
+/** A signed-in person (not a support visit), by cookie or by token. */
+export type AccountAuth = PersonAuth | BearerAuth;
 
 /** A request that is in a school: what tenant-scoped services and audits need. */
 export interface SchoolAuth {
@@ -81,7 +106,7 @@ export function schoolOf(auth: RequestAuth): SchoolAuth {
     tenantId: auth.tenantId,
     userId: auth.userId,
     accountId: auth.accountId,
-    supportSessionId: auth.supportSessionId,
+    supportSessionId: auth.kind === 'web' ? auth.supportSessionId : null,
     platformUserId: null,
   };
 }
@@ -117,15 +142,20 @@ export interface ConsoleSessionLookup {
   resolve(tokenHash: Buffer): Promise<{ readonly platformUserId: string } | null>;
 }
 
-/** Who opened a socket: a school member, a support visit, a console user, or nobody. */
+/**
+ * Who opened a socket: a school member, a support visit, a console user, a parent (a guardian's
+ * token, Task 9), or nobody.
+ */
 export type SocketIdentity =
   | { readonly kind: 'school'; readonly tenantId: string; readonly userId: string | null }
+  | { readonly kind: 'parent'; readonly userId: string }
   | { readonly kind: 'platform'; readonly platformUserId: string }
   | null;
 
 /**
- * Turns the cookie (or, from Task 9, a bearer token) into a `RequestAuth`, for HTTP requests and
- * for socket handshakes alike. Only a value shaped like a session token is looked up.
+ * Turns the cookie or the parent app's bearer token into a `RequestAuth`, for HTTP requests and
+ * for socket handshakes alike. Only a value shaped like a session token, or a bearer token that
+ * `AccessTokens` verifies, is looked up.
  */
 @Injectable()
 export class RequestAuthenticator {
@@ -133,19 +163,36 @@ export class RequestAuthenticator {
 
   constructor(
     private readonly sessions: SessionService,
+    private readonly bearer: BearerSessions,
+    private readonly accessTokens: AccessTokens,
     @Inject(CONFIG) config: Config,
     @Optional() @Inject(CONSOLE_SESSIONS) private readonly console?: ConsoleSessionLookup,
   ) {
     this.names = cookieNames(config.APP_ENV);
   }
 
-  /** The request's staff session, or null with no cookie or one that has ended. */
+  /**
+   * The request's bearer token when it has an Authorization header (never then the cookie),
+   * otherwise its staff session; null when there is none or it has ended.
+   */
   fromRequest(request: FastifyRequest): Promise<RequestAuth | null> {
-    return this.fromCookieToken(request.cookies[this.names.session]);
+    const token = bearerTokenOf(request.headers.authorization);
+    if (token === undefined) return this.fromCookieToken(request.cookies[this.names.session]);
+    return token === null ? Promise.resolve(null) : this.fromBearerToken(token);
   }
 
-  /** A socket handshake: the staff cookie, then the console cookie (Task 10 resolves it). */
-  async fromHandshake(cookieHeader: string | undefined): Promise<SocketIdentity> {
+  /**
+   * A socket handshake: the parent app's access token (`auth.token`) when it sends one, else the
+   * staff cookie, then the console cookie (Task 10 resolves it). A token counts only for a
+   * guardian in a school: a relative (M9b adds their rooms) or a family still choosing gets none.
+   */
+  async fromHandshake(cookieHeader: string | undefined, token?: unknown): Promise<SocketIdentity> {
+    if (token !== undefined) {
+      const auth = typeof token === 'string' ? await this.fromBearerToken(token) : null;
+      return auth?.membershipKind === 'guardian' && auth.userId !== null
+        ? { kind: 'parent', userId: auth.userId }
+        : null;
+    }
     const cookies = cookieHeader === undefined ? {} : fastifyCookie.parse(cookieHeader);
     const auth = await this.fromCookieToken(cookies[this.names.session]);
     if (auth !== null) {
@@ -165,6 +212,11 @@ export class RequestAuthenticator {
     return consoleSession === null
       ? null
       : { kind: 'platform', platformUserId: consoleSession.platformUserId };
+  }
+
+  private async fromBearerToken(token: string): Promise<BearerAuth | null> {
+    const claims = await this.accessTokens.verify(token);
+    return claims === null ? null : this.bearer.resolveBearer(claims);
   }
 
   private async fromCookieToken(token: unknown): Promise<RequestAuth | null> {

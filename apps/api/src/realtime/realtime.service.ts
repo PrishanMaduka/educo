@@ -23,15 +23,23 @@ type RealtimeServer = Server<DefaultEventsMap, DefaultEventsMap, DefaultEventsMa
 
 /**
  * The rooms a socket joins (spec 06 → Realtime): `tenant:{id}` and `user:{id}` for a school
- * member, `tenant:{id}` alone for a support visit, `platform` for a console user, and none
- * without a session (the parent app before sign-in).
+ * member, `tenant:{id}` alone for a support visit, `platform` for a console user, `user:{id}`
+ * alone for a guardian's token (`tenant:{id}` carries staff events), and none without a session
+ * (the parent app before sign-in).
  */
 export function roomsFor(identity: SocketIdentity): string[] {
   if (identity === null) return [];
   if (identity.kind === 'platform') return ['platform'];
+  if (identity.kind === 'parent') return [`user:${identity.userId}`];
   return identity.userId === null
     ? [`tenant:${identity.tenantId}`]
     : [`tenant:${identity.tenantId}`, `user:${identity.userId}`];
+}
+
+/** The parent app's access token from the handshake's `auth` payload, if it sent one. */
+function tokenOf(handshake: { readonly auth: unknown }): unknown {
+  const auth = handshake.auth;
+  return typeof auth === 'object' && auth !== null && 'token' in auth ? auth.token : undefined;
 }
 
 /**
@@ -46,8 +54,8 @@ export function originAllowed(origin: string | undefined, allowed: readonly stri
 /**
  * The Socket.IO server on the API's own HTTP server, at `/socket.io` (spec 06 → Realtime).
  * Engine.IO answers that path before Fastify routes it, so it is not an OpenAPI route. The
- * staff cookie (or, from Task 10, the console cookie) picks the rooms; Task 9 adds the parent
- * app's `auth.token`. M6 adds the Redis adapter.
+ * staff cookie (or, from Task 10, the console cookie) or the parent app's `auth.token` picks
+ * the rooms. M6 adds the Redis adapter.
  */
 @Injectable()
 export class RealtimeService implements OnApplicationBootstrap, BeforeApplicationShutdown {
@@ -76,16 +84,21 @@ export class RealtimeService implements OnApplicationBootstrap, BeforeApplicatio
       },
     });
     server.use((socket, next) => {
-      this.authenticator.fromHandshake(socket.request.headers.cookie).then(
-        (identity) => {
-          socket.data.identity = identity;
-          next();
-        },
-        (error: unknown) => {
-          this.logger.warn({ error: errorForLog(error) }, 'Socket handshake could not be checked');
-          next(new Error('unavailable'));
-        },
-      );
+      this.authenticator
+        .fromHandshake(socket.request.headers.cookie, tokenOf(socket.handshake))
+        .then(
+          (identity) => {
+            socket.data.identity = identity;
+            next();
+          },
+          (error: unknown) => {
+            this.logger.warn(
+              { error: errorForLog(error) },
+              'Socket handshake could not be checked',
+            );
+            next(new Error('unavailable'));
+          },
+        );
     });
     server.on('connection', (socket) => {
       const rooms = roomsFor(socket.data.identity);

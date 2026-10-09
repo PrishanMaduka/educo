@@ -68,11 +68,14 @@ Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
 [*AuthApi*](doc/AuthApi.md) | [**apiV1AuthIdentifyPost**](doc/AuthApi.md#apiv1authidentifypost) | **POST** /api/v1/auth/identify | The sign-in methods for a work email (the same answer whether or not it has an account)
 [*AuthApi*](doc/AuthApi.md) | [**apiV1AuthMembershipsGet**](doc/AuthApi.md#apiv1authmembershipsget) | **GET** /api/v1/auth/memberships | The schools you can open (Choose a school, Switch school)
+[*AuthApi*](doc/AuthApi.md) | [**apiV1AuthOtpRequestPost**](doc/AuthApi.md#apiv1authotprequestpost) | **POST** /api/v1/auth/otp/request | Send a 6-digit sign-in code to a mobile number or email (the same answer whether or not it is known)
+[*AuthApi*](doc/AuthApi.md) | [**apiV1AuthOtpVerifyPost**](doc/AuthApi.md#apiv1authotpverifypost) | **POST** /api/v1/auth/otp/verify | Check the code: signs in to your one school, asks you to choose among several, or says you were not found
 [*AuthApi*](doc/AuthApi.md) | [**apiV1AuthPasswordForgotPost**](doc/AuthApi.md#apiv1authpasswordforgotpost) | **POST** /api/v1/auth/password/forgot | Email a password reset link (the same answer whether or not the account exists)
 [*AuthApi*](doc/AuthApi.md) | [**apiV1AuthPasswordPost**](doc/AuthApi.md#apiv1authpasswordpost) | **POST** /api/v1/auth/password | Sign in with email and password; sets the session cookies and says what comes next
 [*AuthApi*](doc/AuthApi.md) | [**apiV1AuthPasswordResetPost**](doc/AuthApi.md#apiv1authpasswordresetpost) | **POST** /api/v1/auth/password/reset | Set a new password with a reset link; signs out every device
-[*AuthApi*](doc/AuthApi.md) | [**apiV1AuthSelectSchoolPost**](doc/AuthApi.md#apiv1authselectschoolpost) | **POST** /api/v1/auth/select-school | Open one of your schools; rotates the session (needs X-CSRF-Token)
-[*AuthApi*](doc/AuthApi.md) | [**apiV1AuthSignOutPost**](doc/AuthApi.md#apiv1authsignoutpost) | **POST** /api/v1/auth/sign-out | Sign out of every school on this device (needs X-CSRF-Token)
+[*AuthApi*](doc/AuthApi.md) | [**apiV1AuthRefreshPost**](doc/AuthApi.md#apiv1authrefreshpost) | **POST** /api/v1/auth/refresh | Swap the refresh token for a new pair; an old refresh token signs the device out everywhere it was copied
+[*AuthApi*](doc/AuthApi.md) | [**apiV1AuthSelectSchoolPost**](doc/AuthApi.md#apiv1authselectschoolpost) | **POST** /api/v1/auth/select-school | Open one of your schools. Staff: rotates the session cookie (needs X-CSRF-Token). Parent app: with the select_school or a school token, returns the new pair
+[*AuthApi*](doc/AuthApi.md) | [**apiV1AuthSignOutPost**](doc/AuthApi.md#apiv1authsignoutpost) | **POST** /api/v1/auth/sign-out | Sign out: the staff session for every school (needs X-CSRF-Token), or the parent app’s token family on this device
 [*AuthApi*](doc/AuthApi.md) | [**apiV1AuthSsoProviderCallbackGet**](doc/AuthApi.md#apiv1authssoprovidercallbackget) | **GET** /api/v1/auth/sso/{provider}/callback | The provider returns here; the API checks the sign-in and always redirects back to /sign-in
 [*AuthApi*](doc/AuthApi.md) | [**apiV1AuthSsoProviderStartPost**](doc/AuthApi.md#apiv1authssoproviderstartpost) | **POST** /api/v1/auth/sso/{provider}/start | Start single sign-on with Google or Microsoft: the provider URL to open, with PKCE (sets a short-lived state cookie)
 [*AuthApi*](doc/AuthApi.md) | [**apiV1AuthTotpVerifyPost**](doc/AuthApi.md#apiv1authtotpverifypost) | **POST** /api/v1/auth/totp/verify | Check the authenticator or recovery code at the two-step step (needs X-CSRF-Token)
@@ -104,9 +107,14 @@ Class | Method | HTTP request | Description
  - [MeSchoolBrand](doc/MeSchoolBrand.md)
  - [MeSupport](doc/MeSupport.md)
  - [MeUpdateInput](doc/MeUpdateInput.md)
+ - [OtpRequestInput](doc/OtpRequestInput.md)
+ - [OtpVerifyInput](doc/OtpVerifyInput.md)
+ - [OtpVerifyResult](doc/OtpVerifyResult.md)
+ - [OtpVerifyResultMembershipsInner](doc/OtpVerifyResultMembershipsInner.md)
  - [PasswordForgotInput](doc/PasswordForgotInput.md)
  - [PasswordResetInput](doc/PasswordResetInput.md)
  - [PasswordSignInInput](doc/PasswordSignInInput.md)
+ - [RefreshInput](doc/RefreshInput.md)
  - [SelectSchoolInput](doc/SelectSchoolInput.md)
  - [SesWebhookAck](doc/SesWebhookAck.md)
  - [SessionSummaryList](doc/SessionSummaryList.md)
@@ -117,6 +125,7 @@ Class | Method | HTTP request | Description
  - [SnsEnvelope](doc/SnsEnvelope.md)
  - [SsoStartInput](doc/SsoStartInput.md)
  - [SsoStartResult](doc/SsoStartResult.md)
+ - [TokenPair](doc/TokenPair.md)
  - [TotpSetupInput](doc/TotpSetupInput.md)
  - [TotpSetupResult](doc/TotpSetupResult.md)
  - [TotpVerifyInput](doc/TotpVerifyInput.md)
