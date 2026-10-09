@@ -36,13 +36,16 @@ interface LandingBar {
 interface PageBar {
   page: 'page';
   theme: ThemeSwitchLabels;
+  /** The page's path, so its link is marked as the current page (D45). */
+  current?: string;
 }
 
 /**
  * The top bar (spec 19): logo, section links and Sign in (Get the app for parents), the view
  * switch, the theme, Menu at 1100 px and below, and Book a demo (Ask your school for parents).
  * Sticky above 760 px. On the About, Security & trust and legal pages (`page="page"`) the logo
- * goes home, the links go to those pages, and Book a demo goes to the landing page's form.
+ * goes home, the links go to those pages (the current one underlined in lime), and Book a demo goes
+ * to the landing page's form.
  */
 export function TopBar(props: LandingBar | PageBar) {
   const { theme } = props;
@@ -57,7 +60,9 @@ export function TopBar(props: LandingBar | PageBar) {
         { href: '/about', label: t('public.nav.about') },
         { href: '/security', label: t('public.nav.security') },
         { href: '/legal/privacy', label: t('public.nav.privacy') },
+        { href: '/legal/terms', label: t('public.nav.terms') },
       ];
+  const current = props.page === 'page' ? props.current : undefined;
   return (
     <header className="sticky top-0 z-30 bg-site-nav-bg backdrop-blur-[10px] max-[760px]:static">
       <div
@@ -83,7 +88,15 @@ export function TopBar(props: LandingBar | PageBar) {
           className="flex gap-[22px] text-[15px] font-medium max-[1100px]:hidden"
         >
           {links.map((link) => (
-            <a key={link.href} href={link.href} className={navLink}>
+            <a
+              key={link.href}
+              href={link.href}
+              aria-current={link.href === current ? 'page' : undefined}
+              className={cn(
+                navLink,
+                'aria-[current=page]:text-site-on-navy aria-[current=page]:underline aria-[current=page]:decoration-site-lime aria-[current=page]:decoration-[3px] aria-[current=page]:underline-offset-[9px]',
+              )}
+            >
               {link.label}
             </a>
           ))}

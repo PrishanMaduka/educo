@@ -29,11 +29,23 @@ export const privacyPage: ArticleContent = {
   description:
     'How Quad handles personal data: what each app holds, children’s data, AWS Mumbai storage, the companies involved, Ask Quad, retention and your rights.',
   updated: { date: '2026-10-09', version: '0.2' },
-  hasContents: true,
+  layout: 'legal',
+  inShort: [
+    'For school data, the school is in charge. Quad stores and uses it only to run Quad for the school.',
+    'School data is stored in AWS Mumbai (ap-south-1), with a copy of each daily backup in Singapore.',
+    'Children’s data is never sold, never used for advertising, and never used to train AI models.',
+    'Safeguarding and medical records are encrypted field by field, every view is logged, and they are never sent to Ask Quad.',
+    'Only strictly necessary cookies. No tracking or advertising cookies.',
+    <>
+      Questions about your school’s records go to your school first; anything else to{' '}
+      {mail(privacy)}.
+    </>,
+  ],
   sections: [
     {
       id: 'who-we-are',
       title: 'Who we are',
+      icon: 'school',
       body: (
         <>
           <p>
@@ -50,6 +62,7 @@ export const privacyPage: ArticleContent = {
     {
       id: 'roles',
       title: 'Our two roles',
+      icon: 'swap',
       body: (
         <>
           <p>
@@ -72,6 +85,7 @@ export const privacyPage: ArticleContent = {
     {
       id: 'staff-portal',
       title: 'What the staff portal holds',
+      icon: 'screen',
       body: (
         <>
           <p>The staff portal is where a school runs its day. It holds:</p>
@@ -97,6 +111,7 @@ export const privacyPage: ArticleContent = {
     {
       id: 'parent-app',
       title: 'What the parent app holds',
+      icon: 'phone',
       body: (
         <>
           <p>The Quad app for parents shows a family what the school shares. It holds:</p>
@@ -126,6 +141,7 @@ export const privacyPage: ArticleContent = {
     {
       id: 'console',
       title: 'What the platform console holds',
+      icon: 'tiles',
       body: (
         <>
           <p>
@@ -144,6 +160,7 @@ export const privacyPage: ArticleContent = {
     {
       id: 'children',
       title: 'Children’s data',
+      icon: 'cap',
       body: (
         <>
           <p>
@@ -167,6 +184,7 @@ export const privacyPage: ArticleContent = {
     {
       id: 'website',
       title: 'Visitors to this website and demo requests',
+      icon: 'mail',
       body: (
         <>
           <p>
@@ -186,6 +204,7 @@ export const privacyPage: ArticleContent = {
     {
       id: 'sign-in',
       title: 'How people sign in',
+      icon: 'key',
       body: (
         <ul>
           <li>
@@ -205,6 +224,7 @@ export const privacyPage: ArticleContent = {
     {
       id: 'where',
       title: 'Where data is stored',
+      icon: 'globe',
       body: (
         <>
           <p>
@@ -224,6 +244,7 @@ export const privacyPage: ArticleContent = {
     {
       id: 'subprocessors',
       title: 'Companies that handle data for us',
+      icon: 'box',
       body: (
         <>
           <p>These companies handle data for Quad, each only for the purpose shown.</p>
@@ -238,6 +259,7 @@ export const privacyPage: ArticleContent = {
     {
       id: 'ask-quad',
       title: 'Ask Quad and Anthropic',
+      icon: 'spark',
       body: (
         <>
           <p>
@@ -272,6 +294,7 @@ export const privacyPage: ArticleContent = {
     {
       id: 'retention',
       title: 'How long data is kept',
+      icon: 'clock',
       body: (
         <>
           <p>
@@ -300,6 +323,7 @@ export const privacyPage: ArticleContent = {
     {
       id: 'rights',
       title: 'Your rights and how to ask',
+      icon: 'scale',
       body: (
         <>
           <p>
@@ -319,6 +343,7 @@ export const privacyPage: ArticleContent = {
     {
       id: 'cookies',
       title: 'Cookies',
+      icon: 'cookie',
       body: (
         <>
           <p>Quad uses only cookies that are strictly necessary for it to work:</p>
@@ -340,6 +365,7 @@ export const privacyPage: ArticleContent = {
     {
       id: 'security',
       title: 'Keeping data safe',
+      icon: 'shield',
       body: (
         <p>
           The <Link href="/security">Security &amp; trust</Link> page explains how Quad protects
@@ -350,6 +376,7 @@ export const privacyPage: ArticleContent = {
     {
       id: 'changes',
       title: 'Changes to this policy',
+      icon: 'calendar',
       body: (
         <p>
           The date and version at the top show when this policy last changed. We email school admins
@@ -360,6 +387,7 @@ export const privacyPage: ArticleContent = {
     {
       id: 'contact',
       title: 'Contact',
+      icon: 'chat',
       body: (
         <p>
           Email {mail(privacy)}, or write to {COMPANY.legalName}, {COMPANY.registeredAddress}.

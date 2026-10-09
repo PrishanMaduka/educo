@@ -8,6 +8,8 @@ import type { ArticleContent } from '../src/app/(public)/_lib/article';
  * The Security & trust page at /security (D41). Only what the spec makes true by design (spec 02,
  * 05, 11, 16): no certifications, audits or uptime figures, and planned work is called planned.
  * Ask Quad names "Claude by Anthropic" in plain text only: no logo, no partnership wording.
+ * Laid out as promise cards (D45): each promise condenses its section's text, which stays in full
+ * under "The detail".
  */
 
 const mail = (address: string) => <a href={`mailto:${address}`}>{address}</a>;
@@ -21,11 +23,13 @@ export const securityPage: ArticleContent = {
     'Quad holds children’s data, so it is built to keep every school’s data apart and to give each person only the access they need.',
   description:
     'How Quad protects school data: row-level security per school, encryption, two-step sign-in, logged access to sensitive records, and responsible AI.',
-  hasContents: true,
+  layout: 'promises',
   sections: [
     {
       id: 'isolation',
       title: 'Each school’s data is kept apart',
+      icon: 'tiles',
+      promise: 'A query can only ever see one school’s rows.',
       body: (
         <ul>
           <li>
@@ -46,6 +50,9 @@ export const securityPage: ArticleContent = {
     {
       id: 'encryption',
       title: 'Encryption',
+      icon: 'lock',
+      promise:
+        'Encrypted in transit and at rest, and the most sensitive fields again, field by field.',
       body: (
         <ul>
           <li>All traffic is encrypted in transit with TLS 1.2 or later, with HSTS.</li>
@@ -61,6 +68,8 @@ export const securityPage: ArticleContent = {
     {
       id: 'sign-in',
       title: 'Signing in',
+      icon: 'key',
+      promise: 'Two-step sign-in for school admins by default, and always for Quad’s own team.',
       body: (
         <ul>
           <li>
@@ -86,6 +95,8 @@ export const securityPage: ArticleContent = {
     {
       id: 'sensitive',
       title: 'Safeguarding and medical records',
+      icon: 'cross',
+      promise: 'Only staff given sensitive access can open them, and every view is logged.',
       body: (
         <p>
           Safeguarding and medical records sit behind extra keys: only staff given sensitive access
@@ -97,6 +108,8 @@ export const securityPage: ArticleContent = {
     {
       id: 'access',
       title: 'Least privilege and audit logs',
+      icon: 'audit',
+      promise: 'Each role sees only its own modules and scope, and changes are logged for 7 years.',
       body: (
         <ul>
           <li>
@@ -115,6 +128,8 @@ export const securityPage: ArticleContent = {
     {
       id: 'region',
       title: 'Where data lives, and backups',
+      icon: 'globe',
+      promise: 'Stored in AWS Mumbai, with point-in-time recovery for 35 days.',
       body: (
         <p>
           School data is stored in Amazon Web Services’ Mumbai region (ap-south-1), with
@@ -127,6 +142,8 @@ export const securityPage: ArticleContent = {
     {
       id: 'ask-quad',
       title: 'Responsible AI: Ask Quad',
+      icon: 'spark',
+      promise: 'Read-only, permission-checked, and it never sees safeguarding or medical data.',
       body: (
         <>
           <p>
@@ -153,6 +170,8 @@ export const securityPage: ArticleContent = {
     {
       id: 'practice',
       title: 'How we build it',
+      icon: 'code',
+      promise: 'Secrets never in code, and scans on every change. Not yet audited or certified.',
       body: (
         <>
           <ul>
@@ -170,6 +189,8 @@ export const securityPage: ArticleContent = {
     {
       id: 'report',
       title: 'Report a security issue',
+      icon: 'alert',
+      isCallout: true,
       body: (
         <p>
           If you think you have found a security issue in Quad, email{' '}

@@ -26,6 +26,7 @@ export const button = cva(
     variants: {
       variant: {
         accent: 'bg-site-accent text-site-on-vivid',
+        navy: 'bg-site-navy text-site-on-navy',
         line: 'border-2 border-solid border-site-navy-border bg-transparent font-semibold text-site-on-navy hover:border-site-lime',
       },
       size: {
@@ -40,3 +41,49 @@ export const button = cva(
 
 /** The large display headings (prototype `.h2`). */
 export const display = 'm-0 font-extrabold tracking-[-.045em] text-balance';
+
+/**
+ * Body text on the About, Security & trust and legal pages: paragraphs, lists, small headings,
+ * links and tables, all on the `site-*` tokens. `page` is for white cards, `tint` for the pale
+ * sky, pink, lime and orange cards (navy ink in both themes), `navy` for the navy card.
+ */
+export const prose = cva(
+  [
+    '[&>:first-child]:mt-0 [&>:last-child]:mb-0',
+    '[&_p]:my-3.5 [&_ul]:my-3.5 [&_ul]:pl-5 [&_ol]:my-3.5 [&_ol]:pl-5 [&_li]:my-1.5 [&_li]:pl-1',
+    '[&_strong]:font-bold [&_h3]:mt-7 [&_h3]:mb-2 [&_h3]:text-lg [&_h3]:font-bold',
+    '[&_a]:rounded-sm [&_a]:font-semibold [&_a]:wrap-anywhere [&_a]:underline [&_a]:decoration-2 [&_a]:underline-offset-[3px]',
+    '[&_a:focus-visible]:outline-[3px] [&_a:focus-visible]:outline-offset-2 [&_a:focus-visible]:outline-site-focus [&_a:focus-visible]:outline-solid',
+  ],
+  {
+    variants: {
+      tone: {
+        page: 'text-site-page-ink-2 [&_a]:text-site-page-ink [&_h3]:text-site-page-ink [&_li]:marker:text-site-page-ink-3 [&_strong]:text-site-page-ink',
+        tint: 'text-site-on-vivid [&_a]:text-site-on-vivid [&_h3]:text-site-on-vivid [&_li]:marker:text-site-on-vivid [&_strong]:text-site-on-vivid',
+        navy: 'text-site-on-navy-2 [&_a]:text-site-lime [&_strong]:text-site-on-navy',
+      },
+      // Line height after the size, so cn() keeps it (tailwind-merge drops a leading-* before a text-*).
+      size: { md: 'text-[17px] leading-[1.65]', sm: 'text-[15.5px] leading-[1.6]' },
+    },
+    defaultVariants: { tone: 'page', size: 'md' },
+  },
+);
+
+/** The white card the About and legal sections sit on. */
+export const card =
+  'rounded-[28px] border border-solid border-site-card-line bg-site-card-bg p-[clamp(20px,2.6vw,32px)] shadow-[0_10px_30px_var(--quad-site-feed-shadow)]';
+
+/** The pale card in one of the mark's colours (navy ink in both themes). */
+export const tintCard = cva('rounded-[28px] p-[clamp(20px,2.6vw,32px)] text-site-on-vivid', {
+  variants: {
+    tint: {
+      sky: 'bg-site-chip-sky-bg',
+      pink: 'bg-site-chip-pink-bg',
+      lime: 'bg-site-tag-good-bg',
+      orange: 'bg-site-chip-orange-bg',
+    },
+  },
+});
+
+/** The first card on a page rises into the navy header. */
+export const lift = 'relative z-[2] mt-[clamp(-72px,-5vw,-44px)]';

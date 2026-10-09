@@ -574,6 +574,7 @@
   "publicNavAbout": "About",
   "publicNavSecurity": "Security",
   "publicNavPrivacy": "Privacy",
+  "publicNavTerms": "Terms",
   "publicPageUpdated": "Last updated {date} · Version {version}",
   "@publicPageUpdated": {
     "placeholders": {
@@ -586,6 +587,8 @@
     }
   },
   "publicPageContents": "On this page",
+  "publicPageInShort": "In short",
+  "publicPageDetail": "The detail",
   "emailFromSchool": "{school} via Quad",
   "@emailFromSchool": {
     "placeholders": {

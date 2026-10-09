@@ -83,14 +83,17 @@ const COLUMNS = [
   { key: 'location', label: 'Location' },
 ] as const;
 
-/** One card per sub-processor, so the list fits the policy's reading column at any width. */
+/** One card per sub-processor, in as many columns as fit the policy's card (one on phones). */
 export function SubprocessorCards() {
   return (
-    <ul className="m-0! list-none p-0!" aria-label="Sub-processors">
+    <ul
+      className="my-4! grid list-none grid-cols-[repeat(auto-fill,minmax(min(100%,260px),1fr))] gap-2.5 p-0!"
+      aria-label="Sub-processors"
+    >
       {SUBPROCESSORS.map((row) => (
         <li
           key={row.name}
-          className="my-3! rounded-2xl border border-solid border-site-card-line bg-site-card-bg p-4! text-[15px]"
+          className="m-0! rounded-[18px] border border-solid border-site-card-line bg-site-sheet-2 px-4! py-3.5! text-[14.5px] leading-[1.45]"
         >
           <h3 className="m-0! text-base! text-site-page-ink">{row.name}</h3>
           <dl className="m-0 mt-2 grid gap-y-1.5">

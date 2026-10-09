@@ -83,6 +83,63 @@ test.describe('public pages', () => {
     await expect(page.getByRole('heading', { name: 'Cookies', level: 2 })).toBeInViewport();
   });
 
+  test('About shows the three apps, the timeline and the founder (D45)', async ({ page }) => {
+    await page.goto('/about');
+    for (const name of ['The staff portal', 'The Quad app for parents', 'The platform console']) {
+      await expect(page.getByRole('heading', { name, level: 3 })).toBeVisible();
+    }
+    const stage = page.getByRole('region', { name: 'Where we are now' });
+    for (const step of ['Founded in 2026', 'In development', 'Pilots with schools']) {
+      await expect(stage.getByText(step, { exact: true })).toBeVisible();
+    }
+    await expect(page.getByRole('heading', { name: 'Prishan Maduka', level: 3 })).toBeVisible();
+    await expect(page.getByRole('link', { name: /Book a 30-minute demo/ }).last()).toHaveAttribute(
+      'href',
+      '/#demo',
+    );
+  });
+
+  test('Security & trust shows each promise and opens its detail (D45)', async ({ page }) => {
+    await page.goto('/security');
+    await expect(
+      page.getByText('A query can only ever see one school’s rows.', { exact: true }),
+    ).toBeVisible();
+    const detail = page.getByText(
+      'The app connects to the database with its own role, which cannot bypass those rules.',
+    );
+    await expect(detail).toBeHidden();
+    const toggle = page.getByText('The detail: Each school’s data is kept apart');
+    await toggle.click();
+    await expect(detail).toBeVisible();
+    await expectNoSeriousA11yViolations(page);
+    await toggle.click();
+    await expect(detail).toBeHidden();
+    await expect(page.getByRole('heading', { name: 'Report a security issue' })).toBeVisible();
+  });
+
+  test('legal pages open with "In short" and keep "On this page" in reach (D45)', async ({
+    page,
+  }) => {
+    await page.goto('/legal/terms');
+    const inShort = page.getByRole('region', { name: 'In short' });
+    await expect(inShort.getByRole('listitem')).toHaveCount(6);
+    await expect(
+      inShort.getByText('Everything the school puts into Quad belongs to the school.', {
+        exact: false,
+      }),
+    ).toBeVisible();
+    const contents = page.getByRole('navigation', { name: 'On this page' });
+    await expect(contents.getByRole('link')).toHaveCount(12);
+    await page.getByRole('heading', { name: 'Governing law', level: 2 }).scrollIntoViewIfNeeded();
+    if ((page.viewportSize()?.width ?? 0) > 1100) {
+      // From 1100 px the list stays beside the cards as the page scrolls.
+      await expect(contents).toBeInViewport();
+    } else {
+      // Narrower, it is a row of chips above the cards.
+      await expect(contents).not.toBeInViewport();
+    }
+  });
+
   test('the privacy policy names every sub-processor (D44)', async ({ page }) => {
     await page.goto('/legal/privacy#subprocessors');
     const list = page.getByRole('list', { name: 'Sub-processors' });
