@@ -230,6 +230,44 @@ describe('account table constraints', () => {
   });
 });
 
+describe('SSO logins and sign-in methods (0010, Task 8)', () => {
+  const link = (accountId: string, provider: string, subject: string) =>
+    testDb().platform.query(
+      'insert into identities (account_id, provider, subject) values ($1, $2, $3)',
+      [accountId, provider, subject],
+    );
+
+  it('keeps one login per provider per account (identities)', async () => {
+    const account = await insertAccount(withAccount);
+    await link(account.id, 'google', `g-${uuidv7()}`);
+    await link(account.id, 'microsoft', `m-${uuidv7()}`);
+    const second: unknown = await link(account.id, 'google', `g-${uuidv7()}`).catch(
+      (caught: unknown) => caught,
+    );
+    expect(postgresCause(second)).toMatchObject({
+      code: '23505',
+      constraint: 'identities_account_id_provider_unique',
+    });
+  });
+
+  it('records how a session signed in, and takes only a sign-in method', async () => {
+    const session = await insertSession(withAccount, accountA.id);
+    const setMethod = (method: string) =>
+      testDb().platform.query('update sessions set sign_in_method = $2 where id = $1', [
+        session.id,
+        method,
+      ]);
+    await setMethod('sso:microsoft');
+    const { rows } = await testDb().platform.query<{ sign_in_method: string }>(
+      'select sign_in_method from sessions where id = $1',
+      [session.id],
+    );
+    expect(rows).toEqual([{ sign_in_method: 'sso:microsoft' }]);
+    const junk: unknown = await setMethod('carrier pigeon').catch((caught: unknown) => caught);
+    expect(postgresCause(junk)).toMatchObject({ code: '22P02' });
+  });
+});
+
 describe('otp_challenges (open table)', () => {
   it('quad_app can create, read, update and delete challenges without an account', async () => {
     const { app } = testDb();

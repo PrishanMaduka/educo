@@ -1,4 +1,4 @@
-import { SessionKind, SessionStage } from '@quad/contracts';
+import { SessionKind, SessionStage, SignInMethod } from '@quad/contracts';
 import { sql } from 'drizzle-orm';
 import {
   boolean,
@@ -25,6 +25,7 @@ import { accounts } from './accounts';
 
 export const sessionKind = pgEnum('session_kind', SessionKind.options);
 export const sessionStage = pgEnum('session_stage', SessionStage.options);
+export const signInMethod = pgEnum('sign_in_method', SignInMethod.options);
 
 /**
  * A signed-in browser, phone or console tab (spec 04, Identity; spec 05). Account table keyed on
@@ -53,6 +54,11 @@ export const sessions = pgTable(
     /** Increases on every refresh rotation; an older generation means reuse. */
     refreshGeneration: integer('refresh_generation').notNull().default(0),
     keepSignedIn: boolean('keep_signed_in').notNull().default(false),
+    /**
+     * The first factor this staff session signed in with (password or an SSO provider), for the
+     * `auth.sign_in` audit once it opens a school (0010, Task 8). Null for mobile and console.
+     */
+    signInMethod: signInMethod('sign_in_method'),
     previewRoleId: uuid('preview_role_id'),
     previewSampleUserId: uuid('preview_sample_user_id'),
     supportSessionId: uuid('support_session_id').references(() => supportSessions.id),

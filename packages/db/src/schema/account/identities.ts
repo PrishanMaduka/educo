@@ -1,5 +1,5 @@
 import { SsoProvider } from '@quad/contracts';
-import { index, pgEnum, pgTable, text, timestamp, unique, uuid } from 'drizzle-orm/pg-core';
+import { pgEnum, pgTable, text, timestamp, unique, uuid } from 'drizzle-orm/pg-core';
 
 import { uuidv7 } from '../../uuid';
 import { citext } from '../types';
@@ -27,7 +27,9 @@ export const identities = pgTable(
   },
   (table) => [
     unique('identities_provider_subject_unique').on(table.provider, table.subject),
-    index('identities_account_id_idx').on(table.accountId),
+    // One login per provider per account (0010, Task 8): two concurrent first sign-ins cannot
+    // link two subjects. It also serves lookups by account, so the plain index went.
+    unique('identities_account_id_provider_unique').on(table.accountId, table.provider),
   ],
 );
 
