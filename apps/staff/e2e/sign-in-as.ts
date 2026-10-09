@@ -12,6 +12,26 @@ export const PEOPLE = {
   dilini: 'dilini.fernando@colombo-intl.local',
 } as const;
 
+/**
+ * The projects where a journey that signs a seeded person in with a password runs: one light and
+ * one dark, at both widths, plus WebKit for the journeys tagged `@webkit`. The binding limit is
+ * the API's per-email one on `POST /auth/password` (`PER_EMAIL` in `auth.controller.ts`: 10 calls
+ * per address in 15 minutes); the per-IP bucket (20 a minute) never binds, since each test sends
+ * its own client address. Each run starts with an empty rate-limit store (the stack's own Redis
+ * database), and CI retries a failed test once (`retries: 1`), so a journey's calls count twice
+ * at worst. The global sign-in is not retried. Password calls per address in one CI run, at worst:
+ * - Prishan: 1 global sign-in + 2 × (3 sign-in.spec projects + 1 Preview a role) = 9;
+ * - Ruwan: 2 × (2 Choose a school + 2 Switch school) = 8;
+ * - Nadeesha: 2 × 4 projects of the teacher's journey = 8;
+ * - Dilini: 2 × 3 projects of Sign out = 6.
+ * Add a password journey only where its person stays under 10.
+ */
+export const PASSWORD_JOURNEY_PROJECTS: readonly string[] = [
+  'desktop-light',
+  'phone-dark',
+  'webkit-desktop-light',
+];
+
 /** Where the shared signed-in state of Prishan is kept for the run (`global-sign-in.ts`). */
 export const PRISHAN_STATE = fileURLToPath(
   new URL('../test-results/.auth/prishan.json', import.meta.url),
@@ -46,7 +66,8 @@ const nextOf = (answer: unknown): unknown =>
 /**
  * Signs in through the API the way the page does (password, then the stack's fixed code, then
  * the school by name when there are several), so the request's browser context holds a real
- * session. One password call per use: the API allows 10 per address in 15 minutes.
+ * session. One password call per use, counted against the address's 10 in 15 minutes
+ * (`PASSWORD_JOURNEY_PROJECTS`).
  */
 export async function signInThroughApi(
   request: APIRequestContext,

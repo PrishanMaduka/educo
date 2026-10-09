@@ -1045,6 +1045,7 @@
   "errorSomethingWentWrong": "Something went wrong on our side. Try again in a moment.",
   "signInTitle": "Sign in to Quad",
   "signInLede": "One sign-in for every school on Quad. We’ll open your school once you’re signed in.",
+  "signInNoticeTwoStep": "The school you chose asks for a two-step code. Sign in again to set it up.",
   "signInWelcomeBack": "Welcome back to {school}",
   "@signInWelcomeBack": {
     "placeholders": {

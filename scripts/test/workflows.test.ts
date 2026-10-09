@@ -194,6 +194,14 @@ describe('ci.yml', () => {
     expect(script.indexOf('check-services')).toBeLessThan(script.indexOf('pnpm e2e'));
   });
 
+  it('installs WebKit for e2e-smoke and turns the staff WebKit project on there (D27)', () => {
+    const steps = ci.jobs['e2e-smoke']?.steps ?? [];
+    const install = steps.find((step) => step.run?.includes('playwright install') === true);
+    expect(install?.run).toMatch(/playwright install --with-deps chromium webkit$/m);
+    const e2e = steps.find((step) => step.run === 'pnpm e2e');
+    expect(e2e?.env?.QUAD_E2E_WEBKIT).toBe('1');
+  });
+
   it('fails Flutter checks instead of skipping them wherever Flutter runs', () => {
     for (const id of ['typecheck', 'lint', 'unit', 'codegen', 'parent-build']) {
       expect(ci.jobs[id]?.env?.QUAD_REQUIRE_FLUTTER, id).toBe('1');

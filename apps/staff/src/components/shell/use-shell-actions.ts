@@ -2,6 +2,7 @@
 
 import { useToast } from '@quad/ui';
 import { useMutation } from '@tanstack/react-query';
+import { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { hrefOf } from './staff-nav';
@@ -12,8 +13,11 @@ import { ApiError, staffApi, unwrap, unwrapEmpty } from '@/lib/api';
 import { messageFor } from '@/lib/error-copy';
 import { openPage } from '@/lib/navigate';
 
-/** Sign-in again, back to the portal, when the chosen school first needs two-step set up. */
-const SIGN_IN_AGAIN = '/sign-in?next=%2Fapp';
+/**
+ * Sign in again, back to the portal, when the chosen school first needs two-step set up. The
+ * sign-in page reads `notice=two_step` and shows a fixed sentence saying why (`signInNoticeFrom`).
+ */
+const SIGN_IN_AGAIN = '/sign-in?next=%2Fapp&notice=two_step';
 
 export interface PreviewChoice {
   readonly roleId: string;
@@ -45,6 +49,8 @@ export function useShellActions() {
   const fail = (error: unknown) => {
     toast.show(messageFor(error, (key: MessageKey) => t(key)));
   };
+  /** Whether this View as choice already ended the preview that was on (`startPreview`). */
+  const previewEnded = useRef(false);
 
   const signOut = useMutation({
     mutationFn: () => unwrapEmpty(staffApi().POST('/api/v1/auth/sign-out')),
@@ -83,7 +89,11 @@ export function useShellActions() {
 
   const startPreview = useMutation({
     mutationFn: async ({ roleId, needsSample, previewing }: PreviewChoice) => {
-      if (previewing) await unwrapEmpty(staffApi().DELETE('/api/v1/me/role-preview'));
+      previewEnded.current = false;
+      if (previewing) {
+        await unwrapEmpty(staffApi().DELETE('/api/v1/me/role-preview'));
+        previewEnded.current = true;
+      }
       const sampleUserId = needsSample
         ? await sampleFor(roleId, t('error.previewNeedsSample'))
         : undefined;
@@ -97,7 +107,11 @@ export function useShellActions() {
     onSuccess: (permissions) => {
       openPage(hrefOf(permissions.home));
     },
-    onError: fail,
+    // The old preview is already over on the server, so the page reloads without its banner.
+    onError: (error) => {
+      fail(error);
+      if (previewEnded.current) openPage('/app');
+    },
   });
 
   const exitSupport = useMutation({

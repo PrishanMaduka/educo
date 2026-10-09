@@ -6,6 +6,7 @@ import {
   lastSchoolFrom,
   safeNext,
   signInAgainPath,
+  signInNoticeFrom,
   signInPathFor,
 } from './session';
 
@@ -104,5 +105,17 @@ describe('signInAgainPath', () => {
   it('falls back to /app for anything that is not a portal page', () => {
     expect(signInAgainPath(null)).toBe('/sign-in?next=%2Fapp');
     expect(signInAgainPath('https://evil.example/app')).toBe('/sign-in?next=%2Fapp');
+  });
+});
+
+describe('signInNoticeFrom', () => {
+  it('knows the two-step notice the portal asks for', () => {
+    expect(signInNoticeFrom('two_step')).toBe('two_step');
+  });
+
+  it('ignores anything else, so no query text ever reaches the page', () => {
+    for (const raw of [undefined, '', 'Two_Step', '<b>hi</b>', ['two_step'], 'two_step ']) {
+      expect(signInNoticeFrom(raw)).toBeNull();
+    }
   });
 });

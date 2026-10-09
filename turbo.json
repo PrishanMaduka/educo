@@ -43,6 +43,7 @@
         "CI",
         "PLAYWRIGHT_BROWSERS_PATH",
         "QUAD_SCREENSHOTS",
+        "QUAD_E2E_WEBKIT",
         "DATABASE_URL",
         "DATABASE_PLATFORM_URL",
         "DATABASE_OWNER_URL",

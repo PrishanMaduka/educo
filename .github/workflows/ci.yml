@@ -206,9 +206,13 @@ jobs:
       - uses: ./.github/actions/setup
       - name: Postgres, Redis and Mailpit are reachable
         run: node scripts/check-services.mjs
-      - name: Install the Playwright browser
-        run: pnpm --filter @quad/staff exec playwright install --with-deps chromium
+      # WebKit for the staff app's WebKit project (D27): drawer focus and the session cookie
+      # journeys, which run here only (QUAD_E2E_WEBKIT=1); local runs leave the project out.
+      - name: Install the Playwright browsers
+        run: pnpm --filter @quad/staff exec playwright install --with-deps chromium webkit
       - name: End-to-end smoke tests
+        env:
+          QUAD_E2E_WEBKIT: '1'
         run: pnpm e2e
       - name: Upload the Playwright reports
         if: failure()

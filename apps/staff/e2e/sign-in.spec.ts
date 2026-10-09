@@ -3,10 +3,13 @@ import { expectNoSeriousA11yViolations, expectNoSideScroll } from '@quad/config/
 import { tamperedTestLink } from '@quad/config/playwright/signed-token';
 import { test } from '@quad/config/playwright/stack';
 
+import { PASSWORD_JOURNEY_PROJECTS } from './sign-in-as';
+
 /*
  * Staff sign-in against the e2e stack (Task 18's API with Task 17's seed): identifier first, the
  * password, two-step with the stack's fixed code, Choose a school, forgot password and a
- * refused reset link (spec 05; spec 17 journeys).
+ * refused reset link (spec 05; spec 17 journeys). Journeys that sign a seeded person in with a
+ * password run on `PASSWORD_JOURNEY_PROJECTS`, where the API's per-email limit is counted.
  */
 
 const PRISHAN = 'prishan.maduka@colombo-intl.local';
@@ -50,22 +53,34 @@ test.describe('staff sign-in', () => {
     expect(response.headers().location).toBe('/sign-in?next=%2Fapp');
   });
 
-  test('email, then password, then the code, lands in the portal', async ({ page, stack }) => {
-    await page.goto('/app');
-    await expect(page).toHaveURL('/sign-in?next=%2Fapp');
-    await expect(title(page, 'Sign in to Quad')).toBeVisible();
+  test(
+    'email, then password, then the code, lands in the portal',
+    { tag: '@webkit' },
+    async ({ page, stack }, testInfo) => {
+      test.skip(
+        !PASSWORD_JOURNEY_PROJECTS.includes(testInfo.project.name),
+        'Prishan signs in with a password: see PASSWORD_JOURNEY_PROJECTS for the per-email limit',
+      );
+      await page.goto('/app');
+      await expect(page).toHaveURL('/sign-in?next=%2Fapp');
+      await expect(title(page, 'Sign in to Quad')).toBeVisible();
 
-    await enterEmail(page, PRISHAN);
-    await expect(page.getByText(PRISHAN)).toBeVisible();
-    await enterPassword(page, stack.seedPassword);
-    await enterCode(page, stack.fixedCode);
+      await enterEmail(page, PRISHAN);
+      await expect(page.getByText(PRISHAN)).toBeVisible();
+      await enterPassword(page, stack.seedPassword);
+      await enterCode(page, stack.fixedCode);
 
-    // "Opening Colombo International School…" shows only while the portal loads (component test).
-    await expect(page).toHaveURL('/app');
-    await expect(title(page, GREETING)).toBeVisible();
-  });
+      // "Opening Colombo International School…" shows only while the portal loads (component test).
+      await expect(page).toHaveURL('/app');
+      await expect(title(page, GREETING)).toBeVisible();
+    },
+  );
 
-  test('a teacher at two schools chooses one, and it opens', async ({ page, stack }) => {
+  test('a teacher at two schools chooses one, and it opens', async ({ page, stack }, testInfo) => {
+    test.skip(
+      !PASSWORD_JOURNEY_PROJECTS.includes(testInfo.project.name),
+      'Ruwan signs in with a password: see PASSWORD_JOURNEY_PROJECTS for the per-email limit',
+    );
     await page.goto('/sign-in');
     await enterEmail(page, RUWAN);
     await enterPassword(page, stack.seedPassword);
@@ -78,6 +93,21 @@ test.describe('staff sign-in', () => {
     await page.getByRole('button', { name: /Kandy Hill Academy/ }).click();
     // A teacher's home is My teaching: /app sends them there (Task 20).
     await expect(page).toHaveURL('/app/teaching');
+  });
+
+  test('says why when Switch school sent the person back for two-step, and shows no other notice', async ({
+    page,
+  }) => {
+    await page.goto('/sign-in?next=%2Fapp&notice=two_step');
+    await expect(page.getByRole('status')).toHaveText(
+      'The school you chose asks for a two-step code. Sign in again to set it up.',
+    );
+    await expectNoSideScroll(page);
+    await expectAccessibleOnceStill(page);
+    await page.goto('/sign-in?next=%2Fapp&notice=%3Cb%3EPay%20here%3C%2Fb%3E');
+    await expect(title(page, 'Sign in to Quad')).toBeVisible();
+    await expect(page.getByRole('status')).toHaveCount(0);
+    await expect(page.locator('body')).not.toContainText('Pay here');
   });
 
   test('offers no Google or Microsoft sign-in (D37)', async ({ page }) => {

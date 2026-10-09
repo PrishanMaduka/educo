@@ -290,6 +290,19 @@ describe('SignInFlow', () => {
     expect(fake.requests).toEqual([]);
   });
 
+  it('says why when the portal sent the person back to set up two-step', () => {
+    renderFlow({ notice: 'two_step' });
+    expect(screen.getByRole('status')).toHaveTextContent(
+      'The school you chose asks for a two-step code. Sign in again to set it up.',
+    );
+    expect(screen.getByLabelText('Work email')).toHaveValue('');
+  });
+
+  it('shows no notice on an ordinary visit', () => {
+    renderFlow();
+    expect(screen.queryByRole('status')).toBeNull();
+  });
+
   it('takes a recovery code instead of the app’s code', async () => {
     resetFake({
       'POST /api/v1/auth/password': { status: 200, body: { next: 'two_step' } },

@@ -14,6 +14,7 @@ import { initialSignIn, signInReducer, type SignInState } from './sign-in-steps'
 import { TwoStepSetup } from './TwoStepSetup';
 import { TwoStepStep } from './TwoStepStep';
 
+import type { SignInNotice } from '@/lib/session';
 import type { SignInNext } from '@quad/contracts';
 
 export interface SignInFlowProps {
@@ -21,6 +22,8 @@ export interface SignInFlowProps {
   lastSchool: string | null;
   /** Where to go once signed in (already checked by `safeNext`). */
   next: string;
+  /** Why the person was sent here, shown above the email step (`signInNoticeFrom`). */
+  notice?: SignInNotice | null;
   /** A step to start at other than the work email (the invite page). */
   initial?: SignInState;
   /** A staff invite link's token, sent with each sign-in step as a hint (Task 13). */
@@ -48,6 +51,7 @@ const openPage = (path: string) => {
 export function SignInFlow({
   lastSchool,
   next,
+  notice = null,
   initial,
   inviteToken,
   beforeSchool,
@@ -83,6 +87,7 @@ export function SignInFlow({
         <EmailStep
           email={email}
           lastSchool={lastSchool}
+          notice={notice}
           title={emailTitle}
           lede={emailLede}
           onSubmit={(address) => {

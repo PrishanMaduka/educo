@@ -73,3 +73,15 @@ export const PORTAL_PATH_HEADER = 'x-quad-path';
 export function signInAgainPath(requested: string | null): string {
   return `/sign-in?${new URLSearchParams({ next: safeNext(requested) }).toString()}`;
 }
+
+/** A fixed notice the sign-in page can show above the email step (`?notice=`). */
+export type SignInNotice = 'two_step';
+
+/**
+ * The sign-in page's `?notice=`: only a known value, so the page shows one of its own fixed
+ * sentences and never text from the query. Switch school sends `two_step` when the chosen
+ * school needs two-step set up first.
+ */
+export function signInNoticeFrom(raw: unknown): SignInNotice | null {
+  return raw === 'two_step' ? 'two_step' : null;
+}

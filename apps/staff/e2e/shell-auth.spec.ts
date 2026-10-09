@@ -8,14 +8,16 @@ import {
 import { test } from '@quad/config/playwright/stack';
 import { deriveBrand } from '@quad/tokens';
 
-import { PEOPLE, PRISHAN_STATE, signInThroughApi } from './sign-in-as';
+import { PASSWORD_JOURNEY_PROJECTS, PEOPLE, PRISHAN_STATE, signInThroughApi } from './sign-in-as';
 
 /*
  * The signed-in portal shell against the e2e stack (spec 05, spec 08): the school's name, brand
  * and the role's menu from GET /me and /me/permissions, the profile menu (Switch school, Sign
  * out), Preview a role and the no-access and View only pages. Journeys that only read share
  * Prishan's session from `global-sign-in.ts`; the ones that change a session sign in on their
- * own, as other people where they can (the API allows 10 password tries per address in 15 min).
+ * own, as other people where they can, on `PASSWORD_JOURNEY_PROJECTS` (the API's per-email limit
+ * on password calls, 10 per address in 15 minutes, is counted there). `@webkit` journeys also run
+ * in the CI-only WebKit project (D27): the session cookie and focus return.
  */
 
 const GREETING = /^(Good morning|Good afternoon|Good evening|Hello), Prishan$/;
@@ -45,22 +47,28 @@ const tokenValue = (page: Page, name: string) =>
     );
 
 test.describe('signed out', () => {
-  test('a visit to the portal goes to sign-in, keeping the page as ?next=', async ({ page }) => {
-    const response = await page.request.get('/app', { maxRedirects: 0 });
-    expect(response.status()).toBe(307);
-    expect(response.headers().location).toBe('/sign-in?next=%2Fapp');
-  });
+  test(
+    'a visit to the portal goes to sign-in, keeping the page as ?next=',
+    { tag: '@webkit' },
+    async ({ page }) => {
+      const response = await page.request.get('/app', { maxRedirects: 0 });
+      expect(response.status()).toBe(307);
+      expect(response.headers().location).toBe('/sign-in?next=%2Fapp');
+    },
+  );
 
-  test('a session the API no longer accepts goes to sign-in, back to the same page', async ({
-    page,
-    context,
-    baseURL,
-  }) => {
-    await context.addCookies([{ name: 'quad_sid', value: 'expired-session', url: baseURL ?? '' }]);
-    await page.goto('/app/fees?term=2');
-    await expect(page).toHaveURL('/sign-in?next=%2Fapp%2Ffees%3Fterm%3D2');
-    await expect(title(page, 'Sign in to Quad')).toBeVisible();
-  });
+  test(
+    'a session the API no longer accepts goes to sign-in, back to the same page',
+    { tag: '@webkit' },
+    async ({ page, context, baseURL }) => {
+      await context.addCookies([
+        { name: 'quad_sid', value: 'expired-session', url: baseURL ?? '' },
+      ]);
+      await page.goto('/app/fees?term=2');
+      await expect(page).toHaveURL('/sign-in?next=%2Fapp%2Ffees%3Fterm%3D2');
+      await expect(title(page, 'Sign in to Quad')).toBeVisible();
+    },
+  );
 });
 
 test.describe('the shell, signed in as the school admin', () => {
@@ -117,21 +125,23 @@ test.describe('the shell, signed in as the school admin', () => {
     await expectNoSeriousA11yViolations(page);
   });
 
-  test('the profile menu names the school and offers Sign out, and passes axe', async ({
-    page,
-  }) => {
-    await page.goto('/app');
-    await expect(title(page, GREETING)).toBeVisible();
-    const menu = await openProfileMenu(page);
-    await expect(menu.getByText('Colombo International School')).toBeVisible();
-    await expect(menu.getByRole('button', { name: 'Sign out' })).toBeVisible();
-    // Prishan is in one school, so there is nothing to switch to.
-    await expect(menu.getByText('Switch school')).toHaveCount(0);
-    await expectNoSeriousA11yViolations(page);
-    await page.keyboard.press('Escape');
-    await expect(menu).toBeHidden();
-    await expect(page.getByRole('button', { name: 'Open your profile menu' })).toBeFocused();
-  });
+  test(
+    'the profile menu names the school and offers Sign out, and passes axe',
+    { tag: '@webkit' },
+    async ({ page }) => {
+      await page.goto('/app');
+      await expect(title(page, GREETING)).toBeVisible();
+      const menu = await openProfileMenu(page);
+      await expect(menu.getByText('Colombo International School')).toBeVisible();
+      await expect(menu.getByRole('button', { name: 'Sign out' })).toBeVisible();
+      // Prishan is in one school, so there is nothing to switch to.
+      await expect(menu.getByText('Switch school')).toHaveCount(0);
+      await expectNoSeriousA11yViolations(page);
+      await page.keyboard.press('Escape');
+      await expect(menu).toBeHidden();
+      await expect(page.getByRole('button', { name: 'Open your profile menu' })).toBeFocused();
+    },
+  );
 
   test('View as is in the top bar on desktop only', async ({ page }) => {
     await page.goto('/app');
@@ -208,29 +218,33 @@ test.describe('the shell, signed in as the school admin', () => {
     );
   });
 
-  test('closing the menu or the search returns focus to where it was', async ({ page }) => {
-    await page.goto('/app');
-    await expect(title(page, GREETING)).toBeVisible();
-    if (isPhone(page)) {
-      const menuButton = page.getByRole('button', { name: 'Open menu' });
-      await menuButton.click();
-      await expect(page.getByRole('dialog', { name: 'Menu' })).toBeVisible();
+  test(
+    'closing the menu or the search returns focus to where it was',
+    { tag: '@webkit' },
+    async ({ page }) => {
+      await page.goto('/app');
+      await expect(title(page, GREETING)).toBeVisible();
+      if (isPhone(page)) {
+        const menuButton = page.getByRole('button', { name: 'Open menu' });
+        await menuButton.click();
+        await expect(page.getByRole('dialog', { name: 'Menu' })).toBeVisible();
+        await page.keyboard.press('Escape');
+        await expect(menuButton).toBeFocused();
+      }
+      const search = page.getByRole('button', { name: /Search students, staff and pages/ });
+      await search.click();
+      await expect(page.getByRole('dialog', { name: 'Search' })).toBeVisible();
       await page.keyboard.press('Escape');
-      await expect(menuButton).toBeFocused();
-    }
-    const search = page.getByRole('button', { name: /Search students, staff and pages/ });
-    await search.click();
-    await expect(page.getByRole('dialog', { name: 'Search' })).toBeVisible();
-    await page.keyboard.press('Escape');
-    await expect(search).toBeFocused();
+      await expect(search).toBeFocused();
 
-    const theme = page.getByRole('button', { name: 'Change theme' });
-    await theme.focus();
-    await page.keyboard.press('Control+k');
-    await expect(page.getByRole('dialog', { name: 'Search' })).toBeVisible();
-    await page.keyboard.press('Escape');
-    await expect(theme).toBeFocused();
-  });
+      const theme = page.getByRole('button', { name: 'Change theme' });
+      await theme.focus();
+      await page.keyboard.press('Control+k');
+      await expect(page.getByRole('dialog', { name: 'Search' })).toBeVisible();
+      await page.keyboard.press('Escape');
+      await expect(theme).toBeFocused();
+    },
+  );
 
   test('the phone menu closes when the screen grows past 900 px', async ({ page }) => {
     test.skip(!isPhone(page), 'The menu exists only on narrow screens');
@@ -293,16 +307,24 @@ test.describe('a teacher', () => {
 });
 
 test.describe('signing out', () => {
-  test('Sign out in the profile menu ends the session and goes to sign-in', async ({ page }) => {
-    await signInThroughApi(page.request, PEOPLE.dilini);
-    await page.goto('/app');
-    await expect(title(page, /, Dilini$/)).toBeVisible();
-    const menu = await openProfileMenu(page);
-    await menu.getByRole('button', { name: 'Sign out' }).click();
-    await expect(page).toHaveURL('/sign-in');
-    await page.goto('/app');
-    await expect(page).toHaveURL('/sign-in?next=%2Fapp');
-  });
+  test(
+    'Sign out in the profile menu ends the session and goes to sign-in',
+    { tag: '@webkit' },
+    async ({ page }, testInfo) => {
+      test.skip(
+        !PASSWORD_JOURNEY_PROJECTS.includes(testInfo.project.name),
+        'Dilini signs in with a password: see PASSWORD_JOURNEY_PROJECTS for the per-email limit',
+      );
+      await signInThroughApi(page.request, PEOPLE.dilini);
+      await page.goto('/app');
+      await expect(title(page, /, Dilini$/)).toBeVisible();
+      const menu = await openProfileMenu(page);
+      await menu.getByRole('button', { name: 'Sign out' }).click();
+      await expect(page).toHaveURL('/sign-in');
+      await page.goto('/app');
+      await expect(page).toHaveURL('/sign-in?next=%2Fapp');
+    },
+  );
 });
 
 test.describe('Switch school', () => {
@@ -310,8 +332,8 @@ test.describe('Switch school', () => {
     page,
   }, testInfo) => {
     test.skip(
-      !['desktop-light', 'phone-dark'].includes(testInfo.project.name),
-      'Ruwan signs in on two projects only: the API allows 10 password tries per address in 15 minutes',
+      !PASSWORD_JOURNEY_PROJECTS.includes(testInfo.project.name),
+      'Ruwan signs in with a password: see PASSWORD_JOURNEY_PROJECTS for the per-email limit',
     );
     await signInThroughApi(page.request, PEOPLE.ruwan, 'Colombo International School');
     await page.goto('/app/teaching');
@@ -337,7 +359,7 @@ test.describe('Preview a role', () => {
     test.skip(isPhone(page), 'View as is in the top bar on desktop only (spec 08)');
     test.skip(
       testInfo.project.name !== 'desktop-light',
-      'Prishan signs in on her own once per run here: the API allows 10 password tries per address in 15 minutes',
+      'Prishan signs in with a password: one project only, see PASSWORD_JOURNEY_PROJECTS for the per-email limit',
     );
     await signInThroughApi(page.request, PEOPLE.prishan);
     await page.goto('/app');

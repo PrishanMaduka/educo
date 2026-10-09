@@ -559,6 +559,7 @@
   "error.somethingWentWrong": "Something went wrong on our side. Try again in a moment.",
   "signIn.title": "Sign in to Quad",
   "signIn.lede": "One sign-in for every school on Quad. We’ll open your school once you’re signed in.",
+  "signIn.notice.twoStep": "The school you chose asks for a two-step code. Sign in again to set it up.",
   "signIn.welcomeBack": "Welcome back to {school}",
   "signIn.email.label": "Work email",
   "signIn.email.placeholder": "name@yourschool.org",

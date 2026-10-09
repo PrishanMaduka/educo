@@ -1,8 +1,9 @@
 import { createApiClient } from '@quad/client';
+import { Me, MePermissions } from '@quad/contracts';
 
 import { ApiError, unwrap } from './api';
 
-import type { Me, MePermissions } from '@quad/contracts';
+import type { ZodType } from 'zod';
 
 /** The session cookies the API reads (spec 05; D32): `quad_sid` locally, `__Host-` elsewhere. */
 const SESSION_COOKIES: ReadonlySet<string> = new Set(['quad_sid', '__Host-quad_sid']);
@@ -38,9 +39,22 @@ export function sessionCookieHeader(
 }
 
 /**
+ * The answer checked against its contract: the shell puts `/me`'s brand colours into an inline
+ * style, so only values the contract accepts (`HexColor`) may reach it. A body the contract
+ * refuses is thrown, and the error page shows instead of the shell.
+ */
+function parsed<T>(schema: ZodType<T>, body: unknown, route: string): T {
+  const result = schema.safeParse(body);
+  if (!result.success) {
+    throw new Error(`GET ${route} answered a body its contract refuses.`, { cause: result.error });
+  }
+  return result.data;
+}
+
+/**
  * `GET /me` and `GET /me/permissions` for the portal shell, from a server component (spec 06).
  * Both are reads, so no CSRF header. Nothing is cached: every page load asks the API, which
- * checks the session each time.
+ * checks the session each time. Both bodies are parsed with the contracts.
  */
 export async function fetchPortalSession({
   apiUrl,
@@ -57,7 +71,11 @@ export async function fetchPortalSession({
       unwrap(api.GET('/api/v1/me')),
       unwrap(api.GET('/api/v1/me/permissions')),
     ]);
-    return { kind: 'ready', me, permissions };
+    return {
+      kind: 'ready',
+      me: parsed(Me, me, '/me'),
+      permissions: parsed(MePermissions, permissions, '/me/permissions'),
+    };
   } catch (error) {
     if (error instanceof ApiError && error.status === 401) return { kind: 'signed_out' };
     if (error instanceof ApiError && error.code === 'school_suspended') {

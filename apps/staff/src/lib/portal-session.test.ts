@@ -110,6 +110,36 @@ describe('fetchPortalSession', () => {
       }),
     ).rejects.toBeInstanceOf(ApiError);
   });
+
+  it('refuses a /me the contract does not accept, so no unchecked brand value reaches a style', async () => {
+    const forged = {
+      ...ME,
+      school: { ...ME.school, brand: { ...ME.school.brand, fill: 'red; background: url(x)' } },
+    };
+    await expect(
+      fetchPortalSession({
+        apiUrl: API,
+        cookieHeader: 'quad_sid=s-1',
+        fetch: fakeApi({
+          '/api/v1/me': { status: 200, body: forged },
+          '/api/v1/me/permissions': { status: 200, body: PERMISSIONS },
+        }),
+      }),
+    ).rejects.toThrow('GET /me answered');
+  });
+
+  it('refuses /me/permissions the contract does not accept', async () => {
+    await expect(
+      fetchPortalSession({
+        apiUrl: API,
+        cookieHeader: 'quad_sid=s-1',
+        fetch: fakeApi({
+          '/api/v1/me': { status: 200, body: ME },
+          '/api/v1/me/permissions': { status: 200, body: { ...PERMISSIONS, home: 42 } },
+        }),
+      }),
+    ).rejects.toThrow(/GET \/me\/permissions/);
+  });
 });
 
 describe('sessionCookieHeader', () => {
