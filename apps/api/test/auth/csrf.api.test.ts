@@ -145,10 +145,11 @@ describe('cookie names and attributes (spec 05, ruling F63)', () => {
 
   it('a non-local app reads the session from __Host-quad_sid, and ignores quad_sid', async () => {
     // A staging config refuses the compose database's passwords, so the session is served from
-    // the Redis cache entry SessionService would have written (no database is reached).
+    // the Redis cache entry SessionService would have written (no database is reached). It is at
+    // Choose a school: a session in a school would also have its school's status and permissions
+    // read from Postgres by the Task 12 guards.
     const token = newSessionToken();
-    const tenantId = randomUUID();
-    const userId = randomUUID();
+    const accountId = randomUUID();
     const redis = new Redis(REDIS_URL);
     try {
       await redis.set(
@@ -156,15 +157,15 @@ describe('cookie names and attributes (spec 05, ruling F63)', () => {
         JSON.stringify({
           kind: 'web',
           sessionId: randomUUID(),
-          accountId: randomUUID(),
-          stage: 'active',
-          tenantId,
-          userId,
+          accountId,
+          stage: 'choose_school',
+          tenantId: null,
+          userId: null,
           previewRoleId: null,
           previewSampleUserId: null,
           supportSessionId: null,
           keepSignedIn: false,
-          sessionHours: 12,
+          sessionHours: null,
           lastSeenAt: new Date().toISOString(),
           expiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
         }),
@@ -178,11 +179,11 @@ describe('cookie names and attributes (spec 05, ruling F63)', () => {
       staging()
         .getHttpAdapter()
         .getInstance()
-        .inject({ method: 'GET', url: '/api/v1/probe/context', headers: { cookie } });
+        .inject({ method: 'GET', url: '/api/v1/probe/context/any-stage', headers: { cookie } });
 
     const hosted = await probe(`__Host-quad_sid=${token}`);
     expect(hosted.statusCode).toBe(200);
-    expect(hosted.json()).toMatchObject({ tenantId, userId, kind: 'web' });
+    expect(hosted.json()).toEqual({ accountId, kind: 'web' });
     expect((await probe(`quad_sid=${token}`)).statusCode).toBe(401);
   });
 

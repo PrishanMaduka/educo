@@ -286,6 +286,181 @@ export interface paths {
         };
         trace?: never;
     };
+    "/api/v1/me/permissions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** What you can do in this school: permission keys, every staff page and how much of it opens, your home page and any role preview */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Your permissions */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["MePermissions"];
+                    };
+                };
+                /** @description Error */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/role-preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Preview the staff portal as a role, read-only (users.manage; a role for own classes needs a sample person; needs X-CSRF-Token) */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["RolePreviewInput"];
+                };
+            };
+            responses: {
+                /** @description Your permissions while previewing */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["MePermissions"];
+                    };
+                };
+                /** @description Error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+            };
+        };
+        /** End the role preview: back to your own view (needs X-CSRF-Token) */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description The preview ended */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Error */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/me/sessions": {
         parameters: {
             query?: never;
@@ -1636,6 +1811,33 @@ export interface components {
                 /** @enum {string} */
                 word: "Good morning" | "Good afternoon" | "Good evening" | "Hello";
             };
+        };
+        MePermissions: {
+            keys: ("admissions.view" | "admissions.create" | "admissions.edit" | "admissions.delete" | "admissions.approve" | "crm.view" | "crm.create" | "crm.edit" | "crm.delete" | "crm.approve" | "sis.view" | "sis.create" | "sis.edit" | "sis.delete" | "sis.approve" | "attendance.view" | "attendance.create" | "attendance.edit" | "attendance.delete" | "attendance.approve" | "lms.view" | "lms.create" | "lms.edit" | "lms.delete" | "lms.approve" | "fees.view" | "fees.create" | "fees.edit" | "fees.delete" | "fees.approve" | "finance.view" | "finance.create" | "finance.edit" | "finance.delete" | "finance.approve" | "transport.view" | "transport.create" | "transport.edit" | "transport.delete" | "transport.approve" | "settings.view" | "settings.create" | "settings.edit" | "settings.delete" | "settings.approve" | "sensitive.safeguarding" | "sensitive.medical" | "sensitive.finance_reports" | "sensitive.export_data" | "users.manage")[];
+            pages: {
+                /** @enum {string} */
+                id: "dashboard" | "my_teaching" | "admissions" | "crm" | "communications" | "family_connection" | "evenings_forms" | "students" | "early_warning" | "attendance" | "pastoral" | "courses" | "timetable" | "teachers_classes" | "staff_cover" | "exams" | "reports" | "fees" | "accounting" | "routes" | "pickup" | "academic_year" | "users_roles" | "school_settings";
+                /** @enum {string} */
+                access: "hidden" | "view_only" | "full";
+            }[];
+            /** @enum {string} */
+            home: "dashboard" | "my_teaching" | "admissions" | "crm" | "communications" | "family_connection" | "evenings_forms" | "students" | "early_warning" | "attendance" | "pastoral" | "courses" | "timetable" | "teachers_classes" | "staff_cover" | "exams" | "reports" | "fees" | "accounting" | "routes" | "pickup" | "academic_year" | "users_roles" | "school_settings";
+            preview: {
+                /** Format: uuid */
+                roleId: string;
+                roleName: string;
+                sampleUser: {
+                    /** Format: uuid */
+                    id: string;
+                    name: string;
+                } | null;
+            } | null;
+        };
+        RolePreviewInput: {
+            /** Format: uuid */
+            roleId: string;
+            /** Format: uuid */
+            sampleUserId?: string;
         };
         MeUpdateInput: {
             name?: string;

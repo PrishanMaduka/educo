@@ -79,10 +79,13 @@ export class NotFoundError extends AppError {
 
 export type ForbiddenCode = Extract<
   ErrorCode,
-  'forbidden' | 'module_not_in_plan' | 'school_suspended'
+  'forbidden' | 'module_not_in_plan' | 'school_suspended' | 'preview_read_only'
 >;
 
-/** 403: signed in, but not allowed (spec 06: `forbidden`, `module_not_in_plan`, `school_suspended`). */
+/**
+ * 403: signed in, but not allowed (spec 06: `forbidden`, `module_not_in_plan`,
+ * `school_suspended`; and `preview_read_only` for a write while previewing a role).
+ */
 export class ForbiddenError extends AppError {
   constructor(code: ForbiddenCode = 'forbidden', message: string = DEFAULT_MESSAGES.forbidden) {
     super(code, message, 403);

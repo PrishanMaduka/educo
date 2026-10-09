@@ -8,10 +8,12 @@ import {
   Param,
   Patch,
   Query,
+  Req,
   Res,
 } from '@nestjs/common';
 import { MeUpdateInput, PageQuerySchema, SessionIdParams } from '@quad/contracts';
 
+import { PermissionsService } from '../../common/access/permissions.service';
 import { Authenticated } from '../../common/guards/authenticated.decorator';
 import { clearSessionCookies } from '../../common/session/cookies';
 import { Auth } from '../../common/session/request-auth';
@@ -22,14 +24,15 @@ import { MeService } from './me.service';
 
 import type { RequestAuth } from '../../common/session/request-auth';
 import type { Config } from '../../config';
-import type { Me, PageQuery, SessionSummaryList } from '@quad/contracts';
-import type { FastifyReply } from 'fastify';
+import type { Me, MePermissions, PageQuery, SessionSummaryList } from '@quad/contracts';
+import type { FastifyReply, FastifyRequest } from 'fastify';
 
 /** Self-scoped routes (spec 06 Me and auth): `@Authenticated`, no permission check (F02). */
 @Controller('me')
 export class MeController {
   constructor(
     private readonly me: MeService,
+    private readonly access: PermissionsService,
     @Inject(CONFIG) private readonly config: Config,
   ) {}
 
@@ -37,6 +40,16 @@ export class MeController {
   @Authenticated()
   get(@Auth() auth: RequestAuth): Promise<Me> {
     return this.me.get(auth);
+  }
+
+  /** Reflects an active preview (spec 06); read once with the guards' per-request access. */
+  @Get('permissions')
+  @Authenticated()
+  async permissions(
+    @Auth() auth: RequestAuth,
+    @Req() request: FastifyRequest,
+  ): Promise<MePermissions> {
+    return this.me.permissions(auth, await this.access.forRequest(request));
   }
 
   @Patch()

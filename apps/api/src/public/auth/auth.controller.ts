@@ -8,8 +8,10 @@ import {
 
 import { Authenticated } from '../../common/guards/authenticated.decorator';
 import { PreAuth } from '../../common/guards/pre-auth.decorator';
+import { AllowDuringPreview } from '../../common/guards/preview-read-only.guard';
 import { Public } from '../../common/guards/public.decorator';
 import { RelativeAccess } from '../../common/guards/relative-access.decorator';
+import { AllowWhileSuspended } from '../../common/guards/tenant-status.guard';
 import { RateLimit } from '../../common/rate-limit/rate-limit.decorator';
 import { clearSessionCookies } from '../../common/session/cookies';
 import { Auth } from '../../common/session/request-auth';
@@ -123,6 +125,9 @@ export class AuthController {
   @Post('sign-out')
   @Authenticated({ alsoAtStages: ['two_step', 'two_step_setup', 'choose_school'] })
   @RelativeAccess()
+  // A person can always leave: in a suspended school and while previewing a role (Task 12).
+  @AllowWhileSuspended()
+  @AllowDuringPreview()
   @HttpCode(204)
   async signOut(
     @Auth() auth: RequestAuth,

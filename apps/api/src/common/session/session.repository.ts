@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { and, desc, eq, gt, isNull, sessions, sql, users } from '@quad/db';
+import { and, desc, eq, gt, isNotNull, isNull, sessions, sql, users } from '@quad/db';
 
 import { TENANT_DB } from '../../tokens';
 
@@ -284,5 +284,41 @@ export class SessionRepository {
       .where(and(eq(sessions.accountId, accountId), isNull(sessions.revokedAt)))
       .returning({ tokenHash: sessions.tokenHash });
     return rows.flatMap((row) => (row.tokenHash === null ? [] : [row.tokenHash]));
+  }
+
+  /**
+   * Puts a role preview on the account's live session in `tenantId` (Task 12), or clears it with
+   * nulls. Returns the role the session previewed before, or undefined when the session is not
+   * the account's live session in that school. Clearing only matches a session with a preview.
+   */
+  async setPreviewIn(
+    tx: AccountTx,
+    accountId: string,
+    sessionId: string,
+    tenantId: string,
+    preview: { readonly roleId: string; readonly sampleUserId: string | null } | null,
+  ): Promise<{ readonly previousRoleId: string | null } | undefined> {
+    const [before] = await tx
+      .select({ previewRoleId: sessions.previewRoleId })
+      .from(sessions)
+      .where(
+        and(
+          eq(sessions.id, sessionId),
+          eq(sessions.accountId, accountId),
+          eq(sessions.activeTenantId, tenantId),
+          isNull(sessions.revokedAt),
+          preview === null ? isNotNull(sessions.previewRoleId) : undefined,
+        ),
+      )
+      .for('update');
+    if (before === undefined) return undefined;
+    await tx
+      .update(sessions)
+      .set({
+        previewRoleId: preview?.roleId ?? null,
+        previewSampleUserId: preview?.sampleUserId ?? null,
+      })
+      .where(eq(sessions.id, sessionId));
+    return { previousRoleId: before.previewRoleId };
   }
 }

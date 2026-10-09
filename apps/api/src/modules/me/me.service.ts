@@ -1,7 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { firstNameOf, greetingPeriod } from '@quad/domain';
+import { firstNameOf, greetingPeriod, pageAccess, roleHome } from '@quad/domain';
 
 import { brandPalette } from '../../common/branding/brand-palette';
+import { formatMessage } from '../../common/delivery/templates/render';
 import { ForbiddenError, UnauthorizedError } from '../../common/errors';
 import { schoolOf } from '../../common/session/request-auth';
 import { SessionService } from '../../common/session/session.service';
@@ -9,12 +10,14 @@ import { CLOCK, TENANT_DB } from '../../tokens';
 
 import { MeRepository } from './me.repository';
 
+import type { RequestAccess } from '../../common/access/permissions.service';
 import type { AccountAuth, PersonAuth, RequestAuth } from '../../common/session/request-auth';
 import type { Clock } from '../../tokens';
 import type {
   Me,
   MeMembership,
   MembershipKind,
+  MePermissions,
   MePerson,
   MePreview,
   MeUpdateInput,
@@ -83,6 +86,28 @@ export class MeService {
         greeting: greetingPeriod(new Date(this.now()), profile.timeZone),
       };
     });
+  }
+
+  /**
+   * `GET /me/permissions` (spec 05, 06): the keys `access` holds, every staff page with how much
+   * of it opens, the home page and the preview banner. Staff permissions are for the staff
+   * portal, so a parent's token is refused (403): parents are not role-based.
+   */
+  async permissions(auth: RequestAuth, access: RequestAccess): Promise<MePermissions> {
+    if (auth.kind === 'mobile') {
+      throw new ForbiddenError('forbidden', formatMessage('error.staffPortalOnly'));
+    }
+    const { permissions, planModules } = access;
+    const preview =
+      auth.kind === 'web' && access.previewRoleId !== null
+        ? await this.db.withTenant(access.tenantId, (tx) => this.previewIn(tx, auth))
+        : null;
+    return {
+      keys: [...permissions].sort(),
+      pages: [...pageAccess(permissions, planModules)],
+      home: roleHome(permissions, access.scope, planModules),
+      preview,
+    };
   }
 
   /** `PATCH /me`: the person's name, theme and locale in the current school only. */

@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 
+import { AccessModule } from './common/access/access.module';
 import { AuditModule } from './common/audit/audit.module';
 import { CryptoModule } from './common/crypto/crypto.module';
 import { DeliveryModule } from './common/delivery/delivery.module';
@@ -61,6 +62,8 @@ export class AppModule {
         RedisModule,
         // First: its AuthGuard must run before any other global guard (Task 12).
         SessionModule,
+        // Next: the school's status, preview, plan and permission guards, in that order (Task 12).
+        AccessModule,
         RateLimitModule,
         CryptoModule,
         AuditModule,

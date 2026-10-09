@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { eq, roles, users } from '@quad/db';
+import { and, eq, isNull, roles, users } from '@quad/db';
 
-import type { MeUpdateInput, ThemeChoice } from '@quad/contracts';
+import type { MeUpdateInput, RoleScope, ThemeChoice } from '@quad/contracts';
 import type { TenantTx } from '@quad/db';
 
 /** What the school knows about the person (their `users` row). */
@@ -47,5 +47,35 @@ export class MeRepository {
       .where(eq(roles.id, roleId))
       .limit(1);
     return row?.name ?? null;
+  }
+
+  /** A role of the session's school (RLS hides another school's), for a preview. */
+  async previewRole(
+    tx: TenantTx,
+    roleId: string,
+  ): Promise<{ readonly id: string; readonly scope: RoleScope } | null> {
+    const [row] = await tx
+      .select({ id: roles.id, scope: roles.scope })
+      .from(roles)
+      .where(eq(roles.id, roleId))
+      .limit(1);
+    return row ?? null;
+  }
+
+  /** Whether `userId` is an active staff member of the session's school (a preview's sample). */
+  async isActiveStaff(tx: TenantTx, userId: string): Promise<boolean> {
+    const [row] = await tx
+      .select({ id: users.id })
+      .from(users)
+      .where(
+        and(
+          eq(users.id, userId),
+          eq(users.kind, 'staff'),
+          eq(users.status, 'active'),
+          isNull(users.deletedAt),
+        ),
+      )
+      .limit(1);
+    return row !== undefined;
   }
 }

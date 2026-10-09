@@ -374,6 +374,209 @@
           "greeting"
         ]
       },
+      "MePermissions": {
+        "type": "object",
+        "properties": {
+          "keys": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "admissions.view",
+                "admissions.create",
+                "admissions.edit",
+                "admissions.delete",
+                "admissions.approve",
+                "crm.view",
+                "crm.create",
+                "crm.edit",
+                "crm.delete",
+                "crm.approve",
+                "sis.view",
+                "sis.create",
+                "sis.edit",
+                "sis.delete",
+                "sis.approve",
+                "attendance.view",
+                "attendance.create",
+                "attendance.edit",
+                "attendance.delete",
+                "attendance.approve",
+                "lms.view",
+                "lms.create",
+                "lms.edit",
+                "lms.delete",
+                "lms.approve",
+                "fees.view",
+                "fees.create",
+                "fees.edit",
+                "fees.delete",
+                "fees.approve",
+                "finance.view",
+                "finance.create",
+                "finance.edit",
+                "finance.delete",
+                "finance.approve",
+                "transport.view",
+                "transport.create",
+                "transport.edit",
+                "transport.delete",
+                "transport.approve",
+                "settings.view",
+                "settings.create",
+                "settings.edit",
+                "settings.delete",
+                "settings.approve",
+                "sensitive.safeguarding",
+                "sensitive.medical",
+                "sensitive.finance_reports",
+                "sensitive.export_data",
+                "users.manage"
+              ]
+            }
+          },
+          "pages": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "enum": [
+                    "dashboard",
+                    "my_teaching",
+                    "admissions",
+                    "crm",
+                    "communications",
+                    "family_connection",
+                    "evenings_forms",
+                    "students",
+                    "early_warning",
+                    "attendance",
+                    "pastoral",
+                    "courses",
+                    "timetable",
+                    "teachers_classes",
+                    "staff_cover",
+                    "exams",
+                    "reports",
+                    "fees",
+                    "accounting",
+                    "routes",
+                    "pickup",
+                    "academic_year",
+                    "users_roles",
+                    "school_settings"
+                  ]
+                },
+                "access": {
+                  "type": "string",
+                  "enum": [
+                    "hidden",
+                    "view_only",
+                    "full"
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "access"
+              ]
+            }
+          },
+          "home": {
+            "type": "string",
+            "enum": [
+              "dashboard",
+              "my_teaching",
+              "admissions",
+              "crm",
+              "communications",
+              "family_connection",
+              "evenings_forms",
+              "students",
+              "early_warning",
+              "attendance",
+              "pastoral",
+              "courses",
+              "timetable",
+              "teachers_classes",
+              "staff_cover",
+              "exams",
+              "reports",
+              "fees",
+              "accounting",
+              "routes",
+              "pickup",
+              "academic_year",
+              "users_roles",
+              "school_settings"
+            ]
+          },
+          "preview": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "properties": {
+              "roleId": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "roleName": {
+                "type": "string"
+              },
+              "sampleUser": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "name": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "id",
+                  "name"
+                ]
+              }
+            },
+            "required": [
+              "roleId",
+              "roleName",
+              "sampleUser"
+            ]
+          }
+        },
+        "required": [
+          "keys",
+          "pages",
+          "home",
+          "preview"
+        ]
+      },
+      "RolePreviewInput": {
+        "type": "object",
+        "properties": {
+          "roleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sampleUserId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "roleId"
+        ],
+        "additionalProperties": false
+      },
       "MeUpdateInput": {
         "type": "object",
         "properties": {
@@ -1196,6 +1399,160 @@
             }
           },
           "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/me/permissions": {
+      "get": {
+        "summary": "What you can do in this school: permission keys, every staff page and how much of it opens, your home page and any role preview",
+        "tags": [
+          "me",
+          "staff"
+        ],
+        "responses": {
+          "200": {
+            "description": "Your permissions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MePermissions"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/me/role-preview": {
+      "post": {
+        "summary": "Preview the staff portal as a role, read-only (users.manage; a role for own classes needs a sample person; needs X-CSRF-Token)",
+        "tags": [
+          "me",
+          "staff"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RolePreviewInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Your permissions while previewing",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MePermissions"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "End the role preview: back to your own view (needs X-CSRF-Token)",
+        "tags": [
+          "me",
+          "staff"
+        ],
+        "responses": {
+          "204": {
+            "description": "The preview ended"
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "404": {
             "description": "Error",
             "content": {
               "application/json": {

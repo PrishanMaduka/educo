@@ -55,6 +55,14 @@ class AccessProbeController {
     };
   }
 
+  /** The same, at Choose a school too: no school, so no school guard reads the database. */
+  @Get('context/any-stage')
+  @Authenticated({ alsoAtStages: ['choose_school'] })
+  contextAnyStage(): Record<string, unknown> {
+    const context = currentRequestContext();
+    return { accountId: context?.accountId, kind: context?.kind };
+  }
+
   /** Sets the staff cookies the way sign-in (Task 7) will. */
   @Post('cookies')
   @Public()
