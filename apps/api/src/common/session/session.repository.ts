@@ -2,7 +2,9 @@ import { Inject, Injectable } from '@nestjs/common';
 import { and, desc, eq, gt, isNotNull, isNull, sessions, sql, users } from '@quad/db';
 
 import { TENANT_DB } from '../../tokens';
+import { instantText, olderThan } from '../pagination/instant-keyset';
 
+import type { InstantKeyset } from '../pagination/instant-keyset';
 import type {
   MembershipKind,
   MembershipStatus,
@@ -25,12 +27,6 @@ export interface SessionSchool {
   /** Null when the row is not visible: another school's id, or no such membership. */
   readonly member: SessionMember | null;
   readonly profile: TenantProfile | null;
-}
-
-/** Where a page of `GET /me/sessions` starts: after this `created_at` (with microseconds) and id. */
-export interface SessionKeyset {
-  readonly at: string;
-  readonly id: string;
 }
 
 /** One row of `GET /me/sessions`. */
@@ -126,7 +122,7 @@ export class SessionRepository {
    */
   listOwn(
     accountId: string,
-    page: { readonly limit: number; readonly after: SessionKeyset | null },
+    page: { readonly limit: number; readonly after: InstantKeyset | null },
     now: Date,
   ): Promise<SessionRow[]> {
     const after = page.after;
@@ -139,7 +135,7 @@ export class SessionRepository {
           userAgent: sessions.userAgent,
           createdAt: sessions.createdAt,
           lastSeenAt: sessions.lastSeenAt,
-          keysetAt: sql<string>`to_char(${sessions.createdAt} at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"')`,
+          keysetAt: instantText(sessions.createdAt),
         })
         .from(sessions)
         .where(
@@ -147,9 +143,7 @@ export class SessionRepository {
             eq(sessions.accountId, accountId),
             isNull(sessions.revokedAt),
             gt(sessions.expiresAt, now),
-            after === null
-              ? undefined
-              : sql`(${sessions.createdAt}, ${sessions.id}) < (${after.at}::timestamptz, ${after.id}::uuid)`,
+            olderThan(sessions.createdAt, sessions.id, after),
           ),
         )
         .orderBy(desc(sessions.createdAt), desc(sessions.id))

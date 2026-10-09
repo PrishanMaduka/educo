@@ -13,6 +13,7 @@ export * from './auth/totp';
 export * from './auth/otp';
 export * from './auth/tokens';
 export * from './audit/actions';
+export * from './audit/log';
 export * from './me/greeting';
 export * from './me/me';
 export * from './me/permissions';

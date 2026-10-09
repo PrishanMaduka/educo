@@ -70,3 +70,4 @@ export {
   or,
   sql,
 } from 'drizzle-orm';
+export type { AnyColumn, SQL } from 'drizzle-orm';

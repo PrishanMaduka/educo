@@ -53,5 +53,7 @@ export const PlatformAuditAction = z.enum([
   'auth.two_step_setup_started',
   'auth.two_step_enabled',
   'auth.sign_out',
+  // An export of the console's Audit log (Task 15): the filters and the row count, never the rows.
+  'audit.exported',
 ]);
 export type PlatformAuditAction = z.infer<typeof PlatformAuditAction>;

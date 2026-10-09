@@ -1719,6 +1719,78 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/platform/audit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Console → Audit log: every school’s platform_audit entries, newest first, filtered by Quad staff member, school, action and time (any console role). With Accept: text/csv, every filtered entry as a CSV download (the export is recorded; more than 10,000 entries is 422) */
+        get: {
+            parameters: {
+                query?: {
+                    cursor?: string;
+                    limit?: number;
+                    actor?: string;
+                    tenantId?: string;
+                    action?: "tenant.renamed" | "support_session.started" | "support_session.ended" | "auth.password_accepted" | "auth.sign_in" | "auth.sign_in_failed" | "auth.two_step_setup_started" | "auth.two_step_enabled" | "auth.sign_out" | "audit.exported" | "auth.password_reset" | "user.invited" | "user.invite_accepted" | "user.role_changed" | "user.deactivated" | "user.reactivated" | "user.two_step_reminded" | "user.password_reset_sent" | "user.signed_out_everywhere" | "role.created" | "role.updated" | "role.deleted" | "role.permissions_changed" | "role_preview.started" | "role_preview.ended" | "settings.updated" | "sensitive.accessed";
+                    from?: string;
+                    to?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description A page of the log, or the CSV export */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PlatformAuditLog"];
+                        "text/csv": string;
+                    };
+                };
+                /** @description Error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/users": {
         parameters: {
             query?: never;
@@ -2999,6 +3071,86 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/audit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Settings → Audit: the school’s audit log, newest first, filtered by person, action and time (settings.view). With Accept: text/csv, every filtered entry as a CSV download (needs sensitive.export_data; the export is audited; more than 10,000 entries is 422) */
+        get: {
+            parameters: {
+                query?: {
+                    cursor?: string;
+                    limit?: number;
+                    actor?: string;
+                    action?: "auth.sign_in" | "auth.sign_in_failed" | "auth.sign_out" | "auth.password_reset" | "auth.two_step_enabled" | "user.invited" | "user.invite_accepted" | "user.role_changed" | "user.deactivated" | "user.reactivated" | "user.two_step_reminded" | "user.password_reset_sent" | "user.signed_out_everywhere" | "role.created" | "role.updated" | "role.deleted" | "role.permissions_changed" | "role_preview.started" | "role_preview.ended" | "settings.updated" | "support_session.started" | "support_session.ended" | "audit.exported" | "sensitive.accessed";
+                    from?: string;
+                    to?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description A page of the log, or the CSV export */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AuditLog"];
+                        "text/csv": string;
+                    };
+                };
+                /** @description Error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/public/enquiry/{embedKey}": {
         parameters: {
             query?: never;
@@ -3341,6 +3493,42 @@ export interface components {
             name: string;
             /** @enum {string} */
             role: "owner" | "admin" | "support" | "billing" | "readonly";
+        };
+        PlatformAuditLog: {
+            items: {
+                /** Format: uuid */
+                id: string;
+                /** Format: date-time */
+                at: string;
+                action: string;
+                summary: string;
+                actor: {
+                    /** @enum {string} */
+                    type: "quad";
+                    /** Format: uuid */
+                    id: string;
+                    name: string;
+                } | {
+                    /** @enum {string} */
+                    type: "system";
+                };
+                school: {
+                    /** Format: uuid */
+                    id: string;
+                    name: string;
+                } | null;
+                viaSupport: boolean;
+                target: {
+                    type: string;
+                    /** Format: uuid */
+                    id: string | null;
+                } | null;
+                meta: {
+                    [key: string]: unknown;
+                };
+                ip: string | null;
+            }[];
+            nextCursor: string | null;
         };
         StaffList: {
             items: {
@@ -3757,6 +3945,40 @@ export interface components {
             quietWeekends: boolean;
             /** Format: date-time */
             updatedAt: string;
+        };
+        AuditLog: {
+            items: {
+                /** Format: uuid */
+                id: string;
+                /** Format: date-time */
+                at: string;
+                action: string;
+                summary: string;
+                actor: {
+                    /** @enum {string} */
+                    type: "member";
+                    /** Format: uuid */
+                    id: string;
+                    name: string;
+                } | {
+                    /** @enum {string} */
+                    type: "quad_support";
+                } | {
+                    /** @enum {string} */
+                    type: "system";
+                };
+                viaSupport: boolean;
+                target: {
+                    type: string;
+                    /** Format: uuid */
+                    id: string | null;
+                } | null;
+                meta: {
+                    [key: string]: unknown;
+                };
+                ip: string | null;
+            }[];
+            nextCursor: string | null;
         };
         EnquiryInput: {
             parentName: string;

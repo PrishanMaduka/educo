@@ -6,6 +6,7 @@ import { z } from 'zod';
 import { CLOCK, LOGGER, REDIS } from '../../tokens';
 import { NotFoundError } from '../errors';
 import { decodeCursor, pageOf } from '../pagination/cursor';
+import { InstantKeyset } from '../pagination/instant-keyset';
 
 import { BearerSessions } from './bearer-sessions';
 import {
@@ -64,10 +65,6 @@ const CachedSession = z.discriminatedUnion('kind', [
 type CachedSession = z.output<typeof CachedSession>;
 
 /** A `GET /me/sessions` cursor: the last item's `created_at` (UTC, microseconds) and id. */
-const SessionCursor = z.object({
-  at: z.string().regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{6}Z$/),
-  id: IdSchema,
-});
 
 /**
  * Server-side sessions (spec 05; D32): resolves a cookie hash to a `RequestAuth`, with a 30 s
@@ -132,7 +129,7 @@ export class SessionService {
 
   /** `GET /me/sessions`: the person's own live sessions, newest first. */
   async listOwn(auth: AccountAuth, query: PageQuery): Promise<SessionSummaryList> {
-    const after = decodeCursor(SessionCursor, query.cursor);
+    const after = decodeCursor(InstantKeyset, query.cursor);
     const rows = await this.repository.listOwn(
       auth.accountId,
       { limit: query.limit, after },
