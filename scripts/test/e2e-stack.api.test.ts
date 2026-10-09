@@ -21,9 +21,14 @@ const adminUrl = (() => {
   return url.toString();
 })();
 
+const PORT_A = 4000;
+const PORT_B = 4001;
+const PORT_C = 4002;
+
 interface Running {
   readonly child: ChildProcess;
-  readonly database: string;
+  /** The run's database, as the stack names it when it creates it (null before that). */
+  readonly database: () => string | null;
   readonly output: () => string;
   readonly exited: Promise<number | null>;
 }
@@ -58,7 +63,15 @@ function launch(args: string[], env: NodeJS.ProcessEnv = process.env): Running {
       done(code);
     });
   });
-  return { child, database: `quad_e2e_${String(child.pid)}`, output: () => text, exited };
+  const database = () => /Creating database (quad_e2e_\d+_[0-9a-f]{8})\./.exec(text)?.[1] ?? null;
+  return { child, database, output: () => text, exited };
+}
+
+/** The run's database name, once the stack has said it. */
+function nameOf(stack: Running): string {
+  const name = stack.database();
+  if (name === null) throw new Error(`The stack named no database:\n${stack.output()}`);
+  return name;
 }
 
 async function ready(stack: Running): Promise<void> {
@@ -71,11 +84,19 @@ async function ready(stack: Running): Promise<void> {
 }
 
 async function databaseExists(name: string): Promise<boolean> {
+  return (await databasesLike(name)).length === 1;
+}
+
+/** Databases named exactly `pattern`, or starting with it when it ends in `%`. */
+async function databasesLike(pattern: string): Promise<string[]> {
   const client = new Client({ connectionString: adminUrl });
   await client.connect();
   try {
-    const { rows } = await client.query('select 1 from pg_database where datname = $1', [name]);
-    return rows.length === 1;
+    const { rows } = await client.query<{ datname: string }>(
+      'select datname from pg_database where datname like $1',
+      [pattern],
+    );
+    return rows.map((row) => row.datname);
   } finally {
     await client.end();
   }
@@ -104,19 +125,20 @@ async function seededSchools(database: string): Promise<string[]> {
 
 describe('scripts/e2e-stack.mjs', () => {
   it('starts on the given port, answers /health/ready with a seeded database, and drops it on SIGTERM', async () => {
-    const stack = launch(['--port', '4000']);
+    const stack = launch(['--port', String(PORT_A)]);
     await ready(stack);
+    const database = nameOf(stack);
 
-    expect(await readiness(4000)).toEqual({
+    expect(await readiness(PORT_A)).toEqual({
       status: 200,
       body: { status: 'ok', db: 'ok', redis: 'ok' },
     });
-    expect(await databaseExists(stack.database)).toBe(true);
-    expect(await seededSchools(stack.database)).toHaveLength(2);
+    expect(await databaseExists(database)).toBe(true);
+    expect(await seededSchools(database)).toHaveLength(2);
 
     // The worker runs too: a reset email for a seeded person reaches Mailpit with its link.
     const since = new Date(Date.now() - 1_000);
-    const forgot = await fetch('http://localhost:4000/api/v1/auth/password/forgot', {
+    const forgot = await fetch(`http://localhost:${String(PORT_A)}/api/v1/auth/password/forgot`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ email: 'prishan.maduka@colombo-intl.local' }),
@@ -133,54 +155,60 @@ describe('scripts/e2e-stack.mjs', () => {
 
     stack.child.kill('SIGTERM');
     await stack.exited;
-    expect(await databaseExists(stack.database)).toBe(false);
-    expect(stack.output()).toContain(`Dropped ${stack.database}.`);
-    await expect(readiness(4000)).rejects.toThrow();
+    expect(await databaseExists(database)).toBe(false);
+    expect(stack.output()).toContain(`Dropped ${database}.`);
+    await expect(readiness(PORT_A)).rejects.toThrow();
   }, 180_000);
 
-  it('runs two stacks side by side on :4000 and :4001 with separate databases, and SIGINT drops one', async () => {
-    const first = launch(['--port', '4000']);
-    const second = launch(['--port=4001']);
+  it('runs two stacks side by side with separate databases, and SIGINT drops one', async () => {
+    const first = launch(['--port', String(PORT_A)]);
+    const second = launch([`--port=${String(PORT_B)}`]);
     await Promise.all([ready(first), ready(second)]);
+    const [firstDb, secondDb] = [nameOf(first), nameOf(second)];
 
-    expect(first.database).not.toBe(second.database);
-    expect((await readiness(4000)).status).toBe(200);
-    expect((await readiness(4001)).status).toBe(200);
-    expect(await databaseExists(first.database)).toBe(true);
-    expect(await databaseExists(second.database)).toBe(true);
+    expect(firstDb).not.toBe(secondDb);
+    expect((await readiness(PORT_A)).status).toBe(200);
+    expect((await readiness(PORT_B)).status).toBe(200);
+    expect(await databaseExists(firstDb)).toBe(true);
+    expect(await databaseExists(secondDb)).toBe(true);
 
     first.child.kill('SIGINT');
     await first.exited;
-    expect(await databaseExists(first.database)).toBe(false);
+    expect(await databaseExists(firstDb)).toBe(false);
     // The other stack is untouched.
-    expect((await readiness(4001)).status).toBe(200);
-    expect(await databaseExists(second.database)).toBe(true);
+    expect((await readiness(PORT_B)).status).toBe(200);
+    expect(await databaseExists(secondDb)).toBe(true);
 
     second.child.kill('SIGTERM');
     await second.exited;
-    expect(await databaseExists(second.database)).toBe(false);
+    expect(await databaseExists(secondDb)).toBe(false);
   }, 240_000);
 
   it('drops its database when a step after creating it fails, and exits 1', async () => {
     // Nothing listens on port 1, so emptying the run's Redis database fails after the seed.
-    const stack = launch(['--port', '4002'], { ...process.env, REDIS_URL: 'redis://127.0.0.1:1' });
+    const stack = launch(['--port', String(PORT_C)], {
+      ...process.env,
+      REDIS_URL: 'redis://127.0.0.1:1',
+    });
 
     expect(await stack.exited).toBe(1);
+    const database = nameOf(stack);
     expect(stack.output()).toContain('Could not start');
-    expect(stack.output()).toContain(`Dropped ${stack.database}.`);
-    expect(await databaseExists(stack.database)).toBe(false);
+    expect(stack.output()).toContain(`Dropped ${database}.`);
+    expect(await databaseExists(database)).toBe(false);
   }, 180_000);
 
   it('refuses a port that is already in use, and creates nothing', async () => {
-    const stack = launch(['--port', '4000']);
+    const stack = launch(['--port', String(PORT_A)]);
     await ready(stack);
-    const clash = launch(['--port', '4000']);
+    const clash = launch(['--port', String(PORT_A)]);
 
     expect(await clash.exited).toBe(1);
-    expect(clash.output()).toContain('Port 4000 is in use');
-    expect(await databaseExists(clash.database)).toBe(false);
+    expect(clash.output()).toContain(`Port ${String(PORT_A)} is in use`);
+    expect(clash.database()).toBeNull();
+    expect(await databasesLike(`quad_e2e_${String(clash.child.pid)}_%`)).toEqual([]);
     // The running stack still answers.
-    expect((await readiness(4000)).status).toBe(200);
+    expect((await readiness(PORT_A)).status).toBe(200);
 
     stack.child.kill('SIGTERM');
     await stack.exited;

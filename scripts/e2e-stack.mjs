@@ -1,9 +1,11 @@
 #!/usr/bin/env node
 // The end-to-end stack for Playwright (Task 18, D32): `node scripts/e2e-stack.mjs [--port 4000]`.
 //   1. checks the port is free and the API is built (`apps/api/dist`);
-//   2. creates a fresh Postgres database `quad_e2e_<pid>` as the admin role, owned by quad_owner;
+//   2. creates a fresh Postgres database `quad_e2e_<pid>_<8 hex>` as the admin role, owned by
+//      quad_owner (the random part means a reused pid never names another run's database);
 //   3. migrates and seeds it with the api image's own commands (`dist/migrate.js`, `dist/seed.js`);
-//   4. empties the run's own Redis database (1 + port mod 15, never the developer's 0);
+//   4. empties the run's own Redis database (1 + port mod 15, never the developer's 0; so ports
+//      are limited to 4000-4014, where each port has its own);
 //   5. starts `dist/main.js` and `dist/worker.js` on that port, local, with Mailpit SMTP and the
 //      fixed code 000000, and waits for /api/v1/health/ready;
 //   6. on SIGINT, SIGTERM or SIGHUP, when the API or worker exits, or when a step fails, stops
@@ -13,6 +15,7 @@
 // where the services are (DATABASE_*_URL, REDIS_URL, SMTP_URL) comes from the environment (CI).
 import { Buffer } from 'node:buffer';
 import { spawn } from 'node:child_process';
+import { randomBytes } from 'node:crypto';
 import { existsSync, readFileSync } from 'node:fs';
 import net from 'node:net';
 import { dirname, join, resolve } from 'node:path';
@@ -30,9 +33,11 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const API_DIST = join(ROOT, 'apps/api/dist');
 
 export const DEFAULT_STACK_PORT = 4000;
+/** One Redis database per port (`redisDatabaseFor`) holds only within 15 neighbouring ports. */
+const LAST_STACK_PORT = DEFAULT_STACK_PORT + 14;
 const READY_TIMEOUT_MS = 90_000;
 const STOP_TIMEOUT_MS = 10_000;
-const STACK_DATABASE = /^quad_e2e_\d+$/;
+const STACK_DATABASE = /^quad_e2e_\d+_[0-9a-f]{8}$/;
 /** Only these say where the services are; everything else comes from .env.example. */
 const SERVICE_KEYS = [
   'DATABASE_URL',
@@ -54,6 +59,13 @@ function portOf(value) {
   const port = Number(value);
   if (value === undefined || !/^\d+$/.test(value) || port < 1 || port > 65535) {
     throw new Error(`--port needs a port number from 1 to 65535, not ${JSON.stringify(value)}.`);
+  }
+  if (port < DEFAULT_STACK_PORT || port > LAST_STACK_PORT) {
+    throw new Error(
+      `The e2e stack takes ports ${String(DEFAULT_STACK_PORT)} to ${String(LAST_STACK_PORT)} only, not ${String(port)}: ` +
+        'each port empties its own Redis database (1 + port mod 15), and ports outside one ' +
+        '15-port window would share one.',
+    );
   }
   return port;
 }
@@ -78,8 +90,20 @@ export function parseStackArgs(argv) {
   return { port };
 }
 
-/** @param {number} pid */
-export const stackDatabaseName = (pid) => `quad_e2e_${String(pid)}`;
+/**
+ * @param {number} pid
+ * @param {string} suffix 8 lower-case hex digits
+ */
+export function stackDatabaseName(pid, suffix) {
+  return checkedName(`quad_e2e_${String(pid)}_${suffix}`);
+}
+
+/**
+ * A new run's database name: the pid says whose it is, the random part keeps a reused pid (a
+ * restarted container) from naming an earlier run's database.
+ * @param {number} pid
+ */
+export const newStackDatabaseName = (pid) => stackDatabaseName(pid, randomBytes(4).toString('hex'));
 
 /** @param {string} name */
 export const isStackDatabaseName = (name) => STACK_DATABASE.test(name);
@@ -116,17 +140,22 @@ function withPath(url, name) {
 
 /**
  * The environment of the stack's children (API, worker, migrate, seed).
- * @param {{ port: number, pid: number, example: Record<string, string>, env: Env }} options
+ * @param {{ port: number, database: string, example: Record<string, string>, env: Env }} options
  * @returns {Record<string, string>}
  */
-export function stackEnv({ port, pid, example, env }) {
+export function stackEnv({ port, database, example, env }) {
   /** @type {Record<string, string>} */
   const services = {};
   for (const key of SERVICE_KEYS) {
     const value = env[key];
     services[key] = value !== undefined && value !== '' ? value : (example[key] ?? '');
   }
-  const database = stackDatabaseName(pid);
+  if (new URL(services.REDIS_URL ?? '').protocol !== 'redis:') {
+    // The stack empties its Redis database over a plain socket (`redisCommands`).
+    throw new Error(
+      'REDIS_URL must be redis://; rediss:// (TLS) is not supported by the e2e stack.',
+    );
+  }
   return {
     ...example,
     ...services,
@@ -294,12 +323,42 @@ async function waitUntilReady(url, exited) {
 }
 
 /**
- * Starts the stack. `stop` is safe to call at any point and more than once.
- * @param {{ port: number, pid?: number, env?: Env, log?: (line: string) => void }} options
+ * Refuses a port in use and a missing API build, before anything is created.
+ * @param {number} port
  */
-export function createStack({ port, pid = process.pid, env = process.env, log = () => {} }) {
-  const childEnv = stackEnv({ port, pid, example: readEnvExample(), env });
-  const database = checkedName(stackDatabaseName(pid));
+async function preflight(port) {
+  if (!(await isPortFree(port))) {
+    throw new Error(`Port ${String(port)} is in use; stop that server or pass --port.`);
+  }
+  for (const file of ['main.js', 'worker.js', 'migrate.js', 'seed.js']) {
+    if (!existsSync(join(API_DIST, file))) {
+      throw new Error(`apps/api/dist/${file} is missing; run pnpm --filter @quad/api build.`);
+    }
+  }
+}
+
+/**
+ * @typedef {{
+ *   admin: (url: string, statements: string[]) => Promise<void>,
+ *   preflight: (port: number) => Promise<void>,
+ *   emptyRedis: (url: string) => Promise<void>,
+ * }} StackDeps
+ */
+
+/**
+ * Starts the stack. `stop` is safe to call at any point and more than once. `deps` lets the unit
+ * tests hold the admin SQL open; the script uses the real ones.
+ * @param {{ port: number, pid?: number, env?: Env, log?: (line: string) => void, deps?: StackDeps }} options
+ */
+export function createStack({
+  port,
+  pid = process.pid,
+  env = process.env,
+  log = () => {},
+  deps = { admin: asAdmin, preflight, emptyRedis: emptyRedisDatabase },
+}) {
+  const database = newStackDatabaseName(pid);
+  const childEnv = stackEnv({ port, database, example: readEnvExample(), env });
   const adminUrl = childEnv.DATABASE_ADMIN_URL ?? '';
   const redisUrl = childEnv.REDIS_URL ?? '';
   /** @type {import('node:child_process').ChildProcess[]} */
@@ -307,6 +366,9 @@ export function createStack({ port, pid = process.pid, env = process.env, log = 
   /** @type {Map<string, import('node:child_process').ChildProcess>} */
   const byName = new Map();
   let created = false;
+  /** The admin step in flight, which a stop waits for before it drops the database. */
+  /** @type {Promise<void> | undefined} */
+  let pendingAdmin;
   /** @type {Promise<void> | undefined} */
   let stopping;
   /** @type {(name: string) => void} */
@@ -331,22 +393,19 @@ export function createStack({ port, pid = process.pid, env = process.env, log = 
   };
 
   const start = async () => {
-    if (!(await isPortFree(port))) {
-      throw new Error(`Port ${String(port)} is in use; stop that server or pass --port.`);
-    }
-    for (const file of ['main.js', 'worker.js', 'migrate.js', 'seed.js']) {
-      if (!existsSync(join(API_DIST, file))) {
-        throw new Error(`apps/api/dist/${file} is missing; run pnpm --filter @quad/api build.`);
-      }
-    }
-    // A database left by an earlier run with this pid (killed with SIGKILL) goes first.
-    await asAdmin(adminUrl, [`drop database if exists ${database} with (force)`]);
+    stillStarting();
+    await deps.preflight(port);
+    stillStarting();
+    // Marked before the first DDL, in the same tick as the check above, so a stop from here on
+    // waits for this step and then drops whatever it made.
     created = true;
-    await asAdmin(adminUrl, [
+    log(`Creating database ${database}.`);
+    pendingAdmin = deps.admin(adminUrl, [
       `create database ${database} owner quad_owner`,
       `revoke all on database ${database} from public`,
       `grant connect on database ${database} to quad_owner, quad_app, quad_platform`,
     ]);
+    await pendingAdmin;
     const commandEnv = { ...childEnv, PATH: process.env.PATH ?? '' };
     /** @param {import('node:child_process').ChildProcess} child */
     const track = (child) => {
@@ -357,7 +416,7 @@ export function createStack({ port, pid = process.pid, env = process.env, log = 
     stillStarting();
     await runOnce(join(API_DIST, 'seed.js'), commandEnv, track);
     stillStarting();
-    await emptyRedisDatabase(redisUrl);
+    await deps.emptyRedis(redisUrl);
     stillStarting();
     startChild('main');
     startChild('worker');
@@ -374,12 +433,14 @@ export function createStack({ port, pid = process.pid, env = process.env, log = 
     stopping ??= (async () => {
       await Promise.all(children.map(stopChild));
       try {
-        await emptyRedisDatabase(redisUrl);
+        await deps.emptyRedis(redisUrl);
       } catch (error) {
         log(`Could not empty the stack's Redis database: ${messageOf(error)}`);
       }
       if (created) {
-        await asAdmin(adminUrl, [`drop database if exists ${database} with (force)`]);
+        // A create still running would otherwise finish after the drop and leave the database.
+        await pendingAdmin?.catch(() => {});
+        await deps.admin(adminUrl, [`drop database if exists ${database} with (force)`]);
         log(`Dropped ${database}.`);
       }
     })();
@@ -403,6 +464,64 @@ function messageOf(error) {
   return error instanceof Error ? error.message : String(error);
 }
 
+/**
+ * @typedef {{
+ *   on: (event: string, listener: (...args: unknown[]) => void) => unknown,
+ * }} ProcessEvents
+ */
+
+/**
+ * Stops the stack once, whatever asks first (a signal, the API or worker exiting, an uncaught
+ * error), then exits with that first reason's code. The handlers stay installed (`on`, not
+ * `once`), so a second signal or error during the stop is logged and cannot end the process
+ * before the database is dropped.
+ * @param {{
+ *   stack: { database: string, stop: () => Promise<void>, onUnexpectedExit: (handler: (name: string) => void) => void },
+ *   proc: ProcessEvents,
+ *   log: (line: string) => void,
+ *   exit: (code: number) => void,
+ * }} options
+ */
+export function superviseStack({ stack, proc, log, exit }) {
+  /** @type {Promise<void> | undefined} */
+  let finishing;
+  /** @param {number} code */
+  const finish = (code) => {
+    finishing ??= (async () => {
+      let exitCode = code;
+      try {
+        await stack.stop();
+      } catch (error) {
+        log(`Could not drop ${stack.database}: ${messageOf(error)}`);
+        exitCode = exitCode === 0 ? 1 : exitCode;
+      }
+      exit(exitCode);
+    })();
+    return finishing;
+  };
+  for (const [signal, code] of /** @type {const} */ ([
+    ['SIGINT', 130],
+    ['SIGTERM', 143],
+    ['SIGHUP', 129],
+  ])) {
+    proc.on(signal, () => {
+      void finish(code);
+    });
+  }
+  stack.onUnexpectedExit((name) => {
+    log(`${name} exited; stopping the stack.`);
+    void finish(1);
+  });
+  /** @param {unknown} error */
+  const onError = (error) => {
+    log(messageOf(error));
+    void finish(1);
+  };
+  proc.on('uncaughtException', onError);
+  proc.on('unhandledRejection', onError);
+  return { finish };
+}
+
 const isMain = process.argv[1] === fileURLToPath(import.meta.url);
 if (isMain) {
   /** @param {string} line */
@@ -416,37 +535,19 @@ if (isMain) {
     log(messageOf(error));
     process.exit(2);
   }
-  const stack = createStack({ port: args.port, log });
-  /** @param {number} code */
-  const finish = async (code) => {
-    try {
-      await stack.stop();
-    } catch (error) {
-      log(`Could not drop ${stack.database}: ${messageOf(error)}`);
-      code = code === 0 ? 1 : code;
-    }
-    process.exit(code);
-  };
-  for (const [signal, code] of /** @type {const} */ ([
-    ['SIGINT', 130],
-    ['SIGTERM', 143],
-    ['SIGHUP', 129],
-  ])) {
-    process.once(signal, () => {
-      void finish(code);
-    });
+  /** @type {ReturnType<typeof createStack>} */
+  let stack;
+  try {
+    stack = createStack({ port: args.port, log });
+  } catch (error) {
+    log(messageOf(error));
+    process.exit(2);
   }
-  stack.onUnexpectedExit((name) => {
-    log(`${name} exited; stopping the stack.`);
-    void finish(1);
-  });
-  process.once('uncaughtException', (error) => {
-    log(messageOf(error));
-    void finish(1);
-  });
-  process.once('unhandledRejection', (error) => {
-    log(messageOf(error));
-    void finish(1);
+  const { finish } = superviseStack({
+    stack,
+    proc: process,
+    log,
+    exit: (code) => process.exit(code),
   });
   try {
     await stack.start();
