@@ -319,6 +319,41 @@ describe('POST /auth/support-session (the signed link)', () => {
     expect((await redeem(new Browser(app), token)).statusCode).toBe(200);
   });
 
+  it("refuses a correctly signed link whose school is not the visit's, and ends that visit", async () => {
+    clock = Date.now();
+    const schoolA = await schoolWithRoles(db());
+    const schoolB = await schoolWithRoles(db());
+    const quad = await consoleAs('support');
+    const token = await linkFor(quad.browser, schoolA.id);
+    const [segment = ''] = token.split('.');
+    const payload = JSON.parse(Buffer.from(segment, 'base64url').toString('utf8')) as Record<
+      string,
+      unknown
+    >;
+    // A's visit (`sub`) with B's school (`tid`), signed with the real key and a fresh nonce.
+    const mixed = Buffer.from(
+      JSON.stringify({ ...payload, tid: schoolB.id, nonce: 'CCCCCCCCCCCCCCCCCCCCCC' }),
+    ).toString('base64url');
+    const signature = createHmac('sha256', env.LINK_SIGNING_SECRET ?? '')
+      .update(mixed, 'ascii')
+      .digest('base64url');
+    const browser = new Browser(app);
+
+    const response = await redeem(browser, `${mixed}.${signature}`);
+
+    expect(response.statusCode).toBe(400);
+    expect(codeOf(response)).toBe('invalid_link');
+    expect(response.body).not.toContain(schoolA.name);
+    expect(response.body).not.toContain(schoolB.name);
+    expect(browser.cookies.has('quad_sid')).toBe(false);
+    expect(setCookie(response, 'quad_sid')).toBeUndefined();
+    const [visit] = await supportRows(schoolA.id);
+    expect(visit?.ended_at).not.toBeNull();
+    expect(await supportRows(schoolB.id)).toEqual([]);
+    // The real link cannot open the ended visit either.
+    expect((await redeem(new Browser(app), token)).statusCode).toBe(400);
+  });
+
   it('answers 400 validation without a token', async () => {
     const response = await new Browser(app).post('/auth/support-session', {});
     expect(response.statusCode).toBe(400);
