@@ -323,7 +323,7 @@ describe('POST /users/invite races and re-invites (fix round 1, M5)', () => {
       fields?: Record<string, string>;
     }>();
     expect(body.code).toBe('family_member');
-    expect(body.message).toBe('This address belongs to a family member at this school.');
+    expect(body.message).toBe('This address belongs, or belonged, to a family account at this school.');
     expect(body.fields).toEqual({ 'emails.0': body.message });
     const { rows } = await db().platform.query<{ kind: string; deleted: boolean }>(
       'select kind, deleted_at is not null as deleted from users where id = $1',
@@ -348,7 +348,7 @@ describe('POST /users/invite races and re-invites (fix round 1, M5)', () => {
     expect(response.json()).toMatchObject({
       code: 'already_member',
       fields: {
-        'emails.0': 'This address belongs to a family member at this school.',
+        'emails.0': 'This address belongs, or belonged, to a family account at this school.',
         'emails.1': 'This person is already a member of staff here.',
       },
     });
