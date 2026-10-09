@@ -370,6 +370,7 @@ describe('PATCH /users/:id', () => {
     const { school, admin } = await arrange();
     const second = await staffHolding(db(), school, school.roles.admin);
     const other = await db().platform.connect();
+    let committed = false;
     try {
       // Another request, mid-flight: it holds the lock and has demoted `admin`, not yet committed.
       await other.query('begin');
@@ -383,12 +384,14 @@ describe('PATCH /users/:id', () => {
       });
       await waitForLockWaiter();
       await other.query('commit');
+      committed = true;
 
       const response = await pending;
       expect(response.statusCode).toBe(422);
       expect(response.json()).toMatchObject({ code: 'last_admin' });
       expect((await memberRow(second.userId))?.role_ids).toEqual([school.roles.admin]);
     } finally {
+      if (!committed) await other.query('rollback');
       other.release();
     }
   });
@@ -409,11 +412,16 @@ describe('PATCH /users/:id', () => {
   });
 });
 
-/** Waits until some backend waits for a lock (the API request has reached the admin row lock). */
+/**
+ * Waits until a backend of this test database waits for a lock (the API request has reached the
+ * admin row lock). Scoped to this database: other test files run in parallel on the same server.
+ */
 async function waitForLockWaiter(): Promise<void> {
   for (let attempt = 0; attempt < 100; attempt += 1) {
     const { rows } = await db().platform.query<{ waiting: string }>(
-      `select count(*)::text as waiting from pg_locks where not granted`,
+      `select count(*)::text as waiting from pg_locks
+       where not granted
+         and pid in (select pid from pg_stat_activity where datname = current_database())`,
     );
     if (rows[0]?.waiting !== '0') return;
     await new Promise((resolve) => setTimeout(resolve, 20));
