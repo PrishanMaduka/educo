@@ -1,9 +1,11 @@
 # 07 Platform console
 
-App: `apps/console`. Prototype: `design/platform.html`. Users: Quad staff (see [05](05-auth-tenancy-rbac.md#platform-roles)).
+App: `apps/console`. Prototype: `design/platform.html`, on the app design system in [03](03-design-system.md) (D34). Renders: `docs/screenshots/redesign/console-*.png`. Users: Quad staff (see [05](05-auth-tenancy-rbac.md#platform-roles)).
+
+**Sample data.** The prototype's schools and people are the international sample set in [D34](02-architecture.md#decision-log) (Greenfield International School, St. Clare's Academy, Emma Nakamura, Omar Haddad).
 
 ## Shell
-- Side bar (rail `#15173A`, lilac active item) with the Quad logo and a "CONSOLE" badge.
+- Side bar in Quad navy (`rail`) with the Quad logo and a lime "CONSOLE" badge. The console has no school colour, so it uses the default brand: the active item is Quad lime with navy text, and lime marks Quad's own primary actions. Each school keeps its own colour on its card, cover and logo tile (initials in `brand-ink` on `brand-fill`, so they pass AA).
   - **Platform:** Overview, Early warning (count of at-risk schools), Schools (count), Leads (count of new), Curricula, Plans & billing, Audit log.
   - **Team:** Platform users (owner only), Support tickets (open count), System (failed jobs).
   - **Pinned schools:** the schools the user pinned (up to 6, pin or unpin from the school page's ☆ button), then the last 4 schools they opened that are not pinned. Each shows its colour badge and name. Stored per platform user in `platform_user_prefs`, so it follows them across devices. With nothing pinned the group shows recent schools only (as the prototype does).
@@ -32,7 +34,7 @@ App: `apps/console`. Prototype: `design/platform.html`. Users: Quad staff (see [
    - reorder stages (↑/↓), switch a stage off, or add a custom stage.
    
    A live journey bar and totals ("4 stages · 15 year groups · 30 classes") update as you edit. If you change the curriculum after editing, it asks "Load the new template or keep your edits?". Validation: at least one stage is on, every stage that is on has a name and at least one year group.
-3. **Branding:** logo upload by drag and drop or file picker (PNG, JPG or SVG up to 2 MB, square recommended). The brand colour is picked automatically from the logo (dominant non-neutral colour) and can be changed with swatches or a hex. Also a short name, "No logo yet? Make a sample crest", and live previews of the staff portal (after sign-in) and the parent app home (after sign-in). Sign-in screens are Quad-branded and are not previewed.
+3. **Branding:** logo upload by drag and drop or file picker (PNG, JPG or SVG up to 2 MB, square recommended). The brand colour is picked automatically from the logo (dominant non-neutral colour) and can be changed with the named swatches (`QuadBrand.PALETTE`, Quad lime first as the default; [03](03-design-system.md#school-brand-colour)) or any hex. A school with no colour gets Quad lime. Every colour is made readable by the brand derivation, and the previews show the derived button, text and side-bar colours. Also a short name, "No logo yet? Make a sample crest", and live previews of the staff portal (after sign-in) and the parent app home (after sign-in). Sign-in screens are Quad-branded and are not previewed.
 4. **Plan and modules:** Starter, Growth or Enterprise cards. Module switches are limited to what the plan includes. A seat slider, and a live monthly total of seats × the per-student price.
 5. **First admin:** name and email (validated). They get an invite email (a signed staff-invite link).
 6. **Create:** an animated provisioning checklist streamed from the job: create the school record (a `tenants` row in the shared database; no domain or schema is created), set up stages and classes, roles and permissions, school settings, branding, invite the admin. When done: "{School} is live on Quad. Congratulations!", the lines "Staff sign in at quad-edu.com. Quad opens {School} for them from their account." and "Parents use the Quad app. It shows {School}'s logo and colours once they sign in.", a petal burst, and buttons to open the staff portal, the parent app preview and **Import data**.

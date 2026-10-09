@@ -4,6 +4,10 @@ App: `apps/staff`. Prototypes: `design/landing.html` (public landing page and si
 
 The profile menu shows the current school and, for people in more than one school, **Switch school**.
 
+The portal uses the app design system in [03](03-design-system.md) (D34). Renders: `docs/screenshots/redesign/staff-*.png`.
+
+**Sample data.** The prototype uses the international sample set in [D34](02-architecture.md#decision-log): Greenfield International School (USD, Cambridge, colour Greenfield green), Emma Nakamura as the signed-in head of school, and Grace Okafor's Year 4 Emerald.
+
 Academics (timetable, staffing, cover, LMS, exams, reports, academic year, My teaching) are in [14](14-academics.md). Fees and finance are in [13](13-fees-payments-finance.md). Early warning is in [10](10-early-warning.md), Moments and messaging in [12](12-moments-messaging.md), and Ask Quad in [11](11-ask-quad.md).
 
 ## Public landing page
@@ -23,6 +27,8 @@ Academics (timetable, staffing, cover, LMS, exams, reports, academic year, My te
 
 Items are hidden when the user lacks permission or the module is not in the plan. On phones the side bar is a slide-over opened with the menu button.
 
+The side bar is Quad navy for every school, with the school's logo (or initials tile) and name at the top. The school's colour marks only the active item (`rail-active`) and the portal's actions ([03](03-design-system.md#staff-and-console-shell)).
+
 Top bar: search (Ctrl K, see [15](15-cross-cutting.md#search)), Ask Quad (`/`), academic year picker (switching shows that year read-only unless it is the current year), theme, notifications panel, profile (with **Help**, which opens a support-ticket drawer).
 
 All year-group labels come from the school's curriculum (Year 4, Grade 4, PYP 4). Never hard-code "Grade".
@@ -30,7 +36,7 @@ All year-group labels come from the school's curriculum (Year 4, Grade 4, PYP 4)
 ## Dashboard: "the school today"
 Loaded with one call, `GET /dashboard`; blocks refresh on `dashboard.changed`. Each block is shown only to people who may see its data.
 
-1. **Greeting section** with the time-of-day scene (see [03](03-design-system.md#the-greeting-section-time-of-day)): "Good morning / afternoon / evening, {first name}", then a summary built from live data: "{present} of {enrolled} students are in school today, {pct}%. {lowest year group} is the lowest at {pct}%. Term {n} fees are {pct}% collected and {k} things need you before assembly." Below that, a context line ("Monday 5 October · Week 6 of Term 1 · next holiday Vap Poya, Mon 26 Oct") and the actions Take attendance and New application.
+1. **Greeting section** with the time-of-day scene (see [03](03-design-system.md#the-greeting-section-time-of-day)): "Good morning / afternoon / evening, {first name}", then a summary built from live data: "{present} of {enrolled} students are in school today, {pct}%. {lowest year group} is the lowest at {pct}%. Term {n} fees are {pct}% collected and {k} things need you before assembly." Below that, a context line ("Monday 5 October · Week 6 of Term 1 · next break Half-term, Mon 26 Oct") and the actions Take attendance and New application.
 2. **Needs you today:** up to 6 rows, most urgent first, each with an icon, a sentence, detail and one action. This is the one list of row kinds (other files refer to it):
    1. lessons with no cover (Arrange cover);
    2. students who need a conversation (See who);
@@ -75,7 +81,7 @@ Loaded with one call, `GET /dashboard`; blocks refresh on `dashboard.changed`. E
 
 ## CRM & leads
 - Tabs:
-  - **Leads:** source chips with counts, and a table with name, source, interest, lead score bar (green above 70, amber above 40, red otherwise), owner, last contact and status.
+  - **Leads:** source chips with counts, and a table with name, source, interest, lead score bar (`good` above 70, `warn` above 40, `bad` otherwise), owner, last contact and status.
   - **Campaigns:** cards with channel, reach, opened %, clicked % and status.
   - **Enquiry forms:** form list, an embed code, and a public form preview.
 - The lead drawer has details, an activity timeline, **Log call** (outcome and note), **Send email** (template or free text; sent from the school's office address), **Add note**, and **Convert to application**. Each one writes a `lead_activities` row (`POST /leads/:id/activities`) and updates "last contact".
