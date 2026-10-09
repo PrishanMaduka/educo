@@ -1,0 +1,1510 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Quad – Public pages</title>
+<!-- About, Security & trust, Privacy and Terms in design option A, "Story cards" (D45, product owner). -->
+<!-- The real pages: apps/staff/src/app/(public)/_components/ArticlePage.tsx and apps/staff/content/. -->
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&display=swap">
+<style>
+/* Colour tokens copied exactly from design/landing.html (light, then dark). */
+:root{
+  --navy:#101632;--navy-2:#1D2550;--navy-line:#2F3870;--navy-border:#3A4378;--phone:#05081A;--phone-edge:#2A3266;
+  --paper:#F7F5F0;--white:#FFFFFF;--lime:#C8F169;--pink:#FF6FAE;--sky:#59C3FF;--orange:#FF9B45;
+  --school-green:#1B7F53;--school-maroon:#7A1F3D;--pine:#2FA36B;--alert:#E8355F;--butter:#FFE680;--pancake:#E8A24A;--pancake-edge:#B8752A;--peach:#F1C7A3;--blush:#FF7F9C;
+  --on-vivid:#101632;--on-navy:#F7F5F0;--on-navy-2:#C9CBE0;--on-navy-3:#A9ACC8;
+  /* surfaces */
+  --hero-bg:var(--navy);--nav-bg:rgba(16,22,50,.92);
+  --page-bg:var(--paper);--page-ink:#101632;--page-ink-2:#3D4263;--page-ink-3:#555A78;
+  --card-bg:var(--white);--card-line:#E2E0D8;
+  --band-bg:var(--navy);--band-edge:transparent;
+  --sheet-bg:var(--paper);--sheet-ink:#101632;--sheet-ink-2:#555A78;--sheet-2:#ECEBE4;--sheet-line:#E2E0D8;
+  --bar-ink:#101632;
+  --tag-bad-bg:#FFE1E7;--tag-bad-ink:#8A1D33;--tag-good-bg:#D8F5C0;--tag-good-ink:#24561A;
+  --chip-sky-bg:#D9EFFF;--chip-sky-ink:#0D4F7A;--chip-pink-bg:#FFE1EE;--chip-pink-ink:#8A1D4C;--chip-orange-bg:#FFE6CF;--chip-orange-ink:#7A3A07;
+  --feed-time:#5F637E;--screen-ink-2:#3D4263;--screen-ink-3:#555A78;--screen-track:#E6E3DC;--feed-shadow:rgba(16,22,50,.08);--card-shadow:rgba(0,0,0,.4);--phone-shadow:rgba(0,0,0,.45);
+  --focus:#2F6BFF;--backdrop:rgba(16,22,50,.6);
+  --accent:var(--lime);
+  --f:"Bricolage Grotesque",system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:light}
+:root[data-view="parent"]{--accent:var(--pink)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --hero-bg:#0A0D24;--nav-bg:rgba(10,13,36,.92);
+  --page-bg:#0F1330;--page-ink:#F7F5F0;--page-ink-2:#C9CBE0;--page-ink-3:#A9ACC8;
+  --card-bg:#171D45;--card-line:#2A3266;
+  --band-bg:#161C48;--band-edge:#2A3266;
+  --sheet-bg:#1D2550;--sheet-ink:#F7F5F0;--sheet-ink-2:#C9CBE0;--sheet-2:#141A40;--sheet-line:#2F3870;
+  --bar-ink:#C9CBE0;--card-shadow:rgba(0,0,0,.55);--focus:#7FA6FF;--backdrop:rgba(5,8,26,.7);
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --hero-bg:#0A0D24;--nav-bg:rgba(10,13,36,.92);
+  --page-bg:#0F1330;--page-ink:#F7F5F0;--page-ink-2:#C9CBE0;--page-ink-3:#A9ACC8;
+  --card-bg:#171D45;--card-line:#2A3266;
+  --band-bg:#161C48;--band-edge:#2A3266;
+  --sheet-bg:#1D2550;--sheet-ink:#F7F5F0;--sheet-ink-2:#C9CBE0;--sheet-2:#141A40;--sheet-line:#2F3870;
+  --bar-ink:#C9CBE0;--card-shadow:rgba(0,0,0,.55);--focus:#7FA6FF;--backdrop:rgba(5,8,26,.7);
+  color-scheme:dark}
+/* ---------- Base (as in landing.html) ---------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+[hidden] {
+  display: none !important;
+}
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: calc(var(--bar-h, 64px) + 16px);
+}
+body {
+  margin: 0;
+  background: var(--page-bg);
+  color: var(--page-ink);
+  font: 400 16px/1.6 var(--f);
+  -webkit-font-smoothing: antialiased;
+}
+.site {
+  overflow-x: clip;
+}
+h1,
+h2,
+h3 {
+  margin: 0;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  text-wrap: balance;
+}
+p {
+  margin: 0;
+}
+a {
+  color: inherit;
+}
+button {
+  font: inherit;
+}
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+.sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+.skip {
+  position: absolute;
+  left: 16px;
+  top: -80px;
+  z-index: 80;
+  background: var(--lime);
+  color: var(--on-vivid);
+  padding: 10px 16px;
+  border-radius: 12px;
+  font-weight: 700;
+  text-decoration: none;
+}
+.skip:focus {
+  top: 12px;
+}
+.wrap {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding-inline: clamp(16px, 4vw, 56px);
+}
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  border: 0;
+  cursor: pointer;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 17px;
+  padding: 14px 22px;
+  border-radius: 16px;
+  background: var(--lime);
+  color: var(--on-vivid);
+  transition: transform 0.25s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+.btn:hover {
+  transform: translateY(-2px);
+}
+.btn.sm {
+  font-size: 15px;
+  padding: 11px 16px;
+  border-radius: 14px;
+}
+.btn.ghost {
+  background: transparent;
+  color: var(--page-ink);
+  border: 2px solid var(--card-line);
+  font-weight: 600;
+  padding: 9px 14px;
+}
+.btn.ghost:hover {
+  border-color: var(--page-ink-3);
+}
+.btn svg {
+  width: 18px;
+  height: 18px;
+  flex: none;
+}
+
+/* Soft badge: a rounded tinted square with a 2 px line drawing (nav-icons.js style) */
+.sb {
+  --sb-bg: var(--chip-sky-bg);
+  --sb-ink: var(--chip-sky-ink);
+  width: var(--sb, 40px);
+  height: var(--sb, 40px);
+  flex: none;
+  border-radius: calc(var(--sb, 40px) * 0.3);
+  display: grid;
+  place-items: center;
+  background: var(--sb-bg);
+  color: var(--sb-ink);
+}
+.sb svg {
+  width: 58%;
+  height: 58%;
+}
+.sb.sky {
+  --sb-bg: var(--chip-sky-bg);
+  --sb-ink: var(--chip-sky-ink);
+}
+.sb.pink {
+  --sb-bg: var(--chip-pink-bg);
+  --sb-ink: var(--chip-pink-ink);
+}
+.sb.orange {
+  --sb-bg: var(--chip-orange-bg);
+  --sb-ink: var(--chip-orange-ink);
+}
+.sb.lime {
+  --sb-bg: var(--tag-good-bg);
+  --sb-ink: var(--tag-good-ink);
+}
+.sb.plain {
+  --sb-bg: var(--white);
+  --sb-ink: var(--on-vivid);
+}
+
+/* Prose */
+.prose {
+  font-size: 17px;
+  line-height: 1.65;
+  color: var(--page-ink-2);
+}
+.prose > * + * {
+  margin-top: 0.9em;
+}
+.prose strong {
+  color: var(--page-ink);
+  font-weight: 700;
+}
+.prose ul {
+  margin-block: 0.6em 0;
+  padding-left: 1.15em;
+}
+.prose li {
+  margin-top: 0.45em;
+}
+.prose li::marker {
+  color: var(--page-ink-3);
+}
+.prose a {
+  color: var(--page-ink);
+  text-underline-offset: 3px;
+  text-decoration-thickness: 2px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+/* Subprocessor cards (inside Privacy) */
+.sp {
+  list-style: none;
+  margin: 1em 0 0 !important;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
+  gap: 10px;
+}
+.sp li {
+  margin: 0;
+  background: var(--card-bg);
+  border: 1px solid var(--card-line);
+  border-radius: 18px;
+  padding: 14px 16px;
+  font-size: 14.5px;
+  line-height: 1.45;
+}
+.sp h3 {
+  font-size: 16px;
+  letter-spacing: -0.02em;
+  color: var(--page-ink);
+  margin-bottom: 6px;
+}
+.sp dl {
+  margin: 0;
+  display: grid;
+  gap: 4px;
+}
+.sp dt {
+  display: inline;
+  font-weight: 700;
+  color: var(--page-ink);
+}
+.sp dd {
+  display: inline;
+  margin: 0;
+}
+
+/* ---------- Preview controls (not part of the design) ---------- */
+.pv {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: var(--card-bg);
+  color: var(--page-ink);
+  border-bottom: 1px solid var(--card-line);
+  box-shadow: 0 2px 10px var(--feed-shadow);
+}
+.pv .wrap {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 18px;
+  padding-block: 10px;
+}
+.pv-title {
+  font-weight: 800;
+  font-size: 15px;
+  letter-spacing: -0.02em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: auto;
+}
+.pv-title svg {
+  width: 22px;
+  height: 22px;
+}
+.seg {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.seg > span {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--page-ink-3);
+}
+.seg .grp {
+  display: flex;
+  flex-wrap: wrap;
+  background: var(--sheet-2);
+  border-radius: 12px;
+  padding: 3px;
+  gap: 2px;
+}
+.seg button {
+  border: 0;
+  background: transparent;
+  color: var(--page-ink-2);
+  font-weight: 600;
+  font-size: 14px;
+  padding: 7px 12px;
+  border-radius: 9px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.seg button:hover {
+  color: var(--page-ink);
+}
+.seg button[aria-pressed="true"] {
+  background: var(--navy);
+  color: var(--on-navy);
+}
+:root[data-theme="dark"] .seg button[aria-pressed="true"] {
+  background: var(--paper);
+  color: var(--on-vivid);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .seg button[aria-pressed="true"] {
+    background: var(--paper);
+    color: var(--on-vivid);
+  }
+}
+.pv-desc {
+  flex-basis: 100%;
+  font-size: 14px;
+  color: var(--page-ink-3);
+  margin: 0;
+}
+.pv-desc b {
+  color: var(--page-ink);
+}
+@media (max-width: 760px) {
+  .pv .wrap {
+    gap: 6px 10px;
+    padding-block: 8px;
+  }
+  .pv-title {
+    flex-basis: 100%;
+    font-size: 14px;
+  }
+  .seg > span {
+    display: none;
+  }
+  .seg button {
+    padding: 6px 9px;
+    font-size: 13px;
+  }
+  .seg.theme {
+    margin-left: auto;
+  }
+  .pv-desc {
+    font-size: 12.5px;
+    line-height: 1.4;
+  }
+  .lg {
+    display: none;
+  }
+}
+@media (min-width: 761px) {
+  .sm-only {
+    display: none;
+  }
+}
+
+/* ---------- Site top bar (landing look) ---------- */
+.top {
+  background: var(--hero-bg);
+  color: var(--on-navy);
+}
+.top .wrap {
+  display: flex;
+  align-items: center;
+  gap: 14px 24px;
+  padding-block: 14px;
+}
+.logo {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  margin-right: auto;
+  color: var(--on-navy);
+  border-radius: 6px;
+}
+.logo svg {
+  height: 30px;
+  width: auto;
+  display: block;
+}
+.top nav {
+  display: flex;
+  gap: 22px;
+}
+.top nav a {
+  color: var(--on-navy-2);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 15px;
+}
+.top nav a:hover,
+.top nav a[aria-current="page"] {
+  color: var(--on-navy);
+}
+.top nav a[aria-current="page"] {
+  text-decoration: underline;
+  text-decoration-color: var(--lime);
+  text-decoration-thickness: 3px;
+  text-underline-offset: 8px;
+}
+@media (max-width: 900px) {
+  .top nav {
+    display: none;
+  }
+}
+
+/* ---------- Footer: circle quarters (copied from landing.html) ---------- */
+footer.page {
+  background: var(--page-bg);
+  color: var(--page-ink);
+}
+footer.page .wrap {
+  padding-block: 56px 28px;
+}
+footer .fhead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 20px;
+  margin-bottom: 28px;
+}
+footer .fhead p {
+  color: var(--page-ink-3);
+}
+footer .logo {
+  color: var(--page-ink);
+  margin-right: 0;
+}
+footer .quads {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+footer .q {
+  background: var(--c);
+  color: var(--on-vivid);
+  padding: 22px;
+  border-radius: 28px;
+}
+footer .q.tl {
+  border-bottom-right-radius: 8px;
+}
+footer .q.tr {
+  border-bottom-left-radius: 8px;
+}
+footer .q.bl {
+  border-top-right-radius: 8px;
+}
+footer .q.br {
+  border-top-left-radius: 8px;
+}
+footer .q h2 {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+footer .q ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+footer .q a,
+footer .q span {
+  display: inline-block;
+  padding-block: 4px;
+  color: var(--on-vivid);
+  text-decoration: none;
+}
+footer .q a:hover {
+  text-decoration: underline;
+}
+footer .fbase {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px 24px;
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 1px solid var(--card-line);
+  font-size: 13px;
+  color: var(--page-ink-3);
+}
+@media (max-width: 760px) {
+  footer .quads {
+    grid-template-columns: 1fr 1fr;
+  }
+  footer .q {
+    border-radius: 20px !important;
+  }
+}
+@media (max-width: 420px) {
+  footer .quads {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Shared hero bits */
+.hero {
+  background: var(--hero-bg);
+  color: var(--on-navy);
+  position: relative;
+  overflow: hidden;
+}
+.kicker {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--navy-2);
+  color: var(--lime);
+  border-radius: 999px;
+  padding: 6px 14px 6px 6px;
+  font-size: 14px;
+  font-weight: 600;
+}
+.kicker svg {
+  width: 22px;
+  height: 22px;
+}
+.lede {
+  font-size: clamp(17px, 1.5vw, 21px);
+  line-height: 1.5;
+  max-width: 34em;
+  color: var(--on-navy-2);
+  text-wrap: pretty;
+}
+.eyebrow {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--page-ink-3);
+}
+
+/* ======================================================================
+   A. Story cards
+   ====================================================================== */
+.A .hero .wrap {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px 56px;
+  padding-block: clamp(40px, 6vw, 88px) clamp(72px, 9vw, 128px);
+}
+.A .hero-copy {
+  flex: 1 1 520px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+.A .hero h1 {
+  font-size: clamp(44px, 6.4vw, 96px);
+  line-height: 0.92;
+}
+.A .bigmark {
+  flex: 0 0 auto;
+  width: clamp(200px, 26vw, 360px);
+  aspect-ratio: 1;
+  transform: rotate(-10deg);
+  filter: drop-shadow(0 30px 50px var(--phone-shadow));
+}
+.A .bigmark svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  animation: spin 40s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (max-width: 760px) {
+  .A .hero .wrap {
+    padding-block: 28px 72px;
+  }
+  .A .bigmark {
+    order: -1;
+    width: 120px;
+  }
+  .A .bigmark svg {
+    animation: none;
+  }
+}
+.A .body {
+  padding-block: 0 clamp(56px, 7vw, 96px);
+}
+.A .lift {
+  margin-top: clamp(-72px, -5vw, -44px);
+  position: relative;
+  z-index: 2;
+}
+.A .sec + .sec {
+  margin-top: clamp(40px, 5vw, 64px);
+}
+.A .sec-h {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+.A .sec-h h2 {
+  font-size: clamp(28px, 3.2vw, 44px);
+  line-height: 1;
+}
+.A .card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-line);
+  border-radius: 28px;
+  padding: clamp(20px, 2.6vw, 32px);
+  box-shadow: 0 10px 30px var(--feed-shadow);
+}
+.A .tint {
+  color: var(--on-vivid);
+  border: 0;
+  box-shadow: none;
+}
+.A .tint .prose,
+.A .tint .prose strong,
+.A .tint .prose a,
+.A .tint .prose li::marker {
+  color: var(--on-vivid);
+}
+.A .t-sky {
+  background: var(--chip-sky-bg);
+}
+.A .t-pink {
+  background: var(--chip-pink-bg);
+}
+.A .t-lime {
+  background: var(--tag-good-bg);
+}
+.A .t-orange {
+  background: var(--chip-orange-bg);
+}
+.A .v-sky {
+  background: var(--sky);
+}
+.A .v-pink {
+  background: var(--pink);
+}
+.A .v-lime {
+  background: var(--lime);
+}
+.A .v-orange {
+  background: var(--orange);
+}
+/* About: three apps */
+.A .apps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+.A .app {
+  border-radius: 30px;
+  padding: 24px 22px 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  color: var(--on-vivid);
+  transition: transform 0.35s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+.A .app:hover {
+  transform: translateY(-6px) rotate(-1deg);
+}
+.A .app h3 {
+  font-size: 24px;
+  line-height: 1.05;
+}
+.A .app p {
+  font-size: 16px;
+  line-height: 1.5;
+}
+.A .ask {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  margin-top: 14px;
+}
+.A .two {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+.A .two h2 {
+  font-size: clamp(24px, 2.4vw, 32px);
+  margin-bottom: 12px;
+}
+@media (max-width: 900px) {
+  .A .apps,
+  .A .two {
+    grid-template-columns: 1fr;
+  }
+}
+/* About: timeline */
+.A .tl {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0;
+  position: relative;
+}
+.A .tl li {
+  position: relative;
+  padding: 44px 18px 0 0;
+}
+.A .tl li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 15px;
+  height: 4px;
+  background: var(--card-line);
+  border-radius: 2px;
+}
+.A .tl li::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 5px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--card-bg);
+  border: 4px solid var(--card-line);
+}
+.A .tl li.done::after {
+  background: var(--sky);
+  border-color: var(--sky);
+}
+.A .tl li.now::after {
+  background: var(--lime);
+  border-color: var(--navy);
+  box-shadow: 0 0 0 6px var(--tag-good-bg);
+}
+.A .tl li.done::before {
+  background: var(--sky);
+}
+.A .tl b {
+  display: block;
+  font-size: 20px;
+  letter-spacing: -0.02em;
+  color: var(--page-ink);
+}
+.A .tl small {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--page-ink-3);
+  margin-bottom: 4px;
+}
+.A .tl p {
+  font-size: 15.5px;
+  color: var(--page-ink-2);
+  margin-top: 4px;
+}
+@media (max-width: 760px) {
+  .A .tl {
+    grid-template-columns: 1fr;
+  }
+  .A .tl li {
+    padding: 0 0 22px 44px;
+  }
+  .A .tl li::before {
+    left: 10px;
+    right: auto;
+    top: 6px;
+    bottom: -6px;
+    width: 4px;
+    height: auto;
+  }
+  .A .tl li:last-child::before {
+    display: none;
+  }
+}
+.A .note {
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid var(--card-line);
+}
+/* About: founder */
+.A .founder {
+  display: flex;
+  gap: 22px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.A .avatar {
+  width: 96px;
+  height: 96px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--navy);
+  display: grid;
+  place-items: center;
+  color: var(--lime);
+  font-weight: 800;
+  font-size: 34px;
+  letter-spacing: -0.04em;
+  position: relative;
+}
+.A .avatar svg {
+  position: absolute;
+  right: -6px;
+  bottom: -6px;
+  width: 36px;
+  height: 36px;
+}
+.A .founder h3 {
+  font-size: 26px;
+}
+.A .founder .role {
+  font-weight: 700;
+  color: var(--page-ink-3);
+}
+.A .founder .prose {
+  flex: 1 1 280px;
+}
+.A .facts {
+  list-style: none;
+  margin: 16px 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.A .facts li {
+  background: var(--sheet-2);
+  color: var(--page-ink);
+  border-radius: 999px;
+  padding: 7px 14px;
+  font-weight: 600;
+  font-size: 14.5px;
+  margin: 0;
+}
+.A .cta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+.A .cta h2 {
+  font-size: clamp(28px, 3.4vw, 48px);
+  line-height: 1;
+}
+/* Security: card grid */
+.A .grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 360px), 1fr));
+  gap: 14px;
+}
+.A .pc {
+  border-radius: 28px;
+  padding: 24px 24px 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  color: var(--on-vivid);
+}
+.A .pc .ph {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.A .pc h2 {
+  font-size: 22px;
+  line-height: 1.1;
+}
+.A .pc .promise {
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+  text-wrap: pretty;
+}
+.A .pc details {
+  margin-top: auto;
+  border-top: 1.5px solid var(--on-vivid);
+  padding-top: 10px;
+}
+.A .pc summary {
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 14.5px;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.A .pc summary::-webkit-details-marker {
+  display: none;
+}
+.A .pc summary::after {
+  content: "+";
+  font-size: 20px;
+  line-height: 1;
+  margin-left: auto;
+}
+.A .pc details[open] summary::after {
+  content: "–";
+}
+.A .pc .prose {
+  font-size: 15.5px;
+  margin-top: 8px;
+}
+.A .pc.wide {
+  grid-column: 1/-1;
+  background: var(--navy);
+  border: 1px solid var(--band-edge);
+  color: var(--on-navy);
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.A .pc.wide .prose,
+.A .pc.wide .prose a {
+  color: var(--on-navy-2);
+}
+.A .pc.wide .prose a {
+  color: var(--lime);
+}
+.A .pc.wide > div {
+  flex: 1 1 320px;
+}
+/* Legal: in short + cards */
+.A .inshort {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 18px 28px;
+  align-items: start;
+}
+.A .inshort .lbl {
+  background: var(--lime);
+  color: var(--on-vivid);
+  border-radius: 22px 22px 22px 6px;
+  padding: 14px 18px;
+  font-weight: 800;
+  font-size: 20px;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+.A .inshort ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 24px;
+}
+.A .inshort li {
+  display: flex;
+  gap: 10px;
+  font-size: 16.5px;
+  line-height: 1.45;
+  color: var(--page-ink);
+}
+.A .inshort li svg {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  margin-top: 1px;
+  color: var(--school-green);
+}
+.A .meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  color: var(--on-navy-3);
+  font-size: 14px;
+}
+.A .meta span {
+  background: var(--navy-2);
+  border-radius: 999px;
+  padding: 5px 12px;
+}
+@media (max-width: 760px) {
+  .A .inshort {
+    grid-template-columns: 1fr;
+  }
+  .A .inshort ul {
+    grid-template-columns: 1fr;
+  }
+}
+.A .chipnav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 28px 0 18px;
+}
+.A .chipnav a {
+  background: var(--card-bg);
+  border: 1px solid var(--card-line);
+  border-radius: 999px;
+  padding: 6px 13px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  color: var(--page-ink-2);
+}
+.A .chipnav a:hover {
+  color: var(--page-ink);
+  border-color: var(--page-ink-3);
+}
+.A .lcards {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+/* Cards on the left, a sticky "On this page" list on the right, so the page uses its full width. */
+.A .lwrap {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 24px;
+  align-items: start;
+  margin-top: 28px;
+}
+.A .lside {
+  position: sticky;
+  top: 120px;
+}
+.A .lside .card {
+  padding: 20px 22px;
+}
+.A .lsh {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--page-ink-3);
+  margin-bottom: 10px;
+}
+.A .lside .chipnav {
+  flex-direction: column;
+  flex-wrap: nowrap;
+  gap: 2px;
+  margin: 0;
+}
+.A .lside .chipnav a {
+  background: none;
+  border: 0;
+  border-radius: 10px;
+  padding: 7px 10px;
+  margin-inline: -10px;
+  font-size: 15px;
+}
+.A .lside .chipnav a:hover {
+  background: var(--sheet-2);
+}
+@media (max-width: 1100px) {
+  .A .lwrap {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .A .lside {
+    position: static;
+    order: -1;
+  }
+  .A .lside .chipnav {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .A .lside .chipnav a {
+    margin: 0;
+    background: var(--sheet-2);
+    border-radius: 999px;
+    padding: 6px 13px;
+    font-size: 14px;
+  }
+}
+.A .lc {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 6px 18px;
+}
+.A .lc h2 {
+  font-size: clamp(22px, 2.2vw, 28px);
+  line-height: 1.15;
+  align-self: center;
+}
+.A .lc .prose {
+  grid-column: 2;
+}
+@media (max-width: 560px) {
+  .A .lc {
+    grid-template-columns: 1fr;
+  }
+  .A .lc .prose {
+    grid-column: 1;
+  }
+  .A .lc .sb {
+    --sb: 36px;
+  }
+}
+
+/* Mobile preview bar: one row for option and theme, one for page, short description */
+@media (max-width:760px){
+  .pv-title{flex-basis:auto;margin-right:0}
+  
+  .pv-desc{flex-basis:auto;order:3;margin-left:auto}
+  .seg.theme{order:2}
+  .seg.pages{order:4;flex-basis:100%}
+}
+.A .inshort li svg{color:var(--pine)}
+
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
+  <symbol id="qMark" viewBox="0 0 30 30"><path d="M0 10A10 10 0 0 1 10 0A3.5 3.5 0 0 1 13.5 3.5V10A3.5 3.5 0 0 1 10 13.5H3.5A3.5 3.5 0 0 1 0 10Z" fill="var(--sky)"/><path d="M0 10A10 10 0 0 1 10 0A3.5 3.5 0 0 1 13.5 3.5V10A3.5 3.5 0 0 1 10 13.5H3.5A3.5 3.5 0 0 1 0 10Z" fill="var(--pink)" transform="translate(30 0) scale(-1 1)"/><path d="M0 10A10 10 0 0 1 10 0A3.5 3.5 0 0 1 13.5 3.5V10A3.5 3.5 0 0 1 10 13.5H3.5A3.5 3.5 0 0 1 0 10Z" fill="var(--lime)" transform="translate(0 30) scale(1 -1)"/><path d="M0 10A10 10 0 0 1 10 0A3.5 3.5 0 0 1 13.5 3.5V10A3.5 3.5 0 0 1 10 13.5H3.5A3.5 3.5 0 0 1 0 10Z" fill="var(--orange)" transform="translate(30 30) scale(-1 -1)"/></symbol>
+  <symbol id="qLogo" viewBox="0 0 101 30"><use href="#qMark" width="30" height="30"/><path transform="translate(39.175 21.6) scale(0.026)" fill="currentColor" d="M416.5 165.8V19.6Q416.5 -5.1 419.8 -31.6Q423.1 -58 428.8 -86.7Q434.5 -115.4 440.1 -143.6H421.4Q406.8 -91.5 383.4 -56.1Q360 -20.8 325.5 -3.4Q291 14 241.9 14Q174 14 127.1 -20.8Q80.3 -55.5 56 -117.5Q31.7 -179.5 31.7 -261.1Q31.7 -349.5 58.3 -412.2Q84.8 -475 134.4 -508.5Q184 -542 251.6 -542Q299 -542 335.1 -524.1Q371.2 -506.2 394.5 -469.6Q417.7 -432.9 426.2 -375.5H444.4V-527.2H578.5V-277V165.8ZM303.7 -114.1Q324.2 -114.1 341.4 -121.5Q358.7 -128.8 372.5 -142Q386.3 -155.3 396.4 -172.4Q406.5 -189.5 411.7 -209.2Q416.9 -228.9 416.9 -250V-268.9Q416.9 -293.1 410.4 -318.1Q403.9 -343.1 390.7 -363.8Q377.5 -384.6 356.7 -397.1Q335.9 -409.7 307.1 -409.7Q274.7 -409.7 250.6 -391Q226.4 -372.3 213.5 -338.6Q200.6 -304.9 200.6 -259.2Q200.6 -217.5 212.9 -184.6Q225.2 -151.7 248.1 -132.9Q270.9 -114.1 303.7 -114.1Z M841.6 14Q749.1 14 702.8 -48.8Q656.4 -111.7 656.4 -240.5V-528H818.4V-258.7Q818.4 -187 839.4 -153Q860.3 -119.1 902.7 -119.1Q928.7 -119.1 948 -132.2Q967.3 -145.3 980.9 -169.6Q994.5 -194 1001.2 -226.9Q1007.9 -259.9 1007.9 -299.7V-528H1169.1V-217.8V0H1039.2L1036.8 -170.4H1019.2Q1006 -105.5 983.7 -64.7Q961.5 -23.9 927 -5Q892.4 14 841.6 14Z M1380.9 14Q1337.7 14 1303.3 -2.8Q1268.9 -19.7 1249.1 -52.8Q1229.4 -85.9 1229.4 -134.9Q1229.4 -180.6 1247.2 -210.3Q1265 -240 1298.2 -257.7Q1331.4 -275.4 1377.1 -286.5Q1422.8 -297.6 1478.4 -306.2Q1511.8 -312.2 1532.5 -317Q1553.2 -321.8 1563.1 -331.4Q1573 -341 1573 -359Q1573 -384.8 1554.4 -402.2Q1535.7 -419.7 1496.7 -419.7Q1469.8 -419.7 1447 -410Q1424.2 -400.4 1408.6 -381.1Q1393 -361.9 1386.7 -332.8L1244.3 -369.5Q1255.2 -415.5 1278.3 -448.1Q1301.3 -480.7 1335 -501.7Q1368.6 -522.8 1410.9 -532.4Q1453.2 -542 1501 -542Q1580.9 -542 1631.5 -515.7Q1682 -489.5 1706.5 -435.6Q1731 -381.7 1731 -298.7V-215.2Q1731 -179.8 1732.3 -143.8Q1733.5 -107.9 1735.5 -72.1Q1737.5 -36.2 1740.8 0H1599.1Q1595.9 -25.5 1592.7 -58.4Q1589.4 -91.4 1587.8 -126.7H1570.5Q1558.4 -87.4 1532.1 -55.1Q1505.8 -22.9 1467.5 -4.5Q1429.2 14 1380.9 14ZM1452.8 -100.8Q1470.6 -100.8 1489.3 -107.3Q1508 -113.8 1525 -125.9Q1542.1 -138.1 1555.6 -156.5Q1569 -174.9 1575.5 -198.5L1573.9 -267.9L1596 -264.4Q1579.1 -252.2 1557 -245Q1534.8 -237.8 1511.4 -233.7Q1488 -229.6 1465.3 -225.1Q1442.6 -220.6 1424.6 -213.5Q1406.7 -206.4 1396.2 -194.3Q1385.7 -182.2 1385.7 -161Q1385.7 -133.4 1404.6 -117.1Q1423.5 -100.8 1452.8 -100.8Z M2002.7 14Q1938.4 14 1889.3 -19Q1840.1 -52 1812.4 -114.6Q1784.7 -177.2 1784.7 -266Q1784.7 -348 1808.7 -409.8Q1832.7 -471.5 1879.5 -505.9Q1926.4 -540.4 1995.1 -540.4Q2044.3 -540.4 2079 -522.2Q2113.7 -504 2136.7 -467Q2159.7 -430.1 2172.8 -373.8H2194.7Q2188.1 -407 2182.3 -438Q2176.5 -469 2173.2 -496.3Q2169.9 -523.7 2169.9 -545V-716.2H2331.9V-245.9V0H2198.1L2196.5 -157.3H2177.4Q2166.4 -97.7 2143.1 -59.8Q2119.8 -22 2084.6 -4Q2049.5 14 2002.7 14ZM2060.5 -115.8Q2089.2 -115.8 2110.1 -128.4Q2130.9 -140.9 2144.1 -161.3Q2157.3 -181.8 2163.8 -206.3Q2170.2 -230.9 2170.2 -255V-273.3Q2170.2 -294.4 2165 -314.2Q2159.9 -334.1 2150.3 -351.8Q2140.7 -369.5 2126.9 -382.9Q2113 -396.2 2095.3 -403.6Q2077.6 -411 2057.1 -411Q2024.5 -411 2001.5 -392.5Q1978.4 -373.9 1966 -340.8Q1953.6 -307.7 1953.6 -263.9Q1953.6 -220 1966.6 -186.6Q1979.6 -153.2 2003.9 -134.5Q2028.1 -115.8 2060.5 -115.8Z"/></symbol>
+</defs></svg>
+<a class="skip" href="#main">Skip to main content</a>
+<div class="site">
+<section class="pv" aria-label="Preview controls">
+  <div class="wrap">
+    <p class="pv-title"><svg viewBox="0 0 30 30" aria-hidden="true"><use href="#qMark"/></svg><span class="lg">Public pages: About, Security &amp; trust, Privacy, Terms</span></p>
+    <div class="seg pages" role="group" aria-label="Page">
+      <span aria-hidden="true">Page</span>
+      <div class="grp">
+        <button type="button" data-page="about" aria-pressed="true">About</button>
+        <button type="button" data-page="security" aria-pressed="false">Security<span class="lg"> &amp; trust</span></button>
+        <button type="button" data-page="privacy" aria-pressed="false">Privacy</button>
+        <button type="button" data-page="terms" aria-pressed="false">Terms</button>
+      </div>
+    </div>
+    <div class="seg theme" role="group" aria-label="Colour theme">
+      <div class="grp">
+        <button type="button" data-theme-set="light" aria-pressed="true">Light</button>
+        <button type="button" data-theme-set="dark" aria-pressed="false">Dark</button>
+      </div>
+    </div>
+    <p class="pv-desc" id="pvDesc" aria-live="polite"></p>
+  </div>
+</section>
+
+<header class="top">
+  <div class="wrap">
+    <a class="logo" href="#" data-go="about" aria-label="Quad home"><svg viewBox="0 0 101 30" aria-hidden="true"><use href="#qLogo"/></svg></a>
+    <nav aria-label="Site">
+      <a href="#" data-go="about">About</a>
+      <a href="#" data-go="security">Security &amp; trust</a>
+      <a href="#" data-go="privacy">Privacy</a>
+      <a href="#" data-go="terms">Terms</a>
+    </nav>
+    <a class="btn sm" href="https://quad-edu.com/#demo">Book a demo</a>
+  </div>
+</header>
+
+<main id="main" tabindex="-1"></main>
+
+<footer class="page">
+  <div class="wrap">
+    <div class="fhead">
+      <a class="logo" href="#" data-go="about" aria-label="Quad home"><svg viewBox="0 0 101 30" aria-hidden="true" style="height:28px;display:block"><use href="#qLogo"/></svg></a>
+      <p>The school, the family and everyone in between, in one circle.</p>
+    </div>
+    <nav aria-label="About Quad">
+      <ul class="quads">
+        <li class="q tl" style="--c:var(--sky)"><h2>Explore</h2><ul>
+          <li><a href="https://quad-edu.com/#circle">The circle</a></li><li><a href="https://quad-edu.com/#wellbeing">Wellbeing</a></li>
+          <li><a href="https://quad-edu.com/#more">Modules</a></li></ul></li>
+        <li class="q tr" style="--c:var(--pink)"><h2>For schools</h2><ul>
+          <li><a href="https://quad-edu.com/#demo">Book a demo</a></li>
+          <li><a href="#" data-go="security">Security &amp; trust</a></li></ul></li>
+        <li class="q bl" style="--c:var(--lime)"><h2>Company</h2><ul>
+          <li><a href="#" data-go="about">About</a></li>
+          <li><a href="mailto:support@quad-edu.com">support@quad-edu.com</a></li><li><span>Colombo, Sri Lanka</span></li></ul></li>
+        <li class="q br" style="--c:var(--orange)"><h2>Legal</h2><ul>
+          <li><a href="#" data-go="privacy">Privacy</a></li>
+          <li><a href="#" data-go="terms">Terms</a></li></ul></li>
+      </ul>
+    </nav>
+    <div class="fbase"><span>© 2026 Quad Education Pvt Limited (registration in progress)</span><span>Sample school and families are fictional.</span></div>
+  </div>
+</footer>
+</div>
+
+<script>
+(() => {
+/* ---------- Icons: soft-badge line drawings on a 24 px grid (nav-icons.js style) ---------- */
+const I = {
+  tiles: 'M4 4h7v9H4zM13 4h7v5h-7zM13 11h7v9h-7zM4 15h7v5H4z',
+  lock: 'M5.5 10.5h13v10h-13zM8.5 10.5V7.5a3.5 3.5 0 0 1 7 0v3M12 14.5v2.5',
+  key: 'M8 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM12 12h8.5M17.5 12v3M20.5 12v2.5',
+  cross: 'M9.5 4h5v5.5H20v5h-5.5V20h-5v-5.5H4v-5h5.5z',
+  audit: 'M12 20.5H5v-17h9.5L19 8v4M14.5 3.5V8H19M16.5 14a3 3 0 1 0 0 6 3 3 0 0 0 0-6zM18.7 18.2l2.3 2.3',
+  globe: 'M12 3.5a8.5 8.5 0 1 0 0 17a8.5 8.5 0 1 0 0-17zM3.5 12h17M12 3.5c2.4 2.4 3.4 5.4 3.4 8.5s-1 6.1-3.4 8.5c-2.4-2.4-3.4-5.4-3.4-8.5s1-6.1 3.4-8.5z',
+  spark: 'M11 3.5l1.9 5.6 5.6 1.9-5.6 1.9L11 18.5l-1.9-5.6L3.5 11l5.6-1.9zM18.5 15.5v5M16 18h5',
+  code: 'M8.5 7 3.5 12l5 5M15.5 7l5 5-5 5M13.5 4.5l-3 15',
+  alert: 'M12 3.5 21.5 20h-19zM12 9.5v4M12 16.8v.2',
+  mail: 'M3.5 5.5h17v13h-17zM3.5 6.5l8.5 6.5 8.5-6.5',
+  screen: 'M3 4.5h18v12H3zM8.5 20.5h7M12 16.5v4',
+  phone: 'M7 2.5h10v19H7zM10.5 18.5h3',
+  team: 'M9 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM3.5 20a5.5 5.5 0 0 1 11 0M15.5 5.2a3 3 0 0 1 0 5.6M17.5 14.6a5.5 5.5 0 0 1 3 5.4',
+  family: 'M9 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM3.5 20a5.5 5.5 0 0 1 9.3-4M17.5 20.5l-3.1-3a2 2 0 0 1 3.1-2.4 2 2 0 0 1 3.1 2.4z',
+  heart: 'M12 20s-8-4.8-8-10.5A4.5 4.5 0 0 1 12 7a4.5 4.5 0 0 1 8 2.5C20 15.2 12 20 12 20z',
+  flag: 'M5.5 21V4M5.5 4.5h12l-2.5 4 2.5 4h-12',
+  user: 'M12 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM5 20.5a7 7 0 0 1 14 0',
+  pin: 'M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11zM12 7.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5z',
+  chat: 'M4 4.5h11.5v9H8.5L4 17zM15.5 9H20v8.5l-3-2.2h-6V13.5',
+  school: 'M3.5 20.5h17M5.5 20.5V9l6.5-4.5L18.5 9v11.5M10 20.5v-5h4v5M12 11.5v.01',
+  cap: 'M2.5 9 12 4.5 21.5 9 12 13.5zM6.5 11v5c3.5 2.7 7.5 2.7 11 0v-5M21.5 9v5',
+  server: 'M4 4.5h16v6H4zM4 13.5h16v6H4zM7.5 7.5h.01M7.5 16.5h.01M11 7.5h5.5M11 16.5h5.5',
+  clock: 'M12 3.5a8.5 8.5 0 1 0 0 17a8.5 8.5 0 1 0 0-17zM12 7.5V12l3 2',
+  cookie: 'M20.5 12.5A8.5 8.5 0 1 1 11.5 3.5a3 3 0 0 0 4 3.5 3 3 0 0 0 5 5.5zM8.5 10h.01M9.5 15h.01M14 14.5h.01',
+  scale: 'M12 3.5v17M7.5 20.5h9M4.5 7h15M7 7l-3 6.5a3 3 0 0 0 6 0zM17 7l-3 6.5a3 3 0 0 0 6 0z',
+  swap: 'M4 7h13l-3.5-3.5M20 17H7l3.5 3.5',
+  door: 'M9.5 20.5h-5v-17h5M15.5 16.5 20 12l-4.5-4.5M20 12H9',
+  card: 'M3.5 6h17v12.5h-17zM3.5 10.2h17',
+  doc: 'M5 3.5h9.5L19 8v12.5H5zM14.5 3.5V8H19M8.5 12.5h7M8.5 16.5h4',
+  rule: 'M5.5 3.5h13v17h-13zM9 8.5h6M9 12h6M9 15.5h3.5',
+  box: 'M3.5 7.5 12 3.5l8.5 4v9L12 20.5l-8.5-4zM3.5 7.5 12 11.5l8.5-4M12 11.5v9',
+  shield: 'M12 3.5l7.5 3v5.5c0 4.5-3.2 7.5-7.5 9-4.3-1.5-7.5-4.5-7.5-9V6.5zM8.8 12l2.2 2.2 4.2-4.2',
+  check: 'M4.5 12.5l4.5 4.5 10.5-10.5',
+  printer: 'M7 8.5V3.5h10v5M6 17.5H3.5v-9h17v9H18M7 14h10v6.5H7z',
+  calendar: 'M4 5.5h16v15H4zM4 10h16M8 3.5v4M16 3.5v4',
+  power: 'M12 3.5v8M7 6.5a7 7 0 1 0 10 0'
+};
+const svg = (n) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="${I[n]}"/></svg>`;
+const badge = (n, c, size) => `<span class="sb ${c}"${size ? ` style="--sb:${size}px"` : ''}>${svg(n)}</span>`;
+const COLS = ['sky', 'pink', 'lime', 'orange'];
+const mail = (a = 'support@quad-edu.com') => `<a href="mailto:${a}">${a}</a>`;
+const go = (p, t, h) => `<a href="#${h || ''}" data-go="${p}"${h ? ` data-hash="${h}"` : ''}>${t}</a>`;
+const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+
+/* ---------- Company facts (apps/staff/src/app/(public)/_lib/company.ts) ---------- */
+const CO = {
+  legalName: 'Quad Education Pvt Limited (registration in progress)',
+  reg: 'Company registration in progress', address: 'Colombo, Sri Lanka', country: 'Sri Lanka', founded: 'Founded in 2026',
+  founder: 'Prishan Maduka', role: 'Founder', bio: 'Prishan Maduka is a professional software architect and the founder of Quad.',
+  law: 'The laws of Sri Lanka', courts: 'The courts of Sri Lanka', cap: 'the fees the school paid Quad in the 12 months before the claim'
+};
+
+/* ---------- Sub-processors (content/legal/subprocessors.tsx) ---------- */
+const SUBS = [
+  ['Amazon Web Services', 'Hosting, database, storage, email (SES)', 'All school data; email address and message content for email', 'India (ap-south-1); SES sends from the same region; backup snapshots copied to Singapore (ap-southeast-1)'],
+  ['Anthropic', 'Ask Quad answers (schools can turn Ask Quad off)', 'The question and the tool results needed to answer it; never safeguarding or medical data. No training on the data; zero retention where available', 'United States'],
+  ['Google Firebase (FCM)', 'Push notifications', 'Device push token and notification title and text', 'Global'],
+  ['Sentry', 'Error tracking', 'Error details with personal data scrubbed', 'United States or EU (chosen at setup)'],
+  ['Notify.lk', 'SMS in Sri Lanka', 'Phone number and SMS text', 'Sri Lanka'],
+  ['Twilio', 'SMS outside Sri Lanka', 'Phone number and SMS text', 'United States'],
+  ['Cloudflare (Turnstile)', 'Captcha on the demo form', 'IP address and browser signals for the check', 'Global'],
+  ['Grafana Labs', 'Metrics, traces and logs (no personal data)', 'Technical telemetry with tenant ids', 'Chosen region nearest ap-south-1'],
+  ['Plausible Analytics', 'Landing-page visit counts (public site only)', 'No cookies, no personal data', 'EU'],
+  ['PayHere, Stripe', 'Card payments — contracted by each school directly, listed for transparency', 'Payer name, email, amount', 'Sri Lanka; global']
+];
+const subCards = () => `<ul class="sp" aria-label="Sub-processors">${SUBS.map(([n, p, d, l]) => `<li><h3>${n}</h3><dl><div><dt>Purpose: </dt><dd>${p}</dd></div><div><dt>Data: </dt><dd>${d}</dd></div><div><dt>Location: </dt><dd>${l}</dd></div></dl></li>`).join('')}</ul>`;
+const outside = SUBS.slice(1).map((s) => s[0]).join(', ');
+
+/* ---------- Page content (content/*.tsx, word for word where shown) ---------- */
+const APPS = [
+  {name: 'The staff portal', icon: 'screen', c: 'sky', text: 'where a school runs its day: admissions, students, attendance, timetable and cover, exams and reports, pastoral care, fees and communication.'},
+  {name: 'The Quad app for parents', icon: 'phone', c: 'pink', text: 'on iPhone and Android: a child’s day, moments and good news from school, messages, fees to pay, and relatives the family invites.'},
+  {name: 'The platform console', icon: 'tiles', c: 'lime', text: 'where Quad’s own team sets up and supports schools.'}
+];
+const ASK_LINE = 'In each app, Ask Quad answers questions in plain English from the school’s own records and shows where each answer came from.';
+
+const PAGES = {
+  about: {
+    label: 'About', eyebrow: 'About Quad', title: 'A school platform built around the child.',
+    summary: 'Quad is a school platform, in development in Sri Lanka, that helps everyone who looks after a child — at school and at home — see the same picture.',
+    facts: [['calendar', 'Founded in 2026', 'Quad Education Pvt Limited'], ['pin', 'Colombo, Sri Lanka', 'Built for schools internationally'], ['flag', 'In development', 'Preparing pilots with schools'], ['globe', 'AWS Mumbai region', 'Where school data is stored']],
+    sections: [
+      {id: 'what', title: 'What Quad is', icon: 'tiles', html: `<p>Quad brings a school’s work and its families together in three apps:</p><ul>${APPS.map((a) => `<li><strong>${a.name}</strong>, ${a.text}</li>`).join('')}</ul><p>${ASK_LINE}</p>`},
+      {id: 'who', title: 'Who it’s for', icon: 'family', html: `<p>Schools of any size and curriculum, and the people around each child: class teachers, coaches, school nurses, leaders and office staff, and the family at home, including grandparents and relatives wherever they live. Year groups follow each school’s own curriculum.</p>`},
+      {id: 'why', title: 'Why we’re building it', icon: 'heart', html: `<p>Most school systems are built around records. The people who care about a child each see a piece: the teacher sees marks, the nurse sees a visit, the family hears very little until something goes wrong.</p><p>Quad is built around the child instead. It is designed to notice a child who is starting to drift while there is time to help, to bring good news home as it happens, and to keep teachers’ evenings calm with quiet hours.</p>`},
+      {id: 'stage', title: 'Where we are now', icon: 'flag', html: `<p><strong>In development. We’re preparing pilots with schools.</strong></p><p>The sample school and families you see on this website are fictional. If you would like your school to be one of the first to try Quad, <a href="https://quad-edu.com/#demo">book a demo</a>.</p>`},
+      {id: 'founder', title: 'Who’s behind Quad', icon: 'user', html: `<p><strong>${CO.founder}</strong>, ${CO.role}</p><p>${CO.bio}</p>`},
+      {id: 'where', title: 'Where we are', icon: 'pin', html: `<p>Quad is based in ${CO.country} and built for schools internationally. School data is stored in Amazon Web Services’ Mumbai region; the ${go('privacy', 'privacy policy', 'subprocessors')} lists the few services that handle data elsewhere.</p><ul><li>${CO.legalName}</li><li>${CO.reg}</li><li>${CO.address}</li><li>${CO.founded}</li></ul>`},
+      {id: 'contact', title: 'Talk to us', icon: 'mail', html: `<p>Email ${mail()} with any question, or <a href="https://quad-edu.com/#demo">book a 30-minute demo</a>.</p><p>Privacy questions go to ${mail()}, and security reports to ${mail()}.</p>`}
+    ]
+  },
+  security: {
+    label: 'Security & trust', eyebrow: 'Security & trust', title: 'How Quad keeps school data safe.',
+    summary: 'Quad holds children’s data, so it is built to keep every school’s data apart and to give each person only the access they need.',
+    chips: [['ap-south-1 (Mumbai)', 'sky', 'globe', 'Where school data is stored'], ['AES-256-GCM', 'pink', 'lock', 'For the most sensitive fields'], ['35-day point-in-time recovery', 'lime', 'clock', 'Plus a daily copy in Singapore'], ['TLS 1.2+', 'orange', 'shield', 'For all traffic, with HSTS']],
+    sections: [
+      {id: 'isolation', title: 'Each school’s data is kept apart', icon: 'tiles', promise: 'A query can only ever see one school’s rows.', html: `<ul><li>Each school’s data is kept separate in the database with PostgreSQL row-level security, forced on every school table, so a query can only ever see one school’s rows.</li><li>The app connects to the database with its own role, which cannot bypass those rules.</li><li>Which school a request is for comes from the signed-in session, never from the web address or anything else the browser sends.</li><li>Automated tests try to read across schools on every part of the API.</li></ul>`},
+      {id: 'encryption', title: 'Encryption', icon: 'lock', promise: 'Encrypted in transit and at rest, and the most sensitive fields again, field by field.', html: `<ul><li>All traffic is encrypted in transit with TLS 1.2 or later, with HSTS.</li><li>The database, files and backups are encrypted at rest.</li><li>The most sensitive fields (two-step secrets, safeguarding entries, medical notes and payment gateway secrets) are encrypted again, field by field, with AES-256-GCM and keys held in AWS Key Management Service.</li></ul>`},
+      {id: 'sign-in', title: 'Signing in', icon: 'key', promise: 'Two-step sign-in for school admins by default, and always for Quad’s own team.', html: `<ul><li>Staff sign in with their work email and a password. Passwords are stored as Argon2id hashes and checked against known breached passwords.</li><li>Two-step sign-in with an authenticator app (TOTP) is required for school admins by default, and schools can require it for other roles. Quad’s own team must always use it.</li><li>Repeated wrong attempts lock the account for a while, and a new device triggers an email.</li><li>Parents sign in with a one-time code sent by SMS, with limits on every number.</li><li>Links in invitations and password resets are signed, expire, and work once where it matters.</li></ul>`},
+      {id: 'sensitive', title: 'Safeguarding and medical records', icon: 'cross', promise: 'Only staff given sensitive access can open them, and every view is logged.', html: `<p>Safeguarding and medical records sit behind extra keys: only staff given sensitive access can open them, and every view is logged. They never appear in moments, early warning, Ask Quad or Quad’s support access.</p>`},
+      {id: 'access', title: 'Least privilege and audit logs', icon: 'audit', promise: 'Each role sees only its own modules and scope, and changes are logged for 7 years.', html: `<ul><li>Each role sees only its own modules and scope. Parents see only their own children; relatives see only moments.</li><li>Changes are recorded in an audit log that is kept for 7 years.</li><li>When Quad’s team needs to look inside a school to help it, they must give a reason, access ends after 60 minutes, the school sees a banner, and the visit is logged by both the school and Quad.</li></ul>`},
+      {id: 'region', title: 'Where data lives, and backups', icon: 'globe', promise: 'Stored in AWS Mumbai, with point-in-time recovery for 35 days.', html: `<p>School data is stored in Amazon Web Services’ Mumbai region (ap-south-1), with point-in-time recovery for 35 days and a daily backup copy in Singapore for disaster recovery. The ${go('privacy', 'privacy policy', 'subprocessors')} lists every service that handles data and where.</p>`},
+      {id: 'ask-quad', title: 'Responsible AI: Ask Quad', icon: 'spark', promise: 'Read-only, permission-checked, and it never sees safeguarding or medical data.', html: `<p>Ask Quad answers questions from a school’s records. It is powered by Claude by Anthropic, through Anthropic’s API, and it is built with these limits:</p><ul><li>It uses read-only tools, and each tool checks what the person asking is allowed to see.</li><li>It answers only from the school’s records and shows the sources it used.</li><li>It never takes an action by itself: sending a reminder or a message is a button a person presses.</li><li>It never sees safeguarding or medical data.</li><li>Data sent through Anthropic’s API is not used to train its models.</li><li>Each school can turn Ask Quad off.</li></ul>`},
+      {id: 'practice', title: 'How we build it', icon: 'code', promise: 'Secrets never in code, and scans on every change. Not yet audited or certified.', html: `<ul><li>Secrets are kept in a secrets manager, never in code.</li><li>Dependencies and code are scanned automatically on every change.</li><li>Logs are structured with personal data left out.</li></ul><p>Quad has not been independently audited or certified. An external penetration test is planned before the first school goes live, and then every year.</p>`},
+      {id: 'report', title: 'Report a security issue', icon: 'alert', promise: 'Found a problem? Tell us first.', html: `<p>If you think you have found a security issue in Quad, email ${mail()}. Please give us a chance to fix it before telling anyone else.</p>`}
+    ]
+  },
+  privacy: {
+    label: 'Privacy', eyebrow: 'Legal', title: 'Privacy policy', legal: true,
+    summary: 'Schools decide what happens to their data and Quad looks after it for them; this page explains what Quad holds, where it is kept, and how to ask about it.',
+    updated: {date: '9 October 2026', iso: '2026-10-09', version: '0.2'},
+    facts: [['globe', 'AWS Mumbai (ap-south-1)', 'Where school data is stored'], ['cookie', 'No tracking cookies', 'So there is no cookie banner'], ['alert', '72 hours', 'To tell a school about a breach'], ['calendar', '30 days’ notice', 'Before any material change']],
+    inShort: [
+      'For school data, the school is in charge. Quad stores and uses it only to run Quad for the school.',
+      'School data is stored in AWS Mumbai (ap-south-1), with a copy of each daily backup in Singapore.',
+      'Children’s data is never sold, never used for advertising, and never used to train AI models.',
+      'Safeguarding and medical records are encrypted field by field, every view is logged, and they are never sent to Ask Quad.',
+      'Only strictly necessary cookies. No tracking or advertising cookies.',
+      `Questions about your school’s records go to your school first; anything else to ${mail()}.`
+    ],
+    sections: [
+      {id: 'who-we-are', title: 'Who we are', icon: 'school', plain: 'Quad Education Pvt Limited makes Quad. Privacy questions go to support@quad-edu.com.', html: `<p>Quad is a school platform: a staff portal for each school, the Quad app for parents, and a console for Quad’s own team. Quad is in development and preparing pilots with schools.</p><p>Quad is provided by ${CO.legalName}, ${CO.address} (${CO.reg}). For anything about privacy, email ${mail()}.</p>`},
+      {id: 'roles', title: 'Our two roles', icon: 'swap', plain: 'Your school decides about its data and we look after it. For this website, we decide.', html: `<p><strong>For school data, the school is in charge.</strong> Each school decides what it records about its students, families and staff, and why. Quad is the school’s processor: we store and use that data only to run Quad for the school, on its instructions and under its agreement with us.</p><p><strong>For this website, we are in charge.</strong> Quad is the controller for information about visitors to quad-edu.com and people who ask us for a demo.</p><p>If you are a parent or a member of staff with a question about your school’s records, ask your school first. We help schools answer these requests.</p>`},
+      {id: 'staff-portal', title: 'What the staff portal holds', icon: 'screen', plain: 'Staff accounts and the school’s records. Sensitive records are locked away and every view is logged.', html: `<p>The staff portal is where a school runs its day. It holds:</p><ul><li><strong>Staff accounts:</strong> name, work email, role, the password in hashed form, the two-step sign-in secret (encrypted) and a record of sign-ins.</li><li><strong>The school’s records:</strong> students and their guardians, admissions, attendance, timetables and cover, marks, exams and reports, fees and invoices, messages and moments, and pastoral notes.</li><li><strong>Sensitive records:</strong> safeguarding entries and medical notes. These are encrypted field by field, only staff with a sensitive-access permission can open them, and every view is logged.</li></ul>`},
+      {id: 'parent-app', title: 'What the parent app holds', icon: 'phone', plain: 'Your account, what you do in the app, and who you invite. Never your card number.', html: `<p>The Quad app for parents shows a family what the school shares. It holds:</p><ul><li><strong>Your account:</strong> your name, phone number (you sign in with a code sent by SMS), your relationship to your child, and your device’s push token so we can send notifications.</li><li><strong>What you do in the app:</strong> messages to the school, thank-yous, bookings, consent choices (such as photo consent for your child) and the relatives you invite.</li><li><strong>Payments:</strong> when you pay a fee by card, the school’s own payment provider takes the card details. Quad receives the payer’s name, email and the amount, never the card number.</li><li><strong>Relatives you invite:</strong> their name and phone number. They see moments only, and you or the school can remove them at any time.</li></ul>`},
+      {id: 'console', title: 'What the platform console holds', icon: 'tiles', plain: 'Our team’s tools. Looking inside a school needs a reason, lasts at most 60 minutes and is logged.', html: `<p>Quad’s own team uses the console to set up and support schools. It holds our team’s accounts, each school’s name, plan, contacts and billing details, and a record of everything the team does there.</p><p>When the team needs to look inside a school to help it, they must give a reason, the access lasts at most 60 minutes, the school sees a banner, it is logged by both the school and Quad, and it never reaches safeguarding or medical records.</p>`},
+      {id: 'children', title: 'Children’s data', icon: 'cap', plain: 'Children don’t sign in. Their data is never sold, never used for ads and never used to train AI.', html: `<p>Most of the data in Quad is about children, and we handle it only on the school’s instructions. Children do not sign in to Quad.</p><ul><li>Photos of a child are shared only as far as the child’s guardians allow: with the class, with the family only, or not at all.</li><li>Health and safeguarding records never appear in moments or the Circle.</li><li>Children’s data is never sold, never used for advertising, and never used to train AI models.</li></ul>`},
+      {id: 'website', title: 'Visitors to this website and demo requests', icon: 'mail', plain: 'A demo request is an email to us. Visit counts, if any, use no cookies.', html: `<p>When you ask for a demo or ask us to tell your school about Quad, the form opens an email to us in your own email app. We receive what you send: usually your name, email address, school and anything you add. We use it only to reply and arrange a walkthrough, and we delete requests that never lead to an agreement 24 months after our last contact.</p><p>If we count visits to this website, we use Plausible Analytics, which sets no cookies and collects no personal data. When the demo form starts sending requests to us directly, Cloudflare Turnstile will check that a person, not a bot, is sending it.</p>`},
+      {id: 'sign-in', title: 'How people sign in', icon: 'key', plain: 'Staff use email, password and a code; parents use an SMS code. No social sign-in.', html: `<ul><li><strong>School staff:</strong> work email and password, then a two-step code from an authenticator app where the school requires it.</li><li><strong>Parents and relatives:</strong> a one-time code sent by SMS to their phone.</li><li><strong>Quad’s own team:</strong> email, password and a two-step code, always.</li><li>There is no sign-in with Google, Microsoft or social media accounts.</li></ul>`},
+      {id: 'where', title: 'Where data is stored', icon: 'globe', plain: 'In AWS Mumbai, with a backup copy in Singapore. A few services handle limited data elsewhere.', html: `<p>School data is stored and processed in Amazon Web Services’ Mumbai region (ap-south-1): the database, files, queues and backups. A copy of each daily backup is kept in Singapore (ap-southeast-1) so we can recover from a disaster.</p><p>A short list of sub-processors handle limited data outside that region, each for one purpose: ${outside}. <a href="#subprocessors">Companies that handle data for us</a> says what each one receives and where.</p>`},
+      {id: 'subprocessors', title: 'Companies that handle data for us', icon: 'box', plain: 'Each company does one job. Schools hear at least 30 days before we add or replace one.', html: `<p>These companies handle data for Quad, each only for the purpose shown.</p>${subCards()}<p>We tell schools at least 30 days before we add or replace one of these companies, so they can raise concerns first. Email ${mail()} to be told about changes.</p>`},
+      {id: 'ask-quad', title: 'Ask Quad and Anthropic', icon: 'spark', plain: 'Only what the person asking may see is sent. Never safeguarding, medical or contact details.', html: `<p>Ask Quad is an assistant that answers questions from the school’s own records. It is powered by Claude by Anthropic, through Anthropic’s API.</p><ul><li><strong>What is sent:</strong> the question and the results of the read-only lookups needed to answer it, such as names, classes and figures. Only what the person asking is allowed to see is ever looked up.</li><li><strong>What is never sent:</strong> safeguarding records, medical records and contact details.</li><li><strong>Training:</strong> data sent through Anthropic’s API is not used to train its models. We use zero data retention where it is available to us.</li><li><strong>Keeping conversations:</strong> Quad keeps Ask Quad conversations for 90 days, or not at all if the school chooses.</li><li><strong>Turning it off:</strong> each school can turn Ask Quad off in its settings.</li></ul>`},
+      {id: 'retention', title: 'How long data is kept', icon: 'clock', plain: 'Each kind of record has a set time. When it is up, a nightly job deletes it.', html: `<p>Schools can keep some records for longer where the law requires it. Otherwise these are the defaults, and a nightly job deletes data when its time is up:</p><ul><li>Student records: 7 years after the student leaves (the school can extend this).</li><li>Attendance: 7 years.</li><li>Safeguarding records: 25 years from the child’s date of birth (the school can change this).</li><li>Medical records: 7 years after the student leaves.</li><li>Messages and moments: 3 years after the academic year ends.</li><li>Ask Quad conversations: 90 days, or none.</li><li>Notifications: 90 days.</li><li>Audit logs: 7 years.</li><li>Demo requests that never led to an agreement: 24 months.</li><li>Anything deleted in Quad: removed for good after 30 days.</li></ul><p>Backups age out within 35 days, so deleted data leaves them too.</p>`},
+      {id: 'rights', title: 'Your rights and how to ask', icon: 'scale', plain: 'You can see, correct, delete or get a copy of your data. Ask your school first.', html: `<p>Depending on where you live, laws such as Sri Lanka’s Personal Data Protection Act (No. 9 of 2022) and the GDPR give you the right to see the data held about you, to have it corrected or deleted, to get a copy, and to object to how it is used. You can also complain to your data protection authority.</p><p>For data a school holds about you or your child, ask the school: it can export a student’s or guardian’s data and delete it on request, and we help it do so. For anything else, or if you are not sure, email ${mail()}.</p>`},
+      {id: 'cookies', title: 'Cookies', icon: 'cookie', plain: 'Only the cookies Quad needs to work. No tracking, so no cookie banner.', html: `<p>Quad uses only cookies that are strictly necessary for it to work:</p><ul><li>a session cookie that keeps you signed in;</li><li>a security token that protects your forms (CSRF);</li><li>quad_theme, which remembers light or dark mode;</li><li>quad_last_school, which remembers the last school you opened;</li><li>Cloudflare Turnstile’s cookie, when the demo form checks for bots.</li></ul><p>There are no tracking or advertising cookies, so there is no cookie banner. This website also remembers your theme and whether you chose the school or parent view in your browser’s own storage; that never leaves your device.</p>`},
+      {id: 'security', title: 'Keeping data safe', icon: 'shield', plain: 'If a breach affects a school’s data, we tell the school within 72 hours.', html: `<p>The ${go('security', 'Security &amp; trust')} page explains how Quad protects data. If a breach ever affects a school’s data, we tell the school within 72 hours.</p>`},
+      {id: 'changes', title: 'Changes to this policy', icon: 'calendar', plain: 'School admins get an email at least 30 days before any material change.', html: `<p>The date and version at the top show when this policy last changed. We email school admins at least 30 days before any material change.</p>`},
+      {id: 'contact', title: 'Contact', icon: 'chat', plain: 'Email support@quad-edu.com, or write to us in Colombo.', html: `<p>Email ${mail()}, or write to ${CO.legalName}, ${CO.address}.</p>`}
+    ]
+  },
+  terms: {
+    label: 'Terms', eyebrow: 'Legal', title: 'Terms of service', legal: true,
+    summary: 'These terms are the agreement between Quad and each school that uses it; parents, relatives and staff use Quad under their school’s agreement.',
+    updated: {date: '9 October 2026', iso: '2026-10-09', version: '0.1'},
+    facts: [['school', 'The school owns its data', 'And can export it at any time'], ['card', 'Fees go to the school', 'Quad does not hold parents’ payments'], ['calendar', '30 days’ notice', 'Before a material change'], ['scale', 'Laws of Sri Lanka', 'Govern these terms']],
+    inShort: [
+      'The agreement is between Quad and the school. Staff, parents and relatives use Quad under it.',
+      'Everything the school puts into Quad belongs to the school. We never sell it.',
+      'When parents pay school fees in the app, the money goes to the school. Quad does not hold it.',
+      'Ask Quad can be wrong, so check its answers and drafts before you rely on them.',
+      'We email school admins at least 30 days before a material change to these terms.',
+      'Quad is in development. These terms describe how we intend to work with schools from the first pilot.'
+    ],
+    sections: [
+      {id: 'agreement', title: 'Who the agreement is with', icon: 'doc', plain: 'The agreement is between Quad and the school. If the order form says otherwise, it wins.', html: `<p>These terms are an agreement between ${CO.legalName} (“Quad”, “we”) and the school or school group that signs up to use Quad (“the school”). The school’s order form or plan sits alongside them; if the two disagree, the order form wins.</p><p>Quad is in development. These terms describe how we intend to work with schools from the first pilot.</p>`},
+      {id: 'people', title: 'Staff, parents and relatives', icon: 'family', plain: 'The school invites people and is responsible for their roles. Relatives see moments only.', html: `<p>The school invites its staff and the parents and guardians of its students. They use Quad under the school’s agreement, and the school is responsible for who it invites and what role each person has.</p><p>Parents can invite relatives into their child’s circle. Relatives see moments only, and a parent or the school can remove them at any time.</p>`},
+      {id: 'accounts', title: 'Accounts and security', icon: 'key', plain: 'One person per account. Tell us straight away if someone else used yours.', html: `<ul><li>Each account is for one person. Do not share passwords or sign-in codes.</li><li>Use two-step sign-in wherever the school or Quad requires it.</li><li>Tell the school, or us at ${mail()}, straight away if you think someone else has used your account.</li><li>The school manages its users and their roles. We may suspend an account to protect a school, its families or Quad, and we tell the school when we do.</li></ul>`},
+      {id: 'acceptable-use', title: 'Acceptable use', icon: 'rule', plain: 'Don’t break the law, look where you shouldn’t, or test our security without asking.', html: `<p>When using Quad, do not:</p><ul><li>break the law, or upload anything unlawful, harmful or that you have no right to share;</li><li>try to see data you have not been given access to, including another school’s;</li><li>probe, scan or test Quad’s security without our written permission (report issues to ${mail()} instead);</li><li>overload, disrupt or reverse engineer Quad, except where the law allows it;</li><li>use Quad to send spam or messages that have nothing to do with school life.</li></ul><p>Ask Quad drafts letters and answers questions from the school’s records. It can be wrong, so check its answers and drafts before you rely on them or send them.</p>`},
+      {id: 'fees', title: 'Fees', icon: 'card', plain: 'The school pays what its order form says. Parents’ fee payments go to the school.', html: `<p>The school pays the fees set out in its order form or plan, on the terms stated there, plus any taxes that apply.</p><p>When parents pay school fees in the app, the money goes to the school through the school’s own payment provider. Quad does not hold it.</p>`},
+      {id: 'data', title: 'The school owns its data', icon: 'server', plain: 'It’s the school’s data. It can export it at any time, and we never sell it.', html: `<p>Everything the school and its people put into Quad belongs to the school. We use it only to run Quad for the school, on its instructions, as the ${go('privacy', 'privacy policy')} describes. We never sell it.</p><p>The school can export its data at any time. When the agreement ends, we return the data on request and then delete it; backups age out within 35 days.</p>`},
+      {id: 'availability', title: 'Availability and support', icon: 'power', plain: 'We work to keep Quad available. There are no published service levels yet.', html: `<p>We work to keep Quad available and to tell schools about planned maintenance in advance. We do not publish service levels yet; any that apply to a school will be in its order form.</p>`},
+      {id: 'changes', title: 'Changes to Quad and to these terms', icon: 'swap', plain: 'Schools get an email at least 30 days before a material change.', html: `<p>Quad will keep improving. We email school admins at least 30 days before a material change to these terms or a change that removes something the school relies on. The date and version at the top show when these terms last changed.</p>`},
+      {id: 'ending', title: 'Ending the agreement', icon: 'door', plain: 'Either side can end it as the order form allows, or after a serious breach left unfixed for 30 days.', html: `<p>The agreement lasts for the term in the school’s order form. Either side may end it as the order form allows, or straight away if the other side seriously breaks these terms and does not put it right within 30 days of being told.</p>`},
+      {id: 'liability', title: 'Liability', icon: 'shield', plain: 'Each side’s liability is capped at what the school paid Quad in the 12 months before a claim.', html: `<p>Each side’s total liability under this agreement is limited to: ${CO.cap}.</p><p>Nothing in these terms limits liability that the law does not allow to be limited.</p>`},
+      {id: 'law', title: 'Governing law', icon: 'scale', plain: 'Sri Lankan law applies, and disputes go to Sri Lankan courts.', html: `<p>These terms are governed by: ${CO.law}. Disputes go to: ${CO.courts}.</p>`},
+      {id: 'contact', title: 'Contact', icon: 'chat', plain: 'Email support@quad-edu.com.', html: `<p>${CO.legalName}, ${CO.address} (${CO.reg}). Email ${mail()}.</p>`}
+    ]
+  }
+};
+
+/* ---------- Shared bits ---------- */
+const kicker = (p) => `<span class="kicker"><svg viewBox="0 0 30 30" aria-hidden="true"><use href="#qMark"/></svg>${esc(p.eyebrow)}</span>`;
+const updatedLine = (p) => p.updated ? `Last updated <time datetime="${p.updated.iso}">${p.updated.date}</time> · Version ${p.updated.version}` : '';
+
+/* ---------- A. Story cards ---------- */
+function renderA(key, p) {
+  const metaChips = p.updated ? `<p class="meta"><span>Last updated <time datetime="${p.updated.iso}">${p.updated.date}</time></span><span>Version ${p.updated.version}</span></p>` : '';
+  const hero = `<section class="hero" aria-labelledby="h1"><div class="wrap"><div class="hero-copy">${kicker(p)}<h1 id="h1">${esc(p.title)}</h1><p class="lede">${p.summary}</p>${metaChips}</div><div class="bigmark" aria-hidden="true"><svg viewBox="0 0 30 30"><use href="#qMark"/></svg></div></div></section>`;
+  const S = Object.fromEntries(p.sections.map((s) => [s.id, s]));
+  let body = '';
+  if (key === 'about') {
+    body = `
+    <section class="sec lift" id="what" aria-labelledby="what-h">
+      <div class="card"><div class="sec-h">${badge('tiles', 'sky', 44)}<h2 id="what-h">What Quad is</h2></div>
+        <p class="prose" style="margin-bottom:18px">Quad brings a school’s work and its families together in three apps:</p>
+        <ul class="apps" role="list" style="list-style:none;margin:0;padding:0">${APPS.map((a) => `<li class="app v-${a.c}">${badge(a.icon, 'plain', 48)}<h3>${a.name}</h3><p>${a.text.charAt(0).toUpperCase() + a.text.slice(1)}</p></li>`).join('')}</ul>
+        <div class="ask">${badge('spark', 'orange', 44)}<p class="prose">${ASK_LINE}</p></div>
+      </div>
+    </section>
+    <div class="sec two">
+      <section class="card tint t-pink" id="who" aria-labelledby="who-h"><div class="sec-h">${badge('family', 'plain', 40)}<h2 id="who-h">${S.who.title}</h2></div><div class="prose">${S.who.html}</div></section>
+      <section class="card tint t-lime" id="why" aria-labelledby="why-h"><div class="sec-h">${badge('heart', 'plain', 40)}<h2 id="why-h">${S.why.title}</h2></div><div class="prose">${S.why.html}</div></section>
+    </div>
+    <section class="sec card" id="stage" aria-labelledby="stage-h">
+      <div class="sec-h">${badge('flag', 'lime', 44)}<h2 id="stage-h">Where we are now</h2></div>
+      <ol class="tl">
+        <li class="done"><small>Started</small><b>Founded in 2026</b><p>${CO.legalName}, ${CO.address}.</p></li>
+        <li class="now"><small>Now</small><b>In development</b><p>Building the staff portal, the parent app and the platform console.</p></li>
+        <li><small>Next</small><b>Pilots with schools</b><p>We’re preparing pilots with schools.</p></li>
+      </ol>
+      <div class="prose note"><p>The sample school and families you see on this website are fictional. If you would like your school to be one of the first to try Quad, <a href="https://quad-edu.com/#demo">book a demo</a>.</p></div>
+    </section>
+    <div class="sec two">
+      <section class="card" id="founder" aria-labelledby="founder-h">
+        <div class="sec-h">${badge('user', 'pink', 40)}<h2 id="founder-h">${S.founder.title}</h2></div>
+        <div class="founder"><div class="avatar" aria-hidden="true">PM<svg viewBox="0 0 30 30"><use href="#qMark"/></svg></div><div><h3>${CO.founder}</h3><p class="role">${CO.role}</p><p class="prose" style="margin-top:6px">${CO.bio}</p></div></div>
+      </section>
+      <section class="card" id="where" aria-labelledby="where-h">
+        <div class="sec-h">${badge('pin', 'sky', 40)}<h2 id="where-h">${S.where.title}</h2></div>
+        <div class="prose"><p>Quad is based in ${CO.country} and built for schools internationally. School data is stored in Amazon Web Services’ Mumbai region; the ${go('privacy', 'privacy policy', 'subprocessors')} lists the few services that handle data elsewhere.</p></div>
+        <ul class="facts"><li>${CO.legalName}</li><li>${CO.reg}</li><li>${CO.address}</li><li>${CO.founded}</li></ul>
+      </section>
+    </div>
+    <section class="sec card tint t-orange" id="contact" aria-labelledby="contact-h">
+      <div class="cta"><div><div class="sec-h">${badge('mail', 'plain', 44)}<h2 id="contact-h">Talk to us</h2></div><div class="prose">${S.contact.html}</div></div><a class="btn" href="https://quad-edu.com/#demo" style="background:var(--navy);color:var(--on-navy)">Book a 30-minute demo <span aria-hidden="true">→</span></a></div>
+    </section>`;
+  } else if (key === 'security') {
+    const cards = p.sections.map((s, i) => {
+      if (s.id === 'report') return `<section class="pc wide" id="${s.id}" aria-labelledby="${s.id}-h">${badge(s.icon, 'orange', 56)}<div><h2 id="${s.id}-h" style="font-size:26px">${s.title}</h2><div class="prose" style="margin-top:6px">${s.html}</div></div></section>`;
+      const c = COLS[i % 4];
+      return `<section class="pc card tint t-${c}" id="${s.id}" aria-labelledby="${s.id}-h"><div class="ph">${badge(s.icon, 'plain', 44)}<h2 id="${s.id}-h">${s.title}</h2></div><p class="promise">${s.promise}</p><details><summary>The detail</summary><div class="prose">${s.html}</div></details></section>`;
+    }).join('');
+    body = `<div class="grid lift">${cards}</div>`;
+  } else {
+    const inShort = `<section class="card lift" aria-labelledby="short-h"><div class="inshort"><h2 class="lbl" id="short-h">In short</h2><ul>${p.inShort.map((t) => `<li>${svg('check')}<span>${t}</span></li>`).join('')}</ul></div></section>`;
+    const nav = `<nav class="chipnav" aria-label="On this page">${p.sections.map((s) => `<a href="#${s.id}">${s.title}</a>`).join('')}</nav>`;
+    const cards = p.sections.map((s, i) => `<section class="card lc" id="${s.id}" aria-labelledby="${s.id}-h">${badge(s.icon, COLS[i % 4], 44)}<h2 id="${s.id}-h">${s.title}</h2><div class="prose">${s.html}</div></section>`).join('');
+    body = `${inShort}<h2 class="sr">The full ${p.title.toLowerCase()}</h2><div class="lwrap"><div class="lcards">${cards}</div><aside class="lside"><div class="card"><p class="lsh">On this page</p>${nav}</div></aside></div>`;
+  }
+  return `${hero}<div class="wrap body">${body}</div>`;
+}
+
+/* ---------- State, rendering and controls ---------- */
+const root = document.documentElement;
+const main = document.getElementById('main');
+const params = new URLSearchParams(location.search);
+const store = {get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* storage off */ } }};
+const state = {
+  opt: 'A',
+  page: PAGES[params.get('p')] ? params.get('p') : (PAGES[store.get('qpp_page')] ? store.get('qpp_page') : 'about')
+};
+const t0 = params.get('t');
+if (t0 === 'light' || t0 === 'dark') root.dataset.theme = t0;
+
+function isDark() { return root.dataset.theme ? root.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches; }
+function syncTheme() { document.querySelectorAll('[data-theme-set]').forEach((b) => b.setAttribute('aria-pressed', String((b.dataset.themeSet === 'dark') === isDark()))); }
+
+function measureBar() { root.style.setProperty('--bar-h', document.querySelector('.pv').offsetHeight + 'px'); }
+
+function render(scrollTop) {
+  const p = PAGES[state.page];
+  main.className = `${state.opt}${p.legal ? ' legal' : ''}`;
+  main.innerHTML = renderA(state.page, p);
+  main.dataset.opt = state.opt;
+  document.querySelectorAll('button[data-page]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.page === state.page)));
+  document.querySelectorAll('.top nav a').forEach((a) => a.dataset.go === state.page ? a.setAttribute('aria-current', 'page') : a.removeAttribute('aria-current'));
+  document.getElementById('pvDesc').innerHTML = '<b>Story cards (D45)</b><span class="d"> – a big Quad mark in the hero, colourful cards for each idea, and an “In short” summary on legal pages.</span>';
+  store.set('qpp_page', state.page);
+  measureBar();
+  if (scrollTop) window.scrollTo({top: 0, behavior: 'instant'});
+}
+
+document.addEventListener('click', (e) => {
+  const pg = e.target.closest('button[data-page]');
+  if (pg) { state.page = pg.dataset.page; render(true); return; }
+  const th = e.target.closest('[data-theme-set]');
+  if (th) { root.dataset.theme = th.dataset.themeSet; syncTheme(); return; }
+  const link = e.target.closest('a[data-go]');
+  if (link) {
+    e.preventDefault();
+    state.page = link.dataset.go; render(true);
+    const h = link.dataset.hash && document.getElementById(link.dataset.hash);
+    if (h) h.scrollIntoView();
+    main.focus({preventScroll: true});
+  }
+});
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', syncTheme);
+window.addEventListener('resize', measureBar);
+syncTheme();
+render(false);
+})();
+</script>
+</body>
+</html>
