@@ -230,6 +230,16 @@ describe('GET /audit', () => {
   });
 });
 
+describe('GET /audit varies on Accept', () => {
+  it('says so on the JSON page too, so a cache never serves one format for the other', async () => {
+    const { admin } = await arrange();
+    const response = await as(admin)('GET', '/audit');
+    expect(response.statusCode).toBe(200);
+    expect(response.headers['content-type']).toMatch(/^application\/json/);
+    expect(response.headers.vary).toBe('Accept');
+  });
+});
+
 describe('GET /audit as CSV (Accept: text/csv)', () => {
   const csv = (member: StaffSeed, query = '') =>
     as(member)('GET', `/audit${query}`, undefined, { accept: 'text/csv' });
@@ -246,6 +256,8 @@ describe('GET /audit as CSV (Accept: text/csv)', () => {
       /^attachment; filename="quad-audit-\d{4}-\d{2}-\d{2}\.csv"$/,
     );
     expect(response.headers['cache-control']).toBe('no-store');
+    // One URL, two formats: caches must key on Accept (Task 15 review M3).
+    expect(response.headers.vary).toBe('Accept');
     expect(csvLines(response.body)).toEqual([
       'When (UTC),Who,What,Quad support visit,IP address,Details',
       '2026-10-02T09:00:00.000Z,Quad support,Changed School settings: address,Yes,,' +

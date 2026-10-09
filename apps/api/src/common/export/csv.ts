@@ -42,6 +42,15 @@ export function wantsCsv(request: Pick<FastifyRequest, 'headers'>): boolean {
 }
 
 /**
+ * Marks a route that answers JSON or CSV from one URL as varying on `Accept`, so a shared or
+ * browser cache never hands one format to a request for the other (Task 15 review M3). Call it
+ * before choosing the format, so both answers carry it.
+ */
+export function varyOnAccept(reply: FastifyReply): void {
+  void reply.header('vary', 'Accept');
+}
+
+/**
  * Sends `csv` as a download named `<name>-<YYYY-MM-DD>.csv` (the UTC date of `now`). Exports
  * hold personal data, so no cache keeps a copy.
  */

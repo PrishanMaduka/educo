@@ -203,6 +203,16 @@ describe('GET /platform/audit', () => {
   });
 });
 
+describe('GET /platform/audit varies on Accept', () => {
+  it('says so on the JSON page too, so a cache never serves one format for the other', async () => {
+    const quad = await consoleAs('readonly');
+    const response = await quad.browser.get('/platform/audit');
+    expect(response.statusCode).toBe(200);
+    expect(response.headers['content-type']).toMatch(/^application\/json/);
+    expect(response.headers.vary).toBe('Accept');
+  });
+});
+
 describe('GET /platform/audit as CSV', () => {
   it('exports the filtered entries with the school, and records the export in platform_audit', async () => {
     const { a, ids } = await arrange();
@@ -218,6 +228,8 @@ describe('GET /platform/audit as CSV', () => {
       /^attachment; filename="quad-platform-audit-\d{4}-\d{2}-\d{2}\.csv"$/,
     );
     expect(response.headers['cache-control']).toBe('no-store');
+    // One URL, two formats: caches must key on Accept (Task 15 review M3).
+    expect(response.headers.vary).toBe('Accept');
     expect(csvLines(response.body)).toEqual([
       'When (UTC),Who,What,School,Quad support visit,IP address,Details',
       `2026-10-01T09:00:00.000Z,Ama Perera,Renamed the school from “Old Name” to “${a.name}”,${a.name},No,198.51.100.7,` +

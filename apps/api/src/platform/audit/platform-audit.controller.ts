@@ -1,7 +1,7 @@
 import { Controller, Get, Inject, Query, Req, Res } from '@nestjs/common';
 import { PlatformAuditLogQuery } from '@quad/contracts';
 
-import { sendCsv, wantsCsv } from '../../common/export/csv';
+import { sendCsv, varyOnAccept, wantsCsv } from '../../common/export/csv';
 import { PlatformController } from '../../common/guards/platform-controller.decorator';
 import { ZodValidationPipe } from '../../common/zod.pipe';
 import { userAgentOf } from '../../public/auth/sign-in-http';
@@ -33,6 +33,7 @@ export class PlatformAuditController {
     @Req() request: FastifyRequest,
     @Res({ passthrough: true }) reply: FastifyReply,
   ): Promise<PlatformAuditLog | string> {
+    varyOnAccept(reply);
     if (!wantsCsv(request)) return this.auditLog.list(query);
     const client = { ip: request.ip, userAgent: userAgentOf(request) };
     const csv = await this.auditLog.export(auth, query, client);

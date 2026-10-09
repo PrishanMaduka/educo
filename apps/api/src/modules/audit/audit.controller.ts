@@ -2,7 +2,7 @@ import { Controller, Get, Inject, Query, Req, Res } from '@nestjs/common';
 import { AuditLogQuery } from '@quad/contracts';
 
 import { PermissionsService } from '../../common/access/permissions.service';
-import { sendCsv, wantsCsv } from '../../common/export/csv';
+import { sendCsv, varyOnAccept, wantsCsv } from '../../common/export/csv';
 import { Can } from '../../common/guards/can.decorator';
 import { Auth } from '../../common/session/request-auth';
 import { ZodValidationPipe } from '../../common/zod.pipe';
@@ -32,6 +32,7 @@ export class AuditLogController {
     @Req() request: FastifyRequest,
     @Res({ passthrough: true }) reply: FastifyReply,
   ): Promise<AuditLog | string> {
+    varyOnAccept(reply);
     if (!wantsCsv(request)) return this.auditLog.list(auth, query);
     const access = await this.access.forRequest(request);
     const csv = await this.auditLog.export(auth, access, query, request.ip);
