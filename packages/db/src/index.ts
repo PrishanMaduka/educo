@@ -11,6 +11,7 @@ export {
   withPlatform,
   withTenant,
 } from './db';
+export type { OpenRunner, OpenTx } from './open';
 export type { PlatformRunner, PlatformTx } from './platform';
 export { PLATFORM_TABLES } from './platform-tables';
 export { TransactionClosedError } from './client';
@@ -24,6 +25,7 @@ export type {
   AccountSessionLookup,
   AuthMembership,
   DefinerCalls,
+  RefreshFamily,
   SessionLookup,
   SupportSessionLookup,
   SupportVisit,

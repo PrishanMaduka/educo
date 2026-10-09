@@ -60,6 +60,7 @@ const DEFINERS = [
   'tenant_by_embed_key(text)',
   'tenant_by_gateway_account(text, text)',
   'current_support_visit(uuid)',
+  'refresh_family(uuid)',
 ] as const;
 
 /** The tables `definer_read` opens to `quad_owner` (and only to it). */
@@ -84,6 +85,8 @@ let deactivatedSchool: Tenant;
 let person: Account;
 let personInA: User;
 let personInB: User;
+/** The same person as a guardian in `guardianSchool`. */
+let personAsGuardian: User;
 let adminRoleA: Role;
 let teacherRoleA: Role;
 /** A second member of A, with no credentials row. */
@@ -166,7 +169,9 @@ beforeAll(async () => {
   personInB = await insertUser(withTenant, schoolB.id, person.id);
   await insertUser(withTenant, suspended.id, person.id);
   await insertUser(withTenant, deleted.id, person.id);
-  await insertUser(withTenant, guardianSchool.id, person.id, { kind: 'guardian' });
+  personAsGuardian = await insertUser(withTenant, guardianSchool.id, person.id, {
+    kind: 'guardian',
+  });
   await insertUser(withTenant, deactivatedSchool.id, person.id, { status: 'deactivated' });
   adminRoleA = await insertRole(withTenant, schoolA.id, { key: 'admin', name: 'School admin' });
   teacherRoleA = await insertRole(withTenant, schoolA.id, { key: 'teacher', name: 'Teacher' });
@@ -430,6 +435,55 @@ describe('auth_sign_in_rules', () => {
     });
     // No tenant_security row: the table defaults (two-step off, 10 characters).
     expect(byTenant.get(suspended.id)).toMatchObject({ twoStep: 'off', passwordMinLength: 10 });
+  });
+});
+
+describe('refresh_family (a parent refresh token names its family, Task 9)', () => {
+  async function family(overrides: Parameters<typeof insertSession>[2] = {}) {
+    return insertSession(withAccount, person.id, {
+      kind: 'mobile',
+      stage: 'active',
+      tokenHash: null,
+      activeTenantId: guardianSchool.id,
+      activeUserId: personAsGuardian.id,
+      refreshHash: randomTokenHash(),
+      ...overrides,
+    });
+  }
+
+  it("returns only the live mobile family's account and school", async () => {
+    const live = await family();
+    const { rows, fields } = await testDb().app.query('select * from refresh_family($1)', [
+      live.id,
+    ]);
+    expect(fields.map((field) => field.name)).toEqual(['account_id', 'tenant_id']);
+    expect(rows).toEqual([{ account_id: person.id, tenant_id: guardianSchool.id }]);
+    await expect(definers.refreshFamily(live.id)).resolves.toEqual({
+      accountId: person.id,
+      tenantId: guardianSchool.id,
+    });
+  });
+
+  it('finds nothing for a revoked family, a family still choosing a school, or an unknown id', async () => {
+    const revoked = await family({ revokedAt: new Date() });
+    const choosing = await family({
+      stage: 'choose_school',
+      activeTenantId: null,
+      activeUserId: null,
+      refreshHash: null,
+    });
+    await expect(definers.refreshFamily(revoked.id)).resolves.toBeNull();
+    await expect(definers.refreshFamily(choosing.id)).resolves.toBeNull();
+    await expect(definers.refreshFamily(uuidv7())).resolves.toBeNull();
+  });
+
+  it("never finds a staff browser session, even another school's", async () => {
+    const web = await insertSession(withAccount, outsider.id, {
+      stage: 'active',
+      activeTenantId: schoolB.id,
+      activeUserId: outsiderInB.id,
+    });
+    await expect(definers.refreshFamily(web.id)).resolves.toBeNull();
   });
 });
 

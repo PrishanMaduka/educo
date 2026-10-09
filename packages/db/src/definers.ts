@@ -68,6 +68,12 @@ export interface SupportSessionLookup {
 
 export type SessionLookup = AccountSessionLookup | SupportSessionLookup;
 
+/** Whose refresh family a parent refresh token names, and its school (`refresh_family`). */
+export interface RefreshFamily {
+  readonly accountId: string;
+  readonly tenantId: string;
+}
+
 /** The SSO buttons to offer for an email domain. */
 export interface SsoMethods {
   readonly google: boolean;
@@ -165,6 +171,8 @@ export interface DefinerCalls {
   accountByIdentifier(identifier: AccountIdentifier): Promise<AccountLookup | null>;
   /** Resolves a cookie's SHA-256: an account session first, then a support visit. */
   sessionByToken(tokenHash: Buffer): Promise<SessionLookup | null>;
+  /** The account and school of a live parent refresh family (a mobile session in a school). */
+  refreshFamily(sessionId: string): Promise<RefreshFamily | null>;
   ssoMethodsForDomain(domain: string): Promise<SsoMethods>;
   /** One row per active staff membership of a live school. */
   authSignInRules(accountId: string): Promise<AuthSignInRule[]>;
@@ -339,6 +347,15 @@ export function createDefinerCalls(pool: pg.Pool): DefinerCalls {
       ]);
       const [row] = rows;
       return row ? toSessionLookup(row) : null;
+    },
+
+    refreshFamily: async (sessionId) => {
+      const { rows } = await pool.query<{ account_id: string; tenant_id: string }>(
+        'select account_id, tenant_id from refresh_family($1)',
+        [sessionId],
+      );
+      const [row] = rows;
+      return row ? { accountId: row.account_id, tenantId: row.tenant_id } : null;
     },
 
     ssoMethodsForDomain: async (domain) => {
