@@ -410,8 +410,7 @@ input[type=range]{width:100%;accent-color:var(--brand-text)}
 .eyebrow{font-size:11.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
 .panel .lede{font:800 11.5px var(--f-body);color:var(--ink-3);letter-spacing:.1em;text-transform:uppercase;margin:0 0 6px}
 
-/* Greeting header (Home): the date with a time-of-day icon, a Bricolage greeting, then Ask Quad and notifications.
-   Ask Quad sits in the header (navy, lime spark, the same in every school) so it never covers a card. */
+/* Greeting header (Home): the date with a time-of-day icon, a Bricolage greeting, then Messages and notifications. */
 .ghead{flex:none;margin:0;padding:16px 18px 12px;display:flex;flex-direction:column;gap:6px}
 .ghead .gt{display:flex;align-items:center;gap:10px}
 .ghead .gx{flex:1;min-width:0;padding-top:2px}
@@ -420,12 +419,18 @@ input[type=range]{width:100%;accent-color:var(--brand-text)}
 .ghead .gico{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:color-mix(in srgb,currentColor 16%,transparent)}
 .gi-morning,.gi-afternoon{color:var(--c4)}.gi-evening{color:var(--c1)}.gi-night{color:var(--c3)}
 .ghead .acts{display:flex;gap:6px;align-self:flex-start;margin-top:2px}
-.ghead .back,.ghead .askq-btn{position:relative;width:44px;height:44px}
+.ghead .back{position:relative;width:44px;height:44px}
 .hbadge{position:absolute;top:-4px;right:-4px;min-width:19px;height:19px;padding:0 5px;border-radius:10px;background:var(--pink);color:var(--navy);font-size:11px;font-weight:800;display:grid;place-items:center;border:2px solid var(--canvas)}
 .ghead .back .dot{position:absolute;top:7px;right:8px;width:9px;height:9px;border-radius:50%;background:var(--pink);box-shadow:0 0 0 2px var(--surface)}
-.askq-btn{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;flex:none;background:var(--navy);color:var(--lime)}
-:root[data-theme="dark"] .askq-btn{background:var(--navy-2);box-shadow:inset 0 0 0 1.5px var(--navy-line)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .askq-btn{background:var(--navy-2);box-shadow:inset 0 0 0 1.5px var(--navy-line)}}
+/* Ask Quad: a round navy button with a lime spark (the same in every school), bottom right, just above the tab bar.
+   It shows on the four tab pages only, and each page leaves room at the end so the last card scrolls clear of it. */
+.aq-fab{position:absolute;right:16px;bottom:96px;z-index:20;width:56px;height:56px;border-radius:50%;display:grid;place-items:center;background:var(--navy);color:var(--lime);box-shadow:0 10px 24px -8px rgba(16,22,50,.55),0 2px 6px rgba(16,22,50,.18);transition:transform .2s}
+.aq-fab:active{transform:scale(.94)}
+.aq-fab[hidden]{display:none}
+:root[data-theme="dark"] .aq-fab{background:var(--navy-2);box-shadow:inset 0 0 0 1.5px var(--navy-line),0 10px 24px -8px rgba(0,0,0,.6)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .aq-fab{background:var(--navy-2);box-shadow:inset 0 0 0 1.5px var(--navy-line),0 10px 24px -8px rgba(0,0,0,.6)}}
+.body.has-fab{padding-bottom:88px}
+.screen:has(.aq-fab:not([hidden])) .toast{bottom:164px}
 .gs-star{animation:gsTw 3.6s ease-in-out infinite}
 @keyframes gsTw{50%{opacity:.25}}
 .kids{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:0 -16px;padding:2px 16px}
@@ -873,6 +878,7 @@ button.it:active{background:var(--surface-2)}
     <div id="nav"></div>
     <div class="body" id="body"></div>
     <div id="composer"></div>
+    <button class="aq-fab" id="aqFab" data-act="aqOpen" aria-label="Ask Quad" title="Ask Quad (press /)" hidden></button>
     <nav class="tabbar" id="tabbar" aria-label="Main"></nav>
     <div class="scrim" id="scrim" data-act="closeSheet"></div>
     <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-label="Details" aria-hidden="true"></div>
@@ -1452,7 +1458,7 @@ SCR.forms = () => { const k = kid(), fs = formsFor(k), todo = fs.filter(f => !fo
     <p class="fm-q">${esc(f.q)}</p>
     ${d ? `<div class="fm-ok">${ic('check',16,2.6)}<span>${d.ok ? 'You said yes' : 'You said no'} · signed “${esc(d.sig)}” at ${esc(d.at)}</span></div>` : `<div class="seg2" role="radiogroup" aria-label="Your answer"><button class="${S.fAns[f.id] === true ? 'on' : ''}" data-act="fAns" data-id="${f.id}" data-v="1">Yes, I agree</button><button class="${S.fAns[f.id] === false ? 'on' : ''}" data-act="fAns" data-id="${f.id}" data-v="0">No</button></div>
       <label class="fm-l" for="sig-${f.id}">Type your full name to sign</label><input class="inp fm-sig" id="sig-${f.id}" placeholder="Priya Patel" autocomplete="name">
-      <button class="btn" data-act="fSign" data-id="${f.id}">Sign and send${f.amount && S.fAns[f.id] ? ' · ' + money(f.amount) + ' added to Payments' : ''}</button><div class="ferr" id="ferr-${f.id}" role="alert"></div>`}</div>`; }).join('') : `${sum(`Nothing to sign for ${k.first} right now.`)}${empty('No forms waiting.', 'Consent forms and sign-ups from the school appear here.')}`}`}; };
+      <button class="btn" data-act="fSign" data-id="${f.id}">Sign and send${f.amount && S.fAns[f.id] ? ' · ' + money(f.amount) + ' added to Pay' : ''}</button><div class="ferr" id="ferr-${f.id}" role="alert"></div>`}</div>`; }).join('') : `${sum(`Nothing to sign for ${k.first} right now.`)}${empty('No forms waiting.', 'Consent forms and sign-ups from the school appear here.')}`}`}; };
 SCR.exams = () => { const k = kid(), list = examsFor(k), p0 = list.length && list[0].papers[0];
   const dur = p => `${Math.floor(p.dur / 60)}h${p.dur % 60 ? ' ' + p.dur % 60 + 'm' : ''}`;
   if (!p0) return {title:'Exams', body:`${kidSwitch()}${sum(`${k.first}’s exam timetable hasn’t been published yet.`)}${empty('Nothing to revise for just yet.', 'We’ll tell you as soon as the school publishes it.')}`};
@@ -1524,7 +1530,7 @@ SCR.home = () => {
     ['bus','t-green','bus','Track bus'],['pickup','t-blue','qr','Pickup pass'],['wallet','t-gold','wallet','Canteen'],['absence','t-red','alert','Report absence'],
     ['conduct','t-lotus','star','Rewards'],['trips','t-violet','pin','Trips'],['reports','t-blue','file','Reports'],['calendar','t-green','cal','Calendar']];
   return { head:`<div class="ghead"><div class="gt"><div class="gx"><div class="hello"><span class="gico gi-${greetPeriod().k}" aria-hidden="true">${greetIcon(greetPeriod(), 'currentColor', 15)}</span>Monday 5 October</div><h1>${greetPeriod().word}, Priya</h1></div>
-      <div class="acts"><button class="askq-btn" data-act="aqOpen" aria-label="Ask Quad" title="Ask Quad (press /)">${ic('spark',19)}</button><button class="back" data-act="push" data-to="inbox" aria-label="${unreadN() ? `Messages, ${unreadN()} unread` : 'Messages'}">${ic('msg',18)}<span class="hbadge" id="msgBadge" ${unreadN() ? '' : 'hidden'}>${unreadN()}</span></button><button class="back" data-act="push" data-to="notifications" aria-label="${S.notifs ? `Notifications, ${S.notifs} new` : 'Notifications'}">${ic('bell',18)}${S.notifs?'<span class="dot"></span>':''}</button></div></div></div>`, body: `
+      <div class="acts"><button class="back" data-act="push" data-to="inbox" aria-label="${unreadN() ? `Messages, ${unreadN()} unread` : 'Messages'}">${ic('msg',18)}<span class="hbadge" id="msgBadge" ${unreadN() ? '' : 'hidden'}>${unreadN()}</span></button><button class="back" data-act="push" data-to="notifications" aria-label="${S.notifs ? `Notifications, ${S.notifs} new` : 'Notifications'}">${ic('bell',18)}${S.notifs?'<span class="dot"></span>':''}</button></div></div></div>`, body: `
   <div class="stories" role="group" aria-label="School stories">${STORIES.map((st, i) => `<button class="story ${st.seen?'seen':''}" data-act="story" data-i="${i}" aria-label="${st.name} story${st.seen ? ', seen' : ''}"><span class="ring-s"><span style="--acc:var(--${st.acc})">${ic(st.icon,24)}</span></span>${st.name}</button>`).join('')}</div>
   ${kidSwitch(true)}
   ${dayCard(k)}
@@ -1787,7 +1793,7 @@ SCR.trips = () => { const need = S.trips.filter(t => !t.consent);
 
 SCR.pay = () => { const open = S.invoices.filter(i => i.amt > i.paid), paid = S.invoices.filter(i => i.amt <= i.paid), total = open.reduce((a, i) => a + i.amt - i.paid, 0);
   const per = KIDS.map((k, i) => [k, open.filter(x => x.kid === i).reduce((a, x) => a + x.amt - x.paid, 0)]).filter(x => x[1]);
-  return { big:'Payments', body: `
+  return { big:'Pay', body: `
   ${sum(total ? `You owe <b>${money(total)}</b> across ${plural(open.length, 'invoice')}. The next is due ${open[0].due}.` : 'You’re all paid up. Thank you!', total ? `${inDays(daysTo(dueIso(open[0].due)))} · pay by card, bank transfer or in instalments` : 'Receipts are saved in History below')}
   <div class="card hero payhero"><span class="eyebrow">Outstanding balance</span><div class="big num">${money(total)}</div>
     ${per.length ? `<div class="ph-kids">${per.map(([k, a]) => `<span>${av(k.name, k.color, 'xs')}${k.first} · ${money(a)}</span>`).join('')}</div>` : ''}
@@ -1910,6 +1916,9 @@ function render(dir) {
   if (s.composer) { body.style.gap = '10px'; body.scrollTop = 1e6; } else { body.style.gap = ''; body.scrollTop = 0; }
   document.getElementById('composer').innerHTML = s.composer ? `<div class="quick">${QUICK.map(q => `<button data-act="quick" data-q="${q}">${q}</button>`).join('')}</div><form class="composer" id="composerForm"><input id="msgIn" placeholder="Write a message" autocomplete="off" aria-label="Message"><button aria-label="Send">${ic('send',18)}</button></form>${s.quiet ? `<p class="qn" id="quietNote">${ic(inQuiet() ? 'moon' : 'clock', 14, 2.2)}<span>${esc(s.quiet)}</span></p>` : ''}` : '';
   renderTabbar();
+  const fab = document.getElementById('aqFab'), showFab = !S.stack.length && !s.composer;
+  fab.hidden = !showFab; body.classList.toggle('has-fab', showFab);
+  if (showFab) fab.style.bottom = document.getElementById('tabbar').offsetHeight + 12 + 'px';
   const mi = document.getElementById('msgIn'); if (mi && S.draft) { mi.value = S.draft; S.draft = null; setTimeout(() => { try { mi.focus(); mi.setSelectionRange(mi.value.length, mi.value.length); } catch (e) {} }, 350); }
   bindScreen(); S.heroAnim = null;
   countUps(document.getElementById('body'));
@@ -2363,9 +2372,9 @@ const ACT = {
 function unlock() { const f = document.getElementById('faceid'); f.classList.add('scan'); setTimeout(() => { document.getElementById('lock').classList.add('off'); f.classList.remove('scan'); }, 600); }
 document.addEventListener('click', e => { if (dragged) { e.preventDefault(); return; } const el = e.target.closest('[data-act]'); if (!el || !ACT[el.dataset.act]) return; if (el.matches('input')) return; ACT[el.dataset.act](el, e); });
 document.addEventListener('change', e => { if (e.target.matches('[data-act="hw"]')) ACT.hw(e.target); });
-document.getElementById('aqLogo').innerHTML = ic('spark',20); document.getElementById('aqX').innerHTML = ic('x',18); document.getElementById('aqSend').innerHTML = ic('send',18);
+document.getElementById('aqLogo').innerHTML = ic('spark',20); document.getElementById('aqFab').innerHTML = ic('spark',24); document.getElementById('aqX').innerHTML = ic('x',18); document.getElementById('aqSend').innerHTML = ic('send',18);
 document.getElementById('aqForm').onsubmit = e => { e.preventDefault(); const i = document.getElementById('aqIn'); const v = i.value; i.value = ''; aqAsk(v); };
-/* Ask Quad: the navy button in the Today header, or press / */
+/* Ask Quad: the navy button above the tab bar, or press / */
 document.addEventListener('keydown', e => { if (e.key === '/' && !e.ctrlKey && !e.metaKey && !e.target.closest('input,textarea,select,[contenteditable]') && document.getElementById('signin').hidden && document.getElementById('lock').classList.contains('off') && !AQ.open) { e.preventDefault(); aqOpen(); return; }
   if (e.key === 'Escape' && AQ.open) { aqClose(); return; } if (e.key === 'Escape') { closeSheet(); closeStory(); } if (SV && document.activeElement?.id !== 'svIn') { if (e.key === 'ArrowRight') storyStep(1); if (e.key === 'ArrowLeft') storyStep(-1); } });
 applySchoolP();
