@@ -7,10 +7,12 @@ import { hashSessionToken, newSessionToken } from '../../common/session/cookies'
 import { CsrfTokens } from '../../common/session/csrf';
 import { SessionService } from '../../common/session/session.service';
 import { AuthService } from '../../modules/auth/auth.service';
-import { CLOCK, TENANT_DB } from '../../tokens';
+import { errorForLog } from '../../observability/logger';
+import { CLOCK, LOGGER, TENANT_DB } from '../../tokens';
 
 import type { Clock } from '../../tokens';
 import type { EndedSupportVisit, QuadTenantDb, TenantTx } from '@quad/db';
+import type { Logger } from 'pino';
 
 /** The staff cookies a redeemed visit gets, ending when the visit does. */
 export interface SupportCookies {
@@ -45,6 +47,7 @@ export class SupportSessionService {
     private readonly auth: AuthService,
     @Inject(TENANT_DB) private readonly db: QuadTenantDb,
     @Inject(CLOCK) private readonly now: Clock,
+    @Inject(LOGGER) private readonly logger: Logger,
   ) {}
 
   /** `POST /auth/support-session`: every refusal is 400 `invalid_link`, naming no school. */
@@ -83,11 +86,25 @@ export class SupportSessionService {
    * before the visit's cookie replaces it (Task 17, D32): a member's session is signed out on the
    * server (`auth.sign_out` in its school), and an earlier support visit is ended. Otherwise the
    * replaced cookie would stay valid, unseen, until it expired. Anything else is ignored.
+   *
+   * The visit is already redeemed by then, so a failure here never fails the request: that would
+   * leave a visit nobody holds a cookie for. It is logged (the kind of session only, no person or
+   * token) and the visit's cookie is still set; the old session then lives on to its own expiry,
+   * as it did before Task 17 (Task 18, D32).
    */
   async leavePrevious(tokenHash: Buffer, ip: string): Promise<void> {
-    const previous = await this.sessions.resolve(tokenHash);
-    if (previous?.kind === 'web') await this.auth.signOut(previous, ip);
-    else if (previous?.kind === 'support') await this.end(tokenHash, ip, previous.tenantId);
+    let kind: string | null = null;
+    try {
+      const previous = await this.sessions.resolve(tokenHash);
+      kind = previous?.kind ?? null;
+      if (previous?.kind === 'web') await this.auth.signOut(previous, ip);
+      else if (previous?.kind === 'support') await this.end(tokenHash, ip, previous.tenantId);
+    } catch (error) {
+      this.logger.warn(
+        { metric: 'support_leave_previous_failed', previous: kind, error: errorForLog(error) },
+        "The browser's previous staff session could not be signed out after a support link",
+      );
+    }
   }
 
   /**

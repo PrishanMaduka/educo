@@ -11,6 +11,7 @@ import { describe, expect, it } from 'vitest';
 
 import { hashSessionToken, newSessionToken } from '../../src/common/session/cookies';
 import { CsrfTokens } from '../../src/common/session/csrf';
+import { captureLogs } from '../app';
 import { localEnv } from '../env';
 import { GuardsProbeModule } from '../guards/probe.module';
 import { auditEntries } from '../helpers/access';
@@ -41,9 +42,10 @@ const MINUTE_MS = 60 * 1000;
 /** The app's clock, moved by the tests (signed-link and visit expiry). */
 let clock = Date.now();
 
+const logs = captureLogs();
 const { db, app } = useDatabaseApp(
   {},
-  { overrides: { now: () => clock, testModules: [GuardsProbeModule] } },
+  { logger: logs.logger, overrides: { now: () => clock, testModules: [GuardsProbeModule] } },
 );
 
 const env = localEnv();
@@ -407,6 +409,52 @@ describe('POST /auth/support-session (the signed link)', () => {
       [member.session.id],
     );
     expect(rows).toEqual([{ revoked: true }]);
+  });
+
+  it("still opens the visit when signing out the browser's staff session fails, and logs it without personal data", async () => {
+    clock = Date.now();
+    const school = await schoolWithRoles(db());
+    const member = await staffHolding(db(), school, school.roles.admin);
+    const quad = await consoleAs('support');
+    const token = await linkFor(quad.browser, school.id);
+    const browser = new Browser(app);
+    browser.cookies.set('quad_sid', member.session.token);
+    browser.cookies.set('quad_csrf', member.session.csrf);
+    // Make the member's sign-out fail in this school only, as a dropped connection would.
+    await db().owner.query(`
+      create function refuse_sign_out_audit() returns trigger language plpgsql as $$
+      begin
+        if new.action = 'auth.sign_out' and new.tenant_id = '${school.id}' then
+          raise exception 'audit insert refused by the test';
+        end if;
+        return new;
+      end $$;
+      create trigger refuse_sign_out_audit before insert on audit_log
+        for each row execute function refuse_sign_out_audit();
+    `);
+    logs.lines.length = 0;
+    let response: Response;
+    try {
+      response = await redeem(browser, token);
+    } finally {
+      await db().owner.query(`
+        drop trigger refuse_sign_out_audit on audit_log;
+        drop function refuse_sign_out_audit();
+      `);
+    }
+
+    // The redeemed visit is not orphaned: its cookie is set and it works.
+    expect(response.statusCode).toBe(200);
+    expect(browser.cookies.get('quad_sid')).not.toBe(member.session.token);
+    expect(Me.parse((await browser.get('/me')).json()).support).not.toBeNull();
+    const [visit] = await supportRows(school.id);
+    expect(visit?.redeemed).toBe(true);
+    expect(visit?.ended_at).toBeNull();
+    const warning = logs.lines.find((line) => line.metric === 'support_leave_previous_failed');
+    expect(warning).toMatchObject({ previous: 'web' });
+    const text = JSON.stringify(logs.lines);
+    expect(text).not.toContain(member.session.token);
+    expect(text).not.toContain(member.email);
   });
 
   it('leaves the staff session alone when the link is refused', async () => {
