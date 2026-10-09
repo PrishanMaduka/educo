@@ -20,33 +20,40 @@
     return {...p, word: p.k === 'night' && !forced && h < 5 ? 'Hello' : p.word};
   }
 
-  // Palettes. The prototypes use CSS variables so the scene follows the theme; asset export uses hex.
-  const VARS = {surface: 'var(--surface)', ink3: 'var(--ink-3)', c1: 'var(--c1)', c2: 'var(--c2)', c3: 'var(--c3)', c4: 'var(--c4)', c5: 'var(--c5)', deep: 'var(--rail, #101632)'};
-  // Values from design/system/tokens.css (light and dark): surface, ink-3, c1–c5 and the rail.
-  const LIGHT = {surface: '#FFFFFF', ink3: '#5A5F7B', c1: '#E0478A', c2: '#4048B8', c3: '#1F8ACF', c4: '#D9640B', c5: '#4E8A12', deep: '#101632'};
-  const DARK = {surface: '#171D45', ink3: '#A9ACC8', c1: '#FF6FAE', c2: '#8C93FF', c3: '#59C3FF', c4: '#FF9B45', c5: '#C8F169', deep: '#0A0D24'};
+  // Palettes: the landing page's flat colours as named keys, plus a few roles that change with the backdrop.
+  // DARK is for scenes on navy (the apps' greeting card); LIGHT is for scenes on cream (design/brand.html).
+  //   muted: birds and the kite's string · cloud · hill: the sky back hill (morning, afternoon)
+  //   moon and star: night · deep: the front night hill, one step away from the card colour
+  // The prototypes use CSS variables (design/system/tokens.css) so a container can retune a role with --gs-*.
+  const VARS = {navy: 'var(--navy)', navy2: 'var(--navy-2)', navyLine: 'var(--navy-line)', cream: 'var(--on-navy)',
+    lime: 'var(--lime)', pink: 'var(--pink)', sky: 'var(--sky)', orange: 'var(--orange)', violet: 'var(--violet, #8C93FF)',
+    muted: 'var(--gs-muted, var(--on-navy-3))', cloud: 'var(--gs-cloud, var(--navy-line))', hill: 'var(--gs-hill, var(--sky))',
+    moon: 'var(--gs-moon, var(--on-navy))', star: 'var(--gs-star, var(--on-navy))', deep: 'var(--gs-deep, var(--navy-2))'};
+  const FLAT = {navy: '#101632', navy2: '#1D2550', navyLine: '#2F3870', cream: '#F7F5F0', lime: '#C8F169', pink: '#FF6FAE', sky: '#59C3FF', orange: '#FF9B45', violet: '#8C93FF'};
+  const DARK = {...FLAT, muted: '#A9ACC8', cloud: '#2F3870', hill: '#59C3FF', moon: '#F7F5F0', star: '#F7F5F0', deep: '#1D2550'};
+  const LIGHT = {...FLAT, muted: '#5A5F7B', cloud: '#C9CBE0', hill: '#1F8ACF', moon: '#FF9B45', star: '#8C93FF', deep: '#1D2550'};
 
   const hex = s => /^#[0-9a-f]{6}$/i.test(s);
-  const toRgb = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
-  // mix(a, pct, b): pct% of a over b. Hex in → hex out; CSS variables → color-mix().
-  const mix = (a, pct, b) => {
-    if (hex(a) && hex(b)) { const A = toRgb(a), B = toRgb(b); return '#' + A.map((v, i) => Math.round(v * pct / 100 + B[i] * (1 - pct / 100)).toString(16).padStart(2, '0')).join(''); }
-    return `color-mix(in srgb,${a} ${pct}%,${b})`;
-  };
   const fill = c => hex(c) ? `fill="${c}"` : `style="fill:${c}"`;
   const stroke = c => hex(c) ? `stroke="${c}"` : `style="stroke:${c}"`;
-  const stop = (o, c, op) => hex(c) ? `<stop offset="${o}" stop-color="${c}"${op != null ? ` stop-opacity="${op}"` : ''}/>` : `<stop offset="${o}" style="stop-color:${c}${op != null ? `;stop-opacity:${op}` : ''}"/>`;
 
-  const birds = (P, op) => `<g fill="none" ${stroke(P.ink3)} stroke-width="2.4" stroke-linecap="round" opacity="${op}"><path d="M842 92q9-9 18 0q9-9 18 0"/><path d="M892 64q7-7 14 0q7-7 14 0"/><path d="M790 120q6-6 12 0q6-6 12 0"/></g>`;
-  const water = (P, op) => `<g fill="none" ${stroke(P.surface)} stroke-width="2" stroke-linecap="round" opacity="${op}"><path d="M560 300c80-10 170-12 250-6"/><path d="M860 290c80-9 170-11 260-6"/><path d="M700 312c90-8 190-9 280-4"/></g>`;
-  const hills = (P, a, b, c, d) => `<path d="M0 236C170 214 330 226 500 212S820 150 1000 168 1150 176 1200 170V320H0Z" ${fill(a[0])} opacity="${a[1]}"/>
-  <path d="M0 262C210 240 400 258 610 240S960 206 1200 222V320H0Z" ${fill(b[0])} opacity="${b[1]}"/>
-  <path d="M0 290C260 272 500 290 760 272S1060 252 1200 262V320H0Z" ${fill(c[0])} opacity="${c[1]}"/>
-  ${water(P, .35)}
-  <path d="M0 308C300 298 620 310 900 300S1120 292 1200 296V320H0Z" ${fill(d[0])} opacity="${d[1]}"/>`;
-  const cloud = (P, x, y, s, op) => `<g transform="translate(${x} ${y}) scale(${s})" ${fill(mix('#FFFFFF', 34, P.surface))} opacity="${op}"><ellipse cx="0" cy="10" rx="54" ry="16"/><circle cx="-18" cy="0" r="20"/><circle cx="12" cy="-6" r="26"/><circle cx="38" cy="4" r="16"/></g>`;
-  const stars = (P) => { const pts = [[640, 60, 2], [700, 120, 1.6], [760, 40, 2.4], [820, 96, 1.4], [880, 30, 1.8], [930, 140, 1.4], [1080, 52, 2], [1140, 110, 1.6], [1170, 36, 1.4], [600, 150, 1.4], [980, 70, 1.4], [1120, 170, 1.2]];
-    return `<g fill="#FFFFFF">${pts.map(([x, y, r], i) => `<circle class="gs-star" cx="${x}" cy="${y}" r="${r}" opacity="${.55 + (i % 3) * .15}" style="animation-delay:${(i % 5) * .6}s"/>`).join('')}</g>`; };
+  // Flat style: solid fills only (no gradients, glows or see-through layers). Everything is drawn in a
+  // 600 × 300 box placed at the bottom right of the 1200 × 320 view box; the rest stays transparent so the
+  // card colour shows through.
+  const ring = (c, x, y, r) => `<circle cx="${x}" cy="${y}" r="${r}" fill="none" ${stroke(c)} stroke-width="2.4" stroke-dasharray="2 11" stroke-linecap="round"/>`;
+  const sun = (c, x, y, r) => `<circle class="ms-sun gs-body" cx="${x}" cy="${y}" r="${r}" ${fill(c)}/>`;
+  const sparkle = (c, x, y, r, cls) => { const q = +(r * .18).toFixed(2);
+    return `<path${cls ? ` class="${cls}"` : ''} transform="translate(${x} ${y})" d="M0 -${r}Q${q} -${q} ${r} 0Q${q} ${q} 0 ${r}Q-${q} ${q} -${r} 0Q-${q} -${q} 0 -${r}Z" ${fill(c)}/>`; };
+  const cloud = (c, x, y, s) => `<g transform="translate(${x} ${y}) scale(${s})" ${fill(c)}><rect x="-40" y="0" width="92" height="22" rx="11"/><circle cx="-10" cy="2" r="17"/><circle cx="16" cy="-4" r="22"/></g>`;
+  const birds = P => `<g fill="none" ${stroke(P.muted)} stroke-width="2.2" stroke-linecap="round"><path d="M330 120q7-7 14 0q7-7 14 0"/><path d="M372 96q6-6 12 0q6-6 12 0"/></g>`;
+  const kite = P => `<g transform="translate(250 64) rotate(-12)"><path d="M0 -20L14 0L0 22L-14 0Z" ${fill(P.orange)}/><path d="M0 -20V22M-14 0H14" fill="none" ${stroke(P.navyLine)} stroke-width="1.6"/><path d="M0 22c-6 14 8 22 0 36s6 18 2 26" fill="none" ${stroke(P.muted)} stroke-width="1.6" stroke-linecap="round"/></g>`;
+  const hillBack = c => `<path d="M90 300C170 238 300 214 410 240S560 222 600 214V300Z" ${fill(c)}/>`;
+  const hillFront = c => `<path d="M0 300C110 270 250 258 370 276S530 262 600 268V300Z" ${fill(c)}/>`;
+  const heart = c => `<path d="M560 70c-6-8-18-2-12 8l12 12 12-12c6-10-6-16-12-8z" ${fill(c)}/>`;
+  // A crescent as one path (outer circle r 40, bitten by a circle r 36 up and to the right), so nothing is painted over the sky.
+  const crescent = (c, x, y) => `<path class="ms-sun gs-body" transform="translate(${x} ${y})" d="M34.71 19.89A40 40 0 1 1 -5.01 -39.69A36 36 0 0 0 34.71 19.89Z" ${fill(c)}/>`;
+  const STARS = [[330, 70, 7, 'lime'], [560, 150, 6, 'star'], [400, 150, 4, 'star'], [250, 120, 5, 'star'], [590, 50, 5, 'lime'], [180, 60, 4, 'star'], [520, 30, 4, 'star']];
+  const stars = P => STARS.map(([x, y, r, c], i) => sparkle(P[c], x, y, r, 'gs-star').replace('/>', ` style="animation-delay:${(i % 5) * .6}s"/>`)).join('');
 
   function greetScene(period, id, P, opts) {
     P = P || VARS; id = id || 'gs'; opts = opts || {};
@@ -55,36 +62,14 @@
     const size = opts.size ? ` width="${opts.size[0]}" height="${opts.size[1]}"` : '';
     const open = `<svg ${cls ? `class="${cls}" ` : ''}xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 320"${size} preserveAspectRatio="xMaxYMax slice" aria-hidden="true">`;
     let body = '';
-    if (k === 'morning') body = `<defs><linearGradient id="${id}-sky" x1="0" y1="0" x2="1" y2="1">${stop(0, P.surface)}${stop(.55, mix(P.c3, 10, P.surface))}${stop(1, mix(P.c1, 16, P.surface))}</linearGradient>
-  <radialGradient id="${id}-glow" cx="1010" cy="190" r="300" gradientUnits="userSpaceOnUse">${stop(0, P.c1, .32)}${stop(.45, P.c1, .1)}${stop(1, P.c1, 0)}</radialGradient></defs>
-  <rect width="1200" height="320" fill="url(#${id}-sky)"/><rect width="1200" height="320" fill="url(#${id}-glow)"/>
-  <circle class="ms-sun gs-body" cx="1010" cy="196" r="58" ${fill(P.c1)} opacity=".85"/>
-  ${birds(P, .7)}
-  ${hills(P, [P.c3, .16], [P.c3, .3], [P.c2, .42], [P.c2, .6])}`;
-    else if (k === 'afternoon') body = `<defs><linearGradient id="${id}-sky" x1="0" y1="0" x2="1" y2="1">${stop(0, P.surface)}${stop(.5, mix(P.c5, 9, P.surface))}${stop(1, mix(P.c4, 20, P.surface))}</linearGradient>
-  <radialGradient id="${id}-glow" cx="980" cy="86" r="260" gradientUnits="userSpaceOnUse">${stop(0, P.c4, .38)}${stop(.5, P.c4, .1)}${stop(1, P.c4, 0)}</radialGradient></defs>
-  <rect width="1200" height="320" fill="url(#${id}-sky)"/><rect width="1200" height="320" fill="url(#${id}-glow)"/>
-  <circle cx="980" cy="86" r="74" fill="none" ${stroke(P.c4)} stroke-width="2" stroke-dasharray="2 12" stroke-linecap="round" opacity=".55"/>
-  <circle class="ms-sun gs-body" cx="980" cy="86" r="46" ${fill(P.c4)} opacity=".95"/>
-  ${cloud(P, 780, 96, 1, .9)}${cloud(P, 1110, 150, .7, .8)}${cloud(P, 640, 140, .55, .7)}
-  ${hills(P, [P.c5, .16], [P.c5, .28], [P.c2, .4], [P.c2, .58])}`;
-    else if (k === 'evening') body = `<defs><linearGradient id="${id}-sky" x1="0" y1="0" x2="1" y2="1">${stop(0, P.surface)}${stop(.4, mix(P.c3, 14, P.surface))}${stop(.75, mix(P.c1, 26, P.surface))}${stop(1, mix(P.c4, 34, P.surface))}</linearGradient>
-  <radialGradient id="${id}-glow" cx="1000" cy="250" r="360" gradientUnits="userSpaceOnUse">${stop(0, P.c4, .5)}${stop(.35, P.c1, .22)}${stop(1, P.c1, 0)}</radialGradient>
-  <linearGradient id="${id}-sun" x1="0" y1="0" x2="0" y2="1">${stop(0, P.c4)}${stop(1, P.c1)}</linearGradient>
-  <clipPath id="${id}-hz"><path d="M0 0H1200V170C1150 176 1100 168 1000 168S820 150 500 212 170 214 0 236Z"/></clipPath></defs>
-  <rect width="1200" height="320" fill="url(#${id}-sky)"/><rect width="1200" height="320" fill="url(#${id}-glow)"/>
-  <g clip-path="url(#${id}-hz)"><circle class="ms-sun gs-body" cx="1000" cy="214" r="78" fill="url(#${id}-sun)"/></g>
-  <g ${stroke(P.c1)} stroke-width="3" stroke-linecap="round" opacity=".35"><path d="M900 150h-46M1100 150h46M930 106l-30-22M1070 106l30-22M1000 84V56"/></g>
-  ${birds({...P, ink3: P.deep}, .55)}
-  ${hills(P, [P.c3, .26], [P.c2, .38], [P.deep, .5], [P.deep, .72])}`;
-    else body = `<defs><linearGradient id="${id}-sky" x1="0" y1="0" x2="1" y2=".6">${stop(0, P.surface)}${stop(.38, mix(P.c3, 16, P.surface))}${stop(.7, mix(P.c2, 42, P.surface))}${stop(1, mix(P.deep, 78, P.surface))}</linearGradient>
-  <radialGradient id="${id}-glow" cx="1010" cy="96" r="200" gradientUnits="userSpaceOnUse">${stop(0, P.c3, .4)}${stop(1, P.c3, 0)}</radialGradient>
-  <mask id="${id}-moon"><rect width="1200" height="320" fill="#fff"/><circle cx="1032" cy="80" r="40" fill="#000"/></mask></defs>
-  <rect width="1200" height="320" fill="url(#${id}-sky)"/><rect width="1200" height="320" fill="url(#${id}-glow)"/>
-  ${stars(P)}
-  <circle class="ms-sun gs-body" cx="1010" cy="96" r="44" ${fill(mix('#FFFFFF', 78, P.c3))} mask="url(#${id}-moon)"/>
-  ${hills(P, [P.c3, .22], [P.c2, .42], [P.deep, .6], [P.deep, .82])}`;
-    return `${open}\n  ${body}</svg>`;
+    if (k === 'morning') body = ring(P.orange, 470, 214, 84) + sun(P.orange, 470, 214, 58) + cloud(P.cloud, 330, 70, .9) + birds(P) + kite(P)
+      + hillBack(P.hill) + hillFront(P.lime) + sparkle(P.lime, 560, 58, 9);
+    else if (k === 'afternoon') body = ring(P.lime, 480, 92, 70) + sun(P.lime, 480, 92, 44) + cloud(P.cloud, 340, 120, 1) + cloud(P.cloud, 560, 170, .6) + kite(P)
+      + hillBack(P.hill) + hillFront(P.orange) + sparkle(P.pink, 390, 46, 8);
+    else if (k === 'evening') body = sun(P.pink, 460, 250, 78) + ring(P.pink, 460, 250, 104) + birds(P)
+      + hillBack(P.violet) + hillFront(P.navyLine) + sparkle(P.orange, 300, 60, 8) + heart(P.pink);
+    else body = crescent(P.moon, 470, 96) + stars(P) + hillBack(P.navyLine) + hillFront(P.deep);
+    return `${open}\n  <g transform="translate(600 20)">${body}</g></svg>`;
   }
 
   // Small glyphs for compact headers (parent app header dot, email, notifications): 24×24, stroke icons

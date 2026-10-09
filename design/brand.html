@@ -98,9 +98,10 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.9em;back
 .gs-f{margin:0;position:relative;border-radius:16px;overflow:hidden;aspect-ratio:1200/320;border:1px solid var(--line)}
 .gs-f svg{position:absolute;inset:0;width:100%;height:100%;display:block}
 .gs-f figcaption{position:absolute;left:5%;top:14%;font:800 clamp(13px,1.7vw,21px)/1.1 var(--f-display);letter-spacing:-.02em}
-.gs-f.lt{--surface:#FFFFFF;--ink-3:#5A5F7B;--c1:#E0478A;--c2:#4048B8;--c3:#1F8ACF;--c4:#D9640B;--c5:#4E8A12;--rail:#101632}
+/* Flat scenes are transparent outside the drawing: the figure paints the backdrop, and on cream a few roles go darker so they still read (scenes.js LIGHT) */
+.gs-f.lt{background:#F7F5F0;--gs-muted:#5A5F7B;--gs-cloud:#C9CBE0;--gs-hill:#1F8ACF;--gs-moon:#FF9B45;--gs-star:#8C93FF}
 .gs-f.lt figcaption{color:#101632}
-.gs-f.dk{--surface:#101632;--ink-3:#A9ACC8;--c1:#FF6FAE;--c2:#8C93FF;--c3:#59C3FF;--c4:#FF9B45;--c5:#C8F169;--rail:#0A0D24;border-color:#2F3870}
+.gs-f.dk{background:var(--navy);border-color:var(--navy-line)}
 .gs-f.dk figcaption{color:#F7F5F0}
 .gs-icons{display:flex;flex-wrap:wrap;gap:18px}
 .gs-icons>div{display:grid;grid-template-columns:auto auto;column-gap:10px;align-items:center}
@@ -206,7 +207,7 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.9em;back
     </div>
   </section>
 
-  <section class="panel" id="greeting" aria-labelledby="h-greet"><div><h2 id="h-greet">Greeting by time of day</h2><p>Home screens greet people with the right words and a scene for the time of day: the school’s time zone on the web, the phone’s time in the parent app. In the apps the scene sits on the navy story card. The scenes below are drawn live by <code>brand/greeting/scenes.js</code> in the new palette, on cream and on navy.</p></div>
+  <section class="panel" id="greeting" aria-labelledby="h-greet"><div><h2 id="h-greet">Greeting by time of day</h2><p>Home screens greet people with the right words and a scene for the time of day: the school’s time zone on the web, the phone’s time in the parent app. In the apps the scene sits on the navy story card. The scenes below are drawn live by <code>brand/greeting/scenes.js</code> in the flat landing-page palette (solid shapes, no gradients), on cream and on navy.</p></div>
     <div class="gs-grid" id="gsGrid"><div class="gs-h"></div><b class="gs-h">On cream</b><b class="gs-h">On navy</b></div>
     <div class="gs-icons"><div><span class="gi"><img src="brand/greeting/icon-morning.svg" alt="" width="22" height="22"></span><b>Morning</b><small>icon-morning.svg</small></div><div><span class="gi"><img src="brand/greeting/icon-afternoon.svg" alt="" width="22" height="22"></span><b>Afternoon</b><small>icon-afternoon.svg</small></div><div><span class="gi"><img src="brand/greeting/icon-evening.svg" alt="" width="22" height="22"></span><b>Evening</b><small>icon-evening.svg</small></div><div><span class="gi"><img src="brand/greeting/icon-night.svg" alt="" width="22" height="22"></span><b>Night</b><small>icon-night.svg</small></div></div>
     <div class="gs-try"><span>See it in the staff portal:</span><button type="button" data-gs-try="morning">Morning</button><button type="button" data-gs-try="afternoon">Afternoon</button><button type="button" data-gs-try="evening">Evening</button><button type="button" data-gs-try="night">Night</button><button type="button" data-gs-try="">Use the real time</button></div>
@@ -234,7 +235,7 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.9em;back
   }
 
   /* Time-of-day scenes, live from scenes.js, coloured by the scoped tokens */
-  const ROWS = [['morning', '05:00–11:59 · “Good morning”', 'The sun rises over the hills', 'Good morning, Emma'], ['afternoon', '12:00–16:59 · “Good afternoon”', 'High sun and a few clouds', 'Good afternoon, Emma'], ['evening', '17:00–19:59 · “Good evening”', 'The sun sets behind the hills', 'Good evening, Emma'], ['night', '20:00–04:59 · “Good evening”, then “Hello” after midnight', 'Moon and stars', 'Good evening, Emma']];
+  const ROWS = [['morning', '05:00–11:59 · “Good morning”', 'An orange sun rises behind sky and lime hills, with a kite', 'Good morning, Emma'], ['afternoon', '12:00–16:59 · “Good afternoon”', 'A high lime sun, clouds and a kite over orange hills', 'Good afternoon, Emma'], ['evening', '17:00–19:59 · “Good evening”', 'A pink sun sets behind violet hills', 'Good evening, Emma'], ['night', '20:00–04:59 · “Good evening”, then “Hello” after midnight', 'A crescent moon and stars over dark hills', 'Good evening, Emma']];
   $('gsGrid').insertAdjacentHTML('beforeend', ROWS.map(([k, when, what, say]) => `<div class="gs-l"><b>${k[0].toUpperCase() + k.slice(1)}</b><small>${when}</small><small>${what}</small></div>`
     + ['lt', 'dk'].map(v => `<figure class="gs-f ${v}" role="img" aria-label="${k} scene ${v === 'lt' ? 'on cream' : 'on navy'}">${greetScene(k, 'gs-' + k + v)}<figcaption>${say}</figcaption></figure>`).join('')).join(''));
   document.addEventListener('click', e => { const b = e.target.closest('[data-gs-try]'); if (!b) return; const k = b.dataset.gsTry;
