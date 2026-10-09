@@ -62,8 +62,8 @@ const withDefault = <T extends z.ZodTypeAny>(schema: T, value: z.input<T>) =>
 
 /**
  * Required in every environment: from M0 on, plus the field and token keys from M1 (D32).
- * Everything else is optional for now: each later milestone that ships a feature (SSO, email,
- * SMS, push, payments, Ask Quad…) makes its own variables required when that feature is turned
+ * Everything else is optional for now: each later milestone that ships a feature (email, SMS,
+ * push, payments, Ask Quad…) makes its own variables required when that feature is turned
  * on, here and in this list.
  */
 export const M0_REQUIRED = [
@@ -114,18 +114,6 @@ const ConfigSchema = z.object({
   FIELD_ENCRYPTION_KEY: req(z.string().min(32, { message: 'must be at least 32 characters' })),
   KMS_KEY_ID: opt(text),
 
-  // Staff SSO
-  GOOGLE_CLIENT_ID: opt(text),
-  GOOGLE_CLIENT_SECRET: opt(text),
-  MICROSOFT_CLIENT_ID: opt(text),
-  MICROSOFT_CLIENT_SECRET: opt(text),
-
-  // Console sign-in (D22)
-  CONSOLE_GOOGLE_CLIENT_ID: opt(text),
-  CONSOLE_GOOGLE_CLIENT_SECRET: opt(text),
-  CONSOLE_GOOGLE_HD: opt(text),
-  CONSOLE_PASSWORD_LOGIN: withDefault(boolean, 'false'),
-
   // Local and test helpers
   DEV_FIXED_OTP: opt(z.string().regex(/^\d{6}$/, { message: 'must be six digits' })),
   SEED_PASSWORD: opt(text),
@@ -142,9 +130,6 @@ const ConfigSchema = z.object({
   ),
   STORE_REVIEW_OTP: opt(z.string().regex(/^\d{6}$/, { message: 'must be six digits' })),
   STORE_REVIEW_TENANT_ID: opt(z.string().uuid({ message: 'must be a school id (uuid)' })),
-  // The fake OIDC issuer (scripts/fake-oidc.mjs) used instead of Google and Microsoft by staff
-  // and console SSO; local only (D32), refused in `environmentRules`.
-  OIDC_FAKE_ISSUER_URL: opt(httpUrl),
 
   // Files
   S3_ENDPOINT: opt(httpUrl),
@@ -354,9 +339,6 @@ function environmentRules(env: RawEnv): ConfigProblem[] {
   if (typeof session === 'string' && session === blank(env.LINK_SIGNING_SECRET)) {
     problems.push({ variable: 'LINK_SIGNING_SECRET', problem: 'must differ from SESSION_SECRET' });
   }
-  if (blank(env.OIDC_FAKE_ISSUER_URL) !== undefined) {
-    problems.push({ variable: 'OIDC_FAKE_ISSUER_URL', problem: 'must not be set outside local' });
-  }
   for (const name of ['DATABASE_URL', 'DATABASE_PLATFORM_URL'] as const) {
     const url = env[name] ?? '';
     if (COMPOSE_CREDENTIALS.some((credentials) => url.includes(credentials))) {
@@ -366,12 +348,6 @@ function environmentRules(env: RawEnv): ConfigProblem[] {
   if (appEnv === 'production') {
     if (blank(env.DEV_FIXED_OTP) !== undefined) {
       problems.push({ variable: 'DEV_FIXED_OTP', problem: 'must not be set in production' });
-    }
-    if (env.CONSOLE_PASSWORD_LOGIN === 'true') {
-      problems.push({
-        variable: 'CONSOLE_PASSWORD_LOGIN',
-        problem: 'must not be true in production (D22)',
-      });
     }
   }
   return problems;
@@ -459,7 +435,7 @@ function deliveryRules(env: RawEnv): ConfigProblem[] {
 
 /**
  * Parses the environment. Throws `ConfigError` listing every missing or invalid variable at
- * once, plus the production refusals (`DEV_FIXED_OTP` set, `CONSOLE_PASSWORD_LOGIN=true`).
+ * once, plus the production refusal of `DEV_FIXED_OTP`.
  */
 export function loadConfig(env: NodeJS.ProcessEnv): Config {
   const parsed = ConfigSchema.safeParse(env);

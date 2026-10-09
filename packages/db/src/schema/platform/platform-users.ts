@@ -25,7 +25,7 @@ export const platformUsers = pgTable('platform_users', {
   /** Encrypted with the field cipher; null until the person sets up TOTP. */
   totpSecretEnc: text('totp_secret_enc'),
   totpEnabled: boolean('totp_enabled').notNull().default(false),
-  /** Argon2id. Used only when `CONSOLE_PASSWORD_LOGIN=true` (local, dev, staging; D22). */
+  /** Argon2id. The console first factor in every environment, then TOTP (D37). */
   passwordHash: text('password_hash'),
   status: accountStatus('status').notNull().default('active'),
   lastSignInAt: timestamp('last_sign_in_at', { withTimezone: true }),

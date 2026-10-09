@@ -63,6 +63,27 @@ describe('loadConfig', () => {
     expect(Object.keys(config)).not.toContain('DATABASE_OWNER_URL');
   });
 
+  it('reads no sign-in variables for Google, Microsoft or a console flag (D37)', () => {
+    const removed = [
+      'GOOGLE_CLIENT_ID',
+      'GOOGLE_CLIENT_SECRET',
+      'MICROSOFT_CLIENT_ID',
+      'MICROSOFT_CLIENT_SECRET',
+      'CONSOLE_GOOGLE_CLIENT_ID',
+      'CONSOLE_GOOGLE_CLIENT_SECRET',
+      'CONSOLE_GOOGLE_HD',
+      'CONSOLE_PASSWORD_LOGIN',
+      'OIDC_FAKE_ISSUER_URL',
+    ];
+    expect(CONFIG_VARIABLES.filter((name) => removed.includes(name))).toEqual([]);
+    expect(SPEC_VARIABLES.filter((name) => removed.includes(name))).toEqual([]);
+    // A leftover value in an old .env is ignored, in production too.
+    const leftovers = Object.fromEntries(removed.map((name) => [name, 'true']));
+    expect(Object.keys(loadConfig(productionEnv(leftovers)))).not.toContain(
+      'CONSOLE_PASSWORD_LOGIN',
+    );
+  });
+
   it('refuses a missing DATABASE_URL and names it', () => {
     const error = configErrorOf(localEnv({ DATABASE_URL: undefined }));
     expect(error.message).toContain('DATABASE_URL');
@@ -101,15 +122,15 @@ describe('loadConfig', () => {
         DATABASE_URL: 'mysql://x@localhost/quad',
         REDIS_URL: 'localhost:6379',
         PUBLIC_WEB_URL: 'not a url',
-        CONSOLE_PASSWORD_LOGIN: 'yes',
+        PAYMENTS_SANDBOX: 'yes',
       }),
     );
     expect(error.problems.map((p) => p.variable).sort()).toEqual(
       [
         'API_PORT',
         'APP_ENV',
-        'CONSOLE_PASSWORD_LOGIN',
         'DATABASE_URL',
+        'PAYMENTS_SANDBOX',
         'PUBLIC_WEB_URL',
         'REDIS_URL',
       ].sort(),
@@ -139,9 +160,9 @@ describe('loadConfig', () => {
 
   it('parses booleans and numbers', () => {
     const config = loadConfig(
-      localEnv({ CONSOLE_PASSWORD_LOGIN: 'true', PAYMENTS_SANDBOX: 'false', API_PORT: '4100' }),
+      localEnv({ ASSISTANT_ENABLED: 'true', PAYMENTS_SANDBOX: 'false', API_PORT: '4100' }),
     );
-    expect(config.CONSOLE_PASSWORD_LOGIN).toBe(true);
+    expect(config.ASSISTANT_ENABLED).toBe(true);
     expect(config.PAYMENTS_SANDBOX).toBe(false);
     expect(config.API_PORT).toBe(4100);
   });
@@ -218,36 +239,11 @@ describe('loadConfig', () => {
     expect(error.message).toContain('DEV_FIXED_OTP');
   });
 
-  it('refuses CONSOLE_PASSWORD_LOGIN=true in production', () => {
-    const error = configErrorOf(productionEnv({ CONSOLE_PASSWORD_LOGIN: 'true' }));
-    expect(error.message).toContain('CONSOLE_PASSWORD_LOGIN');
-    expect(() => loadConfig(productionEnv({ CONSOLE_PASSWORD_LOGIN: 'false' }))).not.toThrow();
-  });
-
-  it('accepts OIDC_FAKE_ISSUER_URL locally, as an http(s) URL', () => {
-    const url = 'http://127.0.0.1:4455';
-    expect(loadConfig(localEnv({ OIDC_FAKE_ISSUER_URL: url })).OIDC_FAKE_ISSUER_URL).toBe(url);
-    expect(loadConfig(localEnv()).OIDC_FAKE_ISSUER_URL).toBeUndefined();
-    expect(configErrorOf(localEnv({ OIDC_FAKE_ISSUER_URL: 'not a url' })).problems).toEqual([
-      { variable: 'OIDC_FAKE_ISSUER_URL', problem: 'must be an http(s) URL' },
-    ]);
-  });
-
-  it.each(['staging', 'production'])('refuses OIDC_FAKE_ISSUER_URL in %s (D32)', (appEnv) => {
-    const error = configErrorOf(
-      productionEnv({ APP_ENV: appEnv, OIDC_FAKE_ISSUER_URL: 'http://127.0.0.1:4455' }),
-    );
-    expect(error.problems).toEqual([
-      { variable: 'OIDC_FAKE_ISSUER_URL', problem: 'must not be set outside local' },
-    ]);
-  });
-
   it('allows the local-only flags in staging', () => {
     const config = loadConfig(
       productionEnv({
         APP_ENV: 'staging',
         DEV_FIXED_OTP: '000000',
-        CONSOLE_PASSWORD_LOGIN: 'true',
       }),
     );
     expect(config.DEV_FIXED_OTP).toBe('000000');
