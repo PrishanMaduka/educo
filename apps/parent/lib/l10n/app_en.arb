@@ -526,6 +526,29 @@
   "publicDemoMailNote": "Note",
   "publicFooterSample": "Sample school and families are fictional.",
   "publicFooterCopyright": "© Quad",
+  "publicFooterNav": "About Quad",
+  "publicFooterAbout": "About",
+  "publicFooterSecurity": "Security & trust",
+  "publicFooterPrivacy": "Privacy",
+  "publicFooterTerms": "Terms",
+  "publicFooterSubprocessors": "Sub-processors",
+  "publicFooterContact": "Contact",
+  "publicNavPages": "Pages",
+  "publicNavAbout": "About",
+  "publicNavSecurity": "Security",
+  "publicNavPrivacy": "Privacy",
+  "publicPageUpdated": "Last updated {date} · Version {version}",
+  "@publicPageUpdated": {
+    "placeholders": {
+      "date": {
+        "type": "Object"
+      },
+      "version": {
+        "type": "Object"
+      }
+    }
+  },
+  "publicPageContents": "On this page",
   "emailFromSchool": "{school} via Quad",
   "@emailFromSchool": {
     "placeholders": {

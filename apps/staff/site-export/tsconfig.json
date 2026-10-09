@@ -8,6 +8,7 @@
   "include": [
     "../src/**/*.ts",
     "../src/**/*.tsx",
+    "../content/**/*.tsx",
     "app/**/*.ts",
     "app/**/*.tsx",
     "next-env.d.ts",

@@ -16,6 +16,12 @@ const out = join(root, 'out');
 /** Files the published site must have. */
 export const REQUIRED = [
   'index.html',
+  'about.html',
+  'security.html',
+  'legal/privacy.html',
+  'legal/terms.html',
+  'legal/subprocessors.html',
+  'sitemap.xml',
   '404.html',
   'CNAME',
   'robots.txt',

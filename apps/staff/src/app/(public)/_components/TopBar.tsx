@@ -24,25 +24,40 @@ function MoreLabel() {
   );
 }
 
-/**
- * The top bar (spec 19): logo, section links and Sign in (Get the app for parents), the view
- * switch, the theme, Menu at 1100 px and below, and Book a demo (Ask your school for parents).
- * Sticky above 760 px.
- */
-export function TopBar({
-  prelaunch,
-  theme,
-  comingSoon,
-}: {
+/** The landing page's bar: section links, Sign in and the view switch. */
+interface LandingBar {
+  page?: 'landing';
   prelaunch: boolean;
   theme: ThemeSwitchLabels;
   comingSoon: ComingSoonLabels;
-}) {
-  const links = [
-    { href: '#circle', label: t('public.nav.circle') },
-    { href: '#wellbeing', label: t('public.nav.wellbeing') },
-    { href: '#more', label: <MoreLabel /> },
-  ];
+}
+
+/** The bar on the other public pages (D41): links to pages instead of sections, no view switch. */
+interface PageBar {
+  page: 'page';
+  theme: ThemeSwitchLabels;
+}
+
+/**
+ * The top bar (spec 19): logo, section links and Sign in (Get the app for parents), the view
+ * switch, the theme, Menu at 1100 px and below, and Book a demo (Ask your school for parents).
+ * Sticky above 760 px. On the About, Security & trust and legal pages (`page="page"`) the logo
+ * goes home, the links go to those pages, and Book a demo goes to the landing page's form.
+ */
+export function TopBar(props: LandingBar | PageBar) {
+  const { theme } = props;
+  const isLanding = props.page !== 'page';
+  const links = isLanding
+    ? [
+        { href: '#circle', label: t('public.nav.circle') },
+        { href: '#wellbeing', label: t('public.nav.wellbeing') },
+        { href: '#more', label: <MoreLabel /> },
+      ]
+    : [
+        { href: '/about', label: t('public.nav.about') },
+        { href: '/security', label: t('public.nav.security') },
+        { href: '/legal/privacy', label: t('public.nav.privacy') },
+      ];
   return (
     <header className="sticky top-0 z-30 bg-site-nav-bg backdrop-blur-[10px] max-[760px]:static">
       <div
@@ -52,7 +67,7 @@ export function TopBar({
         )}
       >
         <a
-          href="#top"
+          href={isLanding ? '#top' : '/'}
           aria-label={t('public.nav.home')}
           className={cn('mr-auto flex items-center rounded-md text-site-on-navy', focusRing)}
         >
@@ -64,7 +79,7 @@ export function TopBar({
           />
         </a>
         <nav
-          aria-label={t('public.nav.label')}
+          aria-label={t(isLanding ? 'public.nav.label' : 'public.nav.pages')}
           className="flex gap-[22px] text-[15px] font-medium max-[1100px]:hidden"
         >
           {links.map((link) => (
@@ -72,45 +87,57 @@ export function TopBar({
               {link.label}
             </a>
           ))}
-          {/* Staff sign in for schools; parents get the app instead. */}
-          <span className={cn('contents', onlySchool)}>
-            <SignInEntry
-              label={t('public.signIn')}
-              look="nav"
-              prelaunch={prelaunch}
-              comingSoon={comingSoon}
-            />
-          </span>
-          <a href="#getapp" className={cn(navLink, onlyParent)}>
-            {t('public.nav.getApp')}
-          </a>
+          {props.page !== 'page' && (
+            <>
+              {/* Staff sign in for schools; parents get the app instead. */}
+              <span className={cn('contents', onlySchool)}>
+                <SignInEntry
+                  label={t('public.signIn')}
+                  look="nav"
+                  prelaunch={props.prelaunch}
+                  comingSoon={props.comingSoon}
+                />
+              </span>
+              <a href="#getapp" className={cn(navLink, onlyParent)}>
+                {t('public.nav.getApp')}
+              </a>
+            </>
+          )}
         </nav>
-        <ViewToggle
-          label={t('public.view.label')}
-          labels={{ school: t('public.view.school'), parent: t('public.view.parent') }}
-          className="max-[760px]:order-5 max-[760px]:w-full"
-        />
+        {isLanding && (
+          <ViewToggle
+            label={t('public.view.label')}
+            labels={{ school: t('public.view.school'), parent: t('public.view.parent') }}
+            className="max-[760px]:order-5 max-[760px]:w-full"
+          />
+        )}
         <ThemeSwitch variant="icon" labels={theme} className="max-[760px]:hidden" />
         <PublicMenu
           label={t('public.nav.menu')}
-          links={[
-            ...links,
-            { href: '#getapp', label: t('public.nav.getApp'), className: onlyParent },
-          ]}
+          links={
+            isLanding
+              ? [
+                  ...links,
+                  { href: '#getapp', label: t('public.nav.getApp'), className: onlyParent },
+                ]
+              : links
+          }
           theme={theme}
           signIn={
-            <span className={cn('contents', onlySchool)}>
-              <SignInEntry
-                label={t('public.signIn')}
-                look="menu"
-                menuClassName={menuItem}
-                prelaunch={prelaunch}
-                comingSoon={comingSoon}
-              />
-            </span>
+            props.page !== 'page' && (
+              <span className={cn('contents', onlySchool)}>
+                <SignInEntry
+                  label={t('public.signIn')}
+                  look="menu"
+                  menuClassName={menuItem}
+                  prelaunch={props.prelaunch}
+                  comingSoon={props.comingSoon}
+                />
+              </span>
+            )
           }
         />
-        <a href="#demo" className={button({ size: 'sm' })}>
+        <a href={isLanding ? '#demo' : '/#demo'} className={button({ size: 'sm' })}>
           <span className={onlySchool}>{t('public.cta.school')}</span>
           <span className={onlyParent}>{t('public.cta.parent')}</span>
         </a>

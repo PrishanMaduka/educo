@@ -1,6 +1,9 @@
 # Pre-launch site on GitHub Pages (infra/README.md). Same rules as spec 19 for the public paths.
 User-agent: *
 Allow: /
+Allow: /legal/
 Disallow: /app/
 Disallow: /api/
 Disallow: /p/
+
+Sitemap: https://quad-edu.com/sitemap.xml
