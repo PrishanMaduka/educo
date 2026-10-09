@@ -71,7 +71,6 @@ describe('Review Focus #4 (account tables): quad_app sees only the current accou
     expect(ACCOUNT_TABLES).toEqual({
       accounts: { key: 'id', privileges: ['SELECT', 'INSERT', 'UPDATE'] },
       credentials: { key: 'account_id', privileges: ['SELECT', 'INSERT', 'UPDATE'] },
-      identities: { key: 'account_id', privileges: ['SELECT', 'INSERT'] },
       sessions: { key: 'account_id', privileges: ['SELECT', 'INSERT', 'UPDATE'] },
       trusted_devices: { key: 'account_id', privileges: ['SELECT', 'INSERT', 'UPDATE'] },
     });
@@ -230,26 +229,7 @@ describe('account table constraints', () => {
   });
 });
 
-describe('SSO logins and sign-in methods (0010, Task 8)', () => {
-  const link = (accountId: string, provider: string, subject: string) =>
-    testDb().platform.query(
-      'insert into identities (account_id, provider, subject) values ($1, $2, $3)',
-      [accountId, provider, subject],
-    );
-
-  it('keeps one login per provider per account (identities)', async () => {
-    const account = await insertAccount(withAccount);
-    await link(account.id, 'google', `g-${uuidv7()}`);
-    await link(account.id, 'microsoft', `m-${uuidv7()}`);
-    const second: unknown = await link(account.id, 'google', `g-${uuidv7()}`).catch(
-      (caught: unknown) => caught,
-    );
-    expect(postgresCause(second)).toMatchObject({
-      code: '23505',
-      constraint: 'identities_account_id_provider_unique',
-    });
-  });
-
+describe('sign-in methods (0010; only the password since 0012, D37)', () => {
   it('records how a session signed in, and takes only a sign-in method', async () => {
     const session = await insertSession(withAccount, accountA.id);
     const setMethod = (method: string) =>
@@ -257,71 +237,15 @@ describe('SSO logins and sign-in methods (0010, Task 8)', () => {
         session.id,
         method,
       ]);
-    await setMethod('sso:microsoft');
+    await setMethod('password');
     const { rows } = await testDb().platform.query<{ sign_in_method: string }>(
       'select sign_in_method from sessions where id = $1',
       [session.id],
     );
-    expect(rows).toEqual([{ sign_in_method: 'sso:microsoft' }]);
-    const junk: unknown = await setMethod('carrier pigeon').catch((caught: unknown) => caught);
-    expect(postgresCause(junk)).toMatchObject({ code: '22P02' });
-  });
-});
-
-describe('otp_challenges (open table)', () => {
-  it('quad_app can create, read, update and delete challenges without an account', async () => {
-    const { app } = testDb();
-    const id = uuidv7();
-    await app.query(
-      `insert into otp_challenges (id, subject_hash, channel, code_hash, purpose, expires_at)
-       values ($1, $2, 'sms', $3, 'sign_in', now() + interval '10 minutes')`,
-      [id, randomTokenHash(), randomTokenHash()],
-    );
-    await app.query('update otp_challenges set attempts = attempts + 1 where id = $1', [id]);
-    const { rows } = await app.query<{ attempts: number }>(
-      'select attempts from otp_challenges where id = $1',
-      [id],
-    );
-    expect(rows).toEqual([{ attempts: 1 }]);
-    const removed = await app.query('delete from otp_challenges where id = $1', [id]);
-    expect(removed.rowCount).toBe(1);
-  });
-
-  it('withOpen (on createTenantDb) reaches the open table with no school and no account', async () => {
-    const db = createTenantDb({ appUrl: testDb().appUrl, poolMax: 1 });
-    const id = uuidv7();
-    try {
-      const seen = await db.withOpen(async (tx) => {
-        await tx.execute(
-          sql`insert into otp_challenges (id, subject_hash, channel, code_hash, purpose, expires_at)
-              values (${id}, ${randomTokenHash()}, 'sms', ${randomTokenHash()}, 'sign_in',
-                      now() + interval '10 minutes')`,
-        );
-        const challenges = await tx.execute<{ id: string }>(
-          sql`select id::text as id from otp_challenges where id = ${id}`,
-        );
-        const counts = await tx.execute<{ accounts: string; sessions: string }>(
-          sql`select (select count(*) from accounts) as accounts,
-                     (select count(*) from sessions) as sessions`,
-        );
-        const settings = await tx.execute<{ tenant: string | null; account: string | null }>(
-          sql`select nullif(current_setting('app.tenant_id', true), '') as tenant,
-                     nullif(current_setting('app.account_id', true), '') as account`,
-        );
-        return {
-          challenges: challenges.rows,
-          counts: counts.rows[0],
-          settings: settings.rows[0],
-        };
-      });
-      expect(seen).toEqual({
-        challenges: [{ id }],
-        // The account tables keep their RLS: nothing is visible without an account.
-        counts: { accounts: '0', sessions: '0' },
-        settings: { tenant: null, account: null },
-      });
-    } finally {
-      await db.close();
+    expect(rows).toEqual([{ sign_in_method: 'password' }]);
+    for (const method of ['sso:google', 'sso:microsoft', 'carrier pigeon']) {
+      const refused: unknown = await setMethod(method).catch((caught: unknown) => caught);
+      expect(postgresCause(refused)).toMatchObject({ code: '22P02' });
     }
   });
 });

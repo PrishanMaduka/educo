@@ -46,7 +46,6 @@ const DEFINERS = [
   'auth_memberships(uuid)',
   'account_by_identifier(citext, text)',
   'session_by_token(bytea)',
-  'sso_methods_for_domain(citext)',
   'auth_sign_in_rules(uuid)',
   'current_tenant_profile()',
   'update_current_tenant_name(text)',
@@ -144,15 +143,11 @@ beforeAll(async () => {
   deactivatedSchool = await insertTenant(withPlatform);
 
   await testDb().platform.query(
-    `insert into tenant_security (tenant_id, two_step, sso_google, sso_domain, password_min_length, session_hours)
-     values ($1, 'admins', true, 'colombo.test', 12, 8),
-            ($2, 'all', false, null, 14, 12),
-            ($3, 'off', false, 'gone.test', 10, 12)`,
+    `insert into tenant_security (tenant_id, two_step, password_min_length, session_hours)
+     values ($1, 'admins', 12, 8),
+            ($2, 'all', 14, 12),
+            ($3, 'off', 10, 12)`,
     [schoolA.id, schoolB.id, deleted.id],
-  );
-  await testDb().platform.query(
-    `update tenant_security set sso_microsoft = true where tenant_id = $1`,
-    [deleted.id],
   );
   await testDb().platform.query(
     `insert into tenant_branding (tenant_id, brand_color) values ($1, '#0f766e')`,
@@ -382,37 +377,37 @@ describe('account_by_identifier', () => {
   });
 });
 
-describe('sso_methods_for_domain', () => {
-  it("returns a live school's providers for its domain, and no tenant id", async () => {
-    await expect(definers.ssoMethodsForDomain('COLOMBO.test')).resolves.toEqual({
-      google: true,
-      microsoft: false,
-    });
-    const { fields } = await testDb().app.query('select * from sso_methods_for_domain($1)', [
-      'colombo.test',
-    ]);
-    expect(fields.map((field) => field.name)).toEqual(['google', 'microsoft']);
-  });
-
-  it('returns no providers for an unknown domain or a deleted school', async () => {
-    const none = { google: false, microsoft: false };
-    await expect(definers.ssoMethodsForDomain('unknown.test')).resolves.toEqual(none);
-    await expect(definers.ssoMethodsForDomain('gone.test')).resolves.toEqual(none);
-  });
-
-  it("returns a suspended school's providers, so SSO-only staff can reach its notice (D32)", async () => {
-    const paused = await insertTenant(withPlatform, {
-      status: 'suspended',
-      suspendReason: 'Unpaid invoice',
-    });
-    await testDb().platform.query(
-      `insert into tenant_security (tenant_id, sso_microsoft, sso_domain) values ($1, true, 'paused.test')`,
-      [paused.id],
+describe('no Google or Microsoft sign-in is left in the database (D37, 0012)', () => {
+  it('has no sso_methods_for_domain lookup', async () => {
+    const { rows } = await testDb().owner.query<{ found: string | null }>(
+      `select to_regprocedure('sso_methods_for_domain(citext)')::text as found`,
     );
-    await expect(definers.ssoMethodsForDomain('paused.test')).resolves.toEqual({
-      google: false,
-      microsoft: true,
-    });
+    expect(rows).toEqual([{ found: null }]);
+  });
+
+  it('has no identities table and no sso_provider type', async () => {
+    const { rows } = await testDb().owner.query<{ table: string | null; type: string | null }>(
+      `select to_regclass('public.identities')::text as table,
+              to_regtype('public.sso_provider')::text as type`,
+    );
+    expect(rows).toEqual([{ table: null, type: null }]);
+  });
+
+  it('keeps no SSO settings in tenant_security', async () => {
+    const { rows } = await testDb().owner.query<{ name: string }>(
+      `select attname as name from pg_attribute
+       where attrelid = 'public.tenant_security'::regclass and attnum > 0 and not attisdropped
+         and attname like 'sso%'`,
+    );
+    expect(rows).toEqual([]);
+  });
+
+  it('records only the password as a staff sign-in method', async () => {
+    const { rows } = await testDb().owner.query<{ label: string }>(
+      `select enumlabel as label from pg_enum
+       where enumtypid = 'public.sign_in_method'::regtype order by enumsortorder`,
+    );
+    expect(rows).toEqual([{ label: 'password' }]);
   });
 });
 
@@ -658,9 +653,6 @@ describe('current_tenant_profile', () => {
       logoFileId: null,
       modules: ['admissions', 'sis'],
       twoStep: 'admins',
-      ssoGoogle: true,
-      ssoMicrosoft: false,
-      ssoDomain: 'colombo.test',
       passwordMinLength: 12,
       sessionHours: 8,
       ipAllowlist: [],
@@ -672,6 +664,26 @@ describe('current_tenant_profile', () => {
   it('returns no row without app.tenant_id', async () => {
     const { rows } = await testDb().app.query('select * from current_tenant_profile()');
     expect(rows).toEqual([]);
+  });
+
+  it('returns no SSO columns (D37, 0012)', async () => {
+    const { fields } = await testDb().app.query('select * from current_tenant_profile()');
+    expect(fields.map((field) => field.name)).toEqual([
+      'name',
+      'short_name',
+      'status',
+      'suspend_reason',
+      'time_zone',
+      'locale',
+      'currency',
+      'brand_color',
+      'logo_file_id',
+      'modules',
+      'two_step',
+      'password_min_length',
+      'session_hours',
+      'ip_allowlist',
+    ]);
   });
 });
 

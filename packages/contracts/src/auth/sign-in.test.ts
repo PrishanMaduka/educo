@@ -6,6 +6,7 @@ import {
   PasswordResetInput,
   PasswordSignInInput,
   SelectSchoolInput,
+  SignInMethod,
   SignInMembershipList,
   SignInNext,
   SignInResult,
@@ -27,6 +28,12 @@ describe('error codes for sign-in (spec 05, Task 7)', () => {
     'invalid_code',
   ])('has %s', (code) => {
     expect(ErrorCode.safeParse(code).success).toBe(true);
+  });
+});
+
+describe('SignInMethod', () => {
+  it('is only the password (D37: no Google or Microsoft sign-in)', () => {
+    expect(SignInMethod.options).toEqual(['password']);
   });
 });
 

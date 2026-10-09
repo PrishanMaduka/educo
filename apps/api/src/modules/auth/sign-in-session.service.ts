@@ -149,7 +149,7 @@ export class SignInSessions {
         },
         'auth.sign_in',
         { type: 'user', id: membership.userId },
-        // A session from before 0010 has no method recorded.
+        // A session from before 0010 has none recorded, nor one opened by SSO before 0012 (D37).
         { switchedSchool: options.switching, ...(method === null ? {} : { method }) },
       );
       const { expiresAt } = sessionExpiry({

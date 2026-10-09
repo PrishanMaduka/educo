@@ -26,8 +26,11 @@ const TypedPassword = z
   .min(1, { message: 'Enter your password' })
   .max(1024, { message: 'That password is too long' });
 
-/** A way to sign in: a school's SSO for the email's domain, or a password. */
-export const SignInMethod = z.enum(['sso:google', 'sso:microsoft', 'password']);
+/**
+ * How a staff session signed in (`sessions.sign_in_method`, named by the `auth.sign_in` audit).
+ * Only the password since D37: there is no Google or Microsoft sign-in.
+ */
+export const SignInMethod = z.enum(['password']);
 export type SignInMethod = z.infer<typeof SignInMethod>;
 
 /** `POST /auth/password`. */

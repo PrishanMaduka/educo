@@ -32,10 +32,6 @@ export type EmailSuppressionReason = z.infer<typeof EmailSuppressionReason>;
 export const AccountStatus = z.enum(['active', 'locked', 'disabled']);
 export type AccountStatus = z.infer<typeof AccountStatus>;
 
-/** Single sign-on providers for staff (spec 04 `identities.provider`, spec 05). */
-export const SsoProvider = z.enum(['google', 'microsoft']);
-export type SsoProvider = z.infer<typeof SsoProvider>;
-
 /** Which app a session belongs to (spec 04 `sessions.kind`). */
 export const SessionKind = z.enum(['web', 'mobile', 'console']);
 export type SessionKind = z.infer<typeof SessionKind>;

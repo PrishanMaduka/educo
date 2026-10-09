@@ -74,12 +74,6 @@ export interface RefreshFamily {
   readonly tenantId: string;
 }
 
-/** The SSO buttons to offer for an email domain. */
-export interface SsoMethods {
-  readonly google: boolean;
-  readonly microsoft: boolean;
-}
-
 /** One staff membership's sign-in rules; `strictestTwoStep` (packages/domain) combines them. */
 export interface AuthSignInRule {
   readonly tenantId: string;
@@ -102,9 +96,6 @@ export interface TenantProfile {
   /** Enabled plan modules, sorted. */
   readonly modules: readonly string[];
   readonly twoStep: TwoStepRule;
-  readonly ssoGoogle: boolean;
-  readonly ssoMicrosoft: boolean;
-  readonly ssoDomain: string | null;
   readonly passwordMinLength: number;
   readonly sessionHours: number;
   readonly ipAllowlist: readonly string[];
@@ -173,7 +164,6 @@ export interface DefinerCalls {
   sessionByToken(tokenHash: Buffer): Promise<SessionLookup | null>;
   /** The account and school of a live parent refresh family (a mobile session in a school). */
   refreshFamily(sessionId: string): Promise<RefreshFamily | null>;
-  ssoMethodsForDomain(domain: string): Promise<SsoMethods>;
   /** One row per active staff membership of a live school. */
   authSignInRules(accountId: string): Promise<AuthSignInRule[]>;
   /** True only the first time `nonce` is used. */
@@ -258,9 +248,6 @@ type ProfileRow = {
   logo_file_id: string | null;
   modules: string[];
   two_step: TwoStepRule;
-  sso_google: boolean;
-  sso_microsoft: boolean;
-  sso_domain: string | null;
   password_min_length: number;
   session_hours: number;
   ip_allowlist: string[];
@@ -358,15 +345,6 @@ export function createDefinerCalls(pool: pg.Pool): DefinerCalls {
       return row ? { accountId: row.account_id, tenantId: row.tenant_id } : null;
     },
 
-    ssoMethodsForDomain: async (domain) => {
-      const { rows } = await pool.query<SsoMethods>(
-        'select google, microsoft from sso_methods_for_domain($1)',
-        [domain],
-      );
-      const [row] = rows;
-      return { google: row?.google ?? false, microsoft: row?.microsoft ?? false };
-    },
-
     authSignInRules: async (accountId) => {
       const { rows } = await pool.query<SignInRuleRow>('select * from auth_sign_in_rules($1)', [
         accountId,
@@ -441,9 +419,6 @@ export function createDefinerCalls(pool: pg.Pool): DefinerCalls {
         logoFileId: row.logo_file_id,
         modules: row.modules,
         twoStep: row.two_step,
-        ssoGoogle: row.sso_google,
-        ssoMicrosoft: row.sso_microsoft,
-        ssoDomain: row.sso_domain,
         passwordMinLength: row.password_min_length,
         sessionHours: row.session_hours,
         ipAllowlist: row.ip_allowlist,

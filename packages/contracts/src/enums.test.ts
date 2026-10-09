@@ -18,7 +18,6 @@ import {
   SessionKind,
   SessionStage,
   SmsSenderStatus,
-  SsoProvider,
   TenantRegion,
   TenantStatus,
   ThemeChoice,
@@ -50,7 +49,6 @@ describe('tenant enums (spec 04, Platform)', () => {
 describe('identity and access enums (spec 04 Platform and Identity, spec 05)', () => {
   it.each([
     ['AccountStatus', AccountStatus, ['active', 'locked', 'disabled']],
-    ['SsoProvider', SsoProvider, ['google', 'microsoft']],
     ['SessionKind', SessionKind, ['web', 'mobile', 'console']],
     ['SessionStage', SessionStage, ['two_step', 'two_step_setup', 'choose_school', 'active']],
     ['OtpChannel', OtpChannel, ['sms', 'email']],
