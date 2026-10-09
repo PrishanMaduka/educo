@@ -67,6 +67,21 @@ async function tenantName(tenantId: string): Promise<string | undefined> {
   return rows[0]?.name;
 }
 
+/** Waits until a query is blocked on a row lock (the rename waiting for the console's update). */
+async function waitForBlockedRename(): Promise<void> {
+  for (let attempt = 0; attempt < 200; attempt += 1) {
+    const { rows } = await db().platform.query<{ waiting: number }>(
+      // A row-lock wait is a wait on the holder's transaction id.
+      `select count(*)::int as waiting from pg_locks
+       where not granted and locktype = 'transactionid'
+         and pid in (select pid from pg_stat_activity where datname = current_database())`,
+    );
+    if ((rows[0]?.waiting ?? 0) > 0) return;
+    await new Promise((resolve) => setTimeout(resolve, 10));
+  }
+  throw new Error('The rename never waited for the console’s update.');
+}
+
 /** The General values of a school nobody has changed (GET makes the defaults row on first read). */
 const UNTOUCHED = {
   office_email: null,
@@ -111,6 +126,26 @@ describe('GET /school', () => {
     expect(response.headers.etag).toBe(body.etag);
     // The same state reads as the same version.
     expect((await schoolOf(admin)).etag).toBe(body.etag);
+  });
+
+  it('works while previewing a role, and the only write is the defaults row (Task 14 review)', async () => {
+    const { school, admin, principal } = await arrange();
+    await setPreview(db(), admin.session.id, school.roles.principal);
+    expect(await settingsRow(school.id)).toBeUndefined();
+
+    const response = await as(admin)('GET', '/school');
+
+    expect(response.statusCode).toBe(200);
+    expect(School.parse(response.json())).toMatchObject({ name: school.name, officeEmail: null });
+    expect(await settingsRow(school.id)).toEqual({ ...UNTOUCHED, sms_sender_status: null });
+    expect(await tenantName(school.id)).toBe(school.name);
+    const { rows } = await db().platform.query(
+      'select action from audit_log where tenant_id = $1',
+      [school.id],
+    );
+    expect(rows).toEqual([]);
+    // Reading again changes nothing further: the same version.
+    expect((await schoolOf(principal)).etag).toBe(School.parse(response.json()).etag);
   });
 
   it('lets a principal (settings.view) read it', async () => {
@@ -318,6 +353,57 @@ describe('PATCH /school', () => {
     expect((await settingsRow(school.id))?.address).toBe('First');
     // Positive control: the first change was audited; the refused one was not.
     expect(await updatesIn(school)).toHaveLength(1);
+  });
+
+  it('answers 409 and keeps a console rename made while the save was running (Task 14 review)', async () => {
+    const { school, admin } = await arrange();
+    const etag = (await schoolOf(admin)).etag;
+    // Quad renames the school and holds the row until the save has read the old name and waits.
+    const console = await db().platform.connect();
+    try {
+      await console.query('begin');
+      await console.query(`update tenants set name = 'Renamed By Quad' where id = $1`, [school.id]);
+      const saving = patch(admin, { name: 'Renamed By The School' }, etag);
+      await waitForBlockedRename();
+      await console.query('commit');
+
+      const response = await saving;
+
+      expect(response.statusCode).toBe(409);
+      expect(response.json()).toMatchObject({ code: 'conflict' });
+      // The version sent back is the one with Quad's name, so the next read matches it.
+      expect(response.headers.etag).toBe((await schoolOf(admin)).etag);
+    } finally {
+      console.release();
+    }
+    expect(await tenantName(school.id)).toBe('Renamed By Quad');
+    expect(await updatesIn(school)).toEqual([]);
+    const { rows } = await db().platform.query(
+      `select 1 from platform_audit where action = 'tenant.renamed' and tenant_id = $1`,
+      [school.id],
+    );
+    expect(rows).toEqual([]);
+  });
+
+  it('renames without touching school_settings: its values and updated_by stay as they were', async () => {
+    const { school, admin } = await arrange();
+    const other = await staffHolding(db(), school, school.roles.admin);
+    expect((await patch(admin, { address: 'Kandy' })).statusCode).toBe(200);
+    const before = await settingsRow(school.id);
+
+    const response = await patch(other, { name: 'Only The Name' });
+
+    expect(response.statusCode).toBe(200);
+    expect(School.parse(response.json())).toMatchObject({
+      name: 'Only The Name',
+      address: 'Kandy',
+    });
+    expect(await settingsRow(school.id)).toEqual(before);
+    expect(before).toMatchObject({ updated_by: admin.userId });
+    expect((await updatesIn(school)).map((row) => row.meta['fields'])).toEqual([
+      ['address'],
+      ['name'],
+    ]);
   });
 
   it('answers 403 to a teacher, to a principal (view only) and while previewing a role', async () => {

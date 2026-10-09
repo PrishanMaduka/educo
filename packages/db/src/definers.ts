@@ -110,6 +110,12 @@ export interface SignedTokenUse {
   readonly expiresAt: Date;
 }
 
+/** A rename of the current school: only while its name is still `expected` (D32, Task 15). */
+export interface TenantRename {
+  readonly expected: string;
+  readonly name: string;
+}
+
 /** The platform half of an action taken in a support visit (spec 05, dual audit). */
 export interface SupportAuditEntry {
   readonly supportSessionId: string;
@@ -178,8 +184,11 @@ export interface DefinerCalls {
   tenantByGatewayAccount(provider: string, accountId: string): Promise<GatewayAccountTenant | null>;
   /** The current school's profile; null without a school. */
   currentTenantProfile(tx: TenantTx): Promise<TenantProfile | null>;
-  /** Renames the current school only, and writes `platform_audit`. */
-  updateCurrentTenantName(tx: TenantTx, name: string): Promise<void>;
+  /**
+   * Renames the current school only, and writes `platform_audit`, while its name is still
+   * `expected` (the name the caller read). False, changing nothing, when it has changed meanwhile.
+   */
+  updateCurrentTenantName(tx: TenantTx, rename: TenantRename): Promise<boolean>;
   /** Refused unless the support visit is active and for the current school. */
   recordSupportAudit(tx: TenantTx, entry: SupportAuditEntry): Promise<void>;
   /** The account for `email`, created (active) if there is none. Never a second account. */
@@ -435,8 +444,11 @@ export function createDefinerCalls(pool: pg.Pool): DefinerCalls {
       };
     },
 
-    updateCurrentTenantName: async (tx, name) => {
-      await tx.execute(sql`select update_current_tenant_name(${name})`);
+    updateCurrentTenantName: async (tx, rename) => {
+      const { rows } = await tx.execute<{ renamed: boolean | null }>(
+        sql`select update_current_tenant_name(${rename.expected}, ${rename.name}) as renamed`,
+      );
+      return rows[0]?.renamed === true;
     },
 
     recordSupportAudit: async (tx, entry) => {

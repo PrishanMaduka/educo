@@ -3,7 +3,7 @@ import { parseOfficePhone, planSchoolProfileChange } from '@quad/domain';
 
 import { AuditService, auditActorOf } from '../../common/audit/audit.service';
 import { formatMessage } from '../../common/delivery/templates/render';
-import { NotFoundError, ValidationError } from '../../common/errors';
+import { NotFoundError, StaleVersionError, ValidationError } from '../../common/errors';
 import { assertIfMatch } from '../../common/etag/etag';
 import { schoolOf } from '../../common/session/request-auth';
 import { TENANT_DB } from '../../tokens';
@@ -17,6 +17,7 @@ import {
 } from './school.mapper';
 import { SchoolRepository } from './school.repository';
 
+import type { SettingsRow } from './school.repository';
 import type { RequestAuth } from '../../common/session/request-auth';
 import type { School, SchoolBranding, SchoolSettings, SchoolUpdateInput } from '@quad/contracts';
 import type { QuadTenantDb, TenantProfile, TenantTx } from '@quad/db';
@@ -70,7 +71,7 @@ export class SchoolService {
       assertIfMatch(ifMatch, generalEtag(current));
       const { next, fields } = planSchoolProfileChange(current, change);
       if (fields.length === 0) return toSchool(settings, profile);
-      if (fields.includes('name')) await this.db.definers.updateCurrentTenantName(tx, next.name);
+      if (fields.includes('name')) await this.rename(tx, settings, profile, next.name);
       const { name, ...own } = next;
       const saved = fields.some((field) => field !== 'name')
         ? await this.repository.saveGeneral(tx, actor.tenantId, own, actor.userId)
@@ -97,6 +98,20 @@ export class SchoolService {
     return this.db.withTenant(tenantId, async (tx) =>
       toSchoolSettings(await this.repository.settings(tx, tenantId, { forUpdate: false })),
     );
+  }
+
+  /**
+   * Renames the school only while it still has the name this change read: a rename from the
+   * console committed meanwhile wins, and this change gets 409 with the version that has it.
+   */
+  private async rename(
+    tx: TenantTx,
+    settings: SettingsRow,
+    read: TenantProfile,
+    name: string,
+  ): Promise<void> {
+    if (await this.db.definers.updateCurrentTenantName(tx, { expected: read.name, name })) return;
+    throw new StaleVersionError(generalEtag(generalOf(settings, await this.profileIn(tx))));
   }
 
   private async profileIn(tx: TenantTx): Promise<TenantProfile> {

@@ -48,7 +48,7 @@ const DEFINERS = [
   'session_by_token(bytea)',
   'auth_sign_in_rules(uuid)',
   'current_tenant_profile()',
-  'update_current_tenant_name(text)',
+  'update_current_tenant_name(text, text)',
   'consume_signed_token(text, text, timestamptz)',
   'record_support_audit(uuid, text, text, uuid, jsonb)',
   'ensure_account_for_email(citext)',
@@ -705,7 +705,10 @@ describe('current_tenant_profile', () => {
 describe('update_current_tenant_name', () => {
   it('renames only the current school and writes platform_audit', async () => {
     const school = await insertTenant(withPlatform, { name: 'Old Name' });
-    await withTenant(school.id, (tx) => definers.updateCurrentTenantName(tx, 'New Name'));
+    const renamed = await withTenant(school.id, (tx) =>
+      definers.updateCurrentTenantName(tx, { expected: 'Old Name', name: 'New Name' }),
+    );
+    expect(renamed).toBe(true);
     const names = await platformRows<{ id: string; name: string }>(
       'select id, name from tenants where id = any($1::uuid[]) order by name',
       [[school.id, schoolB.id]],
@@ -729,13 +732,47 @@ describe('update_current_tenant_name', () => {
     ]);
   });
 
+  it('changes nothing and answers false when the name is no longer the one expected (Task 14 review)', async () => {
+    const school = await insertTenant(withPlatform, { name: 'Renamed By Quad' });
+    const renamed = await withTenant(school.id, (tx) =>
+      definers.updateCurrentTenantName(tx, { expected: 'Name The Admin Saw', name: 'Admin Name' }),
+    );
+    expect(renamed).toBe(false);
+    const names = await platformRows<{ name: string }>('select name from tenants where id = $1', [
+      school.id,
+    ]);
+    expect(names).toEqual([{ name: 'Renamed By Quad' }]);
+    const audit = await platformRows('select action from platform_audit where tenant_id = $1', [
+      school.id,
+    ]);
+    expect(audit).toEqual([]);
+  });
+
+  it("never renames another school, even when given that school's name", async () => {
+    const school = await insertTenant(withPlatform, { name: 'Own Name' });
+    const renamed = await withTenant(school.id, (tx) =>
+      definers.updateCurrentTenantName(tx, { expected: 'Kandy Test School', name: 'Taken Over' }),
+    );
+    expect(renamed).toBe(false);
+    const names = await platformRows<{ id: string; name: string }>(
+      'select id, name from tenants where id = any($1::uuid[]) order by name',
+      [[school.id, schoolB.id]],
+    );
+    expect(names).toEqual([
+      { id: schoolB.id, name: 'Kandy Test School' },
+      { id: school.id, name: 'Own Name' },
+    ]);
+  });
+
   it('refuses without app.tenant_id and refuses a blank name', async () => {
     const cause = await failure(
-      testDb().app.query(`select update_current_tenant_name('Anything')`),
+      testDb().app.query(`select update_current_tenant_name('Anything', 'Else')`),
     );
     expect(cause).toMatchObject({ code: '42501' });
     const blank = await failure(
-      withTenant(schoolA.id, (tx) => definers.updateCurrentTenantName(tx, '   ')),
+      withTenant(schoolA.id, (tx) =>
+        definers.updateCurrentTenantName(tx, { expected: schoolA.name, name: '   ' }),
+      ),
     );
     expect(blank).toMatchObject({ code: '22023' });
   });

@@ -30,6 +30,7 @@ export type {
   SupportSessionLookup,
   SupportVisit,
   TenantProfile,
+  TenantRename,
 } from './definers';
 export { pingDatabase } from './ping';
 export type { SqlQueryable, TableClasses } from './rls';
