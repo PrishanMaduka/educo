@@ -14,6 +14,7 @@ export * from './auth/tokens';
 export * from './audit/actions';
 export * from './me/greeting';
 export * from './me/me';
+export * from './me/permissions';
 export * from './seed';
 export * from './public/demo-request';
 export { buildArb } from './i18n/build';

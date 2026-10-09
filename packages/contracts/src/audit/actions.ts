@@ -28,6 +28,9 @@ export const AuditAction = z.enum([
   'support_session.started',
   'support_session.ended',
   'audit.exported',
+  // Every allowed request to a `@Sensitive` route (spec 05: every view of safeguarding or medical
+  // data is logged; Task 12). Meta: the key, the method and the route template, never the data.
+  'sensitive.accessed',
 ]);
 export type AuditAction = z.infer<typeof AuditAction>;
 
