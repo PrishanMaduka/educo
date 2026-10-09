@@ -64,7 +64,7 @@ h1,h2,h3{margin:0;text-wrap:balance;letter-spacing:-.02em;font-family:var(--f-di
 .body.in-l{animation:inl .28s cubic-bezier(.2,.8,.2,1)}
 @keyframes inr{from{transform:translateX(40px);opacity:0}}
 @keyframes inl{from{transform:translateX(-40px);opacity:0}}
-.tabbar{flex:none;display:grid;grid-template-columns:repeat(5,1fr);background:var(--surface);border-top:1px solid var(--line);padding:8px 6px 24px;border-radius:24px 24px 0 0;box-shadow:0 -10px 28px -18px rgba(16,22,50,.35)}
+.tabbar{flex:none;display:grid;grid-template-columns:repeat(4,1fr);background:var(--surface);border-top:1px solid var(--line);padding:8px 6px 24px;border-radius:24px 24px 0 0;box-shadow:0 -10px 28px -18px rgba(16,22,50,.35)}
 .tabbar button{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:700;color:var(--ink-3);position:relative;min-height:48px}
 .tabbar .ti{width:54px;height:30px;border-radius:var(--r-pill);display:grid;place-items:center;position:relative;transition:background .25s,color .25s}
 .tabbar button.on{color:var(--ink)}
@@ -419,8 +419,9 @@ input[type=range]{width:100%;accent-color:var(--brand-text)}
 .ghead h1{font:800 27px/1.08 var(--f-display);letter-spacing:-.03em;margin-top:4px;color:var(--ink)}
 .ghead .gico{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:color-mix(in srgb,currentColor 16%,transparent)}
 .gi-morning,.gi-afternoon{color:var(--c4)}.gi-evening{color:var(--c1)}.gi-night{color:var(--c3)}
-.ghead .acts{display:flex;gap:8px;align-self:flex-start;margin-top:4px}
-.ghead .back{position:relative}
+.ghead .acts{display:flex;gap:6px;align-self:flex-start;margin-top:2px}
+.ghead .back,.ghead .askq-btn{position:relative;width:44px;height:44px}
+.hbadge{position:absolute;top:-4px;right:-4px;min-width:19px;height:19px;padding:0 5px;border-radius:10px;background:var(--pink);color:var(--navy);font-size:11px;font-weight:800;display:grid;place-items:center;border:2px solid var(--canvas)}
 .ghead .back .dot{position:absolute;top:7px;right:8px;width:9px;height:9px;border-radius:50%;background:var(--pink);box-shadow:0 0 0 2px var(--surface)}
 .askq-btn{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;flex:none;background:var(--navy);color:var(--lime)}
 :root[data-theme="dark"] .askq-btn{background:var(--navy-2);box-shadow:inset 0 0 0 1.5px var(--navy-line)}
@@ -716,9 +717,16 @@ button.it:active{background:var(--surface-2)}
 .news.art p{margin:0;color:var(--ink-2);line-height:1.6}.news.art p.lead{font-size:16.5px;color:var(--ink);font-weight:600}
 .nthumb{width:64px;height:48px;border-radius:12px;overflow:hidden;flex:none;box-shadow:inset 0 0 0 1px var(--line)}.nthumb .mo-art{width:100%;height:100%;display:block}
 /* More */
-.me-card{display:flex;gap:14px;align-items:center;padding:16px}
-.me-card .m{flex:1;min-width:0}.me-card b{display:block;font:800 20px var(--f-display);letter-spacing:-.02em}.me-card small{display:block;color:var(--ink-3);font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.me-kids{display:flex;gap:6px;margin-top:8px}.me-kids .chip{height:32px;font-size:12.5px}
+.me-card{display:flex;flex-direction:column;gap:14px;padding:18px 16px 16px;background:radial-gradient(100% 80% at 100% 0%,color-mix(in srgb,var(--pink) 20%,transparent),transparent 62%),var(--surface)}
+.me-top{display:flex;gap:14px;align-items:center}
+.me-top .av.lg{width:72px;height:72px;font-size:25px}
+.me-top .back{align-self:flex-start;width:44px;height:44px}
+.me-kids{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.me-kid{display:flex;align-items:center;gap:10px;padding:8px 10px;min-height:52px;border-radius:var(--r-sm);border:1px solid var(--line);background:var(--surface);text-align:left;color:var(--ink);min-width:0}
+.me-kid:hover{background:var(--surface-2)}
+.me-kid span{min-width:0}.me-kid b{display:block;font-size:14px}.me-kid small{display:block;font-size:12px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sch-mark{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;flex:none;background:var(--sc);color:#FFFFFF;font:800 13px var(--f-display)}
+.me-card .m{flex:1;min-width:0}.me-card .m b{display:block;font:800 22px/1.15 var(--f-display);margin-top:2px;letter-spacing:-.02em}.me-card small{display:block;color:var(--ink-3);font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pwr{display:inline-flex;align-items:center;gap:5px;justify-content:center;flex-wrap:wrap}.note.pwr{display:flex}
 .qlogo{flex:none;vertical-align:-3px}
 .ph1{display:flex;align-items:center;gap:10px}.qmark{display:inline-grid}
@@ -1516,7 +1524,7 @@ SCR.home = () => {
     ['bus','t-green','bus','Track bus'],['pickup','t-blue','qr','Pickup pass'],['wallet','t-gold','wallet','Canteen'],['absence','t-red','alert','Report absence'],
     ['conduct','t-lotus','star','Rewards'],['trips','t-violet','pin','Trips'],['reports','t-blue','file','Reports'],['calendar','t-green','cal','Calendar']];
   return { head:`<div class="ghead"><div class="gt"><div class="gx"><div class="hello"><span class="gico gi-${greetPeriod().k}" aria-hidden="true">${greetIcon(greetPeriod(), 'currentColor', 15)}</span>Monday 5 October</div><h1>${greetPeriod().word}, Priya</h1></div>
-      <div class="acts"><button class="askq-btn" data-act="aqOpen" aria-label="Ask Quad" title="Ask Quad (press /)">${ic('spark',19)}</button><button class="back" data-act="push" data-to="notifications" aria-label="${S.notifs ? `Notifications, ${S.notifs} new` : 'Notifications'}">${ic('bell',18)}${S.notifs?'<span class="dot"></span>':''}</button></div></div></div>`, body: `
+      <div class="acts"><button class="askq-btn" data-act="aqOpen" aria-label="Ask Quad" title="Ask Quad (press /)">${ic('spark',19)}</button><button class="back" data-act="push" data-to="inbox" aria-label="${unreadN() ? `Messages, ${unreadN()} unread` : 'Messages'}">${ic('msg',18)}<span class="hbadge" id="msgBadge" ${unreadN() ? '' : 'hidden'}>${unreadN()}</span></button><button class="back" data-act="push" data-to="notifications" aria-label="${S.notifs ? `Notifications, ${S.notifs} new` : 'Notifications'}">${ic('bell',18)}${S.notifs?'<span class="dot"></span>':''}</button></div></div></div>`, body: `
   <div class="stories" role="group" aria-label="School stories">${STORIES.map((st, i) => `<button class="story ${st.seen?'seen':''}" data-act="story" data-i="${i}" aria-label="${st.name} story${st.seen ? ', seen' : ''}"><span class="ring-s"><span style="--acc:var(--${st.acc})">${ic(st.icon,24)}</span></span>${st.name}</button>`).join('')}</div>
   ${kidSwitch(true)}
   ${dayCard(k)}
@@ -1811,24 +1819,35 @@ function sendMsg(v) {
   const t = S.threads.find(x => x.id === +current().p.id) || S.threads[0];
   t.msgs.push({me:true, t:v, at:'Now', isNew:true}); t.seen = false; render();
   setTimeout(() => { t.seen = true; if (current().to !== 'thread') return; S.typing = true; render(); }, 800);
-  setTimeout(() => { S.typing = false; t.msgs.push({me:false, t:replyTo(v), at:'Now', isNew:true}); if (current().to === 'thread') render(); else { t.unread++; showPush(t.from, replyTo(v), () => { S.tab = 'inbox'; S.stack = [{to:'thread', p:{id:t.id}}]; }); } }, 2600);
+  setTimeout(() => { S.typing = false; t.msgs.push({me:false, t:replyTo(v), at:'Now', isNew:true}); if (current().to === 'thread') render(); else { t.unread++; showPush(t.from, replyTo(v), () => threadStack(t.id)); } }, 2600);
 }
 
-SCR.more = () => ({ big:'More', body: `
-  <div class="card me-card">${av('Priya Patel', 'var(--brand)', 'lg')}<div class="m"><b>Priya Patel</b><small>priya.patel@greenfield.example</small><div class="me-kids">${KIDS.map((k, i) => `<button class="chip" data-act="push" data-to="children" data-kid="${i}">${av(k.name, k.color, 'xs')}${k.first}</button>`).join('')}</div></div></div>
+/* Profile (replaces More): the parent first, with their children, then messages and everything More had */
+const PARENT = {name:'Priya Patel', first:'Priya', email:'priya.patel@greenfield.example', phone:'+1 415 555 0134'};
+const SCHOOLS_P = BRAND_DEMOS.slice(0, 2);
+SCR.more = () => { const un = unreadN(), from = [...new Set(S.threads.filter(t => t.unread).map(t => shortName(t.from)))], fam = famCircle(), others = familyOf(kid()).filter(f => f.key !== 'me' && f.kind !== 'pickup');
+  return { big:'Profile', body: `
+  <div class="card me-card"><div class="me-top">${av(PARENT.name, 'var(--brand)', 'lg')}<div class="m"><span class="eyebrow">Parent · ${esc(SCHOOL.name)}</span><b>${PARENT.name}</b><small>${PARENT.email}</small><small class="num">${PARENT.phone}</small></div><button class="back" data-act="push" data-to="contact" aria-label="Edit your contact details">${ic('user',18)}</button></div>
+    <div class="me-kids" role="group" aria-label="Your children">${KIDS.map((k, i) => `<button class="me-kid" data-act="push" data-to="children" data-kid="${i}">${av(k.name, k.color, 'sm')}<span><b>${k.first}</b><small>${acadText(k.grade)}</small></span></button>`).join('')}</div></div>
+  <div class="card">${row('msg', 'a-sky', 'Messages', un ? `${cap(plural(un, 'unread message'))} from ${listJoin(from.map(esc))}` : 'You’re all caught up', un ? `<span class="th-n">${un}</span>` : '', 'data-act="push" data-to="inbox"')}</div>
   ${secX('Your children')}
   <div class="card">${row('kids',FA.children,'My children','Profiles, classes and teachers','', 'data-act="push" data-to="children"')}${KIDS.map((k, i) => row('leaf', insight(k).level[0] === 'good' ? 't-green' : 't-amber', `How ${k.first} is doing`, insight(k).level[1] + ' · attendance, learning, wellbeing', '', `data-act="push" data-to="doing" data-kid="${i}"`)).join('')}${row('orbit',FA.people,'Circle','Moments, the people around your children and this week’s learning','', 'data-act="circGo" data-v="moments"')}</div>
+  ${secX('Family and relatives')}
+  <div class="card">${row('heart','a-pink','Family and relatives', `${esc(listJoin(others.map(f => f.name.split(' ')[0])))} · ${plural(fam.length, 'relative')} can see moments`, '', 'data-act="circGo" data-v="people"')}${row('plus','a-pink','Invite family','Grandparents, aunts and uncles can see moments','', 'data-act="famInvite"')}${row('qr',FA.pickup,'Pickup people', `${S.pickers.map(x => x[0].split(' ')[0]).join(', ')} can collect at the gate`,'', 'data-act="push" data-to="pickup"')}</div>
   ${secX('School life')}
   <div class="card">${row('spark',FA.askq,'Ask Quad','Ask about homework, fees, the bus…','', 'data-act="aqOpen"')}${row('cal',FA.evening,'Parents’ evening','Book times with teachers','', 'data-act="push" data-to="evening"')}${row('file',FA.forms,'Forms','Consent and sign-ups','', 'data-act="push" data-to="forms"')}${row('book',FA.exams,'Exams','Exam timetable','', 'data-act="push" data-to="exams"')}${row('pin',FA.trips,'Trips & bookings','Consent and payment','', 'data-act="push" data-to="trips"')}</div>
   ${secX('Information')}
   <div class="card">${row('cal',FA.calendar,'School calendar','Term dates, events, holidays','', 'data-act="push" data-to="calendar"')}${row('news',FA.news,'News','Stories from campus','', 'data-act="push" data-to="news"')}${row('phone',FA.directory,'Staff directory','Contact the right person','', 'data-act="push" data-to="directory"')}</div>
   ${secX('Account')}
-  <div class="card">${row('user',FA.contact,'Contact details','Address, phone, email','', 'data-act="push" data-to="contact"')}${row('bell',FA.subs,'Notifications','Choose what the school sends you','', 'data-act="push" data-to="subs"')}
+  <div class="card">${row('user',FA.contact,'Contact details','Address, phone, email','', 'data-act="push" data-to="contact"')}${row('bell',FA.subs,'Notification settings','Choose what the school sends you','', 'data-act="push" data-to="subs"')}${row('globe','a-lime','Switch school', `${esc(SCHOOL.name)} · ${plural(SCHOOLS_P.length, 'school')} on your account`,'', 'data-act="schoolSheet"')}
     <div class="row"><div class="ico ${FA.faceid}">${ic('lock',19)}</div><div class="m"><b>Face ID</b><small>Unlock the app with Face ID</small></div><button class="toggle ${S.faceid?'on':''}" data-act="faceid" role="switch" aria-checked="${S.faceid}" aria-label="Face ID"></button></div>
     <div class="row"><div class="ico ${FA.theme}">${ic('moon',19)}</div><div class="m"><b>Dark mode</b><small>Follows your phone unless set here</small></div><button class="toggle ${isDark()?'on':''}" data-act="theme" role="switch" aria-checked="${isDark()}" aria-label="Dark mode"></button></div>
     ${row('globe',FA.language,'Language','English · Spanish and French coming soon')}</div>
   <button class="btn sec" data-act="paSignOut" style="color:var(--bad)">${ic('out',18)}Sign out</button>
-  <p class="note pwr">${esc(SCHOOL.short)} Parent 1.0 · ${esc(SCHOOL.name)} · powered by ${quadMark(isDark(), 14)}Quad</p>` });
+  <p class="note pwr">${esc(SCHOOL.short)} Parent 1.0 · ${esc(SCHOOL.name)} · powered by ${quadMark(isDark(), 14)}Quad</p>` }; };
+const schoolSheet = () => openSheet(`<h2 class="sh-t">Switch school</h2><p class="sh-p">Your account is linked to ${plural(SCHOOLS_P.length, 'school')}. Each one shows its own children, messages and fees.</p>
+  <div style="display:flex;flex-direction:column;gap:8px" role="radiogroup" aria-label="Schools">${SCHOOLS_P.map(([n, sh, sub, col]) => `<button class="paycard ${SCHOOL.name === n ? 'on' : ''}" role="radio" aria-checked="${SCHOOL.name === n}" data-act="schoolPick" data-v="${sub}"><span class="sch-mark" style="--sc:${col}">${sh}</span><span style="flex:1"><b style="display:block">${esc(n)}</b><small style="color:var(--ink-3)">${SCHOOL.name === n ? 'Open now' : 'Tap to open'}</small></span><span class="radio"></span></button>`).join('')}</div>
+  <button class="btn sec" data-act="closeSheet">Keep ${esc(SCHOOL.name)}</button>`);
 
 const CAL = [['2026-10-06','Report absence deadline','Term 1 attendance review'],['2026-10-08','Parent–teacher meetings','8–10 Oct · 3:30–6:00 pm'],['2026-10-10','Term 1 fees due','Pay in the app'],['2026-10-18','Open day','All day'],['2026-10-23','Grade 4 museum trip','Consent required'],['2026-10-26','Half-term','School closed until Mon 2 Nov','off'],['2026-11-08','Science Olympiad','City finals · Grade 9'],['2026-11-20',"Founders’ Day",'School closed · founders’ celebration','off'],['2026-12-12','Term 1 ends · Winter break','Back on Mon 4 Jan · reports published 15 Dec','off']];
 SCR.calendar = () => { const f = S.calF || 'all', off = c => c[3] === 'off', list = CAL.filter(c => f === 'all' || (f === 'off' ? off(c) : !off(c)));
@@ -1867,12 +1886,17 @@ SCR.notifications = () => { S.notifs = 0; const lm = momFor(KIDS[0])[0];
   <button class="btn sec" data-act="push" data-to="subs">${ic('bell', 18)}Choose what you get</button>` }; };
 
 /* ---------- Render ---------- */
-const ROOTS = {home:'home', moments:'moments', pay:'pay', inbox:'inbox', more:'more'};
+/* Four tabs: Today, Circle, Pay, Profile (internal keys home, moments, pay, more). Messages is a screen opened from the Today header and Profile */
+const ROOTS = {home:'home', moments:'moments', pay:'pay', more:'more'};
+const unreadN = () => S.threads.reduce((a, t) => a + t.unread, 0);
+/* Open a conversation from anywhere (notifications, Ask Quad, a teacher's page): Messages, then the thread, on Today or Profile */
+const threadStack = id => { if (S.tab !== 'more') S.tab = 'home'; S.stack = [{to:'inbox', p:{}}, {to:'thread', p:{id}}]; };
 const isDark = () => { const r = document.documentElement.dataset.theme; return r ? r === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches; };
 function current() { return S.stack.length ? S.stack[S.stack.length - 1] : {to: S.tab, p: {}}; }
 function renderTabbar() {
-  const unread = S.threads.reduce((a, t) => a + t.unread, 0), due = S.invoices.filter(i => i.amt > i.paid).length, mn = momUnseen().length;
-  document.getElementById('tabbar').innerHTML = [['home','Home','home'],['moments','Circle','orbit', mn],['pay','Payments','pay', due],['inbox','Messages','msg', unread],['more','More','more']]
+  const mb = document.getElementById('msgBadge'), un = unreadN(); if (mb) { mb.textContent = un; mb.hidden = !un; mb.parentElement.setAttribute('aria-label', un ? `Messages, ${un} unread` : 'Messages'); }
+  const due = S.invoices.filter(i => i.amt > i.paid).length, mn = momUnseen().length;
+  document.getElementById('tabbar').innerHTML = [['home','Today','home'],['moments','Circle','orbit', mn],['pay','Pay','pay', due],['more','Profile','user']]
     .map(([k, l, i, b]) => `<button class="${S.tab===k?'on':''}" data-act="tab" data-t="${k}" aria-current="${S.tab===k?'page':'false'}" ${b ? `aria-label="${l}, ${b} new"` : ''}><span class="ti">${ic(i,21,S.tab===k?2.2:1.8)}</span>${l}${b?`<span class="badge">${b}</span>`:''}</button>`).join('');
 }
 function render(dir) {
@@ -1933,7 +1957,7 @@ const PUSHES = {
   absence:{t:'Attendance alert', m:'Leo was not in the 08:00 register. Tap to give a reason.', go:() => { S.kid = 1; S.tab = 'home'; S.stack = [{to:'absence', p:{}}]; }},
   reward:{t:'Reward earned', m:'Maya earned 5 house points for her science fair project.', go:() => { S.kid = 0; KIDS[0].points += 5; S.celebrate = true; S.tab = 'home'; S.stack = [{to:'conduct', p:{}}]; }},
   invoice:{t:'New invoice', get m() { return `Transport · Route 4 for Leo · ${money(42000)} due 15 Oct.`; }, go:() => { S.invoices.forEach(i => { if (i.no === 'INV-26-01120') { i.paid = 0; } }); S.tab = 'pay'; S.stack = []; }},
-  message:{t:'Ms. Grace Okafor', m:'Maya did brilliantly in today’s spelling test!', go:() => { S.tab = 'inbox'; S.stack = [{to:'thread', p:{id:1}}]; }}
+  message:{t:'Ms. Grace Okafor', m:'Maya did brilliantly in today’s spelling test!', go:() => threadStack(1)}
 };
 let pushGo = null, pushT;
 function showPush(t, m, go) {
@@ -2138,7 +2162,7 @@ function paSignOut() { try { sessionStorage.removeItem('quad-auth-parent'); } ca
 /* ---------- Teacher threads, thanks, chats ---------- */
 function threadFor(k) { let t = S.threads.find(x => x.id === k.thread) || S.threads.find(x => x.from === k.teacher.full);
   if (!t) { t = {id: Math.max(0, ...S.threads.map(x => x.id)) + 1, from: k.teacher.full, role: `${cap(k.teacher.role)} · ${k.first}`, unread: 0, msgs: []}; S.threads.unshift(t); } return t; }
-function openThread(k, draft) { closeSheet(); aqClose(); const t = threadFor(k); S.tab = 'inbox'; S.stack = [{to:'thread', p:{id:t.id}}]; S.draft = draft || null; render('r'); }
+function openThread(k, draft) { closeSheet(); aqClose(); const t = threadFor(k); threadStack(t.id); S.draft = draft || null; render('r'); }
 function rerender() { const b = document.getElementById('body'), st = b.scrollTop; render(); b.scrollTop = st; }
 function petals(el) { if (reduced() || !el) return; const sc = document.getElementById('screen'), r = el.getBoundingClientRect(), sr = sc.getBoundingClientRect();
   const w = document.createElement('div'); w.className = 'petals'; w.style.left = (r.left - sr.left + r.width / 2) + 'px'; w.style.top = (r.top - sr.top + r.height / 2) + 'px';
@@ -2250,7 +2274,7 @@ const ACT = {
   theme: () => { const r = document.documentElement; r.dataset.theme = isDark() ? 'light' : 'dark'; try { localStorage.setItem('quad-parent-theme', r.dataset.theme); } catch (e) {} render(); },
   newMsg: () => openSheet(`<h2 style="font:800 20px var(--f-display)">New message</h2><div class="field"><label for="nm_to">To</label><select class="input" id="nm_to">${STAFF.map(s => `<option>${s[0]}</option>`).join('')}</select></div><div class="field"><label for="nm_b">Message</label><textarea class="input" id="nm_b" rows="4" placeholder="Write your message"></textarea></div><button class="btn" data-act="sendNew">${ic('send',18)}Send</button>`),
   sendNew: () => { const to = document.getElementById('nm_to').value, b = document.getElementById('nm_b').value.trim(); if (!b) { toast('Write a message before sending'); return; }
-    const id = S.threads.length + 1; S.threads.unshift({id, from: to, role:SCHOOL.name, unread:0, msgs:[{me:true, t:b, at:'Now'}]}); closeSheet(); S.tab = 'inbox'; S.stack = [{to:'thread', p:{id}}]; render('r'); },
+    const id = S.threads.length + 1; S.threads.unshift({id, from: to, role:SCHOOL.name, unread:0, msgs:[{me:true, t:b, at:'Now'}]}); closeSheet(); threadStack(id); render('r'); },
   unlock, lockApp: () => { closeSheet(); aqClose(); if (!document.getElementById('signin').hidden) return; document.getElementById('lock').classList.remove('off'); },
   paGo: el => { PA.step = el.dataset.v; paRender(); },
   paMode: () => { PA.email = !PA.email; paRender(); },
@@ -2264,7 +2288,7 @@ const ACT = {
   jump: el => { if (!document.getElementById('signin').hidden) paFinish(); else unlock(); closeSheet(); closeStory(); aqClose(); const to = el.dataset.to; S.demoT = null;
     if (to === 'pay') { S.tab = 'pay'; S.stack = []; render(); setTimeout(() => paySheet(), 250); }
     else if (['moments', 'people', 'learning'].includes(to)) { S.tab = 'moments'; S.stack = []; S.circ = to; if (to !== 'moments') S.kid = 0; if (to === 'moments') S.momF = 'all'; render(); }
-    else if (to === 'quiet') { S.demoT = 19 * 60 + 30; S.tab = 'inbox'; S.stack = [{to:'thread', p:{id:1}}]; render('r'); toast('Demo clock set to 19:30, inside quiet hours'); }
+    else if (to === 'quiet') { S.demoT = 19 * 60 + 30; S.tab = 'home'; threadStack(1); render('r'); toast('Demo clock set to 19:30, inside quiet hours'); }
     else if (to === 'askq') { S.tab = 'home'; S.stack = []; render(); setTimeout(() => aqOpen(), 200); }
     else if (to === 'doing') { S.kid = 1; S.tab = 'home'; S.stack = [{to, p:{}}]; render('r'); }
     else if (to === 'stories') { S.tab = 'home'; S.stack = []; render(); setTimeout(() => openStory(0), 300); }
@@ -2295,7 +2319,7 @@ const ACT = {
   aqAsk: el => aqAsk(el.dataset.q),
   aqGo: el => { aqClose(); closeSheet(); const to = el.dataset.to, kd = el.dataset.kid;
     if (to === 'moments') { S.momF = kd === '' || kd === undefined ? 'all' : kd; S.tab = 'moments'; S.circ = 'moments'; S.stack = []; render(); return; }
-    if (kd !== undefined && kd !== '') S.kid = +kd; if (['pay','inbox','more'].includes(to)) { S.tab = to; S.stack = []; render(); } else push(to); },
+    if (kd !== undefined && kd !== '') S.kid = +kd; if (['pay','more'].includes(to)) { S.tab = to; S.stack = []; render(); } else if (to === 'inbox') { S.tab = 'home'; S.stack = [{to:'inbox', p:{}}]; render('r'); } else push(to); },
   aqThanks: el => { const m = momThank(el.dataset.id); el.innerHTML = ic('check',14) + 'Thanks sent'; el.disabled = true; if (m) { petals(el); toast(`Thank-you sent to ${m.by}`); } if (['home','moments'].includes(current().to)) rerender(); },
   momF: el => { S.momF = el.dataset.v; rerender(); },
   momGo: el => { S.momF = el.dataset.kid !== undefined ? el.dataset.kid : 'all'; S.tab = 'moments'; S.circ = 'moments'; S.stack = []; render('r'); },
@@ -2315,6 +2339,8 @@ const ACT = {
   famSheet: el => famSheet(el.dataset.key),
   famInvite: el => famInvite(el && el.dataset && el.dataset.name),
   famPickup: () => { closeSheet(); push('pickup'); },
+  schoolSheet: () => schoolSheet(),
+  schoolPick: el => { closeSheet(); if (el.getAttribute('aria-checked') === 'true') return; ACT.brandDemo(el); },
   famSend: () => { const n = document.getElementById('fi_n').value.trim(), ph = document.getElementById('fi_p').value.trim(), d = ph.replace(/\D/g, ''), ks = [...document.querySelectorAll('.fi-k:checked')].map(x => x.value), err = document.getElementById('fi_e');
     if (n.split(/\s+/).length < 2) { err.textContent = 'Enter their first and last name.'; return; } if (d.length < 9) { err.textContent = 'Enter their mobile number, like +44 7700 900123.'; return; } if (!ks.length) { err.textContent = 'Choose at least one child.'; return; }
     const f = famCircle(); f.push({id:'f' + Date.now().toString(36), name:n, rel:document.getElementById('fi_r').value, phone:ph.replace(/\d(?=(?:\D*\d){4})/g, '•'), kids:ks, sees:'moments', status:'invited', at:TODAY}); lsSetP('quad-family-circle', f);
@@ -2325,7 +2351,7 @@ const ACT = {
     openSheet(`<h2 class="sh-t">You tried it at home</h2><p class="sh-p">“${esc(l.tryHome)}”</p><div class="field"><label for="lt_n">A line for ${esc(l.by)} (optional)</label><textarea class="input" id="lt_n" rows="3" maxlength="140" placeholder="e.g. ${esc(k.first)} wrote to her grandmother in Lisbon"></textarea></div><button class="btn" data-act="lrnSave" data-id="${esc(l.id)}">${ic('check', 18, 2.4)}Tell ${esc(l.by)} we tried it</button><button class="btn sec" data-act="closeSheet">Not now</button>`.replace('her grandmother', k.he === 'she' ? 'her grandmother' : 'his grandmother')); },
   lrnSave: el => { const l = learning().find(x => x.id === el.dataset.id), k = kid(), T = lsGetP('quad-learning-tried', {}), note = (document.getElementById('lt_n').value || '').trim().slice(0, 140);
     T[l.id] = T[l.id] || {}; T[l.id][k.first] = {at:hmP(demoMin()), note}; lsSetP('quad-learning-tried', T); closeSheet(); rerender(); toast(`Thanks! ${l.by} will see that you tried it at home.`); },
-  pMsg: el => { const k = kid(), P = personOf(k, el.dataset.key), t = personThread(k, P); closeSheet(); S.tab = 'inbox'; S.stack = [{to:'thread', p:{id:t.id}}]; render('r'); },
+  pMsg: el => { const k = kid(), P = personOf(k, el.dataset.key), t = personThread(k, P); closeSheet(); threadStack(t.id); render('r'); },
   pThanks: el => { const k = kid(), P = personOf(k, el.dataset.key), id = k.id + '|' + P.key; S.pthx = S.pthx || {}; if (S.pthx[id]) return;
     const t = personThread(k, P); t.msgs.push({me:true, t:`Thank you, ${P.short}, for everything you’re doing with ${k.first} this term. It really shows at home.`, at:'Now'}); S.pthx[id] = nowHM(); rerender();
     petals(document.querySelector('[data-act="pThanks"]')); toast(`Thank-you sent to ${P.short}`);
