@@ -22,11 +22,20 @@ export const termsPage: ArticleContent = {
   description:
     'Quad’s terms of service: the agreement with each school, acceptable use, accounts, fees, data ownership, availability, changes and governing law.',
   updated: { date: '2026-10-09', version: '0.1' },
-  hasContents: true,
+  layout: 'legal',
+  inShort: [
+    'The agreement is between Quad and the school. Staff, parents and relatives use Quad under it.',
+    'Everything the school puts into Quad belongs to the school. We never sell it.',
+    'When parents pay school fees in the app, the money goes to the school. Quad does not hold it.',
+    'Ask Quad can be wrong, so check its answers and drafts before you rely on them.',
+    'We email school admins at least 30 days before a material change to these terms.',
+    'Quad is in development. These terms describe how we intend to work with schools from the first pilot.',
+  ],
   sections: [
     {
       id: 'agreement',
       title: 'Who the agreement is with',
+      icon: 'doc',
       body: (
         <>
           <p>
@@ -44,6 +53,7 @@ export const termsPage: ArticleContent = {
     {
       id: 'people',
       title: 'Staff, parents and relatives',
+      icon: 'family',
       body: (
         <>
           <p>
@@ -61,6 +71,7 @@ export const termsPage: ArticleContent = {
     {
       id: 'accounts',
       title: 'Accounts and security',
+      icon: 'key',
       body: (
         <ul>
           <li>Each account is for one person. Do not share passwords or sign-in codes.</li>
@@ -79,6 +90,7 @@ export const termsPage: ArticleContent = {
     {
       id: 'acceptable-use',
       title: 'Acceptable use',
+      icon: 'rule',
       body: (
         <>
           <p>When using Quad, do not:</p>
@@ -105,6 +117,7 @@ export const termsPage: ArticleContent = {
     {
       id: 'fees',
       title: 'Fees',
+      icon: 'card',
       body: (
         <>
           <p>
@@ -121,6 +134,7 @@ export const termsPage: ArticleContent = {
     {
       id: 'data',
       title: 'The school owns its data',
+      icon: 'server',
       body: (
         <>
           <p>
@@ -138,6 +152,7 @@ export const termsPage: ArticleContent = {
     {
       id: 'availability',
       title: 'Availability and support',
+      icon: 'power',
       body: (
         <p>
           We work to keep Quad available and to tell schools about planned maintenance in advance.
@@ -149,6 +164,7 @@ export const termsPage: ArticleContent = {
     {
       id: 'changes',
       title: 'Changes to Quad and to these terms',
+      icon: 'swap',
       body: (
         <p>
           Quad will keep improving. We email school admins at least 30 days before a material change
@@ -160,6 +176,7 @@ export const termsPage: ArticleContent = {
     {
       id: 'ending',
       title: 'Ending the agreement',
+      icon: 'door',
       body: (
         <p>
           The agreement lasts for the term in the school’s order form. Either side may end it as the
@@ -171,6 +188,7 @@ export const termsPage: ArticleContent = {
     {
       id: 'liability',
       title: 'Liability',
+      icon: 'shield',
       body: (
         <>
           <p>
@@ -183,6 +201,7 @@ export const termsPage: ArticleContent = {
     {
       id: 'law',
       title: 'Governing law',
+      icon: 'scale',
       body: (
         <p>
           These terms are governed by: {COMPANY.governingLaw}. Disputes go to: {COMPANY.courts}.
@@ -192,6 +211,7 @@ export const termsPage: ArticleContent = {
     {
       id: 'contact',
       title: 'Contact',
+      icon: 'chat',
       body: (
         <p>
           {COMPANY.legalName}, {COMPANY.registeredAddress} ({COMPANY.registrationNumber}). Email{' '}

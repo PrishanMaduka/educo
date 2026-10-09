@@ -14,7 +14,6 @@ const PAGES = [
   { path: '/security', title: 'Security & trust – Quad', h1: 'How Quad keeps school data safe.' },
   { path: '/legal/privacy', title: 'Privacy policy – Quad', h1: 'Privacy policy' },
   { path: '/legal/terms', title: 'Terms of service – Quad', h1: 'Terms of service' },
-  { path: '/legal/subprocessors', title: 'Sub-processors – Quad', h1: 'Sub-processors' },
 ] as const;
 
 /** The navy header and the cream page, light and dark (spec 19 palette). */
@@ -66,7 +65,7 @@ test.describe('public pages', () => {
   }
 
   test('the legal pages show when they last changed and their version', async ({ page }) => {
-    for (const path of ['/legal/privacy', '/legal/terms', '/legal/subprocessors']) {
+    for (const path of ['/legal/privacy', '/legal/terms']) {
       await page.goto(path);
       await expect(page.getByText(/^Last updated \d{1,2} \w+ 20\d\d · Version \S+$/)).toBeVisible();
     }
@@ -84,9 +83,66 @@ test.describe('public pages', () => {
     await expect(page.getByRole('heading', { name: 'Cookies', level: 2 })).toBeInViewport();
   });
 
-  test('the sub-processor list names every sub-processor', async ({ page }) => {
-    await page.goto('/legal/subprocessors');
-    const wide = (page.viewportSize()?.width ?? 0) > 760;
+  test('About shows the three apps, the timeline and the founder (D45)', async ({ page }) => {
+    await page.goto('/about');
+    for (const name of ['The staff portal', 'The Quad app for parents', 'The platform console']) {
+      await expect(page.getByRole('heading', { name, level: 3 })).toBeVisible();
+    }
+    const stage = page.getByRole('region', { name: 'Where we are now' });
+    for (const step of ['Founded in 2026', 'In development', 'Pilots with schools']) {
+      await expect(stage.getByText(step, { exact: true })).toBeVisible();
+    }
+    await expect(page.getByRole('heading', { name: 'Prishan Maduka', level: 3 })).toBeVisible();
+    await expect(page.getByRole('link', { name: /Book a 30-minute demo/ }).last()).toHaveAttribute(
+      'href',
+      '/#demo',
+    );
+  });
+
+  test('Security & trust shows each promise and opens its detail (D45)', async ({ page }) => {
+    await page.goto('/security');
+    await expect(
+      page.getByText('A query can only ever see one school’s rows.', { exact: true }),
+    ).toBeVisible();
+    const detail = page.getByText(
+      'The app connects to the database with its own role, which cannot bypass those rules.',
+    );
+    await expect(detail).toBeHidden();
+    const toggle = page.getByText('The detail: Each school’s data is kept apart');
+    await toggle.click();
+    await expect(detail).toBeVisible();
+    await expectNoSeriousA11yViolations(page);
+    await toggle.click();
+    await expect(detail).toBeHidden();
+    await expect(page.getByRole('heading', { name: 'Report a security issue' })).toBeVisible();
+  });
+
+  test('legal pages open with "In short" and keep "On this page" in reach (D45)', async ({
+    page,
+  }) => {
+    await page.goto('/legal/terms');
+    const inShort = page.getByRole('region', { name: 'In short' });
+    await expect(inShort.getByRole('listitem')).toHaveCount(6);
+    await expect(
+      inShort.getByText('Everything the school puts into Quad belongs to the school.', {
+        exact: false,
+      }),
+    ).toBeVisible();
+    const contents = page.getByRole('navigation', { name: 'On this page' });
+    await expect(contents.getByRole('link')).toHaveCount(12);
+    await page.getByRole('heading', { name: 'Governing law', level: 2 }).scrollIntoViewIfNeeded();
+    if ((page.viewportSize()?.width ?? 0) > 1100) {
+      // From 1100 px the list stays beside the cards as the page scrolls.
+      await expect(contents).toBeInViewport();
+    } else {
+      // Narrower, it is a row of chips above the cards.
+      await expect(contents).not.toBeInViewport();
+    }
+  });
+
+  test('the privacy policy names every sub-processor (D44)', async ({ page }) => {
+    await page.goto('/legal/privacy#subprocessors');
+    const list = page.getByRole('list', { name: 'Sub-processors' });
     for (const name of [
       'Amazon Web Services',
       'Anthropic',
@@ -99,10 +155,7 @@ test.describe('public pages', () => {
       'Plausible Analytics',
       'PayHere, Stripe',
     ]) {
-      const entry = wide
-        ? page.getByRole('rowheader', { name, exact: true })
-        : page.getByRole('heading', { name, exact: true, level: 3 });
-      await expect(entry).toBeVisible();
+      await expect(list.getByRole('heading', { name, exact: true, level: 3 })).toBeVisible();
     }
     await expect(
       page.getByText('Email support@quad-edu.com to be told about changes'),
@@ -118,7 +171,6 @@ test.describe('public pages', () => {
       ['Security & trust', '/security'],
       ['Privacy', '/legal/privacy'],
       ['Terms', '/legal/terms'],
-      ['Sub-processors', '/legal/subprocessors'],
       ['About', '/about'],
     ] as const) {
       await footer.getByRole('link', { name, exact: true }).click();

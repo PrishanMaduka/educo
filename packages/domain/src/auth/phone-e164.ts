@@ -8,6 +8,8 @@ export interface PhoneCountry {
   readonly nationalDigits: number;
   /** The national part of a mobile number, as a regular expression source (SMS needs one). */
   readonly mobilePattern: string;
+  /** The national part of any number, landlines too (a school's office phone, D35). */
+  readonly numberPattern: string;
 }
 
 /**
@@ -16,7 +18,13 @@ export interface PhoneCountry {
  * by owner decision only.
  */
 export const PHONE_COUNTRIES: readonly PhoneCountry[] = Object.freeze([
-  Object.freeze({ country: 'LK', dialCode: '94', nationalDigits: 9, mobilePattern: '7\\d{8}' }),
+  Object.freeze({
+    country: 'LK',
+    dialCode: '94',
+    nationalDigits: 9,
+    mobilePattern: '7\\d{8}',
+    numberPattern: '[1-9]\\d{8}',
+  }),
 ]);
 
 export type PhoneParse =
@@ -42,6 +50,9 @@ function nationalNumber(phoneCountry: PhoneCountry, digits: string): PhoneParse 
 const withPlus = (compact: string): string =>
   compact.startsWith('00') ? `+${compact.slice(2)}` : compact;
 
+/** A number as typed, without separators, and with `00` read as `+`. */
+export const compactPhone = (input: string): string => withPlus(input.replace(SEPARATORS, ''));
+
 /**
  * A mobile number of `country` in E.164, from the national digits (`77 000 0001`, or with one
  * trunk 0, `077 000 0001`) or the full number (`+94 77 000 0001`, `0094 77 000 0001`). Only
@@ -51,7 +62,7 @@ const withPlus = (compact: string): string =>
 export function parsePhone(country: string, input: string): PhoneParse {
   const phoneCountry = PHONE_COUNTRIES.find((candidate) => candidate.country === country);
   if (phoneCountry === undefined) return UNSUPPORTED;
-  const compact = withPlus(input.replace(SEPARATORS, ''));
+  const compact = compactPhone(input);
   const prefix = `+${phoneCountry.dialCode}`;
   if (compact.startsWith('+')) {
     return compact.startsWith(prefix)
@@ -67,7 +78,7 @@ export function parsePhone(country: string, input: string): PhoneParse {
  * refused.
  */
 export function parseInternationalPhone(input: string): PhoneParse {
-  const compact = withPlus(input.replace(SEPARATORS, ''));
+  const compact = compactPhone(input);
   if (!/^\+\d+$/.test(compact)) return INVALID;
   const phoneCountry = PHONE_COUNTRIES.find((candidate) =>
     compact.startsWith(`+${candidate.dialCode}`),

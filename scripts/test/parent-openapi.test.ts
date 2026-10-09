@@ -84,6 +84,8 @@ describe('every tag is classified (fix round 2: an allow-list, not a filter)', (
       'staff',
       'users',
       'roles',
+      'school',
+      'audit',
       'public',
     ]);
   });

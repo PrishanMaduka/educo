@@ -4,7 +4,13 @@ import { ZodError } from 'zod';
 import { errorForLog } from '../observability/logger';
 import { NO_OP_REPORTER } from '../observability/sentry';
 
-import { AppError, DEFAULT_MESSAGES, RateLimitedError, UnavailableError } from './errors';
+import {
+  AppError,
+  DEFAULT_MESSAGES,
+  RateLimitedError,
+  StaleVersionError,
+  UnavailableError,
+} from './errors';
 import { fieldsFromZodError } from './zod.pipe';
 
 import type { ErrorReporter } from '../observability/sentry';
@@ -109,6 +115,9 @@ export function sendError(
   }
   if (error instanceof UnavailableError) {
     void reply.header('retry-after', '30');
+  }
+  if (error instanceof StaleVersionError) {
+    void reply.header('etag', error.etag);
   }
   void reply.status(response.status).send(response.body);
 }

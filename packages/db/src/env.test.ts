@@ -1,10 +1,20 @@
-import { readFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { parseEnv } from 'node:util';
 
 import { LOCAL_SEED_PASSWORD } from '@quad/contracts';
 import { describe, expect, it } from 'vitest';
 
-import { LOCAL_DATABASE_URLS, databaseUrls, seedPasswordRefusal, withDatabaseName } from './env';
+import {
+  LOCAL_DATABASE_URLS,
+  databaseUrls,
+  loadLocalEnvFile,
+  loadRootEnv,
+  localSeedRefusal,
+  seedPasswordRefusal,
+  withDatabaseName,
+} from './env';
 
 describe('databaseUrls', () => {
   it('reads the three urls from the environment', () => {
@@ -64,9 +74,17 @@ describe('seedPasswordRefusal (D32)', () => {
     expect(example.SEED_PASSWORD).toBe(LOCAL_SEED_PASSWORD);
   });
 
-  it.each([undefined, 'local'])('allows anything when APP_ENV is %j', (appEnv) => {
-    expect(seedPasswordRefusal({ APP_ENV: appEnv })).toBeNull();
+  it.each([undefined, 'local'])('allows the placeholder when APP_ENV is %j', (appEnv) => {
     expect(seedPasswordRefusal({ APP_ENV: appEnv, SEED_PASSWORD: LOCAL_SEED_PASSWORD })).toBeNull();
+    expect(seedPasswordRefusal({ APP_ENV: appEnv, SEED_PASSWORD: 'anything-else' })).toBeNull();
+  });
+
+  it.each([undefined, 'local'])('still requires a SEED_PASSWORD when APP_ENV is %j', (appEnv) => {
+    for (const value of [undefined, '']) {
+      expect(seedPasswordRefusal({ APP_ENV: appEnv, SEED_PASSWORD: value })).toBe(
+        'SEED_PASSWORD is required when APP_ENV is local.',
+      );
+    }
   });
 
   it.each(['staging', 'production'])('requires a SEED_PASSWORD when APP_ENV is %s', (appEnv) => {
@@ -88,4 +106,74 @@ describe('seedPasswordRefusal (D32)', () => {
       seedPasswordRefusal({ APP_ENV: 'staging', SEED_PASSWORD: 'a-real-staging-password' }),
     ).toBeNull();
   });
+});
+
+describe('localSeedRefusal (pnpm db:seed)', () => {
+  const local = LOCAL_DATABASE_URLS.ownerUrl;
+
+  it.each([undefined, '', 'local'])(
+    'allows APP_ENV %j with a database on this machine',
+    (appEnv) => {
+      for (const url of [
+        local,
+        'postgres://o:p@127.0.0.1:5432/quad',
+        'postgres://o:p@[::1]/quad',
+      ]) {
+        expect(localSeedRefusal({ APP_ENV: appEnv }, url)).toBeNull();
+      }
+    },
+  );
+
+  it.each(['staging', 'production', 'test'])('refuses APP_ENV %s', (appEnv) => {
+    expect(localSeedRefusal({ APP_ENV: appEnv }, local)).toBe(
+      `pnpm db:seed is for local databases only (APP_ENV is ${appEnv}).`,
+    );
+  });
+
+  it('refuses a database on another host, even with APP_ENV local', () => {
+    expect(
+      localSeedRefusal({ APP_ENV: 'local' }, 'postgres://o:p@db.staging.example.test:5432/quad'),
+    ).toBe(
+      'pnpm db:seed is for local databases only (the database is on db.staging.example.test).',
+    );
+  });
+});
+
+describe('loadLocalEnvFile (the one gated .env loader)', () => {
+  const file = join(mkdtempSync(join(tmpdir(), 'quad-env-')), '.env');
+  writeFileSync(file, 'DEV_FIXED_OTP=000000\nREDIS_URL=redis://from-file:6379\n');
+
+  it.each([[undefined], [''], ['local']])('loads the file when APP_ENV is %j', (appEnv) => {
+    const env: NodeJS.ProcessEnv = { APP_ENV: appEnv };
+    expect(loadLocalEnvFile(env, file)).toBe(true);
+    expect(env.DEV_FIXED_OTP).toBe('000000');
+  });
+
+  it('keeps variables that are already set', () => {
+    const env: NodeJS.ProcessEnv = { REDIS_URL: 'redis://set:6379' };
+    loadLocalEnvFile(env, file);
+    expect(env.REDIS_URL).toBe('redis://set:6379');
+  });
+
+  it.each([['staging'], ['production']])(
+    'never reads the file when APP_ENV is %s (a stray .env must not leak local flags)',
+    (appEnv) => {
+      const env: NodeJS.ProcessEnv = { APP_ENV: appEnv };
+      expect(loadLocalEnvFile(env, file)).toBe(false);
+      expect(env.DEV_FIXED_OTP).toBeUndefined();
+    },
+  );
+
+  it('does nothing when the file is missing', () => {
+    expect(loadLocalEnvFile({}, join(tmpdir(), 'quad-no-such-dir', '.env'))).toBe(false);
+  });
+
+  it.each(['staging', 'production'])(
+    "loadRootEnv ignores the repository's .env when APP_ENV is %s",
+    (appEnv) => {
+      const env: NodeJS.ProcessEnv = { APP_ENV: appEnv };
+      expect(loadRootEnv(env)).toBe(false);
+      expect(env).toEqual({ APP_ENV: appEnv });
+    },
+  );
 });

@@ -9,8 +9,10 @@ import { SessionModule } from './common/session/session.module';
 import { CoreModule } from './core.module';
 import { DatabaseModule } from './database/database.module';
 import { HealthModule } from './health/health.module';
+import { AuditLogModule } from './modules/audit/audit-log.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { MeModule } from './modules/me/me.module';
+import { SchoolModule } from './modules/school/school.module';
 import { UsersModule } from './modules/users/users.module';
 import { OpenApiController } from './openapi/openapi.controller';
 import { PlatformModule } from './platform/platform.module';
@@ -77,6 +79,8 @@ export class AppModule {
         AuthModule.register(overrides.passwordResets, overrides.otpSends),
         MeModule,
         UsersModule,
+        SchoolModule,
+        AuditLogModule,
         EnquiryModule,
         ...(overrides.testModules ?? []),
       ],

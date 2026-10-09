@@ -28,10 +28,17 @@ export interface ApiRoute {
   readonly request?: {
     readonly params?: z.AnyZodObject;
     readonly query?: z.AnyZodObject;
+    /** Request headers the route reads (`If-Match`), so the generated clients send them. */
+    readonly headers?: z.AnyZodObject;
     readonly body?: z.ZodTypeAny;
   };
-  /** Success (and expected non-error) responses by status; omit `schema` for an empty body. */
-  readonly responses: Readonly<Record<number, { description: string; schema?: z.ZodTypeAny }>>;
+  /**
+   * Success (and expected non-error) responses by status; omit `schema` for an empty body. `csv`
+   * also documents a `text/csv` body, for a list that answers `Accept: text/csv` (spec 06).
+   */
+  readonly responses: Readonly<
+    Record<number, { description: string; schema?: z.ZodTypeAny; csv?: boolean }>
+  >;
   /** Error statuses this route can return; each is documented with the `ErrorBody` schema. */
   readonly errors?: readonly number[];
   /** A body limit in bytes for this route, replacing Fastify's 1 MB default (`createApp`). */
@@ -61,19 +68,27 @@ export function named<T extends z.ZodTypeAny>(name: string, schema: T): T {
 const ErrorBody = named('ErrorBody', ErrorBodySchema);
 
 const json = (schema: z.ZodTypeAny) => ({ 'application/json': { schema } });
+const CsvText = z.string().openapi({ description: 'RFC 4180 CSV with a header row (UTF-8)' });
 
 function toRouteConfig(route: ApiRoute): RouteConfig {
   const responses: RouteConfig['responses'] = {};
   for (const [status, response] of Object.entries(route.responses)) {
     responses[status] = {
       description: response.description,
-      ...(response.schema ? { content: json(response.schema) } : {}),
+      ...(response.schema
+        ? {
+            content: {
+              ...json(response.schema),
+              ...(response.csv === true ? { 'text/csv': { schema: CsvText } } : {}),
+            },
+          }
+        : {}),
     };
   }
   for (const status of route.errors ?? []) {
     responses[String(status)] = { description: 'Error', content: json(ErrorBody) };
   }
-  const { params, query, body } = route.request ?? {};
+  const { params, query, headers, body } = route.request ?? {};
   return {
     method: route.method,
     path: `${API_PREFIX}${route.path}`,
@@ -82,6 +97,7 @@ function toRouteConfig(route: ApiRoute): RouteConfig {
     request: {
       ...(params ? { params } : {}),
       ...(query ? { query } : {}),
+      ...(headers ? { headers } : {}),
       ...(body ? { body: { content: json(body), required: true } } : {}),
     },
     responses,

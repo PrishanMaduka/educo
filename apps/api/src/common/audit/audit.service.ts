@@ -60,6 +60,49 @@ export class AuditService {
       ctx.platformUserId === null || ctx.supportSessionId === null
         ? null
         : { platformUserId: ctx.platformUserId, supportSessionId: ctx.supportSessionId };
+    await this.insert(ctx, support, action, target, meta);
+    if (support !== null) {
+      await this.db.definers.recordSupportAudit(ctx.tx, {
+        supportSessionId: support.supportSessionId,
+        action,
+        targetType: target?.type ?? null,
+        targetId: target?.id ?? null,
+        meta,
+      });
+    }
+  }
+
+  /**
+   * The school's entry for a support visit starting (its link redeemed) or ending ("Exit to
+   * platform", sign-out): it names the Quad staff member and the visit like any support entry,
+   * but writes no `platform_audit` copy, because the console's own entry already records it once
+   * (`support_session.started` when the link is made, `support_session.ended` by
+   * `end_support_session`). The visit may already have ended, so `record_support_audit` would
+   * refuse it anyway.
+   */
+  async recordVisitBoundary(
+    ctx: Omit<AuditContext, 'userId'> & {
+      readonly supportSessionId: string;
+      readonly platformUserId: string;
+    },
+    action: Extract<AuditAction, 'support_session.started' | 'support_session.ended'>,
+  ): Promise<void> {
+    await this.insert(
+      { ...ctx, userId: null },
+      { platformUserId: ctx.platformUserId, supportSessionId: ctx.supportSessionId },
+      action,
+      { type: 'support_session', id: ctx.supportSessionId },
+      {},
+    );
+  }
+
+  private async insert(
+    ctx: AuditContext,
+    support: { readonly platformUserId: string; readonly supportSessionId: string } | null,
+    action: AuditAction,
+    target: AuditTarget | null,
+    meta: AuditMeta,
+  ): Promise<void> {
     await ctx.tx.insert(auditLog).values({
       tenantId: ctx.tenantId,
       actorUserId: support === null ? ctx.userId : null,
@@ -71,14 +114,5 @@ export class AuditService {
       meta,
       ip: ctx.ip,
     });
-    if (support !== null) {
-      await this.db.definers.recordSupportAudit(ctx.tx, {
-        supportSessionId: support.supportSessionId,
-        action,
-        targetType: target?.type ?? null,
-        targetId: target?.id ?? null,
-        meta,
-      });
-    }
   }
 }

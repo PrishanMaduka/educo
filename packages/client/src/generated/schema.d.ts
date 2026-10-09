@@ -1719,6 +1719,334 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/platform/audit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Console → Audit log: every school’s platform_audit entries, newest first, filtered by Quad staff member, school, action and time (any console role). With Accept: text/csv, every filtered entry as a CSV download (the export is recorded; more than 10,000 entries is 422) */
+        get: {
+            parameters: {
+                query?: {
+                    cursor?: string;
+                    limit?: number;
+                    actor?: string;
+                    tenantId?: string;
+                    action?: "tenant.renamed" | "support_session.started" | "support_session.ended" | "auth.password_accepted" | "auth.sign_in" | "auth.sign_in_failed" | "auth.two_step_setup_started" | "auth.two_step_enabled" | "auth.sign_out" | "audit.exported" | "auth.password_reset" | "user.invited" | "user.invite_accepted" | "user.role_changed" | "user.deactivated" | "user.reactivated" | "user.two_step_reminded" | "user.password_reset_sent" | "user.signed_out_everywhere" | "role.created" | "role.updated" | "role.deleted" | "role.permissions_changed" | "role_preview.started" | "role_preview.ended" | "settings.updated" | "sensitive.accessed";
+                    from?: string;
+                    to?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description A page of the log, or the CSV export */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PlatformAuditLog"];
+                        "text/csv": string;
+                    };
+                };
+                /** @description Error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/platform/tenants": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Console → Schools: every school that is not deleted, by name, with its id, short name, status and colour (any console role) */
+        get: {
+            parameters: {
+                query?: {
+                    cursor?: string;
+                    limit?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description A page of schools */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PlatformTenantList"];
+                    };
+                };
+                /** @description Error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/platform/tenants/{id}/support-session": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Console → Open as school admin: with a reason (10 to 500 characters), opens a 60-minute support visit to the school and returns a single-use link into the staff portal that works for 2 minutes (support, admin or owner role; needs X-CSRF-Token) */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["SupportSessionCreateInput"];
+                };
+            };
+            responses: {
+                /** @description The single-use link */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SupportSessionLink"];
+                    };
+                };
+                /** @description Error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/support-session": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Staff portal, /sign-in/support/{token}: use a support visit’s single-use link from the console and open the school as Quad support; sets the staff cookies until the visit ends. Every bad, used or expired link is 400 invalid_link */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["SupportSessionRedeemInput"];
+                };
+            };
+            responses: {
+                /** @description The visit is open */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SignInResult"];
+                    };
+                };
+                /** @description Error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/support-session/end": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Staff portal, Exit to platform: end this support visit, clear the staff cookies and return the console’s address (the visit’s own cookie; needs X-CSRF-Token) */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Where to go next */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SupportSessionExit"];
+                    };
+                };
+                /** @description Error */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/users": {
         parameters: {
             query?: never;
@@ -1797,7 +2125,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Invite 1 to 50 people by email with a role; an address already here is 422 already_member (needs X-CSRF-Token) */
+        /** Invite 1 to 50 people by email with a role; an address already on the staff is 422 already_member, a family member’s 422 family_member (needs X-CSRF-Token) */
         post: {
             parameters: {
                 query?: never;
@@ -2774,6 +3102,311 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/school": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** School settings → General, with the read-only time zone, branding and sign-in rules (managed by Quad), the summary and the etag (settings.view) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description The school */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["School"];
+                    };
+                };
+                /** @description Error */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Change General (name, office email and phone, address, SMS sender ID); Quad’s fields are refused with 400, a stale If-Match with 409 (settings.edit; needs X-CSRF-Token) */
+        patch: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description The `etag` value from the last response body, sent as it is. Do not copy the ETag header: a proxy may weaken it (W/), and a weak tag is refused with 409. */
+                    "if-match": string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["SchoolUpdateInput"];
+                };
+            };
+            responses: {
+                /** @description The school */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["School"];
+                    };
+                };
+                /** @description Error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
+    "/api/v1/school/branding": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The school’s colour and logo, set by Quad (any signed-in member) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description The branding */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SchoolBranding"];
+                    };
+                };
+                /** @description Error */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The school’s other settings, read-only for now (settings.view) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description The settings */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SchoolSettings"];
+                    };
+                };
+                /** @description Error */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/audit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Settings → Audit: the school’s audit log, newest first, filtered by person, action and time (settings.view). With Accept: text/csv, every filtered entry as a CSV download (needs sensitive.export_data; the export is audited; more than 10,000 entries is 422) */
+        get: {
+            parameters: {
+                query?: {
+                    cursor?: string;
+                    limit?: number;
+                    actor?: string;
+                    action?: "auth.sign_in" | "auth.sign_in_failed" | "auth.sign_out" | "auth.password_reset" | "auth.two_step_enabled" | "user.invited" | "user.invite_accepted" | "user.role_changed" | "user.deactivated" | "user.reactivated" | "user.two_step_reminded" | "user.password_reset_sent" | "user.signed_out_everywhere" | "role.created" | "role.updated" | "role.deleted" | "role.permissions_changed" | "role_preview.started" | "role_preview.ended" | "settings.updated" | "support_session.started" | "support_session.ended" | "audit.exported" | "sensitive.accessed";
+                    from?: string;
+                    to?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description A page of the log, or the CSV export */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AuditLog"];
+                        "text/csv": string;
+                    };
+                };
+                /** @description Error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/public/enquiry/{embedKey}": {
         parameters: {
             query?: never;
@@ -3117,6 +3750,68 @@ export interface components {
             /** @enum {string} */
             role: "owner" | "admin" | "support" | "billing" | "readonly";
         };
+        PlatformAuditLog: {
+            items: {
+                /** Format: uuid */
+                id: string;
+                /** Format: date-time */
+                at: string;
+                action: string;
+                summary: string;
+                actor: {
+                    /** @enum {string} */
+                    type: "quad";
+                    /** Format: uuid */
+                    id: string;
+                    name: string;
+                } | {
+                    /** @enum {string} */
+                    type: "system";
+                };
+                school: {
+                    /** Format: uuid */
+                    id: string;
+                    name: string;
+                } | null;
+                viaSupport: boolean;
+                target: {
+                    type: string;
+                    /** Format: uuid */
+                    id: string | null;
+                } | null;
+                meta: {
+                    [key: string]: unknown;
+                };
+                ip: string | null;
+            }[];
+            nextCursor: string | null;
+        };
+        PlatformTenantList: {
+            items: {
+                /** Format: uuid */
+                id: string;
+                name: string;
+                shortName: string;
+                /** @enum {string} */
+                status: "trial" | "onboarding" | "active" | "past_due" | "suspended" | "deleted";
+                brandColor: string | null;
+            }[];
+            nextCursor: string | null;
+        };
+        SupportSessionLink: {
+            /** Format: uri */
+            url: string;
+        };
+        SupportSessionCreateInput: {
+            reason: string;
+        };
+        SupportSessionRedeemInput: {
+            token: string;
+        };
+        SupportSessionExit: {
+            /** Format: uri */
+            redirect: string;
+        };
         StaffList: {
             items: {
                 /** Format: uuid */
@@ -3449,6 +4144,123 @@ export interface components {
                 };
             };
             sensitive: ("safeguarding" | "medical" | "finance_reports" | "export_data")[];
+        };
+        School: {
+            name: string;
+            shortName: string;
+            officeEmail: string | null;
+            officePhone: string | null;
+            address: string | null;
+            timeZone: string;
+            smsSenderId: string | null;
+            /** @enum {string|null} */
+            smsSenderStatus: "requested" | "approved" | null;
+            branding: {
+                color: string;
+                /** Format: uri */
+                logoUrl: string | null;
+            };
+            signIn: {
+                /** @enum {string} */
+                twoStep: "off" | "admins" | "staff" | "all";
+                passwordMinLength: number;
+                sessionHours: number;
+                ipAllowlist: string[];
+            };
+            summary: {
+                parts: ({
+                    /** @enum {string} */
+                    code: "ask_quad_on";
+                } | {
+                    /** @enum {string} */
+                    code: "ask_quad_off";
+                } | {
+                    /** @enum {string} */
+                    code: "quiet_hours";
+                    from: string;
+                    until: string;
+                    weekends: boolean;
+                } | {
+                    /** @enum {string} */
+                    code: "quiet_hours_off";
+                })[];
+                needs: ({
+                    /** @enum {string} */
+                    code: "add_office_email";
+                } | {
+                    /** @enum {string} */
+                    code: "sms_sender_pending";
+                    senderId: string;
+                })[];
+            };
+            /** @description The version to send back as If-Match with a change. Send this value from the body, not the ETag header: a proxy may weaken the header (W/), and a weak tag is refused. */
+            etag: string;
+        };
+        SchoolUpdateInput: {
+            name?: string;
+            /** Format: email */
+            officeEmail?: string | null;
+            officePhone?: string | null;
+            address?: string | null;
+            smsSenderId?: string | null;
+        };
+        SchoolBranding: {
+            color: string;
+            /** Format: uri */
+            logoUrl: string | null;
+        };
+        SchoolSettings: {
+            askQuadEnabled: boolean;
+            askQuadKeepConversations: boolean;
+            /** @enum {string} */
+            ewShareWithParents: "off" | "after_plan" | "automatic";
+            /** @enum {string} */
+            absenceAlert: "at_time" | "immediately";
+            absenceAlertTime: string;
+            reminderDays: number[];
+            /** @enum {string} */
+            photoConsentDefault: "class" | "family" | "none";
+            familyCircleEnabled: boolean;
+            quietHoursEnabled: boolean;
+            quietFrom: string;
+            quietUntil: string;
+            quietWeekends: boolean;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        AuditLog: {
+            items: {
+                /** Format: uuid */
+                id: string;
+                /** Format: date-time */
+                at: string;
+                action: string;
+                summary: string;
+                actor: {
+                    /** @enum {string} */
+                    type: "member";
+                    /** Format: uuid */
+                    id: string;
+                    name: string;
+                } | {
+                    /** @enum {string} */
+                    type: "quad_support";
+                } | {
+                    /** @enum {string} */
+                    type: "system";
+                };
+                viaSupport: boolean;
+                target: {
+                    type: string;
+                    /** Format: uuid */
+                    id: string | null;
+                } | null;
+                meta: {
+                    [key: string]: unknown;
+                };
+                ip: string | null;
+            }[];
+            nextCursor: string | null;
         };
         EnquiryInput: {
             parentName: string;

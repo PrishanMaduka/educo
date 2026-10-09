@@ -1,4 +1,4 @@
-import { seedDatabase, seedPasswordRefusal } from '@quad/db/admin';
+import { seedDatabase, seedPasswordRefusal, seedSecrets } from '@quad/db/admin';
 
 import { requireEnv, runCommand } from './run-command';
 
@@ -16,13 +16,18 @@ export function seedRefusal(env: Readonly<Record<string, string | undefined>>): 
   return seedPasswordRefusal(env);
 }
 
-/** `node dist/seed.js`: upserts the sample schools as the owner role (`DATABASE_OWNER_URL`). */
+/**
+ * `node dist/seed.js`: upserts the sample schools, console users and people as the owner role
+ * (`DATABASE_OWNER_URL`), sealing their authenticator secrets with `FIELD_ENCRYPTION_KEY`.
+ */
 async function seed(): Promise<string> {
   const refusal = seedRefusal(process.env);
   if (refusal !== null) {
     throw new Error(refusal);
   }
-  await seedDatabase(requireEnv(process.env, 'DATABASE_OWNER_URL'));
+  const ownerUrl = requireEnv(process.env, 'DATABASE_OWNER_URL');
+  requireEnv(process.env, 'FIELD_ENCRYPTION_KEY');
+  await seedDatabase(ownerUrl, seedSecrets(process.env));
   return 'Seed data is in place.';
 }
 

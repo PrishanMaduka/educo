@@ -48,7 +48,7 @@ const DEFINERS = [
   'session_by_token(bytea)',
   'auth_sign_in_rules(uuid)',
   'current_tenant_profile()',
-  'update_current_tenant_name(text)',
+  'update_current_tenant_name(text, text)',
   'consume_signed_token(text, text, timestamptz)',
   'record_support_audit(uuid, text, text, uuid, jsonb)',
   'ensure_account_for_email(citext)',
@@ -617,8 +617,14 @@ describe('support sessions by token hash (R-support-token)', () => {
     const support = await insertSupportSession(withPlatform, quadStaff.id, schoolB.id);
     const tokenHash = randomTokenHash();
     await definers.redeemSupportSession(support.id, tokenHash);
-    await definers.endSupportSession(tokenHash);
-    await definers.endSupportSession(tokenHash);
+    // The first call names the visit it ended (Task 16: the API audits it in the school once);
+    // the second finds nothing to end.
+    await expect(definers.endSupportSession(tokenHash)).resolves.toEqual({
+      supportSessionId: support.id,
+      tenantId: schoolB.id,
+      platformUserId: quadStaff.id,
+    });
+    await expect(definers.endSupportSession(tokenHash)).resolves.toBeNull();
     await expect(definers.sessionByToken(tokenHash)).resolves.toBeNull();
     const [row] = await platformRows<{ ended: boolean }>(
       'select ended_at is not null as ended from support_sessions where id = $1',
@@ -641,6 +647,72 @@ describe('support sessions by token hash (R-support-token)', () => {
   });
 });
 
+describe('endSupportSessionIn (Task 17)', () => {
+  it("ends the visit in the caller's school transaction, and a rollback ends nothing", async () => {
+    const support = await insertSupportSession(withPlatform, quadStaff.id, schoolA.id);
+    const tokenHash = randomTokenHash();
+    await definers.redeemSupportSession(support.id, tokenHash);
+    const isEnded = async () =>
+      (
+        await platformRows<{ ended: boolean }>(
+          'select ended_at is not null as ended from support_sessions where id = $1',
+          [support.id],
+        )
+      )[0]?.ended;
+
+    await expect(
+      withTenant(schoolA.id, async (tx) => {
+        await expect(definers.endSupportSessionIn(tx, tokenHash)).resolves.toMatchObject({
+          supportSessionId: support.id,
+          tenantId: schoolA.id,
+        });
+        throw new Error('roll back');
+      }),
+    ).rejects.toThrow('roll back');
+    expect(await isEnded()).toBe(false);
+    expect(
+      await platformRows('select 1 from platform_audit where target_id = $1', [support.id]),
+    ).toEqual([]);
+
+    const ended = await withTenant(schoolA.id, (tx) => definers.endSupportSessionIn(tx, tokenHash));
+    expect(ended).toEqual({
+      supportSessionId: support.id,
+      tenantId: schoolA.id,
+      platformUserId: quadStaff.id,
+    });
+    expect(await isEnded()).toBe(true);
+    await expect(
+      withTenant(schoolA.id, (tx) => definers.endSupportSessionIn(tx, tokenHash)),
+    ).resolves.toBeNull();
+  });
+});
+
+describe('end_support_session across schools (Task 16)', () => {
+  it("ends only the visit its cookie names: school A's visit stays active when B's ends", async () => {
+    const inA = await insertSupportSession(withPlatform, quadStaff.id, schoolA.id);
+    const inB = await insertSupportSession(withPlatform, quadStaff.id, schoolB.id);
+    const hashA = randomTokenHash();
+    const hashB = randomTokenHash();
+    await definers.redeemSupportSession(inA.id, hashA);
+    await definers.redeemSupportSession(inB.id, hashB);
+
+    await expect(definers.endSupportSession(hashB)).resolves.toMatchObject({
+      tenantId: schoolB.id,
+    });
+
+    await expect(definers.sessionByToken(hashA)).resolves.toMatchObject({
+      kind: 'support',
+      supportSessionId: inA.id,
+    });
+    await expect(definers.endSupportSession(randomTokenHash())).resolves.toBeNull();
+    const ended = await platformRows<{ id: string }>(
+      'select id from support_sessions where id = any($1) and ended_at is not null',
+      [[inA.id, inB.id]],
+    );
+    expect(ended).toEqual([{ id: inB.id }]);
+  });
+});
+
 describe('current_tenant_profile', () => {
   it("under withTenant(A) returns A's profile, settings and enabled modules only", async () => {
     const profile = await withTenant(schoolA.id, (tx) => definers.currentTenantProfile(tx));
@@ -659,9 +731,20 @@ describe('current_tenant_profile', () => {
       passwordMinLength: 12,
       sessionHours: 8,
       ipAllowlist: [],
+      country: 'LK',
     });
     const nameInB = await withTenant(schoolB.id, (tx) => definers.currentTenantProfile(tx));
     expect(nameInB).toMatchObject({ name: 'Kandy Test School', modules: ['crm'] });
+  });
+
+  it('gives each school its own country, for its phone numbers (D35, Task 14)', async () => {
+    const elsewhere = await insertTenant(withPlatform, { country: 'AE', timeZone: 'Asia/Dubai' });
+    const [inA, inElsewhere] = [
+      await withTenant(schoolA.id, (tx) => definers.currentTenantProfile(tx)),
+      await withTenant(elsewhere.id, (tx) => definers.currentTenantProfile(tx)),
+    ];
+    expect(inA?.country).toBe('LK');
+    expect(inElsewhere).toMatchObject({ country: 'AE', timeZone: 'Asia/Dubai' });
   });
 
   it('returns no row without app.tenant_id', async () => {
@@ -686,6 +769,7 @@ describe('current_tenant_profile', () => {
       'password_min_length',
       'session_hours',
       'ip_allowlist',
+      'country',
     ]);
   });
 });
@@ -693,7 +777,10 @@ describe('current_tenant_profile', () => {
 describe('update_current_tenant_name', () => {
   it('renames only the current school and writes platform_audit', async () => {
     const school = await insertTenant(withPlatform, { name: 'Old Name' });
-    await withTenant(school.id, (tx) => definers.updateCurrentTenantName(tx, 'New Name'));
+    const renamed = await withTenant(school.id, (tx) =>
+      definers.updateCurrentTenantName(tx, { expected: 'Old Name', name: 'New Name' }),
+    );
+    expect(renamed).toBe(true);
     const names = await platformRows<{ id: string; name: string }>(
       'select id, name from tenants where id = any($1::uuid[]) order by name',
       [[school.id, schoolB.id]],
@@ -717,13 +804,47 @@ describe('update_current_tenant_name', () => {
     ]);
   });
 
+  it('changes nothing and answers false when the name is no longer the one expected (Task 14 review)', async () => {
+    const school = await insertTenant(withPlatform, { name: 'Renamed By Quad' });
+    const renamed = await withTenant(school.id, (tx) =>
+      definers.updateCurrentTenantName(tx, { expected: 'Name The Admin Saw', name: 'Admin Name' }),
+    );
+    expect(renamed).toBe(false);
+    const names = await platformRows<{ name: string }>('select name from tenants where id = $1', [
+      school.id,
+    ]);
+    expect(names).toEqual([{ name: 'Renamed By Quad' }]);
+    const audit = await platformRows('select action from platform_audit where tenant_id = $1', [
+      school.id,
+    ]);
+    expect(audit).toEqual([]);
+  });
+
+  it("never renames another school, even when given that school's name", async () => {
+    const school = await insertTenant(withPlatform, { name: 'Own Name' });
+    const renamed = await withTenant(school.id, (tx) =>
+      definers.updateCurrentTenantName(tx, { expected: 'Kandy Test School', name: 'Taken Over' }),
+    );
+    expect(renamed).toBe(false);
+    const names = await platformRows<{ id: string; name: string }>(
+      'select id, name from tenants where id = any($1::uuid[]) order by name',
+      [[school.id, schoolB.id]],
+    );
+    expect(names).toEqual([
+      { id: schoolB.id, name: 'Kandy Test School' },
+      { id: school.id, name: 'Own Name' },
+    ]);
+  });
+
   it('refuses without app.tenant_id and refuses a blank name', async () => {
     const cause = await failure(
-      testDb().app.query(`select update_current_tenant_name('Anything')`),
+      testDb().app.query(`select update_current_tenant_name('Anything', 'Else')`),
     );
     expect(cause).toMatchObject({ code: '42501' });
     const blank = await failure(
-      withTenant(schoolA.id, (tx) => definers.updateCurrentTenantName(tx, '   ')),
+      withTenant(schoolA.id, (tx) =>
+        definers.updateCurrentTenantName(tx, { expected: schoolA.name, name: '   ' }),
+      ),
     );
     expect(blank).toMatchObject({ code: '22023' });
   });

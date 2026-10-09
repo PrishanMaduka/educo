@@ -125,9 +125,11 @@ describe('seedRefusal', () => {
     },
   );
 
-  it('allows local, with or without a seed password', () => {
-    expect(seedRefusal({ APP_ENV: 'local' })).toBeNull();
+  it('allows local with the placeholder, but never without a seed password (Task 17)', () => {
     expect(seedRefusal({ APP_ENV: 'local', SEED_PASSWORD: LOCAL_SEED_PASSWORD })).toBeNull();
+    expect(seedRefusal({ APP_ENV: 'local' })).toBe(
+      'SEED_PASSWORD is required when APP_ENV is local.',
+    );
   });
 
   it('allows staging with a real seed password', () => {

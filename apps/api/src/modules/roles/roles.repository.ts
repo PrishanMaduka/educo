@@ -12,6 +12,8 @@ import {
   userRoles,
 } from '@quad/db';
 
+import { InvariantError } from '../../common/errors';
+
 import type { RoleScope, RoleUpdateInput, SensitiveKey } from '@quad/contracts';
 import type { TenantTx } from '@quad/db';
 
@@ -114,7 +116,7 @@ export class RolesRepository {
       .insert(roles)
       .values({ tenantId, ...role, system: false })
       .returning({ id: roles.id });
-    if (row === undefined) throw new Error('The role row was not written.');
+    if (row === undefined) throw new InvariantError('The role row was not written.');
     return row.id;
   }
 

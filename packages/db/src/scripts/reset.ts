@@ -1,6 +1,13 @@
 import pg from 'pg';
 
-import { databaseUrls, loadRootEnv, runMigrations, seedDatabase } from '../internal';
+import {
+  databaseUrls,
+  loadRootEnv,
+  runMigrations,
+  seedDatabase,
+  seedPasswordRefusal,
+  seedSecrets,
+} from '../internal';
 
 const LOCAL_HOSTS = new Set(['localhost', '127.0.0.1', '[::1]']);
 
@@ -20,6 +27,11 @@ if (!LOCAL_HOSTS.has(host)) {
   refuse(`the database must be on this machine (host is ${host}).`);
 }
 
+const passwordRefusal = seedPasswordRefusal();
+if (passwordRefusal !== null) {
+  refuse(passwordRefusal);
+}
+
 const client = new pg.Client({ connectionString: ownerUrl, application_name: 'quad-reset' });
 await client.connect();
 try {
@@ -34,5 +46,5 @@ try {
   await client.end();
 }
 await runMigrations(ownerUrl);
-await seedDatabase(ownerUrl);
+await seedDatabase(ownerUrl, seedSecrets());
 console.log('Database reset: schema recreated, migrations applied and seed data loaded.');

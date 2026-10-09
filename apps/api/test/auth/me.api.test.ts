@@ -264,7 +264,15 @@ describe('GET /me/sessions', () => {
   it('answers 400 validation for a limit over 200 or a broken cursor', async () => {
     const school = await insertSchool(db());
     const { session } = await signedInMember(db(), school);
-    for (const query of ['limit=201', 'cursor=not-a-cursor']) {
+    // A forged cursor with an impossible instant is a 400, not a database error (Task 15 M2).
+    const forged = (at: string) =>
+      Buffer.from(JSON.stringify({ at, id: session.id })).toString('base64url');
+    for (const query of [
+      'limit=201',
+      'cursor=not-a-cursor',
+      `cursor=${forged('2026-13-45T25:61:00.000000Z')}`,
+      `cursor=${forged('2026-02-30T00:00:00.000000Z')}`,
+    ]) {
       const response = await inject('GET', `/me/sessions?${query}`, sessionHeaders(session));
       expect(response.statusCode).toBe(400);
       expect(response.json()).toMatchObject({ code: 'validation' });

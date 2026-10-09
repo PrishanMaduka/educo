@@ -51,6 +51,8 @@ export interface SupportAuth {
   readonly supportSessionId: string;
   readonly platformUserId: string;
   readonly tenantId: string;
+  /** The visit's hard end (60 minutes after the console opened it): the cookie lives no longer. */
+  readonly expiresAt: Date;
   readonly tokenHash: Buffer;
 }
 

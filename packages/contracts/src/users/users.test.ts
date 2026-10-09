@@ -22,9 +22,12 @@ const pathOf = (result: { success: boolean; error?: { issues: { path: unknown[] 
   result.error?.issues[0]?.path;
 
 describe('the Users & roles error codes (spec 06, 08)', () => {
-  it.each(['last_admin', 'system_role_locked', 'already_member'])('include %s', (code) => {
-    expect(ErrorCode.safeParse(code).success).toBe(true);
-  });
+  it.each(['last_admin', 'system_role_locked', 'already_member', 'family_member'])(
+    'include %s',
+    (code) => {
+      expect(ErrorCode.safeParse(code).success).toBe(true);
+    },
+  );
 });
 
 describe('StaffListQuery (GET /users)', () => {

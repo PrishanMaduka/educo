@@ -24,7 +24,9 @@ export {
   REFRESH_FAMILY_DAYS,
   SELECT_SCHOOL_MINUTES,
   SIGN_IN_STEP_MINUTES,
+  SUPPORT_VISIT_MINUTES,
   sessionExpiry,
+  supportVisitExpiresAt,
 } from './auth/session-expiry';
 export type { SignInFacts } from './auth/next-sign-in-step';
 export { nextSignInStep } from './auth/next-sign-in-step';
@@ -81,3 +83,15 @@ export type {
   StaffChangeRefusal,
 } from './access/staff-changes';
 export { staffActionRefusal, staffChangeRefusal, statusAfterChange } from './access/staff-changes';
+export { compactPhone } from './auth/phone-e164';
+export type { SummaryProfile, SummarySettings } from './settings/settings-summary';
+export { settingsSummary } from './settings/settings-summary';
+export { parseOfficePhone } from './settings/office-phone';
+export type {
+  SchoolProfileChanges,
+  SchoolProfileField,
+  SchoolProfileInput,
+  SchoolProfilePlan,
+  SchoolProfileValues,
+} from './settings/school-profile-change';
+export { planSchoolProfileChange } from './settings/school-profile-change';

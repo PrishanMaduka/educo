@@ -87,11 +87,13 @@
   "errorUsersLastAdmin": "The school needs at least one active admin. Make someone else an admin first.",
   "errorUsersAcceptInviteFirst": "They become active when they accept their invitation.",
   "errorUsersAlreadyMember": "This person is already a member of staff here.",
+  "errorUsersFamilyMember": "This address belongs, or belonged, to a family account at this school.",
   "errorUsersTwoStepOn": "They already use two-step sign-in.",
   "errorUsersNotActive": "This only works for someone who can sign in now.",
   "errorUsersNotInvited": "Only a pending invitation can be sent again.",
   "errorUsersNoEmail": "We don’t have an email address for them.",
   "errorUsersSensitiveNotHeld": "You can’t give access to sensitive data you don’t have yourself.",
+  "errorSchoolOfficePhoneInvalid": "Enter a phone number in the school’s country, or the full number starting with +.",
   "errorRolesSystemLocked": "Built-in roles can’t be changed or deleted, so the school can’t lock itself out.",
   "errorRolesInUse": "Someone still has this role, or an admin is previewing it. Give them another role first.",
   "errorRolesOwnLocked": "You can’t change a role you have yourself. Ask another admin.",
@@ -547,18 +549,32 @@
   },
   "publicDemoMailNote": "Note",
   "publicFooterSample": "Sample school and families are fictional.",
-  "publicFooterCopyright": "© Quad",
+  "publicFooterCopyright": "© {year} {company}",
+  "@publicFooterCopyright": {
+    "placeholders": {
+      "year": {
+        "type": "Object"
+      },
+      "company": {
+        "type": "Object"
+      }
+    }
+  },
   "publicFooterNav": "About Quad",
   "publicFooterAbout": "About",
   "publicFooterSecurity": "Security & trust",
   "publicFooterPrivacy": "Privacy",
   "publicFooterTerms": "Terms",
-  "publicFooterSubprocessors": "Sub-processors",
-  "publicFooterContact": "Contact",
+  "publicFooterTagline": "The school, the family and everyone in between, in one circle.",
+  "publicFooterExplore": "Explore",
+  "publicFooterForSchools": "For schools",
+  "publicFooterCompany": "Company",
+  "publicFooterLegal": "Legal",
   "publicNavPages": "Pages",
   "publicNavAbout": "About",
   "publicNavSecurity": "Security",
   "publicNavPrivacy": "Privacy",
+  "publicNavTerms": "Terms",
   "publicPageUpdated": "Last updated {date} · Version {version}",
   "@publicPageUpdated": {
     "placeholders": {
@@ -571,6 +587,8 @@
     }
   },
   "publicPageContents": "On this page",
+  "publicPageInShort": "In short",
+  "publicPageDetail": "The detail",
   "emailFromSchool": "{school} via Quad",
   "@emailFromSchool": {
     "placeholders": {
@@ -724,6 +742,206 @@
       },
       "minutes": {
         "type": "num"
+      }
+    }
+  },
+  "auditSummarySignIn": "Signed in",
+  "auditSummarySignInFailed": "Could not sign in",
+  "auditSummarySignOut": "Signed out",
+  "auditSummaryPasswordReset": "Reset their password",
+  "auditSummaryTwoStepEnabled": "Turned on two-step sign-in",
+  "auditSummaryPasswordAccepted": "Entered their password and was asked for the authenticator code",
+  "auditSummaryTwoStepSetupStarted": "Started setting up an authenticator app",
+  "auditSummaryUserInvited": "{resent, select, yes {Sent {target} a new invitation} other {Invited {target}}}",
+  "@auditSummaryUserInvited": {
+    "placeholders": {
+      "resent": {
+        "type": "String"
+      },
+      "target": {
+        "type": "Object"
+      }
+    }
+  },
+  "auditSummaryUserInviteAccepted": "Accepted their invitation and joined the staff",
+  "auditSummaryUserRoleChanged": "Changed the role of {target}",
+  "@auditSummaryUserRoleChanged": {
+    "placeholders": {
+      "target": {
+        "type": "Object"
+      }
+    }
+  },
+  "auditSummaryUserDeactivated": "Deactivated {target}",
+  "@auditSummaryUserDeactivated": {
+    "placeholders": {
+      "target": {
+        "type": "Object"
+      }
+    }
+  },
+  "auditSummaryUserReactivated": "Reactivated {target}",
+  "@auditSummaryUserReactivated": {
+    "placeholders": {
+      "target": {
+        "type": "Object"
+      }
+    }
+  },
+  "auditSummaryUserTwoStepReminded": "Reminded {target} to turn on two-step sign-in",
+  "@auditSummaryUserTwoStepReminded": {
+    "placeholders": {
+      "target": {
+        "type": "Object"
+      }
+    }
+  },
+  "auditSummaryUserPasswordResetSent": "Sent {target} a link to reset their password",
+  "@auditSummaryUserPasswordResetSent": {
+    "placeholders": {
+      "target": {
+        "type": "Object"
+      }
+    }
+  },
+  "auditSummaryUserSignedOutEverywhere": "Signed {target} out on every device",
+  "@auditSummaryUserSignedOutEverywhere": {
+    "placeholders": {
+      "target": {
+        "type": "Object"
+      }
+    }
+  },
+  "auditSummaryRoleCreated": "Created {target}",
+  "@auditSummaryRoleCreated": {
+    "placeholders": {
+      "target": {
+        "type": "Object"
+      }
+    }
+  },
+  "auditSummaryRoleUpdated": "Changed {target}",
+  "@auditSummaryRoleUpdated": {
+    "placeholders": {
+      "target": {
+        "type": "Object"
+      }
+    }
+  },
+  "auditSummaryRoleDeleted": "Deleted {target}",
+  "@auditSummaryRoleDeleted": {
+    "placeholders": {
+      "target": {
+        "type": "Object"
+      }
+    }
+  },
+  "auditSummaryRolePermissionsChanged": "Changed what {target} can do",
+  "@auditSummaryRolePermissionsChanged": {
+    "placeholders": {
+      "target": {
+        "type": "Object"
+      }
+    }
+  },
+  "auditSummaryRolePreviewStarted": "Started previewing {target}",
+  "@auditSummaryRolePreviewStarted": {
+    "placeholders": {
+      "target": {
+        "type": "Object"
+      }
+    }
+  },
+  "auditSummaryRolePreviewEnded": "Stopped previewing {target}",
+  "@auditSummaryRolePreviewEnded": {
+    "placeholders": {
+      "target": {
+        "type": "Object"
+      }
+    }
+  },
+  "auditSummarySettingsUpdated": "{count, plural, =0 {Changed School settings} other {Changed School settings: {fields}}}",
+  "@auditSummarySettingsUpdated": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      },
+      "fields": {
+        "type": "Object"
+      }
+    }
+  },
+  "auditSummarySupportSessionStarted": "Quad support started a support visit",
+  "auditSummarySupportSessionEnded": "The Quad support visit ended",
+  "auditSummaryAuditExported": "Exported the audit log ({rows, plural, one {{rows} entry} other {{rows} entries}})",
+  "@auditSummaryAuditExported": {
+    "placeholders": {
+      "rows": {
+        "type": "num"
+      }
+    }
+  },
+  "auditSummarySensitiveAccessed": "{key, select, safeguarding {Viewed safeguarding records} medical {Viewed medical details} other {Viewed sensitive records}}",
+  "@auditSummarySensitiveAccessed": {
+    "placeholders": {
+      "key": {
+        "type": "String"
+      }
+    }
+  },
+  "auditSummaryTenantRenamed": "Renamed the school from “{from}” to “{to}”",
+  "@auditSummaryTenantRenamed": {
+    "placeholders": {
+      "from": {
+        "type": "Object"
+      },
+      "to": {
+        "type": "Object"
+      }
+    }
+  },
+  "auditSummaryOther": "{action}",
+  "@auditSummaryOther": {
+    "placeholders": {
+      "action": {
+        "type": "Object"
+      }
+    }
+  },
+  "auditTargetUser": "a member of staff",
+  "auditTargetRole": "a role",
+  "auditTargetRoleNamed": "the role {name}",
+  "@auditTargetRoleNamed": {
+    "placeholders": {
+      "name": {
+        "type": "Object"
+      }
+    }
+  },
+  "auditTargetOther": "a record",
+  "auditFieldName": "name",
+  "auditFieldOfficeEmail": "office email",
+  "auditFieldOfficePhone": "office phone",
+  "auditFieldAddress": "address",
+  "auditFieldSmsSenderId": "SMS sender ID",
+  "auditFieldSmsSenderStatus": "SMS sender status",
+  "auditActorQuadSupport": "Quad support",
+  "auditActorSystem": "System",
+  "auditCsvWhen": "When (UTC)",
+  "auditCsvWho": "Who",
+  "auditCsvWhat": "What",
+  "auditCsvSchool": "School",
+  "auditCsvViaSupport": "Quad support visit",
+  "auditCsvIp": "IP address",
+  "auditCsvDetails": "Details",
+  "auditCsvYes": "Yes",
+  "auditCsvNo": "No",
+  "errorAuditExportNeedsPermission": "Exporting needs the Export data permission. Ask a school admin.",
+  "errorAuditExportTooLarge": "There are more than {max} entries to export. Choose a shorter date range and export again.",
+  "@errorAuditExportTooLarge": {
+    "placeholders": {
+      "max": {
+        "type": "Object"
       }
     }
   }

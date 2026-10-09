@@ -469,6 +469,9 @@ importers:
 
   packages/db:
     dependencies:
+      '@node-rs/argon2':
+        specifier: 2.2.1
+        version: 2.2.1
       '@quad/contracts':
         specifier: workspace:*
         version: link:../contracts

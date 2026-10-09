@@ -311,13 +311,22 @@ input,select,textarea,button{font:inherit}
 .done p{font-size:16px;color:var(--on-navy-2)}.done p a{color:var(--lime)}
 .done button{font-weight:600;background:transparent;color:var(--on-navy);border:2px solid var(--navy-border);border-radius:12px;padding:10px 16px;cursor:pointer}
 
-footer.page .wrap{display:flex;gap:16px 32px;flex-wrap:wrap;align-items:center;font-size:14px;padding-block:0 32px}
-footer .logo{margin-right:auto;color:var(--page-ink)}
-footer a{color:var(--page-ink)}
-footer span,footer .contact{color:var(--page-ink-3)}
-footer .links{display:flex;flex-wrap:wrap;gap:4px 20px;list-style:none;margin:0;padding:0}
-footer .links a{display:inline-block;padding-block:4px}
-footer .contact{margin:0 auto 0 0}
+/* Footer: circle quarters (D43). Each link group is one quarter of the Quad mark; the corner that points to the mark's centre stays tight. */
+footer.page .wrap{padding-block:56px 28px}
+footer .fhead{display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px;margin-bottom:28px}
+footer .fhead p{color:var(--page-ink-3)}
+footer .logo{color:var(--page-ink);border-radius:6px;margin-right:0}
+footer .quads{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;list-style:none;margin:0;padding:0}
+footer .q{background:var(--c);color:var(--on-vivid);padding:22px;border-radius:28px}
+footer .q.tl{border-bottom-right-radius:8px}footer .q.tr{border-bottom-left-radius:8px}footer .q.bl{border-top-right-radius:8px}footer .q.br{border-top-left-radius:8px}
+footer .q h2{font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:12px}
+footer .q ul{list-style:none;margin:0;padding:0}
+footer .q a,footer .q span{display:inline-block;padding-block:4px;color:var(--on-vivid);text-decoration:none}
+footer .q button{font:inherit;background:none;border:0;padding:4px 0;color:var(--on-vivid);cursor:pointer}
+footer .q a:hover,footer .q button:hover{text-decoration:underline}
+footer .fbase{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 24px;margin-top:40px;padding-top:20px;border-top:1px solid var(--card-line);font-size:13px;color:var(--page-ink-3)}
+@media (max-width:760px){footer .quads{grid-template-columns:1fr 1fr}footer .q{border-radius:20px!important}}
+@media (max-width:420px){footer .quads{grid-template-columns:1fr}}
 
 /* Sign-in dialog */
 dialog.si{width:min(440px,calc(100% - 32px));border:0;border-radius:28px;padding:28px;background:var(--sheet-bg);color:var(--sheet-ink);box-shadow:0 40px 80px -30px rgba(0,0,0,.5)}
@@ -550,22 +559,28 @@ dialog.si::backdrop{background:var(--backdrop);backdrop-filter:blur(3px)}
 
 <footer class="page">
   <div class="wrap">
-    <a class="logo" href="#top" aria-label="Quad home"><svg viewBox="0 0 101 30" aria-hidden="true" style="height:26px"><use href="#qLogo"/></svg></a>
-    <!-- The About, Security & trust and legal pages (spec 19, D41). They live on the real site. -->
+    <div class="fhead">
+      <a class="logo" href="#top" aria-label="Quad home"><svg viewBox="0 0 101 30" aria-hidden="true" style="height:28px;display:block"><use href="#qLogo"/></svg></a>
+      <p>The school, the family and everyone in between, in one circle.</p>
+    </div>
+    <!-- Circle quarters (D43): sky, pink, lime and orange, like the four quarters of the mark. The About, Security & trust and legal pages live on the real site. -->
     <nav aria-label="About Quad">
-      <ul class="links">
-        <li><a href="https://quad-edu.com/about" target="_blank" rel="noopener">About</a></li>
-        <li><a href="https://quad-edu.com/security" target="_blank" rel="noopener">Security &amp; trust</a></li>
-        <li><a href="https://quad-edu.com/legal/privacy" target="_blank" rel="noopener">Privacy</a></li>
-        <li><a href="https://quad-edu.com/legal/terms" target="_blank" rel="noopener">Terms</a></li>
-        <li><a href="https://quad-edu.com/legal/subprocessors" target="_blank" rel="noopener">Sub-processors</a></li>
+      <ul class="quads">
+        <li class="q tl" style="--c:var(--sky)"><h2>Explore</h2><ul>
+          <li><a href="#circle">The circle</a></li><li><a href="#wellbeing">Wellbeing</a></li>
+          <li class="only-school"><a href="#more">Modules</a></li><li class="only-parent"><a href="#more">In the app</a></li></ul></li>
+        <li class="q tr" style="--c:var(--pink)"><h2>For schools</h2><ul>
+          <li><a href="#demo">Book a demo</a></li><li><button type="button" data-signin>Sign in</button></li>
+          <li><a href="https://quad-edu.com/security" target="_blank" rel="noopener">Security &amp; trust</a></li></ul></li>
+        <li class="q bl" style="--c:var(--lime)"><h2>Company</h2><ul>
+          <li><a href="https://quad-edu.com/about" target="_blank" rel="noopener">About</a></li>
+          <li><a href="mailto:support@quad-edu.com">support@quad-edu.com</a></li><li><span>Colombo, Sri Lanka</span></li></ul></li>
+        <li class="q br" style="--c:var(--orange)"><h2>Legal</h2><ul>
+          <li><a href="https://quad-edu.com/legal/privacy" target="_blank" rel="noopener">Privacy</a></li>
+          <li><a href="https://quad-edu.com/legal/terms" target="_blank" rel="noopener">Terms</a></li></ul></li>
       </ul>
     </nav>
-  </div>
-  <div class="wrap">
-    <p class="contact">Contact <a href="mailto:support@quad-edu.com">support@quad-edu.com</a></p>
-    <span>Sample school and families are fictional.</span>
-    <span>© Quad</span>
+    <div class="fbase"><span>© 2026 Quad Education Pvt Limited (registration in progress)</span><span>Sample school and families are fictional.</span></div>
   </div>
 </footer>
 </div>

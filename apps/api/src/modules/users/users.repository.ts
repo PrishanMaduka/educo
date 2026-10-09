@@ -16,6 +16,8 @@ import {
   users,
 } from '@quad/db';
 
+import { InvariantError } from '../../common/errors';
+
 import type { MembershipStatus, StaffListQuery, SystemRoleKey } from '@quad/contracts';
 import type { TenantTx } from '@quad/db';
 
@@ -180,18 +182,24 @@ export class UsersRepository {
   }
 
   /**
-   * The memberships here of `accountIds`, by account: live ones (any kind or status), and removed
-   * (soft-deleted) staff ones, which an invitation brings back as the same row (fix round 1, M5).
-   * A removed guardian or relative membership counts as live: it is never turned into staff
-   * (Task 13 review), and the school's one row per account leaves no room for a second.
+   * The memberships here of `accountIds`, by account: live staff ones (any status), family ones
+   * (guardian or relative, live or removed), and removed (soft-deleted) staff ones, which an
+   * invitation brings back as the same row (fix round 1, M5). A family membership is never turned
+   * into staff (Task 13 review), and the school's one row per account leaves no room for a
+   * second, so it is a clash of its own (`family_member`, Task 14 review).
    */
   async membershipsByAccount(
     tx: TenantTx,
     accountIds: readonly string[],
-  ): Promise<{ readonly live: Set<string>; readonly removed: Map<string, string> }> {
-    const live = new Set<string>();
+  ): Promise<{
+    readonly staff: Set<string>;
+    readonly family: Set<string>;
+    readonly removed: Map<string, string>;
+  }> {
+    const staff = new Set<string>();
+    const family = new Set<string>();
     const removed = new Map<string, string>();
-    if (accountIds.length === 0) return { live, removed };
+    if (accountIds.length === 0) return { staff, family, removed };
     const rows = await tx
       .select({
         id: users.id,
@@ -202,10 +210,11 @@ export class UsersRepository {
       .from(users)
       .where(inArray(users.accountId, [...accountIds]));
     for (const row of rows) {
-      if (row.deletedAt !== null && row.kind === 'staff') removed.set(row.accountId, row.id);
-      else live.add(row.accountId);
+      if (row.kind !== 'staff') family.add(row.accountId);
+      else if (row.deletedAt !== null) removed.set(row.accountId, row.id);
+      else staff.add(row.accountId);
     }
-    return { live, removed };
+    return { staff, family, removed };
   }
 
   /** Adds an invited staff membership holding `roleId` as its primary role; returns its id. */
@@ -222,7 +231,7 @@ export class UsersRepository {
         inviteSentAt: member.at,
       })
       .returning({ id: users.id });
-    if (row === undefined) throw new Error('The membership row was not written.');
+    if (row === undefined) throw new InvariantError('The membership row was not written.');
     await this.setRole(tx, tenantId, row.id, member.roleId);
     return row.id;
   }
@@ -253,7 +262,9 @@ export class UsersRepository {
       })
       .where(and(eq(users.id, userId), eq(users.kind, 'staff'), isNotNull(users.deletedAt)))
       .returning({ id: users.id });
-    if (reinstated.length === 0) throw new Error('Only a removed staff membership is reinstated.');
+    if (reinstated.length === 0) {
+      throw new InvariantError('Only a removed staff membership is reinstated.');
+    }
     await this.setRole(tx, tenantId, userId, member.roleId);
   }
 

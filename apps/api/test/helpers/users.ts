@@ -103,12 +103,20 @@ export async function turnOnTwoStep(db: TestDatabase, accountId: string): Promis
 
 type Method = 'GET' | 'POST' | 'PATCH' | 'DELETE' | 'PUT';
 
-/** Requests as a staff session, each from a fresh address (its own per-IP bucket). */
+/**
+ * Requests as a staff session, each from a fresh address (its own per-IP bucket), with any extra
+ * `headers` (`If-Match`).
+ */
 export function asStaff(
   app: () => NestFastifyApplication,
   session: Pick<SessionSeed, 'token' | 'csrf'>,
-): (method: Method, url: string, body?: unknown) => Promise<Response> {
-  return (method, url, body) =>
+): (
+  method: Method,
+  url: string,
+  body?: unknown,
+  headers?: Readonly<Record<string, string>>,
+) => Promise<Response> {
+  return (method, url, body, headers = {}) =>
     app()
       .getHttpAdapter()
       .getInstance()
@@ -119,6 +127,7 @@ export function asStaff(
         headers: {
           ...sessionHeaders(session),
           ...(body === undefined ? {} : { 'content-type': 'application/json' }),
+          ...headers,
         },
         ...(body === undefined ? {} : { payload: JSON.stringify(body) }),
       });

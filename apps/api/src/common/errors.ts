@@ -173,3 +173,26 @@ export class UnavailableError extends AppError {
     super('unavailable', formatMessage('error.signInUnavailable'), 503);
   }
 }
+
+/**
+ * 409 for a change sent with an `If-Match` that is not the record's current version (spec 06
+ * Concurrency). The filter sends the current version as the `ETag` header.
+ */
+export class StaleVersionError extends ConflictError {
+  constructor(readonly etag: string) {
+    super('conflict');
+  }
+}
+
+/**
+ * 500 for a condition the code itself guarantees, found broken: a row just written that did not
+ * come back, a lookup that cannot be empty. Not an `AppError`, so the client gets only the
+ * generic `internal` answer while the log and the error reporter get `invariant`, which names
+ * the condition and never holds personal data, input or secrets (Task 14 review).
+ */
+export class InvariantError extends Error {
+  constructor(readonly invariant: string) {
+    super(invariant);
+    this.name = 'InvariantError';
+  }
+}

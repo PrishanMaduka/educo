@@ -8,7 +8,9 @@ import {
   REFRESH_FAMILY_DAYS,
   SELECT_SCHOOL_MINUTES,
   SIGN_IN_STEP_MINUTES,
+  SUPPORT_VISIT_MINUTES,
   sessionExpiry,
+  supportVisitExpiresAt,
 } from './session-expiry';
 
 const HOUR = 60 * 60 * 1000;
@@ -121,5 +123,21 @@ describe('sessionExpiry', () => {
         sessionExpiry({ kind: 'select_school', startedAt: T0, now: at(5 * 60 * 1000) }).expired,
       ).toBe(true);
     });
+  });
+});
+
+describe('supportVisitExpiresAt (spec 05: a support visit lasts at most 60 minutes)', () => {
+  it('ends 60 minutes after the console opens it, to the millisecond', () => {
+    expect(SUPPORT_VISIT_MINUTES).toBe(60);
+    const opened = new Date('2026-10-09T08:15:30.250Z');
+    expect(supportVisitExpiresAt(opened)).toEqual(new Date('2026-10-09T09:15:30.250Z'));
+  });
+
+  it('is the hard limit sessionExpiry applies to the visit', () => {
+    const opened = new Date('2026-10-09T08:00:00.000Z');
+    const supportExpiresAt = supportVisitExpiresAt(opened);
+    const at = (minutes: number) => new Date(opened.getTime() + minutes * 60_000);
+    expect(sessionExpiry({ kind: 'support', supportExpiresAt, now: at(59) }).expired).toBe(false);
+    expect(sessionExpiry({ kind: 'support', supportExpiresAt, now: at(60) }).expired).toBe(true);
   });
 });

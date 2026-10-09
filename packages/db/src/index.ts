@@ -29,7 +29,9 @@ export type {
   SessionLookup,
   SupportSessionLookup,
   SupportVisit,
+  EndedSupportVisit,
   TenantProfile,
+  TenantRename,
 } from './definers';
 export { pingDatabase } from './ping';
 export type { SqlQueryable, TableClasses } from './rls';
@@ -42,7 +44,14 @@ export {
   tenantRlsSql,
 } from './rls';
 export * from './schema';
-export { SEED_TENANTS } from './seed-data';
+export type { SeedMembership, SeedPerson, SeedSchool } from './seed-data';
+export {
+  SEED_PEOPLE,
+  SEED_PLATFORM_USERS,
+  SEED_SCHOOL_ACCESS,
+  SEED_SYSTEM_ROLES,
+  SEED_TENANTS,
+} from './seed-data';
 export type { TenantRunner, TenantTx } from './tenant';
 export { InvalidTenantIdError } from './tenant';
 export { uuidv7 } from './uuid';
@@ -69,3 +78,4 @@ export {
   or,
   sql,
 } from 'drizzle-orm';
+export type { AnyColumn, SQL } from 'drizzle-orm';

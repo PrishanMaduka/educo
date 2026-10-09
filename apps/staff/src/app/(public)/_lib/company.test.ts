@@ -2,9 +2,11 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import process from 'node:process';
 
-import { render } from '@testing-library/react';
-import { createElement, Fragment } from 'react';
+import { createElement } from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
+
+import { ArticlePage } from '../_components/ArticlePage';
 
 import { COMPANY, TO_BE_CONFIRMED, unconfirmedFields } from './company';
 import { ARTICLE_PAGES, PUBLIC_PATHS } from './public-pages';
@@ -21,14 +23,15 @@ function sources(dir: string): string[] {
   });
 }
 
-const pageText = (index: number) =>
-  render(
-    createElement(
-      Fragment,
-      null,
-      ...(ARTICLE_PAGES[index]?.sections.map((section) => section.body) ?? []),
-    ),
-  ).container.textContent;
+/** The text of a page's `<main>` as rendered: the header, the sections and their extra parts. */
+function pageText(index: number): string {
+  const content = ARTICLE_PAGES[index];
+  if (!content) throw new Error(`No public page at ${String(index)}`);
+  // Rendered as the server renders it (the top bar's client parts take their server snapshot).
+  const page = document.createElement('div');
+  page.innerHTML = renderToStaticMarkup(createElement(ArticlePage, { content }));
+  return page.querySelector('main')?.textContent ?? '';
+}
 
 describe('company facts (D41)', () => {
   it('lists the placeholders the owner still has to confirm', () => {
@@ -76,14 +79,7 @@ describe('company facts (D41)', () => {
 
 describe('public pages', () => {
   it('are in the sitemap', () => {
-    expect(PUBLIC_PATHS).toEqual([
-      '/',
-      '/about',
-      '/security',
-      '/legal/privacy',
-      '/legal/terms',
-      '/legal/subprocessors',
-    ]);
+    expect(PUBLIC_PATHS).toEqual(['/', '/about', '/security', '/legal/privacy', '/legal/terms']);
   });
 
   it('each open with one plain sentence and a meta description of 155 characters or fewer', () => {

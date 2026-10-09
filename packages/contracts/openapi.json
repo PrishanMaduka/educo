@@ -1203,6 +1203,260 @@
           "role"
         ]
       },
+      "PlatformAuditLog": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "action": {
+                  "type": "string"
+                },
+                "summary": {
+                  "type": "string"
+                },
+                "actor": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "quad"
+                          ]
+                        },
+                        "id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "name": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "id",
+                        "name"
+                      ]
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "system"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "type"
+                      ]
+                    }
+                  ]
+                },
+                "school": {
+                  "type": [
+                    "object",
+                    "null"
+                  ],
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name"
+                  ]
+                },
+                "viaSupport": {
+                  "type": "boolean"
+                },
+                "target": {
+                  "type": [
+                    "object",
+                    "null"
+                  ],
+                  "properties": {
+                    "type": {
+                      "type": "string"
+                    },
+                    "id": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "id"
+                  ]
+                },
+                "meta": {
+                  "type": "object",
+                  "additionalProperties": {}
+                },
+                "ip": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "at",
+                "action",
+                "summary",
+                "actor",
+                "school",
+                "viaSupport",
+                "target",
+                "meta",
+                "ip"
+              ]
+            }
+          },
+          "nextCursor": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "items",
+          "nextCursor"
+        ]
+      },
+      "PlatformTenantList": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "shortName": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "trial",
+                    "onboarding",
+                    "active",
+                    "past_due",
+                    "suspended",
+                    "deleted"
+                  ]
+                },
+                "brandColor": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "pattern": "^#[0-9A-Fa-f]{6}$"
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "shortName",
+                "status",
+                "brandColor"
+              ]
+            }
+          },
+          "nextCursor": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "items",
+          "nextCursor"
+        ]
+      },
+      "SupportSessionLink": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "required": [
+          "url"
+        ]
+      },
+      "SupportSessionCreateInput": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "minLength": 10,
+            "maxLength": 500
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "additionalProperties": false
+      },
+      "SupportSessionRedeemInput": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048
+          }
+        },
+        "required": [
+          "token"
+        ],
+        "additionalProperties": false
+      },
+      "SupportSessionExit": {
+        "type": "object",
+        "properties": {
+          "redirect": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "required": [
+          "redirect"
+        ]
+      },
       "StaffList": {
         "type": "object",
         "properties": {
@@ -2662,6 +2916,531 @@
           "sensitive"
         ],
         "additionalProperties": false
+      },
+      "School": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "shortName": {
+            "type": "string"
+          },
+          "officeEmail": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "officePhone": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "address": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "timeZone": {
+            "type": "string"
+          },
+          "smsSenderId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "smsSenderStatus": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "requested",
+              "approved"
+            ]
+          },
+          "branding": {
+            "type": "object",
+            "properties": {
+              "color": {
+                "type": "string",
+                "pattern": "^#[0-9A-Fa-f]{6}$"
+              },
+              "logoUrl": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "uri"
+              }
+            },
+            "required": [
+              "color",
+              "logoUrl"
+            ]
+          },
+          "signIn": {
+            "type": "object",
+            "properties": {
+              "twoStep": {
+                "type": "string",
+                "enum": [
+                  "off",
+                  "admins",
+                  "staff",
+                  "all"
+                ]
+              },
+              "passwordMinLength": {
+                "type": "integer",
+                "minimum": 10
+              },
+              "sessionHours": {
+                "type": "integer",
+                "exclusiveMinimum": 0
+              },
+              "ipAllowlist": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "twoStep",
+              "passwordMinLength",
+              "sessionHours",
+              "ipAllowlist"
+            ]
+          },
+          "summary": {
+            "type": "object",
+            "properties": {
+              "parts": {
+                "type": "array",
+                "items": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "ask_quad_on"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "code"
+                      ]
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "ask_quad_off"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "code"
+                      ]
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "quiet_hours"
+                          ]
+                        },
+                        "from": {
+                          "type": "string",
+                          "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+                        },
+                        "until": {
+                          "type": "string",
+                          "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+                        },
+                        "weekends": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "from",
+                        "until",
+                        "weekends"
+                      ]
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "quiet_hours_off"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "code"
+                      ]
+                    }
+                  ]
+                }
+              },
+              "needs": {
+                "type": "array",
+                "items": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "add_office_email"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "code"
+                      ]
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "sms_sender_pending"
+                          ]
+                        },
+                        "senderId": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "senderId"
+                      ]
+                    }
+                  ]
+                }
+              }
+            },
+            "required": [
+              "parts",
+              "needs"
+            ]
+          },
+          "etag": {
+            "type": "string",
+            "description": "The version to send back as If-Match with a change. Send this value from the body, not the ETag header: a proxy may weaken the header (W/), and a weak tag is refused."
+          }
+        },
+        "required": [
+          "name",
+          "shortName",
+          "officeEmail",
+          "officePhone",
+          "address",
+          "timeZone",
+          "smsSenderId",
+          "smsSenderStatus",
+          "branding",
+          "signIn",
+          "summary",
+          "etag"
+        ]
+      },
+      "SchoolUpdateInput": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "officeEmail": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 254,
+            "format": "email"
+          },
+          "officePhone": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 1,
+            "maxLength": 32
+          },
+          "address": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "smsSenderId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^(?=.*[A-Za-z])[A-Za-z0-9]{3,11}$"
+          }
+        },
+        "additionalProperties": false
+      },
+      "SchoolBranding": {
+        "type": "object",
+        "properties": {
+          "color": {
+            "type": "string",
+            "pattern": "^#[0-9A-Fa-f]{6}$"
+          },
+          "logoUrl": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uri"
+          }
+        },
+        "required": [
+          "color",
+          "logoUrl"
+        ]
+      },
+      "SchoolSettings": {
+        "type": "object",
+        "properties": {
+          "askQuadEnabled": {
+            "type": "boolean"
+          },
+          "askQuadKeepConversations": {
+            "type": "boolean"
+          },
+          "ewShareWithParents": {
+            "type": "string",
+            "enum": [
+              "off",
+              "after_plan",
+              "automatic"
+            ]
+          },
+          "absenceAlert": {
+            "type": "string",
+            "enum": [
+              "at_time",
+              "immediately"
+            ]
+          },
+          "absenceAlertTime": {
+            "type": "string",
+            "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+          },
+          "reminderDays": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "photoConsentDefault": {
+            "type": "string",
+            "enum": [
+              "class",
+              "family",
+              "none"
+            ]
+          },
+          "familyCircleEnabled": {
+            "type": "boolean"
+          },
+          "quietHoursEnabled": {
+            "type": "boolean"
+          },
+          "quietFrom": {
+            "type": "string",
+            "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+          },
+          "quietUntil": {
+            "type": "string",
+            "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+          },
+          "quietWeekends": {
+            "type": "boolean"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "askQuadEnabled",
+          "askQuadKeepConversations",
+          "ewShareWithParents",
+          "absenceAlert",
+          "absenceAlertTime",
+          "reminderDays",
+          "photoConsentDefault",
+          "familyCircleEnabled",
+          "quietHoursEnabled",
+          "quietFrom",
+          "quietUntil",
+          "quietWeekends",
+          "updatedAt"
+        ]
+      },
+      "AuditLog": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "action": {
+                  "type": "string"
+                },
+                "summary": {
+                  "type": "string"
+                },
+                "actor": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "member"
+                          ]
+                        },
+                        "id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "name": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "id",
+                        "name"
+                      ]
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "quad_support"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "type"
+                      ]
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "system"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "type"
+                      ]
+                    }
+                  ]
+                },
+                "viaSupport": {
+                  "type": "boolean"
+                },
+                "target": {
+                  "type": [
+                    "object",
+                    "null"
+                  ],
+                  "properties": {
+                    "type": {
+                      "type": "string"
+                    },
+                    "id": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "id"
+                  ]
+                },
+                "meta": {
+                  "type": "object",
+                  "additionalProperties": {}
+                },
+                "ip": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "at",
+                "action",
+                "summary",
+                "actor",
+                "viaSupport",
+                "target",
+                "meta",
+                "ip"
+              ]
+            }
+          },
+          "nextCursor": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "items",
+          "nextCursor"
+        ]
       },
       "EnquiryInput": {
         "type": "object",
@@ -4175,6 +4954,400 @@
         }
       }
     },
+    "/api/v1/platform/audit": {
+      "get": {
+        "summary": "Console → Audit log: every school’s platform_audit entries, newest first, filtered by Quad staff member, school, action and time (any console role). With Accept: text/csv, every filtered entry as a CSV download (the export is recorded; more than 10,000 entries is 422)",
+        "tags": [
+          "platform"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": false,
+            "name": "cursor",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200,
+              "default": 50
+            },
+            "required": false,
+            "name": "limit",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": false,
+            "name": "actor",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": false,
+            "name": "tenantId",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "tenant.renamed",
+                "support_session.started",
+                "support_session.ended",
+                "auth.password_accepted",
+                "auth.sign_in",
+                "auth.sign_in_failed",
+                "auth.two_step_setup_started",
+                "auth.two_step_enabled",
+                "auth.sign_out",
+                "audit.exported",
+                "auth.password_reset",
+                "user.invited",
+                "user.invite_accepted",
+                "user.role_changed",
+                "user.deactivated",
+                "user.reactivated",
+                "user.two_step_reminded",
+                "user.password_reset_sent",
+                "user.signed_out_everywhere",
+                "role.created",
+                "role.updated",
+                "role.deleted",
+                "role.permissions_changed",
+                "role_preview.started",
+                "role_preview.ended",
+                "settings.updated",
+                "sensitive.accessed"
+              ]
+            },
+            "required": false,
+            "name": "action",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "required": false,
+            "name": "from",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "required": false,
+            "name": "to",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A page of the log, or the CSV export",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformAuditLog"
+                }
+              },
+              "text/csv": {
+                "schema": {
+                  "type": "string",
+                  "description": "RFC 4180 CSV with a header row (UTF-8)"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/platform/tenants": {
+      "get": {
+        "summary": "Console → Schools: every school that is not deleted, by name, with its id, short name, status and colour (any console role)",
+        "tags": [
+          "platform"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": false,
+            "name": "cursor",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200,
+              "default": 50
+            },
+            "required": false,
+            "name": "limit",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A page of schools",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformTenantList"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/platform/tenants/{id}/support-session": {
+      "post": {
+        "summary": "Console → Open as school admin: with a reason (10 to 500 characters), opens a 60-minute support visit to the school and returns a single-use link into the staff portal that works for 2 minutes (support, admin or owner role; needs X-CSRF-Token)",
+        "tags": [
+          "platform"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SupportSessionCreateInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The single-use link",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupportSessionLink"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/support-session": {
+      "post": {
+        "summary": "Staff portal, /sign-in/support/{token}: use a support visit’s single-use link from the console and open the school as Quad support; sets the staff cookies until the visit ends. Every bad, used or expired link is 400 invalid_link",
+        "tags": [
+          "auth",
+          "staff"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SupportSessionRedeemInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The visit is open",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SignInResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/support-session/end": {
+      "post": {
+        "summary": "Staff portal, Exit to platform: end this support visit, clear the staff cookies and return the console’s address (the visit’s own cookie; needs X-CSRF-Token)",
+        "tags": [
+          "auth",
+          "staff"
+        ],
+        "responses": {
+          "200": {
+            "description": "Where to go next",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupportSessionExit"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/users": {
       "get": {
         "summary": "Staff accounts with role, status, two-step and last sign-in, and the summary (users.manage)",
@@ -4281,7 +5454,7 @@
     },
     "/api/v1/users/invite": {
       "post": {
-        "summary": "Invite 1 to 50 people by email with a role; an address already here is 422 already_member (needs X-CSRF-Token)",
+        "summary": "Invite 1 to 50 people by email with a role; an address already on the staff is 422 already_member, a family member’s 422 family_member (needs X-CSRF-Token)",
         "tags": [
           "users",
           "staff"
@@ -5248,6 +6421,361 @@
             }
           },
           "404": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/school": {
+      "get": {
+        "summary": "School settings → General, with the read-only time zone, branding and sign-in rules (managed by Quad), the summary and the etag (settings.view)",
+        "tags": [
+          "school",
+          "staff"
+        ],
+        "responses": {
+          "200": {
+            "description": "The school",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/School"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "summary": "Change General (name, office email and phone, address, SMS sender ID); Quad’s fields are refused with 400, a stale If-Match with 409 (settings.edit; needs X-CSRF-Token)",
+        "tags": [
+          "school",
+          "staff"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200,
+              "description": "The `etag` value from the last response body, sent as it is. Do not copy the ETag header: a proxy may weaken it (W/), and a weak tag is refused with 409."
+            },
+            "required": true,
+            "description": "The `etag` value from the last response body, sent as it is. Do not copy the ETag header: a proxy may weaken it (W/), and a weak tag is refused with 409.",
+            "name": "if-match",
+            "in": "header"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SchoolUpdateInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The school",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/School"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/school/branding": {
+      "get": {
+        "summary": "The school’s colour and logo, set by Quad (any signed-in member)",
+        "tags": [
+          "school",
+          "staff"
+        ],
+        "responses": {
+          "200": {
+            "description": "The branding",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SchoolBranding"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/settings": {
+      "get": {
+        "summary": "The school’s other settings, read-only for now (settings.view)",
+        "tags": [
+          "school",
+          "staff"
+        ],
+        "responses": {
+          "200": {
+            "description": "The settings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SchoolSettings"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/audit": {
+      "get": {
+        "summary": "Settings → Audit: the school’s audit log, newest first, filtered by person, action and time (settings.view). With Accept: text/csv, every filtered entry as a CSV download (needs sensitive.export_data; the export is audited; more than 10,000 entries is 422)",
+        "tags": [
+          "audit",
+          "staff"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": false,
+            "name": "cursor",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200,
+              "default": 50
+            },
+            "required": false,
+            "name": "limit",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": false,
+            "name": "actor",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "auth.sign_in",
+                "auth.sign_in_failed",
+                "auth.sign_out",
+                "auth.password_reset",
+                "auth.two_step_enabled",
+                "user.invited",
+                "user.invite_accepted",
+                "user.role_changed",
+                "user.deactivated",
+                "user.reactivated",
+                "user.two_step_reminded",
+                "user.password_reset_sent",
+                "user.signed_out_everywhere",
+                "role.created",
+                "role.updated",
+                "role.deleted",
+                "role.permissions_changed",
+                "role_preview.started",
+                "role_preview.ended",
+                "settings.updated",
+                "support_session.started",
+                "support_session.ended",
+                "audit.exported",
+                "sensitive.accessed"
+              ]
+            },
+            "required": false,
+            "name": "action",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "required": false,
+            "name": "from",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "required": false,
+            "name": "to",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A page of the log, or the CSV export",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuditLog"
+                }
+              },
+              "text/csv": {
+                "schema": {
+                  "type": "string",
+                  "description": "RFC 4180 CSV with a header row (UTF-8)"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "403": {
             "description": "Error",
             "content": {
               "application/json": {

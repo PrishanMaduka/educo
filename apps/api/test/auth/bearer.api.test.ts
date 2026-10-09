@@ -333,6 +333,9 @@ describe('relative tokens reach only refresh and sign-out in M1 (D32)', () => {
       if (`${method} ${url}` === 'POST /auth/sign-out') continue;
       // Console routes never read a bearer token: 401 (test/platform/auth.api.test.ts, Task 10).
       if (route.path.startsWith('/platform/')) continue;
+      // Exit to platform reads only a support visit's cookie, never a token: 401 (Task 16,
+      // test/support/support.api.test.ts).
+      if (route.path === '/auth/support-session/end') continue;
       const anonymous = await new Browser(app).request(method, url);
       if (anonymous.statusCode !== 401) continue; // a public route: no token is read
       const response = await new Browser(app).request(method, url, undefined, {

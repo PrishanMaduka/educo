@@ -99,6 +99,8 @@ export interface TenantProfile {
   readonly passwordMinLength: number;
   readonly sessionHours: number;
   readonly ipAllowlist: readonly string[];
+  /** ISO 3166-1 alpha-2: the school's defaults, its phone country among them, come from it (D35). */
+  readonly country: string;
 }
 
 /** A single-use signed-link nonce (D16). */
@@ -106,6 +108,12 @@ export interface SignedTokenUse {
   readonly nonce: string;
   readonly purpose: string;
   readonly expiresAt: Date;
+}
+
+/** A rename of the current school: only while its name is still `expected` (D32, Task 15). */
+export interface TenantRename {
+  readonly expected: string;
+  readonly name: string;
 }
 
 /** The platform half of an action taken in a support visit (spec 05, dual audit). */
@@ -120,6 +128,13 @@ export interface SupportAuditEntry {
 export interface MemberTwoStepStatus {
   readonly userId: string;
   readonly totpEnabled: boolean;
+}
+
+/** The visit `end_support_session` ended (Task 16): what the school's audit entry names. */
+export interface EndedSupportVisit {
+  readonly supportSessionId: string;
+  readonly tenantId: string;
+  readonly platformUserId: string;
 }
 
 /** The support banner's "as {name} from Quad" (spec 05, Support access). */
@@ -170,14 +185,25 @@ export interface DefinerCalls {
   consumeSignedToken(use: SignedTokenUse): Promise<boolean>;
   /** Stores the support cookie's hash once; null when ended, expired or already redeemed. */
   redeemSupportSession(supportSessionId: string, tokenHash: Buffer): Promise<string | null>;
-  /** Ends the visit the cookie names, once, and writes `platform_audit`. */
-  endSupportSession(tokenHash: Buffer): Promise<void>;
+  /**
+   * Ends the visit the cookie names, once, and writes `platform_audit`: the visit it ended, or
+   * null when there was none to end (already ended, or no such cookie).
+   */
+  endSupportSession(tokenHash: Buffer): Promise<EndedSupportVisit | null>;
+  /**
+   * `endSupportSession` in the caller's `withTenant` transaction, so the school's
+   * `support_session.ended` entry commits with it or not at all (Task 17, D32).
+   */
+  endSupportSessionIn(tx: TenantTx, tokenHash: Buffer): Promise<EndedSupportVisit | null>;
   tenantByEmbedKey(key: string): Promise<EmbedKeyTenant | null>;
   tenantByGatewayAccount(provider: string, accountId: string): Promise<GatewayAccountTenant | null>;
   /** The current school's profile; null without a school. */
   currentTenantProfile(tx: TenantTx): Promise<TenantProfile | null>;
-  /** Renames the current school only, and writes `platform_audit`. */
-  updateCurrentTenantName(tx: TenantTx, name: string): Promise<void>;
+  /**
+   * Renames the current school only, and writes `platform_audit`, while its name is still
+   * `expected` (the name the caller read). False, changing nothing, when it has changed meanwhile.
+   */
+  updateCurrentTenantName(tx: TenantTx, rename: TenantRename): Promise<boolean>;
   /** Refused unless the support visit is active and for the current school. */
   recordSupportAudit(tx: TenantTx, entry: SupportAuditEntry): Promise<void>;
   /** The account for `email`, created (active) if there is none. Never a second account. */
@@ -257,7 +283,26 @@ type ProfileRow = {
   password_min_length: number;
   session_hours: number;
   ip_allowlist: string[];
+  country: string;
 };
+
+/** `end_support_session`, read on the pool or in a transaction. */
+type EndedVisitRow = {
+  support_session_id: string;
+  tenant_id: string;
+  platform_user_id: string;
+};
+
+function endedVisit(rows: readonly EndedVisitRow[]): EndedSupportVisit | null {
+  const [row] = rows;
+  return row
+    ? {
+        supportSessionId: row.support_session_id,
+        tenantId: row.tenant_id,
+        platformUserId: row.platform_user_id,
+      }
+    : null;
+}
 
 class UnexpectedDefinerRowError extends Error {
   constructor(definer: string) {
@@ -380,7 +425,18 @@ export function createDefinerCalls(pool: pg.Pool): DefinerCalls {
     },
 
     endSupportSession: async (tokenHash) => {
-      await pool.query('select end_support_session($1)', [tokenHash]);
+      const { rows } = await pool.query<EndedVisitRow>(
+        'select support_session_id, tenant_id, platform_user_id from end_support_session($1)',
+        [tokenHash],
+      );
+      return endedVisit(rows);
+    },
+
+    endSupportSessionIn: async (tx, tokenHash) => {
+      const { rows } = await tx.execute<EndedVisitRow>(
+        sql`select support_session_id, tenant_id, platform_user_id from end_support_session(${tokenHash})`,
+      );
+      return endedVisit(rows);
     },
 
     tenantByEmbedKey: async (key) => {
@@ -428,11 +484,15 @@ export function createDefinerCalls(pool: pg.Pool): DefinerCalls {
         passwordMinLength: row.password_min_length,
         sessionHours: row.session_hours,
         ipAllowlist: row.ip_allowlist,
+        country: row.country,
       };
     },
 
-    updateCurrentTenantName: async (tx, name) => {
-      await tx.execute(sql`select update_current_tenant_name(${name})`);
+    updateCurrentTenantName: async (tx, rename) => {
+      const { rows } = await tx.execute<{ renamed: boolean | null }>(
+        sql`select update_current_tenant_name(${rename.expected}, ${rename.name}) as renamed`,
+      );
+      return rows[0]?.renamed === true;
     },
 
     recordSupportAudit: async (tx, entry) => {

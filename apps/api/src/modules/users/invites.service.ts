@@ -17,6 +17,7 @@ import {
   BusinessRuleError,
   ForbiddenError,
   InvalidLinkError,
+  InvariantError,
   NotFoundError,
   UnauthorizedError,
   ValidationError,
@@ -96,6 +97,30 @@ function raceAnswer(error: unknown): Error | null {
   }
 }
 
+const ALREADY_STAFF = () => formatMessage('error.users.alreadyMember');
+const FAMILY_MEMBER = () => formatMessage('error.users.familyMember');
+
+/**
+ * The 422 for addresses that already belong here, each named for what it is (`fields.emails.<i>`):
+ * a member of staff (`already_member`) or a guardian or relative (`family_member`, Task 14
+ * review). The code is `already_member` when any address is staff; null when none clashes.
+ */
+function clashOf(
+  accountIds: readonly string[],
+  staff: ReadonlySet<string>,
+  family: ReadonlySet<string>,
+): BusinessRuleError | null {
+  const fields: Record<string, string> = {};
+  accountIds.forEach((id, index) => {
+    if (staff.has(id)) fields[`emails.${index}`] = ALREADY_STAFF();
+    else if (family.has(id)) fields[`emails.${index}`] = FAMILY_MEMBER();
+  });
+  if (Object.keys(fields).length === 0) return null;
+  return accountIds.some((id) => staff.has(id))
+    ? new BusinessRuleError('already_member', ALREADY_STAFF(), fields)
+    : new BusinessRuleError('family_member', FAMILY_MEMBER(), fields);
+}
+
 /**
  * Staff invitations (spec 05 Account edge cases; spec 06 Invites; OQ7, OQ9). Sending adds an
  * invited membership per address, through `ensure_account_for_email`, so an existing account gets
@@ -148,20 +173,16 @@ export class InvitesService {
         for (const email of input.emails) {
           accountIds.push(await this.db.definers.ensureAccountForEmail(tx, email));
         }
-        const { live, removed } = await this.repository.membershipsByAccount(tx, accountIds);
-        const clashes = accountIds.flatMap((id, index) => (live.has(id) ? [index] : []));
-        if (clashes.length > 0) {
-          const message = formatMessage('error.users.alreadyMember');
-          throw new BusinessRuleError(
-            'already_member',
-            message,
-            Object.fromEntries(clashes.map((index) => [`emails.${index}`, message])),
-          );
-        }
+        const { staff, family, removed } = await this.repository.membershipsByAccount(
+          tx,
+          accountIds,
+        );
+        const clash = clashOf(accountIds, staff, family);
+        if (clash !== null) throw clash;
         const ids: string[] = [];
         for (const [index, email] of input.emails.entries()) {
           const accountId = accountIds[index];
-          if (accountId === undefined) throw new Error('An address has no account.');
+          if (accountId === undefined) throw new InvariantError('An address has no account.');
           const invited = {
             accountId,
             name: nameFromEmail(email),
@@ -364,7 +385,7 @@ export class InvitesService {
       );
       await this.repository.setInviteSent(tx, userId, { at, nonce });
       const member = await this.repository.member(tx, userId);
-      if (member === null) throw new Error('The invited membership is not visible.');
+      if (member === null) throw new InvariantError('The invited membership is not visible.');
       invites.push({ member, token });
     }
     const school = await this.users.schoolSenderIn(tx);
