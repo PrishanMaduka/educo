@@ -50,6 +50,29 @@ describe('AuditLogQuery (GET /audit)', () => {
   });
 });
 
+describe('the from/to range', () => {
+  // Compared as instants, not as text: '…00Z' sorts after '…00.5Z' as text (Task 15 review M1).
+  it.each([
+    ['2026-10-08T00:00:00Z', '2026-10-08T00:00:00.5Z'],
+    ['2026-10-08T00:00:00.000001Z', '2026-10-08T00:00:00.000002Z'],
+    ['2026-10-08T00:00:00.9Z', '2026-10-08T00:00:01Z'],
+    ['2026-10-08T23:59:59.999999Z', '2026-10-09T00:00:00Z'],
+  ])('accepts from %s before to %s', (from, to) => {
+    expect(AuditLogQuery.safeParse({ from, to }).success).toBe(true);
+    expect(PlatformAuditLogQuery.safeParse({ from, to }).success).toBe(true);
+  });
+
+  it.each([
+    ['2026-10-08T00:00:00.5Z', '2026-10-08T00:00:00Z'],
+    ['2026-10-08T00:00:00.500Z', '2026-10-08T00:00:00.5Z'],
+    ['2026-10-08T00:00:00Z', '2026-10-08T00:00:00.000Z'],
+    ['2026-10-08T00:00:00.000002Z', '2026-10-08T00:00:00.000001Z'],
+  ])('refuses from %s not before to %s', (from, to) => {
+    expect(pathOf(AuditLogQuery.safeParse({ from, to }))).toEqual(['to']);
+    expect(pathOf(PlatformAuditLogQuery.safeParse({ from, to }))).toEqual(['to']);
+  });
+});
+
 describe('AuditEntry and AuditLog', () => {
   const entry = {
     id: ID,

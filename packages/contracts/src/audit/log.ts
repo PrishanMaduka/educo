@@ -12,9 +12,33 @@ import { AuditAction, PlatformAuditAction } from './actions';
  * what and when, page newest first, and answer `Accept: text/csv` with the filtered rows.
  */
 
+/**
+ * Compares two UTC instants (`…Z`, any number of fractional digits) as instants, to the
+ * microsecond and beyond: whole seconds by `Date.parse`, then the fraction digit by digit. Text
+ * order is wrong for these ('…00Z' sorts after '…00.5Z'), and `Date.parse` alone drops
+ * microseconds, which the server compares (Task 15 review M1).
+ */
+function compareInstants(a: string, b: string): number {
+  const [aSeconds, aFraction] = splitInstant(a);
+  const [bSeconds, bFraction] = splitInstant(b);
+  if (aSeconds !== bSeconds) return aSeconds < bSeconds ? -1 : 1;
+  const width = Math.max(aFraction.length, bFraction.length);
+  const left = aFraction.padEnd(width, '0');
+  const right = bFraction.padEnd(width, '0');
+  return left === right ? 0 : left < right ? -1 : 1;
+}
+
+/** Whole seconds since the epoch, and the fraction's digits ('' when there are none). */
+function splitInstant(iso: string): readonly [number, string] {
+  const dot = iso.indexOf('.');
+  const whole = dot === -1 ? iso.slice(0, -1) : iso.slice(0, dot);
+  const fraction = dot === -1 ? '' : iso.slice(dot + 1, -1);
+  return [Date.parse(`${whole}Z`), fraction];
+}
+
 /** `from` must come before `to` when both are given. */
 const rangeInOrder = (range: { from?: string; to?: string }) =>
-  range.from === undefined || range.to === undefined || range.from < range.to;
+  range.from === undefined || range.to === undefined || compareInstants(range.from, range.to) < 0;
 
 const RANGE_MESSAGE = { message: 'Choose an end after the start', path: ['to'] };
 
