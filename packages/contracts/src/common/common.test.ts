@@ -49,7 +49,8 @@ describe('contracts', () => {
     expect(ErrorCode.parse('internal')).toBe('internal');
   });
 
-  it('permission keys stub', () => {
-    expect(PermissionKey.options).toEqual(['settings.edit', 'users.manage']);
+  it('permission keys come from the full catalogue', () => {
+    expect(PermissionKey.options).toContain('settings.edit');
+    expect(PermissionKey.options).toContain('users.manage');
   });
 });
