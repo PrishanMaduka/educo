@@ -2,6 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { and, desc, eq, gt, isNotNull, isNull, sessions, sql, users } from '@quad/db';
 
 import { TENANT_DB } from '../../tokens';
+import { InvariantError } from '../errors';
 import { instantText, olderThan } from '../pagination/instant-keyset';
 
 import type { InstantKeyset } from '../pagination/instant-keyset';
@@ -182,7 +183,7 @@ export class SessionRepository {
         expiresAt: session.expiresAt,
       })
       .returning({ id: sessions.id });
-    if (row === undefined) throw new Error('The session row was not written.');
+    if (row === undefined) throw new InvariantError('The session row was not written.');
     return row.id;
   }
 
