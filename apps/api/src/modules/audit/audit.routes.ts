@@ -1,10 +1,11 @@
-import { AuditLog, AuditLogQuery } from '@quad/contracts';
+import { AuditLog, AuditLogQuery, AuditPeople } from '@quad/contracts';
 
 import { named } from '../../openapi/registry';
 
 import type { ApiRoute } from '../../openapi/registry';
 
 const Log = named('AuditLog', AuditLog);
+const People = named('AuditPeople', AuditPeople);
 
 /** Staff portal only: `audit` and `staff` keep it out of the parent app's client. */
 const TAGS = ['audit', 'staff'] as const;
@@ -21,5 +22,14 @@ export const auditRoutes: readonly ApiRoute[] = [
       200: { description: 'A page of the log, or the CSV export', schema: Log, csv: true },
     },
     errors: [400, 401, 403, 422],
+  },
+  {
+    method: 'get',
+    path: '/audit/people',
+    summary:
+      'Settings → Audit: the school’s members who appear in its log, by name, for the person filter (settings.view)',
+    tags: TAGS,
+    responses: { 200: { description: 'The people', schema: People } },
+    errors: [401, 403],
   },
 ];

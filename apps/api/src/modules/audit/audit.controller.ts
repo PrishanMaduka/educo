@@ -12,7 +12,7 @@ import { AuditLogService } from './audit-log.service';
 
 import type { RequestAuth } from '../../common/session/request-auth';
 import type { Clock } from '../../tokens';
-import type { AuditLog } from '@quad/contracts';
+import type { AuditLog, AuditPeople } from '@quad/contracts';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
 /** Settings → Audit (spec 06 `GET /audit`; spec 08): the school's audit log and its export. */
@@ -37,5 +37,11 @@ export class AuditLogController {
     const access = await this.access.forRequest(request);
     const csv = await this.auditLog.export(auth, access, query, request.ip);
     return sendCsv(reply, 'quad-audit', new Date(this.now()), csv);
+  }
+
+  @Get('people')
+  @Can('settings.view')
+  people(@Auth() auth: RequestAuth): Promise<AuditPeople> {
+    return this.auditLog.people(auth);
   }
 }

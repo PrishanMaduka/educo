@@ -16,7 +16,7 @@ import { AuditRepository } from './audit.repository';
 import type { AuditFilters } from './audit.repository';
 import type { RequestAccess } from '../../common/access/permissions.service';
 import type { RequestAuth } from '../../common/session/request-auth';
-import type { AuditLog, AuditLogQuery } from '@quad/contracts';
+import type { AuditLog, AuditLogQuery, AuditPeople } from '@quad/contracts';
 import type { QuadTenantDb } from '@quad/db';
 
 /** The filters a request set, for the export's own audit entry (unset ones left out). */
@@ -52,6 +52,14 @@ export class AuditLogService {
       const page = pageOf(rows, query.limit, (last) => ({ at: last.keysetAt, id: last.id }));
       return { items: page.items.map(toAuditEntry), nextCursor: page.nextCursor };
     });
+  }
+
+  /** `GET /audit/people`: the person filter's choices. */
+  people(auth: RequestAuth): Promise<AuditPeople> {
+    const { tenantId } = schoolOf(auth);
+    return this.db.withTenant(tenantId, async (tx) => ({
+      items: await this.repository.people(tx),
+    }));
   }
 
   /** `GET /audit` with `Accept: text/csv`: every filtered entry, newest first. */

@@ -99,6 +99,17 @@ export type AuditEntry = z.infer<typeof AuditEntry>;
 export const AuditLog = paginated(AuditEntry);
 export type AuditLog = z.infer<typeof AuditLog>;
 
+/** A member of the school who appears in its log, for the person filter. */
+export const AuditPerson = z.object({ id: IdSchema, name: z.string() });
+export type AuditPerson = z.infer<typeof AuditPerson>;
+
+/**
+ * `GET /audit/people`: the school's members who did something in its log, by name. The person
+ * filter needs it because `settings.view` (a principal) cannot list staff (`users.manage`).
+ */
+export const AuditPeople = z.object({ items: z.array(AuditPerson) });
+export type AuditPeople = z.infer<typeof AuditPeople>;
+
 /**
  * Every key `platform_audit.action` holds: the console's own actions, and the school actions
  * a support visit copies there (dual audit, `record_support_audit`).

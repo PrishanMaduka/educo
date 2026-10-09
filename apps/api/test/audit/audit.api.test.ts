@@ -1,4 +1,4 @@
-import { AuditLog } from '@quad/contracts';
+import { AuditLog, AuditPeople } from '@quad/contracts';
 import { describe, expect, it } from 'vitest';
 
 import { auditEntries, setPreview } from '../helpers/access';
@@ -227,6 +227,60 @@ describe('GET /audit', () => {
       [school.id],
     );
     expect(listOf(await as(admin)('GET', '/audit')).items).toEqual([]);
+  });
+});
+
+describe('GET /audit/people', () => {
+  const peopleOf = async (member: Pick<StaffSeed, 'session'>, query = '') => {
+    const response = await as(member)('GET', `/audit/people${query}`);
+    expect(response.statusCode).toBe(200);
+    return AuditPeople.parse(response.json()).items;
+  };
+
+  it('lists the members who appear in the log as the actor, by name, once each', async () => {
+    const { school, admin, principal, teacher } = await arrange();
+    await history(school, admin, teacher);
+    await insertAuditRow(db(), {
+      tenantId: school.id,
+      action: 'auth.sign_out',
+      at: '2026-10-04T09:00:00.000000Z',
+      actorUserId: teacher.userId,
+    });
+
+    // The principal did nothing, and Quad support is no member: neither is listed.
+    expect(await peopleOf(principal)).toEqual([
+      { id: teacher.userId, name: 'Nadeesha Jayasinghe' },
+      { id: admin.userId, name: 'Prishan Maduka' },
+    ]);
+  });
+
+  it('answers 401 without a session and 403 forbidden to a teacher (no settings.view)', async () => {
+    const { teacher } = await arrange();
+    expect((await new Browser(app).get('/audit/people')).statusCode).toBe(401);
+    const response = await as(teacher)('GET', '/audit/people');
+    expect(response.statusCode).toBe(403);
+    expect(response.json()).toMatchObject({ code: 'forbidden' });
+  });
+
+  it("never lists school B's people to school A, whatever the query says", async () => {
+    const a = await arrange();
+    const b = await arrange();
+    await history(b.school, b.admin, b.teacher);
+    await insertAuditRow(db(), {
+      tenantId: a.school.id,
+      action: 'auth.sign_in',
+      at: '2026-10-04T09:00:00.000000Z',
+      actorUserId: a.admin.userId,
+    });
+
+    expect(await peopleOf(a.admin, `?tenantId=${b.school.id}`)).toEqual([
+      { id: a.admin.userId, name: 'Prishan Maduka' },
+    ]);
+    // Positive control: B sees its own two.
+    expect((await peopleOf(b.admin)).map((person) => person.id)).toEqual([
+      b.teacher.userId,
+      b.admin.userId,
+    ]);
   });
 });
 

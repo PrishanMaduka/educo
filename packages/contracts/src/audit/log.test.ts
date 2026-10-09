@@ -4,6 +4,7 @@ import {
   AuditEntry,
   AuditLog,
   AuditLogQuery,
+  AuditPeople,
   PlatformAuditEntry,
   PlatformAuditLogAction,
   PlatformAuditLogQuery,
@@ -103,6 +104,17 @@ describe('AuditEntry and AuditLog', () => {
       'actor',
       'type',
     ]);
+  });
+});
+
+describe('AuditPeople (GET /audit/people)', () => {
+  it('accepts the members who appear in the log, each with an id and a name', () => {
+    const people = { items: [{ id: ID, name: 'Prishan Maduka' }] };
+    expect(AuditPeople.parse(people)).toEqual(people);
+  });
+
+  it('refuses a person without a name', () => {
+    expect(pathOf(AuditPeople.safeParse({ items: [{ id: ID }] }))).toEqual(['items', 0, 'name']);
   });
 });
 

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { and, auditLog, desc, eq, sql } from '@quad/db';
+import { and, asc, auditLog, desc, eq, exists, sql, users } from '@quad/db';
 
 import { instantText, olderThan } from '../../common/pagination/instant-keyset';
 
@@ -76,6 +76,25 @@ export class AuditRepository {
       .where(and(matching(filters), olderThan(auditLog.at, auditLog.id, after)))
       .orderBy(desc(auditLog.at), desc(auditLog.id))
       .limit(limit + 1);
+  }
+
+  /**
+   * The members who acted in the log, by name: one probe per member on the
+   * `(tenant_id, actor_user_id, at)` index, never a scan of the whole log.
+   */
+  people(tx: TenantTx): Promise<{ id: string; name: string }[]> {
+    return tx
+      .select({ id: users.id, name: users.name })
+      .from(users)
+      .where(
+        exists(
+          tx
+            .select({ one: sql`1` })
+            .from(auditLog)
+            .where(eq(auditLog.actorUserId, users.id)),
+        ),
+      )
+      .orderBy(asc(users.name), asc(users.id));
   }
 
   /** Every matching entry, up to `max + 1` (so the caller can tell there are more than `max`). */

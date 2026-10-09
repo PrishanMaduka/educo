@@ -3407,6 +3407,60 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/audit/people": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Settings → Audit: the school’s members who appear in its log, by name, for the person filter (settings.view) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description The people */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AuditPeople"];
+                    };
+                };
+                /** @description Error */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/public/enquiry/{embedKey}": {
         parameters: {
             query?: never;
@@ -4334,6 +4388,13 @@ export interface components {
                 ip: string | null;
             }[];
             nextCursor: string | null;
+        };
+        AuditPeople: {
+            items: {
+                /** Format: uuid */
+                id: string;
+                name: string;
+            }[];
         };
         EnquiryInput: {
             parentName: string;
