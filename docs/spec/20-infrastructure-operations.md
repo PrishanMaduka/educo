@@ -35,7 +35,7 @@ flowchart LR
 |---|---|---|
 | `quad-edu.com` | CloudFront (production) | Landing, sign-in, staff portal, API, realtime, legal, app links |
 | `www.quad-edu.com` | CloudFront | 301 to `quad-edu.com` |
-| `console.quad-edu.com` | CloudFront → ALB (console; `/api/v1/platform/*`, sign-in under `/api/v1/platform/auth/*` included, and `/socket.io/*` go to the API) | Separate cookie; WAF rule allows only Quad office and VPN ranges plus Google SSO callbacks (optional, off at launch) |
+| `console.quad-edu.com` | CloudFront → ALB (console; `/api/v1/platform/*`, sign-in under `/api/v1/platform/auth/*` included, and `/socket.io/*` go to the API) | Separate cookie; WAF rule allows only Quad office and VPN ranges (optional, off at launch) |
 | `staging.quad-edu.com`, `console.staging.quad-edu.com` | Staging CloudFront | `noindex` header; basic WAF rules |
 | `mail.quad-edu.com` | SES (MAIL FROM, DKIM CNAMEs) | Sending domain for all Quad email (D19) |
 | `status.quad-edu.com` | Hosted status page provider | Outside AWS so it stays up when AWS is down |

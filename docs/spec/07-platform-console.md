@@ -68,7 +68,7 @@ Acceptance: the wizard keeps its state when closed and reopened. Back and Next k
       - sensitive switches, a people search, and a live summary with validation.
   - **Plan & modules:** module switches, a plan change, a seat slider, and the live monthly total.
   - **Branding:** logo, colour, short name and live previews. There is no per-school domain or app listing: every school is reached at `quad-edu.com` and through the one Quad parent app, and its branding shows once a member signs in. **Publish** pushes the branding to the school's apps live (`tenant.branding.updated`).
-  - **Sign-in & security:** Google and Microsoft SSO with the allowed domain, two-step rules, password minimum, session length, IP allowlist.
+  - **Sign-in & security:** two-step rules, password minimum, session length, IP allowlist. Staff always sign in with their work email and a password; there is no Google or Microsoft sign-in to set up (D37).
   - **Danger zone:**
     - export all data (a job that emails a download link);
     - suspend or reactivate, by typing the school's name to confirm. Suspending needs a **Reason (shown to the school admin)**; staff and parents see "{School} is paused on Quad" with that reason and the school's contact details, and sign-ins are blocked until it is reactivated. Billing pauses while suspended;
@@ -113,7 +113,7 @@ Demo requests from the landing page (`POST /public/demo-requests`) and leads add
 ## Platform users
 Owner only (see [05](05-auth-tenancy-rbac.md#platform-roles)).
 - A table of Quad staff: name, email (must be `@quad-edu.com`), role (owner, admin, support, billing, read only), two-step status, last sign-in and status.
-- **Invite** (drawer): name, email and role. The person signs in with Google Workspace and sets up TOTP on first sign-in.
+- **Invite** (drawer): name, email and role. The invite link lets the person choose a password, and they set up TOTP on first sign-in.
 - Row actions: change role, reset TOTP (they set it up again at next sign-in), deactivate (ends their sessions). The last owner cannot be demoted or deactivated.
 - Every change writes `platform_audit`.
 

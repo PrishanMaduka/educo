@@ -60,7 +60,7 @@ Until schools go live, the build-time flag `NEXT_PUBLIC_QUAD_PRELAUNCH=true` (D3
 
 ## Sign-in
 
-**Sign in** opens a dialog (`<dialog>`, focus trapped, Escape closes) with the identifier-first flow: work email → password or SSO → two-step → **Choose a school** when there are several → "Opening {school}…" and a redirect to `/app`. `/sign-in` is the same flow as a full page (used by links, by `/app` when signed out, and when JavaScript has not loaded). `/#signin` opens the dialog. The flow, endpoints and errors are specified in [05](05-auth-tenancy-rbac.md#staff-portal-quad-educom). Parents are told "Parents: use the Quad app" with store badges. Until launch, Sign in opens the coming-soon note instead ([Pre-launch site](#pre-launch-site)).
+**Sign in** opens a dialog (`<dialog>`, focus trapped, Escape closes) with the identifier-first flow: work email → password → two-step → **Choose a school** when there are several → "Opening {school}…" and a redirect to `/app`. `/sign-in` is the same flow as a full page (used by links, by `/app` when signed out, and when JavaScript has not loaded). `/#signin` opens the dialog. The flow, endpoints and errors are specified in [05](05-auth-tenancy-rbac.md#staff-portal-quad-educom). Parents are told "Parents: use the Quad app" with store badges. Until launch, Sign in opens the coming-soon note instead ([Pre-launch site](#pre-launch-site)).
 
 ## Demo requests
 

@@ -197,7 +197,7 @@ Settings → **School settings** (`settings.view` to see, `settings.edit` to cha
 | Import data | Templates, uploads, dry runs and past import batches with rollback. Specified in [21](21-onboarding-import.md) |
 | Audit | The school's audit log: who did what and when, filters for person, action type and date range, a readable detail of each entry, and Export (CSV, needs `sensitive.export_data`). Support sessions from Quad are marked |
 
-Sign-in rules (SSO, two-step, password length, session length, IP allowlist) are shown read-only with "Managed by Quad. Ask support to change them."
+Sign-in rules (two-step, password length, session length, IP allowlist) are shown read-only with "Managed by Quad. Ask support to change them."
 
 ## Notifications panel
 Grouped by today and earlier: absences, payments, messages, cover requests, form replies, changes from parents and system notices. "Mark all read". Each item links to where you act on it.

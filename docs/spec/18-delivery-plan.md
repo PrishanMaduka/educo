@@ -71,9 +71,9 @@ To run a milestone in Claude Code, type `/build-milestone M3` (ids with a letter
 - Global `accounts` and per-school memberships (`users`), the `auth_memberships` security-definer function, and RLS policies with `FORCE ROW LEVEL SECURITY` on every tenant table, with the migration test from M0 covering them all.
 - The tenant-less entry point framework (D16): signed-link tokens (HMAC-SHA256, purpose, tid, subject, expiry, nonce, single use) used by password reset and staff invites; `tenant_by_embed_key` and `tenant_by_gateway_account` stubs with tests.
 - Staff sign-in:
-  - identifier-first sign-in at `quad-edu.com` (`/sign-in` page and a placeholder landing with **Sign in**; the full landing page is M1b), password, TOTP, Google and Microsoft OIDC (mocked in tests), forgot password, lockout;
+  - identifier-first sign-in at `quad-edu.com` (`/sign-in` page and a placeholder landing with **Sign in**; the full landing page is M1b), work email and password, TOTP, forgot password, lockout; no Google or Microsoft sign-in (D37);
   - **Choose a school** for accounts with several memberships, Switch school in the profile menu, and the school's branding applied after sign-in.
-- Console sign-in: Google Workspace + TOTP, and email + password + TOTP when `CONSOLE_PASSWORD_LOGIN=true` (local and staging only, D22).
+- Console sign-in: email + password + TOTP in every environment (D37).
 - Parent OTP sign-in, JWT + refresh rotation, biometric unlock (Flutter, `local_auth`).
 - Roles, the permission matrix, sensitive keys, `@Can` and `@Module` guards, `/me/permissions`, and **Preview a role** (read-only role preview for school admins).
 - School side: **Settings → Users & roles** (invite by email, change role, remind two-step, reset password, sign out everywhere, deactivate; no "sign in as", which is console-only), the **School settings** screen with its General and Sign-in sections and the `school_settings` table (other sections arrive with their features), and **Settings → Audit** (`GET /audit`, filterable).
@@ -84,7 +84,7 @@ To run a milestone in Claude Code, type `/build-milestone M3` (ids with a letter
 **Accept:**
 - Journeys 17, 18, 19, 42, 43 and 50 (signed links and the enquiry key; the webhook part from M7) in [17](17-testing-quality.md#cross-app-journeys-must-stay-green-from-the-milestone-that-introduces-them).
 - Sign-in works in all three apps, all from one domain.
-- `/auth/identify` returns the same response for unknown emails; `select-school` refuses a tenant the account is not a member of; a tampered or reused signed link is refused.
+- `/auth/password` answers an unknown email the same way as a wrong password; `select-school` refuses a tenant the account is not a member of; a tampered or reused signed link is refused.
 - Cross-tenant and wrong-role tests fail with 403/404; the app role cannot read another tenant's rows even with a raw query.
 - The support banner shows in support view; safeguarding routes refuse support sessions.
 - `CONSOLE_PASSWORD_LOGIN=true` is refused at boot when `APP_ENV=production`.
