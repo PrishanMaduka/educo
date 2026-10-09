@@ -1,12 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import {
-  BearerClaims,
-  RefreshInput,
-  RefreshToken,
-  SelectSchoolTokens,
-  TokenPair,
-} from '../index';
+import { BearerClaims, RefreshInput, RefreshToken, SelectSchoolTokens, TokenPair } from '../index';
 
 const SESSION_ID = '0192a6f4-1b2c-7d3e-8f40-123456789abc';
 const OTHER_ID = '0192a6f4-1b2c-7d3e-8f40-cba987654321';
