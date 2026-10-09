@@ -2,9 +2,9 @@ import { randomBytes } from 'node:crypto';
 
 import { Inject, Injectable } from '@nestjs/common';
 import { generateRecoveryCodes, normaliseRecoveryCode } from '@quad/domain';
-import { generateSecret, generateURI, verify } from 'otplib';
 
 import { PasswordHasher } from '../../common/crypto/passwords';
+import { TotpCodes } from '../../common/crypto/totp';
 import { formatMessage } from '../../common/delivery/templates/render';
 import {
   AccountLockedError,
@@ -14,7 +14,7 @@ import {
 } from '../../common/errors';
 import { hashSessionToken, newSessionToken } from '../../common/session/cookies';
 import { errorForLog } from '../../observability/logger';
-import { CLOCK, CONFIG, FIELD_CIPHER, LOGGER } from '../../tokens';
+import { CLOCK, FIELD_CIPHER, LOGGER } from '../../tokens';
 
 import { AccountAudit } from './account-audit.service';
 import { AuthRepository } from './auth.repository';
@@ -23,7 +23,6 @@ import { SignInService } from './sign-in.service';
 
 import type { SignInClient, SignInOutcome } from './sign-in.service';
 import type { PersonAuth, RequestAuth } from '../../common/session/request-auth';
-import type { Config } from '../../config';
 import type { Clock } from '../../tokens';
 import type { TotpSetupInput, TotpSetupResult, TotpVerifyInput } from '@quad/contracts';
 import type { FieldCipher } from '@quad/db';
@@ -32,8 +31,6 @@ import type { Logger } from 'pino';
 /** Spec 05 step 4: "Trust this device for 30 days". */
 export const TRUSTED_DEVICE_DAYS = 30;
 const DAY_MS = 24 * 60 * 60 * 1000;
-/** One 30-second step either side of now (spec 05: ±1 step). */
-const TOTP_TOLERANCE_SECONDS = 30;
 /** The issuer an authenticator app shows next to the code. */
 const TOTP_ISSUER = 'Quad';
 
@@ -58,8 +55,8 @@ export class TwoStepService {
     private readonly lockout: LockoutService,
     private readonly hasher: PasswordHasher,
     private readonly accountAudit: AccountAudit,
+    private readonly totp: TotpCodes,
     @Inject(FIELD_CIPHER) private readonly cipher: FieldCipher,
-    @Inject(CONFIG) private readonly config: Config,
     @Inject(CLOCK) private readonly now: Clock,
     @Inject(LOGGER) private readonly logger: Logger,
   ) {}
@@ -149,7 +146,7 @@ export class TwoStepService {
     if (credentials.totpEnabled) {
       throw new ConflictError('conflict', formatMessage('error.authenticatorExists'));
     }
-    const secret = generateSecret();
+    const secret = this.totp.newSecret();
     const saved = await this.repository.savePendingTotp(
       person.accountId,
       await this.cipher.encrypt(secret),
@@ -158,11 +155,7 @@ export class TwoStepService {
       throw new ConflictError('conflict', formatMessage('error.authenticatorExists'));
     }
     const account = await this.repository.account(person.accountId);
-    const otpauthUri = generateURI({
-      issuer: TOTP_ISSUER,
-      label: account?.email ?? TOTP_ISSUER,
-      secret,
-    });
+    const otpauthUri = this.totp.uri(TOTP_ISSUER, account?.email ?? TOTP_ISSUER, secret);
     return { otpauthUri, recoveryCodes: null, next: null };
   }
 
@@ -171,7 +164,7 @@ export class TwoStepService {
     const sealed = credentials.totpSecretEnc;
     if (credentials.totpEnabled || sealed === null) throw new InvalidCodeError();
     const secret = await this.cipher.decrypt(sealed);
-    const match = await this.codeMatches(
+    const match = await this.totp.match(
       secret,
       code,
       new Date(this.now()),
@@ -208,38 +201,9 @@ export class TwoStepService {
     const credentials = await this.repository.credentials(accountId);
     if (!credentials.totpEnabled || credentials.totpSecretEnc === null) return false;
     const secret = await this.cipher.decrypt(credentials.totpSecretEnc);
-    const match = await this.codeMatches(secret, code, now, credentials.totpLastStep);
+    const match = await this.totp.match(secret, code, now, credentials.totpLastStep);
     if (match === null) return false;
     return match.step === null || this.repository.acceptTotpStep(accountId, match.step);
-  }
-
-  /**
-   * Whether `code` is the authenticator's code within one step of `now` and after `lastStep`:
-   * the step it matched, `{ step: null }` for the local fixed code, or null for no match.
-   */
-  private async codeMatches(
-    secret: string,
-    code: string,
-    now: Date,
-    lastStep: number | null,
-  ): Promise<{ readonly step: number | null } | null> {
-    if (this.isFixedCode(code)) return { step: null };
-    const result = await verify({
-      secret,
-      token: code,
-      epoch: Math.floor(now.getTime() / 1000),
-      epochTolerance: TOTP_TOLERANCE_SECONDS,
-      ...(lastStep === null ? {} : { afterTimeStep: lastStep }),
-    });
-    // A TOTP match carries its RFC 6238 time step (the HOTP shape of the union never does).
-    if (!result.valid || !('timeStep' in result)) return null;
-    return { step: result.timeStep };
-  }
-
-  /** Local and staging only: the config refuses `DEV_FIXED_OTP` in production. */
-  private isFixedCode(code: string): boolean {
-    const fixed = this.config.DEV_FIXED_OTP;
-    return fixed !== undefined && code === fixed;
   }
 
   /** Uses up a matching recovery code; false when none matches or it was just used. */

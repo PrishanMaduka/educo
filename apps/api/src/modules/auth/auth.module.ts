@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 
+import { FailureCounter } from '../../common/lockout/failure-counter';
 import { errorForLog } from '../../observability/logger';
 import { AuthController } from '../../public/auth/auth.controller';
 import { OtpController } from '../../public/auth/otp.controller';
@@ -50,6 +51,7 @@ export class AuthModule {
         AccountAudit,
         AuthRepository,
         AuthService,
+        FailureCounter,
         LockoutService,
         MembershipsService,
         SignInSessions,

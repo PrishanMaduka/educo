@@ -16,6 +16,7 @@ import { createBreachCheck } from './breach-check';
 import { loadJwtKeys } from './jwt-keys';
 import { PasswordHasher } from './passwords';
 import { SignedLinks } from './signed-links';
+import { TotpCodes } from './totp';
 
 import type { BreachCheck } from './breach-check';
 import type { JwtKeys } from './jwt-keys';
@@ -25,14 +26,16 @@ import type { FieldCipher, QuadTenantDb } from '@quad/db';
 import type { Logger } from 'pino';
 
 /**
- * Signed links, password hashing, the breached-password check, the field cipher, the token keys
- * and the parent access tokens, built once from the validated config (D32). Inject
- * `SignedLinks`, `PasswordHasher` and `AccessTokens` by class, the others by token.
+ * Signed links, password hashing, the breached-password check, the field cipher, the token keys,
+ * the parent access tokens and authenticator codes, built once from the validated config (D32).
+ * Inject `SignedLinks`, `PasswordHasher`, `TotpCodes` and `AccessTokens` by class, the others by
+ * token.
  */
 @Global()
 @Module({
   providers: [
     PasswordHasher,
+    TotpCodes,
     {
       provide: SignedLinks,
       inject: [CONFIG, TENANT_DB],
@@ -63,6 +66,14 @@ import type { Logger } from 'pino';
         createBreachCheck(config.APP_ENV, logger),
     },
   ],
-  exports: [PasswordHasher, SignedLinks, AccessTokens, FIELD_CIPHER, JWT_KEYS, BREACH_CHECK],
+  exports: [
+    PasswordHasher,
+    TotpCodes,
+    SignedLinks,
+    AccessTokens,
+    FIELD_CIPHER,
+    JWT_KEYS,
+    BREACH_CHECK,
+  ],
 })
 export class CryptoModule {}
