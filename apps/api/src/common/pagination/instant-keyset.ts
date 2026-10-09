@@ -5,12 +5,26 @@ import { z } from 'zod';
 import type { AnyColumn, SQL } from '@quad/db';
 
 /**
+ * True when the date and time exist (no month 13, no 30 February, no 25:61): a forged cursor
+ * with an impossible instant is then a 400, never a Postgres error (Task 15 review M2). The
+ * millisecond part must survive a round trip through `Date` unchanged.
+ */
+function isRealInstant(at: string): boolean {
+  const millis = `${at.slice(0, 23)}Z`;
+  const parsed = Date.parse(millis);
+  return Number.isFinite(parsed) && new Date(parsed).toISOString() === millis;
+}
+
+/**
  * The keyset of a list ordered newest first by an instant, then id. Postgres keeps microseconds
  * and a JS `Date` only milliseconds, so the cursor carries the instant as text with all six
  * digits: rows a millisecond apart, or in the same millisecond, are never skipped or repeated.
  */
 export const InstantKeyset = z.object({
-  at: z.string().regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{6}Z$/),
+  at: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{6}Z$/)
+    .refine(isRealInstant),
   id: IdSchema,
 });
 export type InstantKeyset = z.infer<typeof InstantKeyset>;

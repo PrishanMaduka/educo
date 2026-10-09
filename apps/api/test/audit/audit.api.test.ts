@@ -172,6 +172,11 @@ describe('GET /audit', () => {
     expect(await fieldsOf('from=2026-10-08T00:00:00Z&to=2026-10-01T00:00:00Z')).toEqual(['to']);
     expect(await fieldsOf('limit=500')).toEqual(['limit']);
     expect(await fieldsOf('cursor=not-a-cursor')).toEqual(['cursor']);
+    // A forged cursor with an impossible instant is a 400, not a database error (Task 15 M2).
+    const forged = (at: string) =>
+      Buffer.from(JSON.stringify({ at, id: admin.userId })).toString('base64url');
+    expect(await fieldsOf(`cursor=${forged('2026-13-45T25:61:00.000000Z')}`)).toEqual(['cursor']);
+    expect(await fieldsOf(`cursor=${forged('2026-02-30T00:00:00.000000Z')}`)).toEqual(['cursor']);
   });
 
   it('answers 401 without a session and 403 forbidden to a teacher (no settings.view)', async () => {
