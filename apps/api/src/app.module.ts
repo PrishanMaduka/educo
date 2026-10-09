@@ -18,6 +18,7 @@ import { SesWebhookModule } from './webhooks/ses/ses-webhook.module';
 
 import type { DeliveryQueue } from './common/delivery/delivery.service';
 import type { Config } from './config';
+import type { OtpSendRequests } from './modules/auth/otp/otp-sends';
 import type { PasswordResetRequests } from './modules/auth/password-reset-requests';
 import type { ErrorReporter } from './observability/sentry';
 import type { Clock } from './tokens';
@@ -33,6 +34,8 @@ export interface AppOverrides {
   readonly delivery?: DeliveryQueue;
   /** Records Forgot password requests instead of adding BullMQ jobs (`test/fakes/password-resets.ts`). */
   readonly passwordResets?: PasswordResetRequests;
+  /** Records sign-in code requests instead of adding BullMQ jobs (`test/fakes/otp-sends.ts`). */
+  readonly otpSends?: OtpSendRequests;
   /**
    * Test-only modules added after the app's own (probe routes behind the real guards, fakes for
    * providers a later task owns). `AppModule` never lists them, so the OpenAPI document is
@@ -66,7 +69,7 @@ export class AppModule {
         HealthModule,
         RealtimeModule,
         SesWebhookModule.register(overrides.snsFetchers),
-        AuthModule.register(overrides.passwordResets),
+        AuthModule.register(overrides.passwordResets, overrides.otpSends),
         MeModule,
         ...(overrides.testModules ?? []),
       ],

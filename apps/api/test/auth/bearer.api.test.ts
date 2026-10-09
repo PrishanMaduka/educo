@@ -14,6 +14,7 @@ import { SessionService } from '../../src/common/session/session.service';
 import { API_ROUTES } from '../../src/openapi/document';
 import { TEST_JWT_KEYS } from '../env';
 import { RecordingDelivery } from '../fakes/delivery';
+import { RecordingOtpSends } from '../fakes/otp-sends';
 import { Browser } from '../helpers/browser';
 import { useDatabaseApp } from '../helpers/database-app';
 import { insertSchool } from '../helpers/identity';
@@ -36,7 +37,8 @@ const SECOND = 1000;
 const MINUTE = 60 * SECOND;
 let clock = NOW;
 const delivery = new RecordingDelivery();
-const { db, app } = useDatabaseApp({}, { overrides: { now: () => clock, delivery } });
+const otpSends = new RecordingOtpSends(delivery);
+const { db, app } = useDatabaseApp({}, { overrides: { now: () => clock, delivery, otpSends } });
 
 beforeEach(() => {
   clock = NOW;
@@ -50,7 +52,7 @@ async function guardian(name = 'Colombo International School') {
   const school = await insertSchool(db(), { name, shortName: 'CIS' });
   const account = await insertPhoneAccount(db());
   const userId = await insertParentMember(db(), school.id, account.id, 'guardian');
-  const pair = await signedInParent(app, delivery, account.phone);
+  const pair = await signedInParent(app, otpSends, account.phone);
   return { school, account, userId, pair };
 }
 
@@ -58,7 +60,7 @@ async function relative() {
   const school = await insertSchool(db());
   const account = await insertPhoneAccount(db());
   await insertParentMember(db(), school.id, account.id, 'relative', 'Sunil Perera');
-  const pair = await signedInParent(app, delivery, account.phone);
+  const pair = await signedInParent(app, otpSends, account.phone);
   return { school, account, pair };
 }
 
@@ -69,7 +71,7 @@ async function choosing() {
   const account = await insertPhoneAccount(db());
   const inA = await insertParentMember(db(), a.id, account.id, 'guardian');
   await insertParentMember(db(), b.id, account.id, 'relative');
-  const result = await signInByPhone(app, delivery, account.phone);
+  const result = await signInByPhone(app, otpSends, account.phone);
   expect(result.status).toBe('choose_school');
   return { a, b, account, inA, selectToken: String(result.accessToken) };
 }
@@ -264,18 +266,19 @@ describe('key ids and rotation (Task 9 fix round 1)', () => {
   describe('with JWT_PUBLIC_KEY_PREVIOUS', () => {
     const old = generateKeyPairSync('ed25519');
     const rotatedDelivery = new RecordingDelivery();
+    const rotatedSends = new RecordingOtpSends(rotatedDelivery);
     const rotated = useDatabaseApp(
       {
         JWT_PUBLIC_KEY_PREVIOUS: old.publicKey.export({ type: 'spki', format: 'pem' }).toString(),
       },
-      { overrides: { now: () => clock, delivery: rotatedDelivery } },
+      { overrides: { now: () => clock, delivery: rotatedDelivery, otpSends: rotatedSends } },
     );
 
     it('accepts a token the previous key signed, by its kid, and signs new ones with the current key', async () => {
       const school = await insertSchool(rotated.db());
       const account = await insertPhoneAccount(rotated.db());
       await insertParentMember(rotated.db(), school.id, account.id);
-      const pair = await signedInParent(rotated.app, rotatedDelivery, account.phone);
+      const pair = await signedInParent(rotated.app, rotatedSends, account.phone);
       const currentKid = await calculateJwkThumbprint(
         await exportJWK(createPublicKey(TEST_JWT_KEYS.JWT_PUBLIC_KEY)),
       );
@@ -541,7 +544,7 @@ describe('POST /auth/sign-out with a bearer token (spec 05 step 7)', () => {
   it("signs out only this device: the same parent's other phone keeps working", async () => {
     const { account, pair } = await guardian();
     clock = NOW + 31 * SECOND;
-    const otherPhone = await signedInParent(app, delivery, account.phone);
+    const otherPhone = await signedInParent(app, otpSends, account.phone);
     await post('/auth/sign-out', pair.accessToken);
     expect((await get('/me', otherPhone.accessToken)).statusCode).toBe(200);
   });

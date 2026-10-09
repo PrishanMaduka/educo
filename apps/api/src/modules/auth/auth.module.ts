@@ -6,7 +6,7 @@ import { OtpController } from '../../public/auth/otp.controller';
 import { SsoController } from '../../public/auth/sso.controller';
 import { PasswordResetController } from '../../public/signed-links/password-reset.controller';
 import { PasswordResetService } from '../../public/signed-links/password-reset.service';
-import { LOGGER, PASSWORD_RESETS, REDIS } from '../../tokens';
+import { LOGGER, OTP_SENDS, PASSWORD_RESETS, REDIS } from '../../tokens';
 import { TotpController } from '../me/totp.controller';
 
 import { AccountAudit } from './account-audit.service';
@@ -14,6 +14,7 @@ import { AuthRepository } from './auth.repository';
 import { AuthService } from './auth.service';
 import { LockoutService } from './lockout.service';
 import { MembershipsService } from './memberships.service';
+import { BullOtpSendRequests } from './otp/otp-sends';
 import { OtpRepository } from './otp/otp.repository';
 import { OtpService } from './otp/otp.service';
 import { BullPasswordResetRequests } from './password-reset-requests';
@@ -26,6 +27,7 @@ import { RefreshService } from './tokens/refresh.service';
 import { TokenService } from './tokens/token.service';
 import { TwoStepService } from './two-step.service';
 
+import type { OtpSendRequests } from './otp/otp-sends';
 import type { PasswordResetRequests } from './password-reset-requests';
 import type { DynamicModule } from '@nestjs/common';
 import type { Redis } from 'ioredis';
@@ -35,11 +37,14 @@ import type { Logger } from 'pino';
  * Staff sign-in (spec 05), SSO included (`./sso`), and parent sign-in with a code (`./otp`) and
  * its tokens (`./tokens`): the services live here, the tenant-less controllers in
  * `src/public/auth` and `src/public/signed-links` (ruling F14), and `POST /me/totp` from
- * `modules/me/totp.controller.ts`. Tests may replace the Forgot password queue.
+ * `modules/me/totp.controller.ts`. Tests may replace the Forgot password and sign-in code queues.
  */
 @Module({})
 export class AuthModule {
-  static register(passwordResets?: PasswordResetRequests): DynamicModule {
+  static register(
+    passwordResets?: PasswordResetRequests,
+    otpSends?: OtpSendRequests,
+  ): DynamicModule {
     return {
       module: AuthModule,
       controllers: [
@@ -76,6 +81,16 @@ export class AuthModule {
                 }),
             }
           : { provide: PASSWORD_RESETS, useValue: passwordResets },
+        otpSends === undefined
+          ? {
+              provide: OTP_SENDS,
+              inject: [REDIS, LOGGER],
+              useFactory: (redis: Redis, logger: Logger): OtpSendRequests =>
+                new BullOtpSendRequests(redis, (error) => {
+                  logger.warn({ error: errorForLog(error) }, 'Sign-in code queue error');
+                }),
+            }
+          : { provide: OTP_SENDS, useValue: otpSends },
       ],
     };
   }

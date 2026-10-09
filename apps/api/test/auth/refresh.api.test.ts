@@ -4,6 +4,7 @@ import { TokenPair } from '@quad/contracts';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { RecordingDelivery } from '../fakes/delivery';
+import { RecordingOtpSends } from '../fakes/otp-sends';
 import { Browser } from '../helpers/browser';
 import { useDatabaseApp } from '../helpers/database-app';
 import { insertSchool, insertWebSession } from '../helpers/identity';
@@ -22,7 +23,8 @@ const MINUTE = 60 * 1000;
 const DAY = 24 * 60 * MINUTE;
 let clock = NOW;
 const delivery = new RecordingDelivery();
-const { db, app } = useDatabaseApp({}, { overrides: { now: () => clock, delivery } });
+const otpSends = new RecordingOtpSends(delivery);
+const { db, app } = useDatabaseApp({}, { overrides: { now: () => clock, delivery, otpSends } });
 
 beforeEach(() => {
   clock = NOW;
@@ -36,7 +38,7 @@ async function parentFamily() {
   const school = await insertSchool(db(), { name: 'Colombo International School' });
   const account = await insertPhoneAccount(db());
   const userId = await insertParentMember(db(), school.id, account.id);
-  const pair = await signedInParent(app, delivery, account.phone);
+  const pair = await signedInParent(app, otpSends, account.phone);
   return { school, account, userId, pair, sessionId: familyIdOf(pair.refreshToken) };
 }
 

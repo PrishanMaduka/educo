@@ -1,12 +1,13 @@
 import { createPublicKey, randomUUID } from 'node:crypto';
 
 import { calculateJwkThumbprint, decodeProtectedHeader, exportJWK } from 'jose';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { TENANT_DB } from '../../src/tokens';
 import { captureLogs } from '../app';
 import { TEST_JWT_KEYS } from '../env';
 import { RecordingDelivery } from '../fakes/delivery';
+import { RecordingOtpSends } from '../fakes/otp-sends';
 import { Browser } from '../helpers/browser';
 import { useDatabaseApp } from '../helpers/database-app';
 import { insertSchool } from '../helpers/identity';
@@ -35,11 +36,15 @@ const MINUTE = 60 * SECOND;
 const DAY = 24 * 60 * MINUTE;
 let clock = NOW;
 const delivery = new RecordingDelivery();
+const otpSends = new RecordingOtpSends(delivery);
 const logs = captureLogs();
 const { db, app } = useDatabaseApp(
   {},
-  { logger: logs.logger, overrides: { now: () => clock, delivery } },
+  { logger: logs.logger, overrides: { now: () => clock, delivery, otpSends } },
 );
+
+/** The worker's turn: it sends (or drops) every code asked for so far. */
+const deliver = () => otpSends.process(app());
 
 beforeEach(() => {
   clock = NOW;
@@ -50,11 +55,15 @@ const request = (body: unknown, browser = new Browser(app)) =>
 const verify = (body: unknown, browser = new Browser(app)) =>
   browser.post('/auth/otp/verify', body);
 
-/** Asks for a code for `phone` and returns it. */
+/** Asks for a code for a known parent's `phone`, lets the worker send it, and returns it. */
 async function codeFor(phone: string): Promise<string> {
   expect((await request({ phone })).statusCode).toBe(202);
+  await deliver();
   return smsCode(delivery, phone);
 }
+
+/** The sign-in SMS queued to `phone` so far. */
+const smsTo = (phone: string) => delivery.sms.filter(({ job }) => job.to === phone);
 
 async function challengeRows(database: TestDatabase) {
   const { rows } = await database.platform.query<{
@@ -88,6 +97,7 @@ describe('POST /auth/otp/request (spec 05 parent app step 3)', () => {
 
     expect(response.statusCode).toBe(202);
     expect(response.body).toBe('');
+    await deliver();
     const code = smsCode(delivery, account.phone);
     expect(code).toMatch(/^\d{6}$/);
     expect(delivery.sms.at(-1)?.job.params).toEqual({ code, minutes: 10 });
@@ -109,6 +119,7 @@ describe('POST /auth/otp/request (spec 05 parent app step 3)', () => {
     const { account } = await guardianAt();
     const response = await request({ email: account.email.toUpperCase() });
     expect(response.statusCode).toBe(202);
+    await deliver();
     expect(emailCode(delivery, account.email)).toMatch(/^\d{6}$/);
   });
 
@@ -125,8 +136,28 @@ describe('POST /auth/otp/request (spec 05 parent app step 3)', () => {
     expect(unknown.body).toBe(known.body);
     expect(unknown.headers['content-type']).toBe(known.headers['content-type']);
     expect(lookup).not.toHaveBeenCalled();
-    // The code goes to the number either way: only its owner learns whether it is known.
-    expect(smsCode(delivery, unknownPhone)).toMatch(/^\d{6}$/);
+    // Then the worker: the known parent gets the code, the unknown number gets nothing (D39).
+    logs.lines.length = 0;
+    await deliver();
+    expect(smsCode(delivery, account.phone)).toMatch(/^\d{6}$/);
+    expect(smsTo(unknownPhone)).toEqual([]);
+    const dropped = logs.lines.filter((line) => line.metric === 'otp_dropped_unknown');
+    expect(dropped).toHaveLength(1);
+    expect(JSON.stringify(logs.lines)).not.toContain(unknownPhone.slice(3));
+  });
+
+  it("sends nothing to a staff-only account's number or a disabled parent's (no parent membership)", async () => {
+    const school = await insertSchool(db());
+    const staff = await insertPhoneAccount(db());
+    await insertParentMember(db(), school.id, staff.id, 'staff');
+    const disabled = await insertPhoneAccount(db(), { status: 'disabled' });
+    await insertParentMember(db(), school.id, disabled.id);
+    for (const phone of [staff.phone, disabled.phone]) {
+      expect((await request({ phone })).statusCode).toBe(202);
+    }
+    await deliver();
+    expect(smsTo(staff.phone)).toEqual([]);
+    expect(smsTo(disabled.phone)).toEqual([]);
   });
 
   it.each([
@@ -136,12 +167,14 @@ describe('POST /auth/otp/request (spec 05 parent app step 3)', () => {
     ['no country code', '77 000 0001'],
   ])('answers 400 for a number with %s, and sends nothing', async (_case, phone) => {
     const sent = delivery.sms.length;
+    const queued = otpSends.requests.length;
     const response = await request({ phone });
     expect(response.statusCode).toBe(400);
     expect(response.json()).toMatchObject({
       code: 'validation',
       fields: { phone: anyText() },
     });
+    expect(otpSends.requests.length).toBe(queued);
     expect(delivery.sms.length).toBe(sent);
   });
 
@@ -162,7 +195,7 @@ describe('POST /auth/otp/request (spec 05 parent app step 3)', () => {
       clock = NOW + offset * SECOND;
       expect((await request({ phone })).statusCode).toBe(202);
     }
-    const sent = delivery.sms.length;
+    const queued = otpSends.requests.length;
     clock = NOW + 93 * SECOND;
 
     const response = await request({ phone });
@@ -171,7 +204,7 @@ describe('POST /auth/otp/request (spec 05 parent app step 3)', () => {
     expect(response.json()).toMatchObject({ code: 'rate_limited' });
     // The first code leaves the 15-minute window at 15:00.
     expect(response.headers['retry-after']).toBe(String(15 * 60 - 93));
-    expect(delivery.sms.length).toBe(sent);
+    expect(otpSends.requests.length).toBe(queued);
     clock = NOW + 15 * MINUTE;
     expect((await request({ phone })).statusCode).toBe(202);
   });
@@ -206,7 +239,7 @@ describe('POST /auth/otp/request (spec 05 parent app step 3)', () => {
   });
 
   it('never writes the number or the code to the log', async () => {
-    const phone = freshPhone();
+    const { phone } = (await guardianAt()).account;
     logs.lines.length = 0;
     const code = await codeFor(phone);
     await verify({ phone, code });
@@ -291,6 +324,7 @@ describe('POST /auth/otp/verify (spec 05 parent app step 4)', () => {
   it('signs in with an emailed code too', async () => {
     const { account } = await guardianAt();
     await request({ email: account.email });
+    await deliver();
     const response = await verify({
       email: account.email,
       code: emailCode(delivery, account.email),
@@ -333,31 +367,31 @@ describe('POST /auth/otp/verify (spec 05 parent app step 4)', () => {
     });
   });
 
-  it('answers not_found for a number with no account, and opens nothing', async () => {
+  it('answers an unknown number, which never got a code, like a wrong code: 400 and the attempt counted', async () => {
     const phone = freshPhone();
-    const response = await verify({ phone, code: await codeFor(phone) });
-    expect(response.statusCode).toBe(200);
-    expect(response.json()).toEqual({ status: 'not_found', memberships: [] });
+    expect((await request({ phone })).statusCode).toBe(202);
+    await deliver();
+    expect(smsTo(phone)).toEqual([]);
+    const response = await verify({ phone, code: '123456' });
+    expect(response.statusCode).toBe(400);
+    expect(response.json()).toMatchObject({ code: 'invalid_code' });
+    const { rows } = await db().platform.query<{ attempts: number }>(
+      'select attempts from otp_challenges order by id desc limit 1',
+    );
+    expect(rows[0]?.attempts).toBe(1);
   });
 
-  it('answers not_found for a staff-only account (bearer tokens are for guardians and relatives)', async () => {
-    const school = await insertSchool(db());
-    const account = await insertPhoneAccount(db());
-    await insertParentMember(db(), school.id, account.id, 'staff');
-    const response = await verify({ phone: account.phone, code: await codeFor(account.phone) });
+  it('answers not_found when the code verified but no parent membership is left, and opens nothing', async () => {
+    const { account, userId } = await guardianAt();
+    const code = await codeFor(account.phone);
+    await db().platform.query(`update users set status = 'deactivated' where id = $1`, [userId]);
+    const response = await verify({ phone: account.phone, code });
+    expect(response.statusCode).toBe(200);
     expect(response.json()).toEqual({ status: 'not_found', memberships: [] });
     const { rows } = await db().platform.query('select 1 from sessions where account_id = $1', [
       account.id,
     ]);
     expect(rows).toEqual([]);
-  });
-
-  it('answers not_found for a disabled account', async () => {
-    const school = await insertSchool(db());
-    const account = await insertPhoneAccount(db(), { status: 'disabled' });
-    await insertParentMember(db(), school.id, account.id);
-    const response = await verify({ phone: account.phone, code: await codeFor(account.phone) });
-    expect(response.json()).toEqual({ status: 'not_found', memberships: [] });
   });
 
   it("never lists another account's schools (school B's guardian is not found by A's number)", async () => {
@@ -476,7 +510,8 @@ describe('POST /auth/otp/verify (spec 05 parent app step 4)', () => {
     const definers = app().get<QuadTenantDb>(TENANT_DB).definers;
     const bodies: string[] = [];
     for (const phone of [known.account.phone, locked.phone, unknown]) {
-      const code = await codeFor(phone);
+      // The unknown number gets no code (D39); any guess is just as wrong.
+      const code = phone === unknown ? (await request({ phone }), '000000') : await codeFor(phone);
       const lookup = vi.spyOn(definers, 'accountByIdentifier');
       const response = await verify({ phone, code: otherCode(code) });
       expect(lookup).not.toHaveBeenCalled();
@@ -511,22 +546,27 @@ describe('POST /auth/otp/verify (spec 05 parent app step 4)', () => {
 describe('fixed codes (spec 16)', () => {
   describe('DEV_FIXED_OTP (local and staging only)', () => {
     const fixedDelivery = new RecordingDelivery();
+    const fixedSends = new RecordingOtpSends(fixedDelivery);
     const fixed = useDatabaseApp(
       { DEV_FIXED_OTP: '000000' },
-      { overrides: { now: () => clock, delivery: fixedDelivery } },
+      { overrides: { now: () => clock, delivery: fixedDelivery, otpSends: fixedSends } },
     );
 
     it('sends and accepts the fixed code', async () => {
-      const phone = freshPhone();
+      const school = await insertSchool(fixed.db());
+      const account = await insertPhoneAccount(fixed.db());
+      await insertParentMember(fixed.db(), school.id, account.id);
+      const { phone } = account;
       expect((await new Browser(fixed.app).post('/auth/otp/request', { phone })).statusCode).toBe(
         202,
       );
+      await fixedSends.process(fixed.app());
       expect(smsCode(fixedDelivery, phone)).toBe('000000');
       const response = await new Browser(fixed.app).post('/auth/otp/verify', {
         phone,
         code: '000000',
       });
-      expect(response.json()).toEqual({ status: 'not_found', memberships: [] });
+      expect(response.json()).toMatchObject({ status: 'signed_in' });
     });
   });
 
@@ -534,6 +574,7 @@ describe('fixed codes (spec 16)', () => {
     const reviewPhone = '+94770009999';
     const reviewSchoolId = randomUUID();
     const reviewDelivery = new RecordingDelivery();
+    const reviewSends = new RecordingOtpSends(reviewDelivery);
     const review = useDatabaseApp(
       {
         DEV_FIXED_OTP: undefined,
@@ -541,72 +582,75 @@ describe('fixed codes (spec 16)', () => {
         STORE_REVIEW_OTP: '481516',
         STORE_REVIEW_TENANT_ID: reviewSchoolId,
       },
-      { overrides: { now: () => clock, delivery: reviewDelivery } },
+      { overrides: { now: () => clock, delivery: reviewDelivery, otpSends: reviewSends } },
     );
+    const ask = async (phone: string) => {
+      await new Browser(review.app).post('/auth/otp/request', { phone });
+      await reviewSends.process(review.app());
+    };
     const verifyReview = (code: string) =>
       new Browser(review.app).post('/auth/otp/verify', { phone: reviewPhone, code });
+    /** The review account: a guardian at App Review and at another school. */
+    async function reviewAccount(): Promise<void> {
+      const appReview = await insertSchool(review.db(), { id: reviewSchoolId, name: 'App Review' });
+      const other = await insertSchool(review.db(), { name: 'A real school' });
+      const account = await review
+        .db()
+        .platform.query<{ id: string }>(
+          `insert into accounts (id, phone_e164, status) values (gen_random_uuid(), $1, 'active') returning id`,
+          [reviewPhone],
+        );
+      const accountId = account.rows[0]?.id ?? '';
+      await insertParentMember(review.db(), appReview.id, accountId);
+      await insertParentMember(review.db(), other.id, accountId);
+    }
 
-    it('sends the review number its secret code, and every other number a random one', async () => {
-      await new Browser(review.app).post('/auth/otp/request', { phone: reviewPhone });
+    beforeAll(reviewAccount);
+
+    it('sends the review number its secret code, and other parents a random one', async () => {
+      await ask(reviewPhone);
       expect(smsCode(reviewDelivery, reviewPhone)).toBe('481516');
+      const school = await insertSchool(review.db());
       const codes = new Set<string>();
       for (let count = 0; count < 3; count += 1) {
-        const phone = freshPhone();
-        await new Browser(review.app).post('/auth/otp/request', { phone });
-        codes.add(smsCode(reviewDelivery, phone));
+        const parent = await insertPhoneAccount(review.db());
+        await insertParentMember(review.db(), school.id, parent.id);
+        await ask(parent.phone);
+        codes.add(smsCode(reviewDelivery, parent.phone));
       }
       expect(codes.has('481516') && codes.size === 1).toBe(false);
     });
 
     it('signs the review number in to the App Review school only, never another school', async () => {
-      const reviewSchool = await insertSchool(review.db(), {
-        id: reviewSchoolId,
-        name: 'App Review',
-      });
-      const other = await insertSchool(review.db(), { name: 'A real school' });
-      const { rows } = await review
-        .db()
-        .platform.query<{ id: string }>(
-          `insert into accounts (id, phone_e164, status) values (gen_random_uuid(), $1, 'active') returning id`,
-          [reviewPhone],
-        );
-      const accountId = rows[0]?.id ?? '';
-      await insertParentMember(review.db(), reviewSchool.id, accountId);
-      await insertParentMember(review.db(), other.id, accountId);
       clock = NOW + 31 * SECOND;
-      await new Browser(review.app).post('/auth/otp/request', { phone: reviewPhone });
-
+      await ask(reviewPhone);
       const response = await verifyReview('481516');
-
       expect(response.json()).toMatchObject({
         status: 'signed_in',
-        memberships: [{ tenantId: reviewSchool.id }],
+        memberships: [{ tenantId: reviewSchoolId }],
       });
       expect(response.json<{ memberships: unknown[] }>().memberships).toHaveLength(1);
     });
 
-    it('answers not_found when the review number belongs to no App Review membership', async () => {
-      const { rows } = await review
-        .db()
-        .platform.query<{ id: string }>(
-          `update accounts set phone_e164 = null, email = 'moved@example.test' where phone_e164 = $1 returning id`,
-          [reviewPhone],
-        );
-      expect(rows).toHaveLength(1);
-      const elsewhere = await insertSchool(review.db());
-      const { rows: created } = await review
-        .db()
-        .platform.query<{ id: string }>(
-          `insert into accounts (id, phone_e164, status) values (gen_random_uuid(), $1, 'active') returning id`,
-          [reviewPhone],
-        );
-      await insertParentMember(review.db(), elsewhere.id, created[0]?.id ?? '');
-      clock = NOW + 62 * SECOND;
-      await new Browser(review.app).post('/auth/otp/request', { phone: reviewPhone });
-      expect((await verifyReview('481516')).json()).toEqual({
-        status: 'not_found',
-        memberships: [],
-      });
+    it('answers not_found when the review number has no App Review membership', async () => {
+      const setStatus = (status: string) =>
+        review
+          .db()
+          .platform.query('update users set status = $2 where tenant_id = $1', [
+            reviewSchoolId,
+            status,
+          ]);
+      await setStatus('deactivated');
+      try {
+        clock = NOW + 62 * SECOND;
+        await ask(reviewPhone);
+        expect((await verifyReview('481516')).json()).toEqual({
+          status: 'not_found',
+          memberships: [],
+        });
+      } finally {
+        await setStatus('active');
+      }
     });
   });
 });

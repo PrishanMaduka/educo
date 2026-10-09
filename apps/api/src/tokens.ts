@@ -31,6 +31,8 @@ export const DELIVERY = Symbol('DELIVERY');
 export const CONSOLE_SESSIONS = Symbol('CONSOLE_SESSIONS');
 /** Queues Forgot password requests for the worker (`PasswordResetRequests`; tests pass a fake). */
 export const PASSWORD_RESETS = Symbol('PASSWORD_RESETS');
+/** Queues parent sign-in code requests for the worker (`OtpSendRequests`; tests pass a fake). */
+export const OTP_SENDS = Symbol('OTP_SENDS');
 /** Replaces `fetch` for the OIDC clients (`openid-client` `customFetch`); unit tests only. */
 export const OIDC_FETCH = Symbol('OIDC_FETCH');
 /** Where unexpected errors go (`ErrorReporter`, Sentry in `main.ts`), for errors a route handles. */

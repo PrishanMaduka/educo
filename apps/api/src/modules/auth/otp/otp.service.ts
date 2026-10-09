@@ -18,14 +18,14 @@ import {
   RateLimitedError,
   ValidationError,
 } from '../../../common/errors';
-import { CLOCK, CONFIG, DELIVERY, TENANT_DB } from '../../../tokens';
+import { CLOCK, CONFIG, OTP_SENDS, TENANT_DB } from '../../../tokens';
 import { MembershipsService, toParentMembership } from '../memberships.service';
 import { TokenService } from '../tokens/token.service';
 
 import { OtpHashes } from './otp-hashes';
 import { OtpRepository } from './otp.repository';
 
-import type { DeliveryQueue } from '../../../common/delivery/delivery.service';
+import type { OtpSendRequests } from './otp-sends';
 import type { Config } from '../../../config';
 import type { Clock } from '../../../tokens';
 import type { TokenClient } from '../tokens/token.service';
@@ -57,7 +57,7 @@ export class OtpService {
     private readonly repository: OtpRepository,
     private readonly memberships: MembershipsService,
     private readonly tokens: TokenService,
-    @Inject(DELIVERY) private readonly delivery: DeliveryQueue,
+    @Inject(OTP_SENDS) private readonly sends: OtpSendRequests,
     @Inject(CONFIG) private readonly config: Config,
     @Inject(CLOCK) private readonly now: Clock,
   ) {
@@ -105,13 +105,16 @@ export class OtpService {
       return allowed;
     });
     if (!decision.allowed) throw new RateLimitedError(decision.retryAfter);
-    const jobId = `otp.${challengeId}`;
-    const params = { code, minutes: OTP_CODE_MINUTES };
-    if ('phone' in subject) {
-      await this.delivery.queueSms({ jobId, to: subject.phone, template: 'otp', params });
-    } else {
-      await this.delivery.queueEmail({ jobId, to: subject.email, template: 'email_otp', params });
-    }
+    // One job either way; the worker sends it only to a known parent (D39).
+    await this.sends.request({
+      jobId: `otp-send.${challengeId}`,
+      job: {
+        challengeId,
+        ...('phone' in subject ? { phone: subject.phone } : { email: subject.email }),
+        code,
+        minutes: OTP_CODE_MINUTES,
+      },
+    });
   }
 
   /**

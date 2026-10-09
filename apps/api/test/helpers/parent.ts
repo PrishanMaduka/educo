@@ -7,6 +7,7 @@ import { Browser } from './browser';
 import { insertMember } from './identity';
 
 import type { RecordingDelivery } from '../fakes/delivery';
+import type { RecordingOtpSends } from '../fakes/otp-sends';
 import type { NestFastifyApplication } from '@nestjs/platform-fastify';
 import type { MembershipKind } from '@quad/contracts';
 import type { TestDatabase } from '@quad/db/testing';
@@ -87,18 +88,19 @@ export function emailCode(delivery: RecordingDelivery, email: string): string {
 export const otherCode = (code: string): string =>
   String((Number(code) + 1) % 1_000_000).padStart(6, '0');
 
-/** Asks for a code and signs in with it, as the parent app does. */
+/** Asks for a code (the worker then sends it) and signs in with it, as the parent app does. */
 export async function signInByPhone(
   app: () => NestFastifyApplication,
-  delivery: RecordingDelivery,
+  sends: RecordingOtpSends,
   phone: string,
   browser: Browser = new Browser(app),
 ): Promise<OtpVerifyResult> {
   const requested = await browser.post('/auth/otp/request', { phone });
   if (requested.statusCode !== 202) throw new Error(`OTP request gave ${requested.statusCode}`);
+  await sends.process(app());
   const verified = await browser.post('/auth/otp/verify', {
     phone,
-    code: smsCode(delivery, phone),
+    code: smsCode(sends.delivery, phone),
   });
   if (verified.statusCode !== 200) throw new Error(`OTP verify gave ${verified.statusCode}`);
   return OtpVerifyResult.parse(verified.json());
@@ -107,10 +109,10 @@ export async function signInByPhone(
 /** Signs in a parent with exactly one school and returns the pair. */
 export async function signedInParent(
   app: () => NestFastifyApplication,
-  delivery: RecordingDelivery,
+  sends: RecordingOtpSends,
   phone: string,
 ): Promise<TokenPair> {
-  const result = await signInByPhone(app, delivery, phone);
+  const result = await signInByPhone(app, sends, phone);
   if (result.status !== 'signed_in') throw new Error(`Expected signed_in, got ${result.status}`);
   return TokenPair.parse(result);
 }

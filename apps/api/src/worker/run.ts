@@ -9,7 +9,9 @@ import { BullDelivery } from '../common/delivery/delivery.service';
 import { createEmailTransport, emailSettingsOf } from '../common/delivery/email';
 import { EMAIL_QUEUE, SMS_QUEUE } from '../common/delivery/queues';
 import { createSmsSender } from '../common/delivery/sms';
+import { createOtpSendRequestProcessor } from '../modules/auth/jobs/otp-send-request.processor';
 import { createPasswordResetRequestProcessor } from '../modules/auth/jobs/password-reset-request.processor';
+import { OTP_SEND_REQUEST_QUEUE } from '../modules/auth/otp/otp-sends';
 import { PASSWORD_RESET_REQUEST_QUEUE } from '../modules/auth/password-reset-requests';
 import { createLogger, errorForLog } from '../observability/logger';
 import { createShutdown, onShutdownSignals } from '../shutdown';
@@ -55,6 +57,7 @@ export async function buildProcessors(
       publicWebUrl: config.PUBLIC_WEB_URL,
       now: Date.now,
     }),
+    [OTP_SEND_REQUEST_QUEUE]: createOtpSendRequestProcessor({ db, delivery, logger }),
     [EMAIL_QUEUE]: createSendEmailProcessor({
       transport: await createEmailTransport(config),
       once,

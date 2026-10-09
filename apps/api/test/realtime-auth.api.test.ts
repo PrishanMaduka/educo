@@ -7,6 +7,7 @@ import { RealtimeService, originAllowed, roomsFor } from '../src/realtime/realti
 import { CONSOLE_SESSIONS } from '../src/tokens';
 
 import { RecordingDelivery } from './fakes/delivery';
+import { RecordingOtpSends } from './fakes/otp-sends';
 import { useDatabaseApp } from './helpers/database-app';
 import {
   insertAccount,
@@ -45,9 +46,10 @@ const fakeConsoleSessions: ConsoleSessionLookup = {
 class FakeConsoleSessionsModule {}
 
 const delivery = new RecordingDelivery();
+const otpSends = new RecordingOtpSends(delivery);
 const { db, app } = useDatabaseApp(
   {},
-  { listen: true, overrides: { testModules: [FakeConsoleSessionsModule], delivery } },
+  { listen: true, overrides: { testModules: [FakeConsoleSessionsModule], delivery, otpSends } },
 );
 
 const WEB = 'http://localhost:3000';
@@ -175,7 +177,7 @@ describe("the parent app's access token in auth.token (Task 9)", () => {
     const school = await insertSchool(db());
     const account = await insertPhoneAccount(db());
     const userId = await insertParentMember(db(), school.id, account.id, 'guardian');
-    const pair = await signedInParent(app, delivery, account.phone);
+    const pair = await signedInParent(app, otpSends, account.phone);
     const socket = connect({}, pair.accessToken);
     await connected(socket);
     const events = received(socket, 'probe');
@@ -188,11 +190,11 @@ describe("the parent app's access token in auth.token (Task 9)", () => {
     const school = await insertSchool(db());
     const relative = await insertPhoneAccount(db());
     const relativeId = await insertParentMember(db(), school.id, relative.id, 'relative');
-    const relativePair = await signedInParent(app, delivery, relative.phone);
+    const relativePair = await signedInParent(app, otpSends, relative.phone);
     const chooser = await insertPhoneAccount(db());
     const chooserId = await insertParentMember(db(), school.id, chooser.id, 'guardian');
     await insertParentMember(db(), (await insertSchool(db())).id, chooser.id, 'guardian');
-    const choosing = await signInByPhone(app, delivery, chooser.phone);
+    const choosing = await signInByPhone(app, otpSends, chooser.phone);
     const sockets = [
       connect({}, relativePair.accessToken),
       connect({}, String(choosing.accessToken)),
