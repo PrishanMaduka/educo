@@ -188,6 +188,10 @@ export interface DefinerCalls {
   revokeMemberSessions(tx: TenantTx, userId: string): Promise<void>;
   /** Ends the member's role preview on their sessions in the current school only (Task 13). */
   clearMemberPreview(tx: TenantTx, userId: string): Promise<void>;
+  /** The account's sign-in email of a member of the current school; null otherwise. */
+  memberAccountEmail(tx: TenantTx, userId: string): Promise<string | null>;
+  /** Whether a current-school member's account has any other membership (false otherwise). */
+  memberHasOtherMemberships(tx: TenantTx, userId: string): Promise<boolean>;
   /** Who from Quad is in an active support visit to the current school; null otherwise. */
   currentSupportVisit(tx: TenantTx, supportSessionId: string): Promise<SupportVisit | null>;
 }
@@ -466,6 +470,20 @@ export function createDefinerCalls(pool: pg.Pool): DefinerCalls {
 
     clearMemberPreview: async (tx, userId) => {
       await tx.execute(sql`select clear_member_preview(${userId})`);
+    },
+
+    memberAccountEmail: async (tx, userId) => {
+      const { rows } = await tx.execute<{ email: string | null }>(
+        sql`select member_account_email(${userId}) as email`,
+      );
+      return rows[0]?.email ?? null;
+    },
+
+    memberHasOtherMemberships: async (tx, userId) => {
+      const { rows } = await tx.execute<{ shared: boolean }>(
+        sql`select member_has_other_memberships(${userId}) as shared`,
+      );
+      return rows[0]?.shared === true;
     },
 
     currentSupportVisit: async (tx, supportSessionId) => {

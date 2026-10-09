@@ -42,6 +42,16 @@ export const users = pgTable(
      * is refused, so Resend invite retires the old link, and the list shows "Invite sent …".
      */
     inviteSentAt: timestamp('invite_sent_at', { withTimezone: true }),
+    /**
+     * The nonce of the one staff invite link that may still be used (Task 13 fix round 1, M1):
+     * Resend replaces it, so only the newest link works; null once accepted or deactivated.
+     */
+    inviteNonce: text('invite_nonce'),
+    /**
+     * When the membership was accepted (Task 13 fix round 1, I1): set by accepting the invitation.
+     * Reactivating one that never was puts it back to `invited`, never `active`.
+     */
+    acceptedAt: timestamp('accepted_at', { withTimezone: true }),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true })
       .notNull()

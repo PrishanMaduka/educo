@@ -61,6 +61,8 @@ const DEFINERS = [
   'current_support_visit(uuid)',
   'refresh_family(uuid)',
   'clear_member_preview(uuid)',
+  'member_account_email(uuid)',
+  'member_has_other_memberships(uuid)',
 ] as const;
 
 /** The tables `definer_read` opens to `quad_owner` (and only to it). */
@@ -1008,6 +1010,53 @@ describe("clear_member_preview (Task 13: a role change ends the member's role pr
       return rows[0]?.value;
     });
     expect(value).toBe(person.id);
+  });
+});
+
+describe('member_account_email (Task 13 fix round 1, M2: where an admin reset is sent)', () => {
+  it("under A gives an A member's account email, and nothing for B's member", async () => {
+    const [mine, theirs] = await withTenant(schoolA.id, async (tx) => [
+      await definers.memberAccountEmail(tx, colleagueInA.id),
+      await definers.memberAccountEmail(tx, outsiderInB.id),
+    ]);
+    expect(mine).toBe(colleague.email);
+    expect(theirs).toBeNull();
+  });
+
+  it('refuses without app.tenant_id', async () => {
+    const refused = await failure(
+      testDb().app.query('select member_account_email($1)', [colleagueInA.id]),
+    );
+    expect(refused).toMatchObject({ code: '42501' });
+  });
+});
+
+describe('member_has_other_memberships (Task 13 fix round 1, I3: did this invite create the account?)', () => {
+  it('is true for an account with a membership in another school, of any kind or status', async () => {
+    const shared = await insertAccount(withAccount);
+    const inA = await insertUser(withTenant, schoolA.id, shared.id, { status: 'invited' });
+    await insertUser(withTenant, schoolB.id, shared.id, {
+      kind: 'guardian',
+      status: 'deactivated',
+    });
+    const only = await insertAccount(withAccount);
+    const onlyInA = await insertUser(withTenant, schoolA.id, only.id, { status: 'invited' });
+    const [sharedResult, onlyResult, theirs] = await withTenant(schoolA.id, async (tx) => [
+      await definers.memberHasOtherMemberships(tx, inA.id),
+      await definers.memberHasOtherMemberships(tx, onlyInA.id),
+      await definers.memberHasOtherMemberships(tx, outsiderInB.id),
+    ]);
+    expect(sharedResult).toBe(true);
+    expect(onlyResult).toBe(false);
+    // Another school's member is not this school's to ask about: false, never its answer.
+    expect(theirs).toBe(false);
+  });
+
+  it('refuses without app.tenant_id', async () => {
+    const refused = await failure(
+      testDb().app.query('select member_has_other_memberships($1)', [colleagueInA.id]),
+    );
+    expect(refused).toMatchObject({ code: '42501' });
   });
 });
 

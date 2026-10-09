@@ -231,3 +231,54 @@ describe('only staff memberships hold roles (Task 12 review, I1)', () => {
     expect(turned).toEqual([{ kind: 'guardian' }]);
   });
 });
+
+describe('a role and a kind change racing (fix round 1, M3: FOR SHARE on the users row)', () => {
+  it('refuses the kind change that waited for a concurrent role grant', async () => {
+    const staff = await insertUser(withTenant, school.id, (await insertAccount(withAccount)).id);
+    const role = await insertRole(withTenant, school.id);
+    const granting = await testDb().platform.connect();
+    try {
+      await granting.query('begin');
+      await granting.query(`select set_config('app.tenant_id', $1, true)`, [school.id]);
+      await granting.query(
+        `insert into user_roles (tenant_id, user_id, role_id, "primary") values ($1, $2, $3, true)`,
+        [school.id, staff.id, role.id],
+      );
+      const { rows } = await granting.query<{ pid: number }>('select pg_backend_pid() as pid');
+      const holder = rows[0]?.pid;
+      let settled = false;
+      const turning = withTenant(school.id, (tx) =>
+        tx.update(users).set({ kind: 'guardian' }).where(eq(users.id, staff.id)),
+      ).then(
+        () => 'changed',
+        (caught: unknown) => {
+          const cause = postgresCause(caught);
+          return typeof cause === 'object' && cause !== null && 'code' in cause
+            ? String(cause.code)
+            : 'failed';
+        },
+      );
+      void turning.finally(() => {
+        settled = true;
+      });
+      // The kind change must wait for the grant's share lock on the users row.
+      await waitUntilBlockedBy(holder, () => settled);
+      await granting.query('commit');
+      expect(await turning).toBe('23514');
+    } finally {
+      granting.release();
+    }
+  });
+});
+
+/** Waits until a backend is blocked by `holder`, or until `done()` (it never blocked). */
+async function waitUntilBlockedBy(holder: number | undefined, done: () => boolean): Promise<void> {
+  for (let attempt = 0; attempt < 200 && !done(); attempt += 1) {
+    const { rows } = await testDb().platform.query<{ blocked: string }>(
+      'select count(*)::text as blocked from pg_stat_activity where $1 = any(pg_blocking_pids(pid))',
+      [holder],
+    );
+    if (rows[0]?.blocked !== '0') return;
+    await new Promise((resolve) => setTimeout(resolve, 10));
+  }
+}

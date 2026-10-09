@@ -113,6 +113,20 @@
       "when": 1791539009108,
       "tag": "0015_role_integrity",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1791544081164,
+      "tag": "0016_users_invite_nonce_accepted_at",
+      "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1791544113903,
+      "tag": "0017_member_lookups_and_role_lock",
+      "breakpoints": true
     }
   ]
 }
