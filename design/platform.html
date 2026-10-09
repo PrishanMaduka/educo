@@ -885,21 +885,25 @@ const PLANS = {
 const TONES = [['t-blue','Blue','var(--c3)'],['t-violet','Pink','var(--c1)'],['t-green','Green','var(--c5)'],['t-amber','Orange','var(--c4)'],['t-red','Red','var(--bad)']];
 const toneCol = c => (TONES.find(x => x[0] === c) || TONES[0])[2];
 const REGIONS = {'us-west':'North America (Oregon)', 'eu-west':'Europe (Ireland)', 'me-central':'Middle East (UAE)', 'ap-south':'Asia Pacific (Mumbai)', 'ap-southeast':'Asia Pacific (Singapore)', 'ap-sydney':'Asia Pacific (Sydney)', 'af-south':'Africa (Cape Town)'};
-/* Where schools are: currency, time zone, data region, a sample city and a phone format (fictional number ranges) */
+/* Where schools are (D35): a new school's currency, time zone, locale and phone country come from its country.
+   Each entry also has a data region, a sample city and a phone format (fictional number ranges). */
 const COUNTRIES = {
-  'United States': {cur:'USD', tz:'America/Los_Angeles', region:'us-west', city:'San Francisco', cc:'US', dial:'+1 415 555 01', d:2},
-  'United Kingdom': {cur:'GBP', tz:'Europe/London', region:'eu-west', city:'London', cc:'GB', dial:'+44 7700 900', d:3},
-  'Ireland': {cur:'EUR', tz:'Europe/Dublin', region:'eu-west', city:'Dublin', cc:'IE', dial:'+353 85 555 0', d:3},
-  'UAE': {cur:'AED', tz:'Asia/Dubai', region:'me-central', city:'Dubai', cc:'AE', dial:'+971 50 555 0', d:3},
-  'India': {cur:'INR', tz:'Asia/Kolkata', region:'ap-south', city:'Bengaluru', cc:'IN', dial:'+91 98765 0', d:4},
-  'Singapore': {cur:'SGD', tz:'Asia/Singapore', region:'ap-southeast', city:'Singapore', cc:'SG', dial:'+65 9123 ', d:4},
-  'Australia': {cur:'AUD', tz:'Australia/Sydney', region:'ap-sydney', city:'Sydney', cc:'AU', dial:'+61 491 570 ', d:3},
-  'Kenya': {cur:'KES', tz:'Africa/Nairobi', region:'af-south', city:'Nairobi', cc:'KE', dial:'+254 700 000 ', d:3},
-  'South Africa': {cur:'ZAR', tz:'Africa/Johannesburg', region:'af-south', city:'Cape Town', cc:'ZA', dial:'+27 21 555 0', d:3}
+  'United States': {locale:'en-US', cur:'USD', tz:'America/Los_Angeles', region:'us-west', city:'San Francisco', cc:'US', dial:'+1 415 555 01', d:2},
+  'United Kingdom': {locale:'en-GB', cur:'GBP', tz:'Europe/London', region:'eu-west', city:'London', cc:'GB', dial:'+44 7700 900', d:3},
+  'Ireland': {locale:'en-IE', cur:'EUR', tz:'Europe/Dublin', region:'eu-west', city:'Dublin', cc:'IE', dial:'+353 85 555 0', d:3},
+  'UAE': {locale:'en-AE', cur:'AED', tz:'Asia/Dubai', region:'me-central', city:'Dubai', cc:'AE', dial:'+971 50 555 0', d:3},
+  'India': {locale:'en-IN', cur:'INR', tz:'Asia/Kolkata', region:'ap-south', city:'Bengaluru', cc:'IN', dial:'+91 98765 0', d:4},
+  'Singapore': {locale:'en-SG', cur:'SGD', tz:'Asia/Singapore', region:'ap-southeast', city:'Singapore', cc:'SG', dial:'+65 9123 ', d:4},
+  'Australia': {locale:'en-AU', cur:'AUD', tz:'Australia/Sydney', region:'ap-sydney', city:'Sydney', cc:'AU', dial:'+61 491 570 ', d:3},
+  'Kenya': {locale:'en-KE', cur:'KES', tz:'Africa/Nairobi', region:'af-south', city:'Nairobi', cc:'KE', dial:'+254 700 000 ', d:3},
+  'South Africa': {locale:'en-ZA', cur:'ZAR', tz:'Africa/Johannesburg', region:'af-south', city:'Cape Town', cc:'ZA', dial:'+27 21 555 0', d:3},
+  'Sri Lanka': {locale:'en-LK', cur:'LKR', tz:'Asia/Colombo', region:'ap-south', city:'Colombo', cc:'LK', dial:'+94 77 000 ', d:4}
 };
+const LOCALES = [['en-US','English (United States)'],['en-GB','English (United Kingdom)'],['en-IE','English (Ireland)'],['en-AE','English (UAE)'],['ar-AE','العربية (UAE)'],['en-IN','English (India)'],['en-SG','English (Singapore)'],['en-AU','English (Australia)'],['en-KE','English (Kenya)'],['en-ZA','English (South Africa)'],['en-LK','English (Sri Lanka)'],['si-LK','සිංහල (Sri Lanka)'],['ta-LK','தமிழ் (Sri Lanka)']];
+const dialCode = c => placeOf(c).dial.split(' ')[0];
 const placeOf = c => COUNTRIES[c] || COUNTRIES['United States'];
 const T = (id, name, sub, country, plan, students, status, color, region, since, extra={}) => { const c = placeOf(country); return {id, name, sub, country, plan, students, status, color, region: region || c.region, since,
-  limit: PLANS[plan].limit, mods: new Set(PLANS[plan].mods), health: 'Healthy', tz: c.tz, currency: c.cur, city: c.city, ...extra}; };
+  limit: PLANS[plan].limit, mods: new Set(PLANS[plan].mods), health: 'Healthy', tz: c.tz, currency: c.cur, locale: c.locale, phoneCountry: country, city: c.city, ...extra}; };
 const tenants = [
   T(1,'Greenfield International School','greenfield','United States','Enterprise',1248,'Active','#1B7F53','','2024-01',{short:'GI', curr:'cambridge', domain:'greenfield.example', wau:[86,88,89,90,91,92], parents:88, adminSeen:0, tickets:1}),
   T(2,'St. Clare’s Academy','stclares','United Kingdom','Growth',812,'Active','#7A1F3D','','2024-06',{short:'SC', curr:'ib', yearLabel:'Grade', domain:'stclares.example', wau:[78,80,79,81,82,84], parents:74, adminSeen:1, tickets:2}),
@@ -1108,7 +1112,7 @@ function tOverview(t) {
   <div class="grid g-2-1"><section class="card"><div class="card-h"><h2>Usage</h2></div><div class="card-b" style="display:flex;flex-direction:column;gap:16px">
     ${[['Student seats', t.students, t.limit, ''],['Storage', Math.round(t.students * .031), 100, ' GB'],['SMS credits this month', Math.round(t.students * 2.4), 5000, ''],['API calls today', Math.round(t.students * 61), 250000, '']].map(([n, v, max, unit]) => `<div class="meter"><div class="mt"><span>${n}</span><b>${fmt(v)}${unit} <span class="muted" style="font-weight:500">/ ${fmt(max)}${unit}</span></b></div><div class="bar" style="height:8px"><i style="width:${Math.min(100, v / max * 100)}%;background:${v / max > .95 ? 'var(--warn)' : 'var(--c2)'}"></i></div></div>`).join('')}
   </div></section>
-  <section class="card"><div class="card-h"><h2>Details</h2></div><div class="card-b"><dl class="kv"><dt>Country</dt><dd>${esc(t.city ? t.city + ', ' + t.country : t.country)}</dd><dt>Time zone</dt><dd>${t.tz}</dd><dt>Currency</dt><dd>${t.currency}</dd><dt>Data region</dt><dd>${REGIONS[t.region]}</dd><dt>Customer since</dt><dd>${t.since}</dd><dt>Curriculum</dt><dd>${esc(curOf(tenantCurr(t)).name)}</dd><dt>Owner</dt><dd>${esc(u[0].name)}</dd><dt>Signs in at</dt><dd>quad-edu.com</dd></dl></div></section></div>
+  <section class="card"><div class="card-h"><h2>Details</h2></div><div class="card-b"><dl class="kv"><dt>Country</dt><dd>${esc(t.city ? t.city + ', ' + t.country : t.country)}</dd><dt>Time zone</dt><dd>${t.tz}</dd><dt>Currency</dt><dd>${t.currency}</dd><dt>Language</dt><dd>${esc((LOCALES.find(l => l[0] === t.locale) || [t.locale, t.locale])[1])}</dd><dt>Phone numbers</dt><dd>${esc(t.phoneCountry)} (${dialCode(t.phoneCountry)})</dd><dt>Data region</dt><dd>${REGIONS[t.region]}</dd><dt>Customer since</dt><dd>${t.since}</dd><dt>Curriculum</dt><dd>${esc(curOf(tenantCurr(t)).name)}</dd><dt>Owner</dt><dd>${esc(u[0].name)}</dd><dt>Signs in at</dt><dd>quad-edu.com</dd></dl></div></section></div>
   <section class="card"><div class="card-h"><h2>Recent activity in this school</h2></div><div class="list">${(u.length > 2 ? [[u[0].name,'invited 3 teachers to Primary campus','20 min ago'],[u[2].name,'posted 46 receipts','1 hour ago'],[u[1].name,'approved 6 offer letters','Yesterday'],['System','nightly backup completed (14.2 GB)','Today, 02:00']] : [['System','created this school and sent the admin invite','Just now'],['System','seeded 7 roles with default permissions','Just now']]).map(([w, a, at]) => `<div class="li">${avatar(w,'sm')}<div class="meta"><b>${w}</b><p>${a}</p></div><time>${at}</time></div>`).join('')}</div></section>`;
 }
 function tUsers(t) {
@@ -1241,10 +1245,15 @@ function tenantWizard() {
   const w = S.wiz, st = w.step, steps = ['School','Stages','Branding','Plan & modules','First admin','Create'];
   const f = (id, l, ph='', type='text') => `<div class="field"><label for="${id}">${l}</label><input class="input" id="${id}" type="${type}" placeholder="${ph}" value="${esc(w[id]||'')}"></div>`;
   let body = '';
+  const pl = placeOf(w.w_country);
   if (st === 0) body = `<div class="form-grid"><div class="field full"><label for="w_name">School name</label><input class="input" id="w_name" value="${esc(w.w_name||'')}" placeholder="e.g. Oakwood International School"></div>
     <div class="field full"><div class="setting" style="border:0;padding:0"><div class="meta"><b>Web address: quad-edu.com</b><small>No domain to set up. Staff sign in at quad-edu.com and Quad opens this school from their account.</small></div></div></div>
-    <div class="field"><label for="w_country">Country</label><select class="input" id="w_country">${Object.keys(COUNTRIES).map(c => `<option ${w.w_country===c?'selected':''}>${c}</option>`).join('')}</select></div>
-    <div class="field"><label for="w_region">Data region</label><select class="input" id="w_region">${Object.entries(REGIONS).map(([k, v]) => `<option value="${k}" ${(w.w_region || placeOf(w.w_country).region)===k?'selected':''}>${v}</option>`).join('')}</select></div>
+    <div class="field"><label for="w_country">Country</label><select class="input" id="w_country">${Object.keys(COUNTRIES).map(c => `<option ${w.w_country===c?'selected':''}>${c}</option>`).join('')}</select><small class="muted">Sets the currency, time zone, language and phone country below. Change any of them if this school is different.</small></div>
+    <div class="field"><label for="w_region">Data region</label><select class="input" id="w_region">${Object.entries(REGIONS).map(([k, v]) => `<option value="${k}" ${(w.w_region || pl.region)===k?'selected':''}>${v}</option>`).join('')}</select></div>
+    <div class="field"><label for="w_cur">Currency</label><select class="input" id="w_cur">${[...new Set(Object.values(COUNTRIES).map(c => c.cur))].map(x => `<option ${(w.w_cur || pl.cur) === x ? 'selected' : ''}>${x}</option>`).join('')}</select></div>
+    <div class="field"><label for="w_tz">Time zone</label><select class="input" id="w_tz">${UK_TZS.map(x => `<option ${(w.w_tz || pl.tz) === x ? 'selected' : ''}>${x}</option>`).join('')}</select></div>
+    <div class="field"><label for="w_locale">Language and number format</label><select class="input" id="w_locale">${LOCALES.map(([k, l]) => `<option value="${k}" ${(w.w_locale || pl.locale) === k ? 'selected' : ''}>${l}</option>`).join('')}</select></div>
+    <div class="field"><label for="w_phone">Phone numbers</label><select class="input" id="w_phone">${Object.keys(COUNTRIES).map(c => `<option value="${esc(c)}" ${(w.w_phone || w.w_country || Object.keys(COUNTRIES)[0]) === c ? 'selected' : ''}>${esc(c)} (${dialCode(c)})</option>`).join('')}</select></div>
     <div class="field"><label for="w_curr">Curriculum</label><select class="input" id="w_curr">${CURRICULA.map(c => `<option value="${c.id}" ${(w.w_curr || 'cambridge') === c.id ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}</select></div>
     <div class="field"><label for="w_students">Expected students</label><input class="input" id="w_students" type="number" value="${w.w_students||600}"></div></div>`;
   else if (st === 1) { const cur = curOf(w.w_curr || 'cambridge');
@@ -1268,6 +1277,9 @@ function tenantWizard() {
   openModal(`${head('New school', 'Creates a new tenant in the shared database, with its own data and branding')}<div class="steps">${steps.map((s, i) => `<div class="${i<=st?'on':''}">${i+1}. ${s}</div>`).join('')}</div>
     <form class="drawer-b" data-form="wizard" novalidate>${body}<div class="err-msg" id="wErr"></div></form>
     <div class="drawer-f" id="wFoot">${st && st < 5 ? '<button class="btn" data-act="wBack">Back</button>' : ''}${st < 5 ? `<button class="btn primary" data-act="wNext">${st < 4 ? 'Continue' : 'Create school'}</button>` : ''}</div>`, 'wide');
+  if (st === 0) document.getElementById('w_country').onchange = e => { saveWiz(); const c = e.target.value, d = placeOf(c);
+    Object.assign(S.wiz, {w_country: c, w_region: d.region, w_cur: d.cur, w_tz: d.tz, w_locale: d.locale, w_phone: c}); S.noFocus = true; tenantWizard(); S.noFocus = false;
+    document.getElementById('w_country').focus(); toast(`Set currency ${d.cur}, time zone ${d.tz} and ${dialCode(c)} phone numbers for ${c}`); };
   if (st === 1) bindStages();
   if (st === 2) {
     const prev = () => { const w2 = S.wiz; document.getElementById('wPrev').innerHTML = brandMock(w2.w_name, w2.w_color || BRAND_SWATCHES[0], w2.logo, w2.w_short || shortOf(w2.w_name)); };
@@ -1282,7 +1294,7 @@ function provision() {
   const step = () => { if (i > 0) { rows[i-1].className = 'done'; rows[i-1].querySelector('i').innerHTML = ic('check',13); }
     if (i < rows.length) { rows[i].className = 'run'; i++; setTimeout(step, 650); return; }
     const w = S.wiz, id = Math.max(...tenants.map(t => t.id)) + 1, plan = w.w_plan || 'Growth';
-    const t = T(id, w.w_name, w.w_sub, w.w_country || 'United States', plan, 0, w.w_trial === false ? 'Onboarding' : 'Trial', w.w_color || BRAND_SWATCHES[0], w.w_region || '', '2026-10', {trialEnds:'4 Nov', health:'Setting up', logo: w.logo || null, short: (w.w_short || shortOf(w.w_name)).toUpperCase()});
+    const t = T(id, w.w_name, w.w_sub, w.w_country || 'United States', plan, 0, w.w_trial === false ? 'Onboarding' : 'Trial', w.w_color || BRAND_SWATCHES[0], w.w_region || '', '2026-10', {trialEnds:'4 Nov', health:'Setting up', currency: w.w_cur || placeOf(w.w_country).cur, tz: w.w_tz || placeOf(w.w_country).tz, locale: w.w_locale || placeOf(w.w_country).locale, phoneCountry: w.w_phone || w.w_country || Object.keys(COUNTRIES)[0], logo: w.logo || null, short: (w.w_short || shortOf(w.w_name)).toUpperCase()});
     t.mods = w.mods || new Set(PLANS[plan].mods); t.stages = w.stages; t.stTpl = w.stTpl; t.curr = w.w_curr || w.stTpl; tenants.push(t);
     usersByTenant[id] = [{id:`${id}-0`, name: w.w_aname, email: w.w_aemail, role:'admin', campus:CAMPUS[0], status:'Invited', mfa:true, last:'Invite sent just now', sso:false}];
     AUDIT.unshift([ME.name, `created tenant ${w.w_name}`, w.w_sub, 'Just now', 'tenant']);
@@ -1310,7 +1322,7 @@ const UK = { tab:'profile', draft:null, draftKey:null, dirty:false, ctx:null, us
 const UK_DEPTS = ['Leadership','Primary','Secondary','Finance office','Admissions office','Student services','Front office','IT'];
 /* Role colours: the chart palette (system/tokens.css --c1 to --c5) plus three school colours */
 const UK_COLORS = ['#E0478A','#4048B8','#1F8ACF','#D9640B','#4E8A12','#1B7F53','#7A1F3D','#5B3FA8'];
-const UK_LANGS = ['English','Español (Spanish)','Français (French)','العربية (Arabic)','中文 (Chinese)'];
+const UK_LANGS = ['English','Español (Spanish)','Français (French)','العربية (Arabic)','中文 (Chinese)','සිංහල (Sinhala)','தமிழ் (Tamil)'];
 const UK_TZS = [...new Set(Object.values(COUNTRIES).map(c => c.tz))];
 const UK_SENSITIVE = [
   ['export','Export data','Download student, staff or finance records as spreadsheets'],
@@ -1551,7 +1563,7 @@ window.addEventListener('beforeunload', e => { if (UK.dirty) { e.preventDefault(
 function tenantCtx(t) { return {
   key:'t' + t.id, name:t.name, adminName:ME.name + ' (Quad)', mods:PERM_MODS, acts:ACTIONS,
   tz:t.tz, city:t.city, where:`${t.city}, ${t.country}`, cityCode:`${t.city}, ${placeOf(t.country).cc}`, parent: t.id === 1 ? 'Priya Patel' : 'Sam Taylor',
-  phone:r => { const c = placeOf(t.country); return c.dial + String(Math.floor(r() * 10 ** c.d)).padStart(c.d, '0'); }, classes:() => tenantClasses(t),
+  phone:r => { const c = placeOf(t.phoneCountry || t.country); return c.dial + String(Math.floor(r() * 10 ** c.d)).padStart(c.d, '0'); }, classes:() => tenantClasses(t),
   users:() => tenantUsers(t), roles:() => tenantRoles(t), perms:() => tenantPerms(t),
   addRole:r => tenantRoles(t).push(r), removeRole:id => { rolesByTenant[t.id] = tenantRoles(t).filter(r => r.id !== id); delete tenantPerms(t)[id]; },
   setPerms:(id, pm) => { tenantPerms(t)[id] = JSON.parse(JSON.stringify(pm)); },
@@ -1672,7 +1684,7 @@ function schoolAcad(t) { const c = curOf(tenantCurr(t));
   return {curr: {id: c.id, name: c.name, short: c.short, grading: c.grading, quals: c.quals}, stages: tenantStages(t).filter(x => x.on && x.years.length).map(x => ({name: x.name, ages: x.ages, years: x.years.slice(), color: x.color, sections: x.sections}))}; }
 /* If this school is the one open in the school apps, push the change there too */
 function republishIfLive(t) { try { const cur = JSON.parse(localStorage.getItem('quad-school') || 'null'); if (cur && cur.sub === t.sub) { publishSchool(t); return true; } } catch (e) {} return false; }
-/* Older prototypes saved the Sri Lankan sample schools; drop them so every app falls back to Greenfield */
+/* Older prototypes saved the previous sample schools; drop them so every app falls back to Greenfield (Sri Lankan schools stay supported, D35) */
 (function dropOldSample() { try { const cur = JSON.parse(localStorage.getItem('quad-school') || 'null'); if (cur && /^(colombo-intl|kandyhill|gallefort|negombobay)$/.test(cur.sub || '')) localStorage.removeItem('quad-school'); } catch (e) {} })();
 function publishSchool(t) {
   try { localStorage.setItem('quad-school', JSON.stringify({name:t.name, short:t.short || shortOf(t.name), sub:t.sub, color:t.color, logo:t.logo || null, acad: schoolAcad(t)})); return true; }
@@ -1712,6 +1724,8 @@ const CURRICULA = [
     stages:[['Early Years','3–6',['Pre-K','Kindergarten'],'#4048B8'],['Primary Years (PYP)','6–11',range(1, 5, n => 'PYP ' + n),'#1F8ACF'],['Middle Years (MYP)','11–16',range(1, 5, n => 'MYP ' + n),'#E0478A'],['Diploma (DP)','16–19',['DP 1','DP 2'],'#D9640B']]},
   {id:'australian', name:'Australian Curriculum', short:'Australian', desc:'Foundation to Year 10, then a state senior certificate. NAPLAN in Years 3, 5, 7 and 9.', grading:'A to E', quals:[['Year 3','NAPLAN'],['Year 9','NAPLAN'],['Year 12','Senior Secondary Certificate']],
     stages:[['Early Learning','3–5',['Pre-Kindy','Kindy'],'#4048B8'],['Primary School','5–12',['Foundation', ...range(1, 6, n => 'Year ' + n)],'#1F8ACF'],['Secondary School','12–16',range(7, 10, n => 'Year ' + n),'#E0478A'],['Senior Secondary','16–18',['Year 11','Year 12'],'#D9640B']]},
+  {id:'local', name:'Sri Lankan national', short:'Sri Lankan', desc:'Ministry of Education syllabus with G.C.E. Ordinary and Advanced Level exams.', grading:'A, B, C, S, W', quals:[['Grade 5','Scholarship exam'],['Grade 11','G.C.E. O/L'],['Grade 13','G.C.E. A/L']],
+    stages:[['Pre-school','3–5',['Lower KG','Upper KG'],'#4048B8'],['Primary','5–10',range(1, 5, n => 'Grade ' + n),'#1F8ACF'],['Junior Secondary','10–14',range(6, 9, n => 'Grade ' + n),'#4E8A12'],['Senior Secondary (O/L)','14–16',['Grade 10','Grade 11'],'#E0478A'],['Collegiate (A/L)','16–19',['Grade 12','Grade 13'],'#D9640B']]},
   {id:'american', name:'American', short:'American', desc:'Common Core based, with Advanced Placement in high school. Grades K to 12.', grading:'A to F · GPA 4.0', quals:[['Grade 8','MAP Growth'],['Grade 11','SAT / PSAT'],['Grade 12','High School Diploma and AP']],
     stages:[['Pre-K','3–5',['Pre-K 3','Pre-K 4'],'#4048B8'],['Elementary School','5–11',['Kindergarten', ...range(1, 5, n => 'Grade ' + n)],'#1F8ACF'],['Middle School','11–14',range(6, 8, n => 'Grade ' + n),'#4E8A12'],['High School','14–18',range(9, 12, n => 'Grade ' + n),'#E0478A']]}
 ].map(c => ({...c, stages: c.stages.map(([name, ages, years, color]) => ({name, ages, years, color, on: true, sections: 2}))}));
@@ -1776,7 +1790,7 @@ function curDrawer(first) {
     <div class="drawer-b">
       <div class="form-grid"><div class="field"><label for="cur_name">Name</label><input class="input" id="cur_name" value="${esc(d.name)}" placeholder="e.g. Indian CBSE"></div><div class="field"><label for="cur_short">Short name</label><input class="input" id="cur_short" value="${esc(d.short)}" placeholder="e.g. CBSE"></div>
         <div class="field full"><label for="cur_desc">Description</label><input class="input" id="cur_desc" value="${esc(d.desc)}" placeholder="What schools on this curriculum teach and sit"></div>
-        <div class="field"><label for="cur_grading">Grading scale</label><input class="input" id="cur_grading" value="${esc(d.grading)}" list="gradeScales"><datalist id="gradeScales"><option>A* to U</option><option>9 to 1</option><option>1 to 7</option><option>A to E</option><option>A to F · GPA 4.0</option><option>Percentage</option></datalist></div></div>
+        <div class="field"><label for="cur_grading">Grading scale</label><input class="input" id="cur_grading" value="${esc(d.grading)}" list="gradeScales"><datalist id="gradeScales"><option>A* to U</option><option>9 to 1</option><option>1 to 7</option><option>A to E</option><option>A, B, C, S, W</option><option>A to F · GPA 4.0</option><option>Percentage</option></datalist></div></div>
       <div class="field"><label>Exams and milestones</label><datalist id="yearList">${years.map(y => `<option>${esc(y)}</option>`).join('')}</datalist>
         ${d.quals.map((q, i) => `<div class="qual"><input class="input" list="yearList" data-qual="${i}|0" value="${esc(q[0])}" placeholder="Year group" aria-label="Year group"><input class="input" data-qual="${i}|1" value="${esc(q[1])}" placeholder="Exam or qualification" aria-label="Exam"><button type="button" class="iconbtn" style="width:34px;height:34px" data-act="curQualRm" data-i="${i}" aria-label="Remove">${ic('x',14)}</button></div>`).join('')}
         <button type="button" class="btn sm" data-act="curQualAdd" style="align-self:flex-start">${ic('plus',14)}Add an exam</button></div>
