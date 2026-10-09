@@ -206,7 +206,12 @@ export class RolesService {
         baseRoleKey: input.baseRoleKey,
       });
       await this.repository.replaceGrant(tx, actor.tenantId, id, grant);
-      await this.record(tx, actor, 'role.created', id, { baseRoleKey: input.baseRoleKey });
+      // The entry says what the new role can do, as role.permissions_changed does.
+      await this.record(tx, actor, 'role.created', id, {
+        baseRoleKey: input.baseRoleKey,
+        matrix: grant.matrix,
+        sensitive: [...grant.sensitive],
+      });
       return this.roleIn(tx, id);
     });
     await this.permissions.invalidateTenant(actor.tenantId);

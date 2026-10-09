@@ -205,7 +205,10 @@ describe('POST /roles', () => {
     const response = await as(admin)('POST', '/roles', {
       ...createBody,
       baseRoleKey: 'counsellor',
-      permissions: { matrix: { fees: { ...VIEW, edit: true }, sis: VIEW }, sensitive: [] },
+      permissions: {
+        matrix: { fees: { ...VIEW, edit: true }, sis: VIEW },
+        sensitive: ['safeguarding'],
+      },
     });
     expect(response.statusCode).toBe(201);
     const role = Role.parse(response.json());
@@ -213,9 +216,19 @@ describe('POST /roles', () => {
     // The counsellor's attendance row and medical key are not copied: the grant sent is the role's.
     expect(await storedGrant(role.id)).toEqual({
       matrix: { fees: '10100', sis: '10000' },
-      sensitive: [],
+      sensitive: ['safeguarding'],
     });
-    expect(await auditIn('role.created', school.id)).toHaveLength(1);
+    // The audit entry says what the new role can do, as role.permissions_changed does.
+    expect(await auditIn('role.created', school.id)).toEqual([
+      expect.objectContaining({
+        target_id: role.id,
+        meta: {
+          baseRoleKey: 'counsellor',
+          matrix: { fees: '10100', sis: '10000' },
+          sensitive: ['safeguarding'],
+        },
+      }),
+    ]);
   });
 
   it('checks the grant it is sent: 422 outside the plan and 403 for unheld keys, and creates nothing', async () => {

@@ -27,6 +27,9 @@ export function useLeaveGuard(active: boolean, message: string): void {
     if (!active) return undefined;
     const onUnload = (event: BeforeUnloadEvent) => {
       event.preventDefault();
+      // Older Safari and webviews show the prompt only when returnValue is set.
+      // eslint-disable-next-line @typescript-eslint/no-deprecated
+      event.returnValue = '';
     };
     // Capture, so this runs before the router's own click handler on the link.
     const onClick = (event: MouseEvent) => {

@@ -27,6 +27,15 @@ function unloadIsHeld(): boolean {
   return event.defaultPrevented;
 }
 
+/** What an older browser reads to decide whether to ask (`returnValue` set by the page). */
+function unloadReturnValue(): unknown {
+  const event = new Event('beforeunload', { cancelable: true });
+  Object.defineProperty(event, 'returnValue', { value: undefined, writable: true });
+  window.dispatchEvent(event);
+  // eslint-disable-next-line @typescript-eslint/no-deprecated
+  return (event as Event & { returnValue: unknown }).returnValue;
+}
+
 afterEach(() => {
   vi.restoreAllMocks();
 });
@@ -57,6 +66,7 @@ describe('useLeaveGuard', () => {
     const confirm = vi.spyOn(window, 'confirm');
     render(<Page active />);
     expect(unloadIsHeld()).toBe(true);
+    expect(unloadReturnValue()).toBe('');
     expect(clickGoesThrough('Help')).toBe(true);
     expect(clickGoesThrough('Skip to the matrix')).toBe(true);
     expect(confirm).not.toHaveBeenCalled();
