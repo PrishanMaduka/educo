@@ -3,8 +3,8 @@ import { and, desc, eq, gt, isNull, sessions, sql, users } from '@quad/db';
 
 import { TENANT_DB } from '../../tokens';
 
-import type { MembershipStatus, SessionKind } from '@quad/contracts';
-import type { QuadTenantDb, SessionLookup, TenantProfile } from '@quad/db';
+import type { MembershipStatus, SessionKind, SessionStage } from '@quad/contracts';
+import type { AccountTx, QuadTenantDb, SessionLookup, TenantProfile } from '@quad/db';
 
 /** The membership a session points at, as far as the guard needs it. */
 export interface SessionMember {
@@ -36,6 +36,24 @@ export interface SessionRow {
   readonly lastSeenAt: Date;
   /** `created_at` in UTC with microseconds, for the next page's keyset. */
   readonly keysetAt: string;
+}
+
+/** Where a staff session is in the sign-in steps, and, once active, its school. */
+export interface SessionPlace {
+  readonly stage: SessionStage;
+  readonly tenantId: string | null;
+  readonly userId: string | null;
+}
+
+/** A new staff browser session (`POST /auth/password`). */
+export interface NewWebSession extends SessionPlace {
+  readonly accountId: string;
+  readonly tokenHash: Buffer;
+  readonly keepSignedIn: boolean;
+  readonly ip: string | null;
+  readonly userAgent: string | null;
+  readonly at: Date;
+  readonly expiresAt: Date;
 }
 
 /**
@@ -129,19 +147,109 @@ export class SessionRepository {
     accountId: string,
     sessionId: string,
   ): Promise<{ tokenHash: Buffer | null } | undefined> {
-    const [row] = await this.db.withAccount(accountId, (tx) =>
-      tx
-        .update(sessions)
-        .set({ revokedAt: sql`now()` })
-        .where(
-          and(
-            eq(sessions.id, sessionId),
-            eq(sessions.accountId, accountId),
-            isNull(sessions.revokedAt),
-          ),
-        )
-        .returning({ tokenHash: sessions.tokenHash }),
-    );
+    return this.db.withAccount(accountId, (tx) => this.revokeIn(tx, accountId, sessionId));
+  }
+  /** Starts a staff browser session (`kind = web`) in the given step; returns its id. */
+  async insertIn(tx: AccountTx, session: NewWebSession): Promise<string> {
+    const [row] = await tx
+      .insert(sessions)
+      .values({
+        accountId: session.accountId,
+        kind: 'web',
+        stage: session.stage,
+        activeTenantId: session.tenantId,
+        activeUserId: session.userId,
+        tokenHash: session.tokenHash,
+        keepSignedIn: session.keepSignedIn,
+        ip: session.ip,
+        userAgent: session.userAgent,
+        createdAt: session.at,
+        lastSeenAt: session.at,
+        expiresAt: session.expiresAt,
+      })
+      .returning({ id: sessions.id });
+    if (row === undefined) throw new Error('The session row was not written.');
+    return row.id;
+  }
+
+  /**
+   * Locks the live session that `tokenHash` still names, before a step moves it on; null when it
+   * was revoked or its token has already rotated (a second tab, a replay).
+   */
+  async lockForStepIn(
+    tx: AccountTx,
+    sessionId: string,
+    tokenHash: Buffer,
+  ): Promise<{ readonly keepSignedIn: boolean } | null> {
+    const [row] = await tx
+      .select({ keepSignedIn: sessions.keepSignedIn })
+      .from(sessions)
+      .where(
+        and(
+          eq(sessions.id, sessionId),
+          eq(sessions.tokenHash, tokenHash),
+          isNull(sessions.revokedAt),
+        ),
+      )
+      .for('update');
+    return row ?? null;
+  }
+
+  /**
+   * Moves a locked session to its next step with a new token (spec 05: the session id rotates on
+   * every step and on Switch school). Any role preview ends with the school it was for.
+   */
+  async rotateIn(
+    tx: AccountTx,
+    sessionId: string,
+    change: SessionPlace & {
+      readonly tokenHash: Buffer;
+      readonly at: Date;
+      readonly expiresAt: Date;
+    },
+  ): Promise<void> {
+    await tx
+      .update(sessions)
+      .set({
+        tokenHash: change.tokenHash,
+        stage: change.stage,
+        activeTenantId: change.tenantId,
+        activeUserId: change.userId,
+        previewRoleId: null,
+        previewSampleUserId: null,
+        lastSeenAt: change.at,
+        expiresAt: change.expiresAt,
+      })
+      .where(eq(sessions.id, sessionId));
+  }
+
+  /** Revokes one of the account's sessions; its token hash, or undefined when it was not live. */
+  async revokeIn(
+    tx: AccountTx,
+    accountId: string,
+    sessionId: string,
+  ): Promise<{ tokenHash: Buffer | null } | undefined> {
+    const [row] = await tx
+      .update(sessions)
+      .set({ revokedAt: sql`now()` })
+      .where(
+        and(
+          eq(sessions.id, sessionId),
+          eq(sessions.accountId, accountId),
+          isNull(sessions.revokedAt),
+        ),
+      )
+      .returning({ tokenHash: sessions.tokenHash });
     return row;
+  }
+
+  /** Revokes every live session of the account (password reset); their cookie hashes. */
+  async revokeAllIn(tx: AccountTx, accountId: string): Promise<Buffer[]> {
+    const rows = await tx
+      .update(sessions)
+      .set({ revokedAt: sql`now()` })
+      .where(and(eq(sessions.accountId, accountId), isNull(sessions.revokedAt)))
+      .returning({ tokenHash: sessions.tokenHash });
+    return rows.flatMap((row) => (row.tokenHash === null ? [] : [row.tokenHash]));
   }
 }

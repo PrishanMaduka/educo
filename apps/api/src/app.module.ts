@@ -8,6 +8,7 @@ import { SessionModule } from './common/session/session.module';
 import { CoreModule } from './core.module';
 import { DatabaseModule } from './database/database.module';
 import { HealthModule } from './health/health.module';
+import { AuthModule } from './modules/auth/auth.module';
 import { MeModule } from './modules/me/me.module';
 import { OpenApiController } from './openapi/openapi.controller';
 import { PlatformModule } from './platform/platform.module';
@@ -56,6 +57,7 @@ export class AppModule {
         HealthModule,
         RealtimeModule,
         SesWebhookModule.register(overrides.snsFetchers),
+        AuthModule,
         MeModule,
         ...(overrides.testModules ?? []),
       ],

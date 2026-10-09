@@ -13,6 +13,7 @@ Method | HTTP request | Description
 [**apiV1MePatch**](MeApi.md#apiv1mepatch) | **PATCH** /api/v1/me | Change your name, theme or locale in this school (needs X-CSRF-Token)
 [**apiV1MeSessionsGet**](MeApi.md#apiv1mesessionsget) | **GET** /api/v1/me/sessions | Your signed-in devices, newest first
 [**apiV1MeSessionsIdDelete**](MeApi.md#apiv1mesessionsiddelete) | **DELETE** /api/v1/me/sessions/{id} | Sign one of your devices out (needs X-CSRF-Token)
+[**apiV1MeTotpPost**](MeApi.md#apiv1metotppost) | **POST** /api/v1/me/totp | Set up an authenticator: without a code it starts one, with its code it confirms it and gives the recovery codes (needs X-CSRF-Token)
 
 
 # **apiV1MeGet**
@@ -172,6 +173,47 @@ No authorization required
 ### HTTP request headers
 
  - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **apiV1MeTotpPost**
+> TotpSetupResult apiV1MeTotpPost(totpSetupInput)
+
+Set up an authenticator: without a code it starts one, with its code it confirms it and gives the recovery codes (needs X-CSRF-Token)
+
+### Example
+```dart
+import 'package:quad_api/api.dart';
+
+final api = QuadApi().getMeApi();
+final TotpSetupInput totpSetupInput = ; // TotpSetupInput | 
+
+try {
+    final response = api.apiV1MeTotpPost(totpSetupInput);
+    print(response);
+} catch on DioException (e) {
+    print('Exception when calling MeApi->apiV1MeTotpPost: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **totpSetupInput** | [**TotpSetupInput**](TotpSetupInput.md)|  | 
+
+### Return type
+
+[**TotpSetupResult**](TotpSetupResult.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
  - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)

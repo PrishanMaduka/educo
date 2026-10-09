@@ -51,6 +51,29 @@
   "askQuadLabel": "Ask Quad",
   "askQuadShortcut": "/",
   "authSignOut": "Sign out",
+  "errorInvalidCredentials": "That email and password don’t match. Check them and try again.",
+  "errorAccountLocked": "Your account is locked for a few minutes after too many tries. We’ve emailed you about it.",
+  "errorInvalidCode": "That code didn’t work. Check your authenticator app and try again.",
+  "errorSchoolSuspended": "This school is paused right now. Ask your school’s admin.",
+  "errorNotYourSchool": "You can’t open that school with this account.",
+  "errorAuthenticatorExists": "You already have an authenticator app set up.",
+  "errorPasswordTooShort": "Use at least {min, plural, one {{min} character} other {{min} characters}}.",
+  "@errorPasswordTooShort": {
+    "placeholders": {
+      "min": {
+        "type": "num"
+      }
+    }
+  },
+  "errorPasswordTooLong": "Use {max} characters or fewer.",
+  "@errorPasswordTooLong": {
+    "placeholders": {
+      "max": {
+        "type": "Object"
+      }
+    }
+  },
+  "errorPasswordBreached": "This password has appeared in a data breach. Choose a different one.",
   "uiFilterClear": "Clear {label}",
   "@uiFilterClear": {
     "placeholders": {

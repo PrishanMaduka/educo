@@ -186,12 +186,14 @@ describe('cookie names and attributes (spec 05, ruling F63)', () => {
     expect((await probe(`quad_sid=${token}`)).statusCode).toBe(401);
   });
 
-  it('name the console session too', () => {
+  it('name the console session and the trusted device too', () => {
     expect(cookieNames('local').consoleSession).toBe('quad_console_sid');
+    expect(cookieNames('local').trustedDevice).toBe('quad_trusted');
     expect(cookieNames('production')).toEqual({
       session: '__Host-quad_sid',
       consoleSession: '__Host-quad_console_sid',
       csrf: '__Host-quad_csrf',
+      trustedDevice: '__Host-quad_trusted',
     });
   });
 });

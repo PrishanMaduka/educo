@@ -4,6 +4,8 @@ import {
   PageQuerySchema,
   SessionIdParams,
   SessionSummaryList,
+  TotpSetupInput,
+  TotpSetupResult,
 } from '@quad/contracts';
 
 import { named } from '../../openapi/registry';
@@ -13,6 +15,8 @@ import type { ApiRoute } from '../../openapi/registry';
 const MeSchema = named('Me', Me);
 const MeUpdate = named('MeUpdateInput', MeUpdateInput);
 const Sessions = named('SessionSummaryList', SessionSummaryList);
+const TotpSetup = named('TotpSetupInput', TotpSetupInput);
+const TotpSetupDone = named('TotpSetupResult', TotpSetupResult);
 
 export const meRoutes: readonly ApiRoute[] = [
   {
@@ -49,5 +53,17 @@ export const meRoutes: readonly ApiRoute[] = [
     request: { params: SessionIdParams },
     responses: { 204: { description: 'Signed out' } },
     errors: [400, 401, 403, 404],
+  },
+  {
+    method: 'post',
+    path: '/me/totp',
+    summary:
+      'Set up an authenticator: without a code it starts one, with its code it confirms it and gives the recovery codes (needs X-CSRF-Token)',
+    tags: ['me'],
+    request: { body: TotpSetup },
+    responses: {
+      200: { description: 'The otpauth URI, or the recovery codes', schema: TotpSetupDone },
+    },
+    errors: [400, 401, 403, 409],
   },
 ];

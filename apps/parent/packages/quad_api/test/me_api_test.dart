@@ -35,5 +35,12 @@ void main() {
       // TODO
     });
 
+    // Set up an authenticator: without a code it starts one, with its code it confirms it and gives the recovery codes (needs X-CSRF-Token)
+    //
+    //Future<TotpSetupResult> apiV1MeTotpPost(TotpSetupInput totpSetupInput) async
+    test('test apiV1MeTotpPost', () async {
+      // TODO
+    });
+
   });
 }

@@ -103,7 +103,12 @@ export class SessionService {
       await this.invalidateToken(tokenHash);
       return null;
     }
-    if (cached.kind === 'web' && now.getTime() - cached.lastSeenAt.getTime() >= TOUCH_INTERVAL_MS) {
+    // A sign-in step keeps the 15-minute expiry its step gave it (D32); only active ones idle on.
+    if (
+      cached.kind === 'web' &&
+      cached.stage === 'active' &&
+      now.getTime() - cached.lastSeenAt.getTime() >= TOUCH_INTERVAL_MS
+    ) {
       await this.touch(tokenHash, cached, now);
     }
     return toRequestAuth(cached, tokenHash);

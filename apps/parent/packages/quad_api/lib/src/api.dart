@@ -7,6 +7,7 @@ import 'package:quad_api/src/auth/api_key_auth.dart';
 import 'package:quad_api/src/auth/basic_auth.dart';
 import 'package:quad_api/src/auth/bearer_auth.dart';
 import 'package:quad_api/src/auth/oauth.dart';
+import 'package:quad_api/src/api/auth_api.dart';
 import 'package:quad_api/src/api/health_api.dart';
 import 'package:quad_api/src/api/me_api.dart';
 import 'package:quad_api/src/api/meta_api.dart';
@@ -61,6 +62,12 @@ class QuadApi {
     if (this.dio.interceptors.any((i) => i is ApiKeyAuthInterceptor)) {
       (this.dio.interceptors.firstWhere((element) => element is ApiKeyAuthInterceptor) as ApiKeyAuthInterceptor).apiKeys[name] = apiKey;
     }
+  }
+
+  /// Get AuthApi instance, base route and serializer can be overridden by a given but be careful,
+  /// by doing that all interceptors will not be executed
+  AuthApi getAuthApi() {
+    return AuthApi(dio);
   }
 
   /// Get HealthApi instance, base route and serializer can be overridden by a given but be careful,

@@ -1,3 +1,5 @@
+import { formatMessage } from './delivery/templates/render';
+
 import type { ErrorCode } from '@quad/contracts';
 
 /** Default messages, plain English from the user's side (also used for framework errors). */
@@ -124,5 +126,29 @@ export class InvalidLinkError extends AppError {
 export class RateLimitedError extends AppError {
   constructor(readonly retryAfterSeconds: number) {
     super('rate_limited', DEFAULT_MESSAGES.rate_limited, 429);
+  }
+}
+
+/**
+ * 401 for a sign-in that fails: an unknown email, a wrong password or a disabled account all
+ * get this one answer, so the response never says whether an account exists (spec 05).
+ */
+export class InvalidCredentialsError extends AppError {
+  constructor() {
+    super('invalid_credentials', formatMessage('error.invalidCredentials'), 401);
+  }
+}
+
+/** 403 while the lockout rule holds the account (spec 05 step 7, ruling F45). */
+export class AccountLockedError extends AppError {
+  constructor() {
+    super('account_locked', formatMessage('error.accountLocked'), 403);
+  }
+}
+
+/** 400 for a two-step or recovery code that does not match (it counts toward the lockout). */
+export class InvalidCodeError extends AppError {
+  constructor() {
+    super('invalid_code', formatMessage('error.invalidCode'), 400);
   }
 }

@@ -18,7 +18,17 @@ export interface CookieNames {
   readonly consoleSession: string;
   /** The readable double-submit CSRF value. */
   readonly csrf: string;
+  /** "Trust this device for 30 days" after two-step (spec 05). */
+  readonly trustedDevice: string;
 }
+
+/**
+ * The remembered school on the sign-in page (spec 05): non-sensitive (its name and logo URL, no
+ * id), readable by the page, and the same name everywhere.
+ */
+export const LAST_SCHOOL_COOKIE = 'quad_last_school';
+/** How long the remembered school stays: a school year. */
+const LAST_SCHOOL_SECONDS = 365 * 24 * 60 * 60;
 
 /**
  * The cookie names (spec 05, D32). Outside local they carry the `__Host-` prefix, which the
@@ -31,6 +41,7 @@ export function cookieNames(appEnv: AppEnv): CookieNames {
     session: `${prefix}quad_sid`,
     consoleSession: `${prefix}quad_console_sid`,
     csrf: `${prefix}quad_csrf`,
+    trustedDevice: `${prefix}quad_trusted`,
   };
 }
 
@@ -91,4 +102,35 @@ export function clearSessionCookies(reply: FastifyReply, appEnv: AppEnv): void {
   const names = cookieNames(appEnv);
   void reply.clearCookie(names.session, sessionCookieOptions(appEnv));
   void reply.clearCookie(names.csrf, csrfCookieOptions(appEnv));
+}
+
+/** Sets the HttpOnly trusted-device cookie (`trusted_devices` keeps only its SHA-256). */
+export function setTrustedDeviceCookie(
+  reply: FastifyReply,
+  appEnv: AppEnv,
+  cookie: { readonly token: string; readonly maxAgeSeconds: number },
+): void {
+  void reply.setCookie(
+    cookieNames(appEnv).trustedDevice,
+    cookie.token,
+    sessionCookieOptions(appEnv, cookie.maxAgeSeconds),
+  );
+}
+
+/** Remembers the chosen school on this device for the sign-in page's "Welcome back". */
+export function setLastSchoolCookie(
+  reply: FastifyReply,
+  appEnv: AppEnv,
+  school: { readonly name: string; readonly logoUrl: string | null },
+): void {
+  void reply.setCookie(
+    LAST_SCHOOL_COOKIE,
+    encodeURIComponent(JSON.stringify({ name: school.name, logoUrl: school.logoUrl })),
+    csrfCookieOptions(appEnv, LAST_SCHOOL_SECONDS),
+  );
+}
+
+/** Forgets the remembered school ("Remember my choice" left off). */
+export function clearLastSchoolCookie(reply: FastifyReply, appEnv: AppEnv): void {
+  void reply.clearCookie(LAST_SCHOOL_COOKIE, csrfCookieOptions(appEnv));
 }

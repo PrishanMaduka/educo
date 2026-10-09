@@ -54,19 +54,30 @@ export class SignedLinks {
   }
 
   /**
+   * Checks the signature, the payload schema and `signedLinkStatus` like `verifyLink`, but never
+   * records the nonce: a page can show a link's details before the final submit uses it up.
+   * Whether a single-use link was already used is known only to `verifyLink`.
+   */
+  inspectLink(token: string, purpose: SignedLinkPurpose, now: Date): SignedLinkPayload {
+    const payload = this.verifiedPayload(token);
+    if (payload === null || signedLinkStatus(payload, purpose, now) !== 'ok') {
+      throw new InvalidLinkError();
+    }
+    return payload;
+  }
+
+  /**
    * Checks, in order: the signature (constant time), the payload schema, `signedLinkStatus`
    * (purpose, rules, expiry), then records the nonce of a single-use purpose. Any failure throws
-   * `InvalidLinkError`; an error from recording the nonce propagates unchanged.
+   * `InvalidLinkError`; an error from recording the nonce propagates unchanged. Call it only on
+   * the final submit, after every other check has passed: it uses the link up.
    */
   async verifyLink(
     token: string,
     purpose: SignedLinkPurpose,
     now: Date,
   ): Promise<SignedLinkPayload> {
-    const payload = this.verifiedPayload(token);
-    if (payload === null || signedLinkStatus(payload, purpose, now) !== 'ok') {
-      throw new InvalidLinkError();
-    }
+    const payload = this.inspectLink(token, purpose, now);
     if (SIGNED_LINK_RULES[purpose].singleUse) {
       if (payload.exp === null) {
         // The nonce is kept until the link expires, so a single-use rule needs a lifetime. A

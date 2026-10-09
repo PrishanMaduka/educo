@@ -29,6 +29,6 @@ import type { Config } from '../../config';
     },
     { provide: APP_GUARD, useClass: AuthGuard },
   ],
-  exports: [SessionService, RequestAuthenticator, CsrfTokens],
+  exports: [SessionService, SessionRepository, RequestAuthenticator, CsrfTokens],
 })
 export class SessionModule {}
