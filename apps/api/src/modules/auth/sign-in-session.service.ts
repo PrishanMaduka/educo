@@ -1,0 +1,285 @@
+import { Inject, Injectable } from '@nestjs/common';
+import { KEEP_SIGNED_IN_DAYS, nextSignInStep, sessionExpiry, strictestTwoStep } from '@quad/domain';
+
+import { AuditService } from '../../common/audit/audit.service';
+import { formatMessage } from '../../common/delivery/templates/render';
+import { ForbiddenError, UnauthorizedError } from '../../common/errors';
+import { hashSessionToken, newSessionToken } from '../../common/session/cookies';
+import { CsrfTokens } from '../../common/session/csrf';
+import { SessionRepository } from '../../common/session/session.repository';
+import { SessionService } from '../../common/session/session.service';
+import { CONFIG, DELIVERY, TENANT_DB } from '../../tokens';
+
+import { AuthRepository } from './auth.repository';
+import { describeDevice } from './device-name';
+
+import type { DeliveryQueue } from '../../common/delivery/delivery.service';
+import type { SessionPlace } from '../../common/session/session.repository';
+import type { Config } from '../../config';
+import type { SignInMethod, SignInNext } from '@quad/contracts';
+import type { AccountTx, AuthMembership, QuadTenantDb } from '@quad/db';
+
+const DAY_SECONDS = 24 * 60 * 60;
+/** Where the new-device email sends the person to review their signed-in devices. */
+const SESSIONS_PAGE = '/app/me/sessions';
+
+/** Who is signing in, from where: request facts, never a source of the tenant. */
+export interface SignInClient {
+  readonly ip: string;
+  readonly userAgent: string | null;
+  /** The trusted-device cookie, when the browser sent one. */
+  readonly trustedToken: string | undefined;
+}
+
+/** New staff session cookies (both are set together, `setSessionCookies`). */
+export interface SessionCookies {
+  readonly token: string;
+  readonly csrf: string;
+  /** Set with Keep me signed in; without it the cookies end with the browser session. */
+  readonly maxAgeSeconds?: number;
+}
+
+/** Where `activate` left the session: open in the school, or at two-step set-up first (I2). */
+export interface Activation {
+  readonly next: 'done' | 'two_step_setup';
+  readonly cookies: SessionCookies;
+}
+
+/** The live session a step continues: its id and the hash its cookie still has. */
+export interface StepSession {
+  readonly id: string;
+  readonly tokenHash: Buffer;
+}
+
+/** Where a sign-in stands after the password or the two-step code. */
+export interface SignInState {
+  readonly accountId: string;
+  /** Null right after the password: no session exists yet. */
+  readonly session: StepSession | null;
+  /** From the password step; a continuing session keeps its own. */
+  readonly keepSignedIn: boolean;
+  /**
+   * The first factor (the password; D37), required for a new session (`session` null);
+   * a continuing session keeps its own. The `auth.sign_in` audit names it.
+   */
+  readonly method?: SignInMethod;
+  /** The two-step code (or a new authenticator) was just checked. */
+  readonly twoStepDone: boolean;
+  /**
+   * A staff invite link's token from the invite page (fix round 1, I4): a hint that is inspected,
+   * never used up. A valid invitation of this account counts as a pending school.
+   */
+  readonly invite?: string;
+  /** The request carried a valid trusted-device cookie of this account. */
+  readonly trustedByCookie: boolean;
+  readonly client: SignInClient;
+  readonly now: Date;
+}
+
+/**
+ * The staff session through the sign-in steps (spec 05): it starts at the first step, moves on
+ * with a new token at every step (and on Switch school), becomes active only in a membership the
+ * caller has checked, and ends when there is no school. Activation audits `auth.sign_in` in that
+ * school and, for a device without the trusted-device cookie, queues the new-device email (spec
+ * 16, ruling F43).
+ */
+@Injectable()
+export class SignInSessions {
+  constructor(
+    @Inject(TENANT_DB) private readonly db: QuadTenantDb,
+    private readonly repository: AuthRepository,
+    private readonly sessionRows: SessionRepository,
+    private readonly sessions: SessionService,
+    private readonly csrf: CsrfTokens,
+    private readonly audit: AuditService,
+    @Inject(DELIVERY) private readonly delivery: DeliveryQueue,
+    @Inject(CONFIG) private readonly config: Config,
+  ) {}
+
+  /** Puts the session at a sign-in step: a new session, or the same one with a new token. */
+  async atStep(
+    state: SignInState,
+    stage: Exclude<SignInNext, 'no_school' | 'done'>,
+  ): Promise<SessionCookies> {
+    const place: SessionPlace = { stage, tenantId: null, userId: null };
+    const { expiresAt } = sessionExpiry({
+      kind: 'sign_in_step',
+      startedAt: state.now,
+      now: state.now,
+    });
+    const { cookies } = await this.write(state, place, () =>
+      Promise.resolve({ expiresAt, value: null }),
+    );
+    return cookies;
+  }
+
+  /**
+   * Makes the session active in `membership`'s school, in one transaction scoped to the account
+   * and that school: the school must still be open, the session row moves (or starts) with a new
+   * token, the membership and account record the sign-in, and `auth.sign_in` is audited there.
+   */
+  async activate(
+    state: SignInState,
+    membership: AuthMembership,
+    options: { readonly switching: boolean },
+  ): Promise<Activation> {
+    // Every way into a school re-checks two-step against the schools as they are now (fix round
+    // 1, I2): a school accepted mid-session, or a rule turned on since the password step, may ask
+    // for an authenticator this account does not have yet. The session then goes to set-up.
+    const [rules, credentials] = await Promise.all([
+      this.db.definers.authSignInRules(state.accountId),
+      this.repository.credentials(state.accountId),
+    ]);
+    const step = nextSignInStep({
+      totpEnabled: credentials.totpEnabled,
+      twoStepRequired: strictestTwoStep(rules).required,
+      // This session has already passed its code (or a trusted device), if it needed one.
+      trustedDevice: true,
+      membershipCount: 1,
+    });
+    if (step === 'two_step_setup') {
+      return { next: step, cookies: await this.atStep(state, 'two_step_setup') };
+    }
+    const place: SessionPlace = {
+      stage: 'active',
+      tenantId: membership.tenantId,
+      userId: membership.userId,
+    };
+    const written = await this.write(state, place, async (tx, { keepSignedIn, method }) => {
+      const profile = await this.db.definers.currentTenantProfile(tx);
+      if (profile === null || profile.status === 'deleted') {
+        throw new ForbiddenError('forbidden', formatMessage('error.notYourSchool'));
+      }
+      if (profile.status === 'suspended') {
+        throw new ForbiddenError(
+          'school_suspended',
+          profile.suspendReason ?? formatMessage('error.schoolSuspended'),
+        );
+      }
+      const name = await this.repository.memberSignedInIn(tx, membership.userId, state.now);
+      const account = await this.repository.accountIn(tx, state.accountId);
+      if (account === null || account.status !== 'active') {
+        // Disabled or locked since the earlier step: the session opens no school.
+        throw new UnauthorizedError();
+      }
+      if (name === null) {
+        throw new ForbiddenError('forbidden', formatMessage('error.notYourSchool'));
+      }
+      await this.repository.signedInIn(tx, state.accountId, state.now);
+      await this.audit.record(
+        {
+          tx,
+          tenantId: membership.tenantId,
+          userId: membership.userId,
+          supportSessionId: null,
+          platformUserId: null,
+          ip: state.client.ip,
+        },
+        'auth.sign_in',
+        { type: 'user', id: membership.userId },
+        // A session from before 0010 has none recorded, nor one opened by SSO before 0012 (D37).
+        { switchedSchool: options.switching, ...(method === null ? {} : { method }) },
+      );
+      const { expiresAt } = sessionExpiry({
+        kind: 'web',
+        lastSeenAt: state.now,
+        keepSignedIn,
+        sessionHours: profile.sessionHours,
+        now: state.now,
+      });
+      return { expiresAt, value: { name, email: account.email, timeZone: profile.timeZone } };
+    });
+    if (!options.switching && !state.trustedByCookie) {
+      await this.queueNewDeviceEmail(state, written.value);
+    }
+    const cookies = written.keepSignedIn
+      ? { ...written.cookies, maxAgeSeconds: KEEP_SIGNED_IN_DAYS * DAY_SECONDS }
+      : written.cookies;
+    return { next: 'done', cookies };
+  }
+
+  /**
+   * Writes the session at `place` with a new token, in one transaction scoped to the account
+   * (and the school, once active). `inTx` runs in that transaction first and gives the expiry; it
+   * is told whether the session keeps the person signed in, and its first factor. The old
+   * token's cache entry goes.
+   */
+  private async write<T>(
+    state: SignInState,
+    place: SessionPlace,
+    inTx: (
+      tx: AccountTx,
+      kept: { readonly keepSignedIn: boolean; readonly method: SignInMethod | null },
+    ) => Promise<{ expiresAt: Date; value: T }>,
+  ): Promise<{ cookies: SessionCookies; keepSignedIn: boolean; value: T }> {
+    const token = newSessionToken();
+    const tokenHash = hashSessionToken(token);
+    const existing = state.session;
+    const written = await this.repository.inAccount(state.accountId, place.tenantId, async (tx) => {
+      if (existing === null) {
+        const method = state.method;
+        if (method === undefined) throw new Error('A new session needs its sign-in method.');
+        const { expiresAt, value } = await inTx(tx, { keepSignedIn: state.keepSignedIn, method });
+        await this.sessionRows.insertIn(tx, {
+          ...place,
+          accountId: state.accountId,
+          tokenHash,
+          keepSignedIn: state.keepSignedIn,
+          signInMethod: method,
+          ip: state.client.ip,
+          userAgent: state.client.userAgent,
+          at: state.now,
+          expiresAt,
+        });
+        return { keepSignedIn: state.keepSignedIn, value };
+      }
+      const locked = await this.sessionRows.lockForStepIn(tx, existing.id, existing.tokenHash);
+      if (locked === null) throw new UnauthorizedError();
+      const { expiresAt, value } = await inTx(tx, {
+        keepSignedIn: locked.keepSignedIn,
+        method: locked.signInMethod,
+      });
+      const rotated = await this.sessionRows.rotateIn(tx, existing.id, existing.tokenHash, {
+        ...place,
+        tokenHash,
+        at: state.now,
+        expiresAt,
+      });
+      if (!rotated) throw new UnauthorizedError();
+      return { keepSignedIn: locked.keepSignedIn, value };
+    });
+    if (existing !== null) await this.sessions.invalidateToken(existing.tokenHash);
+    return { ...written, cookies: { token, csrf: this.csrf.tokenFor(tokenHash) } };
+  }
+
+  /** Ends a sign-in that found no school: the session is revoked and its cookies cleared. */
+  async end(state: SignInState): Promise<'clear'> {
+    const session = state.session;
+    if (session !== null) {
+      await this.repository.inAccount(state.accountId, null, (tx) =>
+        this.sessionRows.revokeIn(tx, state.accountId, session.id),
+      );
+      await this.sessions.invalidateToken(session.tokenHash);
+    }
+    return 'clear';
+  }
+
+  private async queueNewDeviceEmail(
+    state: SignInState,
+    signedIn: { readonly name: string; readonly email: string | null; readonly timeZone: string },
+  ): Promise<void> {
+    if (signedIn.email === null) return;
+    await this.delivery.queueEmail({
+      jobId: `new-device.${state.accountId}.${state.now.getTime()}`,
+      to: signedIn.email,
+      template: 'new_device',
+      params: {
+        name: signedIn.name,
+        device: describeDevice(state.client.userAgent),
+        signedInAt: state.now.toISOString(),
+        timeZone: signedIn.timeZone,
+        link: new URL(SESSIONS_PAGE, this.config.PUBLIC_WEB_URL).href,
+      },
+    });
+  }
+}

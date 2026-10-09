@@ -1,6 +1,5 @@
 export * from './account/accounts';
 export * from './account/credentials';
-export * from './account/identities';
 export * from './account/otp-challenges';
 export * from './account/sessions';
 export * from './account/trusted-devices';

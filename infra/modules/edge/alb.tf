@@ -202,3 +202,30 @@ resource "aws_lb_listener_rule" "route" {
 
   tags = merge(local.tags, { Name = "${var.name}-${each.key}" })
 }
+
+# Task 10 fix round 1 (M5): the console API is served only on the console host. After the
+# console's own platform rule (priority 10) and before the catch-all api rule (30), any other host
+# asking for /api/v1/platform/* gets 403, so the console's routes are never reachable on
+# quad-edu.com. No origin-secret condition: a request without it gets the listener's 403 anyway.
+resource "aws_lb_listener_rule" "platform_off_console" {
+  listener_arn = aws_lb_listener.https.arn
+  priority     = 25
+
+  action {
+    type = "fixed-response"
+
+    fixed_response {
+      content_type = "text/plain"
+      message_body = "Forbidden"
+      status_code  = "403"
+    }
+  }
+
+  condition {
+    path_pattern {
+      values = ["/api/v1/platform/*"]
+    }
+  }
+
+  tags = merge(local.tags, { Name = "${var.name}-platform-off-console" })
+}

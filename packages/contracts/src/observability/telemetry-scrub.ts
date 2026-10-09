@@ -36,14 +36,21 @@ const SENSITIVE_PAIR =
  * people, and are needed to debug.
  */
 const PATH_TOKEN = /\/(?=[A-Za-z_-]*\d)[A-Za-z0-9_-]{32,}(?=[/?#\s"']|$)/g;
+/**
+ * The signed-link pages and routes (D16, D28 follow-up): `/sign-in/{reset,invite,support}/<token>`
+ * and `/auth/invites/<token>`. Their token is `payload.signature` in base64url, whose dot keeps
+ * it out of `PATH_TOKEN`, so the path itself names the segment to replace.
+ */
+const SIGNED_LINK_PATH = /(\/sign-in\/(?:reset|invite|support)|\/auth\/invites)\/[^/?#\s"']+/g;
 const UUID = /^\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /**
  * The text with emails, phone numbers, credentials (auth schemes, JWTs, sensitive `name=value`
- * pairs), query values and path tokens replaced.
+ * pairs), query values, signed-link tokens and path tokens replaced.
  */
 export function scrubTelemetryText(text: string): string {
   return text
+    .replace(SIGNED_LINK_PATH, '$1/:token')
     .replace(JWT, '[jwt]')
     .replace(AUTH_SCHEME, '$1 [redacted]')
     .replace(QUERY_VALUE, '$1[redacted]')
@@ -54,6 +61,39 @@ export function scrubTelemetryText(text: string): string {
     .replace(PHONE_LK_PREFIXED, '[phone]')
     .replace(PHONE_LOCAL, '[phone]')
     .replace(PHONE_LOCAL_MOBILE, '[phone]');
+}
+
+/** A Postgres error's fields that can quote row values or statement text (`pg`'s `DatabaseError`). */
+const POSTGRES_DETAIL_FIELDS = ['detail', 'where'] as const;
+const SQLSTATE = /^[0-9A-Z]{5}$/;
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function isPostgresError(value: Record<string, unknown>): boolean {
+  return (
+    typeof value.severity === 'string' &&
+    typeof value.code === 'string' &&
+    SQLSTATE.test(value.code)
+  );
+}
+
+/**
+ * Removes, in place, `detail` and `where` from every Postgres error found under `value` (D27
+ * follow-up): `detail` quotes the row (`Key (email)=(…) already exists`) and `where` the
+ * statement context. Objects that are not Postgres errors keep their fields.
+ */
+export function dropPostgresErrorDetails(value: unknown): void {
+  if (Array.isArray(value)) {
+    for (const item of value) dropPostgresErrorDetails(item);
+    return;
+  }
+  if (!isRecord(value)) return;
+  if (isPostgresError(value)) {
+    for (const field of POSTGRES_DETAIL_FIELDS) Reflect.deleteProperty(value, field);
+  }
+  for (const item of Object.values(value)) dropPostgresErrorDetails(item);
 }
 
 /** A URL or path without its query string and fragment, then scrubbed. */

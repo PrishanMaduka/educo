@@ -11,6 +11,7 @@ import type { EmailJob, SchoolSender } from './email';
 import type { SmsJob } from './sms';
 import type { EmailParams, EmailTemplateId, SmsParams, SmsTemplateId } from './templates';
 import type { BeforeApplicationShutdown } from '@nestjs/common';
+import type { JobsOptions } from 'bullmq';
 import type { Redis } from 'ioredis';
 
 export interface QueueEmailInput<T extends EmailTemplateId> {
@@ -84,6 +85,19 @@ export function prepareSmsJob<T extends SmsTemplateId>(
   return { jobId: JobIdSchema.parse(input.jobId), job };
 }
 
+/**
+ * Sign-in codes (the SMS `otp` and the email `email_otp`, Task 9 fix round 1): a job that fails
+ * for good is removed at once, so no code or phone number waits in Redis for a day. A code is
+ * useless after 10 minutes anyway, and the person simply asks for a new one.
+ */
+const DISCARDED_ON_FAILURE: ReadonlySet<string> = new Set(['otp', 'email_otp']);
+
+function optionsFor(template: string): JobsOptions {
+  return DISCARDED_ON_FAILURE.has(template)
+    ? { ...DELIVERY_JOB_OPTIONS, removeOnFail: true }
+    : DELIVERY_JOB_OPTIONS;
+}
+
 export interface BullDeliveryOptions {
   /** BullMQ key prefix; tests use their own so a local worker never sees their jobs. */
   readonly prefix?: string;
@@ -105,12 +119,12 @@ export class BullDelivery implements DeliveryQueue, BeforeApplicationShutdown {
 
   async queueEmail<T extends EmailTemplateId>(input: QueueEmailInput<T>): Promise<void> {
     const { jobId, job } = prepareEmailJob(input, currentRequestContext()?.tenantId ?? null);
-    await this.queue(EMAIL_QUEUE).add(job.template, job, { ...DELIVERY_JOB_OPTIONS, jobId });
+    await this.queue(EMAIL_QUEUE).add(job.template, job, { ...optionsFor(job.template), jobId });
   }
 
   async queueSms<T extends SmsTemplateId>(input: QueueSmsInput<T>): Promise<void> {
     const { jobId, job } = prepareSmsJob(input, currentRequestContext()?.tenantId ?? null);
-    await this.queue(SMS_QUEUE).add(job.template, job, { ...DELIVERY_JOB_OPTIONS, jobId });
+    await this.queue(SMS_QUEUE).add(job.template, job, { ...optionsFor(job.template), jobId });
   }
 
   /** Closes the queues; the shared connection is closed by `RedisModule` afterwards. */

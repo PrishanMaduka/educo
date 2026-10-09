@@ -314,7 +314,10 @@ input,select,textarea,button{font:inherit}
 footer.page .wrap{display:flex;gap:16px 32px;flex-wrap:wrap;align-items:center;font-size:14px;padding-block:0 32px}
 footer .logo{margin-right:auto;color:var(--page-ink)}
 footer a{color:var(--page-ink)}
-footer span{color:var(--page-ink-3)}
+footer span,footer .contact{color:var(--page-ink-3)}
+footer .links{display:flex;flex-wrap:wrap;gap:4px 20px;list-style:none;margin:0;padding:0}
+footer .links a{display:inline-block;padding-block:4px}
+footer .contact{margin:0 auto 0 0}
 
 /* Sign-in dialog */
 dialog.si{width:min(440px,calc(100% - 32px));border:0;border-radius:28px;padding:28px;background:var(--sheet-bg);color:var(--sheet-ink);box-shadow:0 40px 80px -30px rgba(0,0,0,.5)}
@@ -331,7 +334,7 @@ dialog.si::backdrop{background:var(--backdrop);backdrop-filter:blur(3px)}
 .si input:focus{outline:none;border-color:var(--focus)}
 .si input.code{letter-spacing:.5em;text-align:center;font-size:22px;font-variant-numeric:tabular-nums}
 .si .btn{justify-content:center;width:100%;background:var(--lime);color:var(--on-vivid)}
-.si .btn.sso,.si .btn.ghost{background:transparent;border:2px solid var(--sheet-line);color:var(--sheet-ink)}
+.si .btn.ghost{background:transparent;border:2px solid var(--sheet-line);color:var(--sheet-ink)}
 .si .err{color:var(--tag-bad-ink);font-size:13.5px;font-weight:700;min-height:1.2em}
 :root[data-theme="dark"] .si .err{color:var(--pink)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .si .err{color:var(--pink)}}
@@ -548,7 +551,19 @@ dialog.si::backdrop{background:var(--backdrop);backdrop-filter:blur(3px)}
 <footer class="page">
   <div class="wrap">
     <a class="logo" href="#top" aria-label="Quad home"><svg viewBox="0 0 101 30" aria-hidden="true" style="height:26px"><use href="#qLogo"/></svg></a>
-    <a href="mailto:support@quad-edu.com">support@quad-edu.com</a>
+    <!-- The About, Security & trust and legal pages (spec 19, D41). They live on the real site. -->
+    <nav aria-label="About Quad">
+      <ul class="links">
+        <li><a href="https://quad-edu.com/about" target="_blank" rel="noopener">About</a></li>
+        <li><a href="https://quad-edu.com/security" target="_blank" rel="noopener">Security &amp; trust</a></li>
+        <li><a href="https://quad-edu.com/legal/privacy" target="_blank" rel="noopener">Privacy</a></li>
+        <li><a href="https://quad-edu.com/legal/terms" target="_blank" rel="noopener">Terms</a></li>
+        <li><a href="https://quad-edu.com/legal/subprocessors" target="_blank" rel="noopener">Sub-processors</a></li>
+      </ul>
+    </nav>
+  </div>
+  <div class="wrap">
+    <p class="contact">Contact <a href="mailto:support@quad-edu.com">support@quad-edu.com</a></p>
     <span>Sample school and families are fictional.</span>
     <span>© Quad</span>
   </div>
@@ -822,12 +837,11 @@ $('getAppBtn').addEventListener('click', e => { const b = e.currentTarget, open 
   menu.addEventListener('click', e => { if (e.target.closest('a,[data-signin]')) set(false); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && !menu.hidden) { set(false); btn.focus(); } }); })();
 
-// Sign in at quad-edu.com: email first, then password (or SSO), two-step, then the school from the account's memberships
+// Sign in at quad-edu.com: email first, then password, two-step, then the school from the account's memberships
 (() => {
   const dlg = document.getElementById('signin'), body = document.getElementById('siBody');
   const SCH = {cis: {name:'Colombo International School', short:'CIS', sub:'colombo-intl', color:'var(--school-maroon)'}, kha: {name:'Kandy Hill Academy', short:'KHA', sub:'kandyhill', color:'var(--school-green)'}};
   const members = em => /^ruwan\.mendis@/i.test(em) ? [[SCH.cis, 'Teacher · Mathematics'], [SCH.kha, 'Head of Mathematics']] : /@kandyhill\./i.test(em) ? [[SCH.kha, 'Staff']] : [[SCH.cis, /^prishan/i.test(em) ? 'Administrator' : 'Staff']];
-  const ssoFor = em => /@(colombo-intl\.lk|kandyhill\.edu\.lk)$/i.test(em) ? 'Google Workspace' : '';
   const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]);
   const st = {email: ''};
   let opener = null;
@@ -836,9 +850,9 @@ $('getAppBtn').addEventListener('click', e => { const b = e.currentTarget, open 
     email: () => `<h2 id="siH">Sign in to Quad</h2><p class="sub">One address for every school. Use your work email and we’ll open your school.</p>
       <form class="f" id="siF" novalidate><label>Work email<input type="email" id="siEmail" autocomplete="username" value="${esc(st.email)}" placeholder="name@yourschool.org" aria-describedby="siErr"></label><div class="err" id="siErr" role="alert"></div><button class="btn primary">Continue</button></form>
       <p class="hint">Try <b>prishan.maduka@colombo-intl.lk</b> (one school) or <b>ruwan.mendis@quad.local</b> (two schools). Any password and the code 000000 work in this prototype.<br>Parents and guardians sign in on the <a href="parent.html" style="font-weight:800">Quad parent app</a>.</p>`,
-    password: () => { const sso = ssoFor(st.email); return `<h2 id="siH">Welcome back</h2>${who()}
-      <form class="f" id="siF" novalidate>${sso ? `<button type="button" class="btn sso" data-si="sso">Continue with ${sso}</button><div class="row2" style="justify-content:center">or use your password</div>` : ''}
-      <label>Password<input type="password" id="siPw" autocomplete="current-password" aria-describedby="siErr"></label><div class="row2"><span></span><a href="#" data-si="forgot">Forgot password?</a></div><div class="err" id="siErr" role="alert"></div><button class="btn primary">Sign in</button></form>`; },
+    password: () => `<h2 id="siH">Welcome back</h2>${who()}
+      <form class="f" id="siF" novalidate>
+      <label>Password<input type="password" id="siPw" autocomplete="current-password" aria-describedby="siErr"></label><div class="row2"><span></span><a href="#" data-si="forgot">Forgot password?</a></div><div class="err" id="siErr" role="alert"></div><button class="btn primary">Sign in</button></form>`,
     code: () => `<h2 id="siH">Two-step sign-in</h2>${who()}<p class="sub">Enter the 6-digit code from your authenticator app.</p>
       <form class="f" id="siF" novalidate><input class="code" id="siCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" aria-label="6-digit code" aria-describedby="siErr"><div class="err" id="siErr" role="alert"></div><button class="btn primary">Verify</button></form>`,
     school: () => `<h2 id="siH">Choose a school</h2>${who()}<p class="sub">Your account is linked to ${members(st.email).length} schools. You can switch later from the menu.</p>
@@ -858,7 +872,7 @@ $('getAppBtn').addEventListener('click', e => { const b = e.currentTarget, open 
     try { sessionStorage.setItem('quad-auth-school', '1'); sessionStorage.setItem('quad-account', st.email); } catch (e) {}
     setTimeout(() => { location.href = 'admin.html#dashboard'; }, 700); }
   body.addEventListener('click', e => { const b = e.target.closest('[data-si]'); if (!b) return; e.preventDefault(); const k = b.dataset.si;
-    if (k === 'change' || k === 'back') go('email'); if (k === 'sso') afterAuth(); if (k === 'forgot') go('forgot'); if (k === 'pick') open(members(st.email)[+b.dataset.i][0]); });
+    if (k === 'change' || k === 'back') go('email'); if (k === 'forgot') go('forgot'); if (k === 'pick') open(members(st.email)[+b.dataset.i][0]); });
   document.querySelectorAll('[data-signin]').forEach(b => b.addEventListener('click', () => { opener = b; go('email'); dlg.showModal(); }));
   dlg.addEventListener('close', () => { if (opener && document.contains(opener)) opener.focus(); opener = null; });
   if (location.hash === '#signin') { go('email'); dlg.showModal(); }

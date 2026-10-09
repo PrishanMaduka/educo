@@ -1,3 +1,5 @@
+import { formatMessage } from './delivery/templates/render';
+
 import type { ErrorCode } from '@quad/contracts';
 
 /** Default messages, plain English from the user's side (also used for framework errors). */
@@ -41,6 +43,33 @@ export class ValidationError extends AppError {
   }
 }
 
+/**
+ * 401: no session or token, or one that has ended: revoked, expired, a deactivated membership
+ * or a deleted school (spec 05; a suspended school is a 403 instead).
+ */
+export class UnauthorizedError extends AppError {
+  constructor(message: string = DEFAULT_MESSAGES.unauthorized) {
+    super('unauthorized', message, 401);
+  }
+}
+
+/** 403 for a cookie-authenticated write without a valid `X-CSRF-Token` (double submit, D32). */
+export class CsrfError extends AppError {
+  constructor() {
+    super('forbidden', 'Your session needs refreshing. Reload the page and try again.', 403);
+  }
+}
+
+/**
+ * 415: a `text/plain` body (D28 follow-up): a cross-site form can send one without a preflight,
+ * so only the SES webhook, which SNS calls that way, accepts it.
+ */
+export class UnsupportedMediaTypeError extends AppError {
+  constructor() {
+    super('validation', 'Send the request body as JSON.', 415);
+  }
+}
+
 /** 404: the record does not exist, or belongs to another school (RLS hides it). */
 export class NotFoundError extends AppError {
   constructor(message: string = DEFAULT_MESSAGES.not_found) {
@@ -50,10 +79,18 @@ export class NotFoundError extends AppError {
 
 export type ForbiddenCode = Extract<
   ErrorCode,
-  'forbidden' | 'module_not_in_plan' | 'school_suspended'
+  | 'forbidden'
+  | 'module_not_in_plan'
+  | 'school_suspended'
+  | 'preview_read_only'
+  | 'two_step_required'
 >;
 
-/** 403: signed in, but not allowed (spec 06: `forbidden`, `module_not_in_plan`, `school_suspended`). */
+/**
+ * 403: signed in, but not allowed (spec 06: `forbidden`, `module_not_in_plan`,
+ * `school_suspended`; `preview_read_only` for a write while previewing a role; and
+ * `two_step_required` when the school chosen needs two-step first, Task 13 fix round 1).
+ */
 export class ForbiddenError extends AppError {
   constructor(code: ForbiddenCode = 'forbidden', message: string = DEFAULT_MESSAGES.forbidden) {
     super(code, message, 403);
@@ -97,5 +134,42 @@ export class InvalidLinkError extends AppError {
 export class RateLimitedError extends AppError {
   constructor(readonly retryAfterSeconds: number) {
     super('rate_limited', DEFAULT_MESSAGES.rate_limited, 429);
+  }
+}
+
+/**
+ * 401 for a sign-in that fails: an unknown email, a wrong password or a disabled account all
+ * get this one answer, so the response never says whether an account exists (spec 05).
+ */
+export class InvalidCredentialsError extends AppError {
+  constructor() {
+    super('invalid_credentials', formatMessage('error.invalidCredentials'), 401);
+  }
+}
+
+/** 403 while the lockout rule holds the account (spec 05 step 7, ruling F45). */
+export class AccountLockedError extends AppError {
+  constructor() {
+    super('account_locked', formatMessage('error.accountLocked'), 403);
+  }
+}
+
+/**
+ * 400 for a code that does not match: a two-step or recovery code (it counts toward the lockout),
+ * or a parent's sign-in code, which says so in its message.
+ */
+export class InvalidCodeError extends AppError {
+  constructor(message: string = formatMessage('error.invalidCode')) {
+    super('invalid_code', message, 400);
+  }
+}
+
+/**
+ * 503 when sign-in cannot reach the lockout counter (Redis): it fails closed rather than check a
+ * password or code that could not be counted (D32). The person can try again shortly.
+ */
+export class UnavailableError extends AppError {
+  constructor() {
+    super('unavailable', formatMessage('error.signInUnavailable'), 503);
   }
 }

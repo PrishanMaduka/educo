@@ -48,13 +48,13 @@ Please follow the [installation procedure](#installation--usage) and then run th
 import 'package:quad_api/quad_api.dart';
 
 
-final api = QuadApi().getHealthApi();
+final api = QuadApi().getAuthApi();
 
 try {
-    final response = await api.apiV1HealthLiveGet();
+    final response = await api.apiV1AuthMembershipsGet();
     print(response);
 } catch on DioException (e) {
-    print("Exception when calling HealthApi->apiV1HealthLiveGet: $e\n");
+    print("Exception when calling AuthApi->apiV1AuthMembershipsGet: $e\n");
 }
 
 ```
@@ -65,10 +65,23 @@ All URIs are relative to *http://localhost*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
+[*AuthApi*](doc/AuthApi.md) | [**apiV1AuthMembershipsGet**](doc/AuthApi.md#apiv1authmembershipsget) | **GET** /api/v1/auth/memberships | The schools you can open (Choose a school, Switch school)
+[*AuthApi*](doc/AuthApi.md) | [**apiV1AuthOtpRequestPost**](doc/AuthApi.md#apiv1authotprequestpost) | **POST** /api/v1/auth/otp/request | Send a 6-digit sign-in code to a mobile number or email (the same answer whether or not it is known)
+[*AuthApi*](doc/AuthApi.md) | [**apiV1AuthOtpVerifyPost**](doc/AuthApi.md#apiv1authotpverifypost) | **POST** /api/v1/auth/otp/verify | Check the code: signs in to your one school, asks you to choose among several, or says you were not found
+[*AuthApi*](doc/AuthApi.md) | [**apiV1AuthPasswordForgotPost**](doc/AuthApi.md#apiv1authpasswordforgotpost) | **POST** /api/v1/auth/password/forgot | Email a password reset link (the same answer whether or not the account exists)
+[*AuthApi*](doc/AuthApi.md) | [**apiV1AuthPasswordPost**](doc/AuthApi.md#apiv1authpasswordpost) | **POST** /api/v1/auth/password | Sign in with email and password; sets the session cookies and says what comes next
+[*AuthApi*](doc/AuthApi.md) | [**apiV1AuthPasswordResetPost**](doc/AuthApi.md#apiv1authpasswordresetpost) | **POST** /api/v1/auth/password/reset | Set a new password with a reset link; signs out every device
+[*AuthApi*](doc/AuthApi.md) | [**apiV1AuthRefreshPost**](doc/AuthApi.md#apiv1authrefreshpost) | **POST** /api/v1/auth/refresh | Swap the refresh token for a new pair; an old refresh token signs the device out everywhere it was copied
+[*AuthApi*](doc/AuthApi.md) | [**apiV1AuthSelectSchoolPost**](doc/AuthApi.md#apiv1authselectschoolpost) | **POST** /api/v1/auth/select-school | Open one of your schools. Staff: rotates the session cookie (needs X-CSRF-Token). Parent app: the select_school token gets both tokens; a school token switches and gets only the new access token (the refresh token stays)
+[*AuthApi*](doc/AuthApi.md) | [**apiV1AuthSignOutPost**](doc/AuthApi.md#apiv1authsignoutpost) | **POST** /api/v1/auth/sign-out | Sign out: the staff session for every school (needs X-CSRF-Token), or the parent app’s token family on this device
+[*AuthApi*](doc/AuthApi.md) | [**apiV1AuthTotpVerifyPost**](doc/AuthApi.md#apiv1authtotpverifypost) | **POST** /api/v1/auth/totp/verify | Check the authenticator or recovery code at the two-step step (needs X-CSRF-Token)
 [*HealthApi*](doc/HealthApi.md) | [**apiV1HealthLiveGet**](doc/HealthApi.md#apiv1healthliveget) | **GET** /api/v1/health/live | The process is up
 [*HealthApi*](doc/HealthApi.md) | [**apiV1HealthReadyGet**](doc/HealthApi.md#apiv1healthreadyget) | **GET** /api/v1/health/ready | Postgres and Redis answer
-[*MetaApi*](doc/MetaApi.md) | [**apiV1OpenapiJsonGet**](doc/MetaApi.md#apiv1openapijsonget) | **GET** /api/v1/openapi.json | This OpenAPI document
-[*WebhooksApi*](doc/WebhooksApi.md) | [**apiV1WebhooksSesPost**](doc/WebhooksApi.md#apiv1webhookssespost) | **POST** /api/v1/webhooks/ses | SES bounce and complaint events from SNS (signature version 2, pinned topic)
+[*MeApi*](doc/MeApi.md) | [**apiV1MeGet**](doc/MeApi.md#apiv1meget) | **GET** /api/v1/me | The signed-in person, their school and brand, other schools, banners and greeting
+[*MeApi*](doc/MeApi.md) | [**apiV1MePatch**](doc/MeApi.md#apiv1mepatch) | **PATCH** /api/v1/me | Change your name, theme or locale in this school (needs X-CSRF-Token)
+[*MeApi*](doc/MeApi.md) | [**apiV1MeSessionsGet**](doc/MeApi.md#apiv1mesessionsget) | **GET** /api/v1/me/sessions | Your signed-in devices, newest first
+[*MeApi*](doc/MeApi.md) | [**apiV1MeSessionsIdDelete**](doc/MeApi.md#apiv1mesessionsiddelete) | **DELETE** /api/v1/me/sessions/{id} | Sign one of your devices out (needs X-CSRF-Token)
+[*MeApi*](doc/MeApi.md) | [**apiV1MeTotpPost**](doc/MeApi.md#apiv1metotppost) | **POST** /api/v1/me/totp | Set up an authenticator: without a code it starts one, with its code it confirms it and gives the recovery codes (needs X-CSRF-Token)
 
 
 ## Documentation For Models
@@ -76,8 +89,35 @@ Class | Method | HTTP request | Description
  - [ErrorBody](doc/ErrorBody.md)
  - [HealthLive](doc/HealthLive.md)
  - [HealthReady](doc/HealthReady.md)
- - [SesWebhookAck](doc/SesWebhookAck.md)
- - [SnsEnvelope](doc/SnsEnvelope.md)
+ - [Me](doc/Me.md)
+ - [MeGreeting](doc/MeGreeting.md)
+ - [MeMembershipsInner](doc/MeMembershipsInner.md)
+ - [MePerson](doc/MePerson.md)
+ - [MePreview](doc/MePreview.md)
+ - [MePreviewSampleUser](doc/MePreviewSampleUser.md)
+ - [MeSchool](doc/MeSchool.md)
+ - [MeSchoolBrand](doc/MeSchoolBrand.md)
+ - [MeSupport](doc/MeSupport.md)
+ - [MeUpdateInput](doc/MeUpdateInput.md)
+ - [OtpRequestInput](doc/OtpRequestInput.md)
+ - [OtpVerifyInput](doc/OtpVerifyInput.md)
+ - [OtpVerifyResult](doc/OtpVerifyResult.md)
+ - [OtpVerifyResultMembershipsInner](doc/OtpVerifyResultMembershipsInner.md)
+ - [PasswordForgotInput](doc/PasswordForgotInput.md)
+ - [PasswordResetInput](doc/PasswordResetInput.md)
+ - [PasswordSignInInput](doc/PasswordSignInInput.md)
+ - [RefreshInput](doc/RefreshInput.md)
+ - [SelectSchoolInput](doc/SelectSchoolInput.md)
+ - [SelectSchoolTokens](doc/SelectSchoolTokens.md)
+ - [SessionSummaryList](doc/SessionSummaryList.md)
+ - [SessionSummaryListItemsInner](doc/SessionSummaryListItemsInner.md)
+ - [SignInMembershipList](doc/SignInMembershipList.md)
+ - [SignInMembershipListItemsInner](doc/SignInMembershipListItemsInner.md)
+ - [SignInResult](doc/SignInResult.md)
+ - [TokenPair](doc/TokenPair.md)
+ - [TotpSetupInput](doc/TotpSetupInput.md)
+ - [TotpSetupResult](doc/TotpSetupResult.md)
+ - [TotpVerifyInput](doc/TotpVerifyInput.md)
 
 
 ## Documentation For Authorization

@@ -34,7 +34,7 @@ The public landing page (`design/landing.html`: product story, demo request and 
 
 The parent app is **one Quad app for every school**, "Quad – School & Family" in the App Store and Google Play. It is not white-labelled: it opens Quad-branded and shows the school's logo, colour and name after sign-in.
 
-Supporting design files: `design/index.html` (launcher), `design/brand.html` (logo guide), `design/brand/*.svg` (logo files), `design/circle.html` (the original Circle concept, for reference only; do not build it as a separate app).
+Supporting design files: `design/system.html` with `design/system/` (the app design system shared by all three apps; [03](03-design-system.md)), `design/index.html` (launcher), `design/brand.html` (logo guide), `design/brand/*.svg` (logo files), `design/circle.html` (the original Circle concept, for reference only; do not build it as a separate app).
 
 ## Feature map
 

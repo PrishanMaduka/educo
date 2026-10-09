@@ -4,7 +4,7 @@ import { ZodError } from 'zod';
 import { errorForLog } from '../observability/logger';
 import { NO_OP_REPORTER } from '../observability/sentry';
 
-import { AppError, DEFAULT_MESSAGES, RateLimitedError } from './errors';
+import { AppError, DEFAULT_MESSAGES, RateLimitedError, UnavailableError } from './errors';
 import { fieldsFromZodError } from './zod.pipe';
 
 import type { ErrorReporter } from '../observability/sentry';
@@ -99,12 +99,16 @@ export function sendError(
   reporter: ErrorReporter = NO_OP_REPORTER,
 ): void {
   const response = toErrorResponse(error);
-  if (response.status >= 500) {
+  // A known outage (503) is logged where it is detected, with its metric; it is not a bug.
+  if (response.status >= 500 && !(error instanceof UnavailableError)) {
     logger.error({ error: errorForLog(error) }, 'Request failed with an unexpected error');
     reporter.capture(error);
   }
   if (error instanceof RateLimitedError) {
     void reply.header('retry-after', String(error.retryAfterSeconds));
+  }
+  if (error instanceof UnavailableError) {
+    void reply.header('retry-after', '30');
   }
   void reply.status(response.status).send(response.body);
 }

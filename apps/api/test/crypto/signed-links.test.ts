@@ -265,3 +265,44 @@ describe('SignedLinks', () => {
     );
   });
 });
+
+describe('SignedLinks.inspectLink (does not use up a single-use link)', () => {
+  it('returns the payload of a good link without recording its nonce', () => {
+    const { consume, links: signer } = links();
+    const token = signer.signLink({ purpose: 'password_reset', tid: null, sub: SUBJECT }, NOW);
+    expect(signer.inspectLink(token, 'password_reset', NOW)).toMatchObject({
+      purpose: 'password_reset',
+      tid: null,
+      sub: SUBJECT,
+    });
+    expect(consume).not.toHaveBeenCalled();
+  });
+
+  it('leaves the link usable: verifyLink still accepts it once afterwards', async () => {
+    const { links: signer } = links();
+    const token = signer.signLink({ purpose: 'password_reset', tid: null, sub: SUBJECT }, NOW);
+    signer.inspectLink(token, 'password_reset', NOW);
+    signer.inspectLink(token, 'password_reset', NOW);
+    await expect(signer.verifyLink(token, 'password_reset', NOW)).resolves.toMatchObject({
+      sub: SUBJECT,
+    });
+    await expectInvalidLink(signer.verifyLink(token, 'password_reset', NOW));
+  });
+
+  it('refuses a changed, wrongly signed, wrong-purpose or expired link with invalid_link', () => {
+    const { links: signer } = links();
+    const token = signer.signLink({ purpose: 'password_reset', tid: null, sub: SUBJECT }, NOW);
+    const [segment, mac] = token.split('.');
+    const flipped = `${segment?.slice(0, -2) ?? ''}${segment?.endsWith('A') === true ? 'B' : 'A'}${segment?.slice(-1) ?? ''}.${mac ?? ''}`;
+    const later = new Date(NOW.getTime() + 30 * MINUTE_MS);
+    for (const [candidate, purpose, at] of [
+      [flipped, 'password_reset', NOW],
+      [forge({ purpose: 'password_reset' }, SESSION_SECRET), 'password_reset', NOW],
+      [token, 'staff_invite', NOW],
+      [token, 'password_reset', later],
+      ['not-a-token', 'password_reset', NOW],
+    ] as const) {
+      expect(() => signer.inspectLink(candidate, purpose, at)).toThrow(InvalidLinkError);
+    }
+  });
+});

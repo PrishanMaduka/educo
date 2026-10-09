@@ -1,6 +1,7 @@
 import { Body, Controller, HttpCode, Post } from '@nestjs/common';
 
 import { ValidationError } from '../../common/errors';
+import { Public } from '../../common/guards/public.decorator';
 
 import { SesWebhookService } from './ses-webhook.service';
 
@@ -25,12 +26,14 @@ class SnsJsonBodyPipe implements PipeTransform<unknown, unknown> {
 }
 
 // Public: no session and no @Can. The SNS topic and signature are the check, done in the
-// service before anything is fetched or written. M1's global guard must mark this route public.
+// service before anything is fetched or written. It is also the one route that accepts a
+// `text/plain` body (SNS sends JSON that way; createApp refuses it everywhere else).
 @Controller('webhooks')
 export class SesWebhookController {
   constructor(private readonly webhook: SesWebhookService) {}
 
   @Post('ses')
+  @Public()
   @HttpCode(200)
   receive(@Body(new SnsJsonBodyPipe()) body: unknown): Promise<SesWebhookAck> {
     return this.webhook.receive(body);

@@ -1,5 +1,5 @@
 // Writes the greeting assets from scenes.js: node design/brand/greeting/export.js
-// SVG scenes (light/dark), 24px icons, and PNG renders (1200×320 @1x and @2x) when Playwright is available.
+// SVG scenes (light/dark), 24px icons, and PNG renders (1200×320 @1x and @2x, transparent outside the drawing) when Playwright is available.
 const fs = require('fs'), path = require('path');
 const G = require('./scenes.js'), out = __dirname;
 const files = [];
@@ -13,6 +13,6 @@ console.log('wrote', files.join(', '));
   let chromium; try { ({chromium} = require(process.env.PW_PATH || 'playwright')); } catch (e) { console.log('Playwright not found: skipping PNG renders'); return; }
   const b = await chromium.launch(process.env.PW_CHROME ? {executablePath: process.env.PW_CHROME} : {});
   for (const scale of [1, 2]) { const pg = await (await b.newContext({viewport: {width: 1200, height: 320}, deviceScaleFactor: scale})).newPage();
-    for (const p of G.PERIODS) for (const t of ['light', 'dark']) { await pg.goto('file://' + path.join(out, `${p.k}-${t}.svg`)); await pg.screenshot({path: path.join(out, 'png', `${p.k}-${t}${scale === 2 ? '@2x' : ''}.png`)}); } }
+    for (const p of G.PERIODS) for (const t of ['light', 'dark']) { await pg.goto('file://' + path.join(out, `${p.k}-${t}.svg`)); await pg.screenshot({path: path.join(out, 'png', `${p.k}-${t}${scale === 2 ? '@2x' : ''}.png`), omitBackground: true}); } }
   await b.close(); console.log('wrote PNG renders to png/');
 })();

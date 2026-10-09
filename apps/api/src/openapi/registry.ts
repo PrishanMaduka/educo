@@ -2,13 +2,15 @@ import { OpenAPIRegistry, extendZodWithOpenApi } from '@asteasolutions/zod-to-op
 import { ErrorBodySchema } from '@quad/contracts';
 import { z } from 'zod';
 
+import { API_PREFIX } from '../common/api-prefix';
+
 import type { RouteConfig } from '@asteasolutions/zod-to-openapi';
 
 // Adds `.openapi()` to every Zod schema, including the ones packages/contracts already built.
 extendZodWithOpenApi(z);
 
-/** Every route is served under this prefix (spec 02, D15). */
-export const API_PREFIX = '/api/v1';
+/** Every route is served under this prefix (spec 02, D15); defined in `common/api-prefix`. */
+export { API_PREFIX };
 
 type Method = 'get' | 'post' | 'put' | 'patch' | 'delete';
 

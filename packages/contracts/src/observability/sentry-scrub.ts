@@ -1,4 +1,4 @@
-import { scrubTelemetryText, scrubTelemetryUrl } from './telemetry-scrub';
+import { dropPostgresErrorDetails, scrubTelemetryText, scrubTelemetryUrl } from './telemetry-scrub';
 
 /**
  * The parts of a Sentry event (`ErrorEvent` in `@sentry/core`) the scrubber reads. Structural, so
@@ -75,6 +75,7 @@ function removeAllBut(record: object, kept: (key: string) => boolean): void {
  *   so the body, cookies, query string and client address go;
  * - reduces the user to `{ id }` (or removes it when there is no id);
  * - deletes local variables from stack frames;
+ * - drops `detail` and `where` from any Postgres error in the event (row values, statement text);
  * - scrubs emails, phone numbers, credentials, query values and path tokens from every other
  *   string (messages, exception values, stack frames, breadcrumbs, extras, contexts, tags),
  *   except the ids in `contexts.trace` (`trace_id`, `span_id`, `parent_span_id`).
@@ -95,6 +96,7 @@ export function scrubSentryEvent<T extends ScrubbableEvent>(event: T): T {
   for (const value of exception?.values ?? []) {
     for (const frame of value.stacktrace?.frames ?? []) delete frame.vars;
   }
+  dropPostgresErrorDetails(event);
   scrubStrings(event, (key) => key === 'contexts');
   const contexts: unknown = Reflect.get(event, 'contexts');
   scrubStrings(contexts, (key) => key === 'trace');

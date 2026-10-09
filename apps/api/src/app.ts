@@ -1,15 +1,18 @@
 import 'reflect-metadata';
 
+import fastifyCookie from '@fastify/cookie';
 import { NestFactory } from '@nestjs/core';
 import { FastifyAdapter } from '@nestjs/platform-fastify';
 import { robotsTagFor } from '@quad/contracts/web-env';
 
 import { AppModule } from './app.module';
-import { AppErrorFilter } from './common/error.filter';
+import { AppErrorFilter, sendError } from './common/error.filter';
+import { UnsupportedMediaTypeError } from './common/errors';
+import { isNoStoreRoute } from './common/no-store';
 import { requestIdFrom, runWithRequestContext } from './common/request-context';
 import { PinoNestLogger, createLogger } from './observability/logger';
 import { API_ROUTES } from './openapi/document';
-import { routeBodyLimits } from './openapi/registry';
+import { API_PREFIX, routeBodyLimits } from './openapi/registry';
 
 import type { AppOverrides } from './app.module';
 import type { Config } from './config';
@@ -43,6 +46,10 @@ function trustHops(hops: number): false | ((address: string, hop: number) => boo
   return hops > 0 ? (_address, hop) => hop < hops : false;
 }
 
+/** The one route that takes a `text/plain` body: SNS posts its JSON that way (D28 follow-up). */
+const TEXT_PLAIN_ROUTE = `POST ${API_PREFIX}/webhooks/ses`;
+const TEXT_PLAIN = /^\s*text\/plain\s*(?:;|$)/i;
+
 /**
  * Builds and initialises the API (Nest on Fastify) with the `/api/v1` prefix, the request
  * context, request logging and the error mapping. Does not listen; `main.ts` does.
@@ -59,9 +66,13 @@ export async function createApp(
       requestIdFrom(request.headers['x-request-id']),
     requestIdHeader: false,
     trustProxy: trustHops(config.TRUST_PROXY_HOPS),
+    // Signed-link tokens travel in paths (`/auth/invites/:token`, Task 13): about 200 characters,
+    // over Fastify's default 100 (a 414). Twice the contracts' 2048 limit, so a longer token
+    // still reaches its schema and gets the usual 400 `validation`.
+    routerOptions: { maxParamLength: 4096 },
   });
   const app = await NestFactory.create<NestFastifyApplication>(
-    AppModule.forRoot(config, logger, options.overrides),
+    AppModule.forRoot(config, logger, options.overrides, options.reporter),
     adapter,
     { logger: new PinoNestLogger(logger), abortOnError: false },
   );
@@ -83,6 +94,25 @@ export async function createApp(
   fastify.addHook('onRequest', (request, reply, done) => {
     void reply.header('x-request-id', request.id);
     runWithRequestContext(request.id, done);
+  });
+  // A cross-site form can post `text/plain` without a CORS preflight, so with cookie sessions
+  // it is refused before the body is read, everywhere but the SES webhook (D28 follow-up).
+  fastify.addHook('onRequest', (request, reply, done) => {
+    const contentType = request.headers['content-type'];
+    const route = `${request.method} ${request.routeOptions.url ?? ''}`;
+    if (contentType !== undefined && TEXT_PLAIN.test(contentType) && route !== TEXT_PLAIN_ROUTE) {
+      sendError(new UnsupportedMediaTypeError(), reply, logger, options.reporter);
+      return;
+    }
+    done();
+  });
+  // Sign-in answers, TOTP secrets and recovery codes are never stored by a browser or a proxy
+  // (Task 10 fix round 1, M3): every /auth, /platform/auth and /me/totp response, errors included.
+  fastify.addHook('onSend', (request, reply, payload, done) => {
+    if (isNoStoreRoute(request.routeOptions.url)) {
+      void reply.header('cache-control', 'no-store');
+    }
+    done(null, payload);
   });
   // Staging must not be indexed (spec 20); onSend also covers error and 404 responses.
   const robotsTag = robotsTagFor(config.APP_ENV, 'api');
@@ -106,6 +136,8 @@ export async function createApp(
     done();
   });
 
+  // Session and CSRF cookies (spec 05, D32); none are signed: the session value is opaque.
+  await app.register(fastifyCookie);
   options.beforeInit?.(fastify);
   await app.init();
   return app;

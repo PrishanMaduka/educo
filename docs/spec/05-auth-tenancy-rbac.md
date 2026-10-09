@@ -5,14 +5,13 @@
 ### Staff portal (`quad-edu.com`)
 References: the **sign-in dialog on `design/landing.html`** is the primary reference for the flow and copy (Quad-branded, since the school is not known yet). The sign-in screen in `design/admin.html` is the reference for the standalone `/sign-in` page, which runs the same steps (used for deep links, expired sessions and sign-out).
 
-Every school's staff use the same address. Sign-in is **identifier first**:
-1. **Work email.** `POST /auth/identify {email}` always answers the same shape, whether or not the account exists (no account enumeration): `{methods: ['password'] | ['sso:google'|'sso:microsoft', 'password']}`. SSO buttons appear when the email's domain matches the `sso_domain` of a school that has SSO on. Rate-limited per IP and per email.
-2. **Single sign-on.** OIDC authorization code flow with PKCE. The ID token email must match the school's `sso_domain` and an active staff membership. The first SSO sign-in links an `identities` row to the account.
-3. **Email and password.** Work email, then password (with Show/Hide), then "Keep me signed in on this device". Passwords are Argon2id with at least 10 characters (the school can set more) and are checked against a breached-password list (k-anonymity API).
-4. **Two-step.** Required when the rule of any school the person belongs to covers their role there (the strictest rule wins, because one account opens all of them). TOTP (authenticator app) with 10 recovery codes. "Trust this device for 30 days" is optional.
-5. **Choose a school.** The API reads the account's active staff memberships (`auth_memberships`). None: "This account isn't linked to a school yet. Ask your school's admin to invite you." One: open it. Several: a list of schools (logo, name, your role) and "Remember my choice on this device". The session stores `active_tenant_id`; the staff portal then loads that school's branding.
-6. **Forgot password.** A signed email link (see [Tenant-less entry points](#tenant-less-entry-points)) valid for 30 minutes, single use; all sessions are revoked on reset.
-7. **Lockout.** Five failures in 15 minutes lock the account for 15 minutes and email the user.
+Every school's staff use the same address, and the only way to sign in is the work email and a password (D37: there is no Google or Microsoft sign-in). Sign-in is **identifier first**:
+1. **Work email.** The dialog asks for the work email first; the next step is always the password, so nothing about the account is looked up yet (no account enumeration).
+2. **Password.** The password (with Show/Hide), then "Keep me signed in on this device". `POST /auth/password` answers a wrong password, an unknown email and a disabled account the same way. Passwords are Argon2id with at least 10 characters (the school can set more) and are checked against a breached-password list (k-anonymity API).
+3. **Two-step.** Required when the rule of any school the person belongs to covers their role there (the strictest rule wins, because one account opens all of them). TOTP (authenticator app) with 10 recovery codes. "Trust this device for 30 days" is optional.
+4. **Choose a school.** The API reads the account's active staff memberships (`auth_memberships`). None: "This account isn't linked to a school yet. Ask your school's admin to invite you." One: open it. Several: a list of schools (logo, name, your role) and "Remember my choice on this device". The session stores `active_tenant_id`; the staff portal then loads that school's branding.
+5. **Forgot password.** A signed email link (see [Tenant-less entry points](#tenant-less-entry-points)) valid for 30 minutes, single use; all sessions are revoked on reset.
+6. **Lockout.** Five failures in 15 minutes lock the account for 15 minutes and email the user.
 
 Switching school (profile menu → the other schools) re-checks the membership, rotates the session id and reloads `/app`. Signing out ends the session for every school.
 
@@ -23,17 +22,16 @@ Session: an opaque session id in a `__Host-` cookie (HttpOnly, Secure, SameSite=
 ### Platform console (`console.quad-edu.com`)
 Quad staff only. Separate cookie, session rows with `kind='console'`, an idle timeout of 8 hours, and every sign-in (and failure) written to `platform_audit`. Console sign-in routes live under `/api/v1/platform/auth/*` on the console host (the ALB sends only `/api/v1/platform/*` and `/socket.io/*` from that host to the API, and WAF rate-limits them as sign-in paths).
 
-- **Production:** Google Workspace SSO for `@quad-edu.com` accounts that exist in `platform_users` with status active, then mandatory TOTP. There is no password sign-in.
-- **Local, dev and staging:** SSO as above, plus email + password + TOTP for seeded platform users (for example `owner@quad.local`), enabled only by the environment flag `CONSOLE_PASSWORD_LOGIN=true`. The API refuses to boot in production if the flag is set.
-- New platform users are invited from **Platform users** (see [07](07-platform-console.md#platform-users)); they set up TOTP on first sign-in.
+- **Every environment:** email + password, then mandatory TOTP, for accounts that exist in `platform_users` with status active (seeded locally as `owner@quad.local`). There is no Google Workspace or other single sign-on (D37).
+- New platform users are invited from **Platform users** (see [07](07-platform-console.md#platform-users)); the invite link lets them choose a password, and they set up TOTP on first sign-in.
 
 ### Parent app
 Reference: the sign-in and lock screens in `design/parent.html` (the welcome screen is Quad-branded in production, see [09](09-parent-app.md#start-up)).
 
 1. **Welcome:** "Sign in" and "I have an invite code".
-2. **Phone or email.** A mobile number with a country-code picker (Sri Lanka `+94` by default; the list covers the countries Quad serves), validated per country (9 digits after +94, without the leading 0). "Use email instead" switches to an email address. Copy: "We'll send you a 6-digit code. Use the mobile number the school has on file for you."
-3. **OTP.** The API sends a 6-digit code by SMS (or email), valid for 10 minutes. Rate limit: 3 per 15 minutes per number or address, 10 per day. Resend after 30 s. Email OTP is also offered when the guardian has an email and no SMS is delivered within 60 s. The response is the same whether or not the number is known.
-4. **Found you.** On a valid OTP the API finds the account with that phone (or email) and returns its guardian and relative memberships (`auth_memberships`). The app shows "You're signed in. Welcome, {first name}. We found {n} children at {school}." with the children's avatars. With several schools it shows the school picker first. With none: "We couldn't find you. Ask your school to add this number."
+2. **Phone or email.** A mobile number with its country code, validated per country (9 digits after +94, without the leading 0). Only Sri Lanka (`+94`) is accepted for now (OQ12, product owner); the country list is data, and more countries are added only by owner decision (D35). "Use email instead" switches to an email address. Copy: "We'll send you a 6-digit code. Use the mobile number the school has on file for you."
+3. **OTP.** The API sends a 6-digit code by SMS (or email), valid for 10 minutes, only to a number or address that belongs to a guardian or relative account (D39): an unknown number gets the same answer and no SMS. Rate limit: 3 per 15 minutes per number or address, 10 per day. Resend after 30 s. Email OTP is also offered when the guardian has an email and no SMS is delivered within 60 s. The response is the same whether or not the number is known. After 60 s without a code the app says "Didn't get a code? Use the mobile number your school has on file."
+4. **Found you.** On a valid OTP the API finds the account with that phone (or email) and returns its guardian and relative memberships (`auth_memberships`). The app shows "You're signed in. Welcome, {first name}. We found {n} children at {school}." with the children's avatars. With several schools it shows the school picker first. An unknown number never gets a code, so a code it guesses is simply wrong (D39); the `not_found` answer remains only for an account whose parent memberships ended after its code was sent.
 5. **Tokens:** an access JWT (15 minutes; claims: sub, tid, kind, roles hash) and a rotating refresh token (60 days) kept in `flutter_secure_storage`. Reusing an old refresh token revokes the whole token family.
 6. **Face ID / fingerprint** (`local_auth`): "Unlock with Face ID?" (Turn on / Not now), then "Allow notifications?". Biometric unlock then gates opening the app, re-opening it after 5 minutes in the background, and approving payments. "Use passcode" falls back to the device passcode.
 7. Signing out on one device revokes that device's refresh family and push token, and wipes the local cache.
@@ -42,8 +40,8 @@ Reference: the sign-in and lock screens in `design/parent.html` (the welcome scr
 
 ### Account edge cases
 - **Invite to an existing account.** A staff invite or guardian invite to an email or phone that already has an account adds a membership to that account; it never creates a second account or asks for a new password. The person accepts with the signed link while signed in, or after signing in, and the school appears in their picker.
-- **One parent, two schools.** Two schools that each add the same phone number reach the same account. The app shows the school picker at sign-in and **Switch school** in More. Each school sees only its own membership and children.
-- **Phone or email already in use.** Changing a membership's phone or email (by the school, by import, or through a parent's approved contact change) to a value that belongs to another account is refused with "This number is already used by another Quad account. Ask Quad support to merge them." Support merges accounts in the console with a logged reason. A parent's own contact changes go to the school for review first (see [09](09-parent-app.md#more)).
+- **One parent, two schools.** Two schools that each add the same phone number reach the same account. The app shows the school picker at sign-in and **Switch school** in Profile. Each school sees only its own membership and children.
+- **Phone or email already in use.** Changing a membership's phone or email (by the school, by import, or through a parent's approved contact change) to a value that belongs to another account is refused with "This number is already used by another Quad account. Ask Quad support to merge them." Support merges accounts in the console with a logged reason. A parent's own contact changes go to the school for review first (see [09](09-parent-app.md#profile)).
 - **Changing your own sign-in.** Changing the account's phone or email needs an OTP to the new value and the current two-step method, and emails the old address.
 - **Leaving a school.** Deactivating a membership revokes that school's sessions and tokens; the account and other memberships stay.
 
@@ -52,7 +50,7 @@ The tenant comes from the session or token (the membership chosen at sign-in). T
 
 | Entry point | How the tenant is found |
 |---|---|
-| Sign-in | `auth_memberships(account_id)` after the password, SSO or OTP step; the chosen membership goes on the session |
+| Sign-in | `auth_memberships(account_id)` after the password or OTP step; the chosen membership goes on the session |
 | Signed links: password reset, staff invite, guardian invite, relative invite, support session, calendar feed, links in emails | A token `base64url(payload).base64url(HMAC-SHA256(payload, LINK_SIGNING_SECRET))` with payload `{purpose, tid, sub, exp, nonce}`. The server checks the signature, purpose and expiry; single-use purposes record the nonce in `signed_token_uses`. Only then is `tid` used. A token never grants a session by itself; the person still signs in (except the support session, which is created by the console) |
 | Payment webhooks (PayHere, Stripe) | Verify the gateway signature first, then `tenant_by_gateway_account(provider, account_id)` |
 | Public admissions enquiry form | `tenant_by_embed_key(key)`; rate-limited and captcha-checked |

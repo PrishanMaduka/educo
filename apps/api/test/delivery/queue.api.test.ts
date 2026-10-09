@@ -134,6 +134,27 @@ describe('queued email and SMS on the compose Redis', () => {
     expect(job?.data).toMatchObject({ to: '+94770000001', template: 'otp', tenantId: null });
   });
 
+  it('removes a failed sign-in code job at once: no code or number stays in Redis', async () => {
+    const smsId = `otp.${randomBytes(6).toString('hex')}`;
+    const emailId = `otp.${randomBytes(6).toString('hex')}`;
+    await inSchool(null, async () => {
+      await delivery.queueSms({
+        jobId: smsId,
+        to: '+94770000001',
+        template: 'otp',
+        params: { code: '482913', minutes: 10 },
+      });
+      await delivery.queueEmail({
+        jobId: emailId,
+        to: 'dilhani@example.test',
+        template: 'email_otp',
+        params: { code: '482913', minutes: 10 },
+      });
+    });
+    expect((await texts.getJob(smsId))?.opts.removeOnFail).toBe(true);
+    expect((await emails.getJob(emailId))?.opts.removeOnFail).toBe(true);
+  });
+
   it('keeps a failed job (whose params hold a link or code) for a day at most', async () => {
     const jobId = `password-reset.keep-${randomBytes(6).toString('hex')}`;
     await inSchool(null, () =>

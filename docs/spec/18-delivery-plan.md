@@ -71,9 +71,9 @@ To run a milestone in Claude Code, type `/build-milestone M3` (ids with a letter
 - Global `accounts` and per-school memberships (`users`), the `auth_memberships` security-definer function, and RLS policies with `FORCE ROW LEVEL SECURITY` on every tenant table, with the migration test from M0 covering them all.
 - The tenant-less entry point framework (D16): signed-link tokens (HMAC-SHA256, purpose, tid, subject, expiry, nonce, single use) used by password reset and staff invites; `tenant_by_embed_key` and `tenant_by_gateway_account` stubs with tests.
 - Staff sign-in:
-  - identifier-first sign-in at `quad-edu.com` (`/sign-in` page and a placeholder landing with **Sign in**; the full landing page is M1b), password, TOTP, Google and Microsoft OIDC (mocked in tests), forgot password, lockout;
+  - identifier-first sign-in at `quad-edu.com` (`/sign-in` page and a placeholder landing with **Sign in**; the full landing page is M1b), work email and password, TOTP, forgot password, lockout; no Google or Microsoft sign-in (D37);
   - **Choose a school** for accounts with several memberships, Switch school in the profile menu, and the school's branding applied after sign-in.
-- Console sign-in: Google Workspace + TOTP, and email + password + TOTP when `CONSOLE_PASSWORD_LOGIN=true` (local and staging only, D22).
+- Console sign-in: email + password + TOTP in every environment (D37).
 - Parent OTP sign-in, JWT + refresh rotation, biometric unlock (Flutter, `local_auth`).
 - Roles, the permission matrix, sensitive keys, `@Can` and `@Module` guards, `/me/permissions`, and **Preview a role** (read-only role preview for school admins).
 - School side: **Settings → Users & roles** (invite by email, change role, remind two-step, reset password, sign out everywhere, deactivate; no "sign in as", which is console-only), the **School settings** screen with its General and Sign-in sections and the `school_settings` table (other sections arrive with their features), and **Settings → Audit** (`GET /audit`, filterable).
@@ -84,10 +84,10 @@ To run a milestone in Claude Code, type `/build-milestone M3` (ids with a letter
 **Accept:**
 - Journeys 17, 18, 19, 42, 43 and 50 (signed links and the enquiry key; the webhook part from M7) in [17](17-testing-quality.md#cross-app-journeys-must-stay-green-from-the-milestone-that-introduces-them).
 - Sign-in works in all three apps, all from one domain.
-- `/auth/identify` returns the same response for unknown emails; `select-school` refuses a tenant the account is not a member of; a tampered or reused signed link is refused.
+- `/auth/password` answers an unknown email the same way as a wrong password; `select-school` refuses a tenant the account is not a member of; a tampered or reused signed link is refused.
 - Cross-tenant and wrong-role tests fail with 403/404; the app role cannot read another tenant's rows even with a raw query.
 - The support banner shows in support view; safeguarding routes refuse support sessions.
-- `CONSOLE_PASSWORD_LOGIN=true` is refused at boot when `APP_ENV=production`.
+- `DEV_FIXED_OTP` is refused at boot when `APP_ENV=production`.
 
 **Prompt:**
 > Build milestone M1 from docs/spec/18-delivery-plan.md (read 02 Tenancy, 04, 05, 06, 08 Users & roles and School settings, and 16). Implement every sign-in flow, sessions, signed-link tokens, RBAC with the permission matrix, plan and module guards, FORCE RLS on all tenant tables, Settings → Users & roles, the School settings screen shell, the Audit view, the audit logs and support access. Write API integration tests for every flow, including cross-tenant and wrong-role denials, and add journeys 17, 18, 19, 42 and 43. Run pnpm verify.
@@ -192,10 +192,11 @@ To run a milestone in Claude Code, type `/build-milestone M3` (ids with a letter
   - Home (without the day ring, heads-up row and Ask Quad) from `/family/home`;
   - child switcher with swipe;
   - Attendance (with Report an absence), Timetable, Homework, Results, Rewards, Children profile;
-  - Messages (with mark read, archive and mute), More, staff directory, contact-details change (with the staff review queue), notification settings (seven categories and the SMS backup flag), Help;
+  - Messages (opened from the Today header and Profile; with mark read, archive and mute), Profile (formerly More), staff directory, contact-details change (with the staff review queue), notification settings (seven categories and the SMS backup flag), Help;
   - offline cache encrypted and wiped on sign-out and school switch; `GET /app/config` with force update; the full deep-link table on `quad://` and `https://quad-edu.com/p/…`.
 - Staff side: the Inbox (with reply templates, `message_templates`), Broadcasts (preview, SMS cost estimate, urgent flag), and the "Changes from parents" queue (contact changes now; pickup approvals join it in M11).
 - FCM push with deep links (`go_router`) and the in-app notification list. Realtime connection in all apps; the Flutter Socket.IO client uses `transports: ['websocket']` (ruling R-sticky, D28).
+- Before any real SMS provider is enabled (`SMS_PROVIDER=live`): the global and per-school daily SMS budget, with alerts at 80% and a circuit breaker that pauses sending when a cap is hit (spec 16, Parent OTP abuse). Sign-in codes are the first SMS that would spend it (Task 9 review).
 
 **Accept:**
 - Journeys 4 (push), 30, 31, 32 and 45.

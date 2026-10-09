@@ -5,7 +5,7 @@ Ask Quad is an assistant in all three apps. People ask in plain English; it answ
 ## User experience (all apps)
 - Entry points:
   - Staff and console: the top-bar button, the floating pill, and the `/` key (when focus is not in a field; Ctrl K stays search).
-  - Parent app: the round floating button on Home, and a row in More.
+  - Parent app: a round navy floating button just above the tab bar on the four tab pages, a row in Profile, and the `/` key where a keyboard is attached (D34, D35, D36).
   - Context buttons: **Write to parents** on early-warning cards and **Draft email** on school signals open Ask Quad with a prefilled question.
 - Panel:
   - Staff and console: a right-side sheet 420 px wide; on phones, a bottom sheet.

@@ -71,7 +71,6 @@ describe('Review Focus #4 (account tables): quad_app sees only the current accou
     expect(ACCOUNT_TABLES).toEqual({
       accounts: { key: 'id', privileges: ['SELECT', 'INSERT', 'UPDATE'] },
       credentials: { key: 'account_id', privileges: ['SELECT', 'INSERT', 'UPDATE'] },
-      identities: { key: 'account_id', privileges: ['SELECT', 'INSERT'] },
       sessions: { key: 'account_id', privileges: ['SELECT', 'INSERT', 'UPDATE'] },
       trusted_devices: { key: 'account_id', privileges: ['SELECT', 'INSERT', 'UPDATE'] },
     });
@@ -230,22 +229,23 @@ describe('account table constraints', () => {
   });
 });
 
-describe('otp_challenges (open table)', () => {
-  it('quad_app can create, read, update and delete challenges without an account', async () => {
-    const { app } = testDb();
-    const id = uuidv7();
-    await app.query(
-      `insert into otp_challenges (id, subject_hash, channel, code_hash, purpose, expires_at)
-       values ($1, $2, 'sms', $3, 'sign_in', now() + interval '10 minutes')`,
-      [id, randomTokenHash(), randomTokenHash()],
+describe('sign-in methods (0010; only the password since 0012, D37)', () => {
+  it('records how a session signed in, and takes only a sign-in method', async () => {
+    const session = await insertSession(withAccount, accountA.id);
+    const setMethod = (method: string) =>
+      testDb().platform.query('update sessions set sign_in_method = $2 where id = $1', [
+        session.id,
+        method,
+      ]);
+    await setMethod('password');
+    const { rows } = await testDb().platform.query<{ sign_in_method: string }>(
+      'select sign_in_method from sessions where id = $1',
+      [session.id],
     );
-    await app.query('update otp_challenges set attempts = attempts + 1 where id = $1', [id]);
-    const { rows } = await app.query<{ attempts: number }>(
-      'select attempts from otp_challenges where id = $1',
-      [id],
-    );
-    expect(rows).toEqual([{ attempts: 1 }]);
-    const removed = await app.query('delete from otp_challenges where id = $1', [id]);
-    expect(removed.rowCount).toBe(1);
+    expect(rows).toEqual([{ sign_in_method: 'password' }]);
+    for (const method of ['sso:google', 'sso:microsoft', 'carrier pigeon']) {
+      const refused: unknown = await setMethod(method).catch((caught: unknown) => caught);
+      expect(postgresCause(refused)).toMatchObject({ code: '22P02' });
+    }
   });
 });

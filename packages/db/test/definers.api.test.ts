@@ -46,7 +46,6 @@ const DEFINERS = [
   'auth_memberships(uuid)',
   'account_by_identifier(citext, text)',
   'session_by_token(bytea)',
-  'sso_methods_for_domain(citext)',
   'auth_sign_in_rules(uuid)',
   'current_tenant_profile()',
   'update_current_tenant_name(text)',
@@ -59,6 +58,11 @@ const DEFINERS = [
   'end_support_session(bytea)',
   'tenant_by_embed_key(text)',
   'tenant_by_gateway_account(text, text)',
+  'current_support_visit(uuid)',
+  'refresh_family(uuid)',
+  'clear_member_preview(uuid)',
+  'member_account_email(uuid)',
+  'member_has_other_memberships(uuid)',
 ] as const;
 
 /** The tables `definer_read` opens to `quad_owner` (and only to it). */
@@ -83,6 +87,8 @@ let deactivatedSchool: Tenant;
 let person: Account;
 let personInA: User;
 let personInB: User;
+/** The same person as a guardian in `guardianSchool`. */
+let personAsGuardian: User;
 let adminRoleA: Role;
 let teacherRoleA: Role;
 /** A second member of A, with no credentials row. */
@@ -140,15 +146,11 @@ beforeAll(async () => {
   deactivatedSchool = await insertTenant(withPlatform);
 
   await testDb().platform.query(
-    `insert into tenant_security (tenant_id, two_step, sso_google, sso_domain, password_min_length, session_hours)
-     values ($1, 'admins', true, 'colombo.test', 12, 8),
-            ($2, 'all', false, null, 14, 12),
-            ($3, 'off', false, 'gone.test', 10, 12)`,
+    `insert into tenant_security (tenant_id, two_step, password_min_length, session_hours)
+     values ($1, 'admins', 12, 8),
+            ($2, 'all', 14, 12),
+            ($3, 'off', 10, 12)`,
     [schoolA.id, schoolB.id, deleted.id],
-  );
-  await testDb().platform.query(
-    `update tenant_security set sso_microsoft = true where tenant_id = $1`,
-    [deleted.id],
   );
   await testDb().platform.query(
     `insert into tenant_branding (tenant_id, brand_color) values ($1, '#0f766e')`,
@@ -165,7 +167,9 @@ beforeAll(async () => {
   personInB = await insertUser(withTenant, schoolB.id, person.id);
   await insertUser(withTenant, suspended.id, person.id);
   await insertUser(withTenant, deleted.id, person.id);
-  await insertUser(withTenant, guardianSchool.id, person.id, { kind: 'guardian' });
+  personAsGuardian = await insertUser(withTenant, guardianSchool.id, person.id, {
+    kind: 'guardian',
+  });
   await insertUser(withTenant, deactivatedSchool.id, person.id, { status: 'deactivated' });
   adminRoleA = await insertRole(withTenant, schoolA.id, { key: 'admin', name: 'School admin' });
   teacherRoleA = await insertRole(withTenant, schoolA.id, { key: 'teacher', name: 'Teacher' });
@@ -376,22 +380,37 @@ describe('account_by_identifier', () => {
   });
 });
 
-describe('sso_methods_for_domain', () => {
-  it("returns a live school's providers for its domain, and no tenant id", async () => {
-    await expect(definers.ssoMethodsForDomain('COLOMBO.test')).resolves.toEqual({
-      google: true,
-      microsoft: false,
-    });
-    const { fields } = await testDb().app.query('select * from sso_methods_for_domain($1)', [
-      'colombo.test',
-    ]);
-    expect(fields.map((field) => field.name)).toEqual(['google', 'microsoft']);
+describe('no Google or Microsoft sign-in is left in the database (D37, 0012)', () => {
+  it('has no sso_methods_for_domain lookup', async () => {
+    const { rows } = await testDb().owner.query<{ found: string | null }>(
+      `select to_regprocedure('sso_methods_for_domain(citext)')::text as found`,
+    );
+    expect(rows).toEqual([{ found: null }]);
   });
 
-  it('returns no providers for an unknown domain or a deleted school', async () => {
-    const none = { google: false, microsoft: false };
-    await expect(definers.ssoMethodsForDomain('unknown.test')).resolves.toEqual(none);
-    await expect(definers.ssoMethodsForDomain('gone.test')).resolves.toEqual(none);
+  it('has no identities table and no sso_provider type', async () => {
+    const { rows } = await testDb().owner.query<{ table: string | null; type: string | null }>(
+      `select to_regclass('public.identities')::text as table,
+              to_regtype('public.sso_provider')::text as type`,
+    );
+    expect(rows).toEqual([{ table: null, type: null }]);
+  });
+
+  it('keeps no SSO settings in tenant_security', async () => {
+    const { rows } = await testDb().owner.query<{ name: string }>(
+      `select attname as name from pg_attribute
+       where attrelid = 'public.tenant_security'::regclass and attnum > 0 and not attisdropped
+         and attname like 'sso%'`,
+    );
+    expect(rows).toEqual([]);
+  });
+
+  it('records only the password as a staff sign-in method', async () => {
+    const { rows } = await testDb().owner.query<{ label: string }>(
+      `select enumlabel as label from pg_enum
+       where enumtypid = 'public.sign_in_method'::regtype order by enumsortorder`,
+    );
+    expect(rows).toEqual([{ label: 'password' }]);
   });
 });
 
@@ -414,6 +433,55 @@ describe('auth_sign_in_rules', () => {
     });
     // No tenant_security row: the table defaults (two-step off, 10 characters).
     expect(byTenant.get(suspended.id)).toMatchObject({ twoStep: 'off', passwordMinLength: 10 });
+  });
+});
+
+describe('refresh_family (a parent refresh token names its family, Task 9)', () => {
+  async function family(overrides: Parameters<typeof insertSession>[2] = {}) {
+    return insertSession(withAccount, person.id, {
+      kind: 'mobile',
+      stage: 'active',
+      tokenHash: null,
+      activeTenantId: guardianSchool.id,
+      activeUserId: personAsGuardian.id,
+      refreshHash: randomTokenHash(),
+      ...overrides,
+    });
+  }
+
+  it("returns only the live mobile family's account and school", async () => {
+    const live = await family();
+    const { rows, fields } = await testDb().app.query('select * from refresh_family($1)', [
+      live.id,
+    ]);
+    expect(fields.map((field) => field.name)).toEqual(['account_id', 'tenant_id']);
+    expect(rows).toEqual([{ account_id: person.id, tenant_id: guardianSchool.id }]);
+    await expect(definers.refreshFamily(live.id)).resolves.toEqual({
+      accountId: person.id,
+      tenantId: guardianSchool.id,
+    });
+  });
+
+  it('finds nothing for a revoked family, a family still choosing a school, or an unknown id', async () => {
+    const revoked = await family({ revokedAt: new Date() });
+    const choosing = await family({
+      stage: 'choose_school',
+      activeTenantId: null,
+      activeUserId: null,
+      refreshHash: null,
+    });
+    await expect(definers.refreshFamily(revoked.id)).resolves.toBeNull();
+    await expect(definers.refreshFamily(choosing.id)).resolves.toBeNull();
+    await expect(definers.refreshFamily(uuidv7())).resolves.toBeNull();
+  });
+
+  it("never finds a staff browser session, even another school's", async () => {
+    const web = await insertSession(withAccount, outsider.id, {
+      stage: 'active',
+      activeTenantId: schoolB.id,
+      activeUserId: outsiderInB.id,
+    });
+    await expect(definers.refreshFamily(web.id)).resolves.toBeNull();
   });
 });
 
@@ -588,9 +656,6 @@ describe('current_tenant_profile', () => {
       logoFileId: null,
       modules: ['admissions', 'sis'],
       twoStep: 'admins',
-      ssoGoogle: true,
-      ssoMicrosoft: false,
-      ssoDomain: 'colombo.test',
       passwordMinLength: 12,
       sessionHours: 8,
       ipAllowlist: [],
@@ -602,6 +667,26 @@ describe('current_tenant_profile', () => {
   it('returns no row without app.tenant_id', async () => {
     const { rows } = await testDb().app.query('select * from current_tenant_profile()');
     expect(rows).toEqual([]);
+  });
+
+  it('returns no SSO columns (D37, 0012)', async () => {
+    const { fields } = await testDb().app.query('select * from current_tenant_profile()');
+    expect(fields.map((field) => field.name)).toEqual([
+      'name',
+      'short_name',
+      'status',
+      'suspend_reason',
+      'time_zone',
+      'locale',
+      'currency',
+      'brand_color',
+      'logo_file_id',
+      'modules',
+      'two_step',
+      'password_min_length',
+      'session_hours',
+      'ip_allowlist',
+    ]);
   });
 });
 
@@ -715,6 +800,34 @@ describe('record_support_audit', () => {
   });
 });
 
+describe('current_support_visit', () => {
+  it('names the Quad staff member of an active visit to the current school (the support banner)', async () => {
+    const support = await insertSupportSession(withPlatform, quadStaff.id, schoolA.id);
+    await expect(
+      withTenant(schoolA.id, (tx) => definers.currentSupportVisit(tx, support.id)),
+    ).resolves.toEqual({ platformUserName: quadStaff.name });
+  });
+
+  it('finds nothing for a visit to another school, an ended or expired visit, or without a school', async () => {
+    const other = await insertSupportSession(withPlatform, quadStaff.id, schoolB.id);
+    const ended = await insertSupportSession(withPlatform, quadStaff.id, schoolA.id, {
+      endedAt: new Date(),
+    });
+    const expired = await insertSupportSession(withPlatform, quadStaff.id, schoolA.id, {
+      expiresAt: new Date(Date.now() - 1000),
+    });
+    for (const visit of [other, ended, expired]) {
+      await expect(
+        withTenant(schoolA.id, (tx) => definers.currentSupportVisit(tx, visit.id)),
+      ).resolves.toBeNull();
+    }
+    const { rows } = await testDb().app.query(`select * from current_support_visit($1)`, [
+      other.id,
+    ]);
+    expect(rows).toEqual([]);
+  });
+});
+
 describe('ensure_account_for_email', () => {
   it('refuses without app.tenant_id', async () => {
     const cause = await failure(
@@ -824,6 +937,143 @@ describe('revoke_member_sessions', () => {
     });
     await withTenant(schoolA.id, (tx) => definers.revokeMemberSessions(tx, outsiderInB.id));
     expect(await revokedById([session.id])).toEqual(new Map([[session.id, false]]));
+  });
+});
+
+describe("clear_member_preview (Task 13: a role change ends the member's role preview)", () => {
+  async function previewOf(sessionId: string) {
+    const rows = await platformRows<{
+      preview_role_id: string | null;
+      preview_sample_user_id: string | null;
+    }>('select preview_role_id, preview_sample_user_id from sessions where id = $1', [sessionId]);
+    return rows[0];
+  }
+
+  it("under A clears the member's previews in A only, and leaves B's", async () => {
+    const member = await insertAccount(withAccount);
+    const inA = await insertUser(withTenant, schoolA.id, member.id);
+    const inB = await insertUser(withTenant, schoolB.id, member.id);
+    const roleA = await insertRole(withTenant, schoolA.id);
+    const roleB = await insertRole(withTenant, schoolB.id);
+    const sessionA = await insertSession(withAccount, member.id, {
+      stage: 'active',
+      activeTenantId: schoolA.id,
+      activeUserId: inA.id,
+      previewRoleId: roleA.id,
+      previewSampleUserId: colleagueInA.id,
+    });
+    const sessionB = await insertSession(withAccount, member.id, {
+      stage: 'active',
+      activeTenantId: schoolB.id,
+      activeUserId: inB.id,
+      previewRoleId: roleB.id,
+    });
+
+    await withTenant(schoolA.id, (tx) => definers.clearMemberPreview(tx, inA.id));
+
+    expect(await previewOf(sessionA.id)).toEqual({
+      preview_role_id: null,
+      preview_sample_user_id: null,
+    });
+    expect(await previewOf(sessionB.id)).toEqual({
+      preview_role_id: roleB.id,
+      preview_sample_user_id: null,
+    });
+  });
+
+  it("does nothing under A for B's user id", async () => {
+    const role = await insertRole(withTenant, schoolB.id);
+    const session = await insertSession(withAccount, outsider.id, {
+      stage: 'active',
+      activeTenantId: schoolB.id,
+      activeUserId: outsiderInB.id,
+      previewRoleId: role.id,
+    });
+    await withTenant(schoolA.id, (tx) => definers.clearMemberPreview(tx, outsiderInB.id));
+    expect(await previewOf(session.id)).toMatchObject({ preview_role_id: role.id });
+  });
+
+  it('refuses without app.tenant_id', async () => {
+    const refused = await failure(
+      testDb().app.query('select clear_member_preview($1)', [personInA.id]),
+    );
+    expect(refused).toMatchObject({ code: '42501' });
+  });
+
+  it("leaves the caller's app.account_id as it was", async () => {
+    const value = await withTenant(schoolA.id, async (tx) => {
+      await tx.execute(sql`select set_config('app.account_id', ${person.id}, true)`);
+      await definers.clearMemberPreview(tx, colleagueInA.id);
+      const { rows } = await tx.execute<{ value: string }>(
+        sql`select current_setting('app.account_id', true) as value`,
+      );
+      return rows[0]?.value;
+    });
+    expect(value).toBe(person.id);
+  });
+});
+
+describe('member_account_email (Task 13 fix round 1, M2: where an admin reset is sent)', () => {
+  it("under A gives an A member's account email, and nothing for B's member", async () => {
+    const [mine, theirs] = await withTenant(schoolA.id, async (tx) => [
+      await definers.memberAccountEmail(tx, colleagueInA.id),
+      await definers.memberAccountEmail(tx, outsiderInB.id),
+    ]);
+    expect(mine).toBe(colleague.email);
+    expect(theirs).toBeNull();
+  });
+
+  it('refuses without app.tenant_id', async () => {
+    const refused = await failure(
+      testDb().app.query('select member_account_email($1)', [colleagueInA.id]),
+    );
+    expect(refused).toMatchObject({ code: '42501' });
+  });
+});
+
+describe('member_has_other_memberships (Task 13 fix round 1, I3: did this invite create the account?)', () => {
+  it('is true for an account with a membership in another school, of any kind or status', async () => {
+    const shared = await insertAccount(withAccount);
+    const inA = await insertUser(withTenant, schoolA.id, shared.id, { status: 'invited' });
+    await insertUser(withTenant, schoolB.id, shared.id, {
+      kind: 'guardian',
+      status: 'deactivated',
+    });
+    const only = await insertAccount(withAccount);
+    const onlyInA = await insertUser(withTenant, schoolA.id, only.id, { status: 'invited' });
+    const [sharedResult, onlyResult, theirs] = await withTenant(schoolA.id, async (tx) => [
+      await definers.memberHasOtherMemberships(tx, inA.id),
+      await definers.memberHasOtherMemberships(tx, onlyInA.id),
+      await definers.memberHasOtherMemberships(tx, outsiderInB.id),
+    ]);
+    expect(sharedResult).toBe(true);
+    expect(onlyResult).toBe(false);
+    // Another school's member is not this school's to ask about: false, never its answer.
+    expect(theirs).toBe(false);
+  });
+
+  it("gives false for another school's member who does have other memberships (Task 13 review)", async () => {
+    // B's member also belongs to a third school, so their own answer is true: a false from A
+    // proves the lookup is held to A's members, not that the account has nothing else.
+    const third = await insertTenant(withPlatform);
+    const shared = await insertAccount(withAccount);
+    const inB = await insertUser(withTenant, schoolB.id, shared.id);
+    await insertUser(withTenant, third.id, shared.id);
+    const fromB = await withTenant(schoolB.id, (tx) =>
+      definers.memberHasOtherMemberships(tx, inB.id),
+    );
+    const fromA = await withTenant(schoolA.id, (tx) =>
+      definers.memberHasOtherMemberships(tx, inB.id),
+    );
+    expect(fromB).toBe(true);
+    expect(fromA).toBe(false);
+  });
+
+  it('refuses without app.tenant_id', async () => {
+    const refused = await failure(
+      testDb().app.query('select member_has_other_memberships($1)', [colleagueInA.id]),
+    );
+    expect(refused).toMatchObject({ code: '42501' });
   });
 });
 

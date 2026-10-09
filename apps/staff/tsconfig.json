@@ -12,6 +12,8 @@
     "next-env.d.ts",
     "src/**/*.ts",
     "src/**/*.tsx",
+    "content/**/*.ts",
+    "content/**/*.tsx",
     "e2e/**/*.ts",
     "*.ts",
     ".next/types/**/*.ts",

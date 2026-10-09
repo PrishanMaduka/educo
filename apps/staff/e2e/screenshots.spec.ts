@@ -31,6 +31,26 @@ test.describe('screenshots', () => {
     await saveScreenshot(page, testInfo, 'landing', 'app-parent');
   });
 
+  // The About, Security & trust and legal pages (D41): docs/screenshots/landing/<name>-<width>-<scheme>.png,
+  // one width and scheme each.
+  for (const shot of [
+    { path: '/about', name: 'about', width: 1440, scheme: 'light' },
+    { path: '/security', name: 'security', width: 1440, scheme: 'light' },
+    { path: '/legal/privacy', name: 'privacy', width: 390, scheme: 'dark' },
+    { path: '/legal/subprocessors', name: 'subprocessors', width: 1440, scheme: 'dark' },
+    { path: '/legal/terms', name: 'terms', width: 1440, scheme: 'light' },
+  ] as const) {
+    test(`${shot.path} (${shot.name})`, async ({ page }, testInfo) => {
+      test.skip(
+        page.viewportSize()?.width !== shot.width || schemeOf(testInfo) !== shot.scheme,
+        `Reviewed at ${String(shot.width)} px in ${shot.scheme}`,
+      );
+      await page.goto(shot.path);
+      await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+      await saveScreenshot(page, testInfo, 'landing', shot.name);
+    });
+  }
+
   test('/design', async ({ page }, testInfo) => {
     await page.goto('/design');
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();

@@ -1,9 +1,9 @@
-export type GreetingPeriod = 'morning' | 'afternoon' | 'evening' | 'night';
+import type { Greeting, GreetingPeriod } from '@quad/contracts';
 
-export interface GreetingResult {
-  period: GreetingPeriod;
-  word: 'Good morning' | 'Good afternoon' | 'Good evening' | 'Hello';
-}
+// The type lives in @quad/contracts so packages/ui needs no @quad/domain (D27 M1 follow-up).
+export type { GreetingPeriod };
+
+export type GreetingResult = Greeting;
 
 /**
  * The greeting band for `now` in the school's time zone (spec 03, the greeting section).

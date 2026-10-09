@@ -1,7 +1,12 @@
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
 
-import { SIGNED_LINK_RULES, signedLinkExpiry, signedLinkStatus } from './signed-link-status';
+import {
+  SIGNED_LINK_RULES,
+  signedLinkExpiry,
+  signedLinkIssuedAt,
+  signedLinkStatus,
+} from './signed-link-status';
 
 import type { SignedLinkPayload, SignedLinkPurpose } from '@quad/contracts';
 
@@ -156,6 +161,29 @@ describe('signedLinkStatus', () => {
           expect(signedLinkStatus(link, checkedFor, new Date(nowMs))).not.toBe('ok');
         },
       ),
+    );
+  });
+});
+
+describe('signedLinkIssuedAt', () => {
+  const base = { tid: null, sub: '0192f0c4-7a3b-7c2d-8e9f-0a1b2c3d4e60', nonce: 'a'.repeat(22) };
+
+  it('is the expiry minus the purpose lifetime, in Unix seconds', () => {
+    const exp = 1_790_000_000;
+    expect(signedLinkIssuedAt({ ...base, purpose: 'password_reset', exp })).toBe(exp - 30 * 60);
+  });
+
+  it('is unknown (null) for a link that never expires', () => {
+    expect(
+      signedLinkIssuedAt({ ...base, purpose: 'calendar_feed', tid: base.sub, exp: null }),
+    ).toBeNull();
+  });
+
+  it('round-trips with signedLinkExpiry', () => {
+    const now = new Date('2026-10-08T09:00:00.700Z');
+    const exp = signedLinkExpiry('password_reset', now);
+    expect(signedLinkIssuedAt({ ...base, purpose: 'password_reset', exp })).toBe(
+      Math.floor(now.getTime() / 1000),
     );
   });
 });

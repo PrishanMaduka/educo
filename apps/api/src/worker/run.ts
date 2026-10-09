@@ -1,11 +1,18 @@
 import { hostname } from 'node:os';
 
+import { createTenantDb } from '@quad/db';
 import { Worker } from 'bullmq';
 import { Redis } from 'ioredis';
 
+import { SignedLinks } from '../common/crypto/signed-links';
+import { BullDelivery } from '../common/delivery/delivery.service';
 import { createEmailTransport, emailSettingsOf } from '../common/delivery/email';
 import { EMAIL_QUEUE, SMS_QUEUE } from '../common/delivery/queues';
 import { createSmsSender } from '../common/delivery/sms';
+import { createOtpSendRequestProcessor } from '../modules/auth/jobs/otp-send-request.processor';
+import { createPasswordResetRequestProcessor } from '../modules/auth/jobs/password-reset-request.processor';
+import { OTP_SEND_REQUEST_QUEUE } from '../modules/auth/otp/otp-sends';
+import { PASSWORD_RESET_REQUEST_QUEUE } from '../modules/auth/password-reset-requests';
 import { createLogger, errorForLog } from '../observability/logger';
 import { createShutdown, onShutdownSignals } from '../shutdown';
 
@@ -18,6 +25,7 @@ import { createSendSmsProcessor } from './jobs/send-sms.processor';
 import type { Config } from '../config';
 import type { ErrorReporter } from '../observability/sentry';
 import type { Tracing } from '../observability/tracing';
+import type { QuadTenantDb } from '@quad/db';
 import type { Processor } from 'bullmq';
 import type { Logger } from 'pino';
 
@@ -25,15 +33,31 @@ import type { Logger } from 'pino';
  * Queue name → processor. Each milestone adds its jobs here (area processors live in
  * `src/modules/<area>/jobs/`, shared ones in `src/worker/jobs/`, cross-tenant ones in
  * `src/worker/platform-jobs/`). `redis` is the worker's connection, also used for the
- * delivered-once markers.
+ * delivered-once markers and to queue the emails jobs send; `db` is its `quad_app` handle.
  */
 export async function buildProcessors(
   config: Config,
   logger: Logger,
   redis: Redis,
+  db: QuadTenantDb,
 ): Promise<Readonly<Record<string, Processor>>> {
   const once = redisOnce(redis);
+  const delivery = new BullDelivery(redis, {
+    onError: (error) => {
+      logger.warn({ error: errorForLog(error) }, 'Delivery queue error');
+    },
+  });
   return {
+    [PASSWORD_RESET_REQUEST_QUEUE]: createPasswordResetRequestProcessor({
+      db,
+      links: new SignedLinks(config.LINK_SIGNING_SECRET, (use) =>
+        db.definers.consumeSignedToken(use),
+      ),
+      delivery,
+      publicWebUrl: config.PUBLIC_WEB_URL,
+      now: Date.now,
+    }),
+    [OTP_SEND_REQUEST_QUEUE]: createOtpSendRequestProcessor({ db, delivery, logger }),
     [EMAIL_QUEUE]: createSendEmailProcessor({
       transport: await createEmailTransport(config),
       once,
@@ -78,7 +102,14 @@ export async function runWorkers(
   });
   await waitForRedis(connection);
 
-  const processors = await buildProcessors(config, logger, connection);
+  const db = createTenantDb({
+    appUrl: config.DATABASE_URL,
+    poolMax: config.DATABASE_POOL_MAX,
+    onPoolError: (error) => {
+      logger.warn({ error: errorForLog(error) }, 'An idle Postgres connection failed');
+    },
+  });
+  const processors = await buildProcessors(config, logger, connection, db);
   const workers = Object.entries(processors).map(([queue, processor]) => {
     const worker = new Worker(queue, processor, { connection });
     worker.on('failed', (job, error) => {
@@ -103,6 +134,7 @@ export async function runWorkers(
       close: async () => {
         await Promise.all(workers.map((worker) => worker.close()));
         await stopHeartbeat();
+        await db.close();
         await connection.quit();
       },
     }),

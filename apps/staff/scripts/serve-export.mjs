@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-// Serves site-export/out the way GitHub Pages does (index.html for /, 404.html for anything
-// missing), for the Playwright run against the export: `node scripts/serve-export.mjs [port]`.
+// Serves site-export/out the way GitHub Pages does (index.html for /, about.html for /about,
+// 404.html for anything missing), for the Playwright run against the export: `node scripts/serve-export.mjs [port]`.
 import console from 'node:console';
 import { createReadStream, existsSync, statSync } from 'node:fs';
 import { createServer } from 'node:http';
@@ -17,6 +17,7 @@ const TYPES = {
   '.svg': 'image/svg+xml',
   '.woff2': 'font/woff2',
   '.txt': 'text/plain; charset=utf-8',
+  '.xml': 'application/xml; charset=utf-8',
 };
 
 createServer((request, response) => {
@@ -24,6 +25,8 @@ createServer((request, response) => {
   let file = normalize(join(out, path));
   if (!file.startsWith(out)) file = join(out, '404.html');
   if (existsSync(file) && statSync(file).isDirectory()) file = join(file, 'index.html');
+  // Pages without a trailing slash are exported as <path>.html (/legal/privacy → legal/privacy.html).
+  if (!existsSync(file) && existsSync(`${file}.html`)) file = `${file}.html`;
   const found = existsSync(file);
   const served = found ? file : join(out, '404.html');
   response.writeHead(found ? 200 : 404, {

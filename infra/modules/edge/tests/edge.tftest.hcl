@@ -300,6 +300,34 @@ run "routes_match_d14" {
   }
 }
 
+run "platform_api_only_on_the_console_host" {
+  command = apply
+
+  # Task 10 fix round 1 (M5): /api/v1/platform/* is answered only on the console host. On any
+  # other host it gets a 403 before the catch-all api rule (priority 30) could forward it.
+  assert {
+    condition = (
+      aws_lb_listener_rule.platform_off_console.priority == 25 &&
+      aws_lb_listener_rule.platform_off_console.action[0].type == "fixed-response" &&
+      aws_lb_listener_rule.platform_off_console.action[0].fixed_response[0].status_code == "403" &&
+      jsonencode(flatten([
+        for condition in aws_lb_listener_rule.platform_off_console.condition : [
+          for path in condition.path_pattern : path.values
+        ]
+      ])) == jsonencode(["/api/v1/platform/*"]) &&
+      length(flatten([
+        for condition in aws_lb_listener_rule.platform_off_console.condition : condition.host_header
+      ])) == 0
+    )
+    error_message = "/api/v1/platform/* must get a 403 on every host but the console (priority 25)."
+  }
+
+  assert {
+    condition     = aws_lb_listener_rule.route["console-platform-api"].priority < aws_lb_listener_rule.platform_off_console.priority && aws_lb_listener_rule.platform_off_console.priority < aws_lb_listener_rule.route["api"].priority
+    error_message = "The console's platform rule must win first, and the refusal must come before the catch-all api rule."
+  }
+}
+
 run "alb_only_reachable_from_cloudfront" {
   command = apply
 

@@ -257,7 +257,6 @@ describe('table classes: tenant, account, open and platform (D32)', () => {
     for (const name of [
       'accounts',
       'credentials',
-      'identities',
       'sessions',
       'trusted_devices',
       'otp_challenges',

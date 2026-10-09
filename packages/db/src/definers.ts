@@ -68,10 +68,10 @@ export interface SupportSessionLookup {
 
 export type SessionLookup = AccountSessionLookup | SupportSessionLookup;
 
-/** The SSO buttons to offer for an email domain. */
-export interface SsoMethods {
-  readonly google: boolean;
-  readonly microsoft: boolean;
+/** Whose refresh family a parent refresh token names, and its school (`refresh_family`). */
+export interface RefreshFamily {
+  readonly accountId: string;
+  readonly tenantId: string;
 }
 
 /** One staff membership's sign-in rules; `strictestTwoStep` (packages/domain) combines them. */
@@ -96,9 +96,6 @@ export interface TenantProfile {
   /** Enabled plan modules, sorted. */
   readonly modules: readonly string[];
   readonly twoStep: TwoStepRule;
-  readonly ssoGoogle: boolean;
-  readonly ssoMicrosoft: boolean;
-  readonly ssoDomain: string | null;
   readonly passwordMinLength: number;
   readonly sessionHours: number;
   readonly ipAllowlist: readonly string[];
@@ -123,6 +120,11 @@ export interface SupportAuditEntry {
 export interface MemberTwoStepStatus {
   readonly userId: string;
   readonly totpEnabled: boolean;
+}
+
+/** The support banner's "as {name} from Quad" (spec 05, Support access). */
+export interface SupportVisit {
+  readonly platformUserName: string;
 }
 
 /** `tenant_by_embed_key` (D16). A stub until M4: always null. */
@@ -160,7 +162,8 @@ export interface DefinerCalls {
   accountByIdentifier(identifier: AccountIdentifier): Promise<AccountLookup | null>;
   /** Resolves a cookie's SHA-256: an account session first, then a support visit. */
   sessionByToken(tokenHash: Buffer): Promise<SessionLookup | null>;
-  ssoMethodsForDomain(domain: string): Promise<SsoMethods>;
+  /** The account and school of a live parent refresh family (a mobile session in a school). */
+  refreshFamily(sessionId: string): Promise<RefreshFamily | null>;
   /** One row per active staff membership of a live school. */
   authSignInRules(accountId: string): Promise<AuthSignInRule[]>;
   /** True only the first time `nonce` is used. */
@@ -183,6 +186,14 @@ export interface DefinerCalls {
   memberTwoStepStatus(tx: TenantTx, userIds: readonly string[]): Promise<MemberTwoStepStatus[]>;
   /** Revokes the member's sessions and refresh families in the current school only. */
   revokeMemberSessions(tx: TenantTx, userId: string): Promise<void>;
+  /** Ends the member's role preview on their sessions in the current school only (Task 13). */
+  clearMemberPreview(tx: TenantTx, userId: string): Promise<void>;
+  /** The account's sign-in email of a member of the current school; null otherwise. */
+  memberAccountEmail(tx: TenantTx, userId: string): Promise<string | null>;
+  /** Whether a current-school member's account has any other membership (false otherwise). */
+  memberHasOtherMemberships(tx: TenantTx, userId: string): Promise<boolean>;
+  /** Who from Quad is in an active support visit to the current school; null otherwise. */
+  currentSupportVisit(tx: TenantTx, supportSessionId: string): Promise<SupportVisit | null>;
 }
 
 // Row shapes as `pg` returns them through the `quad_app` pool (timestamps as Date, arrays parsed).
@@ -243,9 +254,6 @@ type ProfileRow = {
   logo_file_id: string | null;
   modules: string[];
   two_step: TwoStepRule;
-  sso_google: boolean;
-  sso_microsoft: boolean;
-  sso_domain: string | null;
   password_min_length: number;
   session_hours: number;
   ip_allowlist: string[];
@@ -334,13 +342,13 @@ export function createDefinerCalls(pool: pg.Pool): DefinerCalls {
       return row ? toSessionLookup(row) : null;
     },
 
-    ssoMethodsForDomain: async (domain) => {
-      const { rows } = await pool.query<SsoMethods>(
-        'select google, microsoft from sso_methods_for_domain($1)',
-        [domain],
+    refreshFamily: async (sessionId) => {
+      const { rows } = await pool.query<{ account_id: string; tenant_id: string }>(
+        'select account_id, tenant_id from refresh_family($1)',
+        [sessionId],
       );
       const [row] = rows;
-      return { google: row?.google ?? false, microsoft: row?.microsoft ?? false };
+      return row ? { accountId: row.account_id, tenantId: row.tenant_id } : null;
     },
 
     authSignInRules: async (accountId) => {
@@ -417,9 +425,6 @@ export function createDefinerCalls(pool: pg.Pool): DefinerCalls {
         logoFileId: row.logo_file_id,
         modules: row.modules,
         twoStep: row.two_step,
-        ssoGoogle: row.sso_google,
-        ssoMicrosoft: row.sso_microsoft,
-        ssoDomain: row.sso_domain,
         passwordMinLength: row.password_min_length,
         sessionHours: row.session_hours,
         ipAllowlist: row.ip_allowlist,
@@ -438,14 +443,15 @@ export function createDefinerCalls(pool: pg.Pool): DefinerCalls {
     },
 
     ensureAccountForEmail: async (tx, email) => {
-      const { rows } = await tx.execute<{ id: string }>(
+      const { rows } = await tx.execute<{ id: string | null }>(
         sql`select id from ensure_account_for_email(${email})`,
       );
-      const [row] = rows;
-      if (!row) {
+      // `RETURN QUERY SELECT v_id` gives a row even when no id was found, so check the id itself.
+      const id = rows[0]?.id;
+      if (typeof id !== 'string') {
         throw new UnexpectedDefinerRowError('ensure_account_for_email');
       }
-      return row.id;
+      return id;
     },
 
     memberTwoStepStatus: async (tx, userIds) => {
@@ -460,6 +466,32 @@ export function createDefinerCalls(pool: pg.Pool): DefinerCalls {
 
     revokeMemberSessions: async (tx, userId) => {
       await tx.execute(sql`select revoke_member_sessions(${userId})`);
+    },
+
+    clearMemberPreview: async (tx, userId) => {
+      await tx.execute(sql`select clear_member_preview(${userId})`);
+    },
+
+    memberAccountEmail: async (tx, userId) => {
+      const { rows } = await tx.execute<{ email: string | null }>(
+        sql`select member_account_email(${userId}) as email`,
+      );
+      return rows[0]?.email ?? null;
+    },
+
+    memberHasOtherMemberships: async (tx, userId) => {
+      const { rows } = await tx.execute<{ shared: boolean }>(
+        sql`select member_has_other_memberships(${userId}) as shared`,
+      );
+      return rows[0]?.shared === true;
+    },
+
+    currentSupportVisit: async (tx, supportSessionId) => {
+      const { rows } = await tx.execute<{ platform_user_name: string }>(
+        sql`select platform_user_name from current_support_visit(${supportSessionId})`,
+      );
+      const [row] = rows;
+      return row ? { platformUserName: row.platform_user_name } : null;
     },
   };
 }

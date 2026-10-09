@@ -53,7 +53,7 @@ Quad is multi-tenant: every school is a tenant with its own data, users and sett
 | School › Roles & permissions | Role list and a module × action matrix (view, create, edit, delete, approve), locked built-in roles, custom roles, save or discard bar |
 | School › Plan & modules | Module switches, plan change, seat slider, live monthly total |
 | School › Branding | Logo upload, brand colour and live preview; Publish pushes the branding to the staff portal and the Quad parent app (also live in other open tabs). There is no per-school domain or app listing: every school uses `quad-edu.com` and the one Quad app |
-| School › Sign-in & security | Google and Microsoft single sign-on, two-step sign-in rules, password and session policy, IP allowlist |
+| School › Sign-in & security | Two-step sign-in rules, password and session policy, IP allowlist (staff always sign in with their work email and a password; D37) |
 | School › Danger zone | Export data, suspend or reactivate (type the school name to confirm), schedule deletion |
 | Support access | "Open as school admin" opens the school's admin app with a support banner; actions are written to the audit log |
 | Plans & billing | Plan catalogue and this month's invoices. New plan and Edit plan open in a drawer: name, colour, tagline, price per student, student limit, yearly discount, free trial, included modules, offer to new schools, most popular. A live preview card sits beside the form. When editing, it shows the schools on the plan, the monthly revenue change, schools above a lowered limit (which blocks saving), modules that become paid add-ons, and when a price change applies (next invoice, at renewal, or new schools only). Plans with no schools can be deleted |
@@ -63,7 +63,7 @@ The school admin app also has **Settings › Users & roles**, so each school's o
 
 ### Sign-in and school branding
 
-- **Sign-in pages** for all three apps. The console and the staff portal share one design: SSO buttons (Google Workspace, Microsoft 365), email and password with show/hide, forgot-password and "check your inbox" screens, and a 6-digit two-step code with auto-advance and paste. The staff portal's sign-in uses the school's logo and colours. The parent app has its own phone flow: welcome screen, phone number or email, one-time code with resend timer, then an offer to turn on Face ID. Each app has a sign-out button that returns to its sign-in page.
+- **Sign-in pages** for all three apps. The console and the staff portal share one design: work email and password with show/hide (no Google or Microsoft sign-in, D37), forgot-password and "check your inbox" screens, and a 6-digit two-step code with auto-advance and paste. The staff portal's sign-in uses the school's logo and colours. The parent app has its own phone flow: welcome screen, phone number or email, one-time code with resend timer, then an offer to turn on Face ID. Each app has a sign-out button that returns to its sign-in page.
 - **Branding flows from the console to the school apps.** Published branding is stored in the browser (`localStorage` key `quad-school`). The staff portal recolours its sidebar, buttons and sign-in page and shows the school logo and name; the parent app recolours its sign-in, lock screen, home card and notifications. The parent app's side panel can switch between sample schools to show this.
 
 ### Curriculum drives the school apps

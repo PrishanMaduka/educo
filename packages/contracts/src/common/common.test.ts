@@ -34,18 +34,24 @@ describe('contracts', () => {
       ErrorBodySchema.safeParse({ code: 'forbidden', message: 'No', fields: { a: 'b' } }).success,
     ).toBe(true);
     expect(ErrorCode.options).toContain('app_update_required');
-    expect(ErrorCode.options).toHaveLength(16);
+    // 22 until Task 13 added last_admin, system_role_locked, already_member and own_role_locked.
+    expect(ErrorCode.options).toHaveLength(26);
   });
 
   it('has invalid_link for every refused signed link (spec 05, one message for every cause)', () => {
     expect(ErrorCode.parse('invalid_link')).toBe('invalid_link');
   });
 
+  it('has unavailable (503) for sign-in while the lockout counter cannot be reached', () => {
+    expect(ErrorCode.parse('unavailable')).toBe('unavailable');
+  });
+
   it('has an internal code for unexpected server errors (500)', () => {
     expect(ErrorCode.parse('internal')).toBe('internal');
   });
 
-  it('permission keys stub', () => {
-    expect(PermissionKey.options).toEqual(['settings.edit', 'users.manage']);
+  it('permission keys come from the full catalogue', () => {
+    expect(PermissionKey.options).toContain('settings.edit');
+    expect(PermissionKey.options).toContain('users.manage');
   });
 });

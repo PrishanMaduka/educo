@@ -19,6 +19,27 @@ export const USER_LIMIT = { limit: 600, windowSeconds: 60 } as const;
 
 /** Staff and parent sign-in (`/auth/*`) and console sign-in (`/platform/auth/*`), after `/api/v1`. */
 const AUTH_ROUTE = /^\/api\/v1\/(?:platform\/)?auth\//;
+/**
+ * `POST /auth/refresh` is left out of the per-IP sign-in bucket (Task 9 fix round 1): every
+ * parent phone behind one school or mobile-carrier address refreshes every 15 minutes. It is
+ * limited per refresh family instead, after the token's MAC is checked (`RefreshService`).
+ */
+const REFRESH_ROUTE = /^\/api\/v1\/auth\/refresh(?:[?#]|$)/;
+
+/**
+ * Who the per-user limit counts, from the context `AuthGuard` filled in: the membership once a
+ * school is chosen, the account during the sign-in steps, the visit in a support session, the
+ * console user in the console. None on public routes (the per-IP and route limits cover those).
+ */
+function userSubject(): string | null {
+  const context = currentRequestContext();
+  if (context === undefined) return null;
+  if (context.userId !== null) return `user:${context.userId}`;
+  if (context.accountId !== null) return `account:${context.accountId}`;
+  if (context.supportSessionId !== null) return `support:${context.supportSessionId}`;
+  if (context.platformUserId !== null) return `platform:${context.platformUserId}`;
+  return null;
+}
 
 interface Check {
   readonly key: string;
@@ -32,8 +53,8 @@ interface Check {
  * route's own rules (top first, counted per route template), then the per-user limit.
  *
  * If Redis cannot answer, the request goes on and the API logs the `rate_limit_unavailable`
- * metric (fail open, D32): sign-in stays available, and lockout and the edge's WAF limits still
- * apply.
+ * metric (fail open, D32): the edge's WAF limits still apply, and sign-in itself fails closed
+ * (503) because its lockout counter needs Redis.
  */
 @Injectable()
 export class RateLimitInterceptor implements NestInterceptor {
@@ -74,7 +95,8 @@ export class RateLimitInterceptor implements NestInterceptor {
     // The route template, never the raw URL (paths can carry signed-link tokens).
     const route = `${request.method} ${request.routeOptions.url ?? 'unmatched'}`;
     const checks: Check[] = [];
-    if (AUTH_ROUTE.test(request.routeOptions.url ?? '')) {
+    const url = request.routeOptions.url ?? '';
+    if (AUTH_ROUTE.test(url) && !REFRESH_ROUTE.test(url)) {
       // One bucket per IP for the whole sign-in family (spec 06), not one per route.
       checks.push({ key: `ip:auth:${request.ip}`, ...AUTH_IP_LIMIT });
     }
@@ -89,9 +111,9 @@ export class RateLimitInterceptor implements NestInterceptor {
         windowSeconds: rule.windowSeconds,
       });
     });
-    const userId = currentRequestContext()?.userId;
-    if (userId !== undefined && userId !== null) {
-      checks.push({ key: `user:${userId}`, ...USER_LIMIT });
+    const subject = userSubject();
+    if (subject !== null) {
+      checks.push({ key: subject, ...USER_LIMIT });
     }
     return checks;
   }

@@ -1,5 +1,5 @@
 import { AccountStatus, PlatformRole } from '@quad/contracts';
-import { boolean, pgEnum, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
+import { bigint, boolean, pgEnum, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
 
 import { uuidv7 } from '../../uuid';
 import { citext } from '../types';
@@ -25,9 +25,16 @@ export const platformUsers = pgTable('platform_users', {
   /** Encrypted with the field cipher; null until the person sets up TOTP. */
   totpSecretEnc: text('totp_secret_enc'),
   totpEnabled: boolean('totp_enabled').notNull().default(false),
-  /** Argon2id. Used only when `CONSOLE_PASSWORD_LOGIN=true` (local, dev, staging; D22). */
+  /**
+   * The last authenticator time step accepted (RFC 6238 §5.2, as `credentials.totp_last_step`):
+   * only a later step is accepted next, so a code is never accepted twice (0013).
+   */
+  totpLastStep: bigint('totp_last_step', { mode: 'number' }),
+  /** Argon2id. The console first factor in every environment, then TOTP (D37). */
   passwordHash: text('password_hash'),
   status: accountStatus('status').notNull().default('active'),
+  /** Set by the lockout rule, as `accounts.locked_until` (spec 05; 0013). */
+  lockedUntil: timestamp('locked_until', { withTimezone: true }),
   lastSignInAt: timestamp('last_sign_in_at', { withTimezone: true }),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true })

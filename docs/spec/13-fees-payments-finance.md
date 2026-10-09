@@ -21,6 +21,7 @@ All fee maths lives in `packages/domain/fees` and is unit-tested: line totals, d
   - gateway cards to switch on and configure: PayHere (card, eZ Cash, mCash, Genie for LKR), Stripe (international cards, Apple Pay and Google Pay), bank transfer (shows the account details and asks parents to use the invoice number as the reference);
   - each gateway card has **Connect** (credentials, below), the mode (Test or Live) and its status (Not connected, Connected, Failing);
   - settings: who pays card fees (school or parent), instalments allowed, part payments allowed;
+  - parents never see the gateway's name: the parent app shows generic methods (**Card**, **Apple Pay / Google Pay**, **Bank transfer**) and routes each one to the gateway this school configured here (D35). Which gateways are offered depends on the school's country (PayHere and LankaQR for Sri Lanka, Stripe for international cards); more adapters are added as new markets need them;
   - recent online payments matched to invoices, and **Settlements** (below).
 - **Canteen:** the week's menu (date, meal, description, allergens, price) and the wallets by class with balance and daily limit. **Record purchase** (drawer: student, item or amount, note) is the v1 way to spend from a wallet; it is refused over the balance or the daily limit with the reason shown. Each transaction can be refunded to the wallet.
 

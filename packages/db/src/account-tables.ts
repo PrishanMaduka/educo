@@ -20,7 +20,6 @@ export interface OpenTable {
 export const ACCOUNT_TABLES: Readonly<Record<string, AccountTable>> = Object.freeze({
   accounts: { key: 'id', privileges: ['SELECT', 'INSERT', 'UPDATE'] },
   credentials: { key: 'account_id', privileges: ['SELECT', 'INSERT', 'UPDATE'] },
-  identities: { key: 'account_id', privileges: ['SELECT', 'INSERT'] },
   sessions: { key: 'account_id', privileges: ['SELECT', 'INSERT', 'UPDATE'] },
   trusted_devices: { key: 'account_id', privileges: ['SELECT', 'INSERT', 'UPDATE'] },
 });

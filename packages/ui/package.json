@@ -34,7 +34,6 @@
   },
   "dependencies": {
     "@quad/contracts": "workspace:*",
-    "@quad/domain": "workspace:*",
     "@quad/tokens": "workspace:*",
     "@radix-ui/react-checkbox": "1.3.12",
     "@radix-ui/react-dialog": "1.2.0",

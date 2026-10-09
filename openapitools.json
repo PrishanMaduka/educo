@@ -6,7 +6,7 @@
     "generators": {
       "quad-api-dart": {
         "generatorName": "dart-dio",
-        "inputSpec": "packages/contracts/openapi.json",
+        "inputSpec": "node_modules/.cache/quad-api/parent.openapi.json",
         "output": "apps/parent/packages/quad_api",
         "templateDir": "scripts/openapi-templates/dart-dio",
         "additionalProperties": {

@@ -1,0 +1,1 @@
+ALTER TABLE "credentials" ADD COLUMN "totp_last_step" bigint;

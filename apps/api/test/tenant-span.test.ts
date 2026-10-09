@@ -7,7 +7,7 @@ import { SEED_TENANTS } from '@quad/db';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { currentRequestContext, runWithRequestContext } from '../src/common/request-context';
-import { TenantSpanProcessor } from '../src/observability/tenant-span-processor';
+import { TenantSpanProcessor, tagSpanWithTenant } from '../src/observability/tenant-span-processor';
 
 const exporter = new InMemorySpanExporter();
 const provider = new BasicTracerProvider({
@@ -47,5 +47,27 @@ describe('TenantSpanProcessor', () => {
 
     const [span] = exporter.getFinishedSpans();
     expect(span?.attributes).not.toHaveProperty('tenant_id');
+  });
+});
+
+describe('tagSpanWithTenant', () => {
+  afterEach(() => {
+    exporter.reset();
+  });
+
+  it("tags a span that started before the guard knew the school (the request's own span)", () => {
+    const tenantId = SEED_TENANTS.colomboIntl.id;
+    const span = tracer.startSpan('GET /api/v1/me');
+    tagSpanWithTenant(span, tenantId);
+    span.end();
+    expect(exporter.getFinishedSpans()[0]?.attributes.tenant_id).toBe(tenantId);
+  });
+
+  it('does nothing without a span or without a school', () => {
+    const span = tracer.startSpan('sign-in');
+    tagSpanWithTenant(span, null);
+    tagSpanWithTenant(undefined, SEED_TENANTS.colomboIntl.id);
+    span.end();
+    expect(exporter.getFinishedSpans()[0]?.attributes).not.toHaveProperty('tenant_id');
   });
 });

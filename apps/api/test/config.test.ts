@@ -63,6 +63,27 @@ describe('loadConfig', () => {
     expect(Object.keys(config)).not.toContain('DATABASE_OWNER_URL');
   });
 
+  it('reads no sign-in variables for Google, Microsoft or a console flag (D37)', () => {
+    const removed = [
+      'GOOGLE_CLIENT_ID',
+      'GOOGLE_CLIENT_SECRET',
+      'MICROSOFT_CLIENT_ID',
+      'MICROSOFT_CLIENT_SECRET',
+      'CONSOLE_GOOGLE_CLIENT_ID',
+      'CONSOLE_GOOGLE_CLIENT_SECRET',
+      'CONSOLE_GOOGLE_HD',
+      'CONSOLE_PASSWORD_LOGIN',
+      'OIDC_FAKE_ISSUER_URL',
+    ];
+    expect(CONFIG_VARIABLES.filter((name) => removed.includes(name))).toEqual([]);
+    expect(SPEC_VARIABLES.filter((name) => removed.includes(name))).toEqual([]);
+    // A leftover value in an old .env is ignored, in production too.
+    const leftovers = Object.fromEntries(removed.map((name) => [name, 'true']));
+    expect(Object.keys(loadConfig(productionEnv(leftovers)))).not.toContain(
+      'CONSOLE_PASSWORD_LOGIN',
+    );
+  });
+
   it('refuses a missing DATABASE_URL and names it', () => {
     const error = configErrorOf(localEnv({ DATABASE_URL: undefined }));
     expect(error.message).toContain('DATABASE_URL');
@@ -101,15 +122,15 @@ describe('loadConfig', () => {
         DATABASE_URL: 'mysql://x@localhost/quad',
         REDIS_URL: 'localhost:6379',
         PUBLIC_WEB_URL: 'not a url',
-        CONSOLE_PASSWORD_LOGIN: 'yes',
+        PAYMENTS_SANDBOX: 'yes',
       }),
     );
     expect(error.problems.map((p) => p.variable).sort()).toEqual(
       [
         'API_PORT',
         'APP_ENV',
-        'CONSOLE_PASSWORD_LOGIN',
         'DATABASE_URL',
+        'PAYMENTS_SANDBOX',
         'PUBLIC_WEB_URL',
         'REDIS_URL',
       ].sort(),
@@ -139,9 +160,9 @@ describe('loadConfig', () => {
 
   it('parses booleans and numbers', () => {
     const config = loadConfig(
-      localEnv({ CONSOLE_PASSWORD_LOGIN: 'true', PAYMENTS_SANDBOX: 'false', API_PORT: '4100' }),
+      localEnv({ ASSISTANT_ENABLED: 'true', PAYMENTS_SANDBOX: 'false', API_PORT: '4100' }),
     );
-    expect(config.CONSOLE_PASSWORD_LOGIN).toBe(true);
+    expect(config.ASSISTANT_ENABLED).toBe(true);
     expect(config.PAYMENTS_SANDBOX).toBe(false);
     expect(config.API_PORT).toBe(4100);
   });
@@ -173,6 +194,16 @@ describe('loadConfig', () => {
       'LINK_SIGNING_SECRET',
       'SEED_PASSWORD',
       'SESSION_SECRET',
+    ]);
+  });
+
+  it('reads DATABASE_PLATFORM_POOL_MAX as a whole number from 1 to 50, default 2', () => {
+    expect(loadConfig(localEnv()).DATABASE_PLATFORM_POOL_MAX).toBe(2);
+    expect(
+      loadConfig(localEnv({ DATABASE_PLATFORM_POOL_MAX: '5' })).DATABASE_PLATFORM_POOL_MAX,
+    ).toBe(5);
+    expect(configErrorOf(localEnv({ DATABASE_PLATFORM_POOL_MAX: '0' })).problems).toEqual([
+      { variable: 'DATABASE_PLATFORM_POOL_MAX', problem: 'must be a whole number from 1 to 50' },
     ]);
   });
 
@@ -218,18 +249,11 @@ describe('loadConfig', () => {
     expect(error.message).toContain('DEV_FIXED_OTP');
   });
 
-  it('refuses CONSOLE_PASSWORD_LOGIN=true in production', () => {
-    const error = configErrorOf(productionEnv({ CONSOLE_PASSWORD_LOGIN: 'true' }));
-    expect(error.message).toContain('CONSOLE_PASSWORD_LOGIN');
-    expect(() => loadConfig(productionEnv({ CONSOLE_PASSWORD_LOGIN: 'false' }))).not.toThrow();
-  });
-
   it('allows the local-only flags in staging', () => {
     const config = loadConfig(
       productionEnv({
         APP_ENV: 'staging',
         DEV_FIXED_OTP: '000000',
-        CONSOLE_PASSWORD_LOGIN: 'true',
       }),
     );
     expect(config.DEV_FIXED_OTP).toBe('000000');
@@ -370,5 +394,97 @@ describe('loadConfig: field encryption, token keys and the seed password (M1, D3
 
   it('keeps KMS_KEY_ID optional until the M12 KMS adapter', () => {
     expect(loadConfig(productionEnv()).KMS_KEY_ID).toBeUndefined();
+  });
+});
+
+describe('loadConfig: the store-review sign-in (spec 16, Task 9 fix round 1)', () => {
+  const TENANT = '0192a6f4-1b2c-7d3e-8f40-123456789abc';
+  const review = {
+    STORE_REVIEW_PHONE: '+94770009999',
+    STORE_REVIEW_OTP: '481516',
+    STORE_REVIEW_TENANT_ID: TENANT,
+  };
+  const staging = (overrides: Record<string, string | undefined>) =>
+    productionEnv({ APP_ENV: 'staging', ...overrides });
+
+  it('accepts the number, its secret code and its school together', () => {
+    const config = loadConfig(staging(review));
+    expect(config.STORE_REVIEW_OTP).toBe('481516');
+    expect(config.STORE_REVIEW_TENANT_ID).toBe(TENANT);
+  });
+
+  it.each(['STORE_REVIEW_OTP', 'STORE_REVIEW_TENANT_ID'])(
+    'refuses STORE_REVIEW_PHONE without %s',
+    (missing) => {
+      expect(configErrorOf(localEnv({ ...review, [missing]: undefined })).problems).toEqual([
+        { variable: missing, problem: 'is missing (STORE_REVIEW_PHONE needs it)' },
+      ]);
+    },
+  );
+
+  it.each(['12345', '1234567', 'abcdef'])('refuses STORE_REVIEW_OTP=%s', (code) => {
+    expect(
+      configErrorOf(localEnv({ ...review, STORE_REVIEW_OTP: code })).problems.map(
+        (p) => p.variable,
+      ),
+    ).toEqual(['STORE_REVIEW_OTP']);
+  });
+
+  it.each(['000000', '777777'])(
+    'refuses the guessable STORE_REVIEW_OTP=%s outside local',
+    (code) => {
+      expect(configErrorOf(staging({ ...review, STORE_REVIEW_OTP: code })).problems).toEqual([
+        { variable: 'STORE_REVIEW_OTP', problem: 'must not be one digit repeated outside local' },
+      ]);
+      expect(loadConfig(localEnv({ ...review, STORE_REVIEW_OTP: code })).STORE_REVIEW_OTP).toBe(
+        code,
+      );
+    },
+  );
+
+  it.each(['+94112345678', '+919876543210', '+94 77 000 9999', '0770009999'])(
+    'refuses STORE_REVIEW_PHONE=%s (a Sri Lankan mobile in E.164 only)',
+    (phone) => {
+      expect(
+        configErrorOf(localEnv({ ...review, STORE_REVIEW_PHONE: phone })).problems.map(
+          (p) => p.variable,
+        ),
+      ).toEqual(['STORE_REVIEW_PHONE']);
+    },
+  );
+
+  it('refuses a STORE_REVIEW_TENANT_ID that is not a uuid', () => {
+    expect(
+      configErrorOf(localEnv({ ...review, STORE_REVIEW_TENANT_ID: 'review-school' })).problems.map(
+        (p) => p.variable,
+      ),
+    ).toEqual(['STORE_REVIEW_TENANT_ID']);
+  });
+});
+
+describe('loadConfig: JWT_PUBLIC_KEY_PREVIOUS (key rotation overlap, Task 9 fix round 1)', () => {
+  it('is optional and accepts an Ed25519 public key', () => {
+    expect(loadConfig(localEnv()).JWT_PUBLIC_KEY_PREVIOUS).toBeUndefined();
+    const previous = generateKeyPairSync('ed25519')
+      .publicKey.export({ type: 'spki', format: 'pem' })
+      .toString();
+    expect(
+      loadConfig(localEnv({ JWT_PUBLIC_KEY_PREVIOUS: previous })).JWT_PUBLIC_KEY_PREVIOUS,
+    ).toBe(previous);
+  });
+
+  it.each([
+    ['a private key', TEST_JWT_KEYS.JWT_PRIVATE_KEY],
+    [
+      'an RSA key',
+      generateKeyPairSync('rsa', { modulusLength: 2048 })
+        .publicKey.export({ type: 'spki', format: 'pem' })
+        .toString(),
+    ],
+    ['text', 'not-a-key'],
+  ])('refuses %s', (_case, value) => {
+    expect(configErrorOf(localEnv({ JWT_PUBLIC_KEY_PREVIOUS: value })).problems).toEqual([
+      { variable: 'JWT_PUBLIC_KEY_PREVIOUS', problem: 'must be an Ed25519 public key (SPKI PEM)' },
+    ]);
   });
 });

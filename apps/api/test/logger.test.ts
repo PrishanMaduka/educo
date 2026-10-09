@@ -43,6 +43,22 @@ describe('logger', () => {
     expect(lines[0]).toMatchObject({ headers: { 'x-quad-origin-secret': '[redacted]' } });
   });
 
+  it('redacts the CSRF token and Set-Cookie headers if headers are ever logged (D32)', () => {
+    const { lines, logger } = captureLogs();
+    logger.info({ headers: { 'x-csrf-token': 'csrf-1', 'set-cookie': ['quad_sid=sid-1'] } }, 'top');
+    logger.info(
+      { res: { headers: { 'x-csrf-token': 'csrf-2', 'set-cookie': ['quad_sid=sid-2'] } } },
+      'nested',
+    );
+    const text = JSON.stringify(lines);
+    for (const secret of ['csrf-1', 'csrf-2', 'sid-1', 'sid-2']) {
+      expect(text).not.toContain(secret);
+    }
+    expect(lines[0]).toMatchObject({
+      headers: { 'x-csrf-token': '[redacted]', 'set-cookie': '[redacted]' },
+    });
+  });
+
   it('logs each request with its id and route template, not the raw URL', async () => {
     const { lines, logger } = captureLogs();
     const app = await createApp(loadConfig(localEnv(CLOSED_PORTS)), { logger });

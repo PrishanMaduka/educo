@@ -2,20 +2,48 @@ import { AsyncLocalStorage } from 'node:async_hooks';
 import { randomUUID } from 'node:crypto';
 
 /**
- * Per-request values every log line carries. `tenantId` and `userId` stay null until the auth
- * guard (M1) resolves the session; the tenant is never taken from request input.
+ * Per-request values every log line carries. The auth guard fills in who is asking from the
+ * session (never from request input); they stay null for public routes and before sign-in.
  */
 export interface RequestContext {
   readonly requestId: string;
+  /** The school, only once the session is active in one. */
   tenantId: string | null;
+  /** The membership (`users.id`) in that school. */
   userId: string | null;
+  /** The person's account; null in a support visit, which has none. */
+  accountId: string | null;
+  /**
+   * `web` or `mobile` for a person, `support` for a Quad support visit, `console` for a Quad staff
+   * member in the console (Task 10).
+   */
+  kind: 'web' | 'mobile' | 'support' | 'console' | null;
+  /** The role being previewed (spec 06, Preview a role). */
+  previewRoleId: string | null;
+  /** The support visit the request is part of (spec 05, dual audit). */
+  supportSessionId: string | null;
+  /** The console user, from the console session (`PlatformSessionGuard`). */
+  platformUserId: string | null;
 }
 
 const storage = new AsyncLocalStorage<RequestContext>();
 
+function emptyContext(requestId: string, tenantId: string | null): RequestContext {
+  return {
+    requestId,
+    tenantId,
+    userId: null,
+    accountId: null,
+    kind: null,
+    previewRoleId: null,
+    supportSessionId: null,
+    platformUserId: null,
+  };
+}
+
 /** Runs `fn` (and everything it awaits) with a fresh context for `requestId`. */
 export function runWithRequestContext<T>(requestId: string, fn: () => T): T {
-  return storage.run({ requestId, tenantId: null, userId: null }, fn);
+  return storage.run(emptyContext(requestId, null), fn);
 }
 
 /**
@@ -24,7 +52,7 @@ export function runWithRequestContext<T>(requestId: string, fn: () => T): T {
  * after the processor has parsed it, never from anywhere else.
  */
 export function runWithJobContext<T>(jobKey: string, tenantId: string | null, fn: () => T): T {
-  return storage.run({ requestId: jobKey, tenantId, userId: null }, fn);
+  return storage.run(emptyContext(jobKey, tenantId), fn);
 }
 
 /** The current request's or job's context, or undefined outside both (boot). */

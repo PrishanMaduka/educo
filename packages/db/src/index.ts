@@ -11,6 +11,7 @@ export {
   withPlatform,
   withTenant,
 } from './db';
+export type { OpenRunner, OpenTx } from './open';
 export type { PlatformRunner, PlatformTx } from './platform';
 export { PLATFORM_TABLES } from './platform-tables';
 export { TransactionClosedError } from './client';
@@ -20,7 +21,16 @@ export {
   FieldCipherError,
   createFieldCipher,
 } from './crypto/field-cipher';
-export type { DefinerCalls } from './definers';
+export type {
+  AccountSessionLookup,
+  AuthMembership,
+  DefinerCalls,
+  RefreshFamily,
+  SessionLookup,
+  SupportSessionLookup,
+  SupportVisit,
+  TenantProfile,
+} from './definers';
 export { pingDatabase } from './ping';
 export type { SqlQueryable, TableClasses } from './rls';
 export {
@@ -36,3 +46,26 @@ export { SEED_TENANTS } from './seed-data';
 export type { TenantRunner, TenantTx } from './tenant';
 export { InvalidTenantIdError } from './tenant';
 export { uuidv7 } from './uuid';
+/**
+ * Drizzle's query operators, re-exported so the API builds queries with this package's own
+ * drizzle-orm instance (two installs of it have incompatible column types).
+ */
+export {
+  and,
+  asc,
+  count,
+  desc,
+  eq,
+  exists,
+  gt,
+  gte,
+  ilike,
+  inArray,
+  isNotNull,
+  isNull,
+  lt,
+  lte,
+  ne,
+  or,
+  sql,
+} from 'drizzle-orm';

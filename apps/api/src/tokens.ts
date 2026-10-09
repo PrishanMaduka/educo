@@ -27,3 +27,11 @@ export const JWT_KEYS = Symbol('JWT_KEYS');
 export const REDIS = Symbol('REDIS');
 /** Queues email and SMS (`DeliveryQueue`, BullMQ; tests may pass a recording fake). */
 export const DELIVERY = Symbol('DELIVERY');
+/** Resolves a console session cookie (`ConsoleSessionLookup`); Task 10 provides it. */
+export const CONSOLE_SESSIONS = Symbol('CONSOLE_SESSIONS');
+/** Queues Forgot password requests for the worker (`PasswordResetRequests`; tests pass a fake). */
+export const PASSWORD_RESETS = Symbol('PASSWORD_RESETS');
+/** Queues parent sign-in code requests for the worker (`OtpSendRequests`; tests pass a fake). */
+export const OTP_SENDS = Symbol('OTP_SENDS');
+/** Where unexpected errors go (`ErrorReporter`, Sentry in `main.ts`), for errors a route handles. */
+export const ERROR_REPORTER = Symbol('ERROR_REPORTER');

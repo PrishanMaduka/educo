@@ -1,8 +1,35 @@
 import 'package:quad_api/src/model/error_body.dart';
 import 'package:quad_api/src/model/health_live.dart';
 import 'package:quad_api/src/model/health_ready.dart';
-import 'package:quad_api/src/model/ses_webhook_ack.dart';
-import 'package:quad_api/src/model/sns_envelope.dart';
+import 'package:quad_api/src/model/me.dart';
+import 'package:quad_api/src/model/me_greeting.dart';
+import 'package:quad_api/src/model/me_memberships_inner.dart';
+import 'package:quad_api/src/model/me_person.dart';
+import 'package:quad_api/src/model/me_preview.dart';
+import 'package:quad_api/src/model/me_preview_sample_user.dart';
+import 'package:quad_api/src/model/me_school.dart';
+import 'package:quad_api/src/model/me_school_brand.dart';
+import 'package:quad_api/src/model/me_support.dart';
+import 'package:quad_api/src/model/me_update_input.dart';
+import 'package:quad_api/src/model/otp_request_input.dart';
+import 'package:quad_api/src/model/otp_verify_input.dart';
+import 'package:quad_api/src/model/otp_verify_result.dart';
+import 'package:quad_api/src/model/otp_verify_result_memberships_inner.dart';
+import 'package:quad_api/src/model/password_forgot_input.dart';
+import 'package:quad_api/src/model/password_reset_input.dart';
+import 'package:quad_api/src/model/password_sign_in_input.dart';
+import 'package:quad_api/src/model/refresh_input.dart';
+import 'package:quad_api/src/model/select_school_input.dart';
+import 'package:quad_api/src/model/select_school_tokens.dart';
+import 'package:quad_api/src/model/session_summary_list.dart';
+import 'package:quad_api/src/model/session_summary_list_items_inner.dart';
+import 'package:quad_api/src/model/sign_in_membership_list.dart';
+import 'package:quad_api/src/model/sign_in_membership_list_items_inner.dart';
+import 'package:quad_api/src/model/sign_in_result.dart';
+import 'package:quad_api/src/model/token_pair.dart';
+import 'package:quad_api/src/model/totp_setup_input.dart';
+import 'package:quad_api/src/model/totp_setup_result.dart';
+import 'package:quad_api/src/model/totp_verify_input.dart';
 
 final _regList = RegExp(r'^List<(.*)>$');
 final _regSet = RegExp(r'^Set<(.*)>$');
@@ -28,10 +55,64 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return HealthLive.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'HealthReady':
           return HealthReady.fromJson(value as Map<String, dynamic>) as ReturnType;
-        case 'SesWebhookAck':
-          return SesWebhookAck.fromJson(value as Map<String, dynamic>) as ReturnType;
-        case 'SnsEnvelope':
-          return SnsEnvelope.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'Me':
+          return Me.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'MeGreeting':
+          return MeGreeting.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'MeMembershipsInner':
+          return MeMembershipsInner.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'MePerson':
+          return MePerson.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'MePreview':
+          return MePreview.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'MePreviewSampleUser':
+          return MePreviewSampleUser.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'MeSchool':
+          return MeSchool.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'MeSchoolBrand':
+          return MeSchoolBrand.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'MeSupport':
+          return MeSupport.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'MeUpdateInput':
+          return MeUpdateInput.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'OtpRequestInput':
+          return OtpRequestInput.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'OtpVerifyInput':
+          return OtpVerifyInput.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'OtpVerifyResult':
+          return OtpVerifyResult.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'OtpVerifyResultMembershipsInner':
+          return OtpVerifyResultMembershipsInner.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'PasswordForgotInput':
+          return PasswordForgotInput.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'PasswordResetInput':
+          return PasswordResetInput.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'PasswordSignInInput':
+          return PasswordSignInInput.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'RefreshInput':
+          return RefreshInput.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'SelectSchoolInput':
+          return SelectSchoolInput.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'SelectSchoolTokens':
+          return SelectSchoolTokens.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'SessionSummaryList':
+          return SessionSummaryList.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'SessionSummaryListItemsInner':
+          return SessionSummaryListItemsInner.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'SignInMembershipList':
+          return SignInMembershipList.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'SignInMembershipListItemsInner':
+          return SignInMembershipListItemsInner.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'SignInResult':
+          return SignInResult.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'TokenPair':
+          return TokenPair.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'TotpSetupInput':
+          return TotpSetupInput.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'TotpSetupResult':
+          return TotpSetupResult.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'TotpVerifyInput':
+          return TotpVerifyInput.fromJson(value as Map<String, dynamic>) as ReturnType;
         default:
           RegExpMatch? match;
 

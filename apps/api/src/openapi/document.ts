@@ -2,6 +2,12 @@ import { OpenApiGeneratorV31 } from '@asteasolutions/zod-to-openapi';
 
 import { version } from '../../package.json';
 import { healthRoutes } from '../health/health.routes';
+import { meRoutes } from '../modules/me/me.routes';
+import { rolesRoutes } from '../modules/roles/roles.routes';
+import { usersRoutes } from '../modules/users/users.routes';
+import { platformAuthRoutes } from '../platform/auth/platform-auth.routes';
+import { authRoutes } from '../public/auth/auth.routes';
+import { enquiryRoutes } from '../public/enquiry/enquiry.routes';
 import { sesWebhookRoutes } from '../webhooks/ses/ses-webhook.routes';
 
 import { openApiRoutes } from './openapi.routes';
@@ -17,6 +23,14 @@ export const API_ROUTES: readonly ApiRoute[] = [
   ...healthRoutes,
   ...openApiRoutes,
   ...sesWebhookRoutes,
+  // Before the auth routes, so the generated Dart client keeps the name `MeSchoolBrand` for the
+  // brand palette both areas share.
+  ...meRoutes,
+  ...authRoutes,
+  ...platformAuthRoutes,
+  ...usersRoutes,
+  ...rolesRoutes,
+  ...enquiryRoutes,
 ];
 
 export type OpenApiDocument = ReturnType<OpenApiGeneratorV31['generateDocument']>;

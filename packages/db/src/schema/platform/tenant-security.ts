@@ -1,8 +1,6 @@
 import { TwoStepRule } from '@quad/contracts';
 import { sql } from 'drizzle-orm';
-import { boolean, check, integer, pgEnum, pgTable, text, uuid } from 'drizzle-orm/pg-core';
-
-import { citext } from '../types';
+import { check, integer, pgEnum, pgTable, text, uuid } from 'drizzle-orm/pg-core';
 
 import { tenants } from './tenants';
 
@@ -10,7 +8,8 @@ export const twoStepRule = pgEnum('two_step_rule', TwoStepRule.options);
 
 /**
  * A school's sign-in rules, managed by Quad (spec 04, Platform; spec 05; spec 08 shows them
- * read-only).
+ * read-only). Staff always sign in with their work email and a password: there is no single
+ * sign-on to set up (D37).
  */
 export const tenantSecurity = pgTable(
   'tenant_security',
@@ -18,10 +17,6 @@ export const tenantSecurity = pgTable(
     tenantId: uuid('tenant_id')
       .primaryKey()
       .references(() => tenants.id),
-    ssoGoogle: boolean('sso_google').notNull().default(false),
-    ssoMicrosoft: boolean('sso_microsoft').notNull().default(false),
-    /** The email domain SSO accepts, for example `colombo-intl.lk`. */
-    ssoDomain: citext('sso_domain'),
     twoStep: twoStepRule('two_step').notNull().default('off'),
     /** At least 10 (spec 05); the school can ask for more. */
     passwordMinLength: integer('password_min_length').notNull().default(10),

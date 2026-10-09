@@ -24,6 +24,7 @@ const raw = [{ messageId: 'raw' as const }];
 const admin = [{ messageId: 'admin' as const }];
 const testing = [{ messageId: 'testing' as const }];
 const platform = [{ messageId: 'platform' as const }];
+const handle = [{ messageId: 'handle' as const }];
 
 tester.run('quad/no-raw-db-client', rawRule, {
   valid: [
@@ -172,8 +173,78 @@ tester.run('quad/no-with-platform-outside-platform', platformRule, {
       filename: repo('apps/api/src/platform/x.ts'),
     },
     { code: "export * from '@quad/db';", filename: repo('apps/api/src/platform/x.ts') },
+    // The quad_platform handle (PLATFORM_DB, PlatformCoreModule): platform folders and API tests.
+    {
+      code: "import { PLATFORM_DB } from '../tokens';",
+      filename: repo('apps/api/src/platform/audit/x.ts'),
+    },
+    {
+      code: "import { PlatformCoreModule } from './platform-core.module';",
+      filename: repo('apps/api/src/platform/platform.module.ts'),
+    },
+    {
+      code: "import { PLATFORM_DB } from '../../src/platform/tokens'; platformDb().withPlatform(fn);",
+      filename: repo('apps/api/test/audit/x.api.test.ts'),
+    },
+    {
+      code: 'this.db.withPlatform((tx) => tx);',
+      filename: repo('apps/api/src/platform/tenants/t.ts'),
+    },
+    {
+      code: "import { PlatformModule } from './platform/platform.module';",
+      filename: repo('apps/api/src/app.module.ts'),
+    },
+    {
+      code: "import { CONFIG } from '../../tokens'; this.db.withTenant(id, fn);",
+      filename: repo('apps/api/src/modules/me/x.ts'),
+    },
   ],
   invalid: [
+    {
+      code: "import { PLATFORM_DB } from '../../platform/tokens';",
+      filename: repo('apps/api/src/modules/me/x.ts'),
+      errors: [...handle, ...handle],
+    },
+    {
+      code: "import * as tokens from '../../platform/tokens';",
+      filename: repo('apps/api/src/modules/me/x.ts'),
+      errors: handle,
+    },
+    {
+      code: "import { PlatformCoreModule } from './platform/platform-core.module.js';",
+      filename: repo('apps/api/src/app.module.ts'),
+      errors: [...handle, ...handle],
+    },
+    {
+      code: "import { PLATFORM_DB } from './somewhere';",
+      filename: repo('apps/api/src/modules/me/x.ts'),
+      errors: handle,
+    },
+    {
+      code: "export { PlatformCoreModule } from './x';",
+      filename: repo('apps/api/src/modules/me/x.ts'),
+      errors: handle,
+    },
+    {
+      code: "const m = await import('../../platform/platform-core.module');",
+      filename: repo('apps/api/src/modules/me/x.ts'),
+      errors: handle,
+    },
+    {
+      code: 'this.db.withPlatform((tx) => tx);',
+      filename: repo('apps/api/src/modules/students/s.ts'),
+      errors: platform,
+    },
+    {
+      code: 'db?.withPlatform(fn);',
+      filename: repo('apps/api/src/modules/students/s.ts'),
+      errors: platform,
+    },
+    {
+      code: "db['withPlatform'](fn);",
+      filename: repo('apps/api/src/worker/jobs/x.ts'),
+      errors: platform,
+    },
     {
       code: "import { withPlatform } from '@quad/db';",
       filename: repo('apps/api/src/modules/students/s.ts'),
@@ -426,6 +497,60 @@ tester.run('quad/no-cli-import', cliRule, {
       code: "import { x } from '@quad/api/src/cli/seed';",
       filename: repo('apps/staff/src/x.ts'),
       errors: cli,
+    },
+  ],
+});
+
+const openRule = quad.rules['no-with-open-outside-otp'];
+const open = [{ messageId: 'open' as const }];
+
+tester.run('quad/no-with-open-outside-otp', openRule, {
+  valid: [
+    {
+      code: 'await this.db.withOpen((tx) => tx.select());',
+      filename: repo('apps/api/src/modules/auth/otp/otp.repository.ts'),
+    },
+    {
+      code: "import type { OpenTx } from '@quad/db';",
+      filename: repo('apps/api/src/modules/auth/otp/otp.repository.ts'),
+    },
+    {
+      code: "import { createOpenRunner } from './open';",
+      filename: repo('packages/db/src/db.ts'),
+    },
+    { code: 'await this.db.withTenant(id, (tx) => tx);', filename: repo('apps/api/src/x.ts') },
+    { code: 'const withOpenings = 1;', filename: repo('apps/api/src/x.ts') },
+  ],
+  invalid: [
+    {
+      code: 'await this.db.withOpen((tx) => tx.select());',
+      filename: repo('apps/api/src/modules/auth/tokens/x.ts'),
+      errors: open,
+    },
+    {
+      code: 'await db?.withOpen(fn);',
+      filename: repo('apps/api/src/common/x.ts'),
+      errors: open,
+    },
+    {
+      code: "const run = db['withOpen'];",
+      filename: repo('apps/api/src/common/x.ts'),
+      errors: open,
+    },
+    {
+      code: "import type { OpenTx } from '@quad/db';",
+      filename: repo('apps/api/src/modules/me/x.ts'),
+      errors: open,
+    },
+    {
+      code: "import { type OpenRunner, withTenant } from '@quad/db';",
+      filename: repo('apps/staff/src/x.ts'),
+      errors: open,
+    },
+    {
+      code: 'const { withOpen } = db;',
+      filename: repo('apps/api/src/x.ts'),
+      errors: open,
     },
   ],
 });

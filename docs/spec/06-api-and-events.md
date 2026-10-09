@@ -20,7 +20,7 @@ Grouped by module. `→` notes the main behaviour. Every list endpoint supports 
 ### Me and auth
 All routes are served from `https://quad-edu.com/api/v1` (the same origin as the web app). There is no per-school host.
 
-- `POST /auth/identify` (`{email}` → sign-in methods; same response shape whether or not the account exists), `GET /auth/memberships` (after the password, SSO or OTP step: the person's schools), `POST /auth/select-school` (`{tenantId}`, must be one of the memberships; rotates the session), `POST /auth/password`, `POST /auth/sso/:provider/start`, `GET /auth/sso/:provider/callback`, `POST /auth/totp/verify`, `POST /auth/otp/request` (`{phone}` or `{email}`), `POST /auth/otp/verify`, `POST /auth/refresh`, `POST /auth/sign-out`, `POST /auth/password/forgot`, `POST /auth/password/reset` (signed token)
+- `GET /auth/memberships` (after the password or OTP step: the person's schools), `POST /auth/select-school` (`{tenantId}`, must be one of the memberships; rotates the session), `POST /auth/password` (the only staff first factor; no SSO routes, D37), `POST /auth/totp/verify`, `POST /auth/otp/request` (`{phone}` or `{email}`), `POST /auth/otp/verify`, `POST /auth/refresh`, `POST /auth/sign-out`, `POST /auth/password/forgot`, `POST /auth/password/reset` (signed token)
 - Invites: `GET /auth/invites/:token` (verifies a signed staff, guardian or relative invite → `{school, name, phoneMasked}`), `POST /auth/invites/:token/accept` (after sign-in; adds the membership)
 - `POST /me/role-preview` (`{roleId, sampleUserId?}`; `users.manage`; sets a preview on the session: permission checks then use the role's matrix and scope, intersected with the admin's own sensitive keys, and every non-GET request returns 403 `preview_read_only`), `DELETE /me/role-preview`, `GET /me`, `GET /me/permissions` (reflects an active preview), `PATCH /me` (name, theme, locale), `GET /me/sessions`, `DELETE /me/sessions/:id`, `POST /me/totp`, `POST /me/devices` (push token), `DELETE /me/devices/:id`, `POST /me/contact/change` (own phone or email: OTP to the new value)
 - `GET /me/tasks`, `POST /me/tasks`, `PATCH /me/tasks/:id` (title, due, done), `DELETE /me/tasks/:id`
@@ -31,7 +31,7 @@ All routes are served from `https://quad-edu.com/api/v1` (the same origin as the
 - `POST /public/enquiry/:embedKey` (rate-limited, captcha) → `tenant_by_embed_key` → creates a lead or applicant
 - `POST /webhooks/payhere`, `POST /webhooks/stripe` (signature verified first, then `tenant_by_gateway_account`; idempotent on the gateway event id)
 - `POST /webhooks/ses` (SES bounce and complaint events from SNS, sent as `text/plain`, body at most 300 KB; first checked: topic pinned to `SES_SNS_TOPIC_ARN`, `SigningCertURL` exactly `https://sns.<topic region>.amazonaws.com/SimpleNotificationService-<32 hex>.pem`, signature version 2 against that single, currently valid certificate, and a one-hour replay window; then `record_email_suppression`, which never replaces a `manual` entry; no tenant; 200 `{status: 'ok'}`, 403 `forbidden` for anything unverified, 400 `validation` for a body that is not JSON, 413 for a larger body. See [20](20-infrastructure-operations.md))
-- `GET /calendar/:token.ics` (a signed calendar-feed token; see [09](09-parent-app.md#school-life-from-more-and-from-to-dos))
+- `GET /calendar/:token.ics` (a signed calendar-feed token; see [09](09-parent-app.md#school-life-from-profile-and-from-to-dos))
 
 ### Platform (console)
 - `GET /platform/overview` → counts, MRR series (6M/12M), plan mix, system status, needs-you-today list, activity feed

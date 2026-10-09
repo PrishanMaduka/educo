@@ -2,11 +2,13 @@ import { assertAccountId, createAccountRunner } from './account';
 import { createPool } from './client';
 import { createDefinerCalls } from './definers';
 import { databaseUrls } from './env';
+import { createOpenRunner } from './open';
 import { createPlatformRunner } from './platform';
 import { assertTenantId, createTenantRunner } from './tenant';
 
 import type { AccountRunner, AccountScope, AccountTx } from './account';
 import type { DefinerCalls } from './definers';
+import type { OpenRunner } from './open';
 import type { PlatformRunner, PlatformTx } from './platform';
 import type { TenantRunner, TenantTx } from './tenant';
 
@@ -32,6 +34,8 @@ export interface QuadTenantDb {
   readonly withTenant: TenantRunner;
   /** Account-scoped transactions for the account tables (D32), on the same pool. */
   readonly withAccount: AccountRunner;
+  /** Open tables only (D32, `OPEN_TABLES`): a transaction with no school and no account. */
+  readonly withOpen: OpenRunner;
   /** Tenant-less security-definer calls (spec 02, D16), on the same `quad_app` pool. */
   readonly definers: DefinerCalls;
   /** Ends the pool. */
@@ -55,6 +59,7 @@ export function createTenantDb(config: TenantDbConfig): QuadTenantDb {
   return {
     withTenant: createTenantRunner(pool),
     withAccount: createAccountRunner(pool),
+    withOpen: createOpenRunner(pool),
     definers: createDefinerCalls(pool),
     close: async () => {
       await pool.end();
