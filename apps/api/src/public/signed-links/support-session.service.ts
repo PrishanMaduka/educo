@@ -6,6 +6,7 @@ import { InvalidLinkError } from '../../common/errors';
 import { hashSessionToken, newSessionToken } from '../../common/session/cookies';
 import { CsrfTokens } from '../../common/session/csrf';
 import { SessionService } from '../../common/session/session.service';
+import { AuthService } from '../../modules/auth/auth.service';
 import { CLOCK, TENANT_DB } from '../../tokens';
 
 import type { Clock } from '../../tokens';
@@ -41,6 +42,7 @@ export class SupportSessionService {
     private readonly sessions: SessionService,
     private readonly csrf: CsrfTokens,
     private readonly audit: AuditService,
+    private readonly auth: AuthService,
     @Inject(TENANT_DB) private readonly db: QuadTenantDb,
     @Inject(CLOCK) private readonly now: Clock,
   ) {}
@@ -74,6 +76,18 @@ export class SupportSessionService {
     );
     const secondsLeft = Math.floor((auth.expiresAt.getTime() - now.getTime()) / 1000);
     return { token, csrf: this.csrf.tokenFor(tokenHash), maxAgeSeconds: Math.max(secondsLeft, 0) };
+  }
+
+  /**
+   * Leaves whatever the browser's previous staff cookie names, once a link has been redeemed and
+   * before the visit's cookie replaces it (Task 17, D32): a member's session is signed out on the
+   * server (`auth.sign_out` in its school), and an earlier support visit is ended. Otherwise the
+   * replaced cookie would stay valid, unseen, until it expired. Anything else is ignored.
+   */
+  async leavePrevious(tokenHash: Buffer, ip: string): Promise<void> {
+    const previous = await this.sessions.resolve(tokenHash);
+    if (previous?.kind === 'web') await this.auth.signOut(previous, ip);
+    else if (previous?.kind === 'support') await this.end(tokenHash, ip, previous.tenantId);
   }
 
   /**

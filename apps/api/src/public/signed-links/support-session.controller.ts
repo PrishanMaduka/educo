@@ -37,7 +37,11 @@ export class SupportSessionController {
     @Inject(CONFIG) private readonly config: Config,
   ) {}
 
-  /** The link's token is in the body, so request logs never carry it. */
+  /**
+   * The link's token is in the body, so request logs never carry it. A staff cookie the browser
+   * already holds is signed out on the server only once the link is redeemed, so a refused link
+   * signs nobody out.
+   */
   @Post()
   @Public()
   @HttpCode(200)
@@ -47,6 +51,10 @@ export class SupportSessionController {
     @Res({ passthrough: true }) reply: FastifyReply,
   ): Promise<SignInResult> {
     const cookies = await this.support.redeem(body.token, request.ip);
+    const previous: unknown = request.cookies[cookieNames(this.config.APP_ENV).session];
+    if (isSessionTokenShape(previous)) {
+      await this.support.leavePrevious(hashSessionToken(previous), request.ip);
+    }
     setSessionCookies(reply, this.config.APP_ENV, cookies);
     return { next: 'done' };
   }

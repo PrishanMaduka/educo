@@ -354,6 +354,57 @@ describe('POST /auth/support-session (the signed link)', () => {
     expect((await redeem(new Browser(app), token)).statusCode).toBe(400);
   });
 
+  it("signs out the browser's own staff session on the server before the visit's cookie replaces it", async () => {
+    clock = Date.now();
+    const school = await schoolWithRoles(db());
+    const member = await staffHolding(db(), school, school.roles.admin);
+    const quad = await consoleAs('support');
+    const token = await linkFor(quad.browser, school.id);
+    const browser = new Browser(app);
+    browser.cookies.set('quad_sid', member.session.token);
+    browser.cookies.set('quad_csrf', member.session.csrf);
+
+    const response = await redeem(browser, token);
+
+    expect(response.statusCode).toBe(200);
+    expect(browser.cookies.get('quad_sid')).not.toBe(member.session.token);
+    expect(Me.parse((await browser.get('/me')).json()).support).not.toBeNull();
+    // The member's session is revoked, not merely hidden behind the new cookie.
+    expect((await asStaff(app, member.session)('GET', '/me')).statusCode).toBe(401);
+    const { rows } = await db().platform.query<{ revoked: boolean }>(
+      'select revoked_at is not null as revoked from sessions where id = $1',
+      [member.session.id],
+    );
+    expect(rows).toEqual([{ revoked: true }]);
+  });
+
+  it('leaves the staff session alone when the link is refused', async () => {
+    clock = Date.now();
+    const school = await schoolWithRoles(db());
+    const member = await staffHolding(db(), school, school.roles.admin);
+    const browser = new Browser(app);
+    browser.cookies.set('quad_sid', member.session.token);
+    browser.cookies.set('quad_csrf', member.session.csrf);
+
+    const response = await redeem(browser, 'not-a-link');
+
+    expect(response.statusCode).toBe(400);
+    expect((await asStaff(app, member.session)('GET', '/me')).statusCode).toBe(200);
+  });
+
+  it('ends an earlier support visit whose cookie the browser still holds', async () => {
+    clock = Date.now();
+    const school = await schoolWithRoles(db());
+    const { quad, staff } = await visiting(school.id);
+    const token = await linkFor(quad.browser, school.id);
+
+    const response = await redeem(staff, token);
+
+    expect(response.statusCode).toBe(200);
+    const visits = await supportRows(school.id);
+    expect(visits.map((visit) => visit.ended_at !== null)).toEqual([true, false]);
+  });
+
   it('answers 400 validation without a token', async () => {
     const response = await new Browser(app).post('/auth/support-session', {});
     expect(response.statusCode).toBe(400);
