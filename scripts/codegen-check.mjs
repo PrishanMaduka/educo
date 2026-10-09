@@ -1,12 +1,13 @@
 #!/usr/bin/env node
 // Regenerates everything, then fails if a generated file changed or is untracked.
 import { execFileSync } from 'node:child_process';
-import { existsSync } from 'node:fs';
+import { existsSync, readdirSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 
 import { runTool } from './flutter.mjs';
+import { platformLeaks } from './parent-openapi.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 /** @type {(cmd: string, args: string[]) => unknown} */
@@ -42,6 +43,15 @@ if (stale.length > 0) {
     `Generated files are out of date:\n${stale.map((f) => `  ${f}`).join('\n')}\n`,
   );
   process.stderr.write('Run pnpm api:client / tokens:build / i18n:build and commit the result.\n');
+  process.exit(1);
+}
+// The parent app's client never serves the console (Task 10 fix round 1, M9).
+const dartClient = resolve(root, 'apps/parent/packages/quad_api');
+const leaks = platformLeaks(readdirSync(dartClient, { recursive: true, encoding: 'utf8' }));
+if (leaks.length > 0) {
+  process.stderr.write(
+    `The parent app's client has console files:\n${leaks.map((f) => `  ${f}`).join('\n')}\n`,
+  );
   process.exit(1);
 }
 process.stdout.write('Generated files are up to date.\n');

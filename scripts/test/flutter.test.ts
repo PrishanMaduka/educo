@@ -65,7 +65,7 @@ describe('scripts/api-client.mjs without Dart', () => {
     // A copy of the scripts in a scratch repo, with a pnpm stub that logs calls.
     sandbox = mkdtempSync(join(tmpdir(), 'api-client-'));
     mkdirSync(join(sandbox, 'scripts'));
-    for (const file of ['api-client.mjs', 'flutter.mjs']) {
+    for (const file of ['api-client.mjs', 'flutter.mjs', 'parent-openapi.mjs']) {
       copyFileSync(join(root, 'scripts', file), join(sandbox, 'scripts', file));
     }
     const marker = join(sandbox, 'apps/parent/packages/quad_api/pubspec.yaml');
