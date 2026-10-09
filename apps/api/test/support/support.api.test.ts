@@ -170,6 +170,21 @@ describe('POST /platform/tenants/:id/support-session', () => {
     expect(await supportRows(school.id)).toEqual([]);
   });
 
+  it("signs the link with the school's id as stored, even when the path spells it in capitals", async () => {
+    clock = Date.now();
+    const school = await schoolWithRoles(db());
+    const quad = await consoleAs('support');
+    const response = await open(quad.browser, school.id.toUpperCase());
+    expect(response.statusCode).toBe(200);
+    const { url } = SupportSessionLink.parse(response.json());
+    const token = url.slice(url.indexOf(LINK_PATH) + LINK_PATH.length);
+    const [segment = ''] = token.split('.');
+    expect(JSON.parse(Buffer.from(segment, 'base64url').toString('utf8'))).toMatchObject({
+      tid: school.id,
+    });
+    expect((await redeem(new Browser(app), token)).statusCode).toBe(200);
+  });
+
   it('refuses control characters in the reason but keeps line breaks', async () => {
     const school = await insertSchool(db());
     const quad = await consoleAs('support');
@@ -724,7 +739,16 @@ describe('GET /platform/tenants', () => {
     });
     expect(list.items.map((item) => item.id)).not.toContain(deleted.id);
     const names = list.items.map((item) => item.name);
-    expect(names).toEqual([...names].sort((x, y) => x.localeCompare(y, 'en')));
+    // The API's order: lower-cased names in code-point order (not the locale's collation).
+    const byCodePoint = (x: string, y: string) => {
+      const [a, b] = [Array.from(x.toLowerCase()), Array.from(y.toLowerCase())];
+      for (let index = 0; index < Math.min(a.length, b.length); index += 1) {
+        const diff = (a[index]?.codePointAt(0) ?? 0) - (b[index]?.codePointAt(0) ?? 0);
+        if (diff !== 0) return diff;
+      }
+      return a.length - b.length;
+    };
+    expect(names).toEqual([...names].sort(byCodePoint));
   });
 
   it('pages with a cursor, without skipping or repeating a school', async () => {

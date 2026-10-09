@@ -47,7 +47,7 @@ export class SupportService {
     client: ConsoleClient,
   ): Promise<SupportSessionLink> {
     const now = new Date(this.now());
-    const visitId = await this.db.withPlatform(async (tx) => {
+    const visit = await this.db.withPlatform(async (tx) => {
       const school = await this.tenants.liveTenantId(tx, tenantId);
       if (school === null) throw new NotFoundError();
       const id = await this.repository.insert(tx, {
@@ -66,10 +66,11 @@ export class SupportService {
         userAgent: client.userAgent,
         meta: { reason: input.reason },
       });
-      return id;
+      return { id, tenantId: school };
     });
+    // `tid` is the school row the database returned, never the path's id as typed.
     const token = this.links.signLink(
-      { purpose: 'support_session', tid: tenantId, sub: visitId },
+      { purpose: 'support_session', tid: visit.tenantId, sub: visit.id },
       now,
     );
     return { url: new URL(`${LINK_PATH}${token}`, this.config.PUBLIC_WEB_URL).href };
