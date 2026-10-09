@@ -85,6 +85,11 @@ export interface StaffPage {
    * plan-filtered permissions and this check always agree.
    */
   readonly planModule?: PlanModule;
+  /**
+   * When set, a visible page is `full` only with one of these keys, and `view_only` otherwise
+   * (instead of the default: any action besides View on the `view` row).
+   */
+  readonly fullWhen?: readonly PermissionKey[];
 }
 
 const EVERYONE: PagePredicate = Object.freeze({ kind: 'everyone' });
@@ -93,6 +98,8 @@ const anyOf = (...keys: PermissionKey[]): PagePredicate =>
   Object.freeze({ kind: 'any_of', keys: Object.freeze(keys) });
 
 const LEARNING = view('lms');
+/** Run by approvers (principal, admin); teachers (lms view, create and edit) read them. */
+const RUN_BY_APPROVERS: readonly PermissionKey[] = Object.freeze(['lms.approve']);
 
 /** Every staff page in side bar order (spec 08), with the OQ4 visibility rule. */
 export const STAFF_PAGES: readonly StaffPage[] = Object.freeze(
@@ -157,6 +164,8 @@ export const STAFF_PAGES: readonly StaffPage[] = Object.freeze(
         href: '/app/students',
         requires: view('sis'),
         planModule: 'sis',
+        // Creating in sis is pastoral notes and plans; changing records needs sis.edit.
+        fullWhen: Object.freeze(['sis.edit']),
       },
       {
         id: 'early_warning',
@@ -191,6 +200,7 @@ export const STAFF_PAGES: readonly StaffPage[] = Object.freeze(
         href: '/app/timetable',
         requires: LEARNING,
         planModule: 'lms',
+        fullWhen: RUN_BY_APPROVERS,
       },
       {
         id: 'teachers_classes',
@@ -198,6 +208,7 @@ export const STAFF_PAGES: readonly StaffPage[] = Object.freeze(
         href: '/app/staffing',
         requires: LEARNING,
         planModule: 'lms',
+        fullWhen: RUN_BY_APPROVERS,
       },
       {
         id: 'staff_cover',
@@ -205,6 +216,7 @@ export const STAFF_PAGES: readonly StaffPage[] = Object.freeze(
         href: '/app/cover',
         requires: LEARNING,
         planModule: 'lms',
+        fullWhen: RUN_BY_APPROVERS,
       },
       { id: 'exams', group: 'learning', href: '/app/exams', requires: LEARNING, planModule: 'lms' },
       {

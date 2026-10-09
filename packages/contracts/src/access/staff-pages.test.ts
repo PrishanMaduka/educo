@@ -155,6 +155,23 @@ describe('STAFF_PAGES (spec 08, Navigation; OQ4)', () => {
     expect(byId(id).planModule).toBe(planModule);
   });
 
+  it('names the pages that need more than View to be full (fullWhen)', () => {
+    expect(STAFF_PAGES.filter((p) => p.fullWhen).map((p) => [p.id, p.fullWhen])).toEqual([
+      // A counsellor (sis view and create) adds pastoral notes but does not edit records.
+      ['students', ['sis.edit']],
+      // Teachers (lms 11100) read these; approvers (principal, admin) run them.
+      ['timetable', ['lms.approve']],
+      ['teachers_classes', ['lms.approve']],
+      ['staff_cover', ['lms.approve']],
+    ]);
+    for (const page of STAFF_PAGES) {
+      for (const key of page.fullWhen ?? []) {
+        expect(PermissionKey.safeParse(key).success).toBe(true);
+        expect(Object.isFrozen(page.fullWhen)).toBe(true);
+      }
+    }
+  });
+
   it('is frozen data', () => {
     expect(Object.isFrozen(STAFF_PAGES)).toBe(true);
     for (const page of STAFF_PAGES) {
