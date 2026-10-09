@@ -79,7 +79,8 @@ describe('StaffList', () => {
   });
 
   it('says which row is the signed-in person (Task 21: their own role and status are locked)', () => {
-    const { you: _you, ...withoutYou } = member;
+    const withoutYou: Partial<typeof member> = { ...member };
+    delete withoutYou.you;
     const list = {
       items: [withoutYou],
       nextCursor: null,
