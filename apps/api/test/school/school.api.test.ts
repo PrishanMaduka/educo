@@ -67,14 +67,17 @@ async function tenantName(tenantId: string): Promise<string | undefined> {
   return rows[0]?.name;
 }
 
-/** Waits until a query is blocked on a row lock (the rename waiting for the console's update). */
-async function waitForBlockedRename(): Promise<void> {
+/**
+ * Waits until a backend is blocked by the console's open transaction (`holderPid`), which in
+ * this test can only be the API's rename waiting for the tenants row. Other tests' lock waits in
+ * the same database never count (Task 15 review M6).
+ */
+async function waitForBlockedRename(holderPid: number): Promise<void> {
   for (let attempt = 0; attempt < 200; attempt += 1) {
     const { rows } = await db().platform.query<{ waiting: number }>(
-      // A row-lock wait is a wait on the holder's transaction id.
-      `select count(*)::int as waiting from pg_locks
-       where not granted and locktype = 'transactionid'
-         and pid in (select pid from pg_stat_activity where datname = current_database())`,
+      `select count(*)::int as waiting from pg_stat_activity
+       where datname = current_database() and $1 = any(pg_blocking_pids(pid))`,
+      [holderPid],
     );
     if ((rows[0]?.waiting ?? 0) > 0) return;
     await new Promise((resolve) => setTimeout(resolve, 10));
@@ -144,6 +147,12 @@ describe('GET /school', () => {
       [school.id],
     );
     expect(rows).toEqual([]);
+    // Nor anything for the console: a preview read is not a rename (Task 15 review M7).
+    const { rows: platformRows } = await db().platform.query(
+      'select action from platform_audit where tenant_id = $1',
+      [school.id],
+    );
+    expect(platformRows).toEqual([]);
     // Reading again changes nothing further: the same version.
     expect((await schoolOf(principal)).etag).toBe(School.parse(response.json()).etag);
   });
@@ -361,10 +370,13 @@ describe('PATCH /school', () => {
     // Quad renames the school and holds the row until the save has read the old name and waits.
     const console = await db().platform.connect();
     try {
+      const { rows: holder } = await console.query<{ pid: number }>(
+        'select pg_backend_pid() as pid',
+      );
       await console.query('begin');
       await console.query(`update tenants set name = 'Renamed By Quad' where id = $1`, [school.id]);
       const saving = patch(admin, { name: 'Renamed By The School' }, etag);
-      await waitForBlockedRename();
+      await waitForBlockedRename(holder[0]?.pid ?? -1);
       await console.query('commit');
 
       const response = await saving;
