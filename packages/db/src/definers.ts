@@ -190,6 +190,11 @@ export interface DefinerCalls {
    * null when there was none to end (already ended, or no such cookie).
    */
   endSupportSession(tokenHash: Buffer): Promise<EndedSupportVisit | null>;
+  /**
+   * `endSupportSession` in the caller's `withTenant` transaction, so the school's
+   * `support_session.ended` entry commits with it or not at all (Task 17, D32).
+   */
+  endSupportSessionIn(tx: TenantTx, tokenHash: Buffer): Promise<EndedSupportVisit | null>;
   tenantByEmbedKey(key: string): Promise<EmbedKeyTenant | null>;
   tenantByGatewayAccount(provider: string, accountId: string): Promise<GatewayAccountTenant | null>;
   /** The current school's profile; null without a school. */
@@ -280,6 +285,24 @@ type ProfileRow = {
   ip_allowlist: string[];
   country: string;
 };
+
+/** `end_support_session`, read on the pool or in a transaction. */
+type EndedVisitRow = {
+  support_session_id: string;
+  tenant_id: string;
+  platform_user_id: string;
+};
+
+function endedVisit(rows: readonly EndedVisitRow[]): EndedSupportVisit | null {
+  const [row] = rows;
+  return row
+    ? {
+        supportSessionId: row.support_session_id,
+        tenantId: row.tenant_id,
+        platformUserId: row.platform_user_id,
+      }
+    : null;
+}
 
 class UnexpectedDefinerRowError extends Error {
   constructor(definer: string) {
@@ -402,21 +425,18 @@ export function createDefinerCalls(pool: pg.Pool): DefinerCalls {
     },
 
     endSupportSession: async (tokenHash) => {
-      const { rows } = await pool.query<{
-        support_session_id: string;
-        tenant_id: string;
-        platform_user_id: string;
-      }>('select support_session_id, tenant_id, platform_user_id from end_support_session($1)', [
-        tokenHash,
-      ]);
-      const [row] = rows;
-      return row
-        ? {
-            supportSessionId: row.support_session_id,
-            tenantId: row.tenant_id,
-            platformUserId: row.platform_user_id,
-          }
-        : null;
+      const { rows } = await pool.query<EndedVisitRow>(
+        'select support_session_id, tenant_id, platform_user_id from end_support_session($1)',
+        [tokenHash],
+      );
+      return endedVisit(rows);
+    },
+
+    endSupportSessionIn: async (tx, tokenHash) => {
+      const { rows } = await tx.execute<EndedVisitRow>(
+        sql`select support_session_id, tenant_id, platform_user_id from end_support_session(${tokenHash})`,
+      );
+      return endedVisit(rows);
     },
 
     tenantByEmbedKey: async (key) => {

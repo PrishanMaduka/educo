@@ -70,7 +70,7 @@ export class SupportSessionController {
     if (!this.csrf.verify(tokenHash, request.headers[CSRF_HEADER])) throw new CsrfError();
     const auth = await this.sessions.resolve(tokenHash);
     if (auth !== null && auth.kind !== 'support') throw new UnauthorizedError();
-    const ended = await this.support.end(tokenHash, request.ip);
+    const ended = await this.support.end(tokenHash, request.ip, auth?.tenantId ?? null);
     if (!ended && auth === null) throw new UnauthorizedError();
     clearSessionCookies(reply, this.config.APP_ENV);
     return { redirect: this.config.CONSOLE_URL };

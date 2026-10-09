@@ -9,7 +9,7 @@ import { SessionService } from '../../common/session/session.service';
 import { CLOCK, TENANT_DB } from '../../tokens';
 
 import type { Clock } from '../../tokens';
-import type { QuadTenantDb } from '@quad/db';
+import type { EndedSupportVisit, QuadTenantDb, TenantTx } from '@quad/db';
 
 /** The staff cookies a redeemed visit gets, ending when the visit does. */
 export interface SupportCookies {
@@ -29,9 +29,10 @@ export interface SupportCookies {
  * `support_session.started` in the school's audit log.
  *
  * Ending ("Exit to platform", or Sign out in a visit): `end_support_session` ends the visit the
- * cookie names, once, writing `platform_audit`; the school's `support_session.ended` follows,
- * only when a visit was ended now, in the school that visit belongs to. The cookie's cache entry
- * is dropped, so the old cookie is refused at once.
+ * cookie names, once, writing `platform_audit`; the school's `support_session.ended` is written
+ * only when a visit was ended now, in the school that visit belongs to, and in the same
+ * transaction while the visit is live. The cookie's cache entry is dropped, so the old cookie
+ * is refused at once.
  */
 @Injectable()
 export class SupportSessionService {
@@ -56,7 +57,7 @@ export class SupportSessionService {
     if (auth?.kind !== 'support' || auth.tenantId !== payload.tid) {
       // The school was deleted meanwhile, or the link and the visit disagree: never leave a
       // redeemed visit behind that nobody can use or end.
-      await this.end(tokenHash, ip);
+      await this.end(tokenHash, ip, auth?.kind === 'support' ? auth.tenantId : null);
       throw new InvalidLinkError();
     }
     await this.db.withTenant(auth.tenantId, (tx) =>
@@ -77,24 +78,40 @@ export class SupportSessionService {
 
   /**
    * Ends the visit whose cookie hashes to `tokenHash`: true when one was ended now, false when
-   * there was none to end (already ended, or not a visit's cookie).
+   * there was none to end (already ended, or not a visit's cookie). `liveTenantId` is the school
+   * of the visit as the cookie resolved just now, or null when it no longer resolves (expired, or
+   * its school gone). A live visit is ended and its school's `support_session.ended` written in
+   * one `withTenant` transaction, so both happen or neither (Task 17, D32); an expired one has no
+   * school to open first, so its school entry follows in a second transaction.
    */
-  async end(tokenHash: Buffer, ip: string): Promise<boolean> {
-    const ended = await this.db.definers.endSupportSession(tokenHash);
-    await this.sessions.invalidateToken(tokenHash);
-    if (ended === null) return false;
-    await this.db.withTenant(ended.tenantId, (tx) =>
-      this.audit.recordVisitBoundary(
-        {
-          tx,
-          tenantId: ended.tenantId,
-          supportSessionId: ended.supportSessionId,
-          platformUserId: ended.platformUserId,
-          ip,
-        },
-        'support_session.ended',
-      ),
+  async end(tokenHash: Buffer, ip: string, liveTenantId: string | null): Promise<boolean> {
+    try {
+      if (liveTenantId !== null) {
+        return await this.db.withTenant(liveTenantId, async (tx) => {
+          const ended = await this.db.definers.endSupportSessionIn(tx, tokenHash);
+          if (ended !== null) await this.recordEnded(tx, ended, ip);
+          return ended !== null;
+        });
+      }
+      const ended = await this.db.definers.endSupportSession(tokenHash);
+      if (ended === null) return false;
+      await this.db.withTenant(ended.tenantId, (tx) => this.recordEnded(tx, ended, ip));
+      return true;
+    } finally {
+      await this.sessions.invalidateToken(tokenHash);
+    }
+  }
+
+  private recordEnded(tx: TenantTx, ended: EndedSupportVisit, ip: string): Promise<void> {
+    return this.audit.recordVisitBoundary(
+      {
+        tx,
+        tenantId: ended.tenantId,
+        supportSessionId: ended.supportSessionId,
+        platformUserId: ended.platformUserId,
+        ip,
+      },
+      'support_session.ended',
     );
-    return true;
   }
 }

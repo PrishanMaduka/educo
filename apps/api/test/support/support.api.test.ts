@@ -505,6 +505,49 @@ describe('POST /auth/support-session/end (Exit to platform)', () => {
     expect(await platformAuditRows(db(), 'support_session.ended', visit?.id ?? '')).toHaveLength(1);
   });
 
+  it('ends a live visit and writes its school entry together, or neither', async () => {
+    clock = Date.now();
+    const school = await schoolWithRoles(db());
+    const { staff } = await visiting(school.id);
+    const [visit] = await supportRows(school.id);
+    // Make the school's audit insert fail for this school only, as a dropped connection would.
+    await db().owner.query(`
+      create function refuse_ended_audit() returns trigger language plpgsql as $$
+      begin
+        if new.action = 'support_session.ended' and new.tenant_id = '${school.id}' then
+          raise exception 'audit insert refused by the test';
+        end if;
+        return new;
+      end $$;
+      create trigger refuse_ended_audit before insert on audit_log
+        for each row execute function refuse_ended_audit();
+    `);
+    try {
+      const failed = await staff.clone().post('/auth/support-session/end');
+      expect(failed.statusCode).toBe(500);
+      // Nothing was ended: no ended_at, no Quad entry, and the visit still works.
+      expect((await supportRows(school.id))[0]?.ended_at).toBeNull();
+      expect(await platformAuditRows(db(), 'support_session.ended', visit?.id ?? '')).toEqual([]);
+      expect((await staff.get('/me')).statusCode).toBe(200);
+    } finally {
+      await db().owner.query(`
+        drop trigger refuse_ended_audit on audit_log;
+        drop function refuse_ended_audit();
+      `);
+    }
+
+    const response = await staff.post('/auth/support-session/end');
+
+    expect(response.statusCode).toBe(200);
+    expect((await supportRows(school.id))[0]?.ended_at).not.toBeNull();
+    expect(await platformAuditRows(db(), 'support_session.ended', visit?.id ?? '')).toHaveLength(1);
+    expect(
+      (await auditEntries(db(), 'support_session.ended')).filter(
+        (row) => row.tenant_id === school.id,
+      ),
+    ).toHaveLength(1);
+  });
+
   it('needs the CSRF header (403) and its own cookie (401), and then ends nothing', async () => {
     clock = Date.now();
     const school = await schoolWithRoles(db());
@@ -540,6 +583,12 @@ describe('POST /auth/support-session/end (Exit to platform)', () => {
     expect(staff.cookies.has('quad_sid')).toBe(false);
     expect((await supportRows(school.id))[0]?.ended_at).not.toBeNull();
     expect(await platformAuditRows(db(), 'support_session.ended', visit?.id ?? '')).toHaveLength(1);
+    // The expired visit no longer resolves, so its school entry follows in its own transaction.
+    expect(
+      (await auditEntries(db(), 'support_session.ended')).filter(
+        (row) => row.tenant_id === school.id,
+      ),
+    ).toEqual([expect.objectContaining({ target_id: visit?.id })]);
     clock = Date.now();
   });
 

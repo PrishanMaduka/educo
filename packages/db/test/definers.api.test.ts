@@ -647,6 +647,46 @@ describe('support sessions by token hash (R-support-token)', () => {
   });
 });
 
+describe('endSupportSessionIn (Task 17)', () => {
+  it("ends the visit in the caller's school transaction, and a rollback ends nothing", async () => {
+    const support = await insertSupportSession(withPlatform, quadStaff.id, schoolA.id);
+    const tokenHash = randomTokenHash();
+    await definers.redeemSupportSession(support.id, tokenHash);
+    const isEnded = async () =>
+      (
+        await platformRows<{ ended: boolean }>(
+          'select ended_at is not null as ended from support_sessions where id = $1',
+          [support.id],
+        )
+      )[0]?.ended;
+
+    await expect(
+      withTenant(schoolA.id, async (tx) => {
+        await expect(definers.endSupportSessionIn(tx, tokenHash)).resolves.toMatchObject({
+          supportSessionId: support.id,
+          tenantId: schoolA.id,
+        });
+        throw new Error('roll back');
+      }),
+    ).rejects.toThrow('roll back');
+    expect(await isEnded()).toBe(false);
+    expect(
+      await platformRows('select 1 from platform_audit where target_id = $1', [support.id]),
+    ).toEqual([]);
+
+    const ended = await withTenant(schoolA.id, (tx) => definers.endSupportSessionIn(tx, tokenHash));
+    expect(ended).toEqual({
+      supportSessionId: support.id,
+      tenantId: schoolA.id,
+      platformUserId: quadStaff.id,
+    });
+    expect(await isEnded()).toBe(true);
+    await expect(
+      withTenant(schoolA.id, (tx) => definers.endSupportSessionIn(tx, tokenHash)),
+    ).resolves.toBeNull();
+  });
+});
+
 describe('end_support_session across schools (Task 16)', () => {
   it("ends only the visit its cookie names: school A's visit stays active when B's ends", async () => {
     const inA = await insertSupportSession(withPlatform, quadStaff.id, schoolA.id);

@@ -149,7 +149,7 @@ export class AuthController {
     }
     if (auth.kind === 'support') {
       // Signing out of a support visit ends it, as "Exit to platform" does (Task 16).
-      await this.supportSessions.end(auth.tokenHash, request.ip);
+      await this.supportSessions.end(auth.tokenHash, request.ip, auth.tenantId);
       clearSessionCookies(reply, this.config.APP_ENV);
       return;
     }
