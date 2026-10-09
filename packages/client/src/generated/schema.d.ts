@@ -1254,7 +1254,11 @@ export interface paths {
                 path?: never;
                 cookie?: never;
             };
-            requestBody?: never;
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["PlatformNoInput"];
+                };
+            };
             responses: {
                 /** @description The new authenticator */
                 200: {
@@ -1420,7 +1424,11 @@ export interface paths {
                 path?: never;
                 cookie?: never;
             };
-            requestBody?: never;
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["PlatformNoInput"];
+                };
+            };
             responses: {
                 /** @description Signed out */
                 204: {
@@ -1770,6 +1778,8 @@ export interface components {
             secret: string;
             otpauthUri: string;
         };
+        /** @default {} */
+        PlatformNoInput: Record<string, never>;
         PlatformTotpVerifyInput: {
             code: string;
         };

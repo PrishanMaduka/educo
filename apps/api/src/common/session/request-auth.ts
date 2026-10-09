@@ -154,6 +154,9 @@ export type SocketIdentity =
   | { readonly kind: 'platform'; readonly platformUserId: string }
   | null;
 
+/** Which app opened a socket, from its checked Origin: none for the parent app. */
+export type HandshakeSurface = 'school' | 'console' | null;
+
 /**
  * Turns the cookie or the parent app's bearer token into a `RequestAuth`, for HTTP requests and
  * for socket handshakes alike. Only a value shaped like a session token, or a bearer token that
@@ -185,32 +188,38 @@ export class RequestAuthenticator {
 
   /**
    * A socket handshake: the parent app's access token (`auth.token`) when it sends one, else the
-   * staff cookie, then the console cookie (Task 10 resolves it). A token counts only for a
-   * guardian in a school: a relative (M9b adds their rooms) or a family still choosing gets none.
+   * one cookie its origin may use (fix round 1, M6): the staff portal's origin reads only the
+   * staff cookie, the console's only the console cookie, and no origin (the parent app) neither.
+   * A token counts only for a guardian in a school: a relative (M9b adds their rooms) or a family
+   * still choosing gets none.
    */
-  async fromHandshake(cookieHeader: string | undefined, token?: unknown): Promise<SocketIdentity> {
+  async fromHandshake(
+    cookieHeader: string | undefined,
+    token: unknown,
+    surface: HandshakeSurface,
+  ): Promise<SocketIdentity> {
     if (token !== undefined) {
       const auth = typeof token === 'string' ? await this.fromBearerToken(token) : null;
       return auth?.membershipKind === 'guardian' && auth.userId !== null
         ? { kind: 'parent', userId: auth.userId }
         : null;
     }
+    if (surface === null) return null;
     const cookies = cookieHeader === undefined ? {} : fastifyCookie.parse(cookieHeader);
+    if (surface === 'console') return this.fromConsoleCookie(cookies[this.names.consoleSession]);
     const auth = await this.fromCookieToken(cookies[this.names.session]);
-    if (auth !== null) {
-      return auth.stage === 'active' && auth.tenantId !== null
-        ? {
-            kind: 'school',
-            tenantId: auth.tenantId,
-            userId: auth.kind === 'web' ? auth.userId : null,
-          }
-        : null;
-    }
-    const consoleToken = cookies[this.names.consoleSession];
-    if (this.console === undefined || !isSessionTokenShape(consoleToken)) {
-      return null;
-    }
-    const consoleSession = await this.console.resolve(hashSessionToken(consoleToken));
+    return auth !== null && auth.stage === 'active' && auth.tenantId !== null
+      ? {
+          kind: 'school',
+          tenantId: auth.tenantId,
+          userId: auth.kind === 'web' ? auth.userId : null,
+        }
+      : null;
+  }
+
+  private async fromConsoleCookie(token: string | undefined): Promise<SocketIdentity> {
+    if (this.console === undefined || !isSessionTokenShape(token)) return null;
+    const consoleSession = await this.console.resolve(hashSessionToken(token));
     return consoleSession === null
       ? null
       : { kind: 'platform', platformUserId: consoleSession.platformUserId };

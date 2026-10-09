@@ -2,12 +2,16 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 
 import { CsrfError, ForbiddenError, UnauthorizedError } from '../../common/errors';
-import { PlatformControllerMarker } from '../../common/guards/platform-controller.decorator';
+import {
+  PlatformControllerMarker,
+  isPlatformPath,
+} from '../../common/guards/platform-controller.decorator';
 import { PreAuthMarker } from '../../common/guards/pre-auth.decorator';
 import { PublicMarker } from '../../common/guards/public.decorator';
 import { currentRequestContext } from '../../common/request-context';
 import { cookieNames, hashSessionToken, isSessionTokenShape } from '../../common/session/cookies';
 import { CSRF_HEADER, CsrfTokens, needsCsrfToken } from '../../common/session/csrf';
+import { userAgentOf } from '../../public/auth/sign-in-http';
 import { CONFIG } from '../../tokens';
 
 import { attachConsoleAuth } from './console-auth';
@@ -39,7 +43,9 @@ type Access =
  * step) and `@PlatformRole(...)`; a route with none is refused with 403 for everyone (deny by
  * default). `@PlatformRole` needs an active session (or, with `@DuringConsoleSignIn()`, one at a
  * step) and one of its roles: 401 without, 403 for the wrong role. Cookie writes need the console
- * CSRF token. Outside console classes it only refuses a misplaced `@PlatformRole`.
+ * CSRF token. A console route is a `@PlatformController()` class or any path under
+ * `/api/v1/platform/`. Elsewhere it only refuses a misplaced `@PlatformRole`, and outside HTTP it
+ * refuses only console routes and markers.
  */
 @Injectable()
 export class PlatformSessionGuard implements CanActivate {
@@ -55,16 +61,27 @@ export class PlatformSessionGuard implements CanActivate {
   }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    if (context.getType() !== 'http') return false;
     const targets = [context.getHandler(), context.getClass()];
     const roles = this.reflector.getAllAndOverride<readonly PlatformRole[] | undefined>(
       PlatformRoleMarker.KEY,
       targets,
     );
-    const isConsole =
+    const markedConsole =
       this.reflector.getAllAndOverride<true | undefined>(PlatformControllerMarker.KEY, [
         context.getClass(),
       ]) === true;
+    if (context.getType() !== 'http') {
+      // Console routes are HTTP only; anything else is left to its own guards (AuthGuard refuses).
+      const duringSignIn = this.reflector.getAllAndOverride<true | undefined>(
+        DuringConsoleSignInMarker.KEY,
+        targets,
+      );
+      return !markedConsole && roles === undefined && duringSignIn === undefined;
+    }
+    const request = context.switchToHttp().getRequest<FastifyRequest>();
+    // Console routes by class or by path: a path under /api/v1/platform/ is claimed even without
+    // the class marker (consoleRouteProblems also refuses that at startup).
+    const isConsole = markedConsole || isPlatformPath(request.routeOptions.url);
     if (!isConsole) {
       // A console role on a school route would otherwise let AuthGuard's staff session through.
       if (roles !== undefined) throw new ForbiddenError();
@@ -74,10 +91,12 @@ export class PlatformSessionGuard implements CanActivate {
     if (access === null) throw new ForbiddenError();
     if (access.kind === 'public') return true;
 
-    const request = context.switchToHttp().getRequest<FastifyRequest>();
     const token = request.cookies[this.cookieName];
     const auth = isSessionTokenShape(token)
-      ? await this.sessions.authenticate(hashSessionToken(token))
+      ? await this.sessions.authenticate(hashSessionToken(token), {
+          ip: request.ip,
+          userAgent: userAgentOf(request),
+        })
       : null;
     if (auth === null || !atAllowedStage(access, auth)) throw new UnauthorizedError();
     if (access.kind === 'role' && access.roles.length > 0 && !access.roles.includes(auth.role)) {

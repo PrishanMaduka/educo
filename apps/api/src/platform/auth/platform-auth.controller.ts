@@ -10,7 +10,13 @@ import { PlatformController } from '../../common/guards/platform-controller.deco
 import { PreAuth } from '../../common/guards/pre-auth.decorator';
 import { Public } from '../../common/guards/public.decorator';
 import { RateLimit } from '../../common/rate-limit/rate-limit.decorator';
-import { clearConsoleSessionCookies, setConsoleSessionCookies } from '../../common/session/cookies';
+import {
+  clearConsoleSessionCookies,
+  cookieNames,
+  hashSessionToken,
+  isSessionTokenShape,
+  setConsoleSessionCookies,
+} from '../../common/session/cookies';
 import { ZodValidationPipe } from '../../common/zod.pipe';
 import { bodyEmail, userAgentOf } from '../../public/auth/sign-in-http';
 import { CONFIG } from '../../tokens';
@@ -56,7 +62,9 @@ export class PlatformAuthController {
     @Req() request: FastifyRequest,
     @Res({ passthrough: true }) reply: FastifyReply,
   ): Promise<PlatformSignInResult> {
-    const outcome = await this.auth.password(body, clientOf(request));
+    const current = request.cookies[cookieNames(this.config.APP_ENV).consoleSession];
+    const replacing = isSessionTokenShape(current) ? hashSessionToken(current) : null;
+    const outcome = await this.auth.password(body, clientOf(request), replacing);
     setConsoleSessionCookies(reply, this.config.APP_ENV, outcome.cookies);
     return { next: outcome.next };
   }

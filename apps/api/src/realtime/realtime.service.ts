@@ -6,7 +6,7 @@ import { RequestAuthenticator } from '../common/session/request-auth';
 import { errorForLog } from '../observability/logger';
 import { CONFIG, LOGGER } from '../tokens';
 
-import type { SocketIdentity } from '../common/session/request-auth';
+import type { HandshakeSurface, SocketIdentity } from '../common/session/request-auth';
 import type { Config } from '../config';
 import type { BeforeApplicationShutdown, OnApplicationBootstrap } from '@nestjs/common';
 import type { FastifyAdapter } from '@nestjs/platform-fastify';
@@ -61,6 +61,7 @@ export function originAllowed(origin: string | undefined, allowed: readonly stri
 export class RealtimeService implements OnApplicationBootstrap, BeforeApplicationShutdown {
   private server: RealtimeServer | undefined;
   private readonly origins: readonly string[];
+  private readonly consoleOrigin: string;
 
   constructor(
     private readonly adapterHost: HttpAdapterHost<FastifyAdapter>,
@@ -68,7 +69,8 @@ export class RealtimeService implements OnApplicationBootstrap, BeforeApplicatio
     @Inject(CONFIG) config: Config,
     @Inject(LOGGER) private readonly logger: Logger,
   ) {
-    this.origins = [new URL(config.PUBLIC_WEB_URL).origin, new URL(config.CONSOLE_URL).origin];
+    this.consoleOrigin = new URL(config.CONSOLE_URL).origin;
+    this.origins = [new URL(config.PUBLIC_WEB_URL).origin, this.consoleOrigin];
   }
 
   onApplicationBootstrap(): void {
@@ -85,7 +87,11 @@ export class RealtimeService implements OnApplicationBootstrap, BeforeApplicatio
     });
     server.use((socket, next) => {
       this.authenticator
-        .fromHandshake(socket.request.headers.cookie, tokenOf(socket.handshake))
+        .fromHandshake(
+          socket.request.headers.cookie,
+          tokenOf(socket.handshake),
+          this.surfaceOf(socket.request.headers.origin),
+        )
         .then(
           (identity) => {
             socket.data.identity = identity;
@@ -105,6 +111,12 @@ export class RealtimeService implements OnApplicationBootstrap, BeforeApplicatio
       if (rooms.length > 0) void socket.join(rooms);
     });
     this.server = server;
+  }
+
+  /** The app a checked Origin belongs to (allowRequest has refused any other). */
+  private surfaceOf(origin: string | undefined): HandshakeSurface {
+    if (origin === undefined) return null;
+    return origin === this.consoleOrigin ? 'console' : 'school';
   }
 
   /** Sends `event` to everyone in `room` (for example `tenant:{id}`). */

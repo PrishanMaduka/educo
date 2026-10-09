@@ -1,5 +1,6 @@
 import {
   PlatformMe,
+  PlatformNoInput,
   PlatformPasswordSignInInput,
   PlatformSignInResult,
   PlatformTotpSetup,
@@ -15,6 +16,7 @@ const Next = named('PlatformSignInResult', PlatformSignInResult);
 const Setup = named('PlatformTotpSetup', PlatformTotpSetup);
 const Verify = named('PlatformTotpVerifyInput', PlatformTotpVerifyInput);
 const Me = named('PlatformMe', PlatformMe);
+const NoInput = named('PlatformNoInput', PlatformNoInput);
 
 /**
  * Console sign-in and the signed-in console user (spec 05 → Platform console, spec 06 →
@@ -38,6 +40,7 @@ export const platformAuthRoutes: readonly ApiRoute[] = [
     summary:
       'Console, first sign-in: a new authenticator secret and its otpauth URI, shown once (needs X-CSRF-Token)',
     tags: ['platform'],
+    request: { body: NoInput },
     responses: { 200: { description: 'The new authenticator', schema: Setup } },
     errors: [400, 401, 403, 409, 429],
   },
@@ -56,6 +59,7 @@ export const platformAuthRoutes: readonly ApiRoute[] = [
     path: '/platform/auth/sign-out',
     summary: 'Console: sign out this browser and clear the console cookies (needs X-CSRF-Token)',
     tags: ['platform'],
+    request: { body: NoInput },
     responses: { 204: { description: 'Signed out' } },
     errors: [400, 401, 403, 429],
   },

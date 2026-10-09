@@ -174,6 +174,25 @@ export class PlatformAuthRepository {
       );
   }
 
+  /**
+   * Ends the live console session a cookie hash names (a browser signing in again); its platform
+   * user, or null when there was none.
+   */
+  async revokeSessionByToken(tx: PlatformTx, tokenHash: Buffer, now: Date): Promise<string | null> {
+    const [row] = await tx
+      .update(sessions)
+      .set({ revokedAt: now })
+      .where(
+        and(
+          eq(sessions.tokenHash, tokenHash),
+          eq(sessions.kind, 'console'),
+          isNull(sessions.revokedAt),
+        ),
+      )
+      .returning({ platformUserId: sessions.platformUserId });
+    return row?.platformUserId ?? null;
+  }
+
   async lockUntil(tx: PlatformTx, id: string, until: Date): Promise<void> {
     await tx.update(platformUsers).set({ lockedUntil: until }).where(eq(platformUsers.id, id));
   }

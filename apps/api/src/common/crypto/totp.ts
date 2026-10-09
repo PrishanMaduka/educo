@@ -35,15 +35,17 @@ export class TotpCodes {
 
   /**
    * Whether `code` is the authenticator's code within one step of `now` and after `lastStep`:
-   * the step it matched, `{ step: null }` for the local fixed code, or null for no match.
+   * the step it matched, `{ step: null }` for the fixed code, or null for no match. `fixedCode`
+   * is `DEV_FIXED_OTP` unless the caller narrows it (the console passes `consoleFixedCode`).
    */
   async match(
     secret: string,
     code: string,
     now: Date,
     lastStep: number | null,
+    fixedCode: string | undefined = this.config.DEV_FIXED_OTP,
   ): Promise<TotpMatch | null> {
-    if (this.isFixedCode(code)) return { step: null };
+    if (fixedCode !== undefined && code === fixedCode) return { step: null };
     const result = await verify({
       secret,
       token: code,
@@ -54,11 +56,5 @@ export class TotpCodes {
     // A TOTP match carries its RFC 6238 time step (the HOTP shape of the union never does).
     if (!result.valid || !('timeStep' in result)) return null;
     return { step: result.timeStep };
-  }
-
-  /** Local and staging only: the config refuses `DEV_FIXED_OTP` in production. */
-  private isFixedCode(code: string): boolean {
-    const fixed = this.config.DEV_FIXED_OTP;
-    return fixed !== undefined && code === fixed;
   }
 }

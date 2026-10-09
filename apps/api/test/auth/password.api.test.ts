@@ -55,6 +55,16 @@ describe('POST /auth/password (spec 05 step 3)', () => {
     expect(Me.parse(me.json()).school.id).toBe(school.id);
   });
 
+  it('never lets a sign-in answer be cached (no-store), whatever it says', async () => {
+    const school = await insertSchool(db());
+    const account = await insertPasswordAccount(db());
+    await insertMember(db(), school.id, account.id);
+    const ok = await signIn(new Browser(app), { email: account.email, password: account.password });
+    const refused = await signIn(new Browser(app), { email: freshEmail(), password: 'nope nope' });
+    expect(ok.headers['cache-control']).toBe('no-store');
+    expect(refused.headers['cache-control']).toBe('no-store');
+  });
+
   it('keeps the cookie for 30 days with Keep me signed in', async () => {
     const school = await insertSchool(db());
     const account = await insertPasswordAccount(db());

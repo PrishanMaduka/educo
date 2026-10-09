@@ -150,6 +150,31 @@ describe('Socket.IO handshake (spec 06 → Realtime, D28 follow-up)', () => {
     expect(await events).toEqual([{ to: 'platform' }]);
   });
 
+  it('ties the origin to the cookie: the console origin reads only the console cookie, the school origin only quad_sid (M6)', async () => {
+    const school = await insertSchool(db());
+    const { session } = await signedInMember(db(), school);
+    const staff = await insertPlatformUser(db(), 'Amaya Perera');
+    const consoleSession = await insertConsoleSession(db(), staff);
+    const both = `${cookieOf(sessionHeaders(session))}; quad_console_sid=${consoleSession.token}`;
+    const sockets = {
+      staffAtConsole: connect({ origin: CONSOLE, cookie: cookieOf(sessionHeaders(session)) }),
+      consoleAtSchool: connect({ origin: WEB, cookie: `quad_console_sid=${consoleSession.token}` }),
+      bothAtSchool: connect({ origin: WEB, cookie: both }),
+      bothAtConsole: connect({ origin: CONSOLE, cookie: both }),
+    };
+    await Promise.all(Object.values(sockets).map(connected));
+    const events = Object.fromEntries(
+      Object.entries(sockets).map(([name, socket]) => [name, received(socket, 'probe')]),
+    );
+    realtime().emitTo(`tenant:${school.id}`, 'probe', { to: 'tenant' });
+    realtime().emitTo('platform', 'probe', { to: 'platform' });
+    expect(await events.staffAtConsole).toEqual([]);
+    expect(await events.consoleAtSchool).toEqual([]);
+    // The positive controls: each cookie works from its own origin.
+    expect(await events.bothAtSchool).toEqual([{ to: 'tenant' }]);
+    expect(await events.bothAtConsole).toEqual([{ to: 'platform' }]);
+  });
+
   it('joins nothing with a console session still at the authenticator step', async () => {
     const staff = await insertPlatformUser(db(), 'Amaya Perera');
     const active = await insertConsoleSession(db(), staff);

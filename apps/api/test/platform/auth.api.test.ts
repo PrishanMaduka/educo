@@ -7,9 +7,11 @@ import {
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { PasswordHasher } from '../../src/common/crypto/passwords';
+import { TotpCodes } from '../../src/common/crypto/totp';
+import { buildOpenApiDocument } from '../../src/openapi/document';
 import { PlatformAuditService } from '../../src/platform/audit/platform-audit.service';
 import { PlatformAuthRepository } from '../../src/platform/auth/platform-auth.repository';
-import { REDIS } from '../../src/tokens';
+import { FIELD_CIPHER, REDIS } from '../../src/tokens';
 import { RecordingDelivery } from '../fakes/delivery';
 import { RecordingOtpSends } from '../fakes/otp-sends';
 import { setCookie } from '../helpers/browser';
@@ -38,6 +40,7 @@ import { PlatformProbeModule } from './probe.module';
 
 import type { Browser } from '../helpers/browser';
 import type { ConsoleUser } from '../helpers/platform';
+import type { FieldCipher } from '@quad/db';
 import type { Redis } from 'ioredis';
 
 const STEP = 30_000;
@@ -98,9 +101,11 @@ describe('POST /platform/auth/password (spec 05 → Platform console)', () => {
     expect(PlatformSignInResult.parse(response.json())).toEqual({ next: 'two_step' });
     expect(setCookie(response, CONSOLE_SID)).toMatchObject({
       httpOnly: true,
-      sameSite: 'Lax',
+      // Strict: the console is never opened by a link from another site with its session.
+      sameSite: 'Strict',
       path: '/',
     });
+    expect(setCookie(response, CONSOLE_CSRF)).toMatchObject({ sameSite: 'Strict' });
     expect(setCookie(response, CONSOLE_CSRF)?.httpOnly).toBeFalsy();
     // Never the staff cookies.
     expect(setCookie(response, 'quad_sid')).toBeUndefined();
@@ -140,7 +145,8 @@ describe('POST /platform/auth/password (spec 05 → Platform console)', () => {
 
     const wrong = await password(consoleBrowser(app), { ...wrongUser, password: 'not it at all' });
     const disabled = await password(consoleBrowser(app), deactivated);
-    const unknown = await password(consoleBrowser(app), {
+    const unknownBrowser = consoleBrowser(app);
+    const unknown = await password(unknownBrowser, {
       email: unknownEmail,
       password: 'not it at all',
     });
@@ -157,9 +163,22 @@ describe('POST /platform/auth/password (spec 05 → Platform console)', () => {
     expect(await platformAuditRows(db(), 'auth.sign_in_failed', deactivated.id)).toEqual([
       expect.objectContaining({ meta: { reason: 'deactivated' } }),
     ]);
-    // The unknown email is never stored, not even in the audit.
+    // The unknown email's failure is recorded (the positive control) with no actor and no target...
+    const unknownRows = (await platformAuditRows(db(), 'auth.sign_in_failed', null)).filter(
+      (row) => row.ip === unknownBrowser.ip,
+    );
+    expect(unknownRows).toEqual([
+      {
+        actor_platform_user_id: null,
+        target_type: null,
+        target_id: null,
+        ip: unknownBrowser.ip,
+        meta: { reason: 'unknown_email' },
+      },
+    ]);
+    // ...and the email itself is nowhere in any row of the audit.
     const { rows } = await db().platform.query<{ count: string }>(
-      `select count(*) from platform_audit where meta::text like '%' || $1 || '%'`,
+      `select count(*) from platform_audit a where a::text ilike '%' || $1 || '%'`,
       [unknownEmail],
     );
     expect(rows[0]?.count).toBe('0');
@@ -241,6 +260,33 @@ describe('POST /platform/auth/password (spec 05 → Platform console)', () => {
     expect((await password(consoleBrowser(app), user)).statusCode).toBe(200);
   });
 
+  it('audits a password tried while the user is locked, and still answers 403', async () => {
+    const user = await insertConsoleUser(db(), { lockedUntil: new Date(T0 + 60_000) });
+    const response = await password(consoleBrowser(app), user);
+    expect(response.statusCode).toBe(403);
+    expect(response.json()).toMatchObject({ code: 'account_locked' });
+    expect(await platformAuditRows(db(), 'auth.sign_in_failed', user.id)).toEqual([
+      expect.objectContaining({ actor_platform_user_id: null, meta: { reason: 'locked' } }),
+    ]);
+  });
+
+  it('audits a failure it could not count, and still fails closed with 503', async () => {
+    const user = await insertConsoleUser(db());
+    const write = vi.spyOn(app().get<Redis>(REDIS), 'multi').mockImplementation(() => {
+      throw new Error('Redis is down');
+    });
+    try {
+      const response = await password(consoleBrowser(app), { ...user, password: 'wrong one' });
+      expect(response.statusCode).toBe(503);
+      expect(response.json()).toMatchObject({ code: 'unavailable' });
+    } finally {
+      write.mockRestore();
+    }
+    expect(await platformAuditRows(db(), 'auth.sign_in_failed', user.id)).toEqual([
+      expect.objectContaining({ meta: { reason: 'unavailable' } }),
+    ]);
+  });
+
   it('fails closed with 503 unavailable when the lockout counter cannot be read', async () => {
     const user = await insertConsoleUser(db());
     const hasher = app().get(PasswordHasher);
@@ -255,6 +301,33 @@ describe('POST /platform/auth/password (spec 05 → Platform console)', () => {
       read.mockRestore();
       verify.mockRestore();
     }
+    expect(await platformAuditRows(db(), 'auth.sign_in_failed', user.id)).toEqual([
+      expect.objectContaining({ meta: { reason: 'unavailable' } }),
+    ]);
+  });
+
+  it('revokes the console session this browser already had when it signs in again (M4)', async () => {
+    const user = await insertConsoleUser(db());
+    const browser = await signInToConsole(app, user, clock);
+    const before = String(browser.cookies.get(CONSOLE_SID));
+    const kept = browser.clone();
+
+    expect((await password(browser, user)).statusCode).toBe(200);
+
+    expect(browser.cookies.get(CONSOLE_SID)).not.toBe(before);
+    expect((await kept.get('/platform/me')).statusCode).toBe(401);
+    const { rows } = await db().platform.query<{ revoked: number }>(
+      `select count(*)::int as revoked from sessions
+       where platform_user_id = $1 and stage = 'active' and revoked_at is not null`,
+      [user.id],
+    );
+    expect(rows[0]?.revoked).toBe(1);
+  });
+
+  it('never caches a sign-in answer (M3)', async () => {
+    const user = await insertConsoleUser(db());
+    const response = await password(consoleBrowser(app), user);
+    expect(response.headers['cache-control']).toBe('no-store');
   });
 
   it('counts in the shared per-IP sign-in bucket (20 a minute)', async () => {
@@ -369,6 +442,70 @@ describe('POST /platform/auth/totp/verify', () => {
       code: await totpCode(secretOf(user), clock),
     });
     expect(response.statusCode).toBe(401);
+    expect(await platformAuditRows(db(), 'auth.sign_in_failed', user.id)).toEqual([
+      expect.objectContaining({ actor_platform_user_id: null, meta: { reason: 'deactivated' } }),
+    ]);
+  });
+
+  it('locks the user after five wrong codes (403 next, locked_until set), and audits the code tried while locked', async () => {
+    const { user, browser } = await atPasswordStep();
+    for (let attempt = 0; attempt < 5; attempt += 1) {
+      clock += 1000;
+      const wrong = await browser.post('/platform/auth/totp/verify', { code: '000001' });
+      expect(wrong.statusCode).toBe(400);
+    }
+    const locked = await browser.post('/platform/auth/totp/verify', {
+      code: await totpCode(secretOf(user), clock),
+    });
+    expect(locked.statusCode).toBe(403);
+    expect(locked.json()).toMatchObject({ code: 'account_locked' });
+    const { rows } = await db().platform.query<{ locked_until: Date | null }>(
+      'select locked_until from platform_users where id = $1',
+      [user.id],
+    );
+    expect(rows[0]?.locked_until?.getTime()).toBe(T0 + 5000 + 15 * 60 * 1000);
+    const reasons = (await platformAuditRows(db(), 'auth.sign_in_failed', user.id)).map(
+      (row) => row.meta.reason,
+    );
+    expect(reasons).toEqual([
+      'wrong_code',
+      'wrong_code',
+      'wrong_code',
+      'wrong_code',
+      'wrong_code',
+      'locked',
+    ]);
+  });
+
+  it('fails closed with 503 when the counter cannot be read, before the code is decrypted or checked', async () => {
+    const { user, browser } = await atPasswordStep();
+    const cipher = app().get<FieldCipher>(FIELD_CIPHER);
+    const spies = {
+      read: vi.spyOn(app().get<Redis>(REDIS), 'zcard').mockRejectedValue(new Error('down')),
+      decrypt: vi.spyOn(cipher, 'decrypt'),
+      match: vi.spyOn(app().get(TotpCodes), 'match'),
+    };
+    try {
+      const response = await browser.post('/platform/auth/totp/verify', {
+        code: await totpCode(secretOf(user), clock),
+      });
+      expect(response.statusCode).toBe(503);
+      expect(response.json()).toMatchObject({ code: 'unavailable' });
+      expect(spies.decrypt).not.toHaveBeenCalled();
+      expect(spies.match).not.toHaveBeenCalled();
+    } finally {
+      for (const spy of Object.values(spies)) spy.mockRestore();
+    }
+    expect(await platformAuditRows(db(), 'auth.sign_in_failed', user.id)).toEqual([
+      expect.objectContaining({ meta: { reason: 'unavailable' } }),
+    ]);
+  });
+
+  it('refuses the local fixed code when DEV_FIXED_OTP is not set', async () => {
+    const { browser } = await atPasswordStep();
+    const response = await browser.post('/platform/auth/totp/verify', { code: '000000' });
+    expect(response.statusCode).toBe(400);
+    expect(response.json()).toMatchObject({ code: 'invalid_code' });
   });
 
   it('ends the code step after 15 minutes', async () => {
@@ -436,6 +573,27 @@ describe('POST /platform/auth/totp/setup (TOTP is mandatory, spec 07)', () => {
       code: await totpCode(first.secret, clock),
     });
     expect(stale.json()).toMatchObject({ code: 'invalid_code' });
+  });
+
+  it('answers 409 when the authenticator was turned on from another tab', async () => {
+    const { user, browser } = await atPasswordStep({ totp: false });
+    const other = browser.clone();
+    const setup = PlatformTotpSetup.parse((await other.post('/platform/auth/totp/setup')).json());
+    await db().platform.query('update platform_users set totp_enabled = true where id = $1', [
+      user.id,
+    ]);
+    const response = await browser.post('/platform/auth/totp/setup');
+    expect(response.statusCode).toBe(409);
+    expect(response.json()).toMatchObject({ code: 'conflict' });
+    // The secret that was turned on is kept.
+    expect((await consoleTotpOf(db(), user.id)).secret).toBe(setup.secret);
+  });
+
+  it('never lets the secret be cached (M3)', async () => {
+    const { browser } = await atPasswordStep({ totp: false });
+    const response = await browser.post('/platform/auth/totp/setup');
+    expect(response.statusCode).toBe(200);
+    expect(response.headers['cache-control']).toBe('no-store');
   });
 
   it('answers 400 validation for a body with anything in it', async () => {
@@ -640,5 +798,40 @@ describe('@PlatformRole (spec 05 → Platform roles; deny by default)', () => {
         headers: sessionHeaders(session),
       });
     expect(response.statusCode).toBe(403);
+  });
+});
+
+describe('the console routes in the API description (M13)', () => {
+  it('declares the empty request bodies of totp/setup and sign-out', () => {
+    const document = buildOpenApiDocument();
+    for (const path of ['/api/v1/platform/auth/totp/setup', '/api/v1/platform/auth/sign-out']) {
+      expect(document.paths?.[path]?.post?.requestBody).toMatchObject({
+        content: {
+          'application/json': { schema: { $ref: '#/components/schemas/PlatformNoInput' } },
+        },
+      });
+    }
+  });
+});
+
+describe('DEV_FIXED_OTP on the console (local only, D32)', () => {
+  const fixed = useDatabaseApp({ DEV_FIXED_OTP: '000000' }, { overrides: { now: () => clock } });
+
+  it('opens the console with the fixed code at the code step', async () => {
+    const user = await insertConsoleUser(fixed.db());
+    const browser = consoleBrowser(fixed.app);
+    expect((await password(browser, user)).json()).toEqual({ next: 'two_step' });
+    const response = await browser.post('/platform/auth/totp/verify', { code: '000000' });
+    expect(response.json()).toEqual({ next: 'done' });
+  });
+
+  it('turns a new authenticator on with the fixed code at set-up', async () => {
+    const user = await insertConsoleUser(fixed.db(), { totp: false });
+    const browser = consoleBrowser(fixed.app);
+    expect((await password(browser, user)).json()).toEqual({ next: 'two_step_setup' });
+    expect((await browser.post('/platform/auth/totp/setup')).statusCode).toBe(200);
+    const response = await browser.post('/platform/auth/totp/verify', { code: '000000' });
+    expect(response.json()).toEqual({ next: 'done' });
+    expect((await consoleTotpOf(fixed.db(), user.id)).totpEnabled).toBe(true);
   });
 });

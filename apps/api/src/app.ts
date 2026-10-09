@@ -48,6 +48,8 @@ function trustHops(hops: number): false | ((address: string, hop: number) => boo
 /** The one route that takes a `text/plain` body: SNS posts its JSON that way (D28 follow-up). */
 const TEXT_PLAIN_ROUTE = `POST ${API_PREFIX}/webhooks/ses`;
 const TEXT_PLAIN = /^\s*text\/plain\s*(?:;|$)/i;
+/** Routes whose answers may carry a session step, a TOTP secret or recovery codes. */
+const NO_STORE_ROUTE = /^\/api\/v1\/(?:auth\/|platform\/auth\/|me\/totp$)/;
 
 /**
  * Builds and initialises the API (Nest on Fastify) with the `/api/v1` prefix, the request
@@ -100,6 +102,14 @@ export async function createApp(
       return;
     }
     done();
+  });
+  // Sign-in answers, TOTP secrets and recovery codes are never stored by a browser or a proxy
+  // (Task 10 fix round 1, M3): every /auth, /platform/auth and /me/totp response, errors included.
+  fastify.addHook('onSend', (request, reply, payload, done) => {
+    if (NO_STORE_ROUTE.test(request.routeOptions.url ?? '')) {
+      void reply.header('cache-control', 'no-store');
+    }
+    done(null, payload);
   });
   // Staging must not be indexed (spec 20); onSend also covers error and 404 responses.
   const robotsTag = robotsTagFor(config.APP_ENV, 'api');

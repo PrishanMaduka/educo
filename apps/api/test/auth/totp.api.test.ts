@@ -285,6 +285,16 @@ describe('POST /me/totp (set up an authenticator)', () => {
     return secret;
   };
 
+  it('never lets the secret or the recovery codes be cached (no-store)', async () => {
+    const { browser } = await atSetup();
+    const start = await browser.post('/me/totp', {});
+    expect(start.headers['cache-control']).toBe('no-store');
+    const secret = secretFrom(TotpSetupResult.parse(start.json()).otpauthUri ?? '');
+    const confirm = await browser.post('/me/totp', { code: await totpCode(secret, clock) });
+    expect(confirm.statusCode).toBe(200);
+    expect(confirm.headers['cache-control']).toBe('no-store');
+  });
+
   it('starts with an otpauth URI, then confirms with a code and gives 10 recovery codes', async () => {
     const { account, browser } = await atSetup();
     const start = await browser.post('/me/totp', {});

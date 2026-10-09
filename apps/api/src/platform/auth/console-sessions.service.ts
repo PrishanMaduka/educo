@@ -5,9 +5,11 @@ import { TOUCH_INTERVAL_MS } from '../../common/session/session.service';
 import { CLOCK } from '../../tokens';
 import { PLATFORM_DB } from '../tokens';
 
+import { ConsoleSignInFailures } from './console-sign-in-failures';
 import { PlatformAuthRepository } from './platform-auth.repository';
 
 import type { ConsoleAuth } from './console-auth';
+import type { ConsoleClient } from './console-sign-in-failures';
 import type { ConsoleSessionLookup } from '../../common/session/request-auth';
 import type { Clock } from '../../tokens';
 import type { QuadPlatformDb } from '@quad/db';
@@ -26,13 +28,24 @@ export class ConsoleSessions implements ConsoleSessionLookup {
   constructor(
     @Inject(PLATFORM_DB) private readonly db: QuadPlatformDb,
     private readonly repository: PlatformAuthRepository,
+    private readonly failures: ConsoleSignInFailures,
     @Inject(CLOCK) private readonly now: Clock,
   ) {}
 
-  /** The console session a cookie hash names, at any stage, or null. */
-  async authenticate(tokenHash: Buffer): Promise<ConsoleAuth | null> {
+  /**
+   * The console session a cookie hash names, at any stage, or null. A sign-in step whose user was
+   * deactivated or locked meanwhile is a refused sign-in, so with `client` (HTTP) it is audited.
+   */
+  async authenticate(tokenHash: Buffer, client?: ConsoleClient): Promise<ConsoleAuth | null> {
     const row = await this.db.withPlatform((tx) => this.repository.sessionByToken(tx, tokenHash));
-    if (row === null || row.status !== 'active') return null;
+    if (row === null) return null;
+    if (row.status !== 'active') {
+      if (row.stage !== 'active' && client !== undefined) {
+        const reason = row.status === 'locked' ? 'locked' : 'deactivated';
+        await this.failures.refused(row.platformUserId, reason, client);
+      }
+      return null;
+    }
     const now = new Date(this.now());
     if (now.getTime() >= row.expiresAt.getTime()) return null;
     if (row.stage === 'active') {

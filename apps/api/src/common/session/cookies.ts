@@ -112,6 +112,16 @@ export function clearSessionCookies(reply: FastifyReply, appEnv: AppEnv): void {
 }
 
 /**
+ * The console's cookie options: as the staff ones but `SameSite=Strict` (Task 10 fix round 1), so
+ * no link or form from another site ever arrives with the console session. Nothing outside the
+ * console needs to carry it.
+ */
+function consoleCookieOptions(appEnv: AppEnv, readable: boolean): CookieSerializeOptions {
+  const options = readable ? csrfCookieOptions(appEnv) : sessionCookieOptions(appEnv);
+  return { ...options, sameSite: 'strict' };
+}
+
+/**
  * Sets the console session cookie and its CSRF cookie together (console sign-in, Task 10). Both
  * end with the browser session; the server ends the session after 8 hours idle (spec 05).
  */
@@ -121,15 +131,15 @@ export function setConsoleSessionCookies(
   cookies: { readonly token: string; readonly csrf: string },
 ): void {
   const names = cookieNames(appEnv);
-  void reply.setCookie(names.consoleSession, cookies.token, sessionCookieOptions(appEnv));
-  void reply.setCookie(names.consoleCsrf, cookies.csrf, csrfCookieOptions(appEnv));
+  void reply.setCookie(names.consoleSession, cookies.token, consoleCookieOptions(appEnv, false));
+  void reply.setCookie(names.consoleCsrf, cookies.csrf, consoleCookieOptions(appEnv, true));
 }
 
 /** Clears both console cookies (console sign-out). */
 export function clearConsoleSessionCookies(reply: FastifyReply, appEnv: AppEnv): void {
   const names = cookieNames(appEnv);
-  void reply.clearCookie(names.consoleSession, sessionCookieOptions(appEnv));
-  void reply.clearCookie(names.consoleCsrf, csrfCookieOptions(appEnv));
+  void reply.clearCookie(names.consoleSession, consoleCookieOptions(appEnv, false));
+  void reply.clearCookie(names.consoleCsrf, consoleCookieOptions(appEnv, true));
 }
 
 /** Sets the HttpOnly trusted-device cookie (`trusted_devices` keeps only its SHA-256). */

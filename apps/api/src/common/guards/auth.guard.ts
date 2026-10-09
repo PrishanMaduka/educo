@@ -9,7 +9,7 @@ import { CSRF_HEADER, CsrfTokens, needsCsrfToken } from '../session/csrf';
 import { RequestAuthenticator, attachRequestAuth } from '../session/request-auth';
 
 import { AuthenticatedMarker } from './authenticated.decorator';
-import { PlatformControllerMarker } from './platform-controller.decorator';
+import { PlatformControllerMarker, isPlatformPath } from './platform-controller.decorator';
 import { PreAuthMarker } from './pre-auth.decorator';
 import { PublicMarker } from './public.decorator';
 import { RelativeAccessMarker } from './relative-access.decorator';
@@ -28,8 +28,9 @@ type Access =
 
 /**
  * The global guard (spec 05, rulings F02, F09, F39): every route needs an active session unless
- * it is `@Public()`, `@PreAuth(...)` at a matching stage, or in a `@PlatformController()` class
- * (`PlatformSessionGuard` owns those). The session is the staff cookie, or the parent app's
+ * it is `@Public()`, `@PreAuth(...)` at a matching stage, or a console route: a
+ * `@PlatformController()` class or a path under `/api/v1/platform/` (`PlatformSessionGuard` owns
+ * those). The session is the staff cookie, or the parent app's
  * bearer token when the request has an Authorization header. It then checks the double-submit
  * CSRF token on cookie-authenticated writes (before Task 12's preview guard, ruling F42; bearer
  * requests are exempt), and fills the request context and the active span from the session,
@@ -51,15 +52,17 @@ export class AuthGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     // Deny by default: the API serves HTTP only (sockets authenticate in RealtimeService).
     if (context.getType() !== 'http') return false;
+    const request = context.switchToHttp().getRequest<FastifyRequest>();
     const platform = this.reflector.getAllAndOverride<true | undefined>(
       PlatformControllerMarker.KEY,
       [context.getClass()],
     );
-    if (platform !== undefined) return true;
+    // Console routes, by class or by path, are PlatformSessionGuard's alone: this guard never
+    // authenticates one, whatever its decorators say.
+    if (platform !== undefined || isPlatformPath(request.routeOptions.url)) return true;
     const access = this.accessOf(context);
     if (access.kind === 'public') return true;
 
-    const request = context.switchToHttp().getRequest<FastifyRequest>();
     const auth = await this.authenticator.fromRequest(request);
     if (auth === null) {
       throw new UnauthorizedError();

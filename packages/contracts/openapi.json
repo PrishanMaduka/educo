@@ -940,6 +940,12 @@
           "otpauthUri"
         ]
       },
+      "PlatformNoInput": {
+        "type": "object",
+        "properties": {},
+        "default": {},
+        "additionalProperties": false
+      },
       "PlatformTotpVerifyInput": {
         "type": "object",
         "properties": {
@@ -2038,6 +2044,16 @@
         "tags": [
           "platform"
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlatformNoInput"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "The new authenticator",
@@ -2188,6 +2204,16 @@
         "tags": [
           "platform"
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlatformNoInput"
+              }
+            }
+          }
+        },
         "responses": {
           "204": {
             "description": "Signed out"

@@ -13,19 +13,22 @@ import {
   InvalidCredentialsError,
   UnauthorizedError,
 } from '../../common/errors';
-import { FailureCounter } from '../../common/lockout/failure-counter';
 import { hashSessionToken, newSessionToken } from '../../common/session/cookies';
 import { CsrfTokens } from '../../common/session/csrf';
-import { CLOCK, FIELD_CIPHER } from '../../tokens';
+import { CLOCK, CONFIG, FIELD_CIPHER } from '../../tokens';
 import { PlatformAuditService } from '../audit/platform-audit.service';
 import { PLATFORM_DB } from '../tokens';
 
+import { consoleFixedCode } from './console-fixed-code';
+import { ConsoleSignInFailures, lockoutSubject } from './console-sign-in-failures';
 import { PlatformAuthRepository } from './platform-auth.repository';
 
 import type { ConsoleAuth } from './console-auth';
+import type { ConsoleClient, ConsoleFailureReason } from './console-sign-in-failures';
 import type { PasswordUser, TotpUser } from './platform-auth.repository';
-import type { PlatformAuditAction } from '../../common/audit/audit-actions';
+import type { PlatformAuditAction, AuditMeta } from '../../common/audit/audit-actions';
 import type { TotpMatch } from '../../common/crypto/totp';
+import type { Config } from '../../config';
 import type { Clock } from '../../tokens';
 import type {
   PlatformPasswordSignInInput,
@@ -35,14 +38,10 @@ import type {
 } from '@quad/contracts';
 import type { FieldCipher, PlatformTx, QuadPlatformDb } from '@quad/db';
 
+export type { ConsoleClient } from './console-sign-in-failures';
+
 /** The issuer an authenticator app shows next to the console's code. */
 const TOTP_ISSUER = 'Quad console';
-
-/** Request facts a console sign-in records: never a source of anything it decides. */
-export interface ConsoleClient {
-  readonly ip: string;
-  readonly userAgent: string | null;
-}
 
 /** New console cookies (`setConsoleSessionCookies`). */
 export interface ConsoleCookies {
@@ -55,50 +54,53 @@ export interface ConsoleSignInOutcome {
   readonly cookies: ConsoleCookies;
 }
 
-/** Why a console sign-in failed, in `platform_audit.meta` (never the email, password or code). */
-type FailureReason = 'unknown_email' | 'deactivated' | 'wrong_password' | 'wrong_code';
-
-/** The lockout subject of a console user, apart from accounts' (`FailureCounter`). */
-const lockoutSubject = (platformUserId: string): string => `platform:${platformUserId}`;
-
 /**
  * Console sign-in (spec 05 → Platform console; D37): email and password, then TOTP, which is
  * mandatory (a first sign-in sets it up), for active `platform_users`. The session is
  * `kind='console'`: a 15-minute sign-in step, then 8 hours idle once active, with a new token at
- * every step. Every attempt, step and sign-out is written to `platform_audit` in the same
- * transaction as its change (D17). Failures count toward the lockout like staff sign-in (five in
- * 15 minutes lock for 15 minutes), which fails closed (503) when Redis cannot count them.
+ * every step. Every step and sign-out is written to `platform_audit` in the same transaction as
+ * its change (D17), and every refusal before it answers (`ConsoleSignInFailures`). Failures count
+ * toward the lockout like staff sign-in, which fails closed (503) when Redis cannot count them.
+ * `DEV_FIXED_OTP` opens the console only with `APP_ENV=local` (`consoleFixedCode`).
  */
 @Injectable()
 export class PlatformAuthService {
+  private readonly fixedCode: string | undefined;
+
   constructor(
     @Inject(PLATFORM_DB) private readonly db: QuadPlatformDb,
     private readonly repository: PlatformAuthRepository,
     private readonly audit: PlatformAuditService,
-    private readonly failures: FailureCounter,
+    private readonly failures: ConsoleSignInFailures,
     private readonly hasher: PasswordHasher,
     private readonly totp: TotpCodes,
     private readonly csrf: CsrfTokens,
     @Inject(FIELD_CIPHER) private readonly cipher: FieldCipher,
+    @Inject(CONFIG) config: Config,
     @Inject(CLOCK) private readonly now: Clock,
-  ) {}
+  ) {
+    this.fixedCode = consoleFixedCode(config);
+  }
 
   /**
    * `POST /platform/auth/password`. An unknown email, a deactivated user and a wrong password all
    * answer 401 `invalid_credentials` after the same work: one lookup, one counter read, one
    * Argon2 verify, one counted failure and one audit row. Unknown and deactivated users count
-   * against a throwaway subject, so they are never locked (which would answer 403 instead).
+   * against a throwaway subject, so they are never locked (which would answer 403 instead). A
+   * console session this browser already had (`replacing`) is revoked when the new one starts.
    */
   async password(
     input: PlatformPasswordSignInInput,
     client: ConsoleClient,
+    replacing: Buffer | null,
   ): Promise<ConsoleSignInOutcome> {
     const now = new Date(this.now());
     const user = await this.db.withPlatform((tx) => this.repository.userByEmail(tx, input.email));
     const usable = user !== null && user.status !== 'disabled' ? user : null;
     const subject = lockoutSubject(usable?.id ?? randomUUID());
-    await this.failures.assertCounting(subject);
+    await this.failures.assertCounting(subject, user?.id ?? null, client);
     if (usable !== null && (usable.status === 'locked' || isLockedAt(usable.lockedUntil, now))) {
+      await this.failures.refused(usable.id, 'locked', client);
       throw new AccountLockedError();
     }
     const matches =
@@ -106,10 +108,10 @@ export class PlatformAuthService {
         ? await this.hasher.verifyDummy(input.password)
         : await this.hasher.verify(user.passwordHash, input.password);
     if (usable === null || !matches) {
-      await this.signInFailed(subject, user, failureReason(user), client, now);
+      await this.failures.counted(subject, user?.id ?? null, failureReason(user), client, now);
       throw new InvalidCredentialsError();
     }
-    return this.startSignIn(usable, client, now);
+    return this.startSignIn(usable, client, now, replacing);
   }
 
   /**
@@ -118,7 +120,7 @@ export class PlatformAuthService {
    * authenticator is on.
    */
   async setUpTotp(auth: ConsoleAuth, client: ConsoleClient): Promise<PlatformTotpSetup> {
-    const user = await this.totpUser(auth);
+    const user = await this.totpUser(auth, client);
     if (user.totpEnabled) {
       throw new ConflictError('conflict', formatMessage('error.authenticatorExists'));
     }
@@ -135,9 +137,9 @@ export class PlatformAuthService {
 
   /**
    * `POST /platform/auth/totp/verify` at `two_step` (the authenticator's code) or
-   * `two_step_setup` (the first code of the new one, which turns it on). A wrong or replayed code
-   * is 400 `invalid_code` and counts toward the lockout; a right one opens the console on a new
-   * token.
+   * `two_step_setup` (the first code of the new one, which turns it on). The counter is read
+   * before the code is decrypted or checked. A wrong or replayed code is 400 `invalid_code` and
+   * counts toward the lockout; a right one opens the console on a new token.
    */
   async verifyTotp(
     auth: ConsoleAuth,
@@ -146,9 +148,10 @@ export class PlatformAuthService {
   ): Promise<ConsoleSignInOutcome> {
     const now = new Date(this.now());
     const subject = lockoutSubject(auth.platformUserId);
-    await this.failures.assertCounting(subject);
-    const user = await this.totpUser(auth);
+    await this.failures.assertCounting(subject, auth.platformUserId, client);
+    const user = await this.totpUser(auth, client);
     if (user.status === 'locked' || isLockedAt(user.lockedUntil, now)) {
+      await this.failures.refused(user.id, 'locked', client);
       throw new AccountLockedError();
     }
     const settingUp = auth.stage === 'two_step_setup';
@@ -163,6 +166,7 @@ export class PlatformAuthService {
             input.code,
             now,
             user.totpLastStep,
+            this.fixedCode,
           );
     const accepted =
       sealed !== null &&
@@ -171,7 +175,7 @@ export class PlatformAuthService {
         this.acceptCode(tx, user.id, sealed, match, settingUp, client),
       ));
     if (!accepted) {
-      await this.signInFailed(subject, user, 'wrong_code', client, now);
+      await this.failures.counted(subject, user.id, 'wrong_code', client, now);
       throw new InvalidCodeError();
     }
     const cookies = await this.openConsole(auth, client, now);
@@ -188,16 +192,25 @@ export class PlatformAuthService {
     });
   }
 
-  /** The password is right: a sign-in step session for the code, or for setting one up. */
+  /**
+   * The password is right: a sign-in step session for the code, or for setting one up. The
+   * browser's previous console session, if any, ends in the same transaction.
+   */
   private async startSignIn(
     user: PasswordUser,
     client: ConsoleClient,
     now: Date,
+    replacing: Buffer | null,
   ): Promise<ConsoleSignInOutcome> {
     const next = user.totpEnabled ? 'two_step' : 'two_step_setup';
     const token = newSessionToken();
     const tokenHash = hashSessionToken(token);
     await this.db.withPlatform(async (tx) => {
+      const replaced =
+        replacing === null ? null : await this.repository.revokeSessionByToken(tx, replacing, now);
+      if (replaced !== null) {
+        await this.record(tx, replaced, 'auth.sign_out', client, { reason: 'signed_in_again' });
+      }
       await this.repository.insertSession(tx, {
         platformUserId: user.id,
         stage: next,
@@ -254,42 +267,15 @@ export class PlatformAuthService {
     return { token, csrf: this.csrf.tokenFor(tokenHash) };
   }
 
-  /**
-   * Counts the failure (503 when it cannot), persists a lock it trips, and audits it, in one
-   * transaction. Failures have no actor: nobody is signed in yet.
-   */
-  private async signInFailed(
-    subject: string,
-    user: { readonly id: string } | null,
-    reason: FailureReason,
-    client: ConsoleClient,
-    now: Date,
-  ): Promise<void> {
-    const lockedUntil = await this.failures.count(subject, now);
-    await this.db.withPlatform(async (tx) => {
-      if (lockedUntil !== null && user !== null) {
-        await this.repository.lockUntil(tx, user.id, lockedUntil);
-      }
-      await this.audit.record(tx, {
-        actorPlatformUserId: null,
-        action: 'auth.sign_in_failed',
-        target: user === null ? null : { type: 'platform_user', id: user.id },
-        ip: client.ip,
-        userAgent: client.userAgent,
-        meta: {
-          reason,
-          ...(lockedUntil === null ? {} : { lockedUntil: lockedUntil.toISOString() }),
-        },
-      });
-    });
-    if (lockedUntil !== null) await this.failures.clear(subject);
-  }
-
-  private async totpUser(auth: ConsoleAuth): Promise<TotpUser> {
+  /** The session's user for the authenticator steps; a deactivated one is audited, then 401. */
+  private async totpUser(auth: ConsoleAuth, client: ConsoleClient): Promise<TotpUser> {
     const user = await this.db.withPlatform((tx) =>
       this.repository.totpUser(tx, auth.platformUserId),
     );
-    if (user === null || user.status === 'disabled') throw new UnauthorizedError();
+    if (user === null || user.status === 'disabled') {
+      await this.failures.refused(auth.platformUserId, 'deactivated', client);
+      throw new UnauthorizedError();
+    }
     return user;
   }
 
@@ -298,6 +284,7 @@ export class PlatformAuthService {
     platformUserId: string,
     action: PlatformAuditAction,
     client: ConsoleClient,
+    meta?: AuditMeta,
   ): Promise<void> {
     await this.audit.record(tx, {
       actorPlatformUserId: platformUserId,
@@ -305,11 +292,12 @@ export class PlatformAuthService {
       target: { type: 'platform_user', id: platformUserId },
       ip: client.ip,
       userAgent: client.userAgent,
+      ...(meta === undefined ? {} : { meta }),
     });
   }
 }
 
-function failureReason(user: PasswordUser | null): FailureReason {
+function failureReason(user: PasswordUser | null): ConsoleFailureReason {
   if (user === null) return 'unknown_email';
   return user.status === 'disabled' ? 'deactivated' : 'wrong_password';
 }
