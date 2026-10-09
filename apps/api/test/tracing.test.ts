@@ -16,7 +16,9 @@ describe('tracing', () => {
     );
     expect(tracing.enabled).toBe(true);
     await expect(tracing.shutdown()).resolves.toBeUndefined();
-  });
+    // startTracing imports the OpenTelemetry SDK on first use. Alone that takes about 0.25 s, but
+    // under the full parallel suite the cold imports took just over vitest's 5 s default.
+  }, 30_000);
 
   it('parses W3C-style exporter headers', () => {
     expect(parseOtlpHeaders(undefined)).toEqual({});
