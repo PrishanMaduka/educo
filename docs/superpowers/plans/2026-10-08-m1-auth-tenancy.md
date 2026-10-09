@@ -768,6 +768,14 @@ Steps: test first, implement, `pnpm api:client`, append the D32 bullet, then `pn
 
 **Acceptance:** Accept "`DEV_FIXED_OTP` is refused at boot when `APP_ENV=production`" (already covered in `config.test.ts`). Journey 42 API side.
 
+**Handed on to the Platform users work (M2, spec 07; from the Task 10 review).** `POST /platform/users/:id/reset-totp` must:
+- be owner only, and need a fresh TOTP step-up from the owner making the change (a code checked within the last few minutes, not just an active session);
+- clear the target's `totp_secret_enc`, `totp_enabled` and `totp_last_step`, so the next sign-in goes to `two_step_setup`;
+- revoke every console session of the target (`kind='console'` rows), in the same transaction;
+- write `platform_audit` (actor, target, reason) in that transaction;
+- force a password reset: the target sets a new password through a signed link before they can sign in again;
+- come with a break-glass runbook for a sole owner who has lost their authenticator, since no other owner can reset them (the last owner cannot be demoted or deactivated, spec 07).
+
 ## Phase 4: RBAC and guards
 
 ### Task 11: The permission catalogue and access rules
