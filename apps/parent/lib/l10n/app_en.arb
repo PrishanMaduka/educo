@@ -549,14 +549,28 @@
   },
   "publicDemoMailNote": "Note",
   "publicFooterSample": "Sample school and families are fictional.",
-  "publicFooterCopyright": "© Quad",
+  "publicFooterCopyright": "© {year} {company}",
+  "@publicFooterCopyright": {
+    "placeholders": {
+      "year": {
+        "type": "Object"
+      },
+      "company": {
+        "type": "Object"
+      }
+    }
+  },
   "publicFooterNav": "About Quad",
   "publicFooterAbout": "About",
   "publicFooterSecurity": "Security & trust",
   "publicFooterPrivacy": "Privacy",
   "publicFooterTerms": "Terms",
   "publicFooterSubprocessors": "Sub-processors",
-  "publicFooterContact": "Contact",
+  "publicFooterTagline": "The school, the family and everyone in between, in one circle.",
+  "publicFooterExplore": "Explore",
+  "publicFooterForSchools": "For schools",
+  "publicFooterCompany": "Company",
+  "publicFooterLegal": "Legal",
   "publicNavPages": "Pages",
   "publicNavAbout": "About",
   "publicNavSecurity": "Security",
