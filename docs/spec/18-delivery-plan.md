@@ -100,7 +100,7 @@ To run a milestone in Claude Code, type `/build-milestone M3` (ids with a letter
 - The landing page at `/` from `design/landing.html`, section by section as in [19](19-public-site.md#page-structure): top bar with the school/parent view switch, hero with Maya's phone and circle, ticker, one week round the circle, Wellbeing early with the Leo card, modules and features, kind and safe, demo forms, footer, with the shared SVG avatar and doodle components (no screenshots, D29).
 - The sign-in dialog on the landing page (the M1 flow), `/#signin`, and **Open {school}** for signed-in visitors.
 - Demo requests: `POST /api/v1/public/demo-requests` with Turnstile, a 5 per hour per IP limit and a honeypot; `platform_leads`; the sales email and the requester's confirmation.
-- Legal pages `/legal/terms`, `/legal/privacy`, `/legal/dpa`, `/legal/subprocessors` (the D21 list), `/legal/cookies`.
+- Legal pages `/legal/terms`, `/legal/privacy`, `/legal/dpa`, `/legal/cookies`; the D21 sub-processor list is a section of the privacy policy (D44).
 - The `/p/*` "Get the Quad app" fallback page and the `/.well-known` app-link files covering only `/p/*`.
 - SEO (titles, meta, OG image, `sitemap.xml`, `robots.txt`, canonical, JSON-LD), Plausible analytics behind its variable, the Lighthouse CI budget, and the landing visual test.
 

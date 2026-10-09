@@ -29,7 +29,6 @@ describe('Footer', () => {
       ['support@quad-edu.com', 'mailto:support@quad-edu.com'],
       ['Privacy', '/legal/privacy'],
       ['Terms', '/legal/terms'],
-      ['Sub-processors', '/legal/subprocessors'],
     ]);
     expect(within(nav).getByText('Colombo, Sri Lanka')).toBeInTheDocument();
   });

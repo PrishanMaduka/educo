@@ -37,7 +37,6 @@ test.describe('screenshots', () => {
     { path: '/about', name: 'about', width: 1440, scheme: 'light' },
     { path: '/security', name: 'security', width: 1440, scheme: 'light' },
     { path: '/legal/privacy', name: 'privacy', width: 390, scheme: 'dark' },
-    { path: '/legal/subprocessors', name: 'subprocessors', width: 1440, scheme: 'dark' },
     { path: '/legal/terms', name: 'terms', width: 1440, scheme: 'light' },
   ] as const) {
     test(`${shot.path} (${shot.name})`, async ({ page }, testInfo) => {

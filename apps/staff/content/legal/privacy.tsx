@@ -2,7 +2,7 @@ import Link from 'next/link';
 
 import { COMPANY } from '../../src/app/(public)/_lib/company';
 
-import { SUBPROCESSORS } from './subprocessors';
+import { SUBPROCESSORS, SubprocessorCards } from './subprocessors';
 
 import type { ArticleContent } from '../../src/app/(public)/_lib/article';
 
@@ -27,8 +27,8 @@ export const privacyPage: ArticleContent = {
   summary:
     'Schools decide what happens to their data and Quad looks after it for them; this page explains what Quad holds, where it is kept, and how to ask about it.',
   description:
-    'How Quad handles personal data: what each app holds, children’s data, storage in AWS Mumbai, Ask Quad, retention, cookies and your rights.',
-  updated: { date: '2026-10-09', version: '0.1' },
+    'How Quad handles personal data: what each app holds, children’s data, AWS Mumbai storage, the companies involved, Ask Quad, retention and your rights.',
+  updated: { date: '2026-10-09', version: '0.2' },
   hasContents: true,
   sections: [
     {
@@ -214,9 +214,23 @@ export const privacyPage: ArticleContent = {
           </p>
           <p>
             A short list of sub-processors handle limited data outside that region, each for one
-            purpose: {outsideRegion.join(', ')}. The{' '}
-            <Link href="/legal/subprocessors">sub-processors page</Link> says what each one receives
-            and where.
+            purpose: {outsideRegion.join(', ')}.{' '}
+            <Link href="#subprocessors">Companies that handle data for us</Link> says what each one
+            receives and where.
+          </p>
+        </>
+      ),
+    },
+    {
+      id: 'subprocessors',
+      title: 'Companies that handle data for us',
+      body: (
+        <>
+          <p>These companies handle data for Quad, each only for the purpose shown.</p>
+          <SubprocessorCards />
+          <p>
+            We tell schools at least 30 days before we add or replace one of these companies, so
+            they can raise concerns first. Email {mail(privacy)} to be told about changes.
           </p>
         </>
       ),

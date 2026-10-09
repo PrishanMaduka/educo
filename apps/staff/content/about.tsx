@@ -111,8 +111,8 @@ export const aboutPage: ArticleContent = {
           <p>
             Quad is based in {COMPANY.country} and built for schools internationally. School data is
             stored in Amazon Web Services’ Mumbai region; the{' '}
-            <Link href="/legal/subprocessors">sub-processors page</Link> lists the few services that
-            handle data elsewhere.
+            <Link href="/legal/privacy#subprocessors">privacy policy</Link> lists the few services
+            that handle data elsewhere.
           </p>
           <ul>
             <li>{COMPANY.legalName}</li>

@@ -14,7 +14,6 @@ const PAGES = [
   { path: '/security', title: 'Security & trust – Quad', h1: 'How Quad keeps school data safe.' },
   { path: '/legal/privacy', title: 'Privacy policy – Quad', h1: 'Privacy policy' },
   { path: '/legal/terms', title: 'Terms of service – Quad', h1: 'Terms of service' },
-  { path: '/legal/subprocessors', title: 'Sub-processors – Quad', h1: 'Sub-processors' },
 ] as const;
 
 /** The navy header and the cream page, light and dark (spec 19 palette). */
@@ -66,7 +65,7 @@ test.describe('public pages', () => {
   }
 
   test('the legal pages show when they last changed and their version', async ({ page }) => {
-    for (const path of ['/legal/privacy', '/legal/terms', '/legal/subprocessors']) {
+    for (const path of ['/legal/privacy', '/legal/terms']) {
       await page.goto(path);
       await expect(page.getByText(/^Last updated \d{1,2} \w+ 20\d\d · Version \S+$/)).toBeVisible();
     }
@@ -84,9 +83,9 @@ test.describe('public pages', () => {
     await expect(page.getByRole('heading', { name: 'Cookies', level: 2 })).toBeInViewport();
   });
 
-  test('the sub-processor list names every sub-processor', async ({ page }) => {
-    await page.goto('/legal/subprocessors');
-    const wide = (page.viewportSize()?.width ?? 0) > 760;
+  test('the privacy policy names every sub-processor (D44)', async ({ page }) => {
+    await page.goto('/legal/privacy#subprocessors');
+    const list = page.getByRole('list', { name: 'Sub-processors' });
     for (const name of [
       'Amazon Web Services',
       'Anthropic',
@@ -99,10 +98,7 @@ test.describe('public pages', () => {
       'Plausible Analytics',
       'PayHere, Stripe',
     ]) {
-      const entry = wide
-        ? page.getByRole('rowheader', { name, exact: true })
-        : page.getByRole('heading', { name, exact: true, level: 3 });
-      await expect(entry).toBeVisible();
+      await expect(list.getByRole('heading', { name, exact: true, level: 3 })).toBeVisible();
     }
     await expect(
       page.getByText('Email support@quad-edu.com to be told about changes'),
@@ -118,7 +114,6 @@ test.describe('public pages', () => {
       ['Security & trust', '/security'],
       ['Privacy', '/legal/privacy'],
       ['Terms', '/legal/terms'],
-      ['Sub-processors', '/legal/subprocessors'],
       ['About', '/about'],
     ] as const) {
       await footer.getByRole('link', { name, exact: true }).click();

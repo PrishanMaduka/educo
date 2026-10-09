@@ -119,7 +119,7 @@ export const securityPage: ArticleContent = {
         <p>
           School data is stored in Amazon Web Services’ Mumbai region (ap-south-1), with
           point-in-time recovery for 35 days and a daily backup copy in Singapore for disaster
-          recovery. The <Link href="/legal/subprocessors">sub-processors page</Link> lists every
+          recovery. The <Link href="/legal/privacy#subprocessors">privacy policy</Link> lists every
           service that handles data and where.
         </p>
       ),

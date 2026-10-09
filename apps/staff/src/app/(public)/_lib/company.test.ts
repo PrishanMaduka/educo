@@ -76,14 +76,7 @@ describe('company facts (D41)', () => {
 
 describe('public pages', () => {
   it('are in the sitemap', () => {
-    expect(PUBLIC_PATHS).toEqual([
-      '/',
-      '/about',
-      '/security',
-      '/legal/privacy',
-      '/legal/terms',
-      '/legal/subprocessors',
-    ]);
+    expect(PUBLIC_PATHS).toEqual(['/', '/about', '/security', '/legal/privacy', '/legal/terms']);
   });
 
   it('each open with one plain sentence and a meta description of 155 characters or fewer', () => {

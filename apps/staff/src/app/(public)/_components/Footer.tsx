@@ -8,13 +8,12 @@ import { focusRing, onlyParent, onlySchool, wrap } from './styles';
 
 import { t } from '@/i18n';
 
-/** The public pages the footer links to (spec 19 footer, D41), in reading order. */
+/** The public pages the footer links to (spec 19 footer, D41, D44), in reading order. */
 export const FOOTER_LINKS = [
   { href: '/about', label: 'public.footer.about' },
   { href: '/security', label: 'public.footer.security' },
   { href: '/legal/privacy', label: 'public.footer.privacy' },
   { href: '/legal/terms', label: 'public.footer.terms' },
-  { href: '/legal/subprocessors', label: 'public.footer.subprocessors' },
 ] as const;
 
 /** One line in a group: a link, or plain text (the city). Labels are already translated. */
@@ -29,13 +28,7 @@ const page = (entry: (typeof FOOTER_LINKS)[number]): Item => ({
   href: entry.href,
   label: t(entry.label),
 });
-const [about, security, privacy, terms, subprocessors] = FOOTER_LINKS.map(page) as [
-  Item,
-  Item,
-  Item,
-  Item,
-  Item,
-];
+const [about, security, privacy, terms] = FOOTER_LINKS.map(page) as [Item, Item, Item, Item];
 
 /**
  * The four link groups (D43), one per quarter of the Quad mark, with the corner that points to the
@@ -76,7 +69,7 @@ function groups(onLanding: boolean): { title: string; card: string; items: Item[
     {
       title: t('public.footer.legal'),
       card: 'bg-site-orange rounded-[28px] rounded-tl-lg',
-      items: [privacy, terms, subprocessors],
+      items: [privacy, terms],
     },
   ];
 }
