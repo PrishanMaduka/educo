@@ -134,7 +134,7 @@ A school picks one colour in the console (Branding). Inside its staff portal, an
 
 - The parent app's Home greeting is Bricolage 800 at 27 px on one line (the prototype's phone header). The story-card greeting on the web uses Display.
 - Numbers in tables and tiles use `font-variant-numeric: tabular-nums`.
-- **Highlight.** A key word in a sentence gets a lime marker: `box-shadow: inset 0 -0.32em 0 var(--gold-soft)`. In story cards and on navy, the highlighted word (for example the greeted name) is a lime pill, rotated −2°, with navy text.
+- **Highlight.** A key word in a sentence gets a lime marker: `box-shadow: inset 0 -0.32em 0 var(--gold-soft)`. In story cards and on navy, the highlighted word is a lime pill with navy text, rotated −2°. On the greeting card the greeted name is the same pill, straight (D38).
 
 ### Space, shape, elevation and focus
 
@@ -183,7 +183,7 @@ A school picks one colour in the console (Branding). Inside its staff portal, an
 
 ### Story card
 
-- Every page opens with a **story card**: navy (`navy-card`), `r-lg` corners, cream text. An eyebrow, a Bricolage headline with one lime-highlighted word, one or two sentences with the key numbers in bold, and two or three actions. The primary action on navy uses `rail-active`, and secondary actions are outlined in `navy-line`.
+- Every page opens with a **story card**: navy (`navy-card`), `r-lg` corners, cream text. An eyebrow, a Bricolage headline with one lime-highlighted word, one or two sentences with the key numbers in bold, and two or three actions. The primary action on navy uses `rail-active`, and secondary actions are outlined in `navy-line`. **On the greeting card** (the staff Dashboard and the console home) the primary action is **cream** instead: `on-navy` fill and border with `navy` text (16:1 on navy, 13:1 on `navy-2`), hover `on-navy-2`, and a 2 px `on-navy` focus ring offset 3 px, so it never clashes with the lime name (D38). The school colour stays on primary buttons everywhere else.
 
 ### The greeting section (time of day)
 
@@ -191,16 +191,17 @@ A school picks one colour in the console (Branding). Inside its staff portal, an
 
 | Period | Hours | Words | Scene |
 |---|---|---|---|
-| Morning | 05:00–11:59 | Good morning | A `c1` (pink) sun rising behind `c3` (sky) and `c2` (indigo) hills, birds |
-| Afternoon | 12:00–16:59 | Good afternoon | A high `c4` (orange) sun with a dotted halo and a few clouds; `c5` (green) and `c2` hills |
-| Evening | 17:00–19:59 | Good evening | An orange-to-pink sun setting behind the far hill, short rays, birds |
-| Night | 20:00–04:59 | Good evening (until midnight), then Hello | A crescent moon, twinkling stars and dark hills |
+| Morning | 05:00–11:59 | Good morning | An orange sun with a dashed ring, a `navy-line` cloud, birds, an orange kite, a sky back hill, a lime front hill and a lime sparkle |
+| Afternoon | 12:00–16:59 | Good afternoon | A lime sun high up with a dashed ring, two clouds, the kite, a sky back hill, an orange front hill and a pink sparkle |
+| Evening | 17:00–19:59 | Good evening | A pink sun setting behind violet and `navy-line` hills, birds, an orange sparkle and a pink heart |
+| Night | 20:00–04:59 | Good evening (until midnight), then Hello | A cream crescent, twinkling stars (cream and lime) and `navy-line` and `navy-2` hills |
 
-- The scenes are the same drawings as before, **recoloured**: `scenes.js` paints them with `surface`, `ink-3`, `c1`–`c5` and the rail navy, so coral became pink, lilac became sky, amber became orange and teal became green. On the staff Dashboard the scene sits inside the navy story card.
-- **Assets** (source of truth `design/brand/greeting/`): `scenes.js` (one generator for every scene, palette-driven), the exported `{morning,afternoon,evening,night}-{light,dark}.svg` (1200 × 320), PNG renders in `png/` at @1x and @2x, and 24 px icons `icon-{period}.svg`. Re-export with `node design/brand/greeting/export.js`. The brand page (`design/brand.html#greeting`) shows them all.
-- **Web** (`packages/ui`): `<GreetingScene period>` is a port of `scenes.js` that colours the SVG with the theme tokens (CSS variables), so it follows light and dark mode without separate files. `greetingPeriod(date, timeZone)` lives in `packages/domain/greeting`, with unit tests for every boundary (04:59, 05:00, 11:59, 12:00, 16:59, 17:00, 19:59, 20:00, 23:59, 00:00).
+- The scenes are **flat** (D38): solid fills only, with no gradients, glows, opacity layers or see-through hills, in the landing-page palette (navy, `navy-2`, `navy-line`, cream, lime `#C8F169`, pink `#FF6FAE`, sky `#59C3FF`, orange `#FF9B45`, violet `#8C93FF`). Each scene is drawn in a 600 × 300 box at the bottom right of the 1200 × 320 view box and is transparent elsewhere, so the card colour shows through. On the staff Dashboard and the console home the scene sits inside the navy story card.
+- **Palettes:** `scenes.js` names the flat colours as keys, plus a few roles that depend on the backdrop: `muted` (birds, kite string), `cloud`, `hill` (the sky back hill), `moon`, `star` and `deep` (the front night hill). `DARK` is for navy (cloud `navy-line`, cream moon and stars); `LIGHT` is for cream (a pale cloud, a deeper sky hill, an orange moon and violet stars), as shown in `design/brand.html#greeting`. The prototypes colour the scene with CSS variables, and a container can retune a role with `--gs-*` (the dark-mode navy-2 card sets `--gs-deep` to navy so the front night hill still shows).
+- **Assets** (source of truth `design/brand/greeting/`): `scenes.js` (one generator for every scene, palette-driven), the exported `{morning,afternoon,evening,night}-{light,dark}.svg` (1200 × 320), PNG renders in `png/` at @1x and @2x (transparent outside the drawing), and 24 px icons `icon-{period}.svg`. Re-export with `node design/brand/greeting/export.js`. The brand page (`design/brand.html#greeting`) shows them all.
+- **Web** (`packages/ui`): `<GreetingScene period>` is a port of `scenes.js` (same flat shapes) that colours the SVG with the theme tokens (CSS variables): `c1`–`c5` for pink, violet, sky, orange and lime, and `rail`, `rail-2`, `ink-2`, `ink-3` and `line-strong` for the roles, so it follows light and dark mode without separate files. `greetingPeriod(date, timeZone)` lives in `packages/domain/greeting`, with unit tests for every boundary (04:59, 05:00, 11:59, 12:00, 16:59, 17:00, 19:59, 20:00, 23:59, 00:00).
 - **Flutter:** the parent header uses the icons (`assets/greeting/icon-*.svg` via `flutter_svg`, on a 20 px round tint): `c4` orange for morning and afternoon, `c1` pink for evening and `c3` sky for night. The API's `GET /family/home` returns the period computed for the device's time zone header, and the app falls back to the device clock offline.
-- The scene is one SVG with `preserveAspectRatio="xMaxYMax slice"`, positioned `absolute; inset: 0`, behind the whole section. Text always sits on the calm left side (max width about 64%), with the hills below the buttons (bottom padding of about 70 px).
+- The scene is one SVG with `preserveAspectRatio="xMaxYMax slice"`, positioned `absolute; inset: 0`, behind the whole section. Text always sits on the calm left side (max width about 64%); the hills rise on the right. The card is about 40 px shorter than before D38: 26 px top and about 70 px bottom padding on the staff Dashboard (50 px on the console home, which has the calendar note).
 - On narrow screens the scene shrinks to a band about 130 px tall along the bottom, and the text uses the full width.
 - Motion: the sun or moon rises once on load (1.4 s) and the stars twinkle slowly; nothing moves with reduced motion.
 - Content: a small date line, then "Good morning, {first name}" with the highlighted name, a one- or two-sentence summary computed from live data, a context line (week of term, next break) and up to three actions.
