@@ -11,7 +11,9 @@ import { z } from 'zod';
  * three business-rule codes (422): `last_admin` (the school's last active admin cannot be demoted
  * or deactivated), `system_role_locked` (a system role cannot be changed or deleted) and
  * `already_member` (an invited address already belongs to a member of the school), and, from
- * fix round 1, `own_role_locked` (nobody changes a role they hold themselves).
+ * fix round 1, `own_role_locked` (nobody changes a role they hold themselves). Task 15 adds
+ * `family_member` (422): an invited address belongs to a guardian or relative of the school,
+ * whose one membership there can never become staff.
  */
 export const ErrorCode = z.enum([
   'validation',
@@ -30,6 +32,7 @@ export const ErrorCode = z.enum([
   'system_role_locked',
   'already_member',
   'own_role_locked',
+  'family_member',
   'app_update_required',
   'invalid_link',
   'invalid_credentials',

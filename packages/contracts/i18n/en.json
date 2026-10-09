@@ -65,6 +65,7 @@
   "error.users.lastAdmin": "The school needs at least one active admin. Make someone else an admin first.",
   "error.users.acceptInviteFirst": "They become active when they accept their invitation.",
   "error.users.alreadyMember": "This person is already a member of staff here.",
+  "error.users.familyMember": "This address belongs to a family member at this school.",
   "error.users.twoStepOn": "They already use two-step sign-in.",
   "error.users.notActive": "This only works for someone who can sign in now.",
   "error.users.notInvited": "Only a pending invitation can be sent again.",

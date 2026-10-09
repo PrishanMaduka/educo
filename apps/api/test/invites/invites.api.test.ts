@@ -305,7 +305,7 @@ describe('POST /users/invite races and re-invites (fix round 1, M5)', () => {
     expect(rows[0]).toEqual({ last_sign_in_at: null, locale: null, theme: 'system' });
   });
 
-  it("never turns a removed guardian's membership into staff: 422 already_member", async () => {
+  it("never turns a removed guardian's membership into staff: 422 family_member (Task 14 review)", async () => {
     const { school, admin } = await arrange();
     const existing = await insertPasswordAccount(db());
     const removed = await insertMember(db(), school.id, existing.id, { kind: 'guardian' });
@@ -317,14 +317,41 @@ describe('POST /users/invite races and re-invites (fix round 1, M5)', () => {
     });
 
     expect(response.statusCode).toBe(422);
-    const body = response.json<{ code: string; fields?: Record<string, string> }>();
-    expect(body.code).toBe('already_member');
-    expect(Object.keys(body.fields ?? {})).toEqual(['emails.0']);
+    const body = response.json<{
+      code: string;
+      message: string;
+      fields?: Record<string, string>;
+    }>();
+    expect(body.code).toBe('family_member');
+    expect(body.message).toBe('This address belongs to a family member at this school.');
+    expect(body.fields).toEqual({ 'emails.0': body.message });
     const { rows } = await db().platform.query<{ kind: string; deleted: boolean }>(
       'select kind, deleted_at is not null as deleted from users where id = $1',
       [removed],
     );
     expect(rows[0]).toEqual({ kind: 'guardian', deleted: true });
+  });
+
+  it('names each clash for what it is: a family member, or already a member of staff', async () => {
+    const { school, admin } = await arrange();
+    const relative = await insertPasswordAccount(db());
+    await insertMember(db(), school.id, relative.id, { kind: 'relative' });
+    const staff = await insertPasswordAccount(db());
+    await insertMember(db(), school.id, staff.id);
+
+    const response = await as(admin)('POST', '/users/invite', {
+      emails: [relative.email, staff.email],
+      roleId: school.roles.teacher,
+    });
+
+    expect(response.statusCode).toBe(422);
+    expect(response.json()).toMatchObject({
+      code: 'already_member',
+      fields: {
+        'emails.0': 'This address belongs to a family member at this school.',
+        'emails.1': 'This person is already a member of staff here.',
+      },
+    });
   });
 });
 

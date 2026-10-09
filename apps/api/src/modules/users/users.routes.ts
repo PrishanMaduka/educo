@@ -55,7 +55,7 @@ export const usersRoutes: readonly ApiRoute[] = [
     method: 'post',
     path: '/users/invite',
     summary:
-      'Invite 1 to 50 people by email with a role; an address already here is 422 already_member (needs X-CSRF-Token)',
+      'Invite 1 to 50 people by email with a role; an address already on the staff is 422 already_member, a family member’s 422 family_member (needs X-CSRF-Token)',
     tags: TAGS,
     request: { body: Invite },
     responses: { 201: { description: 'The invited members', schema: Invited } },
