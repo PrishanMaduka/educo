@@ -10,6 +10,8 @@ export * from './auth/signed-link';
 export * from './auth/sign-in';
 export * from './auth/sso';
 export * from './auth/totp';
+export * from './auth/otp';
+export * from './auth/tokens';
 export * from './audit/actions';
 export * from './me/greeting';
 export * from './me/me';

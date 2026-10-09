@@ -1,10 +1,12 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  ACCESS_TOKEN_MINUTES,
   CONSOLE_IDLE_HOURS,
   DEFAULT_SESSION_HOURS,
   KEEP_SIGNED_IN_DAYS,
   REFRESH_FAMILY_DAYS,
+  SELECT_SCHOOL_MINUTES,
   SIGN_IN_STEP_MINUTES,
   sessionExpiry,
 } from './session-expiry';
@@ -104,6 +106,19 @@ describe('sessionExpiry', () => {
       ).toEqual({ expiresAt: at(15 * 60 * 1000), expired: false });
       expect(
         sessionExpiry({ kind: 'sign_in_step', startedAt: T0, now: at(15 * 60 * 1000) }).expired,
+      ).toBe(true);
+    });
+  });
+
+  describe("a parent's school choice (OQ20: several schools after the code)", () => {
+    it('lives 5 minutes from the code, and the access token 15 minutes (spec 05)', () => {
+      expect(SELECT_SCHOOL_MINUTES).toBe(5);
+      expect(ACCESS_TOKEN_MINUTES).toBe(15);
+      expect(
+        sessionExpiry({ kind: 'select_school', startedAt: T0, now: at(5 * 60 * 1000 - 1) }),
+      ).toEqual({ expiresAt: at(5 * 60 * 1000), expired: false });
+      expect(
+        sessionExpiry({ kind: 'select_school', startedAt: T0, now: at(5 * 60 * 1000) }).expired,
       ).toBe(true);
     });
   });

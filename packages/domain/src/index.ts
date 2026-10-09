@@ -17,10 +17,12 @@ export {
 } from './auth/password-policy';
 export type { SessionExpiry, SessionExpiryInput } from './auth/session-expiry';
 export {
+  ACCESS_TOKEN_MINUTES,
   CONSOLE_IDLE_HOURS,
   DEFAULT_SESSION_HOURS,
   KEEP_SIGNED_IN_DAYS,
   REFRESH_FAMILY_DAYS,
+  SELECT_SCHOOL_MINUTES,
   SIGN_IN_STEP_MINUTES,
   sessionExpiry,
 } from './auth/session-expiry';
@@ -45,4 +47,20 @@ export {
   generateRecoveryCodes,
   normaliseRecoveryCode,
 } from './auth/recovery-codes';
+export type { OtpSendDecision } from './auth/otp-send-decision';
+export {
+  OTP_CODE_MINUTES,
+  OTP_DAILY_LIMIT,
+  OTP_MAX_ATTEMPTS,
+  OTP_RESEND_SECONDS,
+  OTP_WINDOW_LIMIT,
+  OTP_WINDOW_MINUTES,
+  otpSendDecision,
+} from './auth/otp-send-decision';
+export type { FixedOtpConfig, OtpSubject } from './auth/fixed-otp';
+export { STORE_REVIEW_OTP, fixedOtpFor } from './auth/fixed-otp';
+export type { PhoneCountry, PhoneParse } from './auth/phone-e164';
+export { PHONE_COUNTRIES, parseInternationalPhone, parsePhone } from './auth/phone-e164';
+export type { RefreshFacts, RefreshOutcome } from './auth/refresh-rotation';
+export { refreshOutcome } from './auth/refresh-rotation';
 export { firstNameOf } from './people/first-name';

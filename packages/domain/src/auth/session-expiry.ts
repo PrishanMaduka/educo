@@ -11,6 +11,13 @@ export const REFRESH_FAMILY_DAYS = 60;
  * long from the step that started it; Keep me signed in applies only once it is active (D32).
  */
 export const SIGN_IN_STEP_MINUTES = 15;
+/**
+ * A parent whose code found several schools has this long to choose one with the
+ * `select_school` token (OQ20).
+ */
+export const SELECT_SCHOOL_MINUTES = 5;
+/** Spec 05: a parent's access token (JWT) lives 15 minutes. */
+export const ACCESS_TOKEN_MINUTES = 15;
 
 const HOUR_MS = 60 * 60 * 1000;
 const DAY_MS = 24 * HOUR_MS;
@@ -30,7 +37,9 @@ export type SessionExpiryInput =
   | { readonly kind: 'support'; readonly supportExpiresAt: Date; readonly now: Date }
   | { readonly kind: 'refresh_family'; readonly createdAt: Date; readonly now: Date }
   /** A session still in the sign-in steps; each step starts it afresh. */
-  | { readonly kind: 'sign_in_step'; readonly startedAt: Date; readonly now: Date };
+  | { readonly kind: 'sign_in_step'; readonly startedAt: Date; readonly now: Date }
+  /** A parent's choice of school after the code (OQ20). */
+  | { readonly kind: 'select_school'; readonly startedAt: Date; readonly now: Date };
 
 export interface SessionExpiry {
   readonly expiresAt: Date;
@@ -60,14 +69,17 @@ function expiresAtOf(input: SessionExpiryInput): Date {
       return new Date(input.createdAt.getTime() + REFRESH_FAMILY_DAYS * DAY_MS);
     case 'sign_in_step':
       return new Date(input.startedAt.getTime() + SIGN_IN_STEP_MINUTES * 60 * 1000);
+    case 'select_school':
+      return new Date(input.startedAt.getTime() + SELECT_SCHOOL_MINUTES * 60 * 1000);
   }
 }
 
 /**
  * When a session ends (spec 05, Sessions): web sessions after the school's idle timeout (30 days
  * with "Keep me signed in"), console sessions after 8 hours idle, support visits at their hard
- * limit, parent refresh families 60 days after they were created, and a session still in the
- * sign-in steps 15 minutes after its last step.
+ * limit, parent refresh families 60 days after they were created, a session still in the
+ * sign-in steps 15 minutes after its last step, and a parent's choice of school 5 minutes after
+ * the code.
  */
 export function sessionExpiry(input: SessionExpiryInput): SessionExpiry {
   const expiresAt = expiresAtOf(input);
