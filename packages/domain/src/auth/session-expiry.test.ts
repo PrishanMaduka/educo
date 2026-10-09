@@ -5,6 +5,7 @@ import {
   DEFAULT_SESSION_HOURS,
   KEEP_SIGNED_IN_DAYS,
   REFRESH_FAMILY_DAYS,
+  SIGN_IN_STEP_MINUTES,
   sessionExpiry,
 } from './session-expiry';
 
@@ -91,6 +92,18 @@ describe('sessionExpiry', () => {
       ).toEqual({ expiresAt: at(60 * DAY), expired: false });
       expect(
         sessionExpiry({ kind: 'refresh_family', createdAt: T0, now: at(60 * DAY) }).expired,
+      ).toBe(true);
+    });
+  });
+
+  describe('a sign-in step (password done, two-step or school choice still to come)', () => {
+    it('lives 15 minutes from the step that started it, whatever Keep me signed in says', () => {
+      expect(SIGN_IN_STEP_MINUTES).toBe(15);
+      expect(
+        sessionExpiry({ kind: 'sign_in_step', startedAt: T0, now: at(15 * 60 * 1000 - 1) }),
+      ).toEqual({ expiresAt: at(15 * 60 * 1000), expired: false });
+      expect(
+        sessionExpiry({ kind: 'sign_in_step', startedAt: T0, now: at(15 * 60 * 1000) }).expired,
       ).toBe(true);
     });
   });

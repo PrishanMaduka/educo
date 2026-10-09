@@ -16,6 +16,26 @@ export {
   DEFAULT_SESSION_HOURS,
   KEEP_SIGNED_IN_DAYS,
   REFRESH_FAMILY_DAYS,
+  SIGN_IN_STEP_MINUTES,
   sessionExpiry,
 } from './auth/session-expiry';
+export type { SignInFacts } from './auth/next-sign-in-step';
+export { nextSignInStep } from './auth/next-sign-in-step';
+export type { LockoutState } from './auth/lockout';
+export {
+  LOCKOUT_FAILURES,
+  LOCKOUT_MINUTES,
+  LOCKOUT_WINDOW_MINUTES,
+  isLockedAt,
+  lockoutState,
+} from './auth/lockout';
+export type { TwoStepResult, TwoStepRow } from './auth/two-step-rule';
+export { strictestTwoStep } from './auth/two-step-rule';
+export type { RandomBytes } from './auth/recovery-codes';
+export {
+  RECOVERY_CODE_COUNT,
+  RECOVERY_CODE_PATTERN,
+  generateRecoveryCodes,
+  normaliseRecoveryCode,
+} from './auth/recovery-codes';
 export { firstNameOf } from './people/first-name';

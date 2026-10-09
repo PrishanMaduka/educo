@@ -2,8 +2,11 @@ import { z } from 'zod';
 
 /**
  * Error codes from spec 06 (Conventions), plus `internal` for the 500 the API returns when
- * something unexpected fails (the cause is logged, never sent to the client), and
- * `invalid_link` (400) for any signed link that is refused (spec 05; D32).
+ * something unexpected fails (the cause is logged, never sent to the client), and these from
+ * spec 05 (D32): `invalid_link` (400) for any signed link that is refused, `invalid_credentials`
+ * (401) for a wrong email or password, `account_locked` (403) after the lockout rule,
+ * `invalid_code` (400) for a wrong two-step or recovery code, `two_step_required` (403) and
+ * `preview_read_only` (403, Task 12) for a write while previewing a role.
  */
 export const ErrorCode = z.enum([
   'validation',
@@ -20,6 +23,11 @@ export const ErrorCode = z.enum([
   'business_rule',
   'app_update_required',
   'invalid_link',
+  'invalid_credentials',
+  'account_locked',
+  'invalid_code',
+  'two_step_required',
+  'preview_read_only',
   'rate_limited',
   'internal',
 ]);

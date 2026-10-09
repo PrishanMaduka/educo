@@ -6,6 +6,11 @@ export const KEEP_SIGNED_IN_DAYS = 30;
 export const CONSOLE_IDLE_HOURS = 8;
 /** Spec 05: a parent's rotating refresh token family lives 60 days. */
 export const REFRESH_FAMILY_DAYS = 60;
+/**
+ * A session between the password and the school (two-step, set-up or Choose a school) lives this
+ * long from the step that started it; Keep me signed in applies only once it is active (D32).
+ */
+export const SIGN_IN_STEP_MINUTES = 15;
 
 const HOUR_MS = 60 * 60 * 1000;
 const DAY_MS = 24 * HOUR_MS;
@@ -23,7 +28,9 @@ export type SessionExpiryInput =
   | { readonly kind: 'console'; readonly lastSeenAt: Date; readonly now: Date }
   /** A support visit's `expires_at`: 60 minutes after it started, a hard limit (spec 05). */
   | { readonly kind: 'support'; readonly supportExpiresAt: Date; readonly now: Date }
-  | { readonly kind: 'refresh_family'; readonly createdAt: Date; readonly now: Date };
+  | { readonly kind: 'refresh_family'; readonly createdAt: Date; readonly now: Date }
+  /** A session still in the sign-in steps; each step starts it afresh. */
+  | { readonly kind: 'sign_in_step'; readonly startedAt: Date; readonly now: Date };
 
 export interface SessionExpiry {
   readonly expiresAt: Date;
@@ -51,13 +58,16 @@ function expiresAtOf(input: SessionExpiryInput): Date {
       return input.supportExpiresAt;
     case 'refresh_family':
       return new Date(input.createdAt.getTime() + REFRESH_FAMILY_DAYS * DAY_MS);
+    case 'sign_in_step':
+      return new Date(input.startedAt.getTime() + SIGN_IN_STEP_MINUTES * 60 * 1000);
   }
 }
 
 /**
  * When a session ends (spec 05, Sessions): web sessions after the school's idle timeout (30 days
  * with "Keep me signed in"), console sessions after 8 hours idle, support visits at their hard
- * limit, and parent refresh families 60 days after they were created.
+ * limit, parent refresh families 60 days after they were created, and a session still in the
+ * sign-in steps 15 minutes after its last step.
  */
 export function sessionExpiry(input: SessionExpiryInput): SessionExpiry {
   const expiresAt = expiresAtOf(input);

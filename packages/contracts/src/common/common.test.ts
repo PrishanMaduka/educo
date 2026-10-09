@@ -34,7 +34,7 @@ describe('contracts', () => {
       ErrorBodySchema.safeParse({ code: 'forbidden', message: 'No', fields: { a: 'b' } }).success,
     ).toBe(true);
     expect(ErrorCode.options).toContain('app_update_required');
-    expect(ErrorCode.options).toHaveLength(16);
+    expect(ErrorCode.options).toHaveLength(21);
   });
 
   it('has invalid_link for every refused signed link (spec 05, one message for every cause)', () => {

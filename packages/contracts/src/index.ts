@@ -7,6 +7,8 @@ export * from './enums';
 export * from './health';
 export * from './permissions';
 export * from './auth/signed-link';
+export * from './auth/sign-in';
+export * from './auth/totp';
 export * from './audit/actions';
 export * from './me/greeting';
 export * from './me/me';
