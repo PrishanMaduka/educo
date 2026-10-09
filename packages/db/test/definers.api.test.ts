@@ -617,8 +617,14 @@ describe('support sessions by token hash (R-support-token)', () => {
     const support = await insertSupportSession(withPlatform, quadStaff.id, schoolB.id);
     const tokenHash = randomTokenHash();
     await definers.redeemSupportSession(support.id, tokenHash);
-    await definers.endSupportSession(tokenHash);
-    await definers.endSupportSession(tokenHash);
+    // The first call names the visit it ended (Task 16: the API audits it in the school once);
+    // the second finds nothing to end.
+    await expect(definers.endSupportSession(tokenHash)).resolves.toEqual({
+      supportSessionId: support.id,
+      tenantId: schoolB.id,
+      platformUserId: quadStaff.id,
+    });
+    await expect(definers.endSupportSession(tokenHash)).resolves.toBeNull();
     await expect(definers.sessionByToken(tokenHash)).resolves.toBeNull();
     const [row] = await platformRows<{ ended: boolean }>(
       'select ended_at is not null as ended from support_sessions where id = $1',
@@ -638,6 +644,32 @@ describe('support sessions by token hash (R-support-token)', () => {
         tenant_id: schoolB.id,
       },
     ]);
+  });
+});
+
+describe('end_support_session across schools (Task 16)', () => {
+  it("ends only the visit its cookie names: school A's visit stays active when B's ends", async () => {
+    const inA = await insertSupportSession(withPlatform, quadStaff.id, schoolA.id);
+    const inB = await insertSupportSession(withPlatform, quadStaff.id, schoolB.id);
+    const hashA = randomTokenHash();
+    const hashB = randomTokenHash();
+    await definers.redeemSupportSession(inA.id, hashA);
+    await definers.redeemSupportSession(inB.id, hashB);
+
+    await expect(definers.endSupportSession(hashB)).resolves.toMatchObject({
+      tenantId: schoolB.id,
+    });
+
+    await expect(definers.sessionByToken(hashA)).resolves.toMatchObject({
+      kind: 'support',
+      supportSessionId: inA.id,
+    });
+    await expect(definers.endSupportSession(randomTokenHash())).resolves.toBeNull();
+    const ended = await platformRows<{ id: string }>(
+      'select id from support_sessions where id = any($1) and ended_at is not null',
+      [[inA.id, inB.id]],
+    );
+    expect(ended).toEqual([{ id: inB.id }]);
   });
 });
 

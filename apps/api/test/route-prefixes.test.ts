@@ -30,6 +30,10 @@ describe('route prefixes come from API_PREFIX (fix round 2)', () => {
     ['/api/v1/me/totpx', false],
     ['/api/v1/me', false],
     ['/api/v1/platform/me', false],
+    // The support visit's single-use link (Task 16).
+    ['/api/v1/platform/tenants/:id/support-session', true],
+    ['/api/v1/platform/tenants/:id/support-sessionx', false],
+    ['/api/v1/platform/tenants', false],
   ])('isNoStoreRoute(%s) is %s', (url, expected) => {
     expect(isNoStoreRoute(url)).toBe(expected);
   });

@@ -6,6 +6,8 @@ import { AuthController } from '../../public/auth/auth.controller';
 import { OtpController } from '../../public/auth/otp.controller';
 import { PasswordResetController } from '../../public/signed-links/password-reset.controller';
 import { PasswordResetService } from '../../public/signed-links/password-reset.service';
+import { SupportSessionController } from '../../public/signed-links/support-session.controller';
+import { SupportSessionService } from '../../public/signed-links/support-session.service';
 import { LOGGER, OTP_SENDS, PASSWORD_RESETS, REDIS } from '../../tokens';
 import { TotpController } from '../me/totp.controller';
 
@@ -49,7 +51,13 @@ export class AuthModule {
       module: AuthModule,
       global: true,
       exports: [SignInService, AuthRepository],
-      controllers: [AuthController, OtpController, PasswordResetController, TotpController],
+      controllers: [
+        AuthController,
+        OtpController,
+        PasswordResetController,
+        SupportSessionController,
+        TotpController,
+      ],
       providers: [
         AccountAudit,
         AuthRepository,
@@ -66,6 +74,7 @@ export class AuthModule {
         RefreshService,
         TokenService,
         PasswordResetService,
+        SupportSessionService,
         passwordResets === undefined
           ? {
               provide: PASSWORD_RESETS,

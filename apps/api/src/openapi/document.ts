@@ -9,8 +9,11 @@ import { schoolRoutes } from '../modules/school/school.routes';
 import { usersRoutes } from '../modules/users/users.routes';
 import { platformAuditRoutes } from '../platform/audit/platform-audit.routes';
 import { platformAuthRoutes } from '../platform/auth/platform-auth.routes';
+import { platformSupportRoutes } from '../platform/support/support.routes';
+import { platformTenantsRoutes } from '../platform/tenants/tenants.routes';
 import { authRoutes } from '../public/auth/auth.routes';
 import { enquiryRoutes } from '../public/enquiry/enquiry.routes';
+import { supportSessionRoutes } from '../public/signed-links/support-session.routes';
 import { sesWebhookRoutes } from '../webhooks/ses/ses-webhook.routes';
 
 import { openApiRoutes } from './openapi.routes';
@@ -32,6 +35,9 @@ export const API_ROUTES: readonly ApiRoute[] = [
   ...authRoutes,
   ...platformAuthRoutes,
   ...platformAuditRoutes,
+  ...platformTenantsRoutes,
+  ...platformSupportRoutes,
+  ...supportSessionRoutes,
   ...usersRoutes,
   ...rolesRoutes,
   ...schoolRoutes,

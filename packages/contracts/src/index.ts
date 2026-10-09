@@ -25,6 +25,7 @@ export * from './web-env';
 export * from './webhooks/ses';
 export * from './observability';
 export * from './platform/auth';
+export * from './platform/support';
 export * from './access/staff-pages';
 export * from './users/users';
 export * from './users/invites';

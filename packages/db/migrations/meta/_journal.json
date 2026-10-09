@@ -141,6 +141,13 @@
       "when": 1791548687084,
       "tag": "0019_update_current_tenant_name_expected",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1791552135959,
+      "tag": "0020_end_support_session_returns",
+      "breakpoints": true
     }
   ]
 }

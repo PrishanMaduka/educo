@@ -310,6 +310,7 @@ function toRequestAuth(session: CachedSession, tokenHash: Buffer): RequestAuth {
       supportSessionId: session.supportSessionId,
       platformUserId: session.platformUserId,
       tenantId: session.tenantId,
+      expiresAt: session.expiresAt,
       tokenHash,
     };
   }

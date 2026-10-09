@@ -130,6 +130,13 @@ export interface MemberTwoStepStatus {
   readonly totpEnabled: boolean;
 }
 
+/** The visit `end_support_session` ended (Task 16): what the school's audit entry names. */
+export interface EndedSupportVisit {
+  readonly supportSessionId: string;
+  readonly tenantId: string;
+  readonly platformUserId: string;
+}
+
 /** The support banner's "as {name} from Quad" (spec 05, Support access). */
 export interface SupportVisit {
   readonly platformUserName: string;
@@ -178,8 +185,11 @@ export interface DefinerCalls {
   consumeSignedToken(use: SignedTokenUse): Promise<boolean>;
   /** Stores the support cookie's hash once; null when ended, expired or already redeemed. */
   redeemSupportSession(supportSessionId: string, tokenHash: Buffer): Promise<string | null>;
-  /** Ends the visit the cookie names, once, and writes `platform_audit`. */
-  endSupportSession(tokenHash: Buffer): Promise<void>;
+  /**
+   * Ends the visit the cookie names, once, and writes `platform_audit`: the visit it ended, or
+   * null when there was none to end (already ended, or no such cookie).
+   */
+  endSupportSession(tokenHash: Buffer): Promise<EndedSupportVisit | null>;
   tenantByEmbedKey(key: string): Promise<EmbedKeyTenant | null>;
   tenantByGatewayAccount(provider: string, accountId: string): Promise<GatewayAccountTenant | null>;
   /** The current school's profile; null without a school. */
@@ -392,7 +402,21 @@ export function createDefinerCalls(pool: pg.Pool): DefinerCalls {
     },
 
     endSupportSession: async (tokenHash) => {
-      await pool.query('select end_support_session($1)', [tokenHash]);
+      const { rows } = await pool.query<{
+        support_session_id: string;
+        tenant_id: string;
+        platform_user_id: string;
+      }>('select support_session_id, tenant_id, platform_user_id from end_support_session($1)', [
+        tokenHash,
+      ]);
+      const [row] = rows;
+      return row
+        ? {
+            supportSessionId: row.support_session_id,
+            tenantId: row.tenant_id,
+            platformUserId: row.platform_user_id,
+          }
+        : null;
     },
 
     tenantByEmbedKey: async (key) => {

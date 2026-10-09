@@ -29,6 +29,7 @@ export type {
   SessionLookup,
   SupportSessionLookup,
   SupportVisit,
+  EndedSupportVisit,
   TenantProfile,
   TenantRename,
 } from './definers';

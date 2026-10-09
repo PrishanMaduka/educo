@@ -24,6 +24,7 @@ import { SignInService } from '../../modules/auth/sign-in.service';
 import { TokenService } from '../../modules/auth/tokens/token.service';
 import { TwoStepService } from '../../modules/auth/two-step.service';
 import { CONFIG } from '../../tokens';
+import { SupportSessionService } from '../signed-links/support-session.service';
 
 import {
   applyLastSchoolCookie,
@@ -58,6 +59,7 @@ export class AuthController {
     private readonly twoStep: TwoStepService,
     private readonly schools: MembershipsService,
     private readonly tokens: TokenService,
+    private readonly supportSessions: SupportSessionService,
     @Inject(CONFIG) private readonly config: Config,
   ) {}
 
@@ -143,6 +145,12 @@ export class AuthController {
   ): Promise<void> {
     if (auth.kind === 'mobile') {
       await this.tokens.signOut(auth, request.ip);
+      return;
+    }
+    if (auth.kind === 'support') {
+      // Signing out of a support visit ends it, as "Exit to platform" does (Task 16).
+      await this.supportSessions.end(auth.tokenHash, request.ip);
+      clearSessionCookies(reply, this.config.APP_ENV);
       return;
     }
     await this.auth.signOut(auth, request.ip);

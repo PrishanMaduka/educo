@@ -24,7 +24,9 @@ export {
   REFRESH_FAMILY_DAYS,
   SELECT_SCHOOL_MINUTES,
   SIGN_IN_STEP_MINUTES,
+  SUPPORT_VISIT_MINUTES,
   sessionExpiry,
+  supportVisitExpiresAt,
 } from './auth/session-expiry';
 export type { SignInFacts } from './auth/next-sign-in-step';
 export { nextSignInStep } from './auth/next-sign-in-step';

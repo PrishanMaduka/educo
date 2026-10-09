@@ -6,7 +6,7 @@ import type { LightMyRequestResponse as Response } from 'fastify';
 /** A fresh client address, so each browser has its own per-IP rate-limit bucket. */
 export const randomIp = (): string => `10.${[...randomBytes(3)].join('.')}`;
 
-type Method = 'GET' | 'POST' | 'PATCH' | 'DELETE';
+type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
 export interface BrowserRequestOptions {
   /** Send `X-CSRF-Token` from the CSRF cookie (default true), as the web app does on writes. */

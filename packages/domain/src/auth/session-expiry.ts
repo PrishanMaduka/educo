@@ -18,6 +18,8 @@ export const SIGN_IN_STEP_MINUTES = 15;
 export const SELECT_SCHOOL_MINUTES = 5;
 /** Spec 05: a parent's access token (JWT) lives 15 minutes. */
 export const ACCESS_TOKEN_MINUTES = 15;
+/** Spec 05: a support visit ("Open as school admin") lasts at most 60 minutes. */
+export const SUPPORT_VISIT_MINUTES = 60;
 
 const HOUR_MS = 60 * 60 * 1000;
 const DAY_MS = 24 * HOUR_MS;
@@ -84,4 +86,12 @@ function expiresAtOf(input: SessionExpiryInput): Date {
 export function sessionExpiry(input: SessionExpiryInput): SessionExpiry {
   const expiresAt = expiresAtOf(input);
   return { expiresAt, expired: input.now.getTime() >= expiresAt.getTime() };
+}
+
+/**
+ * When a support visit opened at `openedAt` ends: its `expires_at`, a hard limit that no activity
+ * extends (spec 05, Support access). The visit's clock starts when the console makes the link.
+ */
+export function supportVisitExpiresAt(openedAt: Date): Date {
+  return new Date(openedAt.getTime() + SUPPORT_VISIT_MINUTES * 60 * 1000);
 }
