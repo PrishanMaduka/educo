@@ -21,6 +21,7 @@ import {
   initialsOf,
   Input,
   Kpi,
+  OtpBoxes,
   PetalBurstProvider,
   Pill,
   Segmented,
@@ -135,6 +136,20 @@ function CardSample() {
         })}
       </p>
     </Card>
+  );
+}
+
+function OtpBoxesSample() {
+  const { t } = useTranslation(DESIGN_NS);
+  const [code, setCode] = useState('12');
+  return (
+    <OtpBoxes
+      label={t('sample.otpLabel')}
+      digitLabel={(position, count) => t('sample.otpDigit', { position, count })}
+      value={code}
+      onChange={setCode}
+      className="max-w-[360px]"
+    />
   );
 }
 
@@ -623,6 +638,7 @@ export const STYLE_GUIDE: readonly StyleGuideEntry[] = [
   { name: 'Kpi', Sample: KpiSample },
   { name: 'PetalBurstProvider', Sample: PetalBurstSample },
   { name: 'usePetalBurst', Sample: PetalBurstSample },
+  { name: 'OtpBoxes', Sample: OtpBoxesSample },
   { name: 'Pill', Sample: PillSample },
   { name: 'Segmented', Sample: SegmentedSample },
   { name: 'Select', Sample: SelectSample },

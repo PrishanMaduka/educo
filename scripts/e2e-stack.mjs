@@ -168,6 +168,10 @@ export function stackEnv({ port, database, example, env }) {
     // The maintenance database: the stack never opens the developer's own.
     DATABASE_ADMIN_URL: withPath(services.DATABASE_ADMIN_URL ?? '', 'postgres'),
     REDIS_URL: withPath(services.REDIS_URL ?? '', String(redisDatabaseFor(port))),
+    // The browser reaches the API through the web app's `/api/v1` rewrite: one proxy, so the
+    // address in X-Forwarded-For is the client's. Each Playwright test sends its own (the
+    // `stack` fixture), so parallel journeys never share the per-IP sign-in limit.
+    TRUST_PROXY_HOPS: '1',
     EMAIL_PROVIDER: 'smtp',
     SMS_PROVIDER: 'log',
     DEV_FIXED_OTP: '000000',

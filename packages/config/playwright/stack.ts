@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 
 import { test as base } from '@playwright/test';
@@ -71,12 +72,33 @@ export interface StackOptions {
 }
 
 /**
- * `test` with the `stack` fixture: `test('…', async ({ page, stack }) => …)`. The port comes from
+ * A private address (`10.x.y.z`) for one test run: the test, its project and its retry. The
+ * stack trusts one proxy hop (the web app's rewrite), so a test that sends it as
+ * `X-Forwarded-For` is its own client and gets its own per-IP sign-in limit (20 a minute), as
+ * people at different schools would. Without it every parallel journey would share one bucket.
+ */
+export function clientAddressFor(testId: string, project: string, retry: number): string {
+  const [a = 0, b = 0, c = 0] = createHash('sha256')
+    .update(`${project}\u0000${testId}\u0000${String(retry)}`)
+    .digest();
+  return `10.${String(a)}.${String(b)}.${String(1 + (c % 254))}`;
+}
+
+/**
+ * `test` with the `stack` fixture: `test('…', async ({ page, stack }) => …)`, and each test's
+ * requests sent as its own client. The port comes from
  * the project's `stackPort` option, so a config can run its stack on :4001 beside another on
  * :4000.
  */
 export const test = base.extend<{ stack: Stack }, StackOptions>({
   stackPort: [DEFAULT_STACK_PORT, { option: true, scope: 'worker' }],
+  // Every request the test's pages make carries its own client address (`clientAddressFor`).
+  extraHTTPHeaders: async ({ extraHTTPHeaders }, use, testInfo) => {
+    await use({
+      ...extraHTTPHeaders,
+      'x-forwarded-for': clientAddressFor(testInfo.testId, testInfo.project.name, testInfo.retry),
+    });
+  },
   stack: async ({ stackPort }, use) => {
     const { seedPassword } = stackSecrets();
     await use({

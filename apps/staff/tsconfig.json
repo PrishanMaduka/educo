@@ -15,6 +15,7 @@
     "content/**/*.ts",
     "content/**/*.tsx",
     "e2e/**/*.ts",
+    "test/**/*.ts",
     "*.ts",
     ".next/types/**/*.ts",
     "site-export/app/**/*.tsx",

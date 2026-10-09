@@ -1,11 +1,14 @@
 import { expect, test } from '@playwright/test';
 import { saveScreenshot, schemeOf, takeScreenshots } from '@quad/config/playwright/checks';
 
+import { withPortalCookie } from './portal-cookie';
+
 // Review screenshots for docs/screenshots/m0 (QUAD_SCREENSHOTS=1 pnpm --filter @quad/staff e2e screenshots).
 test.describe('screenshots', () => {
   test.skip(!takeScreenshots, 'Set QUAD_SCREENSHOTS=1 to write the review screenshots');
 
-  test('/app', async ({ page }, testInfo) => {
+  test('/app', async ({ page, context, baseURL }, testInfo) => {
+    await withPortalCookie(context, baseURL ?? '');
     await page.goto('/app');
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
     await saveScreenshot(page, testInfo, 'm0', 'staff-app');
@@ -52,6 +55,20 @@ test.describe('screenshots', () => {
       await saveScreenshot(page, testInfo, 'landing', shot.name);
     });
   }
+
+  // docs/screenshots/m1/sign-in-<width>-<scheme>.png: the work email step, at 1440 px in light
+  // and 390 px in dark (Task 19).
+  test('/sign-in', async ({ page }, testInfo) => {
+    const width = page.viewportSize()?.width;
+    const scheme = schemeOf(testInfo);
+    test.skip(
+      !(width === 1440 && scheme === 'light') && !(width === 390 && scheme === 'dark'),
+      'Reviewed at 1440 px in light and 390 px in dark',
+    );
+    await page.goto('/sign-in');
+    await expect(page.getByRole('heading', { level: 1, name: 'Sign in to Quad' })).toBeVisible();
+    await saveScreenshot(page, testInfo, 'm1', 'sign-in');
+  });
 
   test('/design', async ({ page }, testInfo) => {
     await page.goto('/design');

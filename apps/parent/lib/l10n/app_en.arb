@@ -52,7 +52,7 @@
   "askQuadShortcut": "/",
   "authSignOut": "Sign out",
   "errorInvalidCredentials": "That email and password don’t match. Check them and try again.",
-  "errorAccountLocked": "Your account is locked for a few minutes after too many tries. We’ve emailed you about it.",
+  "errorAccountLocked": "Your account is locked for 15 minutes after too many tries. We’ve emailed you about it.",
   "errorInvalidCode": "That code didn’t work. Check your authenticator app and try again.",
   "errorSchoolSuspended": "This school is paused right now. Ask your school’s admin.",
   "errorPreviewReadOnly": "You’re previewing a role, so nothing can be changed. Choose Back to my view first.",
@@ -944,5 +944,160 @@
         "type": "Object"
       }
     }
-  }
+  },
+  "errorRateLimited": "That’s a lot of tries in a short time. Wait a minute, then try again.",
+  "errorSomethingWentWrong": "Something went wrong on our side. Try again in a moment.",
+  "signInTitle": "Sign in to Quad",
+  "signInLede": "One sign-in for every school on Quad. We’ll open your school once you’re signed in.",
+  "signInWelcomeBack": "Welcome back to {school}",
+  "@signInWelcomeBack": {
+    "placeholders": {
+      "school": {
+        "type": "Object"
+      }
+    }
+  },
+  "signInEmailLabel": "Work email",
+  "signInEmailPlaceholder": "name@yourschool.org",
+  "signInEmailInvalid": "Enter your work email, like name@yourschool.org.",
+  "signInEmailSubmit": "Continue",
+  "signInParents": "Parents and guardians sign in on the Quad parent app.",
+  "signInAccountChange": "Change",
+  "signInAccountChangeLabel": "Use a different email",
+  "signInPasswordTitle": "Welcome back",
+  "signInPasswordLabel": "Password",
+  "signInPasswordMissing": "Enter your password.",
+  "signInPasswordShow": "Show",
+  "signInPasswordHide": "Hide",
+  "signInPasswordShowLabel": "Show password",
+  "signInPasswordHideLabel": "Hide password",
+  "signInPasswordForgot": "Forgot password?",
+  "signInPasswordKeep": "Keep me signed in on this device",
+  "signInPasswordSubmit": "Sign in",
+  "signInCodeLabel": "6-digit code",
+  "signInCodeDigit": "Digit {position} of {count}",
+  "@signInCodeDigit": {
+    "placeholders": {
+      "position": {
+        "type": "Object"
+      },
+      "count": {
+        "type": "Object"
+      }
+    }
+  },
+  "signInTwoStepTitle": "Two-step sign-in",
+  "signInTwoStepLede": "Enter the 6-digit code from your authenticator app.",
+  "signInTwoStepMissingCode": "Enter all 6 digits.",
+  "signInTwoStepTrust": "Trust this device for 30 days",
+  "signInTwoStepSubmit": "Verify and sign in",
+  "signInTwoStepNoPhone": "No phone with you?",
+  "signInTwoStepUseRecovery": "Use a recovery code",
+  "signInTwoStepUseApp": "Use the code from my app",
+  "signInTwoStepRecoveryLabel": "Recovery code",
+  "signInTwoStepRecoveryLede": "Enter one of the 10 recovery codes you saved when you set up two-step sign-in. Each one works once.",
+  "signInTwoStepMissingRecovery": "Enter one of your recovery codes.",
+  "signInSetupTitle": "Turn on two-step sign-in",
+  "signInSetupLede": "Your school asks staff to use an authenticator app. Scan this code with it, then enter the 6-digit code the app shows.",
+  "signInSetupQr": "QR code to add Quad to your authenticator app",
+  "signInSetupManual": "Can’t scan it? Type this key into the app instead:",
+  "signInSetupLoading": "Making your code…",
+  "signInSetupSubmit": "Turn on two-step sign-in",
+  "signInCodesTitle": "Save your recovery codes",
+  "signInCodesLede": "If you can’t use your authenticator app, each of these codes signs you in once. Keep them somewhere safe: we won’t show them again.",
+  "signInCodesList": "Your recovery codes",
+  "signInCodesCopy": "Copy the codes",
+  "signInCodesCopied": "Codes copied",
+  "signInCodesSubmit": "I’ve saved them, continue",
+  "signInSchoolTitle": "Choose a school",
+  "signInSchoolLede": "{email} is linked to {count, plural, one {{count} school} other {{count} schools}} on Quad. You can switch later from the menu.",
+  "@signInSchoolLede": {
+    "placeholders": {
+      "email": {
+        "type": "Object"
+      },
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "signInSchoolRemember": "Remember my choice on this device",
+  "signInSchoolPaused": "Paused: {reason}",
+  "@signInSchoolPaused": {
+    "placeholders": {
+      "reason": {
+        "type": "Object"
+      }
+    }
+  },
+  "signInSchoolPausedNoReason": "Paused for now",
+  "signInSchoolLoading": "Finding your schools…",
+  "signInNoSchoolTitle": "No school yet",
+  "signInNoSchoolBody": "This account isn’t linked to a school yet. Ask your school’s admin to invite you.",
+  "signInForgotTitle": "Reset your password",
+  "signInForgotLede": "We’ll email you a link to choose a new one.",
+  "signInForgotSubmit": "Send reset link",
+  "signInInboxTitle": "Check your inbox",
+  "signInInboxBody": "If {email} has a Quad account, a reset link is on its way. It expires in 30 minutes.",
+  "@signInInboxBody": {
+    "placeholders": {
+      "email": {
+        "type": "Object"
+      }
+    }
+  },
+  "signInBack": "Back",
+  "signInBackToSignIn": "Back to sign in",
+  "signInOpeningTitle": "Opening {school}…",
+  "@signInOpeningTitle": {
+    "placeholders": {
+      "school": {
+        "type": "Object"
+      }
+    }
+  },
+  "signInOpeningTitleNoName": "Opening your school…",
+  "signInOpeningLede": "Loading your school’s portal and branding.",
+  "signInArtTitleStart": "Every school.",
+  "signInArtTitleHighlight": "One address.",
+  "signInArtBody": "Sign in with your work email. Quad finds your school and opens it with your school’s own name, logo and colours.",
+  "signInArtStatOneValue": "1",
+  "signInArtStatOne": "sign-in for all your schools",
+  "signInArtStatTwoValue": "2-step",
+  "signInArtStatTwo": "protection for staff",
+  "signInArtStatThreeValue": "Your",
+  "signInArtStatThree": "school’s branding inside",
+  "signInFoot": "quad-edu.com · Protected by two-step sign-in",
+  "linkInvalidTitle": "This link isn’t valid any more",
+  "linkInvalidBody": "It may have expired or been used already. Ask for a new one.",
+  "resetTitle": "Choose a new password",
+  "resetLede": "Use at least 10 characters. Choosing it signs you out everywhere else.",
+  "resetLabel": "New password",
+  "resetSubmit": "Change my password",
+  "resetDoneTitle": "Your password is changed",
+  "resetDoneBody": "You’re signed out on every device. Sign in with your new password.",
+  "inviteLoading": "Checking your invitation…",
+  "inviteTitle": "Join {school} on Quad",
+  "@inviteTitle": {
+    "placeholders": {
+      "school": {
+        "type": "Object"
+      }
+    }
+  },
+  "inviteFor": "This invitation is for {email}.",
+  "@inviteFor": {
+    "placeholders": {
+      "email": {
+        "type": "Object"
+      }
+    }
+  },
+  "inviteChooseLede": "Choose a password to finish setting up your account. Use at least 10 characters.",
+  "inviteChooseLabel": "Choose a password",
+  "inviteChooseSubmit": "Accept and set up my account",
+  "inviteExistingLede": "You already have a Quad account. Sign in with it to accept.",
+  "inviteExistingSubmit": "Sign in to accept",
+  "supportOpeningTitle": "Opening the school…",
+  "supportOpeningLede": "Starting your support visit. Everything you do is logged in the school’s audit log."
 }

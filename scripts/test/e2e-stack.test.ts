@@ -124,6 +124,10 @@ describe('stackEnv', () => {
     });
   });
 
+  it('trusts one proxy hop, the web app’s rewrite, so each journey can be its own client', () => {
+    expect(env.TRUST_PROXY_HOPS).toBe('1');
+  });
+
   it('has no fake-clock variable: expired links come from the signed-token helper', () => {
     expect(Object.keys(env).filter((key) => /CLOCK|NOW|TIME/.test(key))).toEqual([]);
   });

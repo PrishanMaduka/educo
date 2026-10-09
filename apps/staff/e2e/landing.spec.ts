@@ -143,7 +143,7 @@ test.describe('landing page', () => {
     const note = page.getByRole('dialog', { name: 'Sign-in opens when schools go live' });
     await expect(note).toBeVisible();
     await expect(note.getByRole('link', { name: 'Book a demo' })).toHaveAttribute('href', '#demo');
-    await expect(page.locator('a[href="/sign-in"]')).toHaveCount(0);
+    await expect(page.locator('a[href^="/sign-in"]')).toHaveCount(0);
     await page.keyboard.press('Escape');
     await expect(note).toBeHidden();
     await expect(signIn).toBeFocused();
@@ -155,6 +155,16 @@ test.describe('landing page', () => {
     await again.getByRole('link', { name: 'Book a demo' }).click();
     await expect(again).toBeHidden();
     await expect(page.getByLabel('Your name').filter({ visible: true })).toBeFocused();
+  });
+
+  test('the pre-launch site has no sign-in pages (D32)', async ({ page }, testInfo) => {
+    test.skip(!isPrelaunch(testInfo), 'Only the static export leaves sign-in out');
+    for (const path of ['/sign-in', '/sign-in/reset/a.b', '/app']) {
+      const response = await page.request.get(path);
+      expect(response.status(), path).toBe(404);
+    }
+    await page.goto('/');
+    await expect(page.locator('a[href^="/sign-in"]')).toHaveCount(0);
   });
 
   test('parents get the app instead of signing in: the note, the badges and their form', async ({

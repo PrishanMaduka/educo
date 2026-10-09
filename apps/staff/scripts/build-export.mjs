@@ -28,12 +28,26 @@ export const REQUIRED = [
   '_next/static',
 ];
 
+/**
+ * Routes the pre-launch site must never publish: the portal, the style guide, the health check,
+ * and sign-in with its signed-link pages (D32: `/sign-in` and `/app` stay out of the export).
+ */
+const PORTAL_ROUTES = [
+  'app',
+  'app.html',
+  'design',
+  'design.html',
+  'healthz',
+  'sign-in',
+  'sign-in.html',
+];
+
 /** Problems with an export folder: missing files, portal routes, or no landing page. */
 export function checkExport(dir) {
   const problems = REQUIRED.filter((file) => !existsSync(join(dir, file))).map(
     (file) => `missing ${file}`,
   );
-  for (const portal of ['app', 'app.html', 'design', 'design.html', 'healthz']) {
+  for (const portal of PORTAL_ROUTES) {
     if (existsSync(join(dir, portal))) problems.push(`portal route ${portal} must not be exported`);
   }
   if (

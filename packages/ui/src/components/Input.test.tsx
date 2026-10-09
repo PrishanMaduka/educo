@@ -13,6 +13,14 @@ describe('Input', () => {
     expect(input).toHaveClass('border-bad');
   });
 
+  it('puts an end control, such as Show password, inside the field after the input', () => {
+    render(<Input label="Password" end={<button type="button">Show</button>} />);
+    const input = screen.getByLabelText('Password');
+    const show = screen.getByRole('button', { name: 'Show' });
+    expect(input.parentElement).toContainElement(show);
+    expect(input).toHaveClass('pr-16');
+  });
+
   it('works without a visible label when given an aria-label', () => {
     render(<Input aria-label="Search students" />);
     expect(screen.getByRole('textbox', { name: 'Search students' })).toBeInTheDocument();

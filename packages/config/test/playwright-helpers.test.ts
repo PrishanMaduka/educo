@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest';
 
 import { Mailpit, linkIn, recipientQuery, tokenOf } from '../playwright/mailpit';
 import { expiredTestLink, signTestLink, tamperedTestLink } from '../playwright/signed-token';
+import { clientAddressFor } from '../playwright/stack';
 import { stackSecrets } from '../playwright/stack-secrets';
 
 const decode = (token: string): unknown =>
@@ -102,5 +103,27 @@ describe('mailpit helper', () => {
     expect(
       await mailpit.newest({ to: 'a@b.local', since: new Date('2026-10-09T13:00:00Z') }),
     ).toBeNull();
+  });
+});
+
+describe('clientAddressFor', () => {
+  it('gives each test, project and retry its own private address', () => {
+    const one = clientAddressFor('test-a', 'desktop-light', 0);
+    expect(one).toMatch(/^10\.\d{1,3}\.\d{1,3}\.\d{1,3}$/);
+    expect(clientAddressFor('test-a', 'desktop-light', 0)).toBe(one);
+    const others = [
+      clientAddressFor('test-b', 'desktop-light', 0),
+      clientAddressFor('test-a', 'phone-dark', 0),
+      clientAddressFor('test-a', 'desktop-light', 1),
+    ];
+    for (const other of others) expect(other).not.toBe(one);
+  });
+
+  it('never gives a network or broadcast address', () => {
+    for (let i = 0; i < 2000; i += 1) {
+      const last = Number(clientAddressFor(`t${String(i)}`, 'p', 0).split('.')[3]);
+      expect(last).toBeGreaterThanOrEqual(1);
+      expect(last).toBeLessThanOrEqual(254);
+    }
   });
 });

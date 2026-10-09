@@ -6,9 +6,15 @@ import {
   schemeOf,
 } from '@quad/config/playwright/checks';
 
+import { withPortalCookie } from './portal-cookie';
+
 const GREETING = /^(Good morning|Good afternoon|Good evening|Hello), Prishan$/;
 
 test.describe('staff shell', () => {
+  test.beforeEach(async ({ context, baseURL }) => {
+    await withPortalCookie(context, baseURL ?? '');
+  });
+
   test('/app shows the navigation and the greeting', async ({ page }) => {
     await page.goto('/app');
     await expect(page.getByRole('heading', { level: 1, name: GREETING })).toBeVisible();

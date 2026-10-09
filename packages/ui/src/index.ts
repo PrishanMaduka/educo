@@ -27,6 +27,7 @@ export {
   type PetalBurstProviderProps,
   type PetalOrigin,
 } from './components/PetalBurst';
+export { OtpBoxes, type OtpBoxesProps } from './components/OtpBoxes';
 export { Pill, type PillProps } from './components/Pill';
 export {
   Segmented,
