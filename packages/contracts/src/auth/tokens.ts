@@ -29,6 +29,19 @@ export type RefreshInput = z.infer<typeof RefreshInput>;
 export const TokenPair = z.object({ accessToken: z.string(), refreshToken: z.string() });
 export type TokenPair = z.infer<typeof TokenPair>;
 
+/**
+ * `POST /auth/select-school` with a bearer token (Task 9 fix round 1): the first choice with the
+ * `select_school` token opens the family and gets both tokens; a switch with a school token gets
+ * only the new school's access token, and the family keeps its refresh token, which from then on
+ * refreshes into the new school.
+ */
+export const SelectSchoolTokens = z.object({
+  accessToken: z.string(),
+  /** Only on the first choice (with the `select_school` token). */
+  refreshToken: z.string().optional(),
+});
+export type SelectSchoolTokens = z.infer<typeof SelectSchoolTokens>;
+
 /** The registered claims every access token carries (checked by the API on every request). */
 const Registered = {
   iss: z.string(),

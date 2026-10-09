@@ -99,6 +99,34 @@ export class FamilyRepository {
       : { ...family, generation: row.generation, refreshHash: row.refreshHash };
   }
 
+  /**
+   * Switch school (Task 9 fix round 1): moves a locked active family to another school of the
+   * account and leaves its refresh generation and secret alone, so the refresh token the phone
+   * holds keeps working and refreshes into the new school. Only while the family is still at
+   * `generation` and not revoked; false otherwise.
+   */
+  async switchSchoolIn(
+    tx: AccountTx,
+    sessionId: string,
+    generation: number,
+    school: { readonly tenantId: string; readonly userId: string; readonly at: Date },
+  ): Promise<boolean> {
+    const rows = await tx
+      .update(sessions)
+      .set({ activeTenantId: school.tenantId, activeUserId: school.userId, lastSeenAt: school.at })
+      .where(
+        and(
+          eq(sessions.id, sessionId),
+          eq(sessions.kind, 'mobile'),
+          eq(sessions.stage, 'active'),
+          eq(sessions.refreshGeneration, generation),
+          isNull(sessions.revokedAt),
+        ),
+      )
+      .returning({ id: sessions.id });
+    return rows.length > 0;
+  }
+
   /** Starts a parent refresh family (`kind = mobile`, no cookie). */
   async insertFamilyIn(tx: AccountTx, family: NewFamily): Promise<void> {
     await tx.insert(sessions).values({

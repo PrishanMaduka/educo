@@ -6,6 +6,7 @@ import {
   OTP_CODE_MINUTES,
   fixedOtpFor,
   isLockedAt,
+  isStoreReviewSubject,
   otpSendDecision,
   parseInternationalPhone,
 } from '@quad/domain';
@@ -30,7 +31,7 @@ import type { Clock } from '../../../tokens';
 import type { TokenClient } from '../tokens/token.service';
 import type { OtpRequestInput, OtpVerifyInput, OtpVerifyResult } from '@quad/contracts';
 import type { QuadTenantDb } from '@quad/db';
-import type { OtpSubject } from '@quad/domain';
+import type { FixedOtpConfig, OtpSubject } from '@quad/domain';
 
 const MINUTE_MS = 60_000;
 const DAY_MS = 24 * 60 * MINUTE_MS;
@@ -61,7 +62,15 @@ export class OtpService {
     @Inject(CLOCK) private readonly now: Clock,
   ) {
     this.hashes = new OtpHashes(config.SESSION_SECRET);
+    this.fixedOtps = {
+      appEnv: config.APP_ENV,
+      devFixedOtp: config.DEV_FIXED_OTP ?? null,
+      storeReviewPhone: config.STORE_REVIEW_PHONE ?? null,
+      storeReviewOtp: config.STORE_REVIEW_OTP ?? null,
+    };
   }
+
+  private readonly fixedOtps: FixedOtpConfig;
 
   /**
    * `POST /auth/otp/request`: within the limits of `otpSendDecision` (3 per 15 minutes, 10 per
@@ -75,15 +84,7 @@ export class OtpService {
     const subjectHash = this.hashes.subject(value);
     const now = new Date(this.now());
     const challengeId = uuidv7();
-    const code =
-      fixedOtpFor(
-        {
-          appEnv: this.config.APP_ENV,
-          devFixedOtp: this.config.DEV_FIXED_OTP ?? null,
-          storeReviewPhone: this.config.STORE_REVIEW_PHONE ?? null,
-        },
-        subject,
-      ) ?? randomCode();
+    const code = fixedOtpFor(this.fixedOtps, subject) ?? randomCode();
     const decision = await this.repository.inOpen(async (tx) => {
       await this.repository.lockSubjectIn(tx, subjectHash);
       const sent = await this.repository.sentSinceIn(
@@ -142,7 +143,12 @@ export class OtpService {
     if (account.status === 'locked' || isLockedAt(account.lockedUntil, now)) {
       throw new AccountLockedError();
     }
-    const memberships = await this.memberships.parentMemberships(account.id);
+    const memberships = (await this.memberships.parentMemberships(account.id)).filter(
+      // The store-review number reaches the App Review school only (spec 16).
+      (membership) =>
+        !isStoreReviewSubject(this.fixedOtps, subject) ||
+        membership.tenantId === this.config.STORE_REVIEW_TENANT_ID,
+    );
     const listed = memberships.map(toParentMembership);
     const [only] = memberships;
     if (only === undefined) return NOT_FOUND;

@@ -74,7 +74,7 @@ Class | Method | HTTP request | Description
 [*AuthApi*](doc/AuthApi.md) | [**apiV1AuthPasswordPost**](doc/AuthApi.md#apiv1authpasswordpost) | **POST** /api/v1/auth/password | Sign in with email and password; sets the session cookies and says what comes next
 [*AuthApi*](doc/AuthApi.md) | [**apiV1AuthPasswordResetPost**](doc/AuthApi.md#apiv1authpasswordresetpost) | **POST** /api/v1/auth/password/reset | Set a new password with a reset link; signs out every device
 [*AuthApi*](doc/AuthApi.md) | [**apiV1AuthRefreshPost**](doc/AuthApi.md#apiv1authrefreshpost) | **POST** /api/v1/auth/refresh | Swap the refresh token for a new pair; an old refresh token signs the device out everywhere it was copied
-[*AuthApi*](doc/AuthApi.md) | [**apiV1AuthSelectSchoolPost**](doc/AuthApi.md#apiv1authselectschoolpost) | **POST** /api/v1/auth/select-school | Open one of your schools. Staff: rotates the session cookie (needs X-CSRF-Token). Parent app: with the select_school or a school token, returns the new pair
+[*AuthApi*](doc/AuthApi.md) | [**apiV1AuthSelectSchoolPost**](doc/AuthApi.md#apiv1authselectschoolpost) | **POST** /api/v1/auth/select-school | Open one of your schools. Staff: rotates the session cookie (needs X-CSRF-Token). Parent app: the select_school token gets both tokens; a school token switches and gets only the new access token (the refresh token stays)
 [*AuthApi*](doc/AuthApi.md) | [**apiV1AuthSignOutPost**](doc/AuthApi.md#apiv1authsignoutpost) | **POST** /api/v1/auth/sign-out | Sign out: the staff session for every school (needs X-CSRF-Token), or the parent app’s token family on this device
 [*AuthApi*](doc/AuthApi.md) | [**apiV1AuthSsoProviderCallbackGet**](doc/AuthApi.md#apiv1authssoprovidercallbackget) | **GET** /api/v1/auth/sso/{provider}/callback | The provider returns here; the API checks the sign-in and always redirects back to /sign-in
 [*AuthApi*](doc/AuthApi.md) | [**apiV1AuthSsoProviderStartPost**](doc/AuthApi.md#apiv1authssoproviderstartpost) | **POST** /api/v1/auth/sso/{provider}/start | Start single sign-on with Google or Microsoft: the provider URL to open, with PKCE (sets a short-lived state cookie)
@@ -116,6 +116,7 @@ Class | Method | HTTP request | Description
  - [PasswordSignInInput](doc/PasswordSignInInput.md)
  - [RefreshInput](doc/RefreshInput.md)
  - [SelectSchoolInput](doc/SelectSchoolInput.md)
+ - [SelectSchoolTokens](doc/SelectSchoolTokens.md)
  - [SesWebhookAck](doc/SesWebhookAck.md)
  - [SessionSummaryList](doc/SessionSummaryList.md)
  - [SessionSummaryListItemsInner](doc/SessionSummaryListItemsInner.md)

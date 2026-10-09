@@ -34,8 +34,8 @@ import type { Config } from '../../config';
 import type {
   IdentifyResult,
   SignInMembershipList,
+  SelectSchoolTokens,
   SignInResult,
-  TokenPair,
 } from '@quad/contracts';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
@@ -119,9 +119,9 @@ export class AuthController {
     @Body(new ZodValidationPipe(SelectSchoolInput)) body: SelectSchoolInput,
     @Req() request: FastifyRequest,
     @Res({ passthrough: true }) reply: FastifyReply,
-  ): Promise<TokenPair | undefined> {
+  ): Promise<SelectSchoolTokens | undefined> {
     if (auth.kind === 'mobile') {
-      // The parent app gets its new pair in the body (Nest leaves a status set here alone).
+      // The parent app gets its tokens in the body (Nest leaves a status set here alone).
       const pair = await this.tokens.selectSchool(auth, body, request.ip);
       void reply.status(200);
       return pair;

@@ -173,6 +173,43 @@ describe('POST /auth/refresh (spec 05: rotating refresh families)', () => {
     expect((await refresh({ refreshToken: forged(`${web.id}.0.x`) })).statusCode).toBe(401);
   });
 
+  describe('rate limits (Task 9 fix round 1: per family, not per IP)', () => {
+    it('allows 10 refreshes a minute per family and answers the 11th with 429 and Retry-After', async () => {
+      const { pair } = await parentFamily();
+      let current = pair;
+      for (let count = 0; count < 10; count += 1) {
+        const response = await refresh({ refreshToken: current.refreshToken });
+        expect(response.statusCode).toBe(200);
+        current = TokenPair.parse(response.json());
+      }
+      const eleventh = await refresh({ refreshToken: current.refreshToken });
+      expect(eleventh.statusCode).toBe(429);
+      expect(eleventh.headers['retry-after']).toBe(String(60 - ((NOW / 1000) % 60)));
+      clock = NOW + 60 * 1000;
+      expect((await refresh({ refreshToken: current.refreshToken })).statusCode).toBe(200);
+    });
+
+    it('never counts a forged token against the family it names', async () => {
+      const { pair } = await parentFamily();
+      for (let count = 0; count < 12; count += 1) {
+        expect((await refresh({ refreshToken: forged(pair.refreshToken) })).statusCode).toBe(401);
+      }
+      expect((await refresh({ refreshToken: pair.refreshToken })).statusCode).toBe(200);
+    });
+
+    it('is not in the per-IP sign-in bucket: 25 phones behind one address all refresh', async () => {
+      const families = [];
+      for (let count = 0; count < 25; count += 1) families.push(await parentFamily());
+      const browser = new Browser(app);
+      for (const family of families) {
+        const response = await browser.post('/auth/refresh', {
+          refreshToken: family.pair.refreshToken,
+        });
+        expect(response.statusCode).toBe(200);
+      }
+    });
+  });
+
   it('answers 401 once the membership is deactivated', async () => {
     const { pair, userId } = await parentFamily();
     await db().platform.query(`update users set status = 'deactivated' where id = $1`, [userId]);

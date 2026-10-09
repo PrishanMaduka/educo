@@ -19,6 +19,12 @@ export const USER_LIMIT = { limit: 600, windowSeconds: 60 } as const;
 
 /** Staff and parent sign-in (`/auth/*`) and console sign-in (`/platform/auth/*`), after `/api/v1`. */
 const AUTH_ROUTE = /^\/api\/v1\/(?:platform\/)?auth\//;
+/**
+ * `POST /auth/refresh` is left out of the per-IP sign-in bucket (Task 9 fix round 1): every
+ * parent phone behind one school or mobile-carrier address refreshes every 15 minutes. It is
+ * limited per refresh family instead, after the token's MAC is checked (`RefreshService`).
+ */
+const REFRESH_ROUTE = /^\/api\/v1\/auth\/refresh(?:[?#]|$)/;
 
 /**
  * Who the per-user limit counts, from the context `AuthGuard` filled in: the membership once a
@@ -88,7 +94,8 @@ export class RateLimitInterceptor implements NestInterceptor {
     // The route template, never the raw URL (paths can carry signed-link tokens).
     const route = `${request.method} ${request.routeOptions.url ?? 'unmatched'}`;
     const checks: Check[] = [];
-    if (AUTH_ROUTE.test(request.routeOptions.url ?? '')) {
+    const url = request.routeOptions.url ?? '';
+    if (AUTH_ROUTE.test(url) && !REFRESH_ROUTE.test(url)) {
       // One bucket per IP for the whole sign-in family (spec 06), not one per route.
       checks.push({ key: `ip:auth:${request.ip}`, ...AUTH_IP_LIMIT });
     }

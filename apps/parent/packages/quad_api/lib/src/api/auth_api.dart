@@ -20,6 +20,7 @@ import 'package:quad_api/src/model/password_reset_input.dart';
 import 'package:quad_api/src/model/password_sign_in_input.dart';
 import 'package:quad_api/src/model/refresh_input.dart';
 import 'package:quad_api/src/model/select_school_input.dart';
+import 'package:quad_api/src/model/select_school_tokens.dart';
 import 'package:quad_api/src/model/sign_in_membership_list.dart';
 import 'package:quad_api/src/model/sign_in_result.dart';
 import 'package:quad_api/src/model/sso_start_input.dart';
@@ -653,7 +654,7 @@ _responseData = rawData == null ? null : deserialize<TokenPair, TokenPair>(rawDa
     );
   }
 
-  /// Open one of your schools. Staff: rotates the session cookie (needs X-CSRF-Token). Parent app: with the select_school or a school token, returns the new pair
+  /// Open one of your schools. Staff: rotates the session cookie (needs X-CSRF-Token). Parent app: the select_school token gets both tokens; a school token switches and gets only the new access token (the refresh token stays)
   /// 
   ///
   /// Parameters:
@@ -665,9 +666,9 @@ _responseData = rawData == null ? null : deserialize<TokenPair, TokenPair>(rawDa
   /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// Returns a [Future] containing a [Response] with a [TokenPair] as data
+  /// Returns a [Future] containing a [Response] with a [SelectSchoolTokens] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<TokenPair>> apiV1AuthSelectSchoolPost({ 
+  Future<Response<SelectSchoolTokens>> apiV1AuthSelectSchoolPost({ 
     required SelectSchoolInput selectSchoolInput,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -715,11 +716,11 @@ _bodyData=jsonEncode(selectSchoolInput);
       onReceiveProgress: onReceiveProgress,
     );
 
-    TokenPair? _responseData;
+    SelectSchoolTokens? _responseData;
 
     try {
 final rawData = _response.data;
-_responseData = rawData == null ? null : deserialize<TokenPair, TokenPair>(rawData, 'TokenPair', growable: true);
+_responseData = rawData == null ? null : deserialize<SelectSchoolTokens, SelectSchoolTokens>(rawData, 'SelectSchoolTokens', growable: true);
     } catch (error, stackTrace) {
       throw DioException(
         requestOptions: _response.requestOptions,
@@ -730,7 +731,7 @@ _responseData = rawData == null ? null : deserialize<TokenPair, TokenPair>(rawDa
       );
     }
 
-    return Response<TokenPair>(
+    return Response<SelectSchoolTokens>(
       data: _responseData,
       headers: _response.headers,
       isRedirect: _response.isRedirect,

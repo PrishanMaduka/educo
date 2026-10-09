@@ -908,7 +908,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Open one of your schools. Staff: rotates the session cookie (needs X-CSRF-Token). Parent app: with the select_school or a school token, returns the new pair */
+        /** Open one of your schools. Staff: rotates the session cookie (needs X-CSRF-Token). Parent app: the select_school token gets both tokens; a school token switches and gets only the new access token (the refresh token stays) */
         post: {
             parameters: {
                 query?: never;
@@ -928,7 +928,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["TokenPair"];
+                        "application/json": components["schemas"]["SelectSchoolTokens"];
                     };
                 };
                 /** @description Staff (cookie): signed in to the school */
@@ -1522,9 +1522,9 @@ export interface components {
                 suspendReason: string | null;
             }[];
         };
-        TokenPair: {
+        SelectSchoolTokens: {
             accessToken: string;
-            refreshToken: string;
+            refreshToken?: string;
         };
         SelectSchoolInput: {
             /** Format: uuid */
@@ -1567,6 +1567,10 @@ export interface components {
             /** Format: email */
             email?: string;
             code: string;
+        };
+        TokenPair: {
+            accessToken: string;
+            refreshToken: string;
         };
         RefreshInput: {
             refreshToken: string;

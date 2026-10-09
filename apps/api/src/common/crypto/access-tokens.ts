@@ -1,10 +1,11 @@
 import { BearerClaims } from '@quad/contracts';
 import { ACCESS_TOKEN_MINUTES } from '@quad/domain';
-import { SignJWT, errors, jwtVerify } from 'jose';
+import { SignJWT, calculateJwkThumbprint, errors, exportJWK, jwtVerify } from 'jose';
 
 import type { JwtKeys } from './jwt-keys';
 import type { Clock } from '../../tokens';
 import type { ParentMembershipKind } from '@quad/contracts';
+import type { KeyObject } from 'node:crypto';
 
 /** Who the parent access tokens are for (D32); the issuer is the `PUBLIC_WEB_URL` origin. */
 export const ACCESS_TOKEN_AUDIENCE = 'quad:parent';
@@ -27,13 +28,29 @@ export interface TenantTokenSubject {
  * exactly `alg: EdDSA` and `typ: JWT` with this issuer and audience and an `exp` that has not
  * passed (so `none` and every HS algorithm are refused), then parses the claims with the
  * contract. Anything else is null, never an exception.
+ *
+ * Every token names its key in `kid` (the RFC 7638 thumbprint of the public key, Task 9 fix
+ * round 1), and only a token whose `kid` is the current key's, or `JWT_PUBLIC_KEY_PREVIOUS`'s
+ * during a rotation, is checked at all; with no `kid` it is refused.
  */
 export class AccessTokens {
-  constructor(
+  private constructor(
     private readonly keys: JwtKeys,
     private readonly issuer: string,
     private readonly now: Clock,
+    private readonly kid: string,
+    private readonly verifiers: ReadonlyMap<string, KeyObject>,
   ) {}
+
+  /** Builds the signer with the key ids of the current and the previous public key. */
+  static async create(keys: JwtKeys, issuer: string, now: Clock): Promise<AccessTokens> {
+    const kid = await keyIdOf(keys.publicKey);
+    const verifiers = new Map([[kid, keys.publicKey]]);
+    if (keys.previousPublicKey !== null) {
+      verifiers.set(await keyIdOf(keys.previousPublicKey), keys.previousPublicKey);
+    }
+    return new AccessTokens(keys, issuer, now, kid, verifiers);
+  }
 
   signTenant(subject: TenantTokenSubject): Promise<string> {
     const issuedAt = this.nowSeconds();
@@ -64,7 +81,7 @@ export class AccessTokens {
   /** The token's claims when it is one of ours and still valid; null otherwise. */
   async verify(token: string): Promise<BearerClaims | null> {
     try {
-      const { payload } = await jwtVerify(token, this.keys.publicKey, {
+      const { payload } = await jwtVerify(token, (header) => this.verifierFor(header.kid), {
         algorithms: [this.keys.algorithm],
         typ: 'JWT',
         issuer: this.issuer,
@@ -80,9 +97,16 @@ export class AccessTokens {
     }
   }
 
+  /** The public key a token's `kid` names; a missing or unknown `kid` is refused. */
+  private verifierFor(kid: string | undefined): KeyObject {
+    const key = kid === undefined ? undefined : this.verifiers.get(kid);
+    if (key === undefined) throw new errors.JWKSNoMatchingKey();
+    return key;
+  }
+
   private sign(claims: Record<string, string>, issuedAt: number, expiresAt: number) {
     return new SignJWT(claims)
-      .setProtectedHeader({ alg: this.keys.algorithm, typ: 'JWT' })
+      .setProtectedHeader({ alg: this.keys.algorithm, typ: 'JWT', kid: this.kid })
       .setIssuer(this.issuer)
       .setAudience(ACCESS_TOKEN_AUDIENCE)
       .setIssuedAt(issuedAt)
@@ -93,4 +117,9 @@ export class AccessTokens {
   private nowSeconds(): number {
     return Math.floor(this.now() / 1000);
   }
+}
+
+/** RFC 7638: the SHA-256 thumbprint of the key's JWK, in base64url. */
+async function keyIdOf(publicKey: KeyObject): Promise<string> {
+  return calculateJwkThumbprint(await exportJWK(publicKey));
 }

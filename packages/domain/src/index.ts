@@ -58,7 +58,7 @@ export {
   otpSendDecision,
 } from './auth/otp-send-decision';
 export type { FixedOtpConfig, OtpSubject } from './auth/fixed-otp';
-export { STORE_REVIEW_OTP, fixedOtpFor } from './auth/fixed-otp';
+export { fixedOtpFor, isStoreReviewSubject } from './auth/fixed-otp';
 export type { PhoneCountry, PhoneParse } from './auth/phone-e164';
 export { PHONE_COUNTRIES, parseInternationalPhone, parsePhone } from './auth/phone-e164';
 export type { RefreshFacts, RefreshOutcome } from './auth/refresh-rotation';

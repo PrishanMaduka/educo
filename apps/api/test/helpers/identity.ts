@@ -27,6 +27,8 @@ export interface SchoolSeed {
 export async function insertSchool(
   db: TestDatabase,
   options: {
+    /** A fixed id (for a school an env variable names before the app starts). */
+    readonly id?: string;
     readonly name?: string;
     readonly shortName?: string;
     readonly status?: TenantStatus;
@@ -36,7 +38,7 @@ export async function insertSchool(
     readonly timeZone?: string;
   } = {},
 ): Promise<SchoolSeed> {
-  const id = randomUUID();
+  const id = options.id ?? randomUUID();
   const name = options.name ?? `Test School ${suffix()}`;
   const shortName = options.shortName ?? 'TS';
   await db.platform.query(

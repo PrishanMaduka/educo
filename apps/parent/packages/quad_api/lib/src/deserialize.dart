@@ -22,6 +22,7 @@ import 'package:quad_api/src/model/password_reset_input.dart';
 import 'package:quad_api/src/model/password_sign_in_input.dart';
 import 'package:quad_api/src/model/refresh_input.dart';
 import 'package:quad_api/src/model/select_school_input.dart';
+import 'package:quad_api/src/model/select_school_tokens.dart';
 import 'package:quad_api/src/model/ses_webhook_ack.dart';
 import 'package:quad_api/src/model/session_summary_list.dart';
 import 'package:quad_api/src/model/session_summary_list_items_inner.dart';
@@ -102,6 +103,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return RefreshInput.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'SelectSchoolInput':
           return SelectSchoolInput.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'SelectSchoolTokens':
+          return SelectSchoolTokens.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'SesWebhookAck':
           return SesWebhookAck.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'SessionSummaryList':

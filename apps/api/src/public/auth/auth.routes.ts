@@ -14,6 +14,7 @@ import {
   SsoCallbackQueryFields,
   SsoProviderParams,
   SsoStartInput,
+  SelectSchoolTokens,
   SsoStartResult,
   TokenPair,
   TotpVerifyInput,
@@ -39,6 +40,7 @@ const OtpVerify = named('OtpVerifyInput', OtpVerifyInput);
 const OtpResult = named('OtpVerifyResult', OtpVerifyResult);
 const Refresh = named('RefreshInput', RefreshInput);
 const Pair = named('TokenPair', TokenPair);
+const SchoolTokens = named('SelectSchoolTokens', SelectSchoolTokens);
 
 /**
  * Staff and parent sign-in (spec 05, spec 06 Me and auth). Tenant-less: the school is never an
@@ -113,11 +115,11 @@ export const authRoutes: readonly ApiRoute[] = [
     method: 'post',
     path: '/auth/select-school',
     summary:
-      'Open one of your schools. Staff: rotates the session cookie (needs X-CSRF-Token). Parent app: with the select_school or a school token, returns the new pair',
+      'Open one of your schools. Staff: rotates the session cookie (needs X-CSRF-Token). Parent app: the select_school token gets both tokens; a school token switches and gets only the new access token (the refresh token stays)',
     tags: ['auth'],
     request: { body: SelectSchool },
     responses: {
-      200: { description: 'Parent app (bearer): the tokens for the school', schema: Pair },
+      200: { description: 'Parent app (bearer): the tokens for the school', schema: SchoolTokens },
       204: { description: 'Staff (cookie): signed in to the school' },
     },
     errors: [400, 401, 403, 429],

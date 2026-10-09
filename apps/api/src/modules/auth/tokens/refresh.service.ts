@@ -2,7 +2,8 @@ import { Inject, Injectable } from '@nestjs/common';
 import { refreshOutcome } from '@quad/domain';
 
 import { AuditService } from '../../../common/audit/audit.service';
-import { UnauthorizedError } from '../../../common/errors';
+import { RateLimitedError, UnauthorizedError } from '../../../common/errors';
+import { RateLimitService } from '../../../common/rate-limit/rate-limit.service';
 import { BearerSessions } from '../../../common/session/bearer-sessions';
 import { FamilyRepository } from '../../../common/session/family.repository';
 import { SessionRepository } from '../../../common/session/session.repository';
@@ -20,6 +21,13 @@ import type { Clock } from '../../../tokens';
 import type { TokenPair } from '@quad/contracts';
 import type { AccountTx, QuadTenantDb } from '@quad/db';
 import type { Logger } from 'pino';
+
+/**
+ * Refreshes per family (Task 9 fix round 1): the route is outside the per-IP sign-in bucket,
+ * so a family that refreshes in a loop is held to 10 a minute instead. A healthy app refreshes
+ * once per 15-minute access token.
+ */
+export const REFRESH_FAMILY_LIMIT = { limit: 10, windowSeconds: 60 } as const;
 
 /** How a refresh ended inside its transaction (the 401 is thrown only after the commit). */
 type RefreshResult =
@@ -41,6 +49,7 @@ export class RefreshService {
     private readonly bearer: BearerSessions,
     private readonly tokens: ParentTokens,
     private readonly audit: AuditService,
+    private readonly limits: RateLimitService,
     @Inject(CLOCK) private readonly now: Clock,
     @Inject(LOGGER) private readonly logger: Logger,
   ) {}
@@ -53,9 +62,10 @@ export class RefreshService {
    */
   async refresh(refreshToken: string): Promise<TokenPair> {
     const presented = this.tokens.read(refreshToken);
-    const owner = presented.issued
-      ? await this.db.definers.refreshFamily(presented.sessionId)
-      : null;
+    // A forged token never reaches the limit or the database: its family id is not trusted.
+    if (!presented.issued) throw new UnauthorizedError();
+    await this.countRefresh(presented.sessionId);
+    const owner = await this.db.definers.refreshFamily(presented.sessionId);
     if (owner === null) throw new UnauthorizedError();
     const now = new Date(this.now());
     const result = await this.repository.inAccount(
@@ -100,6 +110,30 @@ export class RefreshService {
       presented.sessionId,
     );
     return { accessToken, refreshToken: result.token };
+  }
+
+  /**
+   * Counts one refresh of the family (`REFRESH_FAMILY_LIMIT`, keyed by the family id from a
+   * token whose MAC was checked); 429 with `Retry-After` past it. Redis trouble fails open with
+   * the metric `rate_limit_unavailable`, like every rate limit (D32).
+   */
+  private async countRefresh(sessionId: string): Promise<void> {
+    let result: { allowed: boolean; retryAfter: number };
+    try {
+      result = await this.limits.hit(
+        `refresh:${sessionId}`,
+        REFRESH_FAMILY_LIMIT.limit,
+        REFRESH_FAMILY_LIMIT.windowSeconds,
+        this.now(),
+      );
+    } catch (error) {
+      this.logger.warn(
+        { metric: 'rate_limit_unavailable', error: errorForLog(error) },
+        'Refresh limit skipped: Redis did not answer',
+      );
+      return;
+    }
+    if (!result.allowed) throw new RateLimitedError(result.retryAfter);
   }
 
   /** The family's membership while it is still the account's live guardian or relative one. */

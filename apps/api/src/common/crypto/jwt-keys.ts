@@ -7,9 +7,11 @@ export interface JwtKeys {
   readonly algorithm: 'EdDSA';
   readonly privateKey: KeyObject;
   readonly publicKey: KeyObject;
+  /** `JWT_PUBLIC_KEY_PREVIOUS`: tokens it signed are still accepted after a rotation. */
+  readonly previousPublicKey: KeyObject | null;
 }
 
-type JwtKeyVariable = 'JWT_PRIVATE_KEY' | 'JWT_PUBLIC_KEY';
+type JwtKeyVariable = 'JWT_PRIVATE_KEY' | 'JWT_PUBLIC_KEY' | 'JWT_PUBLIC_KEY_PREVIOUS';
 
 /** A key that cannot be used. Names the variable; never includes the key. */
 export class JwtKeyError extends Error {
@@ -80,7 +82,7 @@ function readPair(
       problems: [new JwtKeyError('JWT_PUBLIC_KEY', 'must be the public half of JWT_PRIVATE_KEY')],
     };
   }
-  return { keys: { algorithm: 'EdDSA', privateKey, publicKey } };
+  return { keys: { algorithm: 'EdDSA', privateKey, publicKey, previousPublicKey: null } };
 }
 
 /**
@@ -92,11 +94,21 @@ export function jwtKeyProblems(privatePem: string, publicPem: string): readonly 
   return 'problems' in pair ? pair.problems : [];
 }
 
-/** Loads `JWT_PRIVATE_KEY` and `JWT_PUBLIC_KEY` (PEM); throws the first `JwtKeyError`. */
-export function loadJwtKeys(privatePem: string, publicPem: string): JwtKeys {
+/** The problem with an optional extra public key (`JWT_PUBLIC_KEY_PREVIOUS`), or null. */
+export function publicKeyProblem(publicPem: string): string | null {
+  const key = tryParseKey('JWT_PUBLIC_KEY_PREVIOUS', publicPem);
+  return key instanceof JwtKeyError ? key.problem : null;
+}
+
+/**
+ * Loads `JWT_PRIVATE_KEY`, `JWT_PUBLIC_KEY` and the optional `JWT_PUBLIC_KEY_PREVIOUS` (PEM);
+ * throws the first `JwtKeyError`.
+ */
+export function loadJwtKeys(privatePem: string, publicPem: string, previousPem?: string): JwtKeys {
   const pair = readPair(privatePem, publicPem);
   if ('problems' in pair) {
     throw pair.problems[0];
   }
-  return pair.keys;
+  if (previousPem === undefined) return pair.keys;
+  return { ...pair.keys, previousPublicKey: parseKey('JWT_PUBLIC_KEY_PREVIOUS', previousPem) };
 }

@@ -1,9 +1,10 @@
 import { createPrivateKey, createPublicKey } from 'node:crypto';
 
 import { LOCAL_SEED_PASSWORD } from '@quad/contracts';
+import { parseInternationalPhone } from '@quad/domain';
 import { z } from 'zod';
 
-import { jwtKeyProblems, publicKeyDer } from './common/crypto/jwt-keys';
+import { jwtKeyProblems, publicKeyProblem, publicKeyDer } from './common/crypto/jwt-keys';
 
 /**
  * The API's configuration: every environment variable in spec 02 (Repository bootstrap →
@@ -106,6 +107,8 @@ const ConfigSchema = z.object({
   LINK_SIGNING_SECRET: req(text),
   JWT_PRIVATE_KEY: req(pem),
   JWT_PUBLIC_KEY: req(pem),
+  // The key that signed tokens before a rotation, still accepted until they expire (15 min).
+  JWT_PUBLIC_KEY_PREVIOUS: opt(pem),
   // 32 is `FIELD_ENCRYPTION_KEY_MIN_LENGTH` in @quad/db, not imported: this file loads before
   // tracing starts, and @quad/db would load pg too early.
   FIELD_ENCRYPTION_KEY: req(z.string().min(32, { message: 'must be at least 32 characters' })),
@@ -126,9 +129,19 @@ const ConfigSchema = z.object({
   // Local and test helpers
   DEV_FIXED_OTP: opt(z.string().regex(/^\d{6}$/, { message: 'must be six digits' })),
   SEED_PASSWORD: opt(text),
+  // The app-store review account (spec 16): its number, its secret fixed code and the only school
+  // it may enter, set together (`storeReviewRules`).
   STORE_REVIEW_PHONE: opt(
-    z.string().regex(/^\+[1-9]\d{6,14}$/, { message: 'must be an E.164 phone number' }),
+    z.string().refine(
+      (value) => {
+        const phone = parseInternationalPhone(value);
+        return phone.ok && phone.e164 === value;
+      },
+      { message: 'must be a Sri Lankan mobile number in E.164 (+947 and 8 digits)' },
+    ),
   ),
+  STORE_REVIEW_OTP: opt(z.string().regex(/^\d{6}$/, { message: 'must be six digits' })),
+  STORE_REVIEW_TENANT_ID: opt(z.string().uuid({ message: 'must be a school id (uuid)' })),
   // The fake OIDC issuer (scripts/fake-oidc.mjs) used instead of Google and Microsoft by staff
   // and console SSO; local only (D32), refused in `environmentRules`.
   OIDC_FAKE_ISSUER_URL: opt(httpUrl),
@@ -364,16 +377,47 @@ function environmentRules(env: RawEnv): ConfigProblem[] {
   return problems;
 }
 
+/**
+ * In every environment: the store-review number needs its code and its school (spec 16), and
+ * outside local the code may not be one digit repeated (`000000`, `777777`).
+ */
+function storeReviewRules(env: RawEnv): ConfigProblem[] {
+  if (blank(env.STORE_REVIEW_PHONE) === undefined) return [];
+  const problems: ConfigProblem[] = [];
+  for (const name of ['STORE_REVIEW_OTP', 'STORE_REVIEW_TENANT_ID'] as const) {
+    if (blank(env[name]) === undefined) {
+      problems.push({ variable: name, problem: 'is missing (STORE_REVIEW_PHONE needs it)' });
+    }
+  }
+  const code = blank(env.STORE_REVIEW_OTP);
+  if (blank(env.APP_ENV) !== 'local' && typeof code === 'string' && /^(\d)\1{5}$/.test(code)) {
+    problems.push({
+      variable: 'STORE_REVIEW_OTP',
+      problem: 'must not be one digit repeated outside local',
+    });
+  }
+  return problems;
+}
+
 /** In every environment: the JWT keys are an Ed25519 pair that belongs together (D32). */
 function keyFormatRules(env: RawEnv): ConfigProblem[] {
+  const problems: ConfigProblem[] = [];
+  const previous = blank(env.JWT_PUBLIC_KEY_PREVIOUS);
+  if (typeof previous === 'string') {
+    const problem = publicKeyProblem(normalisePem(previous));
+    if (problem !== null) problems.push({ variable: 'JWT_PUBLIC_KEY_PREVIOUS', problem });
+  }
   const privateKey = blank(env.JWT_PRIVATE_KEY);
   const publicKey = blank(env.JWT_PUBLIC_KEY);
   if (typeof privateKey !== 'string' || typeof publicKey !== 'string') {
-    return [];
+    return problems;
   }
-  return jwtKeyProblems(normalisePem(privateKey), normalisePem(publicKey)).map(
-    ({ variable, problem }) => ({ variable, problem }),
-  );
+  return [
+    ...problems,
+    ...jwtKeyProblems(normalisePem(privateKey), normalisePem(publicKey)).map(
+      ({ variable, problem }) => ({ variable, problem }),
+    ),
+  ];
 }
 
 /**
@@ -425,7 +469,12 @@ export function loadConfig(env: NodeJS.ProcessEnv): Config {
         variable: issue.path.join('.'),
         problem: describeIssue(issue),
       }));
-  problems.push(...keyFormatRules(env), ...deliveryRules(env), ...environmentRules(env));
+  problems.push(
+    ...keyFormatRules(env),
+    ...storeReviewRules(env),
+    ...deliveryRules(env),
+    ...environmentRules(env),
+  );
   if (problems.length > 0 || !parsed.success) {
     throw new ConfigError(problems);
   }

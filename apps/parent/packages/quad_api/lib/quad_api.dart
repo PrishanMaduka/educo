@@ -39,6 +39,7 @@ export 'package:quad_api/src/model/password_reset_input.dart';
 export 'package:quad_api/src/model/password_sign_in_input.dart';
 export 'package:quad_api/src/model/refresh_input.dart';
 export 'package:quad_api/src/model/select_school_input.dart';
+export 'package:quad_api/src/model/select_school_tokens.dart';
 export 'package:quad_api/src/model/ses_webhook_ack.dart';
 export 'package:quad_api/src/model/session_summary_list.dart';
 export 'package:quad_api/src/model/session_summary_list_items_inner.dart';

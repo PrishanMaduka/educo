@@ -1,9 +1,16 @@
-import { createPrivateKey, createSecretKey, generateKeyPairSync, randomUUID } from 'node:crypto';
+import {
+  createPrivateKey,
+  createPublicKey,
+  createSecretKey,
+  generateKeyPairSync,
+  randomUUID,
+} from 'node:crypto';
 
 import { TokenPair } from '@quad/contracts';
-import { SignJWT } from 'jose';
+import { SignJWT, calculateJwkThumbprint, decodeProtectedHeader, exportJWK } from 'jose';
 import { beforeEach, describe, expect, it } from 'vitest';
 
+import { SessionService } from '../../src/common/session/session.service';
 import { API_ROUTES } from '../../src/openapi/document';
 import { TEST_JWT_KEYS } from '../env';
 import { RecordingDelivery } from '../fakes/delivery';
@@ -20,7 +27,7 @@ import {
   signInByPhone,
   signedInParent,
 } from '../helpers/parent';
-import { auditRows } from '../helpers/sign-in';
+import { anyText, auditRows } from '../helpers/sign-in';
 
 import type { KeyObject } from 'node:crypto';
 
@@ -70,11 +77,15 @@ async function choosing() {
 const privateKey = createPrivateKey(TEST_JWT_KEYS.JWT_PRIVATE_KEY);
 
 /** Signs `claims` like the API would, unless told otherwise (the attacks below). */
-function sign(
+async function sign(
   claims: Record<string, unknown>,
   options: { readonly key?: KeyObject; readonly alg?: string } = {},
 ): Promise<string> {
   const iat = Math.floor(clock / 1000);
+  // Our own key id, as an attacker would copy it from any real token.
+  const kid = await calculateJwkThumbprint(
+    await exportJWK(createPublicKey(TEST_JWT_KEYS.JWT_PUBLIC_KEY)),
+  );
   return new SignJWT({
     iss: 'http://localhost:3000',
     aud: 'quad:parent',
@@ -82,7 +93,7 @@ function sign(
     exp: iat + 900,
     ...claims,
   })
-    .setProtectedHeader({ alg: options.alg ?? 'EdDSA', typ: 'JWT' })
+    .setProtectedHeader({ alg: options.alg ?? 'EdDSA', typ: 'JWT', kid })
     .sign(options.key ?? privateKey);
 }
 
@@ -225,6 +236,83 @@ describe('the bearer path (spec 06: Authorization: Bearer, mobile)', () => {
   });
 });
 
+describe('key ids and rotation (Task 9 fix round 1)', () => {
+  it('refuses a token with no kid, or with a kid that is not ours', async () => {
+    const { pair } = await guardian();
+    const claims = claimsOf(pair.accessToken);
+    const iat = Math.floor(clock / 1000);
+    const noKid = await new SignJWT(claims)
+      .setProtectedHeader({ alg: 'EdDSA', typ: 'JWT' })
+      .sign(privateKey);
+    const otherKid = await new SignJWT({ ...claims, iat, exp: iat + 900 })
+      .setProtectedHeader({ alg: 'EdDSA', typ: 'JWT', kid: 'not-our-key' })
+      .sign(privateKey);
+    expect((await get('/me', noKid)).statusCode).toBe(401);
+    expect((await get('/me', otherKid)).statusCode).toBe(401);
+  });
+
+  it('refuses a token signed by a previous key when JWT_PUBLIC_KEY_PREVIOUS is not set', async () => {
+    const { pair } = await guardian();
+    const old = generateKeyPairSync('ed25519');
+    const kid = await calculateJwkThumbprint(await exportJWK(old.publicKey));
+    const token = await new SignJWT(claimsOf(pair.accessToken))
+      .setProtectedHeader({ alg: 'EdDSA', typ: 'JWT', kid })
+      .sign(old.privateKey);
+    expect((await get('/me', token)).statusCode).toBe(401);
+  });
+
+  describe('with JWT_PUBLIC_KEY_PREVIOUS', () => {
+    const old = generateKeyPairSync('ed25519');
+    const rotatedDelivery = new RecordingDelivery();
+    const rotated = useDatabaseApp(
+      {
+        JWT_PUBLIC_KEY_PREVIOUS: old.publicKey.export({ type: 'spki', format: 'pem' }).toString(),
+      },
+      { overrides: { now: () => clock, delivery: rotatedDelivery } },
+    );
+
+    it('accepts a token the previous key signed, by its kid, and signs new ones with the current key', async () => {
+      const school = await insertSchool(rotated.db());
+      const account = await insertPhoneAccount(rotated.db());
+      await insertParentMember(rotated.db(), school.id, account.id);
+      const pair = await signedInParent(rotated.app, rotatedDelivery, account.phone);
+      const currentKid = await calculateJwkThumbprint(
+        await exportJWK(createPublicKey(TEST_JWT_KEYS.JWT_PUBLIC_KEY)),
+      );
+      expect(decodeProtectedHeader(pair.accessToken).kid).toBe(currentKid);
+      const oldKid = await calculateJwkThumbprint(await exportJWK(old.publicKey));
+      const signedBefore = await new SignJWT(claimsOf(pair.accessToken))
+        .setProtectedHeader({ alg: 'EdDSA', typ: 'JWT', kid: oldKid })
+        .sign(old.privateKey);
+      const response = await new Browser(rotated.app).get('/me', { headers: bearer(signedBefore) });
+      expect(response.statusCode).toBe(200);
+      // The old key's kid with the current key's signature is not ours.
+      const mixed = await new SignJWT(claimsOf(pair.accessToken))
+        .setProtectedHeader({ alg: 'EdDSA', typ: 'JWT', kid: oldKid })
+        .sign(privateKey);
+      expect(
+        (await new Browser(rotated.app).get('/me', { headers: bearer(mixed) })).statusCode,
+      ).toBe(401);
+    });
+  });
+});
+
+describe('a deactivated membership (Task 9 fix round 1)', () => {
+  it('answers 401 to its access token', async () => {
+    const { pair, userId } = await guardian();
+    await db().platform.query(`update users set status = 'deactivated' where id = $1`, [userId]);
+    expect((await get('/me', pair.accessToken)).statusCode).toBe(401);
+  });
+
+  it('answers 401 at once after invalidateMember, even when the token was just used (cached)', async () => {
+    const { pair, userId, account, school } = await guardian();
+    expect((await get('/me', pair.accessToken)).statusCode).toBe(200);
+    await db().platform.query(`update users set status = 'deactivated' where id = $1`, [userId]);
+    await app().get(SessionService).invalidateMember(account.id, school.id);
+    expect((await get('/me', pair.accessToken)).statusCode).toBe(401);
+  });
+});
+
 describe('relative tokens reach only refresh and sign-out in M1 (D32)', () => {
   it('answers 403 on GET /me', async () => {
     const { pair } = await relative();
@@ -364,26 +452,64 @@ describe('POST /auth/select-school with a bearer token (OQ20, the kind rule)', (
     );
   });
 
-  it("switches an active guardian to another school: the old school's tokens stop working", async () => {
-    const { a, account, selectToken } = await choosing();
-    const b = await insertSchool(db(), { name: 'School C' });
-    await insertParentMember(db(), b.id, account.id, 'guardian');
-    const inA = TokenPair.parse(
-      (await post('/auth/select-school', selectToken, { tenantId: a.id })).json(),
-    );
+  describe('a switch with a school token (Task 9 fix round 1: the family keeps its refresh token)', () => {
+    async function inTwoSchools() {
+      const { a, account, selectToken } = await choosing();
+      const b = await insertSchool(db(), { name: 'School C' });
+      await insertParentMember(db(), b.id, account.id, 'guardian');
+      const inA = TokenPair.parse(
+        (await post('/auth/select-school', selectToken, { tenantId: a.id })).json(),
+      );
+      return { a, b, inA };
+    }
 
-    const response = await post('/auth/select-school', inA.accessToken, { tenantId: b.id });
+    it('answers only an access token for the new school, and no refresh token', async () => {
+      const { b, inA } = await inTwoSchools();
+      const response = await post('/auth/select-school', inA.accessToken, { tenantId: b.id });
+      expect(response.statusCode).toBe(200);
+      const body = response.json<Record<string, unknown>>();
+      expect(Object.keys(body)).toEqual(['accessToken']);
+      expect(claimsOf(String(body.accessToken)).tid).toBe(b.id);
+      expect((await get('/me', String(body.accessToken))).json()).toMatchObject({
+        school: { id: b.id },
+      });
+    });
 
-    expect(response.statusCode).toBe(200);
-    const inB = TokenPair.parse(response.json());
-    expect(claimsOf(inB.accessToken).tid).toBe(b.id);
-    expect((await get('/me', inA.accessToken)).statusCode).toBe(401);
-    expect((await get('/me', inB.accessToken)).json()).toMatchObject({ school: { id: b.id } });
-    // The old refresh token is a rotated-out generation now: presenting it revokes the family.
-    expect(
-      (await new Browser(app).post('/auth/refresh', { refreshToken: inA.refreshToken })).statusCode,
-    ).toBe(401);
-    expect((await get('/me', inB.accessToken)).statusCode).toBe(401);
+    it("stops the old school's access token (401)", async () => {
+      const { b, inA } = await inTwoSchools();
+      await post('/auth/select-school', inA.accessToken, { tenantId: b.id });
+      expect((await get('/me', inA.accessToken)).statusCode).toBe(401);
+    });
+
+    it('keeps the refresh token working, and it then refreshes into the new school', async () => {
+      const { b, inA } = await inTwoSchools();
+      const sessionId = familyIdOf(inA.refreshToken);
+      const before = await familyRow(db(), sessionId);
+      await post('/auth/select-school', inA.accessToken, { tenantId: b.id });
+      const after = await familyRow(db(), sessionId);
+      expect(after.refresh_generation).toBe(before.refresh_generation);
+      expect(after.refresh_hash?.equals(before.refresh_hash ?? Buffer.alloc(0))).toBe(true);
+      expect(after.active_tenant_id).toBe(b.id);
+
+      const refreshed = await new Browser(app).post('/auth/refresh', {
+        refreshToken: inA.refreshToken,
+      });
+      expect(refreshed.statusCode).toBe(200);
+      const pair = TokenPair.parse(refreshed.json());
+      expect(claimsOf(pair.accessToken).tid).toBe(b.id);
+      expect((await familyRow(db(), sessionId)).revoked_at).toBeNull();
+    });
+
+    it('answers 400 for the school the token is already in', async () => {
+      const { a, inA } = await inTwoSchools();
+      const response = await post('/auth/select-school', inA.accessToken, { tenantId: a.id });
+      expect(response.statusCode).toBe(400);
+      expect(response.json()).toMatchObject({
+        code: 'validation',
+        fields: { tenantId: anyText() },
+      });
+      expect((await get('/me', inA.accessToken)).statusCode).toBe(200);
+    });
   });
 
   it('sets no cookies: the staff cookie flow stays separate (select-school.api.test.ts)', async () => {

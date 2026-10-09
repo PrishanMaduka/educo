@@ -4,7 +4,7 @@ import { firstNameOf, sessionExpiry } from '@quad/domain';
 
 import { AuditService } from '../../../common/audit/audit.service';
 import { formatMessage } from '../../../common/delivery/templates/render';
-import { ForbiddenError, UnauthorizedError } from '../../../common/errors';
+import { ForbiddenError, UnauthorizedError, ValidationError } from '../../../common/errors';
 import { BearerSessions } from '../../../common/session/bearer-sessions';
 import { FamilyRepository } from '../../../common/session/family.repository';
 import { SessionRepository } from '../../../common/session/session.repository';
@@ -17,7 +17,7 @@ import { ParentTokens } from './parent-tokens';
 import type { BearerAuth } from '../../../common/session/request-auth';
 import type { Clock } from '../../../tokens';
 import type { ParentAuthMembership } from '../memberships.service';
-import type { SelectSchoolInput, TokenPair } from '@quad/contracts';
+import type { SelectSchoolInput, SelectSchoolTokens, TokenPair } from '@quad/contracts';
 import type { AccountTx, QuadTenantDb } from '@quad/db';
 
 /** The device a parent signs in on: request facts only, never a source of the tenant. */
@@ -104,12 +104,22 @@ export class TokenService {
   }
 
   /**
-   * `POST /auth/select-school` with a bearer token: the `select_school` token chooses, a school
-   * token switches (spec 05 "Switch school"). Only one of the account's own guardian or relative
-   * memberships, never a staff one, another account's or a suspended school's; a refusal leaves
-   * the family as it was. The family moves to the next generation, so the old pair stops working.
+   * `POST /auth/select-school` with a bearer token. Only one of the account's own guardian or
+   * relative memberships, never a staff one, another account's or a suspended school's; a
+   * refusal leaves the family as it was. The first choice, with the `select_school` token, opens
+   * the family in that school with its first refresh token (OQ20). A switch with a school token
+   * (spec 05 "Switch school"; Task 9 fix round 1) moves the family and returns only the new
+   * school's access token: the refresh token is not replaced, so no second credential exists,
+   * and it refreshes into the new school from then on. The current school is 400.
    */
-  async selectSchool(auth: BearerAuth, input: SelectSchoolInput, ip: string): Promise<TokenPair> {
+  async selectSchool(
+    auth: BearerAuth,
+    input: SelectSchoolInput,
+    ip: string,
+  ): Promise<SelectSchoolTokens> {
+    if (auth.stage === 'active' && auth.tenantId === input.tenantId) {
+      throw new ValidationError({ tenantId: formatMessage('error.alreadyInSchool') });
+    }
     const memberships = await this.memberships.parentMemberships(auth.accountId);
     const membership = memberships.find((candidate) => candidate.tenantId === input.tenantId);
     if (membership === undefined) {
@@ -122,6 +132,7 @@ export class TokenService {
       );
     }
     const now = new Date(this.now());
+    const switching = auth.stage === 'active';
     const refreshToken = await this.repository.inAccount(
       auth.accountId,
       membership.tenantId,
@@ -130,15 +141,20 @@ export class TokenService {
         if (family === null || family.stage !== auth.stage || family.tenantId !== auth.tenantId) {
           throw new UnauthorizedError();
         }
-        await this.enterSchoolIn(tx, auth.accountId, membership, ip, now, {
-          switching: auth.stage === 'active',
+        await this.enterSchoolIn(tx, auth.accountId, membership, ip, now, { switching });
+        if (!switching) return this.tokens.moveIn(tx, family, membership, now);
+        const moved = await this.families.switchSchoolIn(tx, family.id, family.generation, {
+          tenantId: membership.tenantId,
+          userId: membership.userId,
+          at: now,
         });
-        return this.tokens.moveIn(tx, family, membership, now);
+        if (!moved) throw new UnauthorizedError();
+        return null;
       },
     );
     await this.bearer.invalidateFamily(auth.sessionId);
     const accessToken = await this.tokens.accessToken(auth.accountId, membership, auth.sessionId);
-    return { accessToken, refreshToken };
+    return refreshToken === null ? { accessToken } : { accessToken, refreshToken };
   }
 
   /**

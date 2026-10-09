@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 
-import { BearerClaims, RefreshInput, RefreshToken, TokenPair } from '../index';
+import {
+  BearerClaims,
+  RefreshInput,
+  RefreshToken,
+  SelectSchoolTokens,
+  TokenPair,
+} from '../index';
 
 const SESSION_ID = '0192a6f4-1b2c-7d3e-8f40-123456789abc';
 const OTHER_ID = '0192a6f4-1b2c-7d3e-8f40-cba987654321';
@@ -44,6 +50,15 @@ describe('TokenPair', () => {
   it('is an access token and a refresh token', () => {
     const pair = { accessToken: 'a.b.c', refreshToken: `${SESSION_ID}.1.${SECRET}` };
     expect(TokenPair.parse(pair)).toEqual(pair);
+  });
+});
+
+describe('SelectSchoolTokens', () => {
+  it('is both tokens on the first choice, and the access token alone on a switch', () => {
+    const pair = { accessToken: 'a.b.c', refreshToken: `${SESSION_ID}.1.${SECRET}` };
+    expect(SelectSchoolTokens.parse(pair)).toEqual(pair);
+    expect(SelectSchoolTokens.parse({ accessToken: 'a.b.c' })).toEqual({ accessToken: 'a.b.c' });
+    expect(pathOf(SelectSchoolTokens.safeParse({ refreshToken: 'r' }))).toEqual(['accessToken']);
   });
 });
 

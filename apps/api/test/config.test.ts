@@ -390,3 +390,95 @@ describe('loadConfig: field encryption, token keys and the seed password (M1, D3
     expect(loadConfig(productionEnv()).KMS_KEY_ID).toBeUndefined();
   });
 });
+
+describe('loadConfig: the store-review sign-in (spec 16, Task 9 fix round 1)', () => {
+  const TENANT = '0192a6f4-1b2c-7d3e-8f40-123456789abc';
+  const review = {
+    STORE_REVIEW_PHONE: '+94770009999',
+    STORE_REVIEW_OTP: '481516',
+    STORE_REVIEW_TENANT_ID: TENANT,
+  };
+  const staging = (overrides: Record<string, string | undefined>) =>
+    productionEnv({ APP_ENV: 'staging', ...overrides });
+
+  it('accepts the number, its secret code and its school together', () => {
+    const config = loadConfig(staging(review));
+    expect(config.STORE_REVIEW_OTP).toBe('481516');
+    expect(config.STORE_REVIEW_TENANT_ID).toBe(TENANT);
+  });
+
+  it.each(['STORE_REVIEW_OTP', 'STORE_REVIEW_TENANT_ID'])(
+    'refuses STORE_REVIEW_PHONE without %s',
+    (missing) => {
+      expect(configErrorOf(localEnv({ ...review, [missing]: undefined })).problems).toEqual([
+        { variable: missing, problem: 'is missing (STORE_REVIEW_PHONE needs it)' },
+      ]);
+    },
+  );
+
+  it.each(['12345', '1234567', 'abcdef'])('refuses STORE_REVIEW_OTP=%s', (code) => {
+    expect(
+      configErrorOf(localEnv({ ...review, STORE_REVIEW_OTP: code })).problems.map(
+        (p) => p.variable,
+      ),
+    ).toEqual(['STORE_REVIEW_OTP']);
+  });
+
+  it.each(['000000', '777777'])(
+    'refuses the guessable STORE_REVIEW_OTP=%s outside local',
+    (code) => {
+      expect(configErrorOf(staging({ ...review, STORE_REVIEW_OTP: code })).problems).toEqual([
+        { variable: 'STORE_REVIEW_OTP', problem: 'must not be one digit repeated outside local' },
+      ]);
+      expect(loadConfig(localEnv({ ...review, STORE_REVIEW_OTP: code })).STORE_REVIEW_OTP).toBe(
+        code,
+      );
+    },
+  );
+
+  it.each(['+94112345678', '+919876543210', '+94 77 000 9999', '0770009999'])(
+    'refuses STORE_REVIEW_PHONE=%s (a Sri Lankan mobile in E.164 only)',
+    (phone) => {
+      expect(
+        configErrorOf(localEnv({ ...review, STORE_REVIEW_PHONE: phone })).problems.map(
+          (p) => p.variable,
+        ),
+      ).toEqual(['STORE_REVIEW_PHONE']);
+    },
+  );
+
+  it('refuses a STORE_REVIEW_TENANT_ID that is not a uuid', () => {
+    expect(
+      configErrorOf(localEnv({ ...review, STORE_REVIEW_TENANT_ID: 'review-school' })).problems.map(
+        (p) => p.variable,
+      ),
+    ).toEqual(['STORE_REVIEW_TENANT_ID']);
+  });
+});
+
+describe('loadConfig: JWT_PUBLIC_KEY_PREVIOUS (key rotation overlap, Task 9 fix round 1)', () => {
+  it('is optional and accepts an Ed25519 public key', () => {
+    expect(loadConfig(localEnv()).JWT_PUBLIC_KEY_PREVIOUS).toBeUndefined();
+    const previous = generateKeyPairSync('ed25519')
+      .publicKey.export({ type: 'spki', format: 'pem' })
+      .toString();
+    expect(
+      loadConfig(localEnv({ JWT_PUBLIC_KEY_PREVIOUS: previous })).JWT_PUBLIC_KEY_PREVIOUS,
+    ).toBe(previous);
+  });
+
+  it.each([
+    ['a private key', TEST_JWT_KEYS.JWT_PRIVATE_KEY],
+    [
+      'an RSA key',
+      generateKeyPairSync('rsa', { modulusLength: 2048 })
+        .publicKey.export({ type: 'spki', format: 'pem' })
+        .toString(),
+    ],
+    ['text', 'not-a-key'],
+  ])('refuses %s', (_case, value) => {
+    expect(configErrorOf(localEnv({ JWT_PUBLIC_KEY_PREVIOUS: value })).problems).toEqual([
+      { variable: 'JWT_PUBLIC_KEY_PREVIOUS', problem: 'must be an Ed25519 public key (SPKI PEM)' },
+    ]);
+  });
+});

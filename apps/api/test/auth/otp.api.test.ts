@@ -1,8 +1,11 @@
-import { decodeProtectedHeader } from 'jose';
+import { createPublicKey, randomUUID } from 'node:crypto';
+
+import { calculateJwkThumbprint, decodeProtectedHeader, exportJWK } from 'jose';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { TENANT_DB } from '../../src/tokens';
 import { captureLogs } from '../app';
+import { TEST_JWT_KEYS } from '../env';
 import { RecordingDelivery } from '../fakes/delivery';
 import { Browser } from '../helpers/browser';
 import { useDatabaseApp } from '../helpers/database-app';
@@ -26,6 +29,7 @@ import type { QuadTenantDb } from '@quad/db';
 import type { TestDatabase } from '@quad/db/testing';
 
 const NOW = Date.UTC(2026, 9, 9, 3, 30, 1);
+const TEST_PUBLIC_KEY = createPublicKey(TEST_JWT_KEYS.JWT_PUBLIC_KEY);
 const SECOND = 1000;
 const MINUTE = 60 * SECOND;
 const DAY = 24 * 60 * MINUTE;
@@ -126,7 +130,7 @@ describe('POST /auth/otp/request (spec 05 parent app step 3)', () => {
   });
 
   it.each([
-    ['the leading 0', '+94 077 000 0001'],
+    ['a landline, not a mobile', '+94 11 234 5678'],
     ['8 digits', '+94 77 000 001'],
     ['another country (Sri Lanka only, OQ12)', '+91 98765 43210'],
     ['no country code', '77 000 0001'],
@@ -181,6 +185,19 @@ describe('POST /auth/otp/request (spec 05 parent app step 3)', () => {
     expect(response.headers['retry-after']).toBe('18');
   });
 
+  it('refuses the 11th code in a day with 429 and Retry-After until the first is a day old', async () => {
+    const phone = freshPhone();
+    // 5:01 apart, so no 15-minute window ever holds more than three.
+    for (let sent = 0; sent < 10; sent += 1) {
+      clock = NOW + sent * 301 * SECOND;
+      expect((await request({ phone })).statusCode).toBe(202);
+    }
+    clock = NOW + 10 * 301 * SECOND;
+    const response = await request({ phone });
+    expect(response.statusCode).toBe(429);
+    expect(response.headers['retry-after']).toBe(String(24 * 60 * 60 - 10 * 301));
+  });
+
   it("counts each number on its own: one number's limit never blocks another", async () => {
     const phone = freshPhone();
     await request({ phone });
@@ -224,7 +241,11 @@ describe('POST /auth/otp/verify (spec 05 parent app step 4)', () => {
     });
     const accessToken = String(body.accessToken);
     const refreshToken = String(body.refreshToken);
-    expect(decodeProtectedHeader(accessToken)).toEqual({ alg: 'EdDSA', typ: 'JWT' });
+    expect(decodeProtectedHeader(accessToken)).toEqual({
+      alg: 'EdDSA',
+      typ: 'JWT',
+      kid: await calculateJwkThumbprint(await exportJWK(TEST_PUBLIC_KEY)),
+    });
     const sessionId = familyIdOf(refreshToken);
     expect(claimsOf(accessToken)).toEqual({
       iss: 'http://localhost:3000',
@@ -383,6 +404,28 @@ describe('POST /auth/otp/verify (spec 05 parent app step 4)', () => {
     });
   });
 
+  it('counts every one of 8 parallel wrong guesses: at most 5 land, and the code is dead after', async () => {
+    const { account } = await guardianAt();
+    const code = await codeFor(account.phone);
+    const guesses = await Promise.all(
+      Array.from({ length: 8 }, (_, index) =>
+        verify({
+          phone: account.phone,
+          code: otherCode(String((Number(code) + index) % 1_000_000).padStart(6, '0')),
+        }),
+      ),
+    );
+    expect(guesses.every((response) => response.statusCode === 400)).toBe(true);
+    // The newest challenge by id (uuidv7, in insertion order): this test's.
+    const { rows } = await db().platform.query<{ attempts: number }>(
+      'select attempts from otp_challenges order by id desc limit 1',
+    );
+    const [latest] = rows;
+    expect(latest?.attempts).toBeLessThanOrEqual(5);
+    expect(latest?.attempts).toBe(5);
+    expect((await verify({ phone: account.phone, code })).statusCode).toBe(400);
+  });
+
   it('refuses an expired code with 400 invalid_code (10 minutes)', async () => {
     const { account } = await guardianAt();
     const code = await codeFor(account.phone);
@@ -456,7 +499,7 @@ describe('POST /auth/otp/verify (spec 05 parent app step 4)', () => {
   it.each([
     ['no code', { phone: '+94770000001' }],
     ['a 5-digit code', { phone: '+94770000001', code: '12345' }],
-    ['a bad number', { phone: '+94 077 000 0001', code: '123456' }],
+    ['a landline', { phone: '+94 11 234 5678', code: '123456' }],
     ['both subjects', { phone: '+94770000001', email: 'a@example.test', code: '123456' }],
   ])('answers 400 validation for %s', async (_case, body) => {
     const response = await verify(body);
@@ -487,24 +530,83 @@ describe('fixed codes (spec 16)', () => {
     });
   });
 
-  describe('STORE_REVIEW_PHONE (its own number only)', () => {
+  describe('STORE_REVIEW_PHONE (its own number, its secret code, its school only)', () => {
     const reviewPhone = '+94770009999';
+    const reviewSchoolId = randomUUID();
     const reviewDelivery = new RecordingDelivery();
     const review = useDatabaseApp(
-      { DEV_FIXED_OTP: undefined, STORE_REVIEW_PHONE: reviewPhone },
+      {
+        DEV_FIXED_OTP: undefined,
+        STORE_REVIEW_PHONE: reviewPhone,
+        STORE_REVIEW_OTP: '481516',
+        STORE_REVIEW_TENANT_ID: reviewSchoolId,
+      },
       { overrides: { now: () => clock, delivery: reviewDelivery } },
     );
+    const verifyReview = (code: string) =>
+      new Browser(review.app).post('/auth/otp/verify', { phone: reviewPhone, code });
 
-    it('gives the review number the fixed code and every other number a random one', async () => {
+    it('sends the review number its secret code, and every other number a random one', async () => {
       await new Browser(review.app).post('/auth/otp/request', { phone: reviewPhone });
-      expect(smsCode(reviewDelivery, reviewPhone)).toBe('000000');
+      expect(smsCode(reviewDelivery, reviewPhone)).toBe('481516');
       const codes = new Set<string>();
       for (let count = 0; count < 3; count += 1) {
         const phone = freshPhone();
         await new Browser(review.app).post('/auth/otp/request', { phone });
         codes.add(smsCode(reviewDelivery, phone));
       }
-      expect(codes.has('000000') && codes.size === 1).toBe(false);
+      expect(codes.has('481516') && codes.size === 1).toBe(false);
+    });
+
+    it('signs the review number in to the App Review school only, never another school', async () => {
+      const reviewSchool = await insertSchool(review.db(), {
+        id: reviewSchoolId,
+        name: 'App Review',
+      });
+      const other = await insertSchool(review.db(), { name: 'A real school' });
+      const { rows } = await review
+        .db()
+        .platform.query<{ id: string }>(
+          `insert into accounts (id, phone_e164, status) values (gen_random_uuid(), $1, 'active') returning id`,
+          [reviewPhone],
+        );
+      const accountId = rows[0]?.id ?? '';
+      await insertParentMember(review.db(), reviewSchool.id, accountId);
+      await insertParentMember(review.db(), other.id, accountId);
+      clock = NOW + 31 * SECOND;
+      await new Browser(review.app).post('/auth/otp/request', { phone: reviewPhone });
+
+      const response = await verifyReview('481516');
+
+      expect(response.json()).toMatchObject({
+        status: 'signed_in',
+        memberships: [{ tenantId: reviewSchool.id }],
+      });
+      expect(response.json<{ memberships: unknown[] }>().memberships).toHaveLength(1);
+    });
+
+    it('answers not_found when the review number belongs to no App Review membership', async () => {
+      const { rows } = await review
+        .db()
+        .platform.query<{ id: string }>(
+          `update accounts set phone_e164 = null, email = 'moved@example.test' where phone_e164 = $1 returning id`,
+          [reviewPhone],
+        );
+      expect(rows).toHaveLength(1);
+      const elsewhere = await insertSchool(review.db());
+      const { rows: created } = await review
+        .db()
+        .platform.query<{ id: string }>(
+          `insert into accounts (id, phone_e164, status) values (gen_random_uuid(), $1, 'active') returning id`,
+          [reviewPhone],
+        );
+      await insertParentMember(review.db(), elsewhere.id, created[0]?.id ?? '');
+      clock = NOW + 62 * SECOND;
+      await new Browser(review.app).post('/auth/otp/request', { phone: reviewPhone });
+      expect((await verifyReview('481516')).json()).toEqual({
+        status: 'not_found',
+        memberships: [],
+      });
     });
   });
 });

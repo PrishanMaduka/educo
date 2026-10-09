@@ -718,7 +718,7 @@
           "items"
         ]
       },
-      "TokenPair": {
+      "SelectSchoolTokens": {
         "type": "object",
         "properties": {
           "accessToken": {
@@ -729,8 +729,7 @@
           }
         },
         "required": [
-          "accessToken",
-          "refreshToken"
+          "accessToken"
         ]
       },
       "SelectSchoolInput": {
@@ -891,6 +890,21 @@
           "code"
         ],
         "additionalProperties": false
+      },
+      "TokenPair": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string"
+          },
+          "refreshToken": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "accessToken",
+          "refreshToken"
+        ]
       },
       "RefreshInput": {
         "type": "object",
@@ -1760,7 +1774,7 @@
     },
     "/api/v1/auth/select-school": {
       "post": {
-        "summary": "Open one of your schools. Staff: rotates the session cookie (needs X-CSRF-Token). Parent app: with the select_school or a school token, returns the new pair",
+        "summary": "Open one of your schools. Staff: rotates the session cookie (needs X-CSRF-Token). Parent app: the select_school token gets both tokens; a school token switches and gets only the new access token (the refresh token stays)",
         "tags": [
           "auth"
         ],
@@ -1780,7 +1794,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/TokenPair"
+                  "$ref": "#/components/schemas/SelectSchoolTokens"
                 }
               }
             }

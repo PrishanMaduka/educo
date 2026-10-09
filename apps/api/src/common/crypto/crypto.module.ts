@@ -48,13 +48,13 @@ import type { Logger } from 'pino';
       provide: JWT_KEYS,
       inject: [CONFIG],
       useFactory: (config: Config): JwtKeys =>
-        loadJwtKeys(config.JWT_PRIVATE_KEY, config.JWT_PUBLIC_KEY),
+        loadJwtKeys(config.JWT_PRIVATE_KEY, config.JWT_PUBLIC_KEY, config.JWT_PUBLIC_KEY_PREVIOUS),
     },
     {
       provide: AccessTokens,
       inject: [JWT_KEYS, CONFIG, CLOCK],
-      useFactory: (keys: JwtKeys, config: Config, now: Clock): AccessTokens =>
-        new AccessTokens(keys, new URL(config.PUBLIC_WEB_URL).origin, now),
+      useFactory: (keys: JwtKeys, config: Config, now: Clock): Promise<AccessTokens> =>
+        AccessTokens.create(keys, new URL(config.PUBLIC_WEB_URL).origin, now),
     },
     {
       provide: BREACH_CHECK,

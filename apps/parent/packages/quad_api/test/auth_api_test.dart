@@ -63,9 +63,9 @@ void main() {
       // TODO
     });
 
-    // Open one of your schools. Staff: rotates the session cookie (needs X-CSRF-Token). Parent app: with the select_school or a school token, returns the new pair
+    // Open one of your schools. Staff: rotates the session cookie (needs X-CSRF-Token). Parent app: the select_school token gets both tokens; a school token switches and gets only the new access token (the refresh token stays)
     //
-    //Future<TokenPair> apiV1AuthSelectSchoolPost(SelectSchoolInput selectSchoolInput) async
+    //Future<SelectSchoolTokens> apiV1AuthSelectSchoolPost(SelectSchoolInput selectSchoolInput) async
     test('test apiV1AuthSelectSchoolPost', () async {
       // TODO
     });

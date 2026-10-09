@@ -31,6 +31,7 @@ doc/PasswordResetInput.md
 doc/PasswordSignInInput.md
 doc/RefreshInput.md
 doc/SelectSchoolInput.md
+doc/SelectSchoolTokens.md
 doc/SesWebhookAck.md
 doc/SessionSummaryList.md
 doc/SessionSummaryListItemsInner.md
@@ -82,6 +83,7 @@ lib/src/model/password_reset_input.dart
 lib/src/model/password_sign_in_input.dart
 lib/src/model/refresh_input.dart
 lib/src/model/select_school_input.dart
+lib/src/model/select_school_tokens.dart
 lib/src/model/ses_webhook_ack.dart
 lib/src/model/session_summary_list.dart
 lib/src/model/session_summary_list_items_inner.dart
@@ -124,6 +126,7 @@ test/password_reset_input_test.dart
 test/password_sign_in_input_test.dart
 test/refresh_input_test.dart
 test/select_school_input_test.dart
+test/select_school_tokens_test.dart
 test/ses_webhook_ack_test.dart
 test/session_summary_list_items_inner_test.dart
 test/session_summary_list_test.dart
