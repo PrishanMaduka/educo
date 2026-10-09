@@ -1,6 +1,7 @@
 // The e2e stack against the compose services and the built API (scripts/e2e-stack.mjs, Task 18):
 // it starts on the port it is given, answers /health/ready, runs beside a second stack with its
-// own database, and drops its database on SIGTERM, SIGINT and failure.
+// own database, and drops its database on SIGTERM, SIGINT and failure. It uses the top of the
+// stack's port window (4012-4014), so it never meets a `pnpm dev` API on 4000.
 import { spawn } from 'node:child_process';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -21,9 +22,10 @@ const adminUrl = (() => {
   return url.toString();
 })();
 
-const PORT_A = 4000;
-const PORT_B = 4001;
-const PORT_C = 4002;
+/** The live tests' ports: the top of the window `parseStackArgs` allows (4000-4014). */
+const PORT_A = 4012;
+const PORT_B = 4013;
+const PORT_C = 4014;
 
 interface Running {
   readonly child: ChildProcess;
