@@ -62,3 +62,12 @@ export { PHONE_COUNTRIES, parseInternationalPhone, parsePhone } from './auth/pho
 export type { RefreshFacts, RefreshOutcome } from './auth/refresh-rotation';
 export { refreshOutcome } from './auth/refresh-rotation';
 export { firstNameOf } from './people/first-name';
+export type { PermissionMatrix, PermissionRow, RoleGrant, RowChange } from './access/matrix';
+export { FULL_ACCESS, NO_ACCESS, bitsOf, normaliseRow, rowOf } from './access/matrix';
+export type { SystemRoleDefaults } from './access/system-roles';
+export { systemRoleMatrix } from './access/system-roles';
+export type { EffectivePermissionsInput } from './access/effective-permissions';
+export { effectivePermissions } from './access/effective-permissions';
+export { isPageVisible, pageAccess } from './access/page-access';
+export { roleHome } from './access/role-home';
+export { canGrant } from './access/grant-checks';
