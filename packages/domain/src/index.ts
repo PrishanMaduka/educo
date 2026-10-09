@@ -67,7 +67,7 @@ export { FULL_ACCESS, NO_ACCESS, bitsOf, normaliseRow, rowOf } from './access/ma
 export type { SystemRoleDefaults } from './access/system-roles';
 export { systemRoleMatrix } from './access/system-roles';
 export type { EffectivePermissionsInput } from './access/effective-permissions';
-export { effectivePermissions } from './access/effective-permissions';
+export { HIDDEN_FROM_SUPPORT, effectivePermissions } from './access/effective-permissions';
 export { isPageVisible, pageAccess } from './access/page-access';
 export { roleHome } from './access/role-home';
 export { canGrant } from './access/grant-checks';

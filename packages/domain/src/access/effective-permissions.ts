@@ -24,8 +24,14 @@ export interface EffectivePermissionsInput {
   readonly support?: boolean;
 }
 
-/** Support never sees safeguarding or medical records, whatever the role (spec 05). */
-const HIDDEN_FROM_SUPPORT: readonly SensitiveKey[] = ['safeguarding', 'medical'];
+/**
+ * Support never sees safeguarding or medical records, whatever the role (spec 05). The API's
+ * `@Sensitive` guard refuses these to a support session too.
+ */
+export const HIDDEN_FROM_SUPPORT: readonly SensitiveKey[] = Object.freeze([
+  'safeguarding',
+  'medical',
+]);
 
 const ADMIN = systemRoleMatrix('admin');
 const SUPPORT: RoleGrant = {

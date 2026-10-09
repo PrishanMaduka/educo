@@ -2,7 +2,7 @@ import { PermissionKey, PermissionModule, PlanModule, SensitiveKey } from '@quad
 import fc from 'fast-check';
 import { describe, expect, expectTypeOf, it } from 'vitest';
 
-import { effectivePermissions } from './effective-permissions';
+import { HIDDEN_FROM_SUPPORT, effectivePermissions } from './effective-permissions';
 import { rowOf } from './matrix';
 import { systemRoleMatrix } from './system-roles';
 
@@ -220,6 +220,11 @@ describe('effectivePermissions (spec 05)', () => {
   });
 
   describe('a support session (spec 05, Support access)', () => {
+    it('names the keys support never sees: safeguarding and medical, frozen', () => {
+      expect(HIDDEN_FROM_SUPPORT).toEqual(['safeguarding', 'medical']);
+      expect(Object.isFrozen(HIDDEN_FROM_SUPPORT)).toBe(true);
+    });
+
     it('gets the admin matrix minus safeguarding and medical, whatever the roles', () => {
       const perms = effectivePermissions({
         roles: [systemRoleMatrix('teacher')],
