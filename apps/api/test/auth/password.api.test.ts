@@ -15,6 +15,7 @@ import {
   freshEmail,
   insertPasswordAccount,
   insertRoleWithKey,
+  malformedEmail,
   setSignInRules,
 } from '../helpers/sign-in';
 
@@ -165,7 +166,7 @@ describe('POST /auth/password (spec 05 step 3)', () => {
   });
 
   it('answers 400 validation for a malformed body', async () => {
-    const response = await signIn(new Browser(app), { email: 'nope', password: '' });
+    const response = await signIn(new Browser(app), { email: malformedEmail(), password: '' });
     expect(response.statusCode).toBe(400);
     expect(ErrorBodySchema.parse(response.json())).toMatchObject({
       code: 'validation',

@@ -28,6 +28,12 @@ const suffix = () => randomBytes(4).toString('hex');
 /** A fresh fictional work email at `domain`. */
 export const freshEmail = (domain = 'example.test') => `person-${suffix()}@${domain}`;
 
+/**
+ * A fresh value that is not an email. Per-email rate limits count even a malformed body email,
+ * and test clocks are fixed, so a constant would fill its bucket after a few runs (429).
+ */
+export const malformedEmail = () => `not-an-email-${suffix()}`;
+
 export interface PasswordAccount {
   readonly id: string;
   readonly email: string;

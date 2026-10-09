@@ -7,7 +7,13 @@ import { fakeSubjectFor, startFakeOidcIssuer } from '../fakes/oidc-issuer';
 import { Browser, setCookie } from '../helpers/browser';
 import { useDatabaseApp } from '../helpers/database-app';
 import { insertMember, insertSchool } from '../helpers/identity';
-import { auditRows, freshEmail, insertPasswordAccount, setSignInRules } from '../helpers/sign-in';
+import {
+  auditRows,
+  freshEmail,
+  insertPasswordAccount,
+  malformedEmail,
+  setSignInRules,
+} from '../helpers/sign-in';
 
 import type { FakeOidcIssuer, FakeSignIn } from '../fakes/oidc-issuer';
 import type { SchoolSeed } from '../helpers/identity';
@@ -170,10 +176,10 @@ describe('POST /auth/sso/:provider/start (spec 05 step 2)', () => {
 
   it('refuses an unknown provider or a bad email with 400 validation, and sets no cookie', async () => {
     const browser = new Browser(app);
-    const unknown = await start(browser, 'github', 'person@school.test');
+    const unknown = await start(browser, 'github', freshEmail('school.test'));
     expect(unknown.statusCode).toBe(400);
     expect(unknown.json()).toMatchObject({ code: 'validation' });
-    const bad = await start(browser, 'google', 'not-an-email');
+    const bad = await start(browser, 'google', malformedEmail());
     expect(bad.statusCode).toBe(400);
     expect(bad.json()).toMatchObject({ code: 'validation' });
     expect(browser.cookies.has(STATE_COOKIE)).toBe(false);

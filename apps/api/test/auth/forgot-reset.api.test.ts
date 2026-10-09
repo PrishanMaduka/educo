@@ -18,6 +18,7 @@ import {
   freshEmail,
   GOOD_PASSWORD,
   insertPasswordAccount,
+  malformedEmail,
   setSignInRules,
 } from '../helpers/sign-in';
 
@@ -127,7 +128,7 @@ describe('POST /auth/password/forgot (spec 05 step 6)', () => {
   });
 
   it('answers 400 validation for a malformed email', async () => {
-    const response = await forgot('nope');
+    const response = await forgot(malformedEmail());
     expect(response.statusCode).toBe(400);
     expect(response.json()).toMatchObject({
       code: 'validation',

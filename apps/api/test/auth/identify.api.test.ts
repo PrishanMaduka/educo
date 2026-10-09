@@ -4,7 +4,13 @@ import { describe, expect, it } from 'vitest';
 import { Browser } from '../helpers/browser';
 import { useDatabaseApp } from '../helpers/database-app';
 import { insertMember, insertSchool } from '../helpers/identity';
-import { anyText, freshEmail, insertPasswordAccount, setSignInRules } from '../helpers/sign-in';
+import {
+  anyText,
+  freshEmail,
+  insertPasswordAccount,
+  malformedEmail,
+  setSignInRules,
+} from '../helpers/sign-in';
 
 /** A fixed instant early in a minute, so a test's calls share one rate-limit window. */
 const NOW = Date.UTC(2026, 9, 8, 3, 30, 1);
@@ -52,7 +58,7 @@ describe('POST /auth/identify (spec 05 step 1)', () => {
     expect(forKnown.headers['set-cookie']).toBeUndefined();
   });
 
-  it.each([{}, { email: 'not-an-email' }, { email: 42 }])(
+  it.each([{}, { email: malformedEmail() }, { email: 42 }])(
     'answers 400 validation for %j',
     async (body) => {
       const response = await new Browser(app).post('/auth/identify', body);
