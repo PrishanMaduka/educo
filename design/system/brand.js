@@ -68,6 +68,10 @@
     return {light: L, dark: D};
   }
 
-  const api = {deriveBrand, applyBrand, vars, contrast, mix, DEFAULT};
+  /** The named colours offered when a school picks its colour in the console, Quad lime first as the default.
+      Any other hex is allowed too; deriveBrand() keeps each one AA. */
+  const PALETTE = [['#C8F169', 'Quad lime (default)'], ['#1B7F53', 'Greenfield green'], ['#7A1F3D', 'Maroon'], ['#F2B705', 'Sunflower'], ['#0F7C86', 'Teal'], ['#3B4AA8', 'Indigo'], ['#D9640B', 'Orange'], ['#5B3FA8', 'Violet']];
+
+  const api = {deriveBrand, applyBrand, vars, contrast, mix, DEFAULT, PALETTE};
   if (typeof module === 'object' && module.exports) module.exports = api; else root.QuadBrand = api;
 })(typeof window !== 'undefined' ? window : globalThis);
