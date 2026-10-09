@@ -31,3 +31,5 @@ export const DELIVERY = Symbol('DELIVERY');
 export const CONSOLE_SESSIONS = Symbol('CONSOLE_SESSIONS');
 /** Queues Forgot password requests for the worker (`PasswordResetRequests`; tests pass a fake). */
 export const PASSWORD_RESETS = Symbol('PASSWORD_RESETS');
+/** Replaces `fetch` for the OIDC clients (`openid-client` `customFetch`); unit tests only. */
+export const OIDC_FETCH = Symbol('OIDC_FETCH');

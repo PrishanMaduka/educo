@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
-import { emailDomainOf, ssoAdmission } from './sso-admission';
+import { emailDomainOf, providerVouchesForEmail, ssoAdmits } from './sso-admission';
 
-import type { SsoSchool } from './sso-admission';
+import type { SsoAdmissionInput, SsoClaims, SsoSchool } from './sso-admission';
+import type { SsoProvider } from '@quad/contracts';
 
 const school = (ssoDomain: string | null, google: boolean, microsoft = false): SsoSchool => ({
   ssoDomain,
@@ -20,104 +21,95 @@ describe('emailDomainOf', () => {
   });
 });
 
-describe('ssoAdmission (spec 05 step 2: the provider’s email must match a school’s sso_domain)', () => {
-  it.each<[string, Parameters<typeof ssoAdmission>[0], ReturnType<typeof ssoAdmission>]>([
+describe('providerVouchesForEmail (who may say an email is the person’s)', () => {
+  it.each<[string, SsoProvider, SsoClaims, boolean]>([
+    ['Google, verified', 'google', { email: 'a@x.test', email_verified: true }, true],
+    ['Google, not verified', 'google', { email: 'a@x.test', email_verified: false }, false],
     [
-      'a verified email at a school with the provider on',
-      {
-        provider: 'google',
-        email: 'a@colombo.test',
-        emailVerified: true,
-        schools: [school('colombo.test', true)],
-      },
-      'admitted',
+      'Google, verified as a string',
+      'google',
+      { email: 'a@x.test', email_verified: 'true' },
+      false,
+    ],
+    ['Google, no word on it', 'google', { email: 'a@x.test' }, false],
+    ['Google, no email', 'google', { email_verified: true }, false],
+    // Entra never sends email_verified; only xms_edov says the domain owner verified the email.
+    ['Microsoft, xms_edov true', 'microsoft', { email: 'a@x.test', xms_edov: true }, true],
+    ['Microsoft, no xms_edov', 'microsoft', { email: 'a@x.test' }, false],
+    ['Microsoft, xms_edov false', 'microsoft', { email: 'a@x.test', xms_edov: false }, false],
+    [
+      'Microsoft, email_verified alone (nOAuth: ignored)',
+      'microsoft',
+      { email: 'a@x.test', email_verified: true },
+      false,
+    ],
+    ['Microsoft, no email', 'microsoft', { xms_edov: true }, false],
+  ])('%s', (_name, provider, claims, expected) => {
+    expect(providerVouchesForEmail(provider, claims)).toBe(expected);
+  });
+});
+
+describe('ssoAdmits (spec 05 step 2: the email must match a school’s sso_domain)', () => {
+  const google = (
+    email: string,
+    hd: unknown,
+    schools: readonly SsoSchool[],
+  ): SsoAdmissionInput => ({ provider: 'google', email, hd, schools });
+  const microsoft = (email: string, schools: readonly SsoSchool[]): SsoAdmissionInput => ({
+    provider: 'microsoft',
+    email,
+    hd: undefined,
+    schools,
+  });
+
+  it.each<[string, SsoAdmissionInput, boolean]>([
+    [
+      'Google: the Workspace hd is the sso_domain',
+      google('a@colombo.test', 'colombo.test', [school('colombo.test', true)]),
+      true,
     ],
     [
-      'the domain in another case',
-      {
-        provider: 'google',
-        email: 'a@Colombo.TEST',
-        emailVerified: true,
-        schools: [school('COLOMBO.test', true)],
-      },
-      'admitted',
+      'Google: the domain and hd in another case',
+      google('a@Colombo.TEST', 'COLOMBO.test', [school('colombo.TEST', true)]),
+      true,
     ],
     [
-      'one of several schools matches',
-      {
-        provider: 'microsoft',
-        email: 'a@kandy.test',
-        emailVerified: true,
-        schools: [school('colombo.test', true), school('kandy.test', false, true)],
-      },
-      'admitted',
+      'Google: no hd (a consumer account holding the work address)',
+      google('a@colombo.test', undefined, [school('colombo.test', true)]),
+      false,
     ],
     [
-      'an email the provider has not verified',
-      {
-        provider: 'google',
-        email: 'a@colombo.test',
-        emailVerified: false,
-        schools: [school('colombo.test', true)],
-      },
-      'unverified_email',
+      'Google: another Workspace domain in hd',
+      google('a@colombo.test', 'elsewhere.test', [school('colombo.test', true)]),
+      false,
     ],
     [
-      'no word on verification',
-      {
-        provider: 'google',
-        email: 'a@colombo.test',
-        emailVerified: undefined,
-        schools: [school('colombo.test', true)],
-      },
-      'unverified_email',
+      'Microsoft: one of several schools matches (no hd needed)',
+      microsoft('a@kandy.test', [school('colombo.test', true), school('kandy.test', false, true)]),
+      true,
     ],
     [
       'an email outside the sso_domain',
-      {
-        provider: 'google',
-        email: 'a@elsewhere.test',
-        emailVerified: true,
-        schools: [school('colombo.test', true)],
-      },
-      'no_school',
+      google('a@elsewhere.test', 'elsewhere.test', [school('colombo.test', true)]),
+      false,
     ],
     [
       'a subdomain of the sso_domain',
-      {
-        provider: 'google',
-        email: 'a@staff.colombo.test',
-        emailVerified: true,
-        schools: [school('colombo.test', true)],
-      },
-      'no_school',
+      google('a@staff.colombo.test', 'colombo.test', [school('colombo.test', true)]),
+      false,
     ],
     [
       'the school has the other provider on',
-      {
-        provider: 'google',
-        email: 'a@colombo.test',
-        emailVerified: true,
-        schools: [school('colombo.test', false, true)],
-      },
-      'no_school',
+      google('a@colombo.test', 'colombo.test', [school('colombo.test', false, true)]),
+      false,
     ],
     [
       'the school has no sso_domain',
-      {
-        provider: 'google',
-        email: 'a@colombo.test',
-        emailVerified: true,
-        schools: [school(null, true)],
-      },
-      'no_school',
+      google('a@colombo.test', 'colombo.test', [school(null, true)]),
+      false,
     ],
-    [
-      'no schools at all',
-      { provider: 'google', email: 'a@colombo.test', emailVerified: true, schools: [] },
-      'no_school',
-    ],
+    ['no schools at all', microsoft('a@colombo.test', []), false],
   ])('%s', (_name, input, expected) => {
-    expect(ssoAdmission(input)).toBe(expected);
+    expect(ssoAdmits(input)).toBe(expected);
   });
 });

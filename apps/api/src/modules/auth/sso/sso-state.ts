@@ -1,4 +1,4 @@
-import { createHmac, hkdfSync, timingSafeEqual } from 'node:crypto';
+import { createHmac, hkdfSync, randomBytes, timingSafeEqual } from 'node:crypto';
 
 import { SsoProvider } from '@quad/contracts';
 import { z } from 'zod';
@@ -18,6 +18,15 @@ export interface SsoState {
   readonly keepSignedIn: boolean;
 }
 
+/** An opened cookie: the state, plus what makes it single use. */
+export interface OpenedSsoState extends SsoState {
+  /** A random id the callback records once (`consume_signed_token`), so a copy fails. */
+  readonly jti: string;
+  readonly expiresAt: Date;
+}
+
+const JTI_BYTES = 16;
+
 const Payload = z
   .object({
     p: SsoProvider,
@@ -25,6 +34,7 @@ const Payload = z
     n: z.string().min(1).max(512),
     v: z.string().min(43).max(128),
     k: z.boolean(),
+    j: z.string().regex(/^[A-Za-z0-9_-]{22}$/),
     exp: z.number().int(),
   })
   .strict();
@@ -34,7 +44,8 @@ const SEGMENT = /^[A-Za-z0-9_-]+$/;
 /**
  * The SSO state cookie (Task 8, D32): `base64url(payload).base64url(HMAC-SHA256)` under a key
  * derived by HKDF from `SESSION_SECRET` for this purpose only, with a 10-minute expiry inside the
- * payload (the cookie's own max-age is only a hint to the browser). The cookie ties the callback
+ * payload (the cookie's own max-age is only a hint to the browser), and a random `jti` the
+ * callback records once, so a copied cookie cannot be used again. The cookie ties the callback
  * to the browser that started: a callback URL opened anywhere else has no cookie and fails.
  */
 export class SsoStateCookies {
@@ -52,6 +63,7 @@ export class SsoStateCookies {
       n: state.nonce,
       v: state.verifier,
       k: state.keepSignedIn,
+      j: randomBytes(JTI_BYTES).toString('base64url'),
       exp: Math.floor(now.getTime() / 1000) + SSO_STATE_TTL_SECONDS,
     };
     const segment = Buffer.from(JSON.stringify(payload), 'utf8').toString('base64url');
@@ -59,7 +71,7 @@ export class SsoStateCookies {
   }
 
   /** The state in a cookie this API signed that has not expired at `now`; otherwise null. */
-  open(value: string | undefined, now: Date): SsoState | null {
+  open(value: string | undefined, now: Date): OpenedSsoState | null {
     const [segment, signature, ...rest] = (value ?? '').split('.');
     if (
       segment === undefined ||
@@ -81,8 +93,16 @@ export class SsoStateCookies {
     }
     const parsed = Payload.safeParse(json);
     if (!parsed.success || parsed.data.exp * 1000 <= now.getTime()) return null;
-    const { p, s, n, v, k } = parsed.data;
-    return { provider: p, state: s, nonce: n, verifier: v, keepSignedIn: k };
+    const { p, s, n, v, k, j, exp } = parsed.data;
+    return {
+      provider: p,
+      state: s,
+      nonce: n,
+      verifier: v,
+      keepSignedIn: k,
+      jti: j,
+      expiresAt: new Date(exp * 1000),
+    };
   }
 
   private mac(segment: string): string {

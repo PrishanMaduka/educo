@@ -59,8 +59,6 @@
   "errorAuthenticatorExists": "You already have an authenticator app set up.",
   "errorSignInUnavailable": "We can’t sign you in right now. Try again in a minute.",
   "errorSsoNotOffered": "Your school doesn’t use this sign-in for your email. Sign in with your password instead.",
-  "errorSsoRefused": "We couldn’t sign you in with that account. Use your work account for your school, or sign in with your password.",
-  "errorSsoUnfinished": "That sign-in didn’t finish or took too long. Start again from the sign-in page.",
   "errorPasswordTooShort": "Use at least {min, plural, one {{min} character} other {{min} characters}}.",
   "@errorPasswordTooShort": {
     "placeholders": {

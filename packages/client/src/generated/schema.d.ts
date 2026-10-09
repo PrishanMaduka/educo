@@ -719,12 +719,14 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** The provider returns here; the API checks the sign-in and redirects to /sign-in?step=<next step> */
+        /** The provider returns here; the API checks the sign-in and always redirects back to /sign-in */
         get: {
             parameters: {
-                query: {
-                    code: string;
-                    state: string;
+                query?: {
+                    code?: string;
+                    state?: string;
+                    error?: string;
+                    error_description?: string;
                 };
                 header?: never;
                 path: {
@@ -734,51 +736,22 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                /** @description Redirects to the next sign-in step */
+                /** @description Signed in: redirects to /sign-in?step=<next step> */
                 302: {
                     headers: {
                         [name: string]: unknown;
                     };
                     content?: never;
                 };
-                /** @description Error */
-                400: {
+                /** @description Refused: redirects to /sign-in?error=<sso_unfinished | sso_refused | account_locked | sso_cancelled> */
+                303: {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-                /** @description Error */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-                /** @description Error */
-                403: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
+                    content?: never;
                 };
                 /** @description Error */
                 429: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-                /** @description Error */
-                503: {
                     headers: {
                         [name: string]: unknown;
                     };

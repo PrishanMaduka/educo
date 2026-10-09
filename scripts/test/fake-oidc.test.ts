@@ -32,19 +32,21 @@ describe('fakeOidcCommand', () => {
 });
 
 describe('scripts/fake-oidc.mjs', () => {
-  it('serves OIDC discovery for the issuer it prints, and stops on SIGTERM', async () => {
+  it('serves OIDC discovery for each client under the URL it prints, and stops on SIGTERM', async () => {
     const child = spawn(process.execPath, [script, '--port', '0'], {
       stdio: ['ignore', 'pipe', 'inherit'],
     });
     try {
       const [chunk] = (await once(child.stdout, 'data')) as [Buffer];
       const url = /listening on (\S+)/.exec(chunk.toString())?.[1] ?? '';
-      const response = await fetch(`${url}/.well-known/openid-configuration`);
-      expect(response.status).toBe(200);
-      expect(await response.json()).toMatchObject({
-        issuer: url,
-        code_challenge_methods_supported: ['S256'],
-      });
+      for (const client of ['google', 'microsoft', 'console_google']) {
+        const response = await fetch(`${url}/${client}/.well-known/openid-configuration`);
+        expect(response.status).toBe(200);
+        expect(await response.json()).toMatchObject({
+          issuer: `${url}/${client}`,
+          code_challenge_methods_supported: ['S256'],
+        });
+      }
     } finally {
       child.kill('SIGTERM');
     }

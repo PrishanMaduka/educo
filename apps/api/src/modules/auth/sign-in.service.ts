@@ -89,6 +89,7 @@ export class SignInService {
       accountId,
       session: null,
       keepSignedIn: input.keepSignedIn,
+      method: 'password',
       twoStepDone: false,
       trustedByCookie: await this.trustedByCookie(accountId, client.trustedToken, now),
       client,

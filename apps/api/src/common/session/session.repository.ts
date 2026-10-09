@@ -3,7 +3,7 @@ import { and, desc, eq, gt, isNull, sessions, sql, users } from '@quad/db';
 
 import { TENANT_DB } from '../../tokens';
 
-import type { MembershipStatus, SessionKind, SessionStage } from '@quad/contracts';
+import type { MembershipStatus, SessionKind, SessionStage, SignInMethod } from '@quad/contracts';
 import type { AccountTx, QuadTenantDb, SessionLookup, TenantProfile } from '@quad/db';
 
 /** The membership a session points at, as far as the guard needs it. */
@@ -45,11 +45,13 @@ export interface SessionPlace {
   readonly userId: string | null;
 }
 
-/** A new staff browser session (`POST /auth/password`). */
+/** A new staff browser session (`POST /auth/password`, the SSO callback). */
 export interface NewWebSession extends SessionPlace {
   readonly accountId: string;
   readonly tokenHash: Buffer;
   readonly keepSignedIn: boolean;
+  /** The first factor it signed in with, for the `auth.sign_in` audit. */
+  readonly signInMethod: SignInMethod;
   readonly ip: string | null;
   readonly userAgent: string | null;
   readonly at: Date;
@@ -161,6 +163,7 @@ export class SessionRepository {
         activeUserId: session.userId,
         tokenHash: session.tokenHash,
         keepSignedIn: session.keepSignedIn,
+        signInMethod: session.signInMethod,
         ip: session.ip,
         userAgent: session.userAgent,
         createdAt: session.at,
@@ -180,9 +183,12 @@ export class SessionRepository {
     tx: AccountTx,
     sessionId: string,
     tokenHash: Buffer,
-  ): Promise<{ readonly keepSignedIn: boolean } | null> {
+  ): Promise<{
+    readonly keepSignedIn: boolean;
+    readonly signInMethod: SignInMethod | null;
+  } | null> {
     const [row] = await tx
-      .select({ keepSignedIn: sessions.keepSignedIn })
+      .select({ keepSignedIn: sessions.keepSignedIn, signInMethod: sessions.signInMethod })
       .from(sessions)
       .where(
         and(

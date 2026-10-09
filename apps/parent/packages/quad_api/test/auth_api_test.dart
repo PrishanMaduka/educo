@@ -56,9 +56,9 @@ void main() {
       // TODO
     });
 
-    // The provider returns here; the API checks the sign-in and redirects to /sign-in?step=<next step>
+    // The provider returns here; the API checks the sign-in and always redirects back to /sign-in
     //
-    //Future apiV1AuthSsoProviderCallbackGet(String provider, String code, String state) async
+    //Future apiV1AuthSsoProviderCallbackGet(String provider, { String code, String state, String error, String errorDescription }) async
     test('test apiV1AuthSsoProviderCallbackGet', () async {
       // TODO
     });

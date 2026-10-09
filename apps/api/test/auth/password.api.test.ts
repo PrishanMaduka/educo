@@ -154,6 +154,20 @@ describe('POST /auth/password (spec 05 step 3)', () => {
     ).toEqual({ next: 'two_step_setup' });
   });
 
+  it('audits the sign-in with its method, password', async () => {
+    const school = await insertSchool(db());
+    const account = await insertPasswordAccount(db());
+    const userId = await insertMember(db(), school.id, account.id);
+    await signIn(new Browser(app), { email: account.email, password: account.password });
+    const { rows } = await db().platform.query<{ actor_user_id: string; meta: unknown }>(
+      `select actor_user_id, meta from audit_log where tenant_id = $1 and action = 'auth.sign_in'`,
+      [school.id],
+    );
+    expect(rows).toEqual([
+      { actor_user_id: userId, meta: { switchedSchool: false, method: 'password' } },
+    ]);
+  });
+
   it('does not run the breached-password check on sign-in', async () => {
     const school = await insertSchool(db());
     const account = await insertPasswordAccount(db(), { password: 'password123' });

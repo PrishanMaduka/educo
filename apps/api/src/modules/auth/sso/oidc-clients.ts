@@ -1,12 +1,17 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { allowInsecureRequests, discovery } from 'openid-client';
+import { Inject, Injectable, Optional } from '@nestjs/common';
+import {
+  allowInsecureRequests,
+  customFetch,
+  discovery,
+  enableNonRepudiationChecks,
+} from 'openid-client';
 
 import { UnavailableError } from '../../../common/errors';
 import { errorForLog } from '../../../observability/logger';
-import { CONFIG, LOGGER } from '../../../tokens';
+import { CONFIG, LOGGER, OIDC_FETCH } from '../../../tokens';
 
 import type { Config } from '../../../config';
-import type { Configuration } from 'openid-client';
+import type { Configuration, CustomFetch } from 'openid-client';
 import type { Logger } from 'pino';
 
 /** The OIDC clients the API signs people in with: staff Google and Microsoft, console Google. */
@@ -34,10 +39,12 @@ interface ClientCredentials {
 }
 
 /**
- * The OIDC client configurations (`openid-client`, discovered once per client and kept). With
- * `OIDC_FAKE_ISSUER_URL` (local only, D32) every client uses the fake issuer, so nothing ever
- * calls Google or Microsoft from a test or the e2e stack; a client with no id configured then
- * uses `quad-local-<client>`. Without the fake, a client with no id is not available (503).
+ * The OIDC client configurations (`openid-client`, discovered once per client and kept), each
+ * with non-repudiation checks on, so every ID token's signature is verified against the issuer's
+ * JWKS. With `OIDC_FAKE_ISSUER_URL` (local only, D32) each client uses the fake issuer at
+ * `<url>/<client>`, so nothing ever calls Google or Microsoft from a test or the e2e stack; a
+ * client with no id configured then uses `quad-local-<client>`. Without the fake, a client with
+ * no id is not available (503).
  */
 @Injectable()
 export class OidcClients {
@@ -46,6 +53,8 @@ export class OidcClients {
   constructor(
     @Inject(CONFIG) private readonly config: Config,
     @Inject(LOGGER) private readonly logger: Logger,
+    /** Replaces `fetch` for every call to the provider (unit tests of the real issuers only). */
+    @Optional() @Inject(OIDC_FETCH) private readonly fetchOverride?: CustomFetch,
   ) {}
 
   /** The client's configuration; 503 `unavailable` when it is not set up or cannot be reached. */
@@ -65,8 +74,14 @@ export class OidcClients {
           // plain http, and OIDC_FAKE_ISSUER_URL is refused outside local (D32).
           // eslint-disable-next-line @typescript-eslint/no-deprecated
           ...(credentials.fake ? { execute: [allowInsecureRequests] } : {}),
+          ...(this.fetchOverride === undefined ? {} : { [customFetch]: this.fetchOverride }),
         },
-      );
+      ).then((configuration) => {
+        // Without this, an ID token from the token endpoint is trusted on TLS alone and its JWS
+        // signature is never checked against the issuer's JWKS (review I-1, D32).
+        enableNonRepudiationChecks(configuration);
+        return configuration;
+      });
       this.discovered.set(name, pending);
     }
     try {
@@ -87,7 +102,8 @@ export class OidcClients {
     const fakeIssuer = this.config.OIDC_FAKE_ISSUER_URL;
     if (fakeIssuer !== undefined) {
       return {
-        issuer: new URL(fakeIssuer),
+        // One fake issuer per client, shaped like its real provider (D32).
+        issuer: new URL(name, fakeIssuer.endsWith('/') ? fakeIssuer : `${fakeIssuer}/`),
         clientId: clientId ?? `quad-local-${name}`,
         clientSecret,
         fake: true,

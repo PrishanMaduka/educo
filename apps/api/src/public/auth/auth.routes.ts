@@ -7,7 +7,7 @@ import {
   SelectSchoolInput,
   SignInMembershipList,
   SignInResult,
-  SsoCallbackQuery,
+  SsoCallbackQueryFields,
   SsoProviderParams,
   SsoStartInput,
   SsoStartResult,
@@ -67,11 +67,17 @@ export const authRoutes: readonly ApiRoute[] = [
     method: 'get',
     path: '/auth/sso/{provider}/callback',
     summary:
-      'The provider returns here; the API checks the sign-in and redirects to /sign-in?step=<next step>',
+      'The provider returns here; the API checks the sign-in and always redirects back to /sign-in',
     tags: ['auth'],
-    request: { params: SsoProviderParams, query: SsoCallbackQuery },
-    responses: { 302: { description: 'Redirects to the next sign-in step' } },
-    errors: [400, 401, 403, 429, 503],
+    request: { params: SsoProviderParams, query: SsoCallbackQueryFields },
+    responses: {
+      302: { description: 'Signed in: redirects to /sign-in?step=<next step>' },
+      303: {
+        description:
+          'Refused: redirects to /sign-in?error=<sso_unfinished | sso_refused | account_locked | sso_cancelled>',
+      },
+    },
+    errors: [429],
   },
   {
     method: 'post',

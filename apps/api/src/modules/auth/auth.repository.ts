@@ -281,10 +281,11 @@ export class AuthRepository {
 
   /**
    * Links the provider's `subject` to the account on its first SSO sign-in (spec 05 step 2).
-   * Account RLS shows only this account's rows, and the unique `(provider, subject)` decides the
-   * rest: an insert that finds the subject taken (by another account, or by a concurrent first
-   * sign-in of this one) inserts nothing, and the account's own row is read again. One login per
-   * provider per account: a second subject is a conflict, never a second link.
+   * Account RLS shows only this account's rows, and two unique pairs decide the rest (0010):
+   * `(provider, subject)` and `(account_id, provider)`. An insert that hits either inserts
+   * nothing, and the account's own row is read again: the same subject (a concurrent first
+   * sign-in) is reused, anything else is a conflict. One login per provider per account: a
+   * second subject is a conflict, never a second link.
    */
   async linkIdentity(
     accountId: string,
@@ -305,7 +306,9 @@ export class AuthRepository {
       const inserted = await tx
         .insert(identities)
         .values({ accountId, provider, subject, email })
-        .onConflictDoNothing({ target: [identities.provider, identities.subject] })
+        // Either unique pair: (provider, subject) taken by any account, or (account, provider)
+        // taken by a concurrent first sign-in of this account with another subject.
+        .onConflictDoNothing()
         .returning({ id: identities.id });
       if (inserted.length > 0) return 'linked';
       return (await own()).some((row) => row.subject === subject) ? 'reused' : 'conflict';

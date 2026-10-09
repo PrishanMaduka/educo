@@ -731,6 +731,8 @@ section 3.
 | App Store Connect API key | App Store Connect → Users and Access → Keys | `ASC_KEY_ID`, `ASC_ISSUER_ID`, `ASC_KEY_P8_B64` |
 | Play upload key and service account | `keytool -genkeypair` locally; Google Cloud → service account with Play Console access | `ANDROID_*` secrets and `PLAY_SERVICE_ACCOUNT_JSON`; Play App Signing holds the app signing key |
 | GitHub `staging-stores` environment secrets | step 5.6 | the fastlane credentials; AWS holds none of them |
+| Google OAuth clients for staff SSO and console sign-in | Google Cloud → APIs & Services → Credentials (Web application) | redirect URIs `https://<staging host>/api/v1/auth/sso/google/callback` and the console's; scopes `openid email`; the ids and secrets go to `GOOGLE_CLIENT_*` and `CONSOLE_GOOGLE_CLIENT_*` (D32, Task 8) |
+| Microsoft Entra app registration for staff SSO | Entra admin center → App registrations, multitenant (organizations) | redirect URI `https://<staging host>/api/v1/auth/sso/microsoft/callback`; Token configuration → add the optional ID-token claims `xms_edov` and `email`, or every Microsoft sign-in is refused (`xms_edov` is the only proof the email is the person's, D32); the id and a client secret go to `MICROSOFT_CLIENT_*` |
 
 ## 6. What CI does
 

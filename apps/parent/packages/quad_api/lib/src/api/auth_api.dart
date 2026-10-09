@@ -515,13 +515,15 @@ _bodyData=jsonEncode(selectSchoolInput);
     return _response;
   }
 
-  /// The provider returns here; the API checks the sign-in and redirects to /sign-in?step&#x3D;&lt;next step&gt;
+  /// The provider returns here; the API checks the sign-in and always redirects back to /sign-in
   /// 
   ///
   /// Parameters:
   /// * [provider] 
   /// * [code] 
   /// * [state] 
+  /// * [error] 
+  /// * [errorDescription] 
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -533,8 +535,10 @@ _bodyData=jsonEncode(selectSchoolInput);
   /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> apiV1AuthSsoProviderCallbackGet({ 
     required String provider,
-    required String code,
-    required String state,
+    String? code,
+    String? state,
+    String? error,
+    String? errorDescription,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -556,8 +560,10 @@ _bodyData=jsonEncode(selectSchoolInput);
     );
 
     final _queryParameters = <String, dynamic>{
-      r'code': code,
-      r'state': state,
+      if (code != null) r'code': code,
+      if (state != null) r'state': state,
+      if (error != null) r'error': error,
+      if (errorDescription != null) r'error_description': errorDescription,
     };
 
     final _response = await _dio.request<Object>(

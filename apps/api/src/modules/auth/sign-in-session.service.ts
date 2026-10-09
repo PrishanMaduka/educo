@@ -16,7 +16,7 @@ import { describeDevice } from './device-name';
 import type { DeliveryQueue } from '../../common/delivery/delivery.service';
 import type { SessionPlace } from '../../common/session/session.repository';
 import type { Config } from '../../config';
-import type { SignInNext } from '@quad/contracts';
+import type { SignInMethod, SignInNext } from '@quad/contracts';
 import type { AccountTx, AuthMembership, QuadTenantDb } from '@quad/db';
 
 const DAY_SECONDS = 24 * 60 * 60;
@@ -45,13 +45,18 @@ export interface StepSession {
   readonly tokenHash: Buffer;
 }
 
-/** Where a sign-in stands after a first factor (password, later SSO) or the two-step code. */
+/** Where a sign-in stands after a first factor (password or SSO) or the two-step code. */
 export interface SignInState {
   readonly accountId: string;
   /** Null right after the password: no session exists yet. */
   readonly session: StepSession | null;
   /** From the password step; a continuing session keeps its own. */
   readonly keepSignedIn: boolean;
+  /**
+   * The first factor (password or an SSO provider), required for a new session (`session` null);
+   * a continuing session keeps its own. The `auth.sign_in` audit names it.
+   */
+  readonly method?: SignInMethod;
   /** The two-step code (or a new authenticator) was just checked. */
   readonly twoStepDone: boolean;
   /** The request carried a valid trusted-device cookie of this account. */
@@ -112,7 +117,7 @@ export class SignInSessions {
       tenantId: membership.tenantId,
       userId: membership.userId,
     };
-    const written = await this.write(state, place, async (tx, keepSignedIn) => {
+    const written = await this.write(state, place, async (tx, { keepSignedIn, method }) => {
       const profile = await this.db.definers.currentTenantProfile(tx);
       if (profile === null || profile.status === 'deleted') {
         throw new ForbiddenError('forbidden', formatMessage('error.notYourSchool'));
@@ -144,7 +149,8 @@ export class SignInSessions {
         },
         'auth.sign_in',
         { type: 'user', id: membership.userId },
-        { switchedSchool: options.switching },
+        // A session from before 0010 has no method recorded.
+        { switchedSchool: options.switching, ...(method === null ? {} : { method }) },
       );
       const { expiresAt } = sessionExpiry({
         kind: 'web',
@@ -166,24 +172,31 @@ export class SignInSessions {
   /**
    * Writes the session at `place` with a new token, in one transaction scoped to the account
    * (and the school, once active). `inTx` runs in that transaction first and gives the expiry; it
-   * is told whether the session keeps the person signed in. The old token's cache entry goes.
+   * is told whether the session keeps the person signed in, and its first factor. The old
+   * token's cache entry goes.
    */
   private async write<T>(
     state: SignInState,
     place: SessionPlace,
-    inTx: (tx: AccountTx, keepSignedIn: boolean) => Promise<{ expiresAt: Date; value: T }>,
+    inTx: (
+      tx: AccountTx,
+      kept: { readonly keepSignedIn: boolean; readonly method: SignInMethod | null },
+    ) => Promise<{ expiresAt: Date; value: T }>,
   ): Promise<{ cookies: SessionCookies; keepSignedIn: boolean; value: T }> {
     const token = newSessionToken();
     const tokenHash = hashSessionToken(token);
     const existing = state.session;
     const written = await this.repository.inAccount(state.accountId, place.tenantId, async (tx) => {
       if (existing === null) {
-        const { expiresAt, value } = await inTx(tx, state.keepSignedIn);
+        const method = state.method;
+        if (method === undefined) throw new Error('A new session needs its sign-in method.');
+        const { expiresAt, value } = await inTx(tx, { keepSignedIn: state.keepSignedIn, method });
         await this.sessionRows.insertIn(tx, {
           ...place,
           accountId: state.accountId,
           tokenHash,
           keepSignedIn: state.keepSignedIn,
+          signInMethod: method,
           ip: state.client.ip,
           userAgent: state.client.userAgent,
           at: state.now,
@@ -193,7 +206,10 @@ export class SignInSessions {
       }
       const locked = await this.sessionRows.lockForStepIn(tx, existing.id, existing.tokenHash);
       if (locked === null) throw new UnauthorizedError();
-      const { expiresAt, value } = await inTx(tx, locked.keepSignedIn);
+      const { expiresAt, value } = await inTx(tx, {
+        keepSignedIn: locked.keepSignedIn,
+        method: locked.signInMethod,
+      });
       const rotated = await this.sessionRows.rotateIn(tx, existing.id, existing.tokenHash, {
         ...place,
         tokenHash,

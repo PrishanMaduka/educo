@@ -7,17 +7,25 @@ export interface SsoSchool {
   readonly microsoft: boolean;
 }
 
-/** What the provider vouched for, and the account's own schools. */
-export interface SsoAdmissionInput {
-  readonly provider: SsoProvider;
-  /** The ID token's `email`. */
-  readonly email: string;
-  /** The ID token's `email_verified`; anything but `true` is not verified. */
-  readonly emailVerified: unknown;
-  readonly schools: readonly SsoSchool[];
+/** The verified ID token claims SSO reads; anything a provider did not send is undefined. */
+export interface SsoClaims {
+  readonly email?: unknown;
+  /** Google: the email is verified. Ignored for Microsoft, which never sends it (nOAuth). */
+  readonly email_verified?: unknown;
+  /** Entra: "email domain owner verified" (an optional claim the app registration adds). */
+  readonly xms_edov?: unknown;
+  /** Google: the Workspace domain of the account; absent for a consumer Google account. */
+  readonly hd?: unknown;
 }
 
-export type SsoAdmission = 'admitted' | 'unverified_email' | 'no_school';
+/** The provider has vouched for `email`; the schools are the account's own staff schools. */
+export interface SsoAdmissionInput {
+  readonly provider: SsoProvider;
+  readonly email: string;
+  /** Google's `hd` claim, as sent. */
+  readonly hd: unknown;
+  readonly schools: readonly SsoSchool[];
+}
 
 /** The part after the last `@`, lower-cased. */
 export function emailDomainOf(email: string): string {
@@ -25,16 +33,36 @@ export function emailDomainOf(email: string): string {
 }
 
 /**
- * Whether an SSO sign-in may continue (spec 05 step 2): the provider verified the email, and one
- * of the account's own staff schools has this provider on with exactly the email's domain as its
- * `sso_domain` (no subdomains). The schools come from the account's memberships, never from the
- * provider, so a domain only ever opens a school the person already belongs to.
+ * Whether the provider vouches that the ID token's email belongs to the person (spec 05 step 2,
+ * D32). Google: `email_verified` is `true`. Microsoft: only `xms_edov` is `true`; `email` in an
+ * Entra token is whatever the user's own tenant set, and `email_verified` is never sent, so
+ * trusting either would let any Entra tenant claim any address (nOAuth). Decided before any
+ * account is looked up.
  */
-export function ssoAdmission(input: SsoAdmissionInput): SsoAdmission {
-  if (input.emailVerified !== true) return 'unverified_email';
+export function providerVouchesForEmail(provider: SsoProvider, claims: SsoClaims): boolean {
+  if (typeof claims.email !== 'string' || claims.email === '') return false;
+  switch (provider) {
+    case 'google':
+      return claims.email_verified === true;
+    case 'microsoft':
+      return claims.xms_edov === true;
+  }
+}
+
+/**
+ * Whether an SSO sign-in may continue (spec 05 step 2): one of the account's own staff schools
+ * has this provider on with exactly the email's domain as its `sso_domain` (no subdomains, any
+ * case), and for Google the account's Workspace domain (`hd`) is that same domain, so a consumer
+ * Google account holding the work address (or another Workspace) is refused. The schools come
+ * from the account's memberships, never from the provider.
+ */
+export function ssoAdmits(input: SsoAdmissionInput): boolean {
   const domain = emailDomainOf(input.email);
-  const admits = input.schools.some(
-    (school) => school[input.provider] && school.ssoDomain?.toLowerCase() === domain,
+  const workspace = typeof input.hd === 'string' ? input.hd.toLowerCase() : null;
+  return input.schools.some(
+    (school) =>
+      school[input.provider] &&
+      school.ssoDomain?.toLowerCase() === domain &&
+      (input.provider !== 'google' || workspace === domain),
   );
-  return admits ? 'admitted' : 'no_school';
 }

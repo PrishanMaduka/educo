@@ -11,7 +11,7 @@ import {
   Req,
   Res,
 } from '@nestjs/common';
-import { SsoCallbackQuery, SsoProviderParams, SsoStartInput } from '@quad/contracts';
+import { SsoProviderParams, SsoStartInput } from '@quad/contracts';
 
 import { Public } from '../../common/guards/public.decorator';
 import { RateLimit } from '../../common/rate-limit/rate-limit.decorator';
@@ -33,7 +33,8 @@ const PER_EMAIL = { limit: 10, windowSeconds: 15 * 60, key: bodyEmail } as const
 /**
  * Staff single sign-on (spec 05 step 2; spec 06 Me and auth). Tenant-less (D16, ruling F14):
  * neither the path, the query nor the provider names a school; the callback finds it in the
- * account's own memberships. Both routes are in the per-IP sign-in bucket (`/auth/*`).
+ * account's own memberships, and parses its own input so that even a malformed callback ends
+ * on the sign-in page. Both routes are in the per-IP sign-in bucket (`/auth/*`).
  */
 @Controller('auth/sso')
 export class SsoController {
@@ -56,29 +57,36 @@ export class SsoController {
     return { url };
   }
 
-  /** The provider sends the browser here; the API sends it on to the next sign-in step. */
+  /**
+   * The provider sends the browser here. It always redirects (I-5): to `/sign-in?step=<next>`
+   * when signed in, or with 303 to `/sign-in?error=<SsoSignInError>`; the state cookie is used
+   * up either way, and a refusal sets no session cookie.
+   */
   @Get(':provider/callback')
   @Public()
   @Redirect()
   async callback(
-    @Param(new ZodValidationPipe(SsoProviderParams)) params: SsoProviderParams,
-    @Query(new ZodValidationPipe(SsoCallbackQuery)) query: SsoCallbackQuery,
+    @Param() params: unknown,
+    @Query() query: unknown,
     @Req() request: FastifyRequest,
     @Res({ passthrough: true }) reply: FastifyReply,
   ): Promise<{ url: string; statusCode: number }> {
     const appEnv = this.config.APP_ENV;
-    // Used once, whatever happens next.
     clearSsoStateCookie(reply, appEnv);
-    const outcome = await this.sso.callback(
-      params.provider,
+    const result = await this.sso.callback({
+      params,
       query,
-      searchOf(request.url),
-      request.cookies[cookieNames(appEnv).ssoState],
-      signInClientOf(request, appEnv),
-    );
-    applySignInCookies(reply, appEnv, outcome);
+      search: searchOf(request.url),
+      stateCookie: request.cookies[cookieNames(appEnv).ssoState],
+      client: signInClientOf(request, appEnv),
+    });
     const next = new URL('/sign-in', this.config.PUBLIC_WEB_URL);
-    next.searchParams.set('step', outcome.next);
+    if ('refused' in result) {
+      next.searchParams.set('error', result.refused);
+      return { url: next.href, statusCode: 303 };
+    }
+    applySignInCookies(reply, appEnv, result.signedIn);
+    next.searchParams.set('step', result.signedIn.next);
     return { url: next.href, statusCode: 302 };
   }
 }

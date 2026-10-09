@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 
-import { SsoCallbackQuery, SsoProviderParams, SsoStartInput, SsoStartResult } from '../index';
+import {
+  SsoCallbackQuery,
+  SsoProviderParams,
+  SsoSignInError,
+  SsoStartInput,
+  SsoStartResult,
+} from '../index';
 
 const pathOf = (result: { success: boolean; error?: { issues: { path: unknown[] }[] } }) =>
   result.error?.issues[0]?.path;
@@ -48,12 +54,35 @@ describe('SsoCallbackQuery', () => {
     ).toEqual({ code: 'c', state: 's' });
   });
 
+  it("takes the provider's error, with its description ignored", () => {
+    expect(
+      SsoCallbackQuery.parse({
+        error: 'access_denied',
+        error_description: 'The user said no',
+        state: 's',
+      }),
+    ).toEqual({ error: 'access_denied', state: 's' });
+  });
+
   it.each([
     [{ state: 's' }, 'code'],
     [{ code: 'c' }, 'state'],
     [{ code: '', state: 's' }, 'code'],
     [{ code: 'c', state: 's'.repeat(513) }, 'state'],
+    [{ error: '' }, 'error'],
+    [{ error: 'e'.repeat(257) }, 'error'],
   ])('refuses %j at %s', (input, field) => {
     expect(pathOf(SsoCallbackQuery.safeParse(input))).toEqual([field]);
+  });
+});
+
+describe('SsoSignInError', () => {
+  it('names every reason the callback sends the browser back to /sign-in?error=', () => {
+    expect(SsoSignInError.options).toEqual([
+      'sso_unfinished',
+      'sso_refused',
+      'account_locked',
+      'sso_cancelled',
+    ]);
   });
 });
