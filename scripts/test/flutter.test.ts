@@ -90,3 +90,55 @@ describe('scripts/api-client.mjs without Dart', () => {
     expect(existsSync(log)).toBe(false);
   });
 });
+
+describe('scripts/api-client.mjs with a route tag nobody classified', () => {
+  let sandbox = '';
+  afterEach(() => {
+    rmSync(sandbox, { recursive: true, force: true });
+  });
+
+  it('fails before generating or deleting the Dart client', () => {
+    sandbox = mkdtempSync(join(tmpdir(), 'api-client-tag-'));
+    mkdirSync(join(sandbox, 'scripts'));
+    for (const file of ['api-client.mjs', 'flutter.mjs', 'parent-openapi.mjs']) {
+      copyFileSync(join(root, 'scripts', file), join(sandbox, 'scripts', file));
+    }
+    const marker = join(sandbox, 'apps/parent/packages/quad_api/pubspec.yaml');
+    mkdirSync(join(sandbox, 'apps/parent/packages/quad_api'), { recursive: true });
+    writeFileSync(marker, 'name: quad_api\n');
+    // The exported description gains a route under a tag nobody classified.
+    const fixture = join(sandbox, 'fixture.json');
+    writeFileSync(
+      fixture,
+      JSON.stringify({
+        openapi: '3.1.0',
+        info: { title: 'Quad API', version: '0.0.0' },
+        paths: { '/api/v1/fees': { get: { tags: ['fees'], responses: {} } } },
+        components: { schemas: {} },
+      }),
+    );
+    const bin = join(sandbox, 'bin');
+    const log = join(sandbox, 'pnpm.log');
+    mkdirSync(bin);
+    // pnpm: openapi:export writes the fixture to its last argument; anything else is logged.
+    writeFileSync(
+      join(bin, 'pnpm'),
+      `#!/bin/sh\necho "$@" >> "${log}"\ncase "$*" in *openapi:export*) for last; do :; done; mkdir -p "$(dirname "$last")"; cp "${fixture}" "$last";; esac\n`,
+    );
+    writeFileSync(join(bin, 'dart'), '#!/bin/sh\nexit 0\n');
+    chmodSync(join(bin, 'pnpm'), 0o755);
+    chmodSync(join(bin, 'dart'), 0o755);
+
+    const result = spawnSync(process.execPath, [join(sandbox, 'scripts/api-client.mjs')], {
+      env: { PATH: `${bin}:/usr/bin:/bin` },
+      encoding: 'utf8',
+    });
+
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toContain(
+      'GET /api/v1/fees has the tag fees, which is neither a parent tag nor an excluded one',
+    );
+    expect(readFileSync(log, 'utf8')).not.toContain('openapi-generator-cli');
+    expect(existsSync(marker)).toBe(true);
+  });
+});

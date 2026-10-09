@@ -6,6 +6,13 @@
 export const PARENT_TAGS = ['health', 'auth', 'me'];
 
 /**
+ * The tags kept out of the parent client: the console, provider webhooks and the API description.
+ * Every tag must be in one list or the other (fix round 2): a new area's tag fails
+ * `pnpm api:client` until someone decides whether the parent app may call it.
+ */
+export const EXCLUDED_TAGS = ['platform', 'webhooks', 'meta'];
+
+/**
  * @typedef {{
  *   paths: Record<string, Record<string, { tags?: string[] } & Record<string, unknown>>>,
  *   components?: { schemas?: Record<string, unknown> } & Record<string, unknown>,
@@ -36,20 +43,34 @@ function collectRefs(value, into) {
 
 /**
  * A copy of `document` with only the operations whose tags are all parent-facing, and only the
- * component schemas those operations reach.
+ * component schemas those operations reach. Throws for an operation with no tag, or with a tag in
+ * neither `PARENT_TAGS` nor `EXCLUDED_TAGS`.
  * @param {OpenApiDocument} document
  * @param {readonly string[]} [tags]
  * @returns {OpenApiDocument & { components: { schemas: Record<string, unknown> } }}
  */
 export function parentSpec(document, tags = PARENT_TAGS) {
+  for (const [path, operations] of Object.entries(document.paths)) {
+    for (const [method, operation] of Object.entries(operations)) {
+      const route = `${method.toUpperCase()} ${path}`;
+      const own = operation.tags ?? [];
+      if (own.length === 0) throw new Error(`${route} has no tag`);
+      for (const tag of own) {
+        if (!tags.includes(tag) && !EXCLUDED_TAGS.includes(tag)) {
+          throw new Error(
+            `${route} has the tag ${tag}, which is neither a parent tag nor an excluded one (scripts/parent-openapi.mjs)`,
+          );
+        }
+      }
+    }
+  }
   /** @type {OpenApiDocument['paths']} */
   const paths = {};
   for (const [path, operations] of Object.entries(document.paths)) {
     /** @type {OpenApiDocument['paths'][string]} */
     const kept = {};
     for (const [method, operation] of Object.entries(operations)) {
-      const own = operation.tags ?? [];
-      if (own.length > 0 && own.every((tag) => tags.includes(tag))) kept[method] = operation;
+      if ((operation.tags ?? []).every((tag) => tags.includes(tag))) kept[method] = operation;
     }
     if (Object.keys(kept).length > 0) paths[path] = kept;
   }

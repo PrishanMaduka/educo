@@ -1,6 +1,10 @@
+
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+
 import { describe, expect, it } from 'vitest';
 
-import { PARENT_TAGS, parentSpec, platformLeaks } from '../parent-openapi.mjs';
+import { EXCLUDED_TAGS, PARENT_TAGS, parentSpec, platformLeaks } from '../parent-openapi.mjs';
 
 const ref = (name: string) => ({ $ref: `#/components/schemas/${name}` });
 const json = (name: string) => ({ content: { 'application/json': { schema: ref(name) } } });
@@ -69,5 +73,42 @@ describe('platformLeaks (codegen check)', () => {
       'lib/src/model/platform_me.dart',
       'doc/PlatformApi.md',
     ]);
+  });
+});
+
+describe('every tag is classified (fix round 2: an allow-list, not a filter)', () => {
+  it('names the tags kept out of the parent client', () => {
+    expect(EXCLUDED_TAGS).toEqual(['platform', 'webhooks', 'meta']);
+  });
+
+  it('classifies every tag of the real API description', () => {
+    const real = JSON.parse(
+      readFileSync(resolve(__dirname, '../../packages/contracts/openapi.json'), 'utf8'),
+    ) as Parameters<typeof parentSpec>[0];
+    const tags = new Set(
+      Object.values(real.paths).flatMap((operations) =>
+        Object.values(operations).flatMap((operation) => operation.tags ?? []),
+      ),
+    );
+    for (const tag of tags) expect([...PARENT_TAGS, ...EXCLUDED_TAGS]).toContain(tag);
+    expect(() => parentSpec(real)).not.toThrow();
+  });
+
+  it('refuses an operation with a tag it does not know, naming it', () => {
+    const unknown = {
+      ...document,
+      paths: { ...document.paths, '/api/v1/fees': { get: { tags: ['fees'], responses: {} } } },
+    };
+    expect(() => parentSpec(unknown)).toThrow(
+      'GET /api/v1/fees has the tag fees, which is neither a parent tag nor an excluded one',
+    );
+  });
+
+  it('refuses an operation with no tag', () => {
+    const untagged = {
+      ...document,
+      paths: { ...document.paths, '/api/v1/odd': { post: { responses: {} } } },
+    };
+    expect(() => parentSpec(untagged)).toThrow('POST /api/v1/odd has no tag');
   });
 });
