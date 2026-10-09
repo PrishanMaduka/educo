@@ -135,7 +135,6 @@ kbd{font:700 11px var(--f-body);border:1px solid var(--line-strong);border-botto
 .btn.gold:hover{border-color:var(--lime-ink)}
 .btn.sm{height:32px;padding:0 13px;font-size:13px;gap:6px}
 .btn.big{height:48px;font-size:15px;width:100%}
-.btn.sso{height:48px;width:100%;gap:10px}
 .linkbtn{background:none;border:0;color:var(--brand-text);font-weight:700;font-size:13px;padding:0;cursor:pointer;align-self:flex-start;text-decoration:underline;text-underline-offset:3px}
 
 /* ---------- Fields ---------- */
@@ -700,7 +699,6 @@ body:has(.savebar,.uk-bar,.bulkbar) .askq-fab{bottom:92px}
 .auth-card h1{font-size:30px}
 .auth-form{display:flex;flex-direction:column;gap:14px}
 .lbl-row{display:flex;justify-content:space-between;align-items:center}
-.auth-or{display:flex;align-items:center;gap:12px;color:var(--ink-3);font-size:12.5px}.auth-or::before,.auth-or::after{content:"";flex:1;height:1px;background:var(--line)}
 .pw{position:relative}.pw .input{padding-right:62px}.pw .linkbtn{position:absolute;right:14px;top:50%;transform:translateY(-50%)}
 .otp{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}
 .otp input{height:56px;text-align:center;font:800 22px var(--f-display);border:1.5px solid var(--field-line);border-radius:var(--r-sm);background:var(--surface);color:var(--ink);width:100%;min-width:0}
@@ -708,7 +706,6 @@ body:has(.savebar,.uk-bar,.bulkbar) .askq-fab{bottom:92px}
 .otp.shake{animation:shake .35s}@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
 .auth-foot{font-size:12.5px;color:var(--ink-3);text-align:center}
 .auth-ok{width:60px;height:60px;border-radius:18px;background:var(--lime-soft);color:var(--lime-ink);display:grid;place-items:center}
-.auth-spin{width:44px;height:44px;border-radius:50%;border:4px solid var(--lime-soft);border-top-color:var(--lime-ink);animation:spin .8s linear infinite}
 
 /* Reveal on route change */
 .content>*{animation:rise .5s cubic-bezier(.2,.8,.2,1) both}
@@ -958,7 +955,7 @@ function tenantUsers(t) {
   const list = Array.from({length:n}, (_, i) => { const cast = CAST[t.id] && CAST[t.id][i], name = cast || `${pick(FIRST)} ${pick(LAST)}`, [f, ...l] = name.split(' '); const role = i < roleMix.length ? roleMix[i] : 'teacher';
     const st = i > 2 && rnd() > .9 ? 'Invited' : i > 3 && rnd() > .94 ? 'Deactivated' : 'Active', status = cast ? 'Active' : st;
     return {id:`${t.id}-${i}`, name, email:`${slug(f)}.${slug(l.join(''))}@${mailDomain(t)}`, role, campus: i % 3 ? CAMPUS[0] : CAMPUS[1],
-      status, mfa: role === 'admin' || role === 'finance' || rnd() > .45, last: status === 'Active' ? pick(['2 min ago','14 min ago','1 hour ago','Today, 08:12','Yesterday','3 days ago']) : status === 'Invited' ? 'Invite sent 2 days ago' : 'Deactivated 12 Sep', sso: rnd() > .4}; });
+      status, mfa: role === 'admin' || role === 'finance' || rnd() > .45, last: status === 'Active' ? pick(['2 min ago','14 min ago','1 hour ago','Today, 08:12','Yesterday','3 days ago']) : status === 'Invited' ? 'Invite sent 2 days ago' : 'Deactivated 12 Sep'}; });
   usersByTenant[t.id] = list; return list;
 }
 const permsByTenant = {};
@@ -966,13 +963,13 @@ const tenantPerms = t => permsByTenant[t.id] || (permsByTenant[t.id] = Object.fr
 const rolesByTenant = {};
 const tenantRoles = t => rolesByTenant[t.id] || (rolesByTenant[t.id] = ROLES.map(r => ({...r})));
 const security = {};
-const tenantSec = t => security[t.id] || (security[t.id] = {mfaAdmins:true, mfaAll:false, sso:{google: t.id % 2 === 1, microsoft:false}, pwLen:12, timeout:30, ipOn:false, ips:'203.0.113.0/24', parentOtp:true});
+const tenantSec = t => security[t.id] || (security[t.id] = {mfaAdmins:true, mfaAll:false, pwLen:12, timeout:30, ipOn:false, ips:'203.0.113.0/24', parentOtp:true});
 const AUDIT = [
   ['Emma Nakamura','changed role of Liam O’Connor to Finance officer','greenfield','12 min ago','users'],
   ['System','sent 1,248 Term 2 draft invoices','greenfield','40 min ago','fees'],
   [ME.name,'upgraded Lakeview International School to 2,000 students','lakeview','1 hour ago','plan'],
   ['Billing','card payment failed for Northbridge College ($1,449)','northbridge','3 hours ago','billing'],
-  ['Isabel Moreau','enabled Google sign-in','stclares','Yesterday','security'],
+  ['Isabel Moreau','turned on two-step sign-in for all staff','stclares','Yesterday','security'],
   [ME.name,'suspended Highlands Academy','highlands','2 days ago','tenant'],
   ['System','created tenant Singapore Harbourfront Intl','harbourfront','4 days ago','tenant'],
   ['Khalid Mansour','invited 18 teachers','dubailakes','5 days ago','users']
@@ -1125,9 +1122,9 @@ function tUsers(t) {
     <select class="input inline" data-filter="us${t.id}" aria-label="Status">${['all','Active','Invited','Deactivated'].map(x => `<option value="${x}" ${sf===x?'selected':''}>${x==='all'?'All statuses':x}</option>`).join('')}</select>
     <span style="flex:1"></span><button class="btn">${ic('down',16)}Import CSV</button><button class="btn primary" data-act="invite" data-id="${t.id}">${ic('plus',16)}Invite users</button></div>
   ${sel.length ? `<div class="bulkbar"><b>${sel.length} selected</b><select class="input inline" id="bulkRole" aria-label="New role"><option value="">Change role to…</option>${tenantRoles(t).map(r => `<option value="${r.id}">${r.n}</option>`).join('')}</select><button class="btn sm" data-act="bulk" data-op="resend" data-id="${t.id}">Resend invite</button><button class="btn sm" data-act="bulk" data-op="mfa" data-id="${t.id}">Require two-step sign-in</button><button class="btn sm danger-soft" data-act="bulk" data-op="deactivate" data-id="${t.id}">Deactivate</button><span style="flex:1"></span><button class="btn sm ghost" data-act="clearSel">Clear</button></div>` : ''}
-  <div class="tbl-wrap"><table><thead><tr><th><input type="checkbox" data-act="selAllU" data-id="${t.id}" aria-label="Select all" ${sel.length && sel.length === rows.length ? 'checked' : ''}></th><th>User</th><th>Role</th><th>Campus</th><th>Sign-in</th><th>Last active</th><th>Status</th></tr></thead><tbody>
+  <div class="tbl-wrap"><table><thead><tr><th><input type="checkbox" data-act="selAllU" data-id="${t.id}" aria-label="Select all" ${sel.length && sel.length === rows.length ? 'checked' : ''}></th><th>User</th><th>Role</th><th>Campus</th><th>Two-step sign-in</th><th>Last active</th><th>Status</th></tr></thead><tbody>
   ${rows.map(u => `<tr class="click" data-act="openUser" data-tid="${t.id}" data-uid="${u.id}"><td><input type="checkbox" class="usel" data-uid="${u.id}" ${S.sel.has(u.id)?'checked':''} aria-label="Select ${esc(u.name)}"></td><td><div class="who">${avatar(u.name,'sm')}<div><b>${u.name}</b><small>${u.email}</small></div></div></td>
-    <td>${roleName(t, u.role)}</td><td class="muted">${u.campus}</td><td>${u.sso ? '<span class="pill t-blue plain">Google</span>' : '<span class="pill t-violet plain">Password</span>'} ${u.mfa ? `<span title="Two-step sign-in on" role="img" aria-label="Two-step sign-in on" style="color:var(--good)">${ic('shield',14)}</span>` : ''}</td><td class="muted">${u.last}</td><td>${pill(u.status)}</td></tr>`).join('') || `<tr><td colspan="7" class="muted" style="text-align:center;padding:40px">No users match these filters.</td></tr>`}
+    <td>${roleName(t, u.role)}</td><td class="muted">${u.campus}</td><td>${u.mfa ? '<span class="pill t-green plain">On</span>' : '<span class="muted">Off</span>'}</td><td class="muted">${u.last}</td><td>${pill(u.status)}</td></tr>`).join('') || `<tr><td colspan="7" class="muted" style="text-align:center;padding:40px">No users match these filters.</td></tr>`}
   </tbody></table></div><div class="tbl-foot"><span>${rows.length} of ${all.length} staff accounts. Parents and students sign in through the apps and are managed from student records.</span></div></div>`;
 }
 function tRoles(t) {
@@ -1169,10 +1166,7 @@ function tBranding(t) {
 }
 function tSecurity(t) {
   const s = tenantSec(t);
-  return `<div class="grid g-1-1"><section class="card"><div class="card-h"><h2>Single sign-on</h2></div>
-    ${[['google','Google Workspace','Staff sign in with their school Google account'],['microsoft','Microsoft 365','Staff sign in with their Microsoft account']].map(([k, n, d]) => `<div class="setting"><div class="dot-ic t-blue">${ic('key',16)}</div><div class="meta"><b>${n}</b><small>${d}</small></div>${s.sso[k] ? `<span class="pill t-green">Connected</span><button class="btn sm" data-act="sso" data-k="${k}" data-id="${t.id}">Disconnect</button>` : `<button class="btn sm primary" data-act="sso" data-k="${k}" data-id="${t.id}">Connect</button>`}</div>`).join('')}
-  </section>
-  <section class="card"><div class="card-h"><h2>Two-step sign-in</h2></div>
+  return `<div class="grid g-1-1"><section class="card"><div class="card-h"><h2>Two-step sign-in</h2></div>
     <div class="setting"><div class="meta"><b>Require for admins and finance</b><small>Recommended. Applies to roles that can change money or users.</small></div>${sw(s.mfaAdmins, 'sec', `data-k="mfaAdmins" data-id="${t.id}" aria-label="Require two-step sign-in for admins and finance"`)}</div>
     <div class="setting"><div class="meta"><b>Require for all staff</b><small>Teachers will be asked to set it up at next sign-in.</small></div>${sw(s.mfaAll, 'sec', `data-k="mfaAll" data-id="${t.id}" aria-label="Require two-step sign-in for all staff"`)}</div>
     <div class="setting"><div class="meta"><b>Parents sign in with a one-time code</b><small>Sent by SMS or email instead of a password.</small></div>${sw(s.parentOtp, 'sec', `data-k="parentOtp" data-id="${t.id}" aria-label="Parents sign in with a one-time code"`)}</div>
@@ -1181,7 +1175,7 @@ function tSecurity(t) {
     <div class="field"><label for="pwLen">Minimum password length</label><select class="input" id="pwLen">${[8,10,12,14,16].map(n => `<option ${n===s.pwLen?'selected':''}>${n} characters</option>`).join('')}</select></div>
     <div class="field"><label for="tmo">Sign out after inactivity</label><select class="input" id="tmo">${[15,30,60,240].map(n => `<option ${n===s.timeout?'selected':''}>${n < 60 ? n + ' minutes' : n / 60 + (n === 60 ? ' hour' : ' hours')}</option>`).join('')}</select></div>
     <button class="btn primary full" data-act="toast" data-msg="Sign-in settings saved">Save</button></div></section>
-  <section class="card"><div class="card-h"><h2>IP allowlist</h2>${sw(s.ipOn, 'sec', `data-k="ipOn" data-id="${t.id}" aria-label="Use an IP allowlist"`)}</div><div class="card-b" style="display:flex;flex-direction:column;gap:10px">
+  <section class="card" style="grid-column:1/-1"><div class="card-h"><h2>IP allowlist</h2>${sw(s.ipOn, 'sec', `data-k="ipOn" data-id="${t.id}" aria-label="Use an IP allowlist"`)}</div><div class="card-b" style="display:flex;flex-direction:column;gap:10px">
     <p class="muted" style="margin:0;font-size:13px">Only allow staff to sign in to the admin app from these networks. Parents and the mobile apps are not affected.</p>
     <textarea class="input" rows="3" ${s.ipOn?'':'disabled'} aria-label="Allowed IP ranges">${s.ips}</textarea></div></section></div>`;
 }
@@ -1296,7 +1290,7 @@ function provision() {
     const w = S.wiz, id = Math.max(...tenants.map(t => t.id)) + 1, plan = w.w_plan || 'Growth';
     const t = T(id, w.w_name, w.w_sub, w.w_country || 'United States', plan, 0, w.w_trial === false ? 'Onboarding' : 'Trial', w.w_color || BRAND_SWATCHES[0], w.w_region || '', '2026-10', {trialEnds:'4 Nov', health:'Setting up', currency: w.w_cur || placeOf(w.w_country).cur, tz: w.w_tz || placeOf(w.w_country).tz, locale: w.w_locale || placeOf(w.w_country).locale, phoneCountry: w.w_phone || w.w_country || Object.keys(COUNTRIES)[0], logo: w.logo || null, short: (w.w_short || shortOf(w.w_name)).toUpperCase()});
     t.mods = w.mods || new Set(PLANS[plan].mods); t.stages = w.stages; t.stTpl = w.stTpl; t.curr = w.w_curr || w.stTpl; tenants.push(t);
-    usersByTenant[id] = [{id:`${id}-0`, name: w.w_aname, email: w.w_aemail, role:'admin', campus:CAMPUS[0], status:'Invited', mfa:true, last:'Invite sent just now', sso:false}];
+    usersByTenant[id] = [{id:`${id}-0`, name: w.w_aname, email: w.w_aemail, role:'admin', campus:CAMPUS[0], status:'Invited', mfa:true, last:'Invite sent just now'}];
     AUDIT.unshift([ME.name, `created tenant ${w.w_name}`, w.w_sub, 'Just now', 'tenant']);
     document.getElementById('provDone').innerHTML = `<div class="prov-ok"><div class="dot-ic">${ic('check',16)}</div><div style="flex:1"><b>${esc(w.w_name)} is live on Quad. Congratulations!</b><div class="muted" style="font-size:12.5px">Staff sign in at quad-edu.com · invite sent to ${esc(w.w_aemail)}</div></div></div>`;
     document.getElementById('provDone').insertAdjacentHTML('beforeend', `<div style="margin-top:14px">${brandMock(t.name, t.color, t.logo, t.short)}</div>`);
@@ -1399,7 +1393,6 @@ function ukProfilePage(ctx, u) {
       </div></section></div></div>`; }
   else if (t === 'security') body = `<div class="grid g-1-1">
     <section class="card"><div class="card-h"><h2>Sign-in</h2></div>
-      <div class="uk-set"><div class="meta"><b>Sign-in method</b><small>${u.sso ? 'Google Workspace (managed by the school)' : 'Email and password'}</small></div><span class="pill ${u.sso?'t-blue':'t-violet'} plain">${u.sso ? 'Google' : 'Password'}</span></div>
       <div class="uk-set"><div class="meta"><b>Two-step sign-in</b><small>${u.mfa ? 'Authenticator app · set up 4 months ago' : 'Not set up. Anyone with the password can sign in.'}</small></div>${ukSw(u.mfa, 'data-uk="mfa" aria-label="Two-step sign-in"')}</div>
       <div class="uk-set"><div class="meta"><b>Password</b><small>Last changed ${p.pwChanged}</small></div><button class="btn sm" data-uk="toast" data-v="Reset link sent to ${esc(u.email)}">Send reset link</button></div>
       <div class="uk-set"><div class="meta"><b>Recovery codes</b><small>8 of 10 unused</small></div><button class="btn sm" data-uk="toast" data-v="New recovery codes created. The old ones no longer work.">Create new codes</button></div>
@@ -1577,16 +1570,12 @@ function tenantCtx(t) { return {
 
 
 /* ---------- Sign-in screens (shared by the platform console and the school portal) ---------- */
-const AUTH = {step:'signin', email:'', cfg:null, sso:''};
-const G_ICON = '<svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>';
-const MS_ICON = '<svg width="16" height="16" viewBox="0 0 21 21" aria-hidden="true"><path fill="#F25022" d="M1 1h9v9H1z"/><path fill="#7FBA00" d="M11 1h9v9h-9z"/><path fill="#00A4EF" d="M1 11h9v9H1z"/><path fill="#FFB900" d="M11 11h9v9h-9z"/></svg>';
+const AUTH = {step:'signin', email:'', cfg:null};
 function authSignedIn(key) { try { return sessionStorage.getItem('quad-auth-' + key) === '1'; } catch (e) { return true; } }
 function authOpen(cfg) { AUTH.cfg = cfg; AUTH.step = 'signin'; const a = document.getElementById('auth'); a.hidden = false; a.classList.remove('leave'); authRender(); }
 function authRender() {
   const c = AUTH.cfg, a = document.getElementById('auth'), st = AUTH.step; let f = '';
   if (st === 'signin') f = `<h1>${c.title}</h1><p class="muted">${c.sub}</p>
-    ${c.sso.map(s => `<button class="btn sso" data-auth="sso" data-v="${s}">${s.startsWith('Google') ? G_ICON : MS_ICON}Continue with ${s}</button>`).join('')}
-    <div class="auth-or"><span>or sign in with email</span></div>
     <form class="auth-form" id="authForm" novalidate><div class="field"><label for="au_e">${c.emailLabel || 'Email'}</label><input class="input" id="au_e" type="email" autocomplete="username" value="${esc(AUTH.email || c.email)}"></div>
     <div class="field"><div class="lbl-row"><label for="au_p">Password</label><button type="button" class="linkbtn" data-auth="forgot">Forgot password?</button></div><div class="pw"><input class="input" id="au_p" type="password" autocomplete="current-password" placeholder="Enter your password"><button type="button" class="linkbtn" data-auth="show">Show</button></div></div>
     <label class="checkrow"><input type="checkbox" checked> Keep me signed in on this device</label><div class="err-msg" id="auErr" role="alert"></div>
@@ -1598,7 +1587,6 @@ function authRender() {
   else if (st === 'forgot') f = `<button class="linkbtn" data-auth="back">← Back</button><h1>Reset your password</h1><p class="muted">We’ll email you a link to choose a new one.</p>
     <form class="auth-form" id="authForgot" novalidate><div class="field"><label for="au_fe">Email</label><input class="input" id="au_fe" type="email" value="${esc(AUTH.email || c.email)}"></div><div class="err-msg" id="auErr" role="alert"></div><button class="btn primary big">Send reset link</button></form>`;
   else if (st === 'sent') f = `<div class="auth-ok">${ic('mail', 26)}</div><h1>Check your inbox</h1><p class="muted">If <b>${esc(AUTH.email)}</b> has an account, a reset link is on its way. It expires in 30 minutes.</p><button class="btn big" data-auth="back">Back to sign in</button>`;
-  else if (st === 'sso') f = `<div class="auth-spin" aria-hidden="true"></div><h1>Signing you in…</h1><p class="muted">Waiting for ${esc(AUTH.sso)} to confirm your account.</p>`;
   a.innerHTML = `<div class="auth-art">${c.art()}</div><div class="auth-panel"><div class="auth-card">${f}</div><div class="auth-foot">${c.foot}</div></div>`;
   const ae = () => document.getElementById('auErr');
   const form = document.getElementById('authForm');
@@ -1626,7 +1614,6 @@ function authDone() { const c = AUTH.cfg; try { sessionStorage.setItem('quad-aut
 function authSignOut(cfg) { try { sessionStorage.removeItem('quad-auth-' + cfg.key); } catch (e) {} AUTH.email = ''; authOpen(cfg); }
 document.addEventListener('click', e => {
   const el = e.target.closest('[data-auth]'); if (!el) return; e.preventDefault(); const k = el.dataset.auth;
-  if (k === 'sso') { AUTH.sso = el.dataset.v; AUTH.step = 'sso'; authRender(); setTimeout(authDone, 1300); }
   if (k === 'forgot') { const em = document.getElementById('au_e'); if (em) AUTH.email = em.value.trim(); AUTH.step = 'forgot'; authRender(); }
   if (k === 'back') { AUTH.step = 'signin'; authRender(); }
   if (k === 'show') { const p = document.getElementById('au_p'); p.type = p.type === 'password' ? 'text' : 'password'; el.textContent = p.type === 'password' ? 'Show' : 'Hide'; }
@@ -1698,7 +1685,7 @@ function bindLogoDrop(id, onFile) {
   zone.ondrop = e => { e.preventDefault(); zone.classList.remove('over'); const f = e.dataTransfer.files[0]; if (f) onFile(f); };
 }
 const platformAuth = () => ({
-  key:'platform', title:'Sign in to Quad', sub:'For Quad staff at <b>console.quad-edu.com</b>. Schools sign in at <b>quad-edu.com</b>.', email:ME.email, emailLabel:'Quad email', sso:['Google Workspace'],
+  key:'platform', title:'Sign in to Quad', sub:'For Quad staff at <b>console.quad-edu.com</b>. Schools sign in at <b>quad-edu.com</b>.', email:ME.email, emailLabel:'Quad email',
   below:'', foot:'Every sign-in to the platform console is recorded in the audit log.',
   art:() => `<svg class="auth-scene" viewBox="0 0 800 300" preserveAspectRatio="xMidYMax slice" aria-hidden="true"><circle cx="600" cy="176" r="118" fill="var(--pink)" opacity=".14"/><circle cx="600" cy="176" r="66" fill="var(--pink)"/><g fill="none" stroke="var(--on-navy-2)" stroke-width="2" stroke-linecap="round" opacity=".7"><path d="M380 92q8-8 16 0q8-8 16 0"/><path d="M430 66q6-6 12 0q6-6 12 0"/></g><path d="M0 200C120 150 240 160 360 190S600 170 800 140V300H0Z" fill="var(--navy-line)"/><path d="M0 236C140 200 300 210 440 230S680 222 800 206V300H0Z" fill="var(--navy-2)"/><g fill="none" stroke="var(--lime)" stroke-width="2" stroke-linecap="round" opacity=".5"><path d="M30 250c80-22 170-24 260-12"/><path d="M420 252c90-16 200-20 360-16"/></g><path d="M0 276C200 258 420 262 800 270V300H0Z" fill="var(--navy)"/></svg>
     <div class="auth-brand"><div class="auth-logo">${document.querySelector('.rail .logo').innerHTML}</div><div><b>Quad</b><small>Platform console</small></div></div>
@@ -2179,7 +2166,7 @@ const ACT = {
     if (!raw.length) { document.getElementById('invErr').textContent = 'Enter at least one email address.'; return; }
     if (bad.length) { document.getElementById('invErr').textContent = `Check ${bad.join(', ')}. Each should look like name@school.example.`; return; }
     const role = document.getElementById('inv_r').value, campus = document.getElementById('inv_c').value, list = tenantUsers(t);
-    raw.forEach((e, i) => { const nm = e.split('@')[0].split(/[._]/).map(w => w[0].toUpperCase() + w.slice(1)).join(' '); list.unshift({id:`${t.id}-n${Date.now()}${i}`, name:nm, email:e, role, campus, status:'Invited', mfa:true, last:'Invite sent just now', sso:false}); });
+    raw.forEach((e, i) => { const nm = e.split('@')[0].split(/[._]/).map(w => w[0].toUpperCase() + w.slice(1)).join(' '); list.unshift({id:`${t.id}-n${Date.now()}${i}`, name:nm, email:e, role, campus, status:'Invited', mfa:true, last:'Invite sent just now'}); });
     closeAll(); route(); toast(`${raw.length} invite${raw.length > 1 ? 's' : ''} sent as ${roleName(t, role)}`); },
   selAllU: el => { const t = tenants.find(x => x.id === +el.dataset.id); document.querySelectorAll('.usel').forEach(c => { c.checked = el.checked; el.checked ? S.sel.add(c.dataset.uid) : S.sel.delete(c.dataset.uid); }); route(); },
   clearSel: () => { S.sel.clear(); route(); },
@@ -2277,7 +2264,6 @@ const ACT = {
   offerOnboard: el => { const t = tenants.find(x => x.id === +el.dataset.id); t.onbOffered = true; AUDIT.unshift([ME.name, `offered a parent app onboarding session to ${t.name}`, t.sub, 'Just now', 'tenant']); route(); toast(`Offered. ${firstName(principal(t))} gets 3 time slots by email.`); },
   escalate: el => { const t = tenants.find(x => x.id === +el.dataset.id); AUDIT.unshift([ME.name, `flagged ${t.tickets} open tickets for ${t.name} to support`, t.sub, 'Just now', 'tenant']); toast(`Flagged to the support desk. They’ll reply to ${t.name} today.`); },
   sec: el => { const t = tenants.find(x => x.id === +el.dataset.id), s = tenantSec(t); s[el.dataset.k] = !s[el.dataset.k]; route(); toast('Saved'); },
-  sso: el => { const t = tenants.find(x => x.id === +el.dataset.id), s = tenantSec(t), k = el.dataset.k; s.sso[k] = !s.sso[k]; route(); toast(s.sso[k] ? `${k === 'google' ? 'Google Workspace' : 'Microsoft 365'} connected. Staff can use it at next sign-in.` : 'Disconnected. Staff will sign in with a password.'); },
   suspend: el => { const t = tenants.find(x => x.id === +el.dataset.id); openModal(`${head('Suspend ' + t.name + '?')}<div class="drawer-b"><p style="margin:0">All ${fmt(tenantUsers(t).length)} staff and ${fmt(Math.round(t.students * .88))} parents will be signed out and can’t sign back in until you reactivate the school. Data is kept.</p><div class="field"><label for="cf">Type <b>${esc(t.name)}</b> to confirm</label><input class="input" id="cf" autocomplete="off"></div><div class="field"><label for="why">Reason (shown to the school admin)</label><select class="input" id="why"><option>Unpaid invoices</option><option>Requested by the school</option><option>Security review</option></select></div></div><div class="drawer-f"><button class="btn" data-act="closeAll">Cancel</button><button class="btn danger" id="cfBtn" data-act="confirmSuspend" data-id="${t.id}" disabled>Suspend school</button></div>`);
     const i = document.getElementById('cf'), b = document.getElementById('cfBtn'); i.oninput = () => { const ok = i.value.trim().toLowerCase() === t.name.toLowerCase(); b.disabled = !ok; }; },
   confirmSuspend: el => { const t = tenants.find(x => x.id === +el.dataset.id); t.prevStatus = t.status; t.status = 'Suspended'; t.health = 'Suspended'; AUDIT.unshift([ME.name, `suspended ${t.name}`, t.sub, 'Just now', 'tenant']); closeAll(); route(); toast(`${t.name} is suspended`); },

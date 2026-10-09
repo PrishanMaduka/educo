@@ -334,8 +334,6 @@ td.r,th.r{text-align:right}
 .auth-form{display:flex;flex-direction:column;gap:14px}
 .lbl-row{display:flex;justify-content:space-between;align-items:center}
 .btn.big{height:46px;font-size:14.5px;width:100%;justify-content:center}
-.btn.sso{height:46px;width:100%;justify-content:center;gap:10px}
-.auth-or{display:flex;align-items:center;gap:12px;color:var(--ink-3);font-size:12px}.auth-or::before,.auth-or::after{content:"";flex:1;height:1px;background:var(--line)}
 .pw{position:relative}.pw .input{padding-right:58px}.pw .linkbtn{position:absolute;right:12px;top:50%;transform:translateY(-50%)}
 .linkbtn{background:none;border:0;color:var(--brand-text);font-weight:600;font-size:12.5px;padding:0;cursor:pointer;align-self:flex-start}
 .otp{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}
@@ -345,7 +343,6 @@ td.r,th.r{text-align:right}
 .auth-foot{font-size:12px;color:var(--ink-3);text-align:center}
 .small{font-size:13px}
 .auth-ok{width:60px;height:60px;border-radius:18px;background:var(--brand-soft);color:var(--brand-text);display:grid;place-items:center}
-.auth-spin{width:44px;height:44px;border-radius:50%;border:4px solid var(--brand-soft);border-top-color:var(--brand-text);animation:authSpin .8s linear infinite}@keyframes authSpin{to{transform:rotate(360deg)}}
 .rail-foot .so{margin-left:auto;width:32px;height:32px;background:transparent;border:1px solid rgba(255,255,255,.14);color:var(--rail-ink,#C5CFE3);border-radius:9px}
 .rail-foot .so:hover{background:rgba(255,255,255,.08);color:#fff}
 .rail-foot .sw{margin-left:auto;width:32px;height:32px;background:transparent;border:1px solid rgba(255,255,255,.14);color:var(--rail-ink,#C5CFE3);border-radius:9px}.rail-foot .sw:hover{background:rgba(255,255,255,.08);color:#fff}.rail-foot .sw:not([hidden]) + .so{margin-left:6px}
@@ -1720,7 +1717,7 @@ seed = 41;
 const staff = ['Emma Nakamura','Lucas Weber','Anna Kowalski','Grace Okafor','Omar Haddad','Claire Bennett','Ken Tanaka','Chloe Dubois','Yusuf Rahman','Sophie Fischer','Ryan Brooks','Sofia Reyes','Mateo García','Yuki Sato']
   .map((n, i) => ({n, email: n.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/ /g, '.') + '@greenfield.example', role: ['admin','finance','admissions','teacher','teacher','principal','teacher','teacher','finance','teacher','frontdesk','counsellor','teacher','teacher'][i],
     status: i === 12 ? 'Invited' : i === 13 ? 'Deactivated' : 'Active', mfa: i < 3 || i === 5 || i === 8 || rnd() > .5, last: ['Now','10 min ago','1 hour ago','Today, 08:05','Yesterday','2 days ago'][i % 6]}));
-staff.forEach((u, i) => { u.id = 's' + i; u.name = u.n; u.campus = i % 3 ? 'Main campus' : 'Primary campus'; u.sso = i % 3 === 0; });
+staff.forEach((u, i) => { u.id = 's' + i; u.name = u.n; u.campus = i % 3 ? 'Main campus' : 'Primary campus'; });
 const ROLE_META = {};
 const roleLabel = k => (STAFF_ROLES.find(r => r[0] === k) || [k, k])[1];
 V.users = () => {
@@ -1830,7 +1827,6 @@ function ukProfilePage(ctx, u) {
       </div></section></div></div>`; }
   else if (t === 'security') body = `<div class="grid g-1-1">
     <section class="card"><div class="card-h"><h2>Sign-in</h2></div>
-      <div class="uk-set"><div class="meta"><b>Sign-in method</b><small>${u.sso ? 'Google Workspace (managed by the school)' : 'Email and password'}</small></div><span class="pill ${u.sso?'t-blue':'t-violet'} plain">${u.sso ? 'Google' : 'Password'}</span></div>
       <div class="uk-set"><div class="meta"><b>Two-step sign-in</b><small>${u.mfa ? 'Authenticator app · set up 4 months ago' : 'Not set up. Anyone with the password can sign in.'}</small></div>${ukSw(u.mfa, 'data-uk="mfa" aria-label="Two-step sign-in"')}</div>
       <div class="uk-set"><div class="meta"><b>Password</b><small>Last changed ${p.pwChanged}</small></div><button class="btn sm" data-uk="toast" data-v="Reset link sent to ${esc(u.email)}">Send reset link</button></div>
       <div class="uk-set"><div class="meta"><b>Recovery codes</b><small>8 of 10 unused</small></div><button class="btn sm" data-uk="toast" data-v="New recovery codes created. The old ones no longer work.">Create new codes</button></div>
@@ -2007,9 +2003,7 @@ function schoolCtx() { return {
 }; }
 
 /* ---------- Sign-in screens (shared by the platform console and the school portal) ---------- */
-const AUTH = {step:'signin', email:'', cfg:null, sso:''};
-const G_ICON = '<svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>';
-const MS_ICON = '<svg width="16" height="16" viewBox="0 0 21 21" aria-hidden="true"><path fill="#F25022" d="M1 1h9v9H1z"/><path fill="#7FBA00" d="M11 1h9v9h-9z"/><path fill="#00A4EF" d="M1 11h9v9H1z"/><path fill="#FFB900" d="M11 11h9v9h-9z"/></svg>';
+const AUTH = {step:'signin', email:'', cfg:null};
 function authSignedIn(key) { try { return sessionStorage.getItem('quad-auth-' + key) === '1'; } catch (e) { return true; } }
 /* Before sign-in nobody knows the school yet: the sign-in screens wear Quad's own lime, whatever the school's colour */
 function authBrand() { let el = document.getElementById('quad-auth-brand'); if (!el) { el = document.createElement('style'); el.id = 'quad-auth-brand'; document.head.appendChild(el); }
@@ -2019,8 +2013,6 @@ function authOpen(cfg) { authBrand(); AUTH.cfg = cfg; AUTH.step = 'signin'; cons
 function authRender() {
   const c = AUTH.cfg, a = document.getElementById('auth'), st = AUTH.step; let f = '';
   if (st === 'signin') f = `<h1>${c.title}</h1><p class="muted">${c.sub}</p>
-    ${c.sso.map(s => `<button class="btn sso" data-auth="sso" data-v="${s}">${s.startsWith('Google') ? G_ICON : MS_ICON}Continue with ${s}</button>`).join('')}
-    <div class="auth-or"><span>or sign in with email</span></div>
     <form class="auth-form" id="authForm" novalidate><div class="field"><label for="au_e">${c.emailLabel || 'Email'}</label><input class="input" id="au_e" type="email" autocomplete="username" value="${esc(AUTH.email || c.email)}"></div>
     <div class="field"><div class="lbl-row"><label for="au_p">Password</label><button type="button" class="linkbtn" data-auth="forgot">Forgot password?</button></div><div class="pw"><input class="input" id="au_p" type="password" autocomplete="current-password" placeholder="Enter your password"><button type="button" class="linkbtn" data-auth="show">Show</button></div></div>
     <label class="checkrow"><input type="checkbox" checked> Keep me signed in on this device</label><div class="err-msg" id="auErr" role="alert"></div>
@@ -2032,7 +2024,6 @@ function authRender() {
   else if (st === 'forgot') f = `<button class="linkbtn" data-auth="back">← Back</button><h1>Reset your password</h1><p class="muted">We’ll email you a link to choose a new one.</p>
     <form class="auth-form" id="authForgot" novalidate><div class="field"><label for="au_fe">Email</label><input class="input" id="au_fe" type="email" value="${esc(AUTH.email || c.email)}"></div><div class="err-msg" id="auErr" role="alert"></div><button class="btn primary big">Send reset link</button></form>`;
   else if (st === 'sent') f = `<div class="auth-ok">${ic('mail', 26)}</div><h1>Check your inbox</h1><p class="muted">If <b>${esc(AUTH.email)}</b> has an account, a reset link is on its way. It expires in 30 minutes.</p><button class="btn big" data-auth="back">Back to sign in</button>`;
-  else if (st === 'sso') f = `<div class="auth-spin" aria-hidden="true"></div><h1>Signing you in…</h1><p class="muted">Waiting for ${esc(AUTH.sso)} to confirm your account.</p>`;
   else if (st === 'school') { const ms = membershipsFor(AUTH.email); f = `<h1>Choose a school</h1><p class="muted"><b>${esc(AUTH.email)}</b> is linked to ${ms.length} schools on Quad. You can switch later from the menu.</p>
     <div class="auth-schools" role="list">${ms.map((m, i) => `<button class="auth-school" role="listitem" data-auth="pick" data-i="${i}"><span class="auth-logo sm" style="background:${m.color};color:#fff">${esc(m.short)}</span><span><b>${esc(m.name)}</b><small>${esc(m.role)}</small></span>${ic('chev', 16)}</button>`).join('')}</div>
     <label class="checkrow"><input type="checkbox" id="au_rem" checked> Remember my choice on this device</label>`; }
@@ -2069,7 +2060,6 @@ function authDone() { const c = AUTH.cfg; try { sessionStorage.setItem('quad-aut
 function authSignOut(cfg) { try { sessionStorage.removeItem('quad-auth-' + cfg.key); } catch (e) {} AUTH.email = ''; authOpen(cfg); }
 document.addEventListener('click', e => {
   const el = e.target.closest('[data-auth]'); if (!el) return; e.preventDefault(); const k = el.dataset.auth;
-  if (k === 'sso') { AUTH.sso = el.dataset.v; AUTH.step = 'sso'; authRender(); setTimeout(authAfter, 1300); }
   if (k === 'pick') pickSchool(membershipsFor(AUTH.email)[+el.dataset.i]);
   if (k === 'forgot') { const em = document.getElementById('au_e'); if (em) AUTH.email = em.value.trim(); AUTH.step = 'forgot'; authRender(); }
   if (k === 'back') { AUTH.step = 'signin'; authRender(); }
@@ -2092,7 +2082,7 @@ function applySchool() {
   document.title = SCHOOL.name + ' · Staff portal';
 }
 const schoolAuth = () => ({
-  key:'school', title:'Sign in to Quad', sub:'One sign-in for every school on Quad. We’ll open your school once you’re signed in.', email:'emma.nakamura@greenfield.example', emailLabel:'Work email', sso:['Google Workspace','Microsoft 365'],
+  key:'school', title:'Sign in to Quad', sub:'One sign-in for every school on Quad. We’ll open your school once you’re signed in.', email:'emma.nakamura@greenfield.example', emailLabel:'Work email',
   below:`<p class="muted small">Teaching at more than one school? Try <b>omar.haddad@quad.local</b> to see the school picker.<br>Parents and guardians: use the <a href="parent.html">Quad parent app</a> on your phone.</p>`,
   foot:`quad-edu.com · Protected by two-step sign-in`,
   art:() => `<div class="auth-brand"><img class="auth-wordmark" src="brand/quad-logo-white.svg" alt="Quad"></div>
