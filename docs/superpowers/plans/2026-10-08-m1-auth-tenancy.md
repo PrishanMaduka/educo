@@ -1235,10 +1235,12 @@ Commit `feat(staff): School settings General, sign-in rules and the audit view`.
   - `apps/console/src/app/(console)/audit/page.tsx` (filters, table, CSV);
   - `apps/console/e2e/{sign-in,support,audit}.spec.ts`.
 - Modify:
-  - `apps/console/src/middleware.ts` (it exists: add a redirect to `/sign-in` without the console cookie; robots stays);
+  - `apps/console/src/middleware.ts` (it exists: robots only; no redirect on the console cookie, see Session gating below);
   - `apps/console/package.json` (`@quad/client` and `@tanstack/react-query`);
   - `apps/console/src/components/shell/ConsoleShell.tsx` (the real user and role, Sign out).
 - Delete: `apps/console/src/lib/placeholders.ts`.
+
+**Session gating (D32, Task 10 fix round 2):** the console cookies are `SameSite=Strict`, so the first request of a deep link arrives without them. Gate the signed-in pages on the client: after the page loads, call `GET /platform/me` and send a 401 to `/sign-in?next=…`. `middleware.ts` and server components must not decide on the console cookie (the middleware keeps only robots); a test opens a deep link in a new context with a signed-in session and lands on the page, not on sign-in.
 
 Commit `feat(console): console sign-in, support entry with a reason, and the platform audit log`.
 
