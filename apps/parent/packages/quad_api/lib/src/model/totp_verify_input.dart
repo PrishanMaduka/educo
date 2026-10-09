@@ -23,6 +23,8 @@ class TotpVerifyInput {
      this.recoveryCode,
 
      this.trustDevice = false,
+
+     this.inviteToken,
   });
 
   @JsonKey(
@@ -61,19 +63,33 @@ class TotpVerifyInput {
 
 
 
+  @JsonKey(
+    
+    name: r'inviteToken',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final String? inviteToken;
+
+
+
 
 
     @override
     bool operator ==(Object other) => identical(this, other) || other is TotpVerifyInput &&
       other.code == code &&
       other.recoveryCode == recoveryCode &&
-      other.trustDevice == trustDevice;
+      other.trustDevice == trustDevice &&
+      other.inviteToken == inviteToken;
 
     @override
     int get hashCode =>
         code.hashCode +
         recoveryCode.hashCode +
-        trustDevice.hashCode;
+        trustDevice.hashCode +
+        inviteToken.hashCode;
 
   factory TotpVerifyInput.fromJson(Map<String, dynamic> json) => _$TotpVerifyInputFromJson(json);
 

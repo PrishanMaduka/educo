@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { staffActionRefusal, staffChangeRefusal } from './staff-changes';
+import { staffActionRefusal, staffChangeRefusal, statusAfterChange } from './staff-changes';
 
 import type { StaffChange } from './staff-changes';
 
@@ -98,5 +98,27 @@ describe('staffActionRefusal (Remind, Reset password, Resend invite)', () => {
     ['resend_invite', 'deactivated', false, 'not_invited'],
   ] as const)('%s for a member %s (two-step %s): %s', (action, status, twoStepOn, expected) => {
     expect(staffActionRefusal(action, { status, twoStepOn })).toBe(expected);
+  });
+});
+
+describe('statusAfterChange (fix round 1, I1: an invite is never activated without being accepted)', () => {
+  it.each([
+    ['active', 'deactivated', true, 'deactivated'],
+    ['invited', 'deactivated', false, 'deactivated'],
+    ['deactivated', 'active', true, 'active'],
+    // Invited, then deactivated before accepting: reactivating puts the invitation back.
+    ['deactivated', 'active', false, 'invited'],
+    ['active', 'active', true, 'active'],
+    ['invited', 'invited', false, 'invited'],
+  ] as const)(
+    '%s asked to be %s (accepted %s) is stored as %s',
+    (current, requested, accepted, stored) => {
+      expect(statusAfterChange({ current, requested, accepted })).toBe(stored);
+    },
+  );
+
+  it('lets a never-accepted member go back to invited through staffChangeRefusal', () => {
+    const target = { id: 'target', status: 'deactivated', isAdmin: false } as const;
+    expect(staffChangeRefusal(change({ target, nextStatus: 'invited' }))).toBeNull();
   });
 });

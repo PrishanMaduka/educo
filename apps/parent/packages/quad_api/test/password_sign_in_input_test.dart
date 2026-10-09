@@ -22,5 +22,10 @@ void main() {
       // TODO
     });
 
+    // String inviteToken
+    test('to test the property `inviteToken`', () async {
+      // TODO
+    });
+
   });
 }

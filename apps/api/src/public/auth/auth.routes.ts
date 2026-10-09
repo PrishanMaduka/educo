@@ -74,6 +74,7 @@ export const authRoutes: readonly ApiRoute[] = [
       200: { description: 'Parent app (bearer): the tokens for the school', schema: SchoolTokens },
       204: { description: 'Staff (cookie): signed in to the school' },
     },
+    // 403 two_step_required: the school needs two-step first; the session moved to set-up.
     errors: [400, 401, 403, 429],
   },
   {

@@ -1557,3 +1557,6 @@ Spec and prototype conflicts noted (spec wins):
 - **New dependencies.** Argon2 is native (prebuilt), plus `openid-client`, `jose`, `otplib`, `nodemailer`, `qrcode` and the Flutter plugins. They may trip `pnpm audit` or need platform builds in the Docker images (`docker/api.Dockerfile` on Alpine needs the musl Argon2 binary; Task 4 checks `scripts/docker-build.mjs api`).
 - **Pre-launch regression.** Any change to `src/app/layout.tsx`, `(public)/**` or shared `@quad/ui` pieces the landing imports reaches `quad-edu.com` on the next merge to `main`. Task 19's guard test and Task 27's export comparison cover it.
 - **Support-session definer writes (resolved by R-support-token).** Built in Task 3: the support cookie hash lives on `support_sessions.token_hash`; no null-account `sessions` row exists.
+
+**Carried to M12 (hardening)**
+- **Batch the two-step status lookup** (Task 13 review, M10). `GET /users` asks `member_two_step_status` for the page and every active member, and the definer runs one `with_account_scope` call per member. That is fine at school sizes, but M12's performance pass should batch it, for example with a set-based definer or a cached count for the summary.

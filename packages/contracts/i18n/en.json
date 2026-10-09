@@ -72,6 +72,8 @@
   "error.users.sensitiveNotHeld": "You can’t give access to sensitive data you don’t have yourself.",
   "error.roles.systemLocked": "Built-in roles can’t be changed or deleted, so the school can’t lock itself out.",
   "error.roles.inUse": "Someone still has this role, or an admin is previewing it. Give them another role first.",
+  "error.roles.ownLocked": "You can’t change a role you have yourself. Ask another admin.",
+  "error.twoStepRequired": "This school asks you to turn on two-step sign-in first.",
   "error.roles.baseNotFound": "Choose a role of this school to start from.",
   "error.invite.choosePassword": "Choose a password to finish setting up your account.",
   "error.invite.signInFirst": "Sign in with the account this invitation is for, then open the link again.",

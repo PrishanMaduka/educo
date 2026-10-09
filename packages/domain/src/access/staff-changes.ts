@@ -33,8 +33,25 @@ export type StaffChangeRefusal = 'self' | 'last_admin' | 'status_not_allowed';
 const ALLOWED_STATUS_CHANGES: Readonly<Record<MembershipStatus, readonly MembershipStatus[]>> = {
   invited: ['deactivated'],
   active: ['deactivated'],
-  deactivated: ['active'],
+  // `invited` only through `statusAfterChange`: reactivating a never-accepted invitation.
+  deactivated: ['active', 'invited'],
 };
+
+/**
+ * The status a requested change stores (fix round 1, I1): reactivating a member who never
+ * accepted their invitation puts the invitation back (`invited`, to be sent again), never
+ * `active`. Anything else is stored as asked.
+ */
+export function statusAfterChange(change: {
+  readonly current: MembershipStatus;
+  readonly requested: MembershipStatus;
+  /** The membership was accepted once (`users.accepted_at`). */
+  readonly accepted: boolean;
+}): MembershipStatus {
+  const { current, requested, accepted } = change;
+  if (current === 'deactivated' && requested === 'active' && !accepted) return 'invited';
+  return requested;
+}
 
 /** Whether a role or status change may go ahead (null), or why not. */
 export function staffChangeRefusal(change: StaffChange): StaffChangeRefusal | null {

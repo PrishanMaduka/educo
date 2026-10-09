@@ -80,4 +80,4 @@ export type {
   StaffChange,
   StaffChangeRefusal,
 } from './access/staff-changes';
-export { staffActionRefusal, staffChangeRefusal } from './access/staff-changes';
+export { staffActionRefusal, staffChangeRefusal, statusAfterChange } from './access/staff-changes';

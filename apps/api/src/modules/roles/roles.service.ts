@@ -24,6 +24,7 @@ import {
   NotFoundError,
   ValidationError,
 } from '../../common/errors';
+import { FOREIGN_KEY_VIOLATION, postgresCodeOf } from '../../common/pg-error';
 import { schoolOf } from '../../common/session/request-auth';
 import { TENANT_DB } from '../../tokens';
 
@@ -80,15 +81,24 @@ function refuseSystem(role: RoleRow): void {
   }
 }
 
+/**
+ * Nobody changes a role they hold themselves (fix round 1, M6): they could widen their own access
+ * past what anyone gave them, or lock themselves out. Another member with `users.manage` does it.
+ */
+async function refuseOwnRole(
+  repository: RolesRepository,
+  tx: TenantTx,
+  actor: AuditActor,
+  roleId: string,
+): Promise<void> {
+  if (actor.userId !== null && (await repository.holds(tx, actor.userId, roleId))) {
+    throw new BusinessRuleError('own_role_locked', formatMessage('error.roles.ownLocked'));
+  }
+}
+
 /** The 403 when a role would give a sensitive key the granter does not hold (spec 08). */
 function refuseUnheldKeys(): never {
   throw new ForbiddenError('forbidden', formatMessage('error.users.sensitiveNotHeld'));
-}
-
-/** Postgres refused a delete because a row still points at it (a session previewing the role). */
-function isStillReferenced(error: unknown): boolean {
-  const cause = error instanceof Error ? error.cause : undefined;
-  return typeof cause === 'object' && cause !== null && 'code' in cause && cause.code === '23503';
 }
 
 /**
@@ -190,6 +200,7 @@ export class RolesService {
       const current = await this.repository.lockById(tx, roleId);
       if (current === null) throw new NotFoundError();
       refuseSystem(current);
+      await refuseOwnRole(this.repository, tx, actor, roleId);
       await this.repository.update(tx, roleId, input);
       await this.record(tx, actor, 'role.updated', roleId, { fields: Object.keys(input).sort() });
       return this.roleIn(tx, roleId);
@@ -214,7 +225,7 @@ export class RolesService {
       });
     } catch (error) {
       // A session still previewing the role holds it (sessions_preview_role_fk, NO ACTION).
-      if (isStillReferenced(error)) {
+      if (postgresCodeOf(error) === FOREIGN_KEY_VIOLATION) {
         throw new ConflictError('in_use', formatMessage('error.roles.inUse'));
       }
       throw error;
@@ -238,6 +249,7 @@ export class RolesService {
       const current = await this.repository.lockById(tx, roleId);
       if (current === null) throw new NotFoundError();
       refuseSystem(current);
+      await refuseOwnRole(this.repository, tx, actor, roleId);
       const { granted, outsidePlan } = planMatrix(input.matrix, await this.planModulesIn(tx));
       if (outsidePlan.length > 0) {
         throw new BusinessRuleError(

@@ -10,7 +10,8 @@ import { z } from 'zod';
  * when sign-in cannot reach the lockout counter (it fails closed). Users & roles (Task 13) adds
  * three business-rule codes (422): `last_admin` (the school's last active admin cannot be demoted
  * or deactivated), `system_role_locked` (a system role cannot be changed or deleted) and
- * `already_member` (an invited address already belongs to a member of the school).
+ * `already_member` (an invited address already belongs to a member of the school), and, from
+ * fix round 1, `own_role_locked` (nobody changes a role they hold themselves).
  */
 export const ErrorCode = z.enum([
   'validation',
@@ -28,6 +29,7 @@ export const ErrorCode = z.enum([
   'last_admin',
   'system_role_locked',
   'already_member',
+  'own_role_locked',
   'app_update_required',
   'invalid_link',
   'invalid_credentials',

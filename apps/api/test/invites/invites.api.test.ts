@@ -1,7 +1,8 @@
 import { InviteDetails, SignInResult, StaffInviteResult } from '@quad/contracts';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { SignedLinks } from '../../src/common/crypto/signed-links';
+import { AuthRepository } from '../../src/modules/auth/auth.repository';
 import { localEnv } from '../env';
 import { RecordingDelivery } from '../fakes/delivery';
 import { RecordingOtpSends } from '../fakes/otp-sends';
@@ -14,6 +15,7 @@ import {
   freshEmail,
   insertPasswordAccount,
   setSignInRules,
+  totpCode,
 } from '../helpers/sign-in';
 import { asStaff, linkTokenOf, schoolWithRoles, staffHolding } from '../helpers/users';
 
@@ -30,6 +32,47 @@ const { db, app } = useDatabaseApp({}, { overrides: { now: () => clock, delivery
 beforeEach(() => {
   clock = NOW;
 });
+
+afterEach(() => {
+  vi.restoreAllMocks();
+});
+
+/** Waits until a backend is blocked by `holder` (`pg_blocking_pids`). */
+async function waitForBlocked(holder: number): Promise<void> {
+  for (let attempt = 0; attempt < 200; attempt += 1) {
+    const { rows } = await db().platform.query<{ waiting: string }>(
+      'select count(*)::text as waiting from pg_stat_activity where $1 = any(pg_blocking_pids(pid))',
+      [holder],
+    );
+    if (rows[0]?.waiting !== '0') return;
+    await new Promise((resolve) => setTimeout(resolve, 10));
+  }
+  throw new Error('No request waited for the lock.');
+}
+
+/** Runs `arrange` in a held transaction, then `act` while it is held, then commits. */
+async function whileHeld<T>(
+  arrangeIn: (client: {
+    query: (text: string, values?: unknown[]) => Promise<unknown>;
+  }) => Promise<void>,
+  act: () => Promise<T>,
+): Promise<T> {
+  const other = await db().platform.connect();
+  let committed = false;
+  try {
+    await other.query('begin');
+    await arrangeIn(other);
+    const { rows } = await other.query<{ pid: number }>('select pg_backend_pid() as pid');
+    const pending = act();
+    await waitForBlocked(rows[0]?.pid ?? 0);
+    await other.query('commit');
+    committed = true;
+    return await pending;
+  } finally {
+    if (!committed) await other.query('rollback');
+    other.release();
+  }
+}
 
 /** Signs links the way the API does, with the test secret; nonces are never recorded here. */
 const links = new SignedLinks(localEnv().LINK_SIGNING_SECRET ?? '', () => Promise.resolve(true));
@@ -70,6 +113,15 @@ async function membership(tenantId: string, email: string) {
     [tenantId, email],
   );
   return rows;
+}
+
+/** An account with an email and no password (a parent's, say). */
+async function insertAccountWithEmail(email: string) {
+  const { rows } = await db().platform.query<{ id: string }>(
+    `insert into accounts (email, status) values ($1, 'active') returning id`,
+    [email],
+  );
+  return { id: rows[0]?.id ?? '', email };
 }
 
 async function accountsWith(email: string): Promise<number> {
@@ -182,6 +234,57 @@ describe('POST /users/invite', () => {
   });
 });
 
+describe('POST /users/invite races and re-invites (fix round 1, M5)', () => {
+  it('answers 422 already_member when the same address is invited at the same moment', async () => {
+    const { school, admin } = await arrange();
+    const existing = await insertPasswordAccount(db());
+    const response = await whileHeld(
+      (client) =>
+        client
+          .query(
+            `insert into users (tenant_id, account_id, kind, name, status) values ($1, $2, 'staff', 'Held', 'invited')`,
+            [school.id, existing.id],
+          )
+          .then(() => undefined),
+      () =>
+        as(admin)('POST', '/users/invite', {
+          emails: [existing.email],
+          roleId: school.roles.teacher,
+        }),
+    );
+    expect(response.statusCode).toBe(422);
+    expect(response.json()).toMatchObject({ code: 'already_member' });
+  });
+
+  it('answers 404 when the role is deleted while the invite waits for it', async () => {
+    const { school, admin } = await arrange();
+    const doomed = await insertCustomRole(db(), school.id);
+    const fresh = freshEmail();
+    const response = await whileHeld(
+      (client) => client.query('delete from roles where id = $1', [doomed]).then(() => undefined),
+      () => as(admin)('POST', '/users/invite', { emails: [fresh], roleId: doomed }),
+    );
+    expect(response.statusCode).toBe(404);
+    expect(await accountsWith(fresh)).toBe(0);
+  });
+
+  it('invites a removed (soft-deleted) member again, as the same membership', async () => {
+    const { school, admin } = await arrange();
+    const existing = await insertPasswordAccount(db());
+    const removed = await insertMember(db(), school.id, existing.id);
+    await db().platform.query('update users set deleted_at = now() where id = $1', [removed]);
+
+    const result = await invite(admin, school, [existing.email]);
+
+    expect(result.items[0]).toMatchObject({ id: removed, status: 'invited' });
+    const { rows } = await db().platform.query<{ deleted: boolean }>(
+      'select deleted_at is not null as deleted from users where id = $1',
+      [removed],
+    );
+    expect(rows[0]?.deleted).toBe(false);
+  });
+});
+
 describe('POST /users/:id/resend-invite', () => {
   it('sends a new link and retires the old one (202)', async () => {
     const { school, admin } = await arrange();
@@ -199,6 +302,19 @@ describe('POST /users/:id/resend-invite', () => {
     expect((await details(newToken)).statusCode).toBe(200);
     expect((await membership(school.id, fresh))[0]?.invite_sent_at?.getTime()).toBe(clock);
     expect(await auditIn('user.invited', school.id)).toHaveLength(2);
+  });
+
+  it('retires the old link even when the resend comes in the same second (M1)', async () => {
+    const { school, admin } = await arrange();
+    const fresh = freshEmail();
+    const [member] = (await invite(admin, school, [fresh])).items;
+    const oldToken = linkTokenOf(delivery, fresh, 'staff_invite');
+    expect((await as(admin)('POST', `/users/${member?.id ?? ''}/resend-invite`)).statusCode).toBe(
+      202,
+    );
+    const newToken = linkTokenOf(delivery, fresh, 'staff_invite');
+    expect((await details(oldToken)).json()).toMatchObject({ code: 'invalid_link' });
+    expect((await details(newToken)).statusCode).toBe(200);
   });
 
   it('answers 422 for a member who is not invited', async () => {
@@ -232,12 +348,18 @@ describe('GET /auth/invites/:token', () => {
     const response = await details(linkTokenOf(delivery, fresh, 'staff_invite'));
 
     expect(response.statusCode).toBe(200);
+    // The name was made from the address, so it is left out (it would spell out the mask, M7).
     expect(InviteDetails.parse(response.json())).toEqual({
       school: school.name,
-      name: 'Amaya Perera',
       emailMasked: `a•••@${domain}.example`,
       needsPassword: true,
     });
+    const [row] = await membership(school.id, fresh);
+    await db().platform.query(`update users set name = 'Amaya Perera-Silva' where id = $1`, [
+      row?.id,
+    ]);
+    const named = await details(linkTokenOf(delivery, fresh, 'staff_invite'));
+    expect(InviteDetails.parse(named.json()).name).toBe('Amaya Perera-Silva');
   });
 
   it('says an existing account needs no password (it signs in instead)', async () => {
@@ -375,7 +497,8 @@ describe('POST /auth/invites/:token/accept', () => {
 
     const accepted = await accept(token, {}, owner);
     expect(accepted.statusCode).toBe(200);
-    expect(accepted.json()).toEqual({ next: 'choose_school' });
+    // The session is active in its own school, and stays there (M8).
+    expect(accepted.json()).toEqual({ next: 'done' });
     expect((await membership(school.id, existing.email))[0]?.status).toBe('active');
     const schools = (await owner.get('/auth/memberships')).json<{
       items: { tenantId: string }[];
@@ -385,6 +508,110 @@ describe('POST /auth/invites/:token/accept', () => {
     );
     // Still in the school it was in: accepting never switches school by itself.
     expect((await owner.get('/me')).json()).toMatchObject({ school: { name: elsewhere.name } });
+  });
+
+  it('treats an existing account without a password as existing: no password is set from the link (I3)', async () => {
+    const { school, admin } = await arrange();
+    const elsewhere = await schoolWithRoles(db());
+    const accountId = await insertAccountWithEmail(freshEmail());
+    await insertMember(db(), elsewhere.id, accountId.id, { kind: 'guardian' });
+    await invite(admin, school, [accountId.email]);
+    const token = linkTokenOf(delivery, accountId.email, 'staff_invite');
+
+    expect(InviteDetails.parse((await details(token)).json()).needsPassword).toBe(false);
+    const refused = await accept(token, { password: GOOD_PASSWORD });
+    expect(refused.statusCode).toBe(401);
+    const { rows } = await db().platform.query<{ hash: string | null }>(
+      'select password_hash as hash from credentials where account_id = $1',
+      [accountId.id],
+    );
+    expect(rows[0]?.hash ?? null).toBeNull();
+    expect((await membership(school.id, accountId.email))[0]?.status).toBe('invited');
+  });
+
+  it('never replaces a password that appeared after the link was checked (I3, password_hash IS NULL)', async () => {
+    const { school, admin } = await arrange();
+    const fresh = freshEmail();
+    await invite(admin, school, [fresh]);
+    const token = linkTokenOf(delivery, fresh, 'staff_invite');
+    const [row] = await membership(school.id, fresh);
+    // A password set meanwhile (a reset), which this accept read too early to see.
+    await db().platform.query(
+      `insert into credentials (account_id, password_hash) values ($1, 'kept-hash')`,
+      [row?.account_id],
+    );
+    const repository = app().get(AuthRepository);
+    const real = repository.credentials.bind(repository);
+    vi.spyOn(repository, 'credentials').mockImplementation(async (accountId) => ({
+      ...(await real(accountId)),
+      passwordHash: null,
+    }));
+
+    const response = await accept(token, { password: GOOD_PASSWORD });
+
+    expect(response.json()).toMatchObject({ code: 'invalid_link' });
+    const { rows } = await db().platform.query<{ hash: string }>(
+      'select password_hash as hash from credentials where account_id = $1',
+      [row?.account_id],
+    );
+    expect(rows[0]?.hash).toBe('kept-hash');
+  });
+
+  it('audits user.invite_accepted on both paths (M4)', async () => {
+    const { school, admin } = await arrange();
+    const fresh = freshEmail();
+    await invite(admin, school, [fresh]);
+    await accept(linkTokenOf(delivery, fresh, 'staff_invite'), { password: GOOD_PASSWORD });
+    const elsewhere = await schoolWithRoles(db());
+    const existing = await insertPasswordAccount(db());
+    await insertMember(db(), elsewhere.id, existing.id);
+    await invite(admin, school, [existing.email]);
+    const owner = new Browser(app);
+    await owner.post('/auth/password', { email: existing.email, password: existing.password });
+    await accept(linkTokenOf(delivery, existing.email, 'staff_invite'), {}, owner);
+
+    const rows = await auditIn('user.invite_accepted', school.id);
+    const ids = [
+      (await membership(school.id, fresh))[0]?.id,
+      (await membership(school.id, existing.email))[0]?.id,
+    ];
+    expect(rows.map((entry) => entry.target_id).sort()).toEqual([...ids].sort());
+    expect(rows.every((entry) => entry.actor_user_id === entry.target_id)).toBe(true);
+  });
+
+  it("answers the session's real next step for an existing account: choose_school or done (M8)", async () => {
+    const { school, admin } = await arrange();
+    const a = await schoolWithRoles(db());
+    const b = await schoolWithRoles(db());
+    const existing = await insertPasswordAccount(db());
+    await insertMember(db(), a.id, existing.id);
+    await insertMember(db(), b.id, existing.id);
+    await invite(admin, school, [existing.email]);
+    const choosing = new Browser(app);
+    expect(
+      (
+        await choosing.post('/auth/password', {
+          email: existing.email,
+          password: existing.password,
+        })
+      ).json(),
+    ).toEqual({ next: 'choose_school' });
+    expect(
+      (await accept(linkTokenOf(delivery, existing.email, 'staff_invite'), {}, choosing)).json(),
+    ).toEqual({ next: 'choose_school' });
+
+    const other = await insertPasswordAccount(db());
+    await insertMember(db(), a.id, other.id);
+    await invite(admin, school, [other.email]);
+    const active = new Browser(app);
+    expect(
+      (
+        await active.post('/auth/password', { email: other.email, password: other.password })
+      ).json(),
+    ).toEqual({ next: 'done' });
+    expect(
+      (await accept(linkTokenOf(delivery, other.email, 'staff_invite'), {}, active)).json(),
+    ).toEqual({ next: 'done' });
   });
 
   it("never activates anything in another school: a token for A naming B's member is refused", async () => {
@@ -400,5 +627,112 @@ describe('POST /auth/invites/:token/accept', () => {
     expect(response.json()).toMatchObject({ code: 'invalid_link' });
     expect((await membership(b.school.id, fresh))[0]?.status).toBe('invited');
     expect(await membership(a.school.id, fresh)).toEqual([]);
+  });
+});
+
+describe('signing in from the invite page (Task 13 fix round 1, I4: the token is only a hint)', () => {
+  /** An account with a password and no school yet, invited to `school`. */
+  async function invitedWithoutSchool(options: { readonly totp?: boolean } = {}) {
+    const { school, admin } = await arrange();
+    const account = await insertPasswordAccount(db(), options);
+    await invite(admin, school, [account.email]);
+    return { school, account, token: linkTokenOf(delivery, account.email, 'staff_invite') };
+  }
+
+  const signIn = (
+    browser: Browser,
+    account: { email: string; password: string },
+    inviteToken?: string,
+  ) =>
+    browser.post('/auth/password', {
+      email: account.email,
+      password: account.password,
+      ...(inviteToken === undefined ? {} : { inviteToken }),
+    });
+
+  it('reaches Choose a school instead of no school, then accepts and opens the school', async () => {
+    const { school, account, token } = await invitedWithoutSchool();
+    expect((await signIn(new Browser(app), account)).json()).toEqual({ next: 'no_school' });
+
+    const browser = new Browser(app);
+    expect((await signIn(browser, account, token)).json()).toEqual({ next: 'choose_school' });
+    // The hint used nothing up: the link still works for the accept.
+    expect((await accept(token, {}, browser)).json()).toEqual({ next: 'choose_school' });
+    expect((await browser.post('/auth/select-school', { tenantId: school.id })).statusCode).toBe(
+      204,
+    );
+    expect((await browser.get('/me')).json()).toMatchObject({ school: { name: school.name } });
+  });
+
+  it('carries the hint through the two-step code', async () => {
+    const { account, token } = await invitedWithoutSchool({ totp: true });
+    const browser = new Browser(app);
+    expect((await signIn(browser, account, token)).json()).toEqual({ next: 'two_step' });
+    const verify = await browser.post('/auth/totp/verify', {
+      code: await totpCode(account.totpSecret ?? '', clock),
+      inviteToken: token,
+    });
+    expect(verify.json()).toEqual({ next: 'choose_school' });
+  });
+
+  it("counts the invited school's two-step rule, and carries the hint through set-up", async () => {
+    const { school, account, token } = await invitedWithoutSchool();
+    await setSignInRules(db(), school.id, { twoStep: 'staff' });
+    const browser = new Browser(app);
+    expect((await signIn(browser, account, token)).json()).toEqual({ next: 'two_step_setup' });
+    const started = await browser.post('/me/totp', {});
+    const secret =
+      new URL(started.json<{ otpauthUri: string }>().otpauthUri).searchParams.get('secret') ?? '';
+    const confirmed = await browser.post('/me/totp', {
+      code: await totpCode(secret, clock),
+      inviteToken: token,
+    });
+    expect(confirmed.json()).toMatchObject({ next: 'choose_school' });
+  });
+
+  it('ignores a hint that is tampered with, or is another account’s invitation', async () => {
+    const { account, token } = await invitedWithoutSchool();
+    const other = await invitedWithoutSchool();
+    const [segment, signature] = token.split('.');
+    const tampered = `${segment ?? ''}.${(signature ?? '').slice(0, -2)}AA`;
+    for (const hint of [tampered, other.token]) {
+      expect((await signIn(new Browser(app), account, hint)).json()).toEqual({ next: 'no_school' });
+    }
+  });
+
+  it('answers a wrong password with a hint exactly as without one (no enumeration)', async () => {
+    const { account, token } = await invitedWithoutSchool();
+    const wrong = { email: account.email, password: 'not the password at all' };
+    const withHint = await signIn(new Browser(app), wrong, token);
+    const without = await signIn(new Browser(app), wrong);
+    expect(withHint.statusCode).toBe(401);
+    expect(withHint.body).toBe(without.body);
+  });
+});
+
+describe('switching to a school accepted mid-session re-checks two-step (fix round 1, I2)', () => {
+  it('lands on two_step_setup when the accepted school requires two-step', async () => {
+    const { school, admin } = await arrange();
+    await setSignInRules(db(), school.id, { twoStep: 'staff' });
+    const b = await schoolWithRoles(db());
+    const account = await insertPasswordAccount(db());
+    await insertMember(db(), b.id, account.id);
+    await invite(admin, school, [account.email]);
+    const browser = new Browser(app);
+    expect(
+      (
+        await browser.post('/auth/password', { email: account.email, password: account.password })
+      ).json(),
+    ).toEqual({ next: 'done' });
+    expect(
+      (await accept(linkTokenOf(delivery, account.email, 'staff_invite'), {}, browser)).statusCode,
+    ).toBe(200);
+
+    const switched = await browser.post('/auth/select-school', { tenantId: school.id });
+
+    expect(switched.statusCode).toBe(403);
+    expect(switched.json()).toMatchObject({ code: 'two_step_required' });
+    expect((await browser.get('/me')).statusCode).toBe(401);
+    expect((await browser.post('/me/totp', {})).statusCode).toBe(200);
   });
 });

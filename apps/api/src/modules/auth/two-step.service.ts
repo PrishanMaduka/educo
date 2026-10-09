@@ -98,6 +98,7 @@ export class TwoStepService {
       keepSignedIn: false,
       twoStepDone: true,
       trustedByCookie,
+      ...(input.inviteToken === undefined ? {} : { invite: input.inviteToken }),
       client,
       now,
     });
@@ -131,6 +132,7 @@ export class TwoStepService {
               client.trustedToken,
               now,
             ),
+            ...(input.inviteToken === undefined ? {} : { invite: input.inviteToken }),
             client,
             now,
           })

@@ -6,6 +6,8 @@ import {
   TotpVerifyInput,
 } from '@quad/contracts';
 
+import { formatMessage } from '../../common/delivery/templates/render';
+import { ForbiddenError } from '../../common/errors';
 import { Authenticated } from '../../common/guards/authenticated.decorator';
 import { PreAuth } from '../../common/guards/pre-auth.decorator';
 import { AllowDuringPreview } from '../../common/guards/preview-read-only.guard';
@@ -112,12 +114,17 @@ export class AuthController {
       void reply.status(200);
       return pair;
     }
-    const { session, lastSchool } = await this.signIn.selectSchool(
+    const { next, session, lastSchool } = await this.signIn.selectSchool(
       auth,
       body,
       signInClientOf(request, this.config.APP_ENV),
     );
     applySignInCookies(reply, this.config.APP_ENV, { session });
+    if (next === 'two_step_setup') {
+      // The chosen school needs two-step first (fix round 1, I2): the session moved to set-up
+      // (its new cookies are set), the school is not opened, and the page shows the set-up step.
+      throw new ForbiddenError('two_step_required', formatMessage('error.twoStepRequired'));
+    }
     applyLastSchoolCookie(reply, this.config.APP_ENV, lastSchool);
     return undefined;
   }

@@ -33,12 +33,20 @@ const TypedPassword = z
 export const SignInMethod = z.enum(['password']);
 export type SignInMethod = z.infer<typeof SignInMethod>;
 
+/**
+ * A staff invite link's token sent along with a sign-in step from the invite page (Task 13 fix
+ * round 1, I4): a hint only. It is inspected, never used up, and counts only when it is a valid
+ * invitation for the account that just signed in, so the pending school reaches Choose a school.
+ */
+export const InviteTokenHint = z.string().min(1).max(2048);
+
 /** `POST /auth/password`. */
 export const PasswordSignInInput = z.object({
   email: SignInEmail,
   password: TypedPassword,
   /** "Keep me signed in on this device": 30 days instead of the school's idle timeout. */
   keepSignedIn: z.boolean().default(false),
+  inviteToken: InviteTokenHint.optional(),
 });
 export type PasswordSignInInput = z.infer<typeof PasswordSignInInput>;
 
@@ -73,6 +81,7 @@ export const TotpVerifyInput = z
       .optional(),
     /** "Trust this device for 30 days". */
     trustDevice: z.boolean().default(false),
+    inviteToken: InviteTokenHint.optional(),
   })
   .superRefine((input, context) => {
     if ((input.code === undefined) === (input.recoveryCode === undefined)) {

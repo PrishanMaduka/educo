@@ -38,6 +38,14 @@ export class SignedLinks {
 
   /** Signs a link for `input` at `now`, with the purpose's expiry and a 128-bit nonce. */
   signLink(input: SignedLinkInput, now: Date): string {
+    return this.issueLink(input, now).token;
+  }
+
+  /**
+   * `signLink`, also giving the link's nonce, for a record that keeps which link of its own may
+   * still be used (a staff invitation, Task 13 fix round 1).
+   */
+  issueLink(input: SignedLinkInput, now: Date): { readonly token: string; readonly nonce: string } {
     const payload: SignedLinkPayload = {
       purpose: input.purpose,
       tid: input.tid,
@@ -50,7 +58,7 @@ export class SignedLinks {
       throw new Error(`A ${input.purpose} link needs a school (only password_reset may omit it).`);
     }
     const segment = Buffer.from(JSON.stringify(payload), 'utf8').toString('base64url');
-    return `${segment}.${this.mac(segment)}`;
+    return { token: `${segment}.${this.mac(segment)}`, nonce: payload.nonce };
   }
 
   /**

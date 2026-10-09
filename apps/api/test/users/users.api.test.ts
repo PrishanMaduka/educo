@@ -382,7 +382,7 @@ describe('PATCH /users/:id', () => {
       const pending = as(admin)('PATCH', `/users/${second.userId}`, {
         roleId: school.roles.teacher,
       });
-      await waitForLockWaiter();
+      await waitForLockWaiter(await pidOf(other));
       await other.query('commit');
       committed = true;
 
@@ -390,6 +390,47 @@ describe('PATCH /users/:id', () => {
       expect(response.statusCode).toBe(422);
       expect(response.json()).toMatchObject({ code: 'last_admin' });
       expect((await memberRow(second.userId))?.role_ids).toEqual([school.roles.admin]);
+    } finally {
+      if (!committed) await other.query('rollback');
+      other.release();
+    }
+  });
+
+  it('puts a never-accepted invitation back to invited on reactivation, never active (I1)', async () => {
+    const { school, admin } = await arrange();
+    const invited = await as(admin)('POST', '/users/invite', {
+      emails: [`invitee-${Date.now()}@example.test`],
+      roleId: school.roles.teacher,
+    });
+    const id = StaffMember.parse(invited.json<{ items: unknown[] }>().items[0]).id;
+    expect((await as(admin)('PATCH', `/users/${id}`, { status: 'deactivated' })).statusCode).toBe(
+      200,
+    );
+
+    const back = await as(admin)('PATCH', `/users/${id}`, { status: 'active' });
+
+    expect(back.statusCode).toBe(200);
+    expect(StaffMember.parse(back.json()).status).toBe('invited');
+    expect((await memberRow(id))?.status).toBe('invited');
+    // It needs a new invitation: Resend applies again.
+    expect((await as(admin)('POST', `/users/${id}/resend-invite`)).statusCode).toBe(202);
+  });
+
+  it('answers 404 when the new role is deleted while the change waits for it (M5)', async () => {
+    const { school, admin, teacher } = await arrange();
+    const doomed = await insertCustomRole(db(), school.id);
+    const other = await db().platform.connect();
+    let committed = false;
+    try {
+      await other.query('begin');
+      await other.query('delete from roles where id = $1', [doomed]);
+      const pending = as(admin)('PATCH', `/users/${teacher.userId}`, { roleId: doomed });
+      await waitForLockWaiter(await pidOf(other));
+      await other.query('commit');
+      committed = true;
+      const response = await pending;
+      expect(response.statusCode).toBe(404);
+      expect((await memberRow(teacher.userId))?.role_ids).toEqual([school.roles.teacher]);
     } finally {
       if (!committed) await other.query('rollback');
       other.release();
@@ -413,20 +454,27 @@ describe('PATCH /users/:id', () => {
 });
 
 /**
- * Waits until a backend of this test database waits for a lock (the API request has reached the
- * admin row lock). Scoped to this database: other test files run in parallel on the same server.
+ * Waits until a backend is blocked by `holder` (`pg_blocking_pids`): the API request has reached
+ * the lock that connection holds. Nothing else on the server can satisfy it.
  */
-async function waitForLockWaiter(): Promise<void> {
-  for (let attempt = 0; attempt < 100; attempt += 1) {
+async function waitForLockWaiter(holder: number): Promise<void> {
+  for (let attempt = 0; attempt < 200; attempt += 1) {
     const { rows } = await db().platform.query<{ waiting: string }>(
-      `select count(*)::text as waiting from pg_locks
-       where not granted
-         and pid in (select pid from pg_stat_activity where datname = current_database())`,
+      'select count(*)::text as waiting from pg_stat_activity where $1 = any(pg_blocking_pids(pid))',
+      [holder],
     );
     if (rows[0]?.waiting !== '0') return;
-    await new Promise((resolve) => setTimeout(resolve, 20));
+    await new Promise((resolve) => setTimeout(resolve, 10));
   }
   throw new Error('No request waited for the lock.');
+}
+
+/** The backend pid of a held connection. */
+async function pidOf(client: { query: (text: string) => Promise<{ rows: { pid: number }[] }> }) {
+  const { rows } = await client.query('select pg_backend_pid() as pid');
+  const pid = rows[0]?.pid;
+  if (pid === undefined) throw new Error('No backend pid.');
+  return pid;
 }
 
 describe('POST /users/:id/remind-two-step', () => {
@@ -499,6 +547,20 @@ describe('POST /users/:id/reset-password', () => {
     expect(await auditIn('user.password_reset_sent', school.id)).toEqual([
       expect.objectContaining({ actor_user_id: admin.userId, target_id: teacher.userId }),
     ]);
+  });
+
+  it("sends the reset to the account's sign-in address, not the school's copy (M2)", async () => {
+    const { admin, teacher } = await arrange();
+    await db().platform.query(`update users set email = 'stale-copy@example.test' where id = $1`, [
+      teacher.userId,
+    ]);
+    expect((await as(admin)('POST', `/users/${teacher.userId}/reset-password`)).statusCode).toBe(
+      202,
+    );
+    expect(() => linkTokenOf(delivery, teacher.email, 'password_reset')).not.toThrow();
+    expect(delivery.emails.filter((email) => email.job.to === 'stale-copy@example.test')).toEqual(
+      [],
+    );
   });
 
   it('answers 422 for a member who cannot sign in (invited)', async () => {

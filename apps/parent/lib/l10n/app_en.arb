@@ -94,6 +94,8 @@
   "errorUsersSensitiveNotHeld": "You can’t give access to sensitive data you don’t have yourself.",
   "errorRolesSystemLocked": "Built-in roles can’t be changed or deleted, so the school can’t lock itself out.",
   "errorRolesInUse": "Someone still has this role, or an admin is previewing it. Give them another role first.",
+  "errorRolesOwnLocked": "You can’t change a role you have yourself. Ask another admin.",
+  "errorTwoStepRequired": "This school asks you to turn on two-step sign-in first.",
   "errorRolesBaseNotFound": "Choose a role of this school to start from.",
   "errorInviteChoosePassword": "Choose a password to finish setting up your account.",
   "errorInviteSignInFirst": "Sign in with the account this invitation is for, then open the link again.",

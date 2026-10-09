@@ -712,6 +712,11 @@
           "code": {
             "type": "string",
             "pattern": "^\\d{6}$"
+          },
+          "inviteToken": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048
           }
         }
       },
@@ -749,6 +754,11 @@
           "keepSignedIn": {
             "type": "boolean",
             "default": false
+          },
+          "inviteToken": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048
           }
         },
         "required": [
@@ -771,6 +781,11 @@
           "trustDevice": {
             "type": "boolean",
             "default": false
+          },
+          "inviteToken": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048
           }
         }
       },
@@ -1510,7 +1525,6 @@
         },
         "required": [
           "school",
-          "name",
           "emailMasked",
           "needsPassword"
         ]

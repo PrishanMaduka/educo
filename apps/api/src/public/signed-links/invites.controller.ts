@@ -15,9 +15,6 @@ import type { SignedInAccount } from '../../modules/users/invites.service';
 import type { InviteDetails, SignInResult } from '@quad/contracts';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
-/** The sign-in steps after which a person counts as signed in (two-step done). */
-const SIGNED_IN_STAGES: ReadonlySet<string> = new Set(['choose_school', 'active']);
-
 /**
  * The staff invite link (spec 05 Account edge cases; spec 06 Invites; OQ9). Tenant-less and
  * signed (D16): the school comes only from the verified `staff_invite` token, every bad link is
@@ -67,8 +64,10 @@ export class InvitesController {
    */
   private async signedIn(request: FastifyRequest): Promise<SignedInAccount | null> {
     const auth = await this.authenticator.fromRequest(request);
-    if (auth?.kind !== 'web' || !SIGNED_IN_STAGES.has(auth.stage)) return null;
+    if (auth?.kind !== 'web') return null;
+    const stage = auth.stage === 'active' || auth.stage === 'choose_school' ? auth.stage : null;
+    if (stage === null) return null;
     if (!this.csrf.verify(auth.tokenHash, request.headers[CSRF_HEADER])) throw new CsrfError();
-    return { accountId: auth.accountId };
+    return { accountId: auth.accountId, stage };
   }
 }

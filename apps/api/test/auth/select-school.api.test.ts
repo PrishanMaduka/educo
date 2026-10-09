@@ -10,7 +10,13 @@ import {
   insertWebSession,
   setSchoolStatus,
 } from '../helpers/identity';
-import { anyText, auditRows, insertPasswordAccount, textContaining } from '../helpers/sign-in';
+import {
+  anyText,
+  auditRows,
+  insertPasswordAccount,
+  setSignInRules,
+  textContaining,
+} from '../helpers/sign-in';
 
 import type { SchoolSeed } from '../helpers/identity';
 import type { PasswordAccount } from '../helpers/sign-in';
@@ -248,5 +254,35 @@ describe('POST /auth/select-school (spec 05 step 5)', () => {
     browser.cookies.set('quad_csrf', session.csrf);
     expect((await select(browser, { tenantId: schoolB.id })).statusCode).toBe(403);
     expect(Me.parse((await browser.get('/me')).json()).school.id).toBe(schoolA.id);
+  });
+});
+
+describe('POST /auth/select-school re-checks the school’s two-step rule (Task 13 fix round 1, I2)', () => {
+  it('sends a session without an authenticator to set-up when the chosen school now requires it', async () => {
+    const { a, b, browser } = await choosing();
+    expect((await select(browser, { tenantId: b.id })).statusCode).toBe(204);
+    // School A turns two-step on for all staff while the person is in B.
+    await setSignInRules(db(), a.id, { twoStep: 'staff' });
+
+    const response = await select(browser, { tenantId: a.id });
+
+    expect(response.statusCode).toBe(403);
+    expect(response.json()).toMatchObject({ code: 'two_step_required' });
+    expect(await sessionOf(browser)).toEqual({
+      stage: 'two_step_setup',
+      active_tenant_id: null,
+      active_user_id: null,
+    });
+    expect((await browser.get('/me')).statusCode).toBe(401);
+    // The set-up step is where the session now is.
+    const setup = await browser.post('/me/totp', {});
+    expect(setup.statusCode).toBe(200);
+  });
+
+  it('opens the school as before when its rule is met (the positive control)', async () => {
+    const { a, browser } = await choosing();
+    await setSignInRules(db(), a.id, { twoStep: 'admins' });
+    expect((await select(browser, { tenantId: a.id })).statusCode).toBe(204);
+    expect(await sessionOf(browser)).toMatchObject({ stage: 'active', active_tenant_id: a.id });
   });
 });

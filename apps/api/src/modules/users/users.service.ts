@@ -1,6 +1,12 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { IdSchema } from '@quad/contracts';
-import { canGrant, sensitiveKeysOf, staffActionRefusal, staffChangeRefusal } from '@quad/domain';
+import {
+  canGrant,
+  sensitiveKeysOf,
+  staffActionRefusal,
+  staffChangeRefusal,
+  statusAfterChange,
+} from '@quad/domain';
 import { z } from 'zod';
 
 import { PermissionsService } from '../../common/access/permissions.service';
@@ -14,6 +20,7 @@ import {
   NotFoundError,
 } from '../../common/errors';
 import { decodeCursor, pageOf } from '../../common/pagination/cursor';
+import { FOREIGN_KEY_VIOLATION, postgresCodeOf } from '../../common/pg-error';
 import { schoolOf } from '../../common/session/request-auth';
 import { SessionService } from '../../common/session/session.service';
 import { CLOCK, CONFIG, DELIVERY, TENANT_DB } from '../../tokens';
@@ -132,67 +139,92 @@ export class UsersService {
     ip: string,
   ): Promise<StaffMember> {
     const actor = auditActorOf(schoolOf(auth), ip);
-    const result = await this.db.withTenant(actor.tenantId, async (tx) => {
-      await this.repository.lockAdminRole(tx);
-      const target = await this.repository.member(tx, userId);
-      if (target === null) throw new NotFoundError();
-      const held = await this.repository.rolesOf(tx, userId);
-      const next = input.roleId === undefined ? null : await this.roles.grantIn(tx, input.roleId);
-      if (input.roleId !== undefined && next === null) throw new NotFoundError();
-      const roleChanges = next !== null && !(held.length === 1 && held[0]?.id === next.role.id);
-      const nextStatus = input.status ?? target.status;
-      const otherAdmins = (await this.repository.activeAdminIds(tx)).filter((id) => id !== userId);
-      const refusal = staffChangeRefusal({
-        actorUserId: actor.userId,
-        target: { id: target.id, status: target.status, isAdmin: held.some(isAdmin) },
-        nextIsAdmin: next === null || !roleChanges ? held.some(isAdmin) : isAdmin(next.role),
-        roleChanges,
-        nextStatus,
-        otherActiveAdmins: otherAdmins.length,
-      });
-      if (refusal !== null) refuseChange(refusal);
-      if (roleChanges) {
-        // Assigning a role gives its sensitive keys: the granter must hold the new ones (D32).
-        const current = [...(await this.permissions.roleGrantsIn(tx, held)).values()];
-        const before = current.flatMap((grant) => grant.sensitive);
-        if (!canGrant(sensitiveKeysOf(access.permissions), before, next.grant.sensitive)) {
-          throw new ForbiddenError('forbidden', formatMessage('error.users.sensitiveNotHeld'));
-        }
-        await this.repository.setRole(tx, actor.tenantId, userId, next.role.id);
-        await this.record(tx, actor, 'user.role_changed', userId, {
-          from: held.map((role) => role.id),
-          to: next.role.id,
+    const result = await this.roleStillThere(() =>
+      this.db.withTenant(actor.tenantId, async (tx) => {
+        await this.repository.lockAdminRole(tx);
+        const target = await this.repository.member(tx, userId);
+        if (target === null) throw new NotFoundError();
+        const held = await this.repository.rolesOf(tx, userId);
+        const next = input.roleId === undefined ? null : await this.roles.grantIn(tx, input.roleId);
+        if (input.roleId !== undefined && next === null) throw new NotFoundError();
+        const roleChanges = next !== null && !(held.length === 1 && held[0]?.id === next.role.id);
+        // A never-accepted invitation goes back to invited, never active (fix round 1, I1).
+        const nextStatus =
+          input.status === undefined
+            ? target.status
+            : statusAfterChange({
+                current: target.status,
+                requested: input.status,
+                accepted: target.acceptedAt !== null,
+              });
+        const otherAdmins = (await this.repository.activeAdminIds(tx)).filter(
+          (id) => id !== userId,
+        );
+        const refusal = staffChangeRefusal({
+          actorUserId: actor.userId,
+          target: { id: target.id, status: target.status, isAdmin: held.some(isAdmin) },
+          nextIsAdmin: next === null || !roleChanges ? held.some(isAdmin) : isAdmin(next.role),
+          roleChanges,
+          nextStatus,
+          otherActiveAdmins: otherAdmins.length,
         });
-      }
-      const statusChanges = nextStatus !== target.status;
-      if (statusChanges) {
-        await this.repository.setStatus(tx, userId, nextStatus);
-        const action = nextStatus === 'deactivated' ? 'user.deactivated' : 'user.reactivated';
-        await this.record(tx, actor, action, userId, {});
-      }
-      if (roleChanges || nextStatus === 'deactivated') {
-        // A role change or a deactivation ends the member's preview here (Task 12 review, I2).
-        await this.db.definers.clearMemberPreview(tx, userId);
-      }
-      if (statusChanges && nextStatus === 'deactivated') {
-        // Spec 05: leaving a school revokes that school's sessions and refresh families.
-        await this.db.definers.revokeMemberSessions(tx, userId);
-      }
-      const updated = await this.repository.member(tx, userId);
-      if (updated === null) throw new NotFoundError();
-      const twoStep = await this.twoStepOf(tx, [userId]);
-      return {
-        member: toStaffMember(updated, twoStep.get(userId) === true),
-        accountId: target.accountId,
-        roleChanges,
-        statusChanges,
-      };
-    });
+        if (refusal !== null) refuseChange(refusal);
+        if (roleChanges) {
+          // Assigning a role gives its sensitive keys: the granter must hold the new ones (D32).
+          const current = [...(await this.permissions.roleGrantsIn(tx, held)).values()];
+          const before = current.flatMap((grant) => grant.sensitive);
+          if (!canGrant(sensitiveKeysOf(access.permissions), before, next.grant.sensitive)) {
+            throw new ForbiddenError('forbidden', formatMessage('error.users.sensitiveNotHeld'));
+          }
+          await this.repository.setRole(tx, actor.tenantId, userId, next.role.id);
+          await this.record(tx, actor, 'user.role_changed', userId, {
+            from: held.map((role) => role.id),
+            to: next.role.id,
+          });
+        }
+        const statusChanges = nextStatus !== target.status;
+        if (statusChanges) {
+          await this.repository.setStatus(tx, userId, nextStatus);
+          if (nextStatus === 'deactivated') {
+            await this.record(tx, actor, 'user.deactivated', userId, {});
+          } else {
+            await this.record(tx, actor, 'user.reactivated', userId, { status: nextStatus });
+          }
+        }
+        if (roleChanges || nextStatus === 'deactivated') {
+          // A role change or a deactivation ends the member's preview here (Task 12 review, I2).
+          await this.db.definers.clearMemberPreview(tx, userId);
+        }
+        if (statusChanges && nextStatus === 'deactivated') {
+          // Spec 05: leaving a school revokes that school's sessions and refresh families.
+          await this.db.definers.revokeMemberSessions(tx, userId);
+        }
+        const updated = await this.repository.member(tx, userId);
+        if (updated === null) throw new NotFoundError();
+        const twoStep = await this.twoStepOf(tx, [userId]);
+        return {
+          member: toStaffMember(updated, twoStep.get(userId) === true),
+          accountId: target.accountId,
+          roleChanges,
+          statusChanges,
+        };
+      }),
+    );
     if (result.roleChanges) await this.permissions.invalidateTenant(actor.tenantId);
     if (result.roleChanges || result.statusChanges) {
       await this.sessions.invalidateMember(result.accountId, actor.tenantId);
     }
     return result.member;
+  }
+
+  /** Runs `write`; the new role deleted meanwhile (a 23503 on `user_roles`) is a 404 (M5). */
+  private async roleStillThere<T>(write: () => Promise<T>): Promise<T> {
+    try {
+      return await write();
+    } catch (error) {
+      if (postgresCodeOf(error) === FOREIGN_KEY_VIOLATION) throw new NotFoundError();
+      throw error;
+    }
   }
 
   /** `POST /users/:id/remind-two-step`: emails the member to turn on two-step sign-in. */
@@ -223,7 +255,7 @@ export class UsersService {
    */
   async resetPassword(auth: RequestAuth, userId: string, ip: string): Promise<void> {
     const actor = auditActorOf(schoolOf(auth), ip);
-    const member = await this.db.withTenant(actor.tenantId, async (tx) => {
+    const { member, to } = await this.db.withTenant(actor.tenantId, async (tx) => {
       const found = await this.repository.member(tx, userId);
       if (found === null) throw new NotFoundError();
       const refusal = staffActionRefusal('reset_password', {
@@ -231,9 +263,13 @@ export class UsersService {
         twoStepOn: false,
       });
       if (refusal !== null) refuseAction(refusal);
-      emailOf(found);
+      // The account's own sign-in address, never the school's copy of it (fix round 1, M2).
+      const address = await this.db.definers.memberAccountEmail(tx, userId);
+      if (address === null) {
+        throw new BusinessRuleError('business_rule', formatMessage('error.users.noEmail'));
+      }
       await this.record(tx, actor, 'user.password_reset_sent', userId, {});
-      return found;
+      return { member: found, to: address };
     });
     const now = this.now();
     const token = this.links.signLink(
@@ -242,7 +278,7 @@ export class UsersService {
     );
     await this.delivery.queueEmail({
       jobId: `password-reset.member.${userId}.${now}`,
-      to: emailOf(member),
+      to,
       template: 'password_reset',
       params: {
         name: member.name,

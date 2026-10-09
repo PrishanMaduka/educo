@@ -34,8 +34,8 @@ describe('contracts', () => {
       ErrorBodySchema.safeParse({ code: 'forbidden', message: 'No', fields: { a: 'b' } }).success,
     ).toBe(true);
     expect(ErrorCode.options).toContain('app_update_required');
-    // 22 until Task 13 added last_admin, system_role_locked and already_member.
-    expect(ErrorCode.options).toHaveLength(25);
+    // 22 until Task 13 added last_admin, system_role_locked, already_member and own_role_locked.
+    expect(ErrorCode.options).toHaveLength(26);
   });
 
   it('has invalid_link for every refused signed link (spec 05, one message for every cause)', () => {

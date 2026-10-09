@@ -422,6 +422,36 @@ describe('PUT /roles/:id/permissions', () => {
   });
 });
 
+describe('a role its holder changes (fix round 1, M6)', () => {
+  it('refuses PATCH and PUT …/permissions on a role the caller holds (422 own_role_locked)', async () => {
+    const { school } = await arrange();
+    const manager = await keylessManager(school);
+    const { rows } = await db().platform.query<{ role_id: string }>(
+      'select role_id from user_roles where user_id = $1',
+      [manager.userId],
+    );
+    const own = rows[0]?.role_id ?? '';
+    const renamed = await as(manager)('PATCH', `/roles/${own}`, { name: 'Mine now' });
+    expect(renamed.statusCode).toBe(422);
+    expect(renamed.json()).toMatchObject({ code: 'own_role_locked' });
+    const widened = await as(manager)('PUT', `/roles/${own}/permissions`, {
+      matrix: {
+        settings: { view: true, create: true, edit: true, delete: true, approve: true },
+        fees: VIEW,
+      },
+      sensitive: [],
+    });
+    expect(widened.statusCode).toBe(422);
+    expect(widened.json()).toMatchObject({ code: 'own_role_locked' });
+    expect((await storedGrant(own)).matrix).toEqual({ settings: '11111' });
+    // The positive control: another custom role is theirs to change.
+    const other = await insertCustomRole(db(), school.id);
+    expect((await as(manager)('PATCH', `/roles/${other}`, { name: 'Year lead' })).statusCode).toBe(
+      200,
+    );
+  });
+});
+
 describe('every module row in a role response', () => {
   it('has a row for each of the nine modules', async () => {
     const { admin } = await arrange();

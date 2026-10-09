@@ -13,12 +13,16 @@ export type InviteTokenParams = z.infer<typeof InviteTokenParams>;
 
 /**
  * `GET /auth/invites/:token`: what the invite page shows. Only the school, the name the school
- * gave, the address masked (`maskEmail`) and whether a password must be chosen here (a new
+ * gave (if any), the address masked (`maskEmail`) and whether a password must be chosen here (a new
  * account) or the person signs in first (an existing one).
  */
 export const InviteDetails = z.object({
   school: z.string(),
-  name: z.string(),
+  /**
+   * The name the school gave the invitee; left out while it is still the one made from the address
+   * (`nameFromEmail`), which would spell out the masked part (fix round 1, M7).
+   */
+  name: z.string().optional(),
   emailMasked: z.string(),
   needsPassword: z.boolean(),
 });

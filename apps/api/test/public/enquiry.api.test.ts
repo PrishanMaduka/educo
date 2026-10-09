@@ -8,7 +8,9 @@ import { useDatabaseApp } from '../helpers/database-app';
 
 import type { QuadTenantDb } from '@quad/db';
 
-const { app } = useDatabaseApp();
+/** A fixed clock, so the 20-a-minute window never rolls over mid-test (fix round 1, M9). */
+const NOW = Date.UTC(2026, 9, 9, 3, 30, 1);
+const { app } = useDatabaseApp({}, { overrides: { now: () => NOW } });
 
 afterEach(() => {
   vi.restoreAllMocks();

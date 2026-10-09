@@ -23,6 +23,8 @@ class PasswordSignInInput {
     required  this.password,
 
      this.keepSignedIn = false,
+
+     this.inviteToken,
   });
 
   @JsonKey(
@@ -61,19 +63,33 @@ class PasswordSignInInput {
 
 
 
+  @JsonKey(
+    
+    name: r'inviteToken',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final String? inviteToken;
+
+
+
 
 
     @override
     bool operator ==(Object other) => identical(this, other) || other is PasswordSignInInput &&
       other.email == email &&
       other.password == password &&
-      other.keepSignedIn == keepSignedIn;
+      other.keepSignedIn == keepSignedIn &&
+      other.inviteToken == inviteToken;
 
     @override
     int get hashCode =>
         email.hashCode +
         password.hashCode +
-        keepSignedIn.hashCode;
+        keepSignedIn.hashCode +
+        inviteToken.hashCode;
 
   factory PasswordSignInInput.fromJson(Map<String, dynamic> json) => _$PasswordSignInInputFromJson(json);
 

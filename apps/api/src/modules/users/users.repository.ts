@@ -30,6 +30,9 @@ export interface StaffRow {
   readonly status: MembershipStatus;
   readonly lastSignInAt: Date | null;
   readonly inviteSentAt: Date | null;
+  /** The nonce of the one invite link that may still be used (never sent to a client). */
+  readonly inviteNonce: string | null;
+  readonly acceptedAt: Date | null;
   readonly roleId: string | null;
   readonly roleName: string | null;
 }
@@ -49,6 +52,12 @@ export interface InvitedMember {
   readonly at: Date;
 }
 
+/** The invitation a link carries: when it was sent and the nonce only that link has. */
+export interface InviteSent {
+  readonly at: Date;
+  readonly nonce: string;
+}
+
 /** The SQL `LIKE` pattern that finds `text` anywhere, with its wildcards matched literally. */
 function containing(text: string): string {
   return `%${text.replace(/[\\%_]/g, (char) => `\\${char}`)}%`;
@@ -62,6 +71,8 @@ const staffColumns = {
   status: users.status,
   lastSignInAt: users.lastSignInAt,
   inviteSentAt: users.inviteSentAt,
+  inviteNonce: users.inviteNonce,
+  acceptedAt: users.acceptedAt,
   roleId: roles.id,
   roleName: roles.name,
 };
@@ -138,33 +149,55 @@ export class UsersRepository {
   }
 
   /**
-   * Makes an invited staff membership of `accountId` active (accepting the invitation); false
-   * when it is no longer invited or is not that account's.
+   * Accepts an invitation (fix round 1, I1, M1): an invited staff membership of `accountId`
+   * becomes active, records `accepted_at` and retires its link. False when it is no longer
+   * invited, is not that account's, or `nonce` is not its current link's.
    */
-  async activateInvited(tx: TenantTx, userId: string, accountId: string): Promise<boolean> {
+  async activateInvited(
+    tx: TenantTx,
+    accepted: {
+      readonly userId: string;
+      readonly accountId: string;
+      readonly nonce: string;
+      readonly at: Date;
+    },
+  ): Promise<boolean> {
     const rows = await tx
       .update(users)
-      .set({ status: 'active' })
+      .set({ status: 'active', acceptedAt: accepted.at, inviteNonce: null })
       .where(
         and(
           isStaff,
-          eq(users.id, userId),
-          eq(users.accountId, accountId),
+          eq(users.id, accepted.userId),
+          eq(users.accountId, accepted.accountId),
           eq(users.status, 'invited'),
+          eq(users.inviteNonce, accepted.nonce),
         ),
       )
       .returning({ id: users.id });
     return rows.length > 0;
   }
 
-  /** Which of `accountIds` already have a membership here (any kind or status). */
-  async membersByAccount(tx: TenantTx, accountIds: readonly string[]): Promise<Set<string>> {
-    if (accountIds.length === 0) return new Set();
+  /**
+   * The memberships here of `accountIds`, by account: live ones (any kind or status) and removed
+   * ones (soft-deleted), which an invitation brings back as the same row (fix round 1, M5).
+   */
+  async membershipsByAccount(
+    tx: TenantTx,
+    accountIds: readonly string[],
+  ): Promise<{ readonly live: Set<string>; readonly removed: Map<string, string> }> {
+    const live = new Set<string>();
+    const removed = new Map<string, string>();
+    if (accountIds.length === 0) return { live, removed };
     const rows = await tx
-      .select({ accountId: users.accountId })
+      .select({ id: users.id, accountId: users.accountId, deletedAt: users.deletedAt })
       .from(users)
       .where(inArray(users.accountId, [...accountIds]));
-    return new Set(rows.map((row) => row.accountId));
+    for (const row of rows) {
+      if (row.deletedAt === null) live.add(row.accountId);
+      else removed.set(row.accountId, row.id);
+    }
+    return { live, removed };
   }
 
   /** Adds an invited staff membership holding `roleId` as its primary role; returns its id. */
@@ -182,10 +215,31 @@ export class UsersRepository {
       })
       .returning({ id: users.id });
     if (row === undefined) throw new Error('The membership row was not written.');
-    await tx
-      .insert(userRoles)
-      .values({ tenantId, userId: row.id, roleId: member.roleId, primary: true });
+    await this.setRole(tx, tenantId, row.id, member.roleId);
     return row.id;
+  }
+
+  /** Brings a removed membership back as a new invitation holding `roleId`. */
+  async reinstateInvited(
+    tx: TenantTx,
+    tenantId: string,
+    userId: string,
+    member: InvitedMember,
+  ): Promise<void> {
+    await tx
+      .update(users)
+      .set({
+        kind: 'staff',
+        name: member.name,
+        email: member.email,
+        status: 'invited',
+        inviteSentAt: member.at,
+        inviteNonce: null,
+        acceptedAt: null,
+        deletedAt: null,
+      })
+      .where(eq(users.id, userId));
+    await this.setRole(tx, tenantId, userId, member.roleId);
   }
 
   /** Replaces the member's roles with `roleId` as the only, primary one. */
@@ -194,12 +248,20 @@ export class UsersRepository {
     await tx.insert(userRoles).values({ tenantId, userId, roleId, primary: true });
   }
 
+  /** Stores a new status; any status but `invited` retires the outstanding invite link. */
   async setStatus(tx: TenantTx, userId: string, status: MembershipStatus): Promise<void> {
-    await tx.update(users).set({ status }).where(eq(users.id, userId));
+    await tx
+      .update(users)
+      .set({ status, ...(status === 'invited' ? {} : { inviteNonce: null }) })
+      .where(eq(users.id, userId));
   }
 
-  async setInviteSent(tx: TenantTx, userId: string, at: Date): Promise<void> {
-    await tx.update(users).set({ inviteSentAt: at }).where(eq(users.id, userId));
+  /** Records the invitation just sent: only its link (`nonce`) works from now on (M1). */
+  async setInviteSent(tx: TenantTx, userId: string, sent: InviteSent): Promise<void> {
+    await tx
+      .update(users)
+      .set({ inviteSentAt: sent.at, inviteNonce: sent.nonce })
+      .where(eq(users.id, userId));
   }
 
   /**

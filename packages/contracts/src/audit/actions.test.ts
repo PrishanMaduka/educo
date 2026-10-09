@@ -11,6 +11,7 @@ describe('audit action keys', () => {
       'auth.password_reset',
       'auth.two_step_enabled',
       'user.invited',
+      'user.invite_accepted',
       'user.role_changed',
       'user.deactivated',
       'user.reactivated',

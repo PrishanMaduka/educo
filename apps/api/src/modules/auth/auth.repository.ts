@@ -257,6 +257,63 @@ export class AuthRepository {
     return true;
   }
 
+  /**
+   * Sets the account's first password (a new invitee, OQ9) in the caller's transaction, only while
+   * it has none (`password_hash IS NULL`, fix round 1, I3): false for an account that has one by
+   * now, or may not sign in (disabled). A password is never replaced from an invite link.
+   */
+  async setFirstPasswordIn(
+    tx: AccountTx,
+    accountId: string,
+    passwordHash: string,
+    at: Date,
+  ): Promise<boolean> {
+    const account = await this.accountIn(tx, accountId);
+    if (account === null || account.status === 'disabled') return false;
+    const rows = await tx
+      .insert(credentials)
+      .values({ accountId, passwordHash, passwordChangedAt: at })
+      .onConflictDoUpdate({
+        target: credentials.accountId,
+        set: { passwordHash, passwordChangedAt: at },
+        setWhere: isNull(credentials.passwordHash),
+      })
+      .returning({ accountId: credentials.accountId });
+    return rows.length > 0;
+  }
+
+  /**
+   * The role keys of the account's pending staff invitation `userId` in the transaction's school
+   * (I4: a sign-in from the invite page): only while it is invited, the account's, and `nonce` is
+   * its current link's; null otherwise. RLS limits it to `app.tenant_id`, the link's school.
+   */
+  async pendingInviteIn(
+    tx: AccountTx,
+    invite: { readonly userId: string; readonly accountId: string; readonly nonce: string },
+  ): Promise<string[] | null> {
+    const [member] = await tx
+      .select({ id: users.id })
+      .from(users)
+      .where(
+        and(
+          eq(users.id, invite.userId),
+          eq(users.accountId, invite.accountId),
+          eq(users.kind, 'staff'),
+          eq(users.status, 'invited'),
+          eq(users.inviteNonce, invite.nonce),
+          isNull(users.deletedAt),
+        ),
+      )
+      .limit(1);
+    if (member === undefined) return null;
+    const held = await tx
+      .select({ key: roles.key })
+      .from(userRoles)
+      .innerJoin(roles, eq(roles.id, userRoles.roleId))
+      .where(eq(userRoles.userId, invite.userId));
+    return held.map((role) => role.key);
+  }
+
   /** Revokes every trusted device of the account (password reset, spec 05). */
   async revokeTrustedDevicesIn(tx: AccountTx, accountId: string): Promise<void> {
     await tx

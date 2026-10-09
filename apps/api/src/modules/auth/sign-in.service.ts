@@ -4,8 +4,14 @@ import { Inject, Injectable } from '@nestjs/common';
 import { nextSignInStep, strictestTwoStep } from '@quad/domain';
 
 import { PasswordHasher } from '../../common/crypto/passwords';
+import { SignedLinks } from '../../common/crypto/signed-links';
 import { formatMessage } from '../../common/delivery/templates/render';
-import { AccountLockedError, ForbiddenError, InvalidCredentialsError } from '../../common/errors';
+import {
+  AccountLockedError,
+  ForbiddenError,
+  InvalidCredentialsError,
+  InvalidLinkError,
+} from '../../common/errors';
 import { hashSessionToken, isSessionTokenShape } from '../../common/session/cookies';
 import { errorForLog } from '../../observability/logger';
 import { CLOCK, LOGGER, TENANT_DB } from '../../tokens';
@@ -19,8 +25,14 @@ import { SignInSessions } from './sign-in-session.service';
 import type { SessionCookies, SignInClient, SignInState } from './sign-in-session.service';
 import type { RequestAuth } from '../../common/session/request-auth';
 import type { Clock } from '../../tokens';
-import type { PasswordSignInInput, SelectSchoolInput, SignInNext } from '@quad/contracts';
+import type {
+  PasswordSignInInput,
+  SelectSchoolInput,
+  SignInNext,
+  SignedLinkPayload,
+} from '@quad/contracts';
 import type { QuadTenantDb } from '@quad/db';
+import type { TwoStepRow } from '@quad/domain';
 import type { Logger } from 'pino';
 
 export type {
@@ -54,6 +66,7 @@ export class SignInService {
     private readonly memberships: MembershipsService,
     private readonly lockout: LockoutService,
     private readonly hasher: PasswordHasher,
+    private readonly links: SignedLinks,
     private readonly accountAudit: AccountAudit,
     @Inject(CLOCK) private readonly now: Clock,
     @Inject(LOGGER) private readonly logger: Logger,
@@ -92,6 +105,7 @@ export class SignInService {
       method: 'password',
       twoStepDone: false,
       trustedByCookie: await this.trustedByCookie(accountId, client.trustedToken, now),
+      ...(input.inviteToken === undefined ? {} : { invite: input.inviteToken }),
       client,
       now,
     });
@@ -106,17 +120,19 @@ export class SignInService {
    * suspended is shown on Choose a school with its reason instead of being opened.
    */
   async continueSignIn(state: SignInState): Promise<SignInOutcome> {
-    const [rules, memberships, credentials] = await Promise.all([
+    const [rules, memberships, credentials, pending] = await Promise.all([
       this.db.definers.authSignInRules(state.accountId),
       this.memberships.staffMemberships(state.accountId),
       this.repository.credentials(state.accountId),
+      this.pendingInvite(state),
     ]);
     const next = nextSignInStep({
       totpEnabled: credentials.totpEnabled,
-      twoStepRequired: strictestTwoStep(rules).required,
+      // A pending invitation's school counts with its own rule (I4).
+      twoStepRequired: strictestTwoStep(pending === null ? rules : [...rules, pending]).required,
       // A code checked in this request counts like a trusted device: two-step is done.
       trustedDevice: state.trustedByCookie || state.twoStepDone,
-      membershipCount: memberships.length,
+      membershipCount: memberships.length + (pending === null ? 0 : 1),
     });
     switch (next) {
       case 'no_school':
@@ -132,7 +148,8 @@ export class SignInService {
             session: await this.steps.atStep(state, 'choose_school'),
           };
         }
-        return { next, session: await this.steps.activate(state, only, { switching: false }) };
+        const opened = await this.steps.activate(state, only, { switching: false });
+        return { next: opened.next, session: opened.cookies };
       }
       case 'two_step':
       case 'two_step_setup':
@@ -151,7 +168,11 @@ export class SignInService {
     auth: RequestAuth,
     input: SelectSchoolInput,
     client: SignInClient,
-  ): Promise<{ readonly session: SessionCookies; readonly lastSchool: string | null }> {
+  ): Promise<{
+    readonly next: 'done' | 'two_step_setup';
+    readonly session: SessionCookies;
+    readonly lastSchool: string | null;
+  }> {
     if (auth.kind !== 'web') {
       throw new ForbiddenError('forbidden', formatMessage('error.notYourSchool'));
     }
@@ -168,7 +189,7 @@ export class SignInService {
     }
     const now = new Date(this.now());
     const switching = auth.stage === 'active';
-    const session = await this.steps.activate(
+    const opened = await this.steps.activate(
       {
         accountId: auth.accountId,
         session: { id: auth.sessionId, tokenHash: auth.tokenHash },
@@ -182,7 +203,43 @@ export class SignInService {
       membership,
       { switching },
     );
-    return { session, lastSchool: input.remember ? membership.tenantName : null };
+    // Set-up first (I2): the school is not opened, so it is not remembered either.
+    const remember = opened.next === 'done' && input.remember;
+    return {
+      next: opened.next,
+      session: opened.cookies,
+      lastSchool: remember ? membership.tenantName : null,
+    };
+  }
+
+  /**
+   * The school of a pending staff invitation the invite page sent as a hint (fix round 1, I4), as
+   * a two-step rule row, or null. The link is inspected, never used up, and counts only when it is
+   * this account's current invitation; anything else is ignored, as if no hint had been sent. It
+   * runs only after the password (and code) passed, so it changes nothing a wrong guess sees.
+   */
+  private async pendingInvite(state: SignInState): Promise<TwoStepRow | null> {
+    if (state.invite === undefined) return null;
+    let payload: SignedLinkPayload;
+    try {
+      payload = this.links.inspectLink(state.invite, 'staff_invite', state.now);
+    } catch (error) {
+      if (error instanceof InvalidLinkError) return null;
+      throw error;
+    }
+    const tenantId = payload.tid;
+    if (tenantId === null) return null;
+    return this.repository.inAccount(state.accountId, tenantId, async (tx) => {
+      const roleKeys = await this.repository.pendingInviteIn(tx, {
+        userId: payload.sub,
+        accountId: state.accountId,
+        nonce: payload.nonce,
+      });
+      if (roleKeys === null) return null;
+      const profile = await this.db.definers.currentTenantProfile(tx);
+      if (profile === null || profile.status === 'deleted') return null;
+      return { twoStep: profile.twoStep, roleKeys };
+    });
   }
 
   /** True when `token` is a live trusted device of this account (spec 05, 30 days). */

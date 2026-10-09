@@ -1,7 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  AuditAction,
   ErrorCode,
+  PasswordSignInInput,
+  TotpSetupInput,
+  TotpVerifyInput,
   InviteAcceptInput,
   InviteDetails,
   InviteTokenParams,
@@ -131,5 +135,33 @@ describe('the staff invite link (GET /auth/invites/:token, POST …/accept)', ()
       'password',
     ]);
     expect(pathOf(InviteAcceptInput.safeParse({ email: 'a@b.example' }))).toEqual([]);
+  });
+});
+
+describe('fix round 1 additions', () => {
+  it('has own_role_locked and the user.invite_accepted audit action', () => {
+    expect(ErrorCode.safeParse('own_role_locked').success).toBe(true);
+    expect(AuditAction.safeParse('user.invite_accepted').success).toBe(true);
+  });
+
+  it('shows the invitee name only when the school set one (M7)', () => {
+    const details = {
+      school: 'Colombo International School',
+      emailMasked: 'a•••@school.example',
+      needsPassword: true,
+    };
+    expect(InviteDetails.safeParse(details).success).toBe(true);
+  });
+
+  it.each([
+    ['PasswordSignInInput', PasswordSignInInput, { email: 'a@school.example', password: 'x' }],
+    ['TotpVerifyInput', TotpVerifyInput, { code: '000000' }],
+    ['TotpSetupInput', TotpSetupInput, { code: '000000' }],
+  ] as const)('%s takes an optional invite token as a hint (I4)', (_name, schema, input) => {
+    expect(schema.safeParse({ ...input, inviteToken: 'a.b' }).success).toBe(true);
+    expect(schema.safeParse(input).success).toBe(true);
+    expect(pathOf(schema.safeParse({ ...input, inviteToken: 'a'.repeat(2049) }))).toEqual([
+      'inviteToken',
+    ]);
   });
 });

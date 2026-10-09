@@ -1,6 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { PermissionModule } from '@quad/contracts';
-import { asc, count, desc, eq, rolePermissions, roleSensitive, roles, userRoles } from '@quad/db';
+import {
+  and,
+  asc,
+  count,
+  desc,
+  eq,
+  rolePermissions,
+  roleSensitive,
+  roles,
+  userRoles,
+} from '@quad/db';
 
 import type { RoleScope, RoleUpdateInput, SensitiveKey } from '@quad/contracts';
 import type { TenantTx } from '@quad/db';
@@ -66,6 +76,16 @@ export class RolesRepository {
       .from(userRoles)
       .groupBy(userRoles.roleId);
     return new Map(rows.map((row) => [row.roleId, row.members]));
+  }
+
+  /** Whether `userId` holds `roleId`. */
+  async holds(tx: TenantTx, userId: string, roleId: string): Promise<boolean> {
+    const [row] = await tx
+      .select({ roleId: userRoles.roleId })
+      .from(userRoles)
+      .where(and(eq(userRoles.userId, userId), eq(userRoles.roleId, roleId)))
+      .limit(1);
+    return row !== undefined;
   }
 
   async byId(tx: TenantTx, roleId: string): Promise<RoleRow | null> {

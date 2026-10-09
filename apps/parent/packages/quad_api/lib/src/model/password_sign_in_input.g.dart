@@ -16,6 +16,7 @@ PasswordSignInInput _$PasswordSignInInputFromJson(Map<String, dynamic> json) =>
           'keepSignedIn',
           (v) => v as bool? ?? false,
         ),
+        inviteToken: $checkedConvert('inviteToken', (v) => v as String?),
       );
       return val;
     });
@@ -26,4 +27,5 @@ Map<String, dynamic> _$PasswordSignInInputToJson(
   'email': instance.email,
   'password': instance.password,
   'keepSignedIn': ?instance.keepSignedIn,
+  'inviteToken': ?instance.inviteToken,
 };

@@ -19,6 +19,8 @@ class TotpSetupInput {
   TotpSetupInput({
 
      this.code,
+
+     this.inviteToken,
   });
 
   @JsonKey(
@@ -33,15 +35,29 @@ class TotpSetupInput {
 
 
 
+  @JsonKey(
+    
+    name: r'inviteToken',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final String? inviteToken;
+
+
+
 
 
     @override
     bool operator ==(Object other) => identical(this, other) || other is TotpSetupInput &&
-      other.code == code;
+      other.code == code &&
+      other.inviteToken == inviteToken;
 
     @override
     int get hashCode =>
-        code.hashCode;
+        code.hashCode +
+        inviteToken.hashCode;
 
   factory TotpSetupInput.fromJson(Map<String, dynamic> json) => _$TotpSetupInputFromJson(json);
 

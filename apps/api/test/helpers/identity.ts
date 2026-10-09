@@ -98,7 +98,10 @@ export async function insertMember(
 ): Promise<string> {
   const id = randomUUID();
   await db.platform.query(
-    `insert into users (id, tenant_id, account_id, kind, name, status) values ($1, $2, $3, $4, $5, $6)`,
+    // A membership past its invitation was accepted (Task 13 fix round 1, as 0016 backfills).
+    `insert into users (id, tenant_id, account_id, kind, name, status, accepted_at)
+     values ($1, $2, $3, $4, $5, $6::text::membership_status,
+             case when $6::text = 'invited' then null else now() end)`,
     [
       id,
       tenantId,

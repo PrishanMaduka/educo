@@ -2991,6 +2991,7 @@ export interface components {
         };
         TotpSetupInput: {
             code?: string;
+            inviteToken?: string;
         };
         SignInResult: {
             /** @enum {string} */
@@ -3002,12 +3003,14 @@ export interface components {
             password: string;
             /** @default false */
             keepSignedIn: boolean;
+            inviteToken?: string;
         };
         TotpVerifyInput: {
             code?: string;
             recoveryCode?: string;
             /** @default false */
             trustDevice: boolean;
+            inviteToken?: string;
         };
         SignInMembershipList: {
             items: {
@@ -3190,7 +3193,7 @@ export interface components {
         };
         InviteDetails: {
             school: string;
-            name: string;
+            name?: string;
             emailMasked: string;
             needsPassword: boolean;
         };

@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { KEEP_SIGNED_IN_DAYS, sessionExpiry } from '@quad/domain';
+import { KEEP_SIGNED_IN_DAYS, nextSignInStep, sessionExpiry, strictestTwoStep } from '@quad/domain';
 
 import { AuditService } from '../../common/audit/audit.service';
 import { formatMessage } from '../../common/delivery/templates/render';
@@ -39,6 +39,12 @@ export interface SessionCookies {
   readonly maxAgeSeconds?: number;
 }
 
+/** Where `activate` left the session: open in the school, or at two-step set-up first (I2). */
+export interface Activation {
+  readonly next: 'done' | 'two_step_setup';
+  readonly cookies: SessionCookies;
+}
+
 /** The live session a step continues: its id and the hash its cookie still has. */
 export interface StepSession {
   readonly id: string;
@@ -59,6 +65,11 @@ export interface SignInState {
   readonly method?: SignInMethod;
   /** The two-step code (or a new authenticator) was just checked. */
   readonly twoStepDone: boolean;
+  /**
+   * A staff invite link's token from the invite page (fix round 1, I4): a hint that is inspected,
+   * never used up. A valid invitation of this account counts as a pending school.
+   */
+  readonly invite?: string;
   /** The request carried a valid trusted-device cookie of this account. */
   readonly trustedByCookie: boolean;
   readonly client: SignInClient;
@@ -111,7 +122,24 @@ export class SignInSessions {
     state: SignInState,
     membership: AuthMembership,
     options: { readonly switching: boolean },
-  ): Promise<SessionCookies> {
+  ): Promise<Activation> {
+    // Every way into a school re-checks two-step against the schools as they are now (fix round
+    // 1, I2): a school accepted mid-session, or a rule turned on since the password step, may ask
+    // for an authenticator this account does not have yet. The session then goes to set-up.
+    const [rules, credentials] = await Promise.all([
+      this.db.definers.authSignInRules(state.accountId),
+      this.repository.credentials(state.accountId),
+    ]);
+    const step = nextSignInStep({
+      totpEnabled: credentials.totpEnabled,
+      twoStepRequired: strictestTwoStep(rules).required,
+      // This session has already passed its code (or a trusted device), if it needed one.
+      trustedDevice: true,
+      membershipCount: 1,
+    });
+    if (step === 'two_step_setup') {
+      return { next: step, cookies: await this.atStep(state, 'two_step_setup') };
+    }
     const place: SessionPlace = {
       stage: 'active',
       tenantId: membership.tenantId,
@@ -164,9 +192,10 @@ export class SignInSessions {
     if (!options.switching && !state.trustedByCookie) {
       await this.queueNewDeviceEmail(state, written.value);
     }
-    return written.keepSignedIn
+    const cookies = written.keepSignedIn
       ? { ...written.cookies, maxAgeSeconds: KEEP_SIGNED_IN_DAYS * DAY_SECONDS }
       : written.cookies;
+    return { next: 'done', cookies };
   }
 
   /**

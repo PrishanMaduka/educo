@@ -79,12 +79,17 @@ export class NotFoundError extends AppError {
 
 export type ForbiddenCode = Extract<
   ErrorCode,
-  'forbidden' | 'module_not_in_plan' | 'school_suspended' | 'preview_read_only'
+  | 'forbidden'
+  | 'module_not_in_plan'
+  | 'school_suspended'
+  | 'preview_read_only'
+  | 'two_step_required'
 >;
 
 /**
  * 403: signed in, but not allowed (spec 06: `forbidden`, `module_not_in_plan`,
- * `school_suspended`; and `preview_read_only` for a write while previewing a role).
+ * `school_suspended`; `preview_read_only` for a write while previewing a role; and
+ * `two_step_required` when the school chosen needs two-step first, Task 13 fix round 1).
  */
 export class ForbiddenError extends AppError {
   constructor(code: ForbiddenCode = 'forbidden', message: string = DEFAULT_MESSAGES.forbidden) {
