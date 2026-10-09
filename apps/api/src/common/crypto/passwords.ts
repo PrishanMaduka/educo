@@ -1,7 +1,5 @@
 import { hash, verify } from '@node-rs/argon2';
-
-/** Argon2id parameters (spec 05; D32): OWASP's 19 MiB, two passes, one lane. */
-export const ARGON2ID_PARAMETERS = { memoryCost: 19456, timeCost: 2, parallelism: 1 } as const;
+import { ARGON2ID_PARAMETERS } from '@quad/contracts';
 
 /**
  * The package's default algorithm is Argon2id. It is left implicit because `Algorithm` is an

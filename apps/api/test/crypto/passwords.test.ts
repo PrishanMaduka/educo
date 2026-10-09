@@ -1,6 +1,7 @@
+import { ARGON2ID_PARAMETERS } from '@quad/contracts';
 import { describe, expect, it } from 'vitest';
 
-import { ARGON2ID_PARAMETERS, PasswordHasher } from '../../src/common/crypto/passwords';
+import { PasswordHasher } from '../../src/common/crypto/passwords';
 
 const PASSWORD = 'correct horse battery staple';
 

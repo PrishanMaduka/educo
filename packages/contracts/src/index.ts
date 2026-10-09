@@ -12,6 +12,7 @@ export * from './auth/sign-in';
 export * from './auth/totp';
 export * from './auth/otp';
 export * from './auth/tokens';
+export * from './auth/passwords';
 export * from './audit/actions';
 export * from './audit/log';
 export * from './me/greeting';

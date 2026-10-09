@@ -44,7 +44,14 @@ export {
   tenantRlsSql,
 } from './rls';
 export * from './schema';
-export { SEED_TENANTS } from './seed-data';
+export type { SeedMembership, SeedPerson, SeedSchool } from './seed-data';
+export {
+  SEED_PEOPLE,
+  SEED_PLATFORM_USERS,
+  SEED_SCHOOL_ACCESS,
+  SEED_SYSTEM_ROLES,
+  SEED_TENANTS,
+} from './seed-data';
 export type { TenantRunner, TenantTx } from './tenant';
 export { InvalidTenantIdError } from './tenant';
 export { uuidv7 } from './uuid';

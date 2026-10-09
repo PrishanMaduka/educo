@@ -10,7 +10,7 @@ export type {
   RoleCredentials,
 } from './bootstrap';
 export { bootstrapRoles } from './bootstrap';
-export type { DatabaseUrls } from './env';
-export { databaseUrls, seedPasswordRefusal, withDatabaseName } from './env';
+export type { DatabaseUrls, SeedSecrets } from './env';
+export { databaseUrls, seedPasswordRefusal, seedSecrets, withDatabaseName } from './env';
 export { MIGRATIONS_FOLDER, runMigrations } from './migrate';
 export { seedDatabase } from './seed';

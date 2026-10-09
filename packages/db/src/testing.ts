@@ -5,6 +5,8 @@ import pg from 'pg';
 import { databaseUrls, withDatabaseName } from './env';
 import { runMigrations } from './migrate';
 
+export { seedDatabase } from './seed';
+
 /**
  * Test-only database helpers (`@quad/db/testing`). ESLint (`quad/no-raw-db-client`) allows this
  * entry only in test folders and inside packages/db: it hands out raw pools for every role.
