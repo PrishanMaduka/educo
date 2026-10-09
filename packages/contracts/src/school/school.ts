@@ -111,8 +111,16 @@ export const School = z.object({
   /** Read-only: "Managed by Quad". */
   signIn: SchoolSignInRules,
   summary: SettingsSummary,
-  /** The version to send back as `If-Match` with a change (also the `ETag` header). */
-  etag: z.string(),
+  /**
+   * The version to send back as `If-Match` with a change (also the `ETag` header). Clients send
+   * this body value, never the header: a proxy may weaken the header to `W/"…"`, which the strong
+   * comparison refuses (D32).
+   */
+  etag: z
+    .string()
+    .describe(
+      'The version to send back as If-Match with a change. Send this value from the body, not the ETag header: a proxy may weaken the header (W/), and a weak tag is refused.',
+    ),
 });
 export type School = z.infer<typeof School>;
 
@@ -179,9 +187,18 @@ export const SchoolUpdateInput = z
   .refine((input) => Object.keys(input).length > 0, { message: 'Change at least one thing' });
 export type SchoolUpdateInput = z.infer<typeof SchoolUpdateInput>;
 
-/** `If-Match` on `PATCH /school`: the `etag` last read. */
+/**
+ * `If-Match` on `PATCH /school`: the body's `etag` from the last read, sent as it is. Not the
+ * `ETag` response header, which a proxy may have weakened (D32).
+ */
 export const IfMatchHeaders = z.object({
-  'if-match': z.string().min(1).max(200),
+  'if-match': z
+    .string()
+    .min(1)
+    .max(200)
+    .describe(
+      'The `etag` value from the last response body, sent as it is. Do not copy the ETag header: a proxy may weaken it (W/), and a weak tag is refused with 409.',
+    ),
 });
 export type IfMatchHeaders = z.infer<typeof IfMatchHeaders>;
 

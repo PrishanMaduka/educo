@@ -2889,7 +2889,8 @@
             ]
           },
           "etag": {
-            "type": "string"
+            "type": "string",
+            "description": "The version to send back as If-Match with a change. Send this value from the body, not the ETag header: a proxy may weaken the header (W/), and a weak tag is refused."
           }
         },
         "required": [
@@ -5707,9 +5708,11 @@
             "schema": {
               "type": "string",
               "minLength": 1,
-              "maxLength": 200
+              "maxLength": 200,
+              "description": "The `etag` value from the last response body, sent as it is. Do not copy the ETag header: a proxy may weaken it (W/), and a weak tag is refused with 409."
             },
             "required": true,
+            "description": "The `etag` value from the last response body, sent as it is. Do not copy the ETag header: a proxy may weaken it (W/), and a weak tag is refused with 409.",
             "name": "if-match",
             "in": "header"
           }

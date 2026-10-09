@@ -2830,6 +2830,7 @@ export interface paths {
             parameters: {
                 query?: never;
                 header: {
+                    /** @description The `etag` value from the last response body, sent as it is. Do not copy the ETag header: a proxy may weaken it (W/), and a weak tag is refused with 409. */
                     "if-match": string;
                 };
                 path?: never;
@@ -3722,6 +3723,7 @@ export interface components {
                     senderId: string;
                 })[];
             };
+            /** @description The version to send back as If-Match with a change. Send this value from the body, not the ETag header: a proxy may weaken the header (W/), and a weak tag is refused. */
             etag: string;
         };
         SchoolUpdateInput: {
