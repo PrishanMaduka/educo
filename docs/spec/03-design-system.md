@@ -177,7 +177,7 @@ A school picks one colour in the console (Branding). Inside its staff portal, an
 ## Page patterns
 
 ### Staff and console shell
-- **Side bar:** Quad navy (`rail`) for every school, 248 px (collapsible to 72 px). It has the school logo or initials tile and name at the top ("Staff portal · powered by Quad"); the console shows the Quad logo with a lime "CONSOLE" badge. Grouped nav has uppercase `rail-ink-2` group labels and pill-shaped items with count badges. The active item is a `rail-active` pill with `rail-active-ink` text. The signed-in user and sign-out sit at the bottom above a `rail-line` divider. On phones it becomes a slide-over menu.
+- **Side bar:** Quad navy (`rail`) for every school, 248 px (collapsible to 72 px). It has the school logo or initials tile and name at the top ("Staff portal · powered by Quad"); the console shows the Quad logo with a lime "CONSOLE" badge. Grouped nav has uppercase `rail-ink-2` group labels and pill-shaped items with count badges. The active item is a `rail-active` pill with `rail-active-ink` text. Every item has an icon badge ([Side bar icons](#side-bar-icons)). The signed-in user and sign-out sit at the bottom above a `rail-line` divider. On phones it becomes a slide-over menu.
 - **Top bar:** sticky and translucent cream (`canvas` at 86% with a blur) with a `line` bottom border. It holds the collapse button, search (a pill on `surface-2` with a Ctrl K hint), the **Ask Quad** pill (`navy-card`, cream text, a lime spark and a `/` hint), the academic year picker (staff), the theme toggle, notifications (a pink dot for new) and the profile menu.
 - **Content:** max width 1480 px, 24 px padding (16 px on phones), 20 px gaps.
 
@@ -282,7 +282,29 @@ A `surface` bar with rounded top corners. The active tab is a 54 × 30 `brand-fi
 
 ## Icons
 
-A single stroke icon set (Lucide), stroke width 1.9, round caps and joins. Icons are decorative and `aria-hidden` unless they are the only content of a button, which then needs an `aria-label`.
+A single stroke icon set (Lucide), stroke width 1.9, round caps and joins, for every icon except the side bar's. Icons are decorative and `aria-hidden` unless they are the only content of a button, which then needs an `aria-label`.
+
+### Side bar icons
+
+The staff portal and console side bars use **soft badges** ([D40](02-architecture.md#decision-log)). The drawings live in one shared set, `design/system/nav-icons.js` (`QuadNavIcons.svg(name, size)` and `QuadNavIcons.badge(name, colour)`), which the web apps port to `packages/ui`.
+
+- **Drawings:** one per item, so no two items in a side bar share an icon. 2 px round-capped and round-joined lines on a 24 px grid, no fills, drawn at 19 px.
+- **Badge:** each icon sits in a 32 px circle, `rail-2` with a 1 px inset `rail-line` ring. The icon is drawn in its **section colour**. Rows are 38 px tall with the badge 4 px from the pill's left edge and a 10 px gap to the label.
+- **Section colours** (`nav-*` tokens, the same in both themes): Quad's palette, never the school colour, so the school-colour active pill still stands out. Each is 5.4:1 or more against `rail-2` and against navy in both themes, so none needs lifting.
+
+| Token | Value | Staff portal | Console |
+|---|---|---|---|
+| `nav-lime` | `lime` `#C8F169` | Overview, Finance | Overview |
+| `nav-orange` | `orange` `#FF9B45` | Pre-admission, Transport | Plans & billing, Leads |
+| `nav-pink` | `pink` `#FF6FAE` | Relationships | Early warning, Parent app |
+| `nav-sky` | `sky` `#59C3FF` | Student information | Schools, School admin app, Support tickets |
+| `nav-violet` | `#8C93FF` | Learning | Curricula, Platform users |
+| `nav-mist` | `on-navy-2` `#C9CBE0` | Settings | Audit log, System |
+
+- **Which drawing:** Dashboard `home`, My teaching `teach`, Admissions pipeline `funnel`, CRM & leads `target`, Communications `chat`, Family connection `family`, Evenings & forms `clip`, Students `cap`, Early warning `alert`, Attendance `register`, Pastoral care `care`, Courses & gradebook `book`, Timetable `grid`, Teachers & classes `board`, Staff cover `swap`, Exams `exam`, Reports `chart`, Fees & invoicing `card`, Accounting `calc`, Routes `bus`, Pickup `pickup`, Academic year `year`, Users & roles `shield`, School settings `sliders`. Console: Overview `tiles`, Early warning `alert`, Schools `school`, Leads `tray`, Curricula `books`, Plans & billing `receipt`, Audit log `audit`, Platform users `team`, Support tickets `lifebuoy`, System `server`, School admin app `screen`, Parent app `phone`. Help uses `help`. The footer's Sign out and Switch school buttons use `signout` and `switch`, bare in `rail-ink`, not in a badge.
+- **Selected item:** it keeps the `rail-active` pill. Its badge turns `navy` with no ring, and the icon stays in its section colour (6.5:1 or more on navy). For a light school colour `navy` is also `rail-active-ink`; a deep colour (Greenfield green, maroon) takes white `rail-active-ink`, and the badge still stays navy.
+- **Pinned schools** in the console keep their school-initial tiles (22 px), centred in the same 32 px slot.
+- **Collapsed** (72 px staff, 76 px console): only the badges show, centred, with the same row and group spacing; the active pill wraps the badge. Every item keeps its `title` tooltip, which is also its accessible name while the label is hidden. On phones the side bar is the full slide-over menu, as before.
 
 ## Motion
 

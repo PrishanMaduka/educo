@@ -27,7 +27,7 @@ Academics (timetable, staffing, cover, LMS, exams, reports, academic year, My te
 
 Items are hidden when the user lacks permission or the module is not in the plan. On phones the side bar is a slide-over opened with the menu button.
 
-The side bar is Quad navy for every school, with the school's logo (or initials tile) and name at the top. The school's colour marks only the active item (`rail-active`) and the portal's actions ([03](03-design-system.md#staff-and-console-shell)).
+The side bar is Quad navy for every school, with the school's logo (or initials tile) and name at the top. The school's colour marks only the active item (`rail-active`) and the portal's actions ([03](03-design-system.md#staff-and-console-shell)). Each item has its own icon in a navy badge, drawn in its group's section colour from Quad's palette (Overview lime, Pre-admission orange, Relationships pink, Student information sky, Learning violet, Finance lime, Transport orange, Settings mist; [03](03-design-system.md#side-bar-icons), D40).
 
 Top bar: search (Ctrl K, see [15](15-cross-cutting.md#search)), Ask Quad (`/`), academic year picker (switching shows that year read-only unless it is the current year), theme, notifications panel, profile (with **Help**, which opens a support-ticket drawer).
 
