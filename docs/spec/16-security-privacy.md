@@ -21,7 +21,7 @@ Quad holds children's data, so every design choice errs on the side of least acc
 | A staff member sees safeguarding records without the right | Sensitive key guard, view logging, and support view always blocked |
 | Account takeover | Argon2id, breached-password check, lockout, TOTP (required for admins by default), session revocation, new-device email |
 | Parent OTP abuse (SMS pumping) | Per-number and per-IP limits, country allowlist per school, captcha after 3 attempts, WAF rate rules on `/api/v1/auth/*`, a daily SMS spend cap per school and globally with alerts at 80% (OTP sending pauses for non-allowlisted countries when the global cap is hit), spend alerts |
-| Store-review or demo backdoor reused | The fixed-OTP review number (`STORE_REVIEW_PHONE`) works only for its own number and only reaches the App Review demo school with fictional data; `DEV_FIXED_OTP` and `CONSOLE_PASSWORD_LOGIN` are refused at boot in production |
+| Store-review or demo backdoor reused | The fixed-OTP review number (`STORE_REVIEW_PHONE`) works only for its own number and only reaches the App Review demo school with fictional data; `DEV_FIXED_OTP` is refused at boot in production |
 | Demo form or enquiry form spam | Turnstile captcha, 5 requests per hour per IP, honeypot field, WAF rules ([19](19-public-site.md#demo-requests)) |
 | Payment tampering | The server computes amounts; signed gateway webhooks; idempotency keys; the client cannot mark paid |
 | Prompt injection through records | Tool results are treated as data; read-only tools; actions only after a human presses a button |
