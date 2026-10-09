@@ -81,3 +81,15 @@ export type {
   StaffChangeRefusal,
 } from './access/staff-changes';
 export { staffActionRefusal, staffChangeRefusal, statusAfterChange } from './access/staff-changes';
+export { compactPhone } from './auth/phone-e164';
+export type { SummaryProfile, SummarySettings } from './settings/settings-summary';
+export { settingsSummary } from './settings/settings-summary';
+export { parseOfficePhone } from './settings/office-phone';
+export type {
+  SchoolProfileChanges,
+  SchoolProfileField,
+  SchoolProfileInput,
+  SchoolProfilePlan,
+  SchoolProfileValues,
+} from './settings/school-profile-change';
+export { planSchoolProfileChange } from './settings/school-profile-change';

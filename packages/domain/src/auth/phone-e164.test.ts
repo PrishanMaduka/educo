@@ -3,9 +3,15 @@ import { describe, expect, it } from 'vitest';
 import { PHONE_COUNTRIES, parseInternationalPhone, parsePhone } from './phone-e164';
 
 describe('PHONE_COUNTRIES (OQ12, D35: Sri Lankan mobiles only for now)', () => {
-  it('lists only Sri Lanka: +94, mobiles 7 and 8 more digits', () => {
+  it('lists only Sri Lanka: +94, mobiles 7 and 8 more digits, any number 9 digits not from 0', () => {
     expect(PHONE_COUNTRIES).toEqual([
-      { country: 'LK', dialCode: '94', nationalDigits: 9, mobilePattern: '7\\d{8}' },
+      {
+        country: 'LK',
+        dialCode: '94',
+        nationalDigits: 9,
+        mobilePattern: '7\\d{8}',
+        numberPattern: '[1-9]\\d{8}',
+      },
     ]);
   });
 });
