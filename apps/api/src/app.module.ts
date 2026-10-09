@@ -14,6 +14,7 @@ import { MeModule } from './modules/me/me.module';
 import { UsersModule } from './modules/users/users.module';
 import { OpenApiController } from './openapi/openapi.controller';
 import { PlatformModule } from './platform/platform.module';
+import { EnquiryModule } from './public/enquiry/enquiry.module';
 import { RealtimeModule } from './realtime/realtime.module';
 import { RedisModule } from './redis/redis.module';
 import { SesWebhookModule } from './webhooks/ses/ses-webhook.module';
@@ -76,6 +77,7 @@ export class AppModule {
         AuthModule.register(overrides.passwordResets, overrides.otpSends),
         MeModule,
         UsersModule,
+        EnquiryModule,
         ...(overrides.testModules ?? []),
       ],
       controllers: [OpenApiController],

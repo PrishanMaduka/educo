@@ -18,6 +18,7 @@ export * from './me/me';
 export * from './me/permissions';
 export * from './seed';
 export * from './public/demo-request';
+export * from './public/enquiry';
 export { buildArb } from './i18n/build';
 export * from './web-env';
 export * from './webhooks/ses';

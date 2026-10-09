@@ -77,7 +77,15 @@ describe('platformLeaks (codegen check)', () => {
 
 describe('every tag is classified (fix round 2: an allow-list, not a filter)', () => {
   it('names the tags kept out of the parent client', () => {
-    expect(EXCLUDED_TAGS).toEqual(['platform', 'webhooks', 'meta', 'staff', 'users', 'roles']);
+    expect(EXCLUDED_TAGS).toEqual([
+      'platform',
+      'webhooks',
+      'meta',
+      'staff',
+      'users',
+      'roles',
+      'public',
+    ]);
   });
 
   it('drops a /me route also tagged staff (staff portal only, Task 12)', () => {

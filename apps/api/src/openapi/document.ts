@@ -7,6 +7,7 @@ import { rolesRoutes } from '../modules/roles/roles.routes';
 import { usersRoutes } from '../modules/users/users.routes';
 import { platformAuthRoutes } from '../platform/auth/platform-auth.routes';
 import { authRoutes } from '../public/auth/auth.routes';
+import { enquiryRoutes } from '../public/enquiry/enquiry.routes';
 import { sesWebhookRoutes } from '../webhooks/ses/ses-webhook.routes';
 
 import { openApiRoutes } from './openapi.routes';
@@ -29,6 +30,7 @@ export const API_ROUTES: readonly ApiRoute[] = [
   ...platformAuthRoutes,
   ...usersRoutes,
   ...rolesRoutes,
+  ...enquiryRoutes,
 ];
 
 export type OpenApiDocument = ReturnType<OpenApiGeneratorV31['generateDocument']>;

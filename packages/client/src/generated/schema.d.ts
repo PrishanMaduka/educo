@@ -2774,6 +2774,73 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/public/enquiry/{embedKey}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** An admissions enquiry from a school’s public form, found by its embed key (20 a minute per address; every key is unknown until M4) */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    embedKey: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["EnquiryInput"];
+                };
+            };
+            responses: {
+                /** @description The enquiry was received */
+                202: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -3379,6 +3446,14 @@ export interface components {
                 };
             };
             sensitive: ("safeguarding" | "medical" | "finance_reports" | "export_data")[];
+        };
+        EnquiryInput: {
+            parentName: string;
+            /** Format: email */
+            email: string;
+            phone?: string;
+            childName?: string;
+            message?: string;
         };
     };
     responses: never;
