@@ -17,10 +17,13 @@ export const SUPPORT_REASON_MIN = 10;
 export const SUPPORT_REASON_MAX = 500;
 
 /**
- * Any control character but the line feed (Unicode `Cc`: C0, DEL and C1). The reason is shown in
- * the console and written to `platform_audit`, so it keeps line breaks and nothing else unseen.
+ * Any control character but the line feed (Unicode `Cc`: C0, DEL and C1), and any invisible
+ * format character (`Cf`: bidi overrides and isolates such as U+202E, zero-width spaces, the byte
+ * order mark, soft hyphens) but the zero-width joiner and non-joiner, which Sinhala and Tamil
+ * spelling needs. The reason is shown in the console and written to `platform_audit`, so it
+ * keeps line breaks and nothing else unseen, and cannot display reordered text.
  */
-const CONTROL_EXCEPT_LINE_FEED = /[^\P{Cc}\n]/u;
+const HIDDEN_CHARACTER = /[^\P{Cc}\n]|[^\P{Cf}\u200c\u200d]/u;
 
 /** `:id` of `/platform/tenants/:id/…`: a school's id. */
 export const TenantIdParams = z.object({ id: IdSchema });
@@ -38,7 +41,7 @@ export const SupportSessionCreateInput = z
       .max(SUPPORT_REASON_MAX, {
         message: `Keep the reason to ${SUPPORT_REASON_MAX} characters or fewer.`,
       })
-      .refine((reason) => !CONTROL_EXCEPT_LINE_FEED.test(reason), {
+      .refine((reason) => !HIDDEN_CHARACTER.test(reason), {
         message: 'Write the reason as plain text; line breaks are fine.',
       }),
   })

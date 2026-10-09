@@ -54,6 +54,25 @@ describe('SupportSessionCreateInput (POST /platform/tenants/:id/support-session)
     },
   );
 
+  it.each([
+    ['U+202E right-to-left override', '\u202e'],
+    ['U+2066 left-to-right isolate', '\u2066'],
+    ['U+200B zero-width space', '\u200b'],
+    ['U+2060 word joiner', '\u2060'],
+    ['U+FEFF byte order mark', '\ufeff'],
+    ['U+00AD soft hyphen', '\u00ad'],
+  ])('refuses the invisible format character %s inside the reason', (_name, format) => {
+    const result = SupportSessionCreateInput.safeParse({ reason: `A good${format}reason here` });
+    expect(pathOf(result)).toEqual(['reason']);
+  });
+
+  it('keeps the zero-width joiner and non-joiner that Sinhala and Tamil words need', () => {
+    // "ශ්‍රී ලංකාව" (Sri Lanka) spells its rakaransaya with U+200D.
+    const reason =
+      'Help for \u0dc1\u0dca\u200d\u0dbb\u0dd3 \u0dbd\u0d82\u0d9a\u0dcf\u0dc0 and a\u200cb';
+    expect(SupportSessionCreateInput.parse({ reason }).reason).toBe(reason);
+  });
+
   it('answers with the single-use link into the staff portal', () => {
     expect(SupportSessionLink.parse({ url: 'https://quad-edu.com/sign-in/support/a.b' })).toEqual({
       url: 'https://quad-edu.com/sign-in/support/a.b',
