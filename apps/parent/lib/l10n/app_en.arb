@@ -92,6 +92,7 @@
   "errorUsersNotInvited": "Only a pending invitation can be sent again.",
   "errorUsersNoEmail": "We don’t have an email address for them.",
   "errorUsersSensitiveNotHeld": "You can’t give access to sensitive data you don’t have yourself.",
+  "errorSchoolOfficePhoneInvalid": "Enter a phone number in the school’s country, or the full number starting with +.",
   "errorRolesSystemLocked": "Built-in roles can’t be changed or deleted, so the school can’t lock itself out.",
   "errorRolesInUse": "Someone still has this role, or an admin is previewing it. Give them another role first.",
   "errorRolesOwnLocked": "You can’t change a role you have yourself. Ask another admin.",

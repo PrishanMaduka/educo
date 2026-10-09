@@ -28,6 +28,8 @@ export interface ApiRoute {
   readonly request?: {
     readonly params?: z.AnyZodObject;
     readonly query?: z.AnyZodObject;
+    /** Request headers the route reads (`If-Match`), so the generated clients send them. */
+    readonly headers?: z.AnyZodObject;
     readonly body?: z.ZodTypeAny;
   };
   /** Success (and expected non-error) responses by status; omit `schema` for an empty body. */
@@ -73,7 +75,7 @@ function toRouteConfig(route: ApiRoute): RouteConfig {
   for (const status of route.errors ?? []) {
     responses[String(status)] = { description: 'Error', content: json(ErrorBody) };
   }
-  const { params, query, body } = route.request ?? {};
+  const { params, query, headers, body } = route.request ?? {};
   return {
     method: route.method,
     path: `${API_PREFIX}${route.path}`,
@@ -82,6 +84,7 @@ function toRouteConfig(route: ApiRoute): RouteConfig {
     request: {
       ...(params ? { params } : {}),
       ...(query ? { query } : {}),
+      ...(headers ? { headers } : {}),
       ...(body ? { body: { content: json(body), required: true } } : {}),
     },
     responses,

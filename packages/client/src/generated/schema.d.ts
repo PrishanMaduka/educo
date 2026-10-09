@@ -2774,6 +2774,230 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/school": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** School settings → General, with the read-only time zone, branding and sign-in rules (managed by Quad), the summary and the etag (settings.view) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description The school */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["School"];
+                    };
+                };
+                /** @description Error */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Change General (name, office email and phone, address, SMS sender ID); Quad’s fields are refused with 400, a stale If-Match with 409 (settings.edit; needs X-CSRF-Token) */
+        patch: {
+            parameters: {
+                query?: never;
+                header: {
+                    "if-match": string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["SchoolUpdateInput"];
+                };
+            };
+            responses: {
+                /** @description The school */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["School"];
+                    };
+                };
+                /** @description Error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
+    "/api/v1/school/branding": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The school’s colour and logo, set by Quad (any signed-in member) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description The branding */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SchoolBranding"];
+                    };
+                };
+                /** @description Error */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The school’s other settings, read-only for now (settings.view) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description The settings */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SchoolSettings"];
+                    };
+                };
+                /** @description Error */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/public/enquiry/{embedKey}": {
         parameters: {
             query?: never;
@@ -3449,6 +3673,88 @@ export interface components {
                 };
             };
             sensitive: ("safeguarding" | "medical" | "finance_reports" | "export_data")[];
+        };
+        School: {
+            name: string;
+            shortName: string;
+            officeEmail: string | null;
+            officePhone: string | null;
+            address: string | null;
+            timeZone: string;
+            smsSenderId: string | null;
+            /** @enum {string|null} */
+            smsSenderStatus: "requested" | "approved" | null;
+            branding: {
+                color: string;
+                /** Format: uri */
+                logoUrl: string | null;
+            };
+            signIn: {
+                /** @enum {string} */
+                twoStep: "off" | "admins" | "staff" | "all";
+                passwordMinLength: number;
+                sessionHours: number;
+                ipAllowlist: string[];
+            };
+            summary: {
+                parts: ({
+                    /** @enum {string} */
+                    code: "ask_quad_on";
+                } | {
+                    /** @enum {string} */
+                    code: "ask_quad_off";
+                } | {
+                    /** @enum {string} */
+                    code: "quiet_hours";
+                    from: string;
+                    until: string;
+                    weekends: boolean;
+                } | {
+                    /** @enum {string} */
+                    code: "quiet_hours_off";
+                })[];
+                needs: ({
+                    /** @enum {string} */
+                    code: "add_office_email";
+                } | {
+                    /** @enum {string} */
+                    code: "sms_sender_pending";
+                    senderId: string;
+                })[];
+            };
+            etag: string;
+        };
+        SchoolUpdateInput: {
+            name?: string;
+            /** Format: email */
+            officeEmail?: string | null;
+            officePhone?: string | null;
+            address?: string | null;
+            smsSenderId?: string | null;
+        };
+        SchoolBranding: {
+            color: string;
+            /** Format: uri */
+            logoUrl: string | null;
+        };
+        SchoolSettings: {
+            askQuadEnabled: boolean;
+            askQuadKeepConversations: boolean;
+            /** @enum {string} */
+            ewShareWithParents: "off" | "after_plan" | "automatic";
+            /** @enum {string} */
+            absenceAlert: "at_time" | "immediately";
+            absenceAlertTime: string;
+            reminderDays: number[];
+            /** @enum {string} */
+            photoConsentDefault: "class" | "family" | "none";
+            familyCircleEnabled: boolean;
+            quietHoursEnabled: boolean;
+            quietFrom: string;
+            quietUntil: string;
+            quietWeekends: boolean;
+            /** Format: date-time */
+            updatedAt: string;
         };
         EnquiryInput: {
             parentName: string;

@@ -173,3 +173,13 @@ export class UnavailableError extends AppError {
     super('unavailable', formatMessage('error.signInUnavailable'), 503);
   }
 }
+
+/**
+ * 409 for a change sent with an `If-Match` that is not the record's current version (spec 06
+ * Concurrency). The filter sends the current version as the `ETag` header.
+ */
+export class StaleVersionError extends ConflictError {
+  constructor(readonly etag: string) {
+    super('conflict');
+  }
+}

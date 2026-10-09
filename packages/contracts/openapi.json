@@ -2663,6 +2663,392 @@
         ],
         "additionalProperties": false
       },
+      "School": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "shortName": {
+            "type": "string"
+          },
+          "officeEmail": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "officePhone": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "address": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "timeZone": {
+            "type": "string"
+          },
+          "smsSenderId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "smsSenderStatus": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "requested",
+              "approved"
+            ]
+          },
+          "branding": {
+            "type": "object",
+            "properties": {
+              "color": {
+                "type": "string",
+                "pattern": "^#[0-9A-Fa-f]{6}$"
+              },
+              "logoUrl": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "uri"
+              }
+            },
+            "required": [
+              "color",
+              "logoUrl"
+            ]
+          },
+          "signIn": {
+            "type": "object",
+            "properties": {
+              "twoStep": {
+                "type": "string",
+                "enum": [
+                  "off",
+                  "admins",
+                  "staff",
+                  "all"
+                ]
+              },
+              "passwordMinLength": {
+                "type": "integer",
+                "minimum": 10
+              },
+              "sessionHours": {
+                "type": "integer",
+                "exclusiveMinimum": 0
+              },
+              "ipAllowlist": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "twoStep",
+              "passwordMinLength",
+              "sessionHours",
+              "ipAllowlist"
+            ]
+          },
+          "summary": {
+            "type": "object",
+            "properties": {
+              "parts": {
+                "type": "array",
+                "items": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "ask_quad_on"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "code"
+                      ]
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "ask_quad_off"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "code"
+                      ]
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "quiet_hours"
+                          ]
+                        },
+                        "from": {
+                          "type": "string",
+                          "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+                        },
+                        "until": {
+                          "type": "string",
+                          "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+                        },
+                        "weekends": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "from",
+                        "until",
+                        "weekends"
+                      ]
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "quiet_hours_off"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "code"
+                      ]
+                    }
+                  ]
+                }
+              },
+              "needs": {
+                "type": "array",
+                "items": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "add_office_email"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "code"
+                      ]
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "sms_sender_pending"
+                          ]
+                        },
+                        "senderId": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "senderId"
+                      ]
+                    }
+                  ]
+                }
+              }
+            },
+            "required": [
+              "parts",
+              "needs"
+            ]
+          },
+          "etag": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "shortName",
+          "officeEmail",
+          "officePhone",
+          "address",
+          "timeZone",
+          "smsSenderId",
+          "smsSenderStatus",
+          "branding",
+          "signIn",
+          "summary",
+          "etag"
+        ]
+      },
+      "SchoolUpdateInput": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "officeEmail": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 254,
+            "format": "email"
+          },
+          "officePhone": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 1,
+            "maxLength": 32
+          },
+          "address": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "smsSenderId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^(?=.*[A-Za-z])[A-Za-z0-9]{3,11}$"
+          }
+        },
+        "additionalProperties": false
+      },
+      "SchoolBranding": {
+        "type": "object",
+        "properties": {
+          "color": {
+            "type": "string",
+            "pattern": "^#[0-9A-Fa-f]{6}$"
+          },
+          "logoUrl": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uri"
+          }
+        },
+        "required": [
+          "color",
+          "logoUrl"
+        ]
+      },
+      "SchoolSettings": {
+        "type": "object",
+        "properties": {
+          "askQuadEnabled": {
+            "type": "boolean"
+          },
+          "askQuadKeepConversations": {
+            "type": "boolean"
+          },
+          "ewShareWithParents": {
+            "type": "string",
+            "enum": [
+              "off",
+              "after_plan",
+              "automatic"
+            ]
+          },
+          "absenceAlert": {
+            "type": "string",
+            "enum": [
+              "at_time",
+              "immediately"
+            ]
+          },
+          "absenceAlertTime": {
+            "type": "string",
+            "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+          },
+          "reminderDays": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "photoConsentDefault": {
+            "type": "string",
+            "enum": [
+              "class",
+              "family",
+              "none"
+            ]
+          },
+          "familyCircleEnabled": {
+            "type": "boolean"
+          },
+          "quietHoursEnabled": {
+            "type": "boolean"
+          },
+          "quietFrom": {
+            "type": "string",
+            "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+          },
+          "quietUntil": {
+            "type": "string",
+            "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+          },
+          "quietWeekends": {
+            "type": "boolean"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "askQuadEnabled",
+          "askQuadKeepConversations",
+          "ewShareWithParents",
+          "absenceAlert",
+          "absenceAlertTime",
+          "reminderDays",
+          "photoConsentDefault",
+          "familyCircleEnabled",
+          "quietHoursEnabled",
+          "quietFrom",
+          "quietUntil",
+          "quietWeekends",
+          "updatedAt"
+        ]
+      },
       "EnquiryInput": {
         "type": "object",
         "properties": {
@@ -5258,6 +5644,210 @@
             }
           },
           "422": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/school": {
+      "get": {
+        "summary": "School settings → General, with the read-only time zone, branding and sign-in rules (managed by Quad), the summary and the etag (settings.view)",
+        "tags": [
+          "school",
+          "staff"
+        ],
+        "responses": {
+          "200": {
+            "description": "The school",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/School"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "summary": "Change General (name, office email and phone, address, SMS sender ID); Quad’s fields are refused with 400, a stale If-Match with 409 (settings.edit; needs X-CSRF-Token)",
+        "tags": [
+          "school",
+          "staff"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "required": true,
+            "name": "if-match",
+            "in": "header"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SchoolUpdateInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The school",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/School"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/school/branding": {
+      "get": {
+        "summary": "The school’s colour and logo, set by Quad (any signed-in member)",
+        "tags": [
+          "school",
+          "staff"
+        ],
+        "responses": {
+          "200": {
+            "description": "The branding",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SchoolBranding"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/settings": {
+      "get": {
+        "summary": "The school’s other settings, read-only for now (settings.view)",
+        "tags": [
+          "school",
+          "staff"
+        ],
+        "responses": {
+          "200": {
+            "description": "The settings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SchoolSettings"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "403": {
             "description": "Error",
             "content": {
               "application/json": {

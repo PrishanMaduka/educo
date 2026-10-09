@@ -4,6 +4,7 @@ import { version } from '../../package.json';
 import { healthRoutes } from '../health/health.routes';
 import { meRoutes } from '../modules/me/me.routes';
 import { rolesRoutes } from '../modules/roles/roles.routes';
+import { schoolRoutes } from '../modules/school/school.routes';
 import { usersRoutes } from '../modules/users/users.routes';
 import { platformAuthRoutes } from '../platform/auth/platform-auth.routes';
 import { authRoutes } from '../public/auth/auth.routes';
@@ -30,6 +31,7 @@ export const API_ROUTES: readonly ApiRoute[] = [
   ...platformAuthRoutes,
   ...usersRoutes,
   ...rolesRoutes,
+  ...schoolRoutes,
   ...enquiryRoutes,
 ];
 
