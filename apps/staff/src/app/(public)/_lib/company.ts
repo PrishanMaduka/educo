@@ -14,14 +14,14 @@ export const COMPANY = {
   /** The registered legal entity that contracts with schools. */
   legalName: 'Quad Education Pvt Limited (registration in progress)',
   registrationNumber: 'Company registration in progress',
-  registeredAddress: `Registered address ${TO_BE_CONFIRMED}, Sri Lanka`,
+  registeredAddress: 'Colombo, Sri Lanka',
   /** Where the company is based. */
   country: 'Sri Lanka',
   foundedYear: 'Founded in 2026',
   founder: {
     name: 'Prishan Maduka',
     role: 'Founder',
-    bio: `Biography ${TO_BE_CONFIRMED}.`,
+    bio: 'Prishan Maduka is a professional software architect and the founder of Quad.',
   },
   /** The law and courts named in the terms of service. */
   governingLaw: 'The laws of Sri Lanka',
