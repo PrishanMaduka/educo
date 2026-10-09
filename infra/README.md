@@ -637,12 +637,16 @@ role's version (or the Redis version) and apply again, then run db-bootstrap and
   call, for example
   `app_secret_versions = { SESSION_SECRET = 2, LINK_SIGNING_SECRET = 1, FIELD_ENCRYPTION_KEY = 1 }`),
   apply, then force a new deployment of `api` and `worker`. Everyone is signed out until the
-  two-value rotation of spec 20 arrives (M12).
+  two-value rotation of spec 20 arrives (M12). A new `SESSION_SECRET` also signs every parent out
+  of the app (their refresh tokens are keyed by it) and voids every sign-in code already sent
+  (D32, Task 9).
 - `FIELD_ENCRYPTION_KEY` is generated too, but must **not** be rotated before M12: a new key would
   leave every encrypted field (TOTP secrets) unreadable. The module refuses a version other than 1.
   M12's KMS adapter brings re-encryption and rotation (D32).
-- `JWT_PRIVATE_KEY` and `JWT_PUBLIC_KEY` are set by hand (step 8), always as a pair. A new pair
-  signs every parent out of the app until the two-key rotation of spec 20 arrives (M12).
+- `JWT_PRIVATE_KEY` and `JWT_PUBLIC_KEY` are set by hand (step 8), always as a pair. The API
+  accepts `JWT_PUBLIC_KEY_PREVIOUS` (the old public key) so access tokens signed before a new pair
+  keep working for their last 15 minutes; it is not wired into the task definition yet, so until
+  then a new pair makes every parent app refresh at once (their refresh tokens stay valid).
 - `SEED_PASSWORD` is set by hand (step 8); change it, then run the seed task again.
 - `SENTRY_DSN` and `OTEL_EXPORTER_OTLP_HEADERS` are set by hand (step 10) in the same JSON shape.
   After a change, force a new deployment of every service that reads them (`api`, `worker`,

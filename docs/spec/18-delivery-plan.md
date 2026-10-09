@@ -196,6 +196,7 @@ To run a milestone in Claude Code, type `/build-milestone M3` (ids with a letter
   - offline cache encrypted and wiped on sign-out and school switch; `GET /app/config` with force update; the full deep-link table on `quad://` and `https://quad-edu.com/p/…`.
 - Staff side: the Inbox (with reply templates, `message_templates`), Broadcasts (preview, SMS cost estimate, urgent flag), and the "Changes from parents" queue (contact changes now; pickup approvals join it in M11).
 - FCM push with deep links (`go_router`) and the in-app notification list. Realtime connection in all apps; the Flutter Socket.IO client uses `transports: ['websocket']` (ruling R-sticky, D28).
+- Before any real SMS provider is enabled (`SMS_PROVIDER=live`): the global and per-school daily SMS budget, with alerts at 80% and a circuit breaker that pauses sending when a cap is hit (spec 16, Parent OTP abuse). Sign-in codes are the first SMS that would spend it (Task 9 review).
 
 **Accept:**
 - Journeys 4 (push), 30, 31, 32 and 45.
