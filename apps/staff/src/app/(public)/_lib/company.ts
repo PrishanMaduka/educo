@@ -12,29 +12,29 @@ export const COMPANY = {
   /** The product and brand name. */
   brandName: 'Quad',
   /** The registered legal entity that contracts with schools. */
-  legalName: `Quad (company name ${TO_BE_CONFIRMED})`,
-  registrationNumber: `Registration number ${TO_BE_CONFIRMED}`,
-  registeredAddress: `Registered address ${TO_BE_CONFIRMED}`,
+  legalName: 'Quad Education Pvt Limited (registration in progress)',
+  registrationNumber: 'Company registration in progress',
+  registeredAddress: `Registered address ${TO_BE_CONFIRMED}, Sri Lanka`,
   /** Where the company is based. */
   country: 'Sri Lanka',
-  foundedYear: `Year founded ${TO_BE_CONFIRMED}`,
+  foundedYear: 'Founded in 2026',
   founder: {
     name: 'Prishan Maduka',
     role: 'Founder',
     bio: `Biography ${TO_BE_CONFIRMED}.`,
   },
   /** The law and courts named in the terms of service. */
-  governingLaw: `The laws of Sri Lanka (${TO_BE_CONFIRMED})`,
-  courts: `The courts of Sri Lanka (${TO_BE_CONFIRMED})`,
+  governingLaw: 'The laws of Sri Lanka',
+  courts: 'The courts of Sri Lanka',
   /** The cap on each side's liability in the terms of service. */
-  liabilityCap: `Liability cap ${TO_BE_CONFIRMED}`,
+  liabilityCap: 'the fees the school paid Quad in the 12 months before the claim',
   contact: {
     /** General questions, demos and support (spec 19 footer). */
     support: 'support@quad-edu.com',
     /** Privacy questions and requests (spec 19 legal pages). */
-    privacy: 'privacy@quad-edu.com',
+    privacy: 'support@quad-edu.com',
     /** Security reports (spec 20 mail). */
-    security: 'security@quad-edu.com',
+    security: 'support@quad-edu.com',
   },
 } as const;
 

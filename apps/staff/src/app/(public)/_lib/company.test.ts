@@ -32,16 +32,7 @@ const pageText = (index: number) =>
 
 describe('company facts (D41)', () => {
   it('lists the placeholders the owner still has to confirm', () => {
-    expect(unconfirmedFields()).toEqual([
-      'legalName',
-      'registrationNumber',
-      'registeredAddress',
-      'foundedYear',
-      'founder.bio',
-      'governingLaw',
-      'courts',
-      'liabilityCap',
-    ]);
+    expect(unconfirmedFields()).toEqual(['registeredAddress', 'founder.bio']);
     expect(COMPANY.founder.name).toBe('Prishan Maduka');
     expect(COMPANY.country).toBe('Sri Lanka');
   });

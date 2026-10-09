@@ -105,7 +105,7 @@ test.describe('public pages', () => {
       await expect(entry).toBeVisible();
     }
     await expect(
-      page.getByText('Email privacy@quad-edu.com to be told about changes'),
+      page.getByText('Email support@quad-edu.com to be told about changes'),
     ).toBeVisible();
   });
 
