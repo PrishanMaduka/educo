@@ -6,6 +6,7 @@ import {
   exists,
   ilike,
   inArray,
+  isNotNull,
   isNull,
   or,
   roles,
@@ -179,8 +180,10 @@ export class UsersRepository {
   }
 
   /**
-   * The memberships here of `accountIds`, by account: live ones (any kind or status) and removed
-   * ones (soft-deleted), which an invitation brings back as the same row (fix round 1, M5).
+   * The memberships here of `accountIds`, by account: live ones (any kind or status), and removed
+   * (soft-deleted) staff ones, which an invitation brings back as the same row (fix round 1, M5).
+   * A removed guardian or relative membership counts as live: it is never turned into staff
+   * (Task 13 review), and the school's one row per account leaves no room for a second.
    */
   async membershipsByAccount(
     tx: TenantTx,
@@ -190,12 +193,17 @@ export class UsersRepository {
     const removed = new Map<string, string>();
     if (accountIds.length === 0) return { live, removed };
     const rows = await tx
-      .select({ id: users.id, accountId: users.accountId, deletedAt: users.deletedAt })
+      .select({
+        id: users.id,
+        accountId: users.accountId,
+        kind: users.kind,
+        deletedAt: users.deletedAt,
+      })
       .from(users)
       .where(inArray(users.accountId, [...accountIds]));
     for (const row of rows) {
-      if (row.deletedAt === null) live.add(row.accountId);
-      else removed.set(row.accountId, row.id);
+      if (row.deletedAt !== null && row.kind === 'staff') removed.set(row.accountId, row.id);
+      else live.add(row.accountId);
     }
     return { live, removed };
   }
@@ -219,26 +227,33 @@ export class UsersRepository {
     return row.id;
   }
 
-  /** Brings a removed membership back as a new invitation holding `roleId`. */
+  /**
+   * Brings a removed staff membership back as a new invitation holding `roleId`, as if new: its
+   * last sign-in, language and theme go too (Task 13 review). Only a `staff` row is reinstated.
+   */
   async reinstateInvited(
     tx: TenantTx,
     tenantId: string,
     userId: string,
     member: InvitedMember,
   ): Promise<void> {
-    await tx
+    const reinstated = await tx
       .update(users)
       .set({
-        kind: 'staff',
         name: member.name,
         email: member.email,
         status: 'invited',
         inviteSentAt: member.at,
         inviteNonce: null,
         acceptedAt: null,
+        lastSignInAt: null,
+        locale: null,
+        theme: 'system',
         deletedAt: null,
       })
-      .where(eq(users.id, userId));
+      .where(and(eq(users.id, userId), eq(users.kind, 'staff'), isNotNull(users.deletedAt)))
+      .returning({ id: users.id });
+    if (reinstated.length === 0) throw new Error('Only a removed staff membership is reinstated.');
     await this.setRole(tx, tenantId, userId, member.roleId);
   }
 

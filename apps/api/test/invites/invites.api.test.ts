@@ -283,6 +283,49 @@ describe('POST /users/invite races and re-invites (fix round 1, M5)', () => {
     );
     expect(rows[0]?.deleted).toBe(false);
   });
+
+  it('brings a removed member back without their old sign-in, language or theme (Task 13 review)', async () => {
+    const { school, admin } = await arrange();
+    const existing = await insertPasswordAccount(db());
+    const removed = await insertMember(db(), school.id, existing.id);
+    await db().platform.query(
+      `update users set deleted_at = now(), last_sign_in_at = now(), locale = 'si-LK',
+                        theme = 'dark'
+       where id = $1`,
+      [removed],
+    );
+
+    await invite(admin, school, [existing.email]);
+
+    const { rows } = await db().platform.query<{
+      last_sign_in_at: Date | null;
+      locale: string | null;
+      theme: string;
+    }>('select last_sign_in_at, locale, theme from users where id = $1', [removed]);
+    expect(rows[0]).toEqual({ last_sign_in_at: null, locale: null, theme: 'system' });
+  });
+
+  it("never turns a removed guardian's membership into staff: 422 already_member", async () => {
+    const { school, admin } = await arrange();
+    const existing = await insertPasswordAccount(db());
+    const removed = await insertMember(db(), school.id, existing.id, { kind: 'guardian' });
+    await db().platform.query('update users set deleted_at = now() where id = $1', [removed]);
+
+    const response = await as(admin)('POST', '/users/invite', {
+      emails: [existing.email],
+      roleId: school.roles.teacher,
+    });
+
+    expect(response.statusCode).toBe(422);
+    const body = response.json<{ code: string; fields?: Record<string, string> }>();
+    expect(body.code).toBe('already_member');
+    expect(Object.keys(body.fields ?? {})).toEqual(['emails.0']);
+    const { rows } = await db().platform.query<{ kind: string; deleted: boolean }>(
+      'select kind, deleted_at is not null as deleted from users where id = $1',
+      [removed],
+    );
+    expect(rows[0]).toEqual({ kind: 'guardian', deleted: true });
+  });
 });
 
 describe('POST /users/:id/resend-invite', () => {
@@ -635,8 +678,15 @@ describe('signing in from the invite page (Task 13 fix round 1, I4: the token is
   async function invitedWithoutSchool(options: { readonly totp?: boolean } = {}) {
     const { school, admin } = await arrange();
     const account = await insertPasswordAccount(db(), options);
-    await invite(admin, school, [account.email]);
-    return { school, account, token: linkTokenOf(delivery, account.email, 'staff_invite') };
+    const [member] = (await invite(admin, school, [account.email])).items;
+    if (member === undefined) throw new Error('Nobody was invited.');
+    return {
+      school,
+      admin,
+      member,
+      account,
+      token: linkTokenOf(delivery, account.email, 'staff_invite'),
+    };
   }
 
   const signIn = (
@@ -698,6 +748,36 @@ describe('signing in from the invite page (Task 13 fix round 1, I4: the token is
     for (const hint of [tampered, other.token]) {
       expect((await signIn(new Browser(app), account, hint)).json()).toEqual({ next: 'no_school' });
     }
+  });
+
+  it('ignores the hint of an expired link, as if none was sent (Task 13 review)', async () => {
+    const { account, token } = await invitedWithoutSchool();
+    clock = NOW + 7 * DAY + MINUTE;
+    expect((await signIn(new Browser(app), account, token)).json()).toEqual({ next: 'no_school' });
+  });
+
+  it('ignores the hint of a link a resend retired, and takes the new one (Task 13 review)', async () => {
+    const { admin, member, account, token } = await invitedWithoutSchool();
+    clock = NOW + MINUTE;
+    expect((await as(admin)('POST', `/users/${member.id}/resend-invite`)).statusCode).toBe(202);
+    const renewed = linkTokenOf(delivery, account.email, 'staff_invite');
+
+    expect((await signIn(new Browser(app), account, token)).json()).toEqual({ next: 'no_school' });
+    expect((await signIn(new Browser(app), account, renewed)).json()).toEqual({
+      next: 'choose_school',
+    });
+  });
+
+  it('ignores the hint of an invitation that was deactivated (Task 13 review)', async () => {
+    const { admin, member, account, token } = await invitedWithoutSchool();
+    // Positive control: the same hint opens Choose a school before the deactivation.
+    expect((await signIn(new Browser(app), account, token)).json()).toEqual({
+      next: 'choose_school',
+    });
+    const deactivated = await as(admin)('PATCH', `/users/${member.id}`, { status: 'deactivated' });
+    expect(deactivated.statusCode).toBe(200);
+
+    expect((await signIn(new Browser(app), account, token)).json()).toEqual({ next: 'no_school' });
   });
 
   it('answers a wrong password with a hint exactly as without one (no enumeration)', async () => {
