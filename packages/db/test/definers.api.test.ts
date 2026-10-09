@@ -1052,6 +1052,23 @@ describe('member_has_other_memberships (Task 13 fix round 1, I3: did this invite
     expect(theirs).toBe(false);
   });
 
+  it("gives false for another school's member who does have other memberships (Task 13 review)", async () => {
+    // B's member also belongs to a third school, so their own answer is true: a false from A
+    // proves the lookup is held to A's members, not that the account has nothing else.
+    const third = await insertTenant(withPlatform);
+    const shared = await insertAccount(withAccount);
+    const inB = await insertUser(withTenant, schoolB.id, shared.id);
+    await insertUser(withTenant, third.id, shared.id);
+    const fromB = await withTenant(schoolB.id, (tx) =>
+      definers.memberHasOtherMemberships(tx, inB.id),
+    );
+    const fromA = await withTenant(schoolA.id, (tx) =>
+      definers.memberHasOtherMemberships(tx, inB.id),
+    );
+    expect(fromB).toBe(true);
+    expect(fromA).toBe(false);
+  });
+
   it('refuses without app.tenant_id', async () => {
     const refused = await failure(
       testDb().app.query('select member_has_other_memberships($1)', [colleagueInA.id]),
