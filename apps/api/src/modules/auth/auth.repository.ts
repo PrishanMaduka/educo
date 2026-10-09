@@ -18,15 +18,24 @@ export interface CredentialRow {
   readonly passwordHash: string | null;
   readonly totpSecretEnc: string | null;
   readonly totpEnabled: boolean;
+  /** The last authenticator time step accepted; only a later one is accepted next. */
+  readonly totpLastStep: number | null;
   readonly recoveryCodesHash: readonly string[];
+  readonly passwordChangedAt: Date | null;
 }
 
 const NO_CREDENTIALS: CredentialRow = {
   passwordHash: null,
   totpSecretEnc: null,
   totpEnabled: false,
+  totpLastStep: null,
   recoveryCodesHash: [],
+  passwordChangedAt: null,
 };
+
+/** Only a time step later than the last one accepted (RFC 6238 §5.2), so a replay loses a race. */
+const laterStep = (step: number) =>
+  sql`(${credentials.totpLastStep} is null or ${credentials.totpLastStep} < ${step})`;
 
 /**
  * Sign-in reads and writes on the account tables (`accounts`, `credentials`, `trusted_devices`),
@@ -58,7 +67,9 @@ export class AuthRepository {
           passwordHash: credentials.passwordHash,
           totpSecretEnc: credentials.totpSecretEnc,
           totpEnabled: credentials.totpEnabled,
+          totpLastStep: credentials.totpLastStep,
           recoveryCodesHash: credentials.recoveryCodesHash,
+          passwordChangedAt: credentials.passwordChangedAt,
         })
         .from(credentials)
         .where(eq(credentials.accountId, accountId))
@@ -104,25 +115,47 @@ export class AuthRepository {
   }
 
   /**
-   * Confirms the pending authenticator `totpSecretEnc` and stores the recovery code hashes. False
-   * when it is no longer the pending one (a newer start, or already confirmed).
+   * Confirms the pending authenticator `totpSecretEnc` with the code of time step `step` (null
+   * for the local fixed code) and stores the recovery code hashes. False when it is no longer the
+   * pending one (a newer start, or already confirmed) or the step was already used.
    */
   async enableTotp(
     accountId: string,
     totpSecretEnc: string,
+    step: number | null,
     recoveryCodesHash: readonly string[],
   ): Promise<boolean> {
     const rows = await this.db.withAccount(accountId, (tx) =>
       tx
         .update(credentials)
-        .set({ totpEnabled: true, recoveryCodesHash: [...recoveryCodesHash] })
+        .set({
+          totpEnabled: true,
+          recoveryCodesHash: [...recoveryCodesHash],
+          ...(step === null ? {} : { totpLastStep: step }),
+        })
         .where(
           and(
             eq(credentials.accountId, accountId),
             eq(credentials.totpEnabled, false),
             eq(credentials.totpSecretEnc, totpSecretEnc),
+            step === null ? undefined : laterStep(step),
           ),
         )
+        .returning({ accountId: credentials.accountId }),
+    );
+    return rows.length > 0;
+  }
+
+  /**
+   * Records `step` as the last accepted authenticator time step; false when that step (or a later
+   * one) was already accepted, so a concurrent replay of the same code loses.
+   */
+  async acceptTotpStep(accountId: string, step: number): Promise<boolean> {
+    const rows = await this.db.withAccount(accountId, (tx) =>
+      tx
+        .update(credentials)
+        .set({ totpLastStep: step })
+        .where(and(eq(credentials.accountId, accountId), laterStep(step)))
         .returning({ accountId: credentials.accountId }),
     );
     return rows.length > 0;

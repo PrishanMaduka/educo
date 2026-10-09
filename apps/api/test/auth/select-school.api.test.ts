@@ -102,6 +102,16 @@ describe('POST /auth/select-school (spec 05 step 5)', () => {
     expect((await browser.get('/me')).statusCode).toBe(401);
   });
 
+  it('refuses (401) an account disabled since the password step, and opens no school', async () => {
+    const { account, a, browser } = await choosing();
+    await db().platform.query(`update accounts set status = 'disabled' where id = $1`, [
+      account.id,
+    ]);
+    const response = await select(browser, { tenantId: a.id });
+    expect(response.statusCode).toBe(401);
+    expect((await sessionOf(browser))?.active_tenant_id).toBeNull();
+  });
+
   it('refuses a deactivated membership with 403', async () => {
     const left = await insertSchool(db());
     const { browser } = await choosing(async (account) => {

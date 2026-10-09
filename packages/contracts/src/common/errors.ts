@@ -6,7 +6,8 @@ import { z } from 'zod';
  * spec 05 (D32): `invalid_link` (400) for any signed link that is refused, `invalid_credentials`
  * (401) for a wrong email or password, `account_locked` (403) after the lockout rule,
  * `invalid_code` (400) for a wrong two-step or recovery code, `two_step_required` (403) and
- * `preview_read_only` (403, Task 12) for a write while previewing a role.
+ * `preview_read_only` (403, Task 12) for a write while previewing a role, and `unavailable` (503)
+ * when sign-in cannot reach the lockout counter (it fails closed).
  */
 export const ErrorCode = z.enum([
   'validation',
@@ -29,6 +30,7 @@ export const ErrorCode = z.enum([
   'two_step_required',
   'preview_read_only',
   'rate_limited',
+  'unavailable',
   'internal',
 ]);
 export type ErrorCode = z.infer<typeof ErrorCode>;

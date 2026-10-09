@@ -8,7 +8,13 @@ import { RecordingDelivery } from '../fakes/delivery';
 import { Browser, setCookie } from '../helpers/browser';
 import { useDatabaseApp } from '../helpers/database-app';
 import { insertMember, insertSchool } from '../helpers/identity';
-import { anyText, insertPasswordAccount, setSignInRules, totpCode } from '../helpers/sign-in';
+import {
+  anyText,
+  auditRows,
+  insertPasswordAccount,
+  setSignInRules,
+  totpCode,
+} from '../helpers/sign-in';
 
 import type { PasswordAccount } from '../helpers/sign-in';
 
@@ -175,6 +181,42 @@ describe('POST /auth/totp/verify (spec 05 step 4)', () => {
     expect(response.json()).toEqual({ next: 'two_step' });
   });
 
+  it('refuses a code that was already accepted (RFC 6238 §5.2), even on a new sign-in', async () => {
+    const { account, browser } = await atTwoStep();
+    const code = await totpCode(secretOf(account), clock);
+    expect((await browser.post('/auth/totp/verify', { code })).statusCode).toBe(200);
+
+    const again = new Browser(app);
+    await again.post('/auth/password', { email: account.email, password: account.password });
+    const replayed = await again.post('/auth/totp/verify', { code });
+    expect(replayed.statusCode).toBe(400);
+    expect(replayed.json()).toMatchObject({ code: 'invalid_code' });
+    // The next step's code is new, so it works.
+    clock += STEP;
+    const later = await again.post('/auth/totp/verify', {
+      code: await totpCode(secretOf(account), clock),
+    });
+    expect(later.statusCode).toBe(200);
+  });
+
+  it('refuses the sign-in session 15 minutes after its last step (401)', async () => {
+    const { account, browser } = await atTwoStep();
+    clock += 15 * 60_000 - 1000;
+    expect(
+      (
+        await browser.clone().post('/auth/totp/verify', {
+          code: await totpCode(secretOf(account), clock),
+        })
+      ).statusCode,
+    ).not.toBe(401);
+    const late = await atTwoStep();
+    clock += 15 * 60_000;
+    const response = await late.browser.post('/auth/totp/verify', {
+      code: await totpCode(secretOf(late.account), clock),
+    });
+    expect(response.statusCode).toBe(401);
+  });
+
   it('answers 401 without a sign-in session, and at another stage', async () => {
     const none = await new Browser(app).post('/auth/totp/verify', { code: '123456' });
     expect(none.statusCode).toBe(401);
@@ -273,6 +315,20 @@ describe('POST /me/totp (set up an authenticator)', () => {
       [account.id],
     );
     expect(after.rows[0]).toEqual({ totp_enabled: true, n: 10 });
+    const audits = (await auditRows(db(), 'auth.two_step_enabled')).filter(
+      (row) => row.target_id === account.id,
+    );
+    expect(audits).toHaveLength(1);
+  });
+
+  it('never accepts the confirming code again at the code step (replay)', async () => {
+    const { account, browser } = await atSetup(2);
+    const started = TotpSetupResult.parse((await browser.post('/me/totp', {})).json());
+    const code = await totpCode(secretFrom(started.otpauthUri ?? ''), clock);
+    expect((await browser.post('/me/totp', { code })).statusCode).toBe(200);
+    const again = new Browser(app);
+    await again.post('/auth/password', { email: account.email, password: account.password });
+    expect((await again.post('/auth/totp/verify', { code })).statusCode).toBe(400);
   });
 
   it('refuses a code from another secret with 400 invalid_code', async () => {

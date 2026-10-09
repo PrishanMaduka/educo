@@ -9,6 +9,7 @@ import {
   lockoutState,
 } from '@quad/domain';
 
+import { UnavailableError } from '../../common/errors';
 import { errorForLog } from '../../observability/logger';
 import { CONFIG, DELIVERY, LOGGER, REDIS } from '../../tokens';
 
@@ -30,8 +31,9 @@ export const lockoutKey = (accountId: string): string => `lockout:${accountId}`;
  * minutes after the last failure. Five within 15 minutes set `accounts.locked_until` 15 minutes
  * ahead (which persists the lock), clear the set and email the person once.
  *
- * If Redis does not answer, failures are not counted and the API logs `lockout_unavailable`
- * (fail open, like the rate limits); a lock already stored on the account still holds.
+ * It fails closed: if Redis cannot read or write the counter, sign-in answers 503 `unavailable`
+ * (and the API logs `lockout_unavailable`) instead of checking a password or code it could not
+ * count. Only forgetting the failures after a success may fail quietly.
  */
 @Injectable()
 export class LockoutService {
@@ -48,10 +50,20 @@ export class LockoutService {
     return isLockedAt(account.lockedUntil, now);
   }
 
-  /** Counts a failure at `now`; locks the account (and emails it) on the fifth in the window. */
+  /**
+   * Checks the counter can be read before a password or code is checked; 503 when it cannot.
+   * Sign-in calls it for an unknown email too (with a throwaway id), so both do the same work.
+   */
+  async assertCounting(accountId: string): Promise<void> {
+    await this.orUnavailable(() => this.redis.zcard(lockoutKey(accountId)));
+  }
+
+  /**
+   * Counts a failure at `now` (503 when it cannot be counted); locks the account, and emails it,
+   * on the fifth in the window.
+   */
   async recordFailure(accountId: string, now: Date): Promise<void> {
     const failures = await this.addFailure(accountId, now);
-    if (failures === null) return;
     const state = lockoutState(failures, now);
     if (!state.locked || state.lockedUntil === null) return;
     const email = await this.repository.lockUntil(accountId, state.lockedUntil);
@@ -75,11 +87,11 @@ export class LockoutService {
     await this.safely(() => this.redis.del(lockoutKey(accountId)));
   }
 
-  /** Adds one failure and returns the failure times still in the window; null without Redis. */
-  private async addFailure(accountId: string, now: Date): Promise<Date[] | null> {
+  /** Adds one failure and returns the failure times still in the window. */
+  private async addFailure(accountId: string, now: Date): Promise<Date[]> {
     const key = lockoutKey(accountId);
     const at = now.getTime();
-    const result = await this.safely(() =>
+    const result = await this.orUnavailable(() =>
       this.redis
         .multi()
         // A random suffix keeps two failures in the same millisecond apart.
@@ -91,11 +103,30 @@ export class LockoutService {
     );
     const [, , , range] = result ?? [];
     const entries = range?.[1];
-    if (range === undefined || range[0] !== null || !Array.isArray(entries)) return null;
+    if (range === undefined || range[0] !== null || !Array.isArray(entries)) {
+      this.unavailable(new Error('The lockout counter gave no failures back.'));
+    }
     // WITHSCORES alternates member and score.
     return entries
       .filter((_value, index) => index % 2 === 1)
       .map((score) => new Date(Number(score)));
+  }
+
+  /** Runs a counter command; a Redis failure becomes 503 `unavailable` (fail closed). */
+  private async orUnavailable<T>(command: () => Promise<T>): Promise<T> {
+    try {
+      return await command();
+    } catch (error) {
+      this.unavailable(error);
+    }
+  }
+
+  private unavailable(error: unknown): never {
+    this.logger.warn(
+      { metric: 'lockout_unavailable', error: errorForLog(error) },
+      'Sign-in refused: the lockout counter did not answer',
+    );
+    throw new UnavailableError();
   }
 
   private async safely<T>(command: () => Promise<T>): Promise<T | undefined> {
@@ -104,7 +135,7 @@ export class LockoutService {
     } catch (error) {
       this.logger.warn(
         { metric: 'lockout_unavailable', error: errorForLog(error) },
-        'Lockout counting skipped: Redis did not answer',
+        'Lockout failures not forgotten: Redis did not answer',
       );
       return undefined;
     }

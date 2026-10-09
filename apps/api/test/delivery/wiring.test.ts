@@ -1,3 +1,4 @@
+import { createTenantDb } from '@quad/db';
 import { Redis } from 'ioredis';
 import pino from 'pino';
 import { afterAll, describe, expect, it } from 'vitest';
@@ -6,6 +7,7 @@ import { BullDelivery } from '../../src/common/delivery/delivery.service';
 import { EMAIL_QUEUE, SMS_QUEUE } from '../../src/common/delivery/queues';
 import { RateLimitService } from '../../src/common/rate-limit/rate-limit.service';
 import { loadConfig } from '../../src/config';
+import { PASSWORD_RESET_REQUEST_QUEUE } from '../../src/modules/auth/password-reset-requests';
 import { DELIVERY } from '../../src/tokens';
 import { buildProcessors } from '../../src/worker/run';
 import { CLOSED_PORTS, useTestApp } from '../app';
@@ -41,9 +43,16 @@ describe('the worker processors', () => {
     redis.disconnect();
   });
 
-  it('registers send-email and send-sms', async () => {
-    const config = loadConfig(localEnv({ SMTP_URL: 'smtp://localhost:1025' }));
-    const processors = await buildProcessors(config, pino({ level: 'silent' }), redis);
-    expect(Object.keys(processors).sort()).toEqual([EMAIL_QUEUE, SMS_QUEUE].sort());
+  it('registers send-email, send-sms and password-reset-request', async () => {
+    const config = loadConfig(localEnv({ SMTP_URL: 'smtp://localhost:1025', ...CLOSED_PORTS }));
+    const db = createTenantDb({ appUrl: config.DATABASE_URL });
+    try {
+      const processors = await buildProcessors(config, pino({ level: 'silent' }), redis, db);
+      expect(Object.keys(processors).sort()).toEqual(
+        [EMAIL_QUEUE, SMS_QUEUE, PASSWORD_RESET_REQUEST_QUEUE].sort(),
+      );
+    } finally {
+      await db.close();
+    }
   });
 });

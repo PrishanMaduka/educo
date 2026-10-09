@@ -49,6 +49,7 @@
   "error.schoolSuspended": "This school is paused right now. Ask your school’s admin.",
   "error.notYourSchool": "You can’t open that school with this account.",
   "error.authenticatorExists": "You already have an authenticator app set up.",
+  "error.signInUnavailable": "We can’t sign you in right now. Try again in a minute.",
   "error.password.tooShort": "Use at least {min, plural, one {# character} other {# characters}}.",
   "error.password.tooLong": "Use {max} characters or fewer.",
   "error.password.breached": "This password has appeared in a data breach. Choose a different one.",

@@ -152,3 +152,13 @@ export class InvalidCodeError extends AppError {
     super('invalid_code', formatMessage('error.invalidCode'), 400);
   }
 }
+
+/**
+ * 503 when sign-in cannot reach the lockout counter (Redis): it fails closed rather than check a
+ * password or code that could not be counted (D32). The person can try again shortly.
+ */
+export class UnavailableError extends AppError {
+  constructor() {
+    super('unavailable', formatMessage('error.signInUnavailable'), 503);
+  }
+}

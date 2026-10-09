@@ -1,11 +1,13 @@
 import { createHmac } from 'node:crypto';
 
 import { SignedLinkPayloadSchema } from '@quad/contracts';
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { SignedLinks } from '../../src/common/crypto/signed-links';
+import { TENANT_DB } from '../../src/tokens';
 import { localEnv } from '../env';
 import { RecordingDelivery } from '../fakes/delivery';
+import { RecordingPasswordResets } from '../fakes/password-resets';
 import { Browser } from '../helpers/browser';
 import { useDatabaseApp } from '../helpers/database-app';
 import { insertMember, insertSchool, insertWebSession } from '../helpers/identity';
@@ -20,17 +22,33 @@ import {
 } from '../helpers/sign-in';
 
 import type { PasswordAccount } from '../helpers/sign-in';
+import type { QuadTenantDb } from '@quad/db';
 
 const NOW = Date.UTC(2026, 9, 8, 3, 30, 1);
 const MINUTE = 60_000;
+let clock = NOW;
 const delivery = new RecordingDelivery();
-const { db, app } = useDatabaseApp({}, { overrides: { now: () => NOW, delivery } });
+const passwordResets = new RecordingPasswordResets(() => clock);
+const { db, app } = useDatabaseApp(
+  {},
+  { overrides: { now: () => clock, delivery, passwordResets } },
+);
+
+beforeEach(() => {
+  clock = NOW;
+});
 
 /** Signs links the way the API does, with the test secret; nonces are never recorded here. */
 const links = new SignedLinks(localEnv().LINK_SIGNING_SECRET ?? '', () => Promise.resolve(true));
 const NEW_PASSWORD = 'a brand new passphrase';
 
 const forgot = (email: unknown) => new Browser(app).post('/auth/password/forgot', { email });
+/** Forgot password, then the worker's job, as it runs after the response. */
+async function forgotAndProcess(email: string) {
+  const response = await forgot(email);
+  await passwordResets.process(app(), delivery);
+  return response;
+}
 const reset = (token: string, password: string) =>
   new Browser(app).post('/auth/password/reset', { token, password });
 
@@ -41,9 +59,9 @@ async function staffAccount(): Promise<PasswordAccount> {
   return account;
 }
 
-/** The token in the reset email queued for `email`. */
+/** The token in the latest reset email queued for `email`. */
 function queuedToken(email: string): string {
-  const [queued] = emailsTo(delivery, email, 'password_reset');
+  const queued = emailsTo(delivery, email, 'password_reset').at(-1);
   const link = queued?.job.params.link;
   if (typeof link !== 'string') throw new Error('No reset email was queued.');
   const match = /\/sign-in\/reset\/([^/?#]+)$/.exec(link);
@@ -60,9 +78,9 @@ const signIn = (account: PasswordAccount, password: string) =>
   new Browser(app).post('/auth/password', { email: account.email, password });
 
 describe('POST /auth/password/forgot (spec 05 step 6)', () => {
-  it('answers 202 and queues a single-use reset link with no school in it (OQ8)', async () => {
+  it('answers 202, and the job emails a single-use reset link with no school in it (OQ8)', async () => {
     const account = await staffAccount();
-    const response = await forgot(account.email.toUpperCase());
+    const response = await forgotAndProcess(account.email.toUpperCase());
     expect(response.statusCode).toBe(202);
     const [queued] = emailsTo(delivery, account.email, 'password_reset');
     expect(queued?.job).toMatchObject({ tenantId: null, school: null, params: { minutes: 30 } });
@@ -74,14 +92,38 @@ describe('POST /auth/password/forgot (spec 05 step 6)', () => {
     expect(queued?.jobId).not.toContain(queuedToken(account.email));
   });
 
-  it('answers 202 with the identical body for an unknown email, and queues nothing', async () => {
+  it('answers 202 with the identical body for an unknown email, and the job sends nothing', async () => {
     const account = await staffAccount();
-    const known = await forgot(account.email);
+    const known = await forgotAndProcess(account.email);
     const unknownEmail = freshEmail();
-    const unknown = await forgot(unknownEmail);
+    const unknown = await forgotAndProcess(unknownEmail);
     expect(unknown.statusCode).toBe(202);
     expect(unknown.body).toBe(known.body);
     expect(delivery.emails.filter(({ job }) => job.to === unknownEmail)).toEqual([]);
+  });
+
+  it('does the same work for a known and an unknown email: one job keyed by the HMAC of the email, no lookup', async () => {
+    const account = await staffAccount();
+    const definers = app().get<QuadTenantDb>(TENANT_DB).definers;
+    const lookup = vi.spyOn(definers, 'accountByIdentifier');
+    try {
+      await forgot(account.email);
+      const unknownEmail = freshEmail();
+      await forgot(unknownEmail);
+      expect(lookup).not.toHaveBeenCalled();
+      const [forKnown, forUnknown, ...rest] = passwordResets.requests.splice(0);
+      expect(rest).toEqual([]);
+      expect(forKnown?.email).toBe(account.email);
+      expect(forUnknown?.email).toBe(unknownEmail);
+      expect(forKnown?.jobId).toMatch(/^password-reset-request\.[A-Za-z0-9_-]{43}$/);
+      expect(forKnown?.jobId).not.toContain(account.email.split('@')[0] ?? '');
+      expect(forUnknown?.jobId).not.toBe(forKnown?.jobId);
+      // The same address (any spelling) always gives the same job id.
+      await forgot(account.email.toUpperCase());
+      expect(passwordResets.requests.splice(0)[0]?.jobId).toBe(forKnown?.jobId);
+    } finally {
+      lookup.mockRestore();
+    }
   });
 
   it('answers 400 validation for a malformed email', async () => {
@@ -111,7 +153,7 @@ describe('POST /auth/password/reset (signed link)', () => {
       `insert into trusted_devices (account_id, token_hash, expires_at) values ($1, $2, $3)`,
       [account.id, Buffer.from('a-trusted-device'), new Date(NOW + 30 * 24 * 60 * MINUTE)],
     );
-    await forgot(account.email);
+    await forgotAndProcess(account.email);
     const before = await auditRows(db(), 'auth.password_reset');
 
     const response = await reset(queuedToken(account.email), NEW_PASSWORD);
@@ -136,7 +178,7 @@ describe('POST /auth/password/reset (signed link)', () => {
 
   it('refuses a weak password with 400 and fields.password, and does not use up the link', async () => {
     const account = await staffAccount();
-    await forgot(account.email);
+    await forgotAndProcess(account.email);
     const token = queuedToken(account.email);
 
     const short = await reset(token, 'too short');
@@ -157,7 +199,7 @@ describe('POST /auth/password/reset (signed link)', () => {
     await setSignInRules(db(), school.id, { passwordMinLength: 16 });
     const account = await insertPasswordAccount(db());
     await insertMember(db(), school.id, account.id);
-    await forgot(account.email);
+    await forgotAndProcess(account.email);
     const token = queuedToken(account.email);
     expect((await reset(token, 'fifteen chars!!')).statusCode).toBe(400);
     expect((await reset(token, 'sixteen chars!!!')).statusCode).toBe(204);
@@ -165,7 +207,7 @@ describe('POST /auth/password/reset (signed link)', () => {
 
   it('refuses a second use with 400 invalid_link (the nonce is recorded in the database)', async () => {
     const account = await staffAccount();
-    await forgot(account.email);
+    await forgotAndProcess(account.email);
     const token = queuedToken(account.email);
     expect((await reset(token, NEW_PASSWORD)).statusCode).toBe(204);
     const again = await reset(token, 'yet another passphrase');
@@ -241,6 +283,22 @@ describe('POST /auth/password/reset (signed link)', () => {
     });
   });
 
+  it('refuses a link issued before the password last changed with invalid_link', async () => {
+    const account = await staffAccount();
+    await forgotAndProcess(account.email);
+    const older = queuedToken(account.email);
+    clock = NOW + MINUTE;
+    await forgotAndProcess(account.email);
+    const newer = queuedToken(account.email);
+    clock = NOW + 2 * MINUTE;
+    expect((await reset(newer, NEW_PASSWORD)).statusCode).toBe(204);
+    clock = NOW + 3 * MINUTE;
+    const stale = await reset(older, 'yet another passphrase');
+    expect(stale.statusCode).toBe(400);
+    expect(stale.json()).toMatchObject({ code: 'invalid_link' });
+    expect((await signIn(account, NEW_PASSWORD)).statusCode).toBe(200);
+  });
+
   it('answers 400 validation without a token', async () => {
     const response = await new Browser(app).post('/auth/password/reset', {
       password: GOOD_PASSWORD,
@@ -255,7 +313,7 @@ describe('POST /auth/password/reset (signed link)', () => {
   it("changes only the link's own account: account A's link never touches account B", async () => {
     const a = await staffAccount();
     const b = await staffAccount();
-    await forgot(a.email);
+    await forgotAndProcess(a.email);
     expect((await reset(queuedToken(a.email), NEW_PASSWORD)).statusCode).toBe(204);
     expect((await signIn(b, b.password)).statusCode).toBe(200);
     expect((await signIn(b, NEW_PASSWORD)).statusCode).toBe(401);

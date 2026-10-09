@@ -10,6 +10,7 @@ export const AuditAction = z.enum([
   'auth.sign_in_failed',
   'auth.sign_out',
   'auth.password_reset',
+  'auth.two_step_enabled',
   'user.invited',
   'user.role_changed',
   'user.deactivated',

@@ -1,6 +1,10 @@
 import { ErrorBodySchema, Me, SignInResult } from '@quad/contracts';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { PasswordHasher } from '../../src/common/crypto/passwords';
+import { AuthRepository } from '../../src/modules/auth/auth.repository';
+import { MembershipsService } from '../../src/modules/auth/memberships.service';
+import { REDIS, TENANT_DB } from '../../src/tokens';
 import { RecordingDelivery } from '../fakes/delivery';
 import { Browser, setCookie } from '../helpers/browser';
 import { useDatabaseApp } from '../helpers/database-app';
@@ -13,6 +17,9 @@ import {
   insertRoleWithKey,
   setSignInRules,
 } from '../helpers/sign-in';
+
+import type { QuadTenantDb } from '@quad/db';
+import type { Redis } from 'ioredis';
 
 const T0 = Date.UTC(2026, 9, 8, 3, 30, 1);
 let clock = T0;
@@ -209,12 +216,15 @@ describe('POST /auth/password (spec 05 step 3)', () => {
     const inB = await insertMember(db(), schoolB.id, account.id);
     await insertMember(db(), familySchool.id, account.id, { kind: 'guardian' });
     await insertMember(db(), leftSchool.id, account.id, { status: 'deactivated' });
-    const before = await auditRows(db(), 'auth.sign_in_failed');
-
     await signIn(new Browser(app), { email: account.email, password: 'wrong password here' });
 
-    const rows = (await auditRows(db(), 'auth.sign_in_failed')).slice(before.length);
-    expect(rows).toHaveLength(2);
+    // Written after the response (off the timed path), so wait for it.
+    const forAccount = async () =>
+      (await auditRows(db(), 'auth.sign_in_failed')).filter((row) => row.target_id === account.id);
+    await vi.waitFor(async () => {
+      expect(await forAccount()).toHaveLength(2);
+    });
+    const rows = await forAccount();
     expect(rows).toEqual(
       expect.arrayContaining([
         { tenant_id: schoolA.id, actor_user_id: inA, target_id: account.id },
@@ -223,10 +233,58 @@ describe('POST /auth/password (spec 05 step 3)', () => {
     );
   });
 
-  it('audits nothing for an unknown email', async () => {
-    const before = await auditRows(db(), 'auth.sign_in_failed');
-    await signIn(new Browser(app), { email: freshEmail(), password: 'wrong password here' });
-    expect(await auditRows(db(), 'auth.sign_in_failed')).toHaveLength(before.length);
+  it('does the same database and Redis work for an unknown email as for a wrong password before it answers', async () => {
+    const school = await insertSchool(db());
+    const account = await insertPasswordAccount(db());
+    await insertMember(db(), school.id, account.id);
+    const definers = app().get<QuadTenantDb>(TENANT_DB).definers;
+    const repository = app().get(AuthRepository);
+    const hasher = app().get(PasswordHasher);
+    const redis = app().get<Redis>(REDIS);
+    const spies = {
+      lookup: vi.spyOn(definers, 'accountByIdentifier'),
+      credentials: vi.spyOn(repository, 'credentials'),
+      verify: vi.spyOn(hasher, 'verify'),
+      verifyDummy: vi.spyOn(hasher, 'verifyDummy'),
+      counterRead: vi.spyOn(redis, 'zcard'),
+      counterWrite: vi.spyOn(redis, 'multi'),
+    };
+    const work = async (email: string) => {
+      for (const spy of Object.values(spies)) spy.mockClear();
+      const response = await signIn(new Browser(app), { email, password: 'wrong password here' });
+      expect(response.statusCode).toBe(401);
+      return {
+        lookups: spies.lookup.mock.calls.length,
+        credentialReads: spies.credentials.mock.calls.length,
+        argon2Verifies: spies.verify.mock.calls.length + spies.verifyDummy.mock.calls.length,
+        counterReads: spies.counterRead.mock.calls.length,
+        counterWrites: spies.counterWrite.mock.calls.length,
+      };
+    };
+    try {
+      const known = await work(account.email);
+      const unknown = await work(freshEmail());
+      expect(known).toEqual({
+        lookups: 1,
+        credentialReads: 1,
+        argon2Verifies: 1,
+        counterReads: 1,
+        counterWrites: 1,
+      });
+      expect(unknown).toEqual(known);
+    } finally {
+      for (const spy of Object.values(spies)) spy.mockRestore();
+    }
+  });
+
+  it('audits nothing for an unknown email (no school is even looked up)', async () => {
+    const lookup = vi.spyOn(app().get(MembershipsService), 'staffMemberships');
+    try {
+      await signIn(new Browser(app), { email: freshEmail(), password: 'wrong password here' });
+      expect(lookup).not.toHaveBeenCalled();
+    } finally {
+      lookup.mockRestore();
+    }
   });
 
   it("puts school A's session only in school A: the membership of A never reaches B", async () => {

@@ -57,6 +57,7 @@
   "errorSchoolSuspended": "This school is paused right now. Ask your school’s admin.",
   "errorNotYourSchool": "You can’t open that school with this account.",
   "errorAuthenticatorExists": "You already have an authenticator app set up.",
+  "errorSignInUnavailable": "We can’t sign you in right now. Try again in a minute.",
   "errorPasswordTooShort": "Use at least {min, plural, one {{min} character} other {{min} characters}}.",
   "@errorPasswordTooShort": {
     "placeholders": {

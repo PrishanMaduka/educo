@@ -29,3 +29,5 @@ export const REDIS = Symbol('REDIS');
 export const DELIVERY = Symbol('DELIVERY');
 /** Resolves a console session cookie (`ConsoleSessionLookup`); Task 10 provides it. */
 export const CONSOLE_SESSIONS = Symbol('CONSOLE_SESSIONS');
+/** Queues Forgot password requests for the worker (`PasswordResetRequests`; tests pass a fake). */
+export const PASSWORD_RESETS = Symbol('PASSWORD_RESETS');

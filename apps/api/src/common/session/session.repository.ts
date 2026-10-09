@@ -197,18 +197,20 @@ export class SessionRepository {
 
   /**
    * Moves a locked session to its next step with a new token (spec 05: the session id rotates on
-   * every step and on Switch school). Any role preview ends with the school it was for.
+   * every step and on Switch school), only while `oldTokenHash` is still its token and it is not
+   * revoked; false otherwise. Any role preview ends with the school it was for.
    */
   async rotateIn(
     tx: AccountTx,
     sessionId: string,
+    oldTokenHash: Buffer,
     change: SessionPlace & {
       readonly tokenHash: Buffer;
       readonly at: Date;
       readonly expiresAt: Date;
     },
-  ): Promise<void> {
-    await tx
+  ): Promise<boolean> {
+    const rows = await tx
       .update(sessions)
       .set({
         tokenHash: change.tokenHash,
@@ -220,7 +222,15 @@ export class SessionRepository {
         lastSeenAt: change.at,
         expiresAt: change.expiresAt,
       })
-      .where(eq(sessions.id, sessionId));
+      .where(
+        and(
+          eq(sessions.id, sessionId),
+          eq(sessions.tokenHash, oldTokenHash),
+          isNull(sessions.revokedAt),
+        ),
+      )
+      .returning({ id: sessions.id });
+    return rows.length > 0;
   }
 
   /** Revokes one of the account's sessions; its token hash, or undefined when it was not live. */

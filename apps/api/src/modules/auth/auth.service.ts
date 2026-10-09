@@ -1,26 +1,19 @@
-import { createHash } from 'node:crypto';
-
 import { Inject, Injectable } from '@nestjs/common';
-import { SIGNED_LINK_RULES } from '@quad/domain';
 
 import { AuditService } from '../../common/audit/audit.service';
-import { SignedLinks } from '../../common/crypto/signed-links';
 import { ForbiddenError } from '../../common/errors';
 import { SessionRepository } from '../../common/session/session.repository';
 import { SessionService } from '../../common/session/session.service';
-import { CLOCK, CONFIG, DELIVERY, TENANT_DB } from '../../tokens';
+import { CONFIG, PASSWORD_RESETS, TENANT_DB } from '../../tokens';
 
 import { AuthRepository } from './auth.repository';
+import { passwordResetJobIds } from './password-reset-requests';
 
-import type { DeliveryQueue } from '../../common/delivery/delivery.service';
+import type { PasswordResetRequests } from './password-reset-requests';
 import type { RequestAuth } from '../../common/session/request-auth';
 import type { Config } from '../../config';
-import type { Clock } from '../../tokens';
 import type { IdentifyResult, SignInMethod } from '@quad/contracts';
 import type { QuadTenantDb } from '@quad/db';
-
-/** The reset link's lifetime in minutes, for the email (spec 05 step 6: 30 minutes). */
-const RESET_LINK_MINUTES = (SIGNED_LINK_RULES.password_reset.ttlSeconds ?? 0) / 60;
 
 /**
  * The tenant-less staff auth routes that are not a sign-in step: identify, sign out and Forgot
@@ -33,12 +26,14 @@ export class AuthService {
     private readonly repository: AuthRepository,
     private readonly sessionRows: SessionRepository,
     private readonly sessions: SessionService,
-    private readonly links: SignedLinks,
     private readonly audit: AuditService,
-    @Inject(DELIVERY) private readonly delivery: DeliveryQueue,
-    @Inject(CONFIG) private readonly config: Config,
-    @Inject(CLOCK) private readonly now: Clock,
-  ) {}
+    @Inject(PASSWORD_RESETS) private readonly passwordResets: PasswordResetRequests,
+    @Inject(CONFIG) config: Config,
+  ) {
+    this.resetJobId = passwordResetJobIds(config.SESSION_SECRET);
+  }
+
+  private readonly resetJobId: (email: string) => string;
 
   /**
    * `POST /auth/identify`: the SSO buttons for the email's domain, then password. It reads the
@@ -77,27 +72,11 @@ export class AuthService {
   }
 
   /**
-   * `POST /auth/password/forgot`: for an active account, queues a single-use reset link with no
-   * school in it (OQ8). The caller answers 202 either way.
+   * `POST /auth/password/forgot`: queues exactly one job for the address, known or not, keyed by
+   * the HMAC of the email, and looks nothing up; the worker finds the account and sends the link
+   * (OQ8: no school in it). The caller answers 202 either way.
    */
   async forgot(email: string): Promise<void> {
-    const found = await this.db.definers.accountByIdentifier({ email });
-    if (found === null || found.status !== 'active') return;
-    const account = await this.repository.account(found.id);
-    if (account === null || account.email === null) return;
-    const token = this.links.signLink(
-      { purpose: 'password_reset', tid: null, sub: found.id },
-      new Date(this.now()),
-    );
-    await this.delivery.queueEmail({
-      // The job id is in logs, so it carries a digest of the token, never the token.
-      jobId: `password-reset.${createHash('sha256').update(token).digest('hex').slice(0, 40)}`,
-      to: account.email,
-      template: 'password_reset',
-      params: {
-        link: new URL(`/sign-in/reset/${token}`, this.config.PUBLIC_WEB_URL).href,
-        minutes: RESET_LINK_MINUTES,
-      },
-    });
+    await this.passwordResets.request({ jobId: this.resetJobId(email), email });
   }
 }

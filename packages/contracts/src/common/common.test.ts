@@ -34,11 +34,15 @@ describe('contracts', () => {
       ErrorBodySchema.safeParse({ code: 'forbidden', message: 'No', fields: { a: 'b' } }).success,
     ).toBe(true);
     expect(ErrorCode.options).toContain('app_update_required');
-    expect(ErrorCode.options).toHaveLength(21);
+    expect(ErrorCode.options).toHaveLength(22);
   });
 
   it('has invalid_link for every refused signed link (spec 05, one message for every cause)', () => {
     expect(ErrorCode.parse('invalid_link')).toBe('invalid_link');
+  });
+
+  it('has unavailable (503) for sign-in while the lockout counter cannot be reached', () => {
+    expect(ErrorCode.parse('unavailable')).toBe('unavailable');
   });
 
   it('has an internal code for unexpected server errors (500)', () => {

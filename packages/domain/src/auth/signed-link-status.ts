@@ -62,3 +62,13 @@ export function signedLinkStatus(
   }
   return now.getTime() >= payload.exp * 1000 ? 'expired' : 'ok';
 }
+
+/**
+ * When a link was signed, in Unix seconds: its expiry minus its purpose's lifetime (the payload
+ * carries no `iat`). Null for a purpose that never expires. A password reset link signed before
+ * the password last changed is refused with this.
+ */
+export function signedLinkIssuedAt(payload: SignedLinkPayload): number | null {
+  const { ttlSeconds } = SIGNED_LINK_RULES[payload.purpose];
+  return ttlSeconds === null || payload.exp === null ? null : payload.exp - ttlSeconds;
+}

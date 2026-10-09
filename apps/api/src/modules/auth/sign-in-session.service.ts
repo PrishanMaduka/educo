@@ -125,7 +125,11 @@ export class SignInSessions {
       }
       const name = await this.repository.memberSignedInIn(tx, membership.userId, state.now);
       const account = await this.repository.accountIn(tx, state.accountId);
-      if (name === null || account === null) {
+      if (account === null || account.status !== 'active') {
+        // Disabled or locked since the earlier step: the session opens no school.
+        throw new UnauthorizedError();
+      }
+      if (name === null) {
         throw new ForbiddenError('forbidden', formatMessage('error.notYourSchool'));
       }
       await this.repository.signedInIn(tx, state.accountId, state.now);
@@ -190,12 +194,13 @@ export class SignInSessions {
       const locked = await this.sessionRows.lockForStepIn(tx, existing.id, existing.tokenHash);
       if (locked === null) throw new UnauthorizedError();
       const { expiresAt, value } = await inTx(tx, locked.keepSignedIn);
-      await this.sessionRows.rotateIn(tx, existing.id, {
+      const rotated = await this.sessionRows.rotateIn(tx, existing.id, existing.tokenHash, {
         ...place,
         tokenHash,
         at: state.now,
         expiresAt,
       });
+      if (!rotated) throw new UnauthorizedError();
       return { keepSignedIn: locked.keepSignedIn, value };
     });
     if (existing !== null) await this.sessions.invalidateToken(existing.tokenHash);

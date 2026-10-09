@@ -1,16 +1,20 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { MAX_PASSWORD_LENGTH, MIN_PASSWORD_LENGTH, checkPasswordPolicy } from '@quad/domain';
+import {
+  MAX_PASSWORD_LENGTH,
+  MIN_PASSWORD_LENGTH,
+  checkPasswordPolicy,
+  signedLinkIssuedAt,
+} from '@quad/domain';
 
-import { AuditService } from '../../common/audit/audit.service';
 import { PasswordHasher } from '../../common/crypto/passwords';
 import { SignedLinks } from '../../common/crypto/signed-links';
 import { formatMessage } from '../../common/delivery/templates/render';
 import { InvalidLinkError, ValidationError } from '../../common/errors';
 import { SessionRepository } from '../../common/session/session.repository';
 import { SessionService } from '../../common/session/session.service';
+import { AccountAudit } from '../../modules/auth/account-audit.service';
 import { AuthRepository } from '../../modules/auth/auth.repository';
 import { LockoutService } from '../../modules/auth/lockout.service';
-import { MembershipsService } from '../../modules/auth/memberships.service';
 import { BREACH_CHECK, CLOCK, TENANT_DB } from '../../tokens';
 
 import type { BreachCheck } from '../../common/crypto/breach-check';
@@ -47,14 +51,15 @@ export class PasswordResetService {
     private readonly sessionRows: SessionRepository,
     private readonly sessions: SessionService,
     private readonly lockout: LockoutService,
-    private readonly memberships: MembershipsService,
-    private readonly audit: AuditService,
+    private readonly accountAudit: AccountAudit,
     @Inject(CLOCK) private readonly now: Clock,
   ) {}
 
   async reset(input: PasswordResetInput, ip: string): Promise<void> {
     const now = new Date(this.now());
-    const { sub: accountId } = this.links.inspectLink(input.token, 'password_reset', now);
+    const payload = this.links.inspectLink(input.token, 'password_reset', now);
+    const accountId = payload.sub;
+    await this.refuseIfStale(accountId, signedLinkIssuedAt(payload));
     await this.checkPassword(accountId, input.password);
     await this.links.verifyLink(input.token, 'password_reset', now);
 
@@ -70,7 +75,23 @@ export class PasswordResetService {
     for (const tokenHash of revoked) await this.sessions.invalidateToken(tokenHash);
     await this.sessions.invalidateAccount(accountId);
     await this.lockout.clear(accountId);
-    await this.auditReset(accountId, ip);
+    await this.accountAudit.recordInStaffSchools(accountId, ip, 'auth.password_reset');
+  }
+
+  /**
+   * A link signed before the password last changed is refused (a reset, or Forgot asked twice
+   * and the newer link used): only links from after the change still work. Compared in whole
+   * seconds, the precision of the link's expiry.
+   */
+  private async refuseIfStale(accountId: string, issuedAt: number | null): Promise<void> {
+    const { passwordChangedAt } = await this.repository.credentials(accountId);
+    if (
+      issuedAt !== null &&
+      passwordChangedAt !== null &&
+      issuedAt < Math.floor(passwordChangedAt.getTime() / 1000)
+    ) {
+      throw new InvalidLinkError();
+    }
   }
 
   /** The policy with the strictest school minimum, then the breached list (400 `fields.password`). */
@@ -83,26 +104,6 @@ export class PasswordResetService {
     }
     if (await this.breachCheck.isBreached(password)) {
       throw new ValidationError({ password: formatMessage('error.password.breached') });
-    }
-  }
-
-  private async auditReset(accountId: string, ip: string): Promise<void> {
-    const memberships = await this.memberships.staffMemberships(accountId);
-    for (const membership of memberships) {
-      await this.db.withTenant(membership.tenantId, (tx) =>
-        this.audit.record(
-          {
-            tx,
-            tenantId: membership.tenantId,
-            userId: membership.userId,
-            supportSessionId: null,
-            platformUserId: null,
-            ip,
-          },
-          'auth.password_reset',
-          { type: 'account', id: accountId },
-        ),
-      );
     }
   }
 }

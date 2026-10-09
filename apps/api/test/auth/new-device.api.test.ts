@@ -106,6 +106,8 @@ describe('the new-device email (spec 16, ruling F43)', () => {
     await late.post('/auth/totp/verify', { code: await totpCode(account.totpSecret ?? '', clock) });
     expect(emailsTo(delivery, account.email, 'new_device')).toHaveLength(2);
 
+    // A new code: the last one was used (RFC 6238 §5.2).
+    clock += 30_000;
     const forged = new Browser(app);
     forged.cookies.set('quad_trusted', 'x'.repeat(43));
     await forged.post('/auth/password', { email: account.email, password: account.password });

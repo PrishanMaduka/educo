@@ -15,6 +15,7 @@ import {
 import { hashSessionToken, newSessionToken } from '../../common/session/cookies';
 import { CLOCK, CONFIG, FIELD_CIPHER } from '../../tokens';
 
+import { AccountAudit } from './account-audit.service';
 import { AuthRepository } from './auth.repository';
 import { LockoutService } from './lockout.service';
 import { SignInService } from './sign-in.service';
@@ -54,6 +55,7 @@ export class TwoStepService {
     private readonly signIn: SignInService,
     private readonly lockout: LockoutService,
     private readonly hasher: PasswordHasher,
+    private readonly accountAudit: AccountAudit,
     @Inject(FIELD_CIPHER) private readonly cipher: FieldCipher,
     @Inject(CONFIG) private readonly config: Config,
     @Inject(CLOCK) private readonly now: Clock,
@@ -67,6 +69,7 @@ export class TwoStepService {
   ): Promise<SignInOutcome> {
     const person = personOf(auth);
     const now = new Date(this.now());
+    await this.lockout.assertCounting(person.accountId);
     const account = await this.repository.account(person.accountId);
     if (account === null || account.status === 'disabled') throw new UnauthorizedError();
     if (account.status === 'locked' || this.lockout.isLocked(account, now)) {
@@ -77,7 +80,7 @@ export class TwoStepService {
         ? await this.useRecoveryCode(person.accountId, input.recoveryCode ?? '')
         : await this.checkCode(person.accountId, input.code, now);
     if (!accepted) {
-      await this.signIn.recordFailure(person.accountId, client, now, 'wrong_code');
+      await this.signIn.recordCodeFailure(person.accountId, client, now);
       throw new InvalidCodeError();
     }
     await this.lockout.clear(person.accountId);
@@ -114,7 +117,7 @@ export class TwoStepService {
     if (input.code === undefined) {
       return { result: await this.start(person), outcome: null };
     }
-    const recoveryCodes = await this.confirm(person, input.code);
+    const recoveryCodes = await this.confirm(person, input.code, client);
     const now = new Date(this.now());
     const outcome =
       person.stage === 'two_step_setup'
@@ -160,38 +163,66 @@ export class TwoStepService {
     return { otpauthUri, recoveryCodes: null, next: null };
   }
 
-  private async confirm(person: PersonAuth, code: string): Promise<string[]> {
+  private async confirm(person: PersonAuth, code: string, client: SignInClient): Promise<string[]> {
     const credentials = await this.repository.credentials(person.accountId);
     const sealed = credentials.totpSecretEnc;
     if (credentials.totpEnabled || sealed === null) throw new InvalidCodeError();
     const secret = await this.cipher.decrypt(sealed);
-    if (!(await this.codeMatches(secret, code, new Date(this.now())))) {
-      throw new InvalidCodeError();
-    }
+    const match = await this.codeMatches(
+      secret,
+      code,
+      new Date(this.now()),
+      credentials.totpLastStep,
+    );
+    if (match === null) throw new InvalidCodeError();
     const recoveryCodes = generateRecoveryCodes((length) => randomBytes(length));
     const hashes = await Promise.all(recoveryCodes.map((recovery) => this.hasher.hash(recovery)));
-    if (!(await this.repository.enableTotp(person.accountId, sealed, hashes))) {
+    if (!(await this.repository.enableTotp(person.accountId, sealed, match.step, hashes))) {
       throw new InvalidCodeError();
     }
+    await this.accountAudit.recordInStaffSchools(
+      person.accountId,
+      client.ip,
+      'auth.two_step_enabled',
+    );
     return recoveryCodes;
   }
 
-  /** The account's confirmed authenticator accepts `code` at `now`. */
+  /**
+   * The account's confirmed authenticator accepts `code` at `now`, and its time step was not
+   * accepted before (RFC 6238 §5.2): the step is recorded at once, so a replay of the same code,
+   * even a concurrent one, is refused.
+   */
   private async checkCode(accountId: string, code: string, now: Date): Promise<boolean> {
     const credentials = await this.repository.credentials(accountId);
     if (!credentials.totpEnabled || credentials.totpSecretEnc === null) return false;
-    return this.codeMatches(await this.cipher.decrypt(credentials.totpSecretEnc), code, now);
+    const secret = await this.cipher.decrypt(credentials.totpSecretEnc);
+    const match = await this.codeMatches(secret, code, now, credentials.totpLastStep);
+    if (match === null) return false;
+    return match.step === null || this.repository.acceptTotpStep(accountId, match.step);
   }
 
-  private async codeMatches(secret: string, code: string, now: Date): Promise<boolean> {
-    if (this.isFixedCode(code)) return true;
+  /**
+   * Whether `code` is the authenticator's code within one step of `now` and after `lastStep`:
+   * the step it matched, `{ step: null }` for the local fixed code, or null for no match.
+   */
+  private async codeMatches(
+    secret: string,
+    code: string,
+    now: Date,
+    lastStep: number | null,
+  ): Promise<{ readonly step: number | null } | null> {
+    if (this.isFixedCode(code)) return { step: null };
     const result = await verify({
       secret,
       token: code,
       epoch: Math.floor(now.getTime() / 1000),
       epochTolerance: TOTP_TOLERANCE_SECONDS,
+      ...(lastStep === null ? {} : { afterTimeStep: lastStep }),
     });
-    return result.valid;
+    // A TOTP match carries its RFC 6238 time step (the HOTP shape of the union never does).
+    if (!result.valid || !('timeStep' in result)) return null;
+    return { step: result.timeStep };
   }
 
   /** Local and staging only: the config refuses `DEV_FIXED_OTP` in production. */

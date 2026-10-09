@@ -1,11 +1,12 @@
 import { Redis } from 'ioredis';
-import { afterAll, beforeEach, describe, expect, it } from 'vitest';
+import { afterAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { REDIS } from '../../src/tokens';
 import { RecordingDelivery } from '../fakes/delivery';
 import { Browser } from '../helpers/browser';
 import { useDatabaseApp } from '../helpers/database-app';
 import { insertMember, insertSchool } from '../helpers/identity';
-import { emailsTo, insertPasswordAccount } from '../helpers/sign-in';
+import { emailsTo, insertPasswordAccount, totpCode } from '../helpers/sign-in';
 
 import type { PasswordAccount } from '../helpers/sign-in';
 
@@ -119,5 +120,85 @@ describe('lockout (spec 05 step 7: five failures in 15 minutes lock it for 15 mi
       await signIn(account, 'wrong password here');
     }
     expect((await signIn(other, other.password)).statusCode).toBe(200);
+  });
+
+  it('does not let a correct password wipe out wrong codes: the second factor still locks', async () => {
+    const school = await insertSchool(db());
+    const account = await insertPasswordAccount(db(), { totp: true });
+    await insertMember(db(), school.id, account.id);
+    const secret = account.totpSecret ?? '';
+    const right = await totpCode(secret, clock);
+    const wrong = right === '000000' ? '111111' : '000000';
+    const atCode = async (): Promise<Browser> => {
+      const browser = new Browser(app);
+      const response = await browser.post('/auth/password', {
+        email: account.email,
+        password: account.password,
+      });
+      expect(response.json()).toEqual({ next: 'two_step' });
+      return browser;
+    };
+
+    const first = await atCode();
+    for (let attempt = 1; attempt <= 4; attempt += 1) {
+      expect((await first.post('/auth/totp/verify', { code: wrong })).statusCode).toBe(400);
+    }
+    const second = await atCode();
+    expect((await second.post('/auth/totp/verify', { code: wrong })).statusCode).toBe(400);
+
+    const next = await second.post('/auth/totp/verify', { code: right });
+    expect(next.statusCode).toBe(403);
+    expect(next.json()).toMatchObject({ code: 'account_locked' });
+    expect((await signIn(account, account.password)).statusCode).toBe(403);
+  });
+});
+
+describe('lockout without Redis (fails closed)', () => {
+  const appRedis = (): Redis => app().get<Redis>(REDIS);
+
+  it('answers 503 on the password step, without checking the password, when the counter cannot be read', async () => {
+    const account = await staffAccount();
+    const read = vi.spyOn(appRedis(), 'zcard').mockRejectedValue(new Error('Redis is down'));
+    try {
+      const response = await signIn(account, account.password);
+      expect(response.statusCode).toBe(503);
+      expect(response.json()).toMatchObject({ code: 'unavailable' });
+      expect(response.headers['set-cookie']).toBeUndefined();
+    } finally {
+      read.mockRestore();
+    }
+    expect((await signIn(account, account.password)).statusCode).toBe(200);
+  });
+
+  it('answers 503 when a failure cannot be counted', async () => {
+    const account = await staffAccount();
+    const write = vi.spyOn(appRedis(), 'multi').mockImplementation(() => {
+      throw new Error('Redis is down');
+    });
+    try {
+      const response = await signIn(account, 'wrong password here');
+      expect(response.statusCode).toBe(503);
+      expect(response.json()).toMatchObject({ code: 'unavailable' });
+    } finally {
+      write.mockRestore();
+    }
+  });
+
+  it('answers 503 on the code step when the counter cannot be read', async () => {
+    const school = await insertSchool(db());
+    const account = await insertPasswordAccount(db(), { totp: true });
+    await insertMember(db(), school.id, account.id);
+    const browser = new Browser(app);
+    await browser.post('/auth/password', { email: account.email, password: account.password });
+    const read = vi.spyOn(appRedis(), 'zcard').mockRejectedValue(new Error('Redis is down'));
+    try {
+      const response = await browser.post('/auth/totp/verify', {
+        code: await totpCode(account.totpSecret ?? '', clock),
+      });
+      expect(response.statusCode).toBe(503);
+      expect(response.json()).toMatchObject({ code: 'unavailable' });
+    } finally {
+      read.mockRestore();
+    }
   });
 });

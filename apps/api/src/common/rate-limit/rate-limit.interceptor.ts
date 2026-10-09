@@ -46,8 +46,8 @@ interface Check {
  * route's own rules (top first, counted per route template), then the per-user limit.
  *
  * If Redis cannot answer, the request goes on and the API logs the `rate_limit_unavailable`
- * metric (fail open, D32): sign-in stays available, and lockout and the edge's WAF limits still
- * apply.
+ * metric (fail open, D32): the edge's WAF limits still apply, and sign-in itself fails closed
+ * (503) because its lockout counter needs Redis.
  */
 @Injectable()
 export class RateLimitInterceptor implements NestInterceptor {
