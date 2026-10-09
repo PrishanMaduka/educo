@@ -314,7 +314,10 @@ input,select,textarea,button{font:inherit}
 footer.page .wrap{display:flex;gap:16px 32px;flex-wrap:wrap;align-items:center;font-size:14px;padding-block:0 32px}
 footer .logo{margin-right:auto;color:var(--page-ink)}
 footer a{color:var(--page-ink)}
-footer span{color:var(--page-ink-3)}
+footer span,footer .contact{color:var(--page-ink-3)}
+footer .links{display:flex;flex-wrap:wrap;gap:4px 20px;list-style:none;margin:0;padding:0}
+footer .links a{display:inline-block;padding-block:4px}
+footer .contact{margin:0 auto 0 0}
 
 /* Sign-in dialog */
 dialog.si{width:min(440px,calc(100% - 32px));border:0;border-radius:28px;padding:28px;background:var(--sheet-bg);color:var(--sheet-ink);box-shadow:0 40px 80px -30px rgba(0,0,0,.5)}
@@ -548,7 +551,19 @@ dialog.si::backdrop{background:var(--backdrop);backdrop-filter:blur(3px)}
 <footer class="page">
   <div class="wrap">
     <a class="logo" href="#top" aria-label="Quad home"><svg viewBox="0 0 101 30" aria-hidden="true" style="height:26px"><use href="#qLogo"/></svg></a>
-    <a href="mailto:support@quad-edu.com">support@quad-edu.com</a>
+    <!-- The About, Security & trust and legal pages (spec 19, D41). They live on the real site. -->
+    <nav aria-label="About Quad">
+      <ul class="links">
+        <li><a href="https://quad-edu.com/about" target="_blank" rel="noopener">About</a></li>
+        <li><a href="https://quad-edu.com/security" target="_blank" rel="noopener">Security &amp; trust</a></li>
+        <li><a href="https://quad-edu.com/legal/privacy" target="_blank" rel="noopener">Privacy</a></li>
+        <li><a href="https://quad-edu.com/legal/terms" target="_blank" rel="noopener">Terms</a></li>
+        <li><a href="https://quad-edu.com/legal/subprocessors" target="_blank" rel="noopener">Sub-processors</a></li>
+      </ul>
+    </nav>
+  </div>
+  <div class="wrap">
+    <p class="contact">Contact <a href="mailto:support@quad-edu.com">support@quad-edu.com</a></p>
     <span>Sample school and families are fictional.</span>
     <span>© Quad</span>
   </div>
