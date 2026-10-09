@@ -168,11 +168,17 @@ describe('loadLocalEnvFile (the one gated .env loader)', () => {
     expect(loadLocalEnvFile({}, join(tmpdir(), 'quad-no-such-dir', '.env'))).toBe(false);
   });
 
+  it('loadRootEnv loads the given .env in local (so the cases below test the gate, not a missing file)', () => {
+    const env: NodeJS.ProcessEnv = { APP_ENV: 'local' };
+    expect(loadRootEnv(env, file)).toBe(true);
+    expect(env.DEV_FIXED_OTP).toBe('000000');
+  });
+
   it.each(['staging', 'production'])(
-    "loadRootEnv ignores the repository's .env when APP_ENV is %s",
+    'loadRootEnv ignores the .env when APP_ENV is %s',
     (appEnv) => {
       const env: NodeJS.ProcessEnv = { APP_ENV: appEnv };
-      expect(loadRootEnv(env)).toBe(false);
+      expect(loadRootEnv(env, file)).toBe(false);
       expect(env).toEqual({ APP_ENV: appEnv });
     },
   );

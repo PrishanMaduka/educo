@@ -123,9 +123,15 @@ export function loadLocalEnvFile(env: NodeJS.ProcessEnv, path: string): boolean 
   return true;
 }
 
-/** Loads the repository's root `.env` into `env` with `loadLocalEnvFile` (local only). */
-export function loadRootEnv(env: NodeJS.ProcessEnv = process.env): boolean {
-  return loadLocalEnvFile(env, fileURLToPath(new URL('../../../.env', import.meta.url)));
+/** The repository's root `.env`. */
+const ROOT_ENV_FILE = fileURLToPath(new URL('../../../.env', import.meta.url));
+
+/**
+ * Loads the repository's root `.env` (or `path`, for tests) into `env` with `loadLocalEnvFile`
+ * (local only).
+ */
+export function loadRootEnv(env: NodeJS.ProcessEnv = process.env, path = ROOT_ENV_FILE): boolean {
+  return loadLocalEnvFile(env, path);
 }
 
 const SAFE_IDENTIFIER = /^[a-z_][a-z0-9_]{0,62}$/;
