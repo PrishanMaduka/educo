@@ -4,7 +4,15 @@ export type { AuditAction, PlatformAuditAction };
 
 /** What an audit entry is about (`audit_log.target_type`, `platform_audit.target_type`). */
 export type AuditTargetType =
-  'account' | 'audit_log' | 'role' | 'school' | 'session' | 'support_session' | 'tenant' | 'user';
+  | 'account'
+  | 'audit_log'
+  | 'platform_user'
+  | 'role'
+  | 'school'
+  | 'session'
+  | 'support_session'
+  | 'tenant'
+  | 'user';
 
 export interface AuditTarget {
   readonly type: AuditTargetType;

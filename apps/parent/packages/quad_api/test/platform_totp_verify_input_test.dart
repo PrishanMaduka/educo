@@ -1,0 +1,16 @@
+import 'package:test/test.dart';
+import 'package:quad_api/quad_api.dart';
+
+// tests for PlatformTotpVerifyInput
+void main() {
+  final PlatformTotpVerifyInput? instance = /* PlatformTotpVerifyInput(...) */ null;
+  // TODO add properties to the entity
+
+  group(PlatformTotpVerifyInput, () {
+    // String code
+    test('to test the property `code`', () async {
+      // TODO
+    });
+
+  });
+}

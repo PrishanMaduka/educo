@@ -18,6 +18,11 @@ import 'package:quad_api/src/model/otp_verify_result_memberships_inner.dart';
 import 'package:quad_api/src/model/password_forgot_input.dart';
 import 'package:quad_api/src/model/password_reset_input.dart';
 import 'package:quad_api/src/model/password_sign_in_input.dart';
+import 'package:quad_api/src/model/platform_me.dart';
+import 'package:quad_api/src/model/platform_password_sign_in_input.dart';
+import 'package:quad_api/src/model/platform_sign_in_result.dart';
+import 'package:quad_api/src/model/platform_totp_setup.dart';
+import 'package:quad_api/src/model/platform_totp_verify_input.dart';
 import 'package:quad_api/src/model/refresh_input.dart';
 import 'package:quad_api/src/model/select_school_input.dart';
 import 'package:quad_api/src/model/select_school_tokens.dart';
@@ -91,6 +96,16 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return PasswordResetInput.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'PasswordSignInInput':
           return PasswordSignInInput.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'PlatformMe':
+          return PlatformMe.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'PlatformPasswordSignInInput':
+          return PlatformPasswordSignInInput.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'PlatformSignInResult':
+          return PlatformSignInResult.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'PlatformTotpSetup':
+          return PlatformTotpSetup.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'PlatformTotpVerifyInput':
+          return PlatformTotpVerifyInput.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'RefreshInput':
           return RefreshInput.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'SelectSchoolInput':

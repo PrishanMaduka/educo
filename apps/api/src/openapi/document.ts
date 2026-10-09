@@ -3,6 +3,7 @@ import { OpenApiGeneratorV31 } from '@asteasolutions/zod-to-openapi';
 import { version } from '../../package.json';
 import { healthRoutes } from '../health/health.routes';
 import { meRoutes } from '../modules/me/me.routes';
+import { platformAuthRoutes } from '../platform/auth/platform-auth.routes';
 import { authRoutes } from '../public/auth/auth.routes';
 import { sesWebhookRoutes } from '../webhooks/ses/ses-webhook.routes';
 
@@ -23,6 +24,7 @@ export const API_ROUTES: readonly ApiRoute[] = [
   // brand palette both areas share.
   ...meRoutes,
   ...authRoutes,
+  ...platformAuthRoutes,
 ];
 
 export type OpenApiDocument = ReturnType<OpenApiGeneratorV31['generateDocument']>;

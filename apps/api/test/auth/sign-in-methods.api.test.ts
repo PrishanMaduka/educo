@@ -38,6 +38,7 @@ describe('staff sign-in methods (D37)', () => {
 
   it('names no SSO state cookie', () => {
     expect(Object.keys(cookieNames('local')).sort()).toEqual([
+      'consoleCsrf',
       'consoleSession',
       'csrf',
       'session',

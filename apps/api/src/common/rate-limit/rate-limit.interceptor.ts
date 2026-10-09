@@ -28,8 +28,8 @@ const REFRESH_ROUTE = /^\/api\/v1\/auth\/refresh(?:[?#]|$)/;
 
 /**
  * Who the per-user limit counts, from the context `AuthGuard` filled in: the membership once a
- * school is chosen, the account during the sign-in steps, the visit in a support session. None
- * on public routes (the per-IP and route limits cover those).
+ * school is chosen, the account during the sign-in steps, the visit in a support session, the
+ * console user in the console. None on public routes (the per-IP and route limits cover those).
  */
 function userSubject(): string | null {
   const context = currentRequestContext();
@@ -37,6 +37,7 @@ function userSubject(): string | null {
   if (context.userId !== null) return `user:${context.userId}`;
   if (context.accountId !== null) return `account:${context.accountId}`;
   if (context.supportSessionId !== null) return `support:${context.supportSessionId}`;
+  if (context.platformUserId !== null) return `platform:${context.platformUserId}`;
   return null;
 }
 

@@ -13,12 +13,17 @@ export interface RequestContext {
   userId: string | null;
   /** The person's account; null in a support visit, which has none. */
   accountId: string | null;
-  /** `web` or `mobile` for a person, `support` for a Quad support visit. */
-  kind: 'web' | 'mobile' | 'support' | null;
+  /**
+   * `web` or `mobile` for a person, `support` for a Quad support visit, `console` for a Quad staff
+   * member in the console (Task 10).
+   */
+  kind: 'web' | 'mobile' | 'support' | 'console' | null;
   /** The role being previewed (spec 06, Preview a role). */
   previewRoleId: string | null;
   /** The support visit the request is part of (spec 05, dual audit). */
   supportSessionId: string | null;
+  /** The console user, from the console session (`PlatformSessionGuard`). */
+  platformUserId: string | null;
 }
 
 const storage = new AsyncLocalStorage<RequestContext>();
@@ -32,6 +37,7 @@ function emptyContext(requestId: string, tenantId: string | null): RequestContex
     kind: null,
     previewRoleId: null,
     supportSessionId: null,
+    platformUserId: null,
   };
 }
 

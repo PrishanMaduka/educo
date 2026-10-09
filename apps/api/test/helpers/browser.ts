@@ -21,6 +21,8 @@ export interface BrowserRequestOptions {
  */
 export class Browser {
   readonly cookies = new Map<string, string>();
+  /** The cookie echoed in `X-CSRF-Token`: the console app echoes its own (Task 10). */
+  csrfCookie = 'quad_csrf';
 
   constructor(
     private readonly app: () => NestFastifyApplication,
@@ -43,7 +45,7 @@ export class Browser {
     options: BrowserRequestOptions = {},
   ): Promise<Response> {
     const cookie = [...this.cookies].map(([name, value]) => `${name}=${value}`).join('; ');
-    const csrf = this.cookies.get('quad_csrf');
+    const csrf = this.cookies.get(this.csrfCookie);
     const response = await this.app()
       .getHttpAdapter()
       .getInstance()
@@ -67,6 +69,7 @@ export class Browser {
   /** A copy with the same cookies and address (the same device in another tab). */
   clone(): Browser {
     const copy = new Browser(this.app, this.ip, this.userAgent);
+    copy.csrfCookie = this.csrfCookie;
     for (const [name, value] of this.cookies) copy.cookies.set(name, value);
     return copy;
   }

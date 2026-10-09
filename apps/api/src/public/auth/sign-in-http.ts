@@ -21,12 +21,17 @@ const USER_AGENT_MAX = 512;
  * cookie. None of them ever names a school.
  */
 export function signInClientOf(request: FastifyRequest, appEnv: AppEnv): SignInClient {
-  const userAgent = request.headers['user-agent'];
   return {
     ip: request.ip,
-    userAgent: typeof userAgent === 'string' ? userAgent.slice(0, USER_AGENT_MAX) : null,
+    userAgent: userAgentOf(request),
     trustedToken: request.cookies[cookieNames(appEnv).trustedDevice],
   };
+}
+
+/** The request's user agent as a session stores it (cut to a sane length), or null. */
+export function userAgentOf(request: FastifyRequest): string | null {
+  const userAgent = request.headers['user-agent'];
+  return typeof userAgent === 'string' ? userAgent.slice(0, USER_AGENT_MAX) : null;
 }
 
 /** Sets (or clears) the cookies a sign-in step asks for. */

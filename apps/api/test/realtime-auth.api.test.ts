@@ -1,10 +1,7 @@
-import { Global, Module } from '@nestjs/common';
 import { io } from 'socket.io-client';
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { hashSessionToken, newSessionToken } from '../src/common/session/cookies';
 import { RealtimeService, originAllowed, roomsFor } from '../src/realtime/realtime.service';
-import { CONSOLE_SESSIONS } from '../src/tokens';
 
 import { RecordingDelivery } from './fakes/delivery';
 import { RecordingOtpSends } from './fakes/otp-sends';
@@ -24,33 +21,13 @@ import {
   signInByPhone,
   signedInParent,
 } from './helpers/parent';
+import { insertConsoleSession } from './helpers/platform';
 
-import type { ConsoleSessionLookup } from '../src/common/session/request-auth';
 import type { Socket } from 'socket.io-client';
-
-/** Stands in for Task 10's console session lookup: one known console cookie. */
-const consoleToken = newSessionToken();
-const CONSOLE_USER = '0192a6f4-1b2c-7d3e-8f40-123456789abc';
-const fakeConsoleSessions: ConsoleSessionLookup = {
-  resolve: (tokenHash) =>
-    Promise.resolve(
-      tokenHash.equals(hashSessionToken(consoleToken)) ? { platformUserId: CONSOLE_USER } : null,
-    ),
-};
-
-@Global()
-@Module({
-  providers: [{ provide: CONSOLE_SESSIONS, useValue: fakeConsoleSessions }],
-  exports: [CONSOLE_SESSIONS],
-})
-class FakeConsoleSessionsModule {}
 
 const delivery = new RecordingDelivery();
 const otpSends = new RecordingOtpSends(delivery);
-const { db, app } = useDatabaseApp(
-  {},
-  { listen: true, overrides: { testModules: [FakeConsoleSessionsModule], delivery, otpSends } },
-);
+const { db, app } = useDatabaseApp({}, { listen: true, overrides: { delivery, otpSends } });
 
 const WEB = 'http://localhost:3000';
 const CONSOLE = 'http://localhost:3001';
@@ -163,12 +140,29 @@ describe('Socket.IO handshake (spec 06 → Realtime, D28 follow-up)', () => {
     expect(await preAuthEvents).toEqual([]);
   });
 
-  it('joins platform with a console session from the console origin (lookup from Task 10)', async () => {
-    const socket = connect({ origin: CONSOLE, cookie: `quad_console_sid=${consoleToken}` });
+  it('joins platform with a console session from the console origin (Task 10)', async () => {
+    const staff = await insertPlatformUser(db(), 'Amaya Perera');
+    const { token } = await insertConsoleSession(db(), staff);
+    const socket = connect({ origin: CONSOLE, cookie: `quad_console_sid=${token}` });
     await connected(socket);
     const events = received(socket, 'probe');
     realtime().emitTo('platform', 'probe', { to: 'platform' });
     expect(await events).toEqual([{ to: 'platform' }]);
+  });
+
+  it('joins nothing with a console session still at the authenticator step', async () => {
+    const staff = await insertPlatformUser(db(), 'Amaya Perera');
+    const active = await insertConsoleSession(db(), staff);
+    const pending = await insertConsoleSession(db(), staff, { stage: 'two_step' });
+    const signedIn = connect({ origin: CONSOLE, cookie: `quad_console_sid=${active.token}` });
+    const atStep = connect({ origin: CONSOLE, cookie: `quad_console_sid=${pending.token}` });
+    await Promise.all([connected(signedIn), connected(atStep)]);
+    const signedInEvents = received(signedIn, 'probe');
+    const atStepEvents = received(atStep, 'probe');
+    realtime().emitTo('platform', 'probe', { to: 'platform' });
+    // The signed-in socket is the positive control: the event was sent.
+    expect(await signedInEvents).toEqual([{ to: 'platform' }]);
+    expect(await atStepEvents).toEqual([]);
   });
 });
 
@@ -212,7 +206,7 @@ describe("the parent app's access token in auth.token (Task 9)", () => {
 describe('roomsFor and originAllowed', () => {
   it('names the rooms of each kind of socket', () => {
     expect(roomsFor(null)).toEqual([]);
-    expect(roomsFor({ kind: 'platform', platformUserId: CONSOLE_USER })).toEqual(['platform']);
+    expect(roomsFor({ kind: 'platform', platformUserId: 'p' })).toEqual(['platform']);
     expect(roomsFor({ kind: 'school', tenantId: 't', userId: null })).toEqual(['tenant:t']);
     expect(roomsFor({ kind: 'school', tenantId: 't', userId: 'u' })).toEqual([
       'tenant:t',

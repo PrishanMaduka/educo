@@ -83,6 +83,11 @@ Class | Method | HTTP request | Description
 [*MeApi*](doc/MeApi.md) | [**apiV1MeSessionsIdDelete**](doc/MeApi.md#apiv1mesessionsiddelete) | **DELETE** /api/v1/me/sessions/{id} | Sign one of your devices out (needs X-CSRF-Token)
 [*MeApi*](doc/MeApi.md) | [**apiV1MeTotpPost**](doc/MeApi.md#apiv1metotppost) | **POST** /api/v1/me/totp | Set up an authenticator: without a code it starts one, with its code it confirms it and gives the recovery codes (needs X-CSRF-Token)
 [*MetaApi*](doc/MetaApi.md) | [**apiV1OpenapiJsonGet**](doc/MetaApi.md#apiv1openapijsonget) | **GET** /api/v1/openapi.json | This OpenAPI document
+[*PlatformApi*](doc/PlatformApi.md) | [**apiV1PlatformAuthPasswordPost**](doc/PlatformApi.md#apiv1platformauthpasswordpost) | **POST** /api/v1/platform/auth/password | Console: sign in with email and password; sets the console cookies and asks for the authenticator code (or to set one up)
+[*PlatformApi*](doc/PlatformApi.md) | [**apiV1PlatformAuthSignOutPost**](doc/PlatformApi.md#apiv1platformauthsignoutpost) | **POST** /api/v1/platform/auth/sign-out | Console: sign out this browser and clear the console cookies (needs X-CSRF-Token)
+[*PlatformApi*](doc/PlatformApi.md) | [**apiV1PlatformAuthTotpSetupPost**](doc/PlatformApi.md#apiv1platformauthtotpsetuppost) | **POST** /api/v1/platform/auth/totp/setup | Console, first sign-in: a new authenticator secret and its otpauth URI, shown once (needs X-CSRF-Token)
+[*PlatformApi*](doc/PlatformApi.md) | [**apiV1PlatformAuthTotpVerifyPost**](doc/PlatformApi.md#apiv1platformauthtotpverifypost) | **POST** /api/v1/platform/auth/totp/verify | Console: check the authenticator code (or the first code of a new one) and open the console on a new cookie (needs X-CSRF-Token)
+[*PlatformApi*](doc/PlatformApi.md) | [**apiV1PlatformMeGet**](doc/PlatformApi.md#apiv1platformmeget) | **GET** /api/v1/platform/me | Console: the signed-in Quad staff member’s name and role
 [*WebhooksApi*](doc/WebhooksApi.md) | [**apiV1WebhooksSesPost**](doc/WebhooksApi.md#apiv1webhookssespost) | **POST** /api/v1/webhooks/ses | SES bounce and complaint events from SNS (signature version 2, pinned topic)
 
 
@@ -108,6 +113,11 @@ Class | Method | HTTP request | Description
  - [PasswordForgotInput](doc/PasswordForgotInput.md)
  - [PasswordResetInput](doc/PasswordResetInput.md)
  - [PasswordSignInInput](doc/PasswordSignInInput.md)
+ - [PlatformMe](doc/PlatformMe.md)
+ - [PlatformPasswordSignInInput](doc/PlatformPasswordSignInInput.md)
+ - [PlatformSignInResult](doc/PlatformSignInResult.md)
+ - [PlatformTotpSetup](doc/PlatformTotpSetup.md)
+ - [PlatformTotpVerifyInput](doc/PlatformTotpVerifyInput.md)
  - [RefreshInput](doc/RefreshInput.md)
  - [SelectSchoolInput](doc/SelectSchoolInput.md)
  - [SelectSchoolTokens](doc/SelectSchoolTokens.md)

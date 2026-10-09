@@ -16,6 +16,12 @@ export interface CookieNames {
   readonly session: string;
   /** The console session (`console.quad-edu.com`, Task 10). */
   readonly consoleSession: string;
+  /**
+   * The console's readable double-submit CSRF value. Its own name: locally the staff portal and
+   * the console share the host `localhost` (cookies ignore the port), so one name would let each
+   * app overwrite the other's.
+   */
+  readonly consoleCsrf: string;
   /** The readable double-submit CSRF value. */
   readonly csrf: string;
   /** "Trust this device for 30 days" after two-step (spec 05). */
@@ -40,6 +46,7 @@ export function cookieNames(appEnv: AppEnv): CookieNames {
   return {
     session: `${prefix}quad_sid`,
     consoleSession: `${prefix}quad_console_sid`,
+    consoleCsrf: `${prefix}quad_console_csrf`,
     csrf: `${prefix}quad_csrf`,
     trustedDevice: `${prefix}quad_trusted`,
   };
@@ -102,6 +109,27 @@ export function clearSessionCookies(reply: FastifyReply, appEnv: AppEnv): void {
   const names = cookieNames(appEnv);
   void reply.clearCookie(names.session, sessionCookieOptions(appEnv));
   void reply.clearCookie(names.csrf, csrfCookieOptions(appEnv));
+}
+
+/**
+ * Sets the console session cookie and its CSRF cookie together (console sign-in, Task 10). Both
+ * end with the browser session; the server ends the session after 8 hours idle (spec 05).
+ */
+export function setConsoleSessionCookies(
+  reply: FastifyReply,
+  appEnv: AppEnv,
+  cookies: { readonly token: string; readonly csrf: string },
+): void {
+  const names = cookieNames(appEnv);
+  void reply.setCookie(names.consoleSession, cookies.token, sessionCookieOptions(appEnv));
+  void reply.setCookie(names.consoleCsrf, cookies.csrf, csrfCookieOptions(appEnv));
+}
+
+/** Clears both console cookies (console sign-out). */
+export function clearConsoleSessionCookies(reply: FastifyReply, appEnv: AppEnv): void {
+  const names = cookieNames(appEnv);
+  void reply.clearCookie(names.consoleSession, sessionCookieOptions(appEnv));
+  void reply.clearCookie(names.consoleCsrf, csrfCookieOptions(appEnv));
 }
 
 /** Sets the HttpOnly trusted-device cookie (`trusted_devices` keeps only its SHA-256). */

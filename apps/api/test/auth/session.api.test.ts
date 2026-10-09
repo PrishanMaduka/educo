@@ -72,9 +72,11 @@ describe('the global AuthGuard', () => {
   });
 
   it('leaves a @PlatformController() class to its own guard', async () => {
+    // Without a session AuthGuard would answer 401; PlatformSessionGuard (Task 10) owns the
+    // route instead, and refuses it for having no console access marker (deny by default).
     const response = await request('GET', '/platform/probe');
-    expect(response.statusCode).toBe(200);
-    expect(response.json()).toEqual({ ok: true });
+    expect(response.statusCode).toBe(403);
+    expect(response.json()).toMatchObject({ code: 'forbidden' });
   });
 
   it('lets a sign-in step through @PreAuth only at its stage, and never to an active route', async () => {

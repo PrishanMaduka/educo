@@ -11,6 +11,7 @@ import 'package:quad_api/src/api/auth_api.dart';
 import 'package:quad_api/src/api/health_api.dart';
 import 'package:quad_api/src/api/me_api.dart';
 import 'package:quad_api/src/api/meta_api.dart';
+import 'package:quad_api/src/api/platform_api.dart';
 import 'package:quad_api/src/api/webhooks_api.dart';
 
 class QuadApi {
@@ -86,6 +87,12 @@ class QuadApi {
   /// by doing that all interceptors will not be executed
   MetaApi getMetaApi() {
     return MetaApi(dio);
+  }
+
+  /// Get PlatformApi instance, base route and serializer can be overridden by a given but be careful,
+  /// by doing that all interceptors will not be executed
+  PlatformApi getPlatformApi() {
+    return PlatformApi(dio);
   }
 
   /// Get WebhooksApi instance, base route and serializer can be overridden by a given but be careful,

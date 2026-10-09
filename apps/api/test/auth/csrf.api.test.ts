@@ -186,12 +186,16 @@ describe('cookie names and attributes (spec 05, ruling F63)', () => {
     expect((await probe(`quad_sid=${token}`)).statusCode).toBe(401);
   });
 
-  it('name the console session and the trusted device too', () => {
+  it('name the console session, its own CSRF cookie and the trusted device too', () => {
     expect(cookieNames('local').consoleSession).toBe('quad_console_sid');
+    // Locally both apps share the host `localhost` (cookies ignore the port), so the console's
+    // CSRF cookie needs its own name or it would overwrite the staff one (Task 10).
+    expect(cookieNames('local').consoleCsrf).toBe('quad_console_csrf');
     expect(cookieNames('local').trustedDevice).toBe('quad_trusted');
     expect(cookieNames('production')).toEqual({
       session: '__Host-quad_sid',
       consoleSession: '__Host-quad_console_sid',
+      consoleCsrf: '__Host-quad_console_csrf',
       csrf: '__Host-quad_csrf',
       trustedDevice: '__Host-quad_trusted',
     });
