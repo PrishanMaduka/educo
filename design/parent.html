@@ -16,7 +16,7 @@
    Layout: a phone frame centred on a soft stage with a prototype control panel beside it; full-bleed app on real phones.
    Colours come only from system/tokens.css; the aliases below keep the prototype's older names pointing at them. */
 :root{--bg:var(--canvas);--deep:var(--navy);--deep-2:var(--navy-2);--deep-ink:var(--on-navy);--deep-ink-2:var(--on-navy-2);--lotus:var(--c5);--lotus-soft:var(--lime-soft);--teal:var(--good)}
-/* TODO move to system: the stage behind the prototype phone frame, and the phone bezel */
+/* Prototype chrome, not product tokens (kept here, not in system/tokens.css): the stage behind the phone frame and the phone bezel */
 :root{--stage:#ECE9E1;--bezel:#14152A;--bezel-line:#2E3260}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--stage:#080B1E}}
 :root[data-theme="dark"]{--stage:#080B1E}
@@ -126,7 +126,7 @@ select.input{appearance:none;background-image:linear-gradient(45deg,transparent 
 textarea.input{height:auto;padding:12px 14px;resize:none}
 .input:focus,.inp:focus{outline:none;border-color:var(--focus);box-shadow:0 0 0 3px color-mix(in srgb,var(--focus) 22%,transparent)}
 /* Switch: the school colour when on, as in design/system.html */
-.toggle{width:50px;height:30px;border-radius:var(--r-pill);background:var(--line-strong);position:relative;flex:none;transition:background .2s}
+.toggle{width:50px;height:30px;border-radius:var(--r-pill);background:var(--switch-off);position:relative;flex:none;transition:background .2s}
 .toggle::after{content:"";position:absolute;left:3px;top:3px;width:24px;height:24px;border-radius:50%;background:var(--surface);box-shadow:var(--shadow-sm);transition:transform .2s,background .2s}
 .toggle.on{background:var(--brand-fill)}
 .toggle.on::after{transform:translateX(20px);background:var(--brand-ink)}

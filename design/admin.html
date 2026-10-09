@@ -279,7 +279,7 @@ td.r,th.r{text-align:right}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 /* User kit: profile page and role builder */
-.uk-sw{width:42px;height:24px;border-radius:12px;background:var(--line-strong);position:relative;border:0;flex:none;transition:background .2s;cursor:pointer}
+.uk-sw{width:42px;height:24px;border-radius:12px;background:var(--switch-off);position:relative;border:0;flex:none;transition:background .2s;cursor:pointer}
 .uk-sw::after{content:"";position:absolute;left:3px;top:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.3);transition:transform .2s}
 .uk-sw.on{background:var(--good)}.uk-sw.on::after{transform:translateX(18px)}
 .uk-sw:disabled{opacity:.5;cursor:not-allowed}
@@ -1087,14 +1087,6 @@ button[data-auth="show"]{min-height:24px;padding:3px 6px}
 .perm th,.perm td{text-align:center}
 .perm td:first-child,.perm th:first-child{text-align:left}
 
-/* TODO move to system: local tokens the shared files don't have yet.
-   --on-fill   text and icons on a filled status or chart colour (good, bad, warn, info, c1–c5): white in light mode,
-               navy in dark mode, where those fills are light. */
-:root{--on-fill:#ffffff}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--on-fill:#101632}
-}
-:root[data-theme="dark"]{--on-fill:#101632}
-/* end TODO */
 
 /* ===== Rollout: every other screen on the app design system (design/system.html) =====
    Colour-coded things (subjects, stages, houses) use the chart tokens c1–c5 as a dot, bar or edge and keep their words in ink,

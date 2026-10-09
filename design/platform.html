@@ -15,14 +15,7 @@
    brand: the default --brand* tokens are Quad lime, so lime marks Quad's own actions and the active item on the navy bar.
    Each school keeps its own colour on its card, cover and logo tile (system/brand.js keeps the initials AA). */
 
-/* TODO move to system: tokens the console needed that tokens.css does not have yet.
-   --navy-card / --navy-card-ring  a navy surface (Ask Quad button, save bars) that lifts to navy-2 with a ring in dark mode
-   --inverse / --on-inverse        toasts and tooltips: navy on cream in light, cream on navy in dark
-   --t-orange                      (class) an orange accent tile, like .tag.orange in system.html */
-:root{--navy-card:var(--navy);--navy-card-ring:transparent;--inverse:var(--navy);--on-inverse:var(--on-navy)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--navy-card:var(--navy-2);--navy-card-ring:var(--navy-line);--inverse:var(--on-navy);--on-inverse:var(--navy)}}
-:root[data-theme="dark"]{--navy-card:var(--navy-2);--navy-card-ring:var(--navy-line);--inverse:var(--on-navy);--on-inverse:var(--navy)}
-/* end TODO */
+/* navy-card, inverse and on-fill now come from system/tokens.css */
 
 /* Soft hills drawn over a school's colour on its cover and card (illustration, not a token) */
 :root{--hills:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 80' preserveAspectRatio='none'%3E%3Cpath d='M0 46C90 18 170 22 250 40S420 30 490 18 580 20 600 24V80H0Z' fill='%23FFFFFF' fill-opacity='.13'/%3E%3Cpath d='M0 62C110 40 210 46 300 58S470 52 600 44V80H0Z' fill='%23FFFFFF' fill-opacity='.18'/%3E%3Cg fill='none' stroke='%23FFFFFF' stroke-opacity='.18' stroke-width='1.2'%3E%3Cpath d='M20 72c60-12 140-14 220-6M330 70c70-10 160-14 250-12'/%3E%3C/g%3E%3C/svg%3E")}
@@ -168,7 +161,7 @@ input[type=radio]:checked::after{content:"";width:8px;height:8px;border-radius:5
 input[type=checkbox]:disabled,input[type=radio]:disabled{opacity:.55;cursor:not-allowed}
 input[type=range]{accent-color:var(--ink);width:100%}
 .checkrow{display:flex;align-items:center;gap:10px;padding:6px 0;font-size:14px;cursor:pointer}
-.switch,.uk-sw{width:44px;height:26px;border-radius:var(--r-pill);background:var(--field-line);position:relative;border:0;flex:none;padding:0;cursor:pointer;transition:background .2s}
+.switch,.uk-sw{width:44px;height:26px;border-radius:var(--r-pill);background:var(--switch-off);position:relative;border:0;flex:none;padding:0;cursor:pointer;transition:background .2s}
 .switch::after,.uk-sw::after{content:"";position:absolute;left:3px;top:3px;width:20px;height:20px;border-radius:50%;background:var(--surface);box-shadow:var(--shadow-sm);transition:transform .2s}
 .switch.on,.uk-sw.on{background:var(--brand-fill)}
 .switch.on::after,.uk-sw.on::after{transform:translateX(18px);background:var(--brand-ink)}
@@ -1630,8 +1623,8 @@ document.addEventListener('click', e => {
 });
 
 /* ---------- School branding: logo upload, colour from logo, live mock-ups, publishing ---------- */
-/* TODO move to system: the school colour palette offered when a school picks its colour (Quad lime is the default) */
-const SCHOOL_PALETTE = [['#C8F169','Quad lime (default)'],['#1B7F53','Greenfield green'],['#7A1F3D','Maroon'],['#F2B705','Sunflower'],['#0F7C86','Teal'],['#3B4AA8','Indigo'],['#D9640B','Orange'],['#5B3FA8','Violet']];
+/* The named school colours, Quad lime first as the default, from design/system/brand.js */
+const SCHOOL_PALETTE = QuadBrand.PALETTE;
 const BRAND_SWATCHES = SCHOOL_PALETTE.map(x => x[0]);
 const swName = c => 'Colour: ' + ((SCHOOL_PALETTE.find(x => x[0].toLowerCase() === String(c).toLowerCase()) || [c, c])[1]);
 const shortOf = n => (n || '').replace(/[^A-Za-z ]/g, '').split(' ').filter(w => w && /[A-Z]/.test(w[0])).map(w => w[0]).slice(0, 3).join('') || 'SCH';
