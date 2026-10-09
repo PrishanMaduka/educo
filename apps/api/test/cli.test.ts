@@ -149,6 +149,30 @@ describe('seedRefusal', () => {
   });
 });
 
+describe('seed command', () => {
+  it('exits 1 naming FIELD_ENCRYPTION_KEY when it is missing, before touching the database', () => {
+    const password = 'Sup3r:s3cret-seed-pass';
+    const result = spawnSync(
+      process.execPath,
+      ['--import', 'tsx', resolve(__dirname, '../src/cli/seed.ts')],
+      {
+        encoding: 'utf8',
+        env: {
+          PATH: process.env.PATH,
+          APP_ENV: 'staging',
+          SEED_PASSWORD: password,
+          // Unresolvable on purpose: the command must stop before it connects.
+          DATABASE_OWNER_URL: 'postgres://quad_owner:o@db.invalid:5432/quad',
+        },
+      },
+    );
+    expect(result.stderr).toBe('seed failed: FIELD_ENCRYPTION_KEY is required.\n');
+    expect(result.status).toBe(1);
+    expect(result.stderr + result.stdout).not.toContain(password);
+    // A child process that loads tsx, as the db-bootstrap test above.
+  }, 30_000);
+});
+
 describe('redact', () => {
   it('removes connection URLs', () => {
     expect(redact(new Error('cannot reach postgres://u:p@db.internal:5432/quad now'))).toBe(
