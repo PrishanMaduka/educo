@@ -84,4 +84,16 @@ describe('the sign-in steps', () => {
       at({ name: 'email' }),
     );
   });
+
+  it('shows a masked address only, and never puts it in the email field', () => {
+    const masked = {
+      step: { name: 'two_step' },
+      email: 'n•••@kandyhill.lk',
+      emailMasked: true,
+    } as const;
+    expect(signInReducer(masked, { type: 'change_email' })).toEqual({
+      step: { name: 'email' },
+      email: '',
+    });
+  });
 });

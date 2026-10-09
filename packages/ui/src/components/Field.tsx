@@ -21,7 +21,8 @@ export interface FieldProps {
 export function Field({ label, hint, error, className, children, id: idProp }: FieldProps) {
   const generated = useId();
   const id = idProp ?? generated;
-  const hintId = hint ? `${id}-hint` : undefined;
+  // The hint gives way to an error, so it is only referenced while it is shown.
+  const hintId = hint && !error ? `${id}-hint` : undefined;
   const errorId = error ? `${id}-error` : undefined;
   const describedBy = [errorId, hintId].filter(Boolean).join(' ') || undefined;
   return (

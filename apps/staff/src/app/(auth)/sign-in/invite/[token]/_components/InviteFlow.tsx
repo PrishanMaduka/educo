@@ -2,12 +2,11 @@
 
 import { Input } from '@quad/ui';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { useCallback, useState, type FormEvent } from 'react';
+import { useCallback, useRef, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AuthCard } from '../../../_components/AuthCard';
-import { BigButton, ShowPasswordButton, StepError } from '../../../_components/bits';
-import { errorKeyFor, fieldError, isFieldError } from '../../../_components/error-copy';
+import { BigButton, BigLink, ShowPasswordButton, StepError } from '../../../_components/bits';
 import { InvalidLink } from '../../../_components/InvalidLink';
 import { initialSignIn, stepFor, type SignInState } from '../../../_components/sign-in-steps';
 import { SignInFlow } from '../../../_components/SignInFlow';
@@ -16,6 +15,7 @@ import type { MessageKey } from '@/i18n';
 import type { InviteDetails, SignInNext } from '@quad/contracts';
 
 import { ApiError, staffApi, unwrap } from '@/lib/api';
+import { errorKeyFor, fieldError, isFieldError } from '@/lib/error-copy';
 
 /** What accepting can answer besides a bad link, in the invitee's words. */
 const ACCEPT_ERRORS: Readonly<Record<string, MessageKey>> = {
@@ -120,8 +120,13 @@ export function InviteFlow({ token }: { token: string }) {
     retry: false,
   });
 
+  // The invitation is single use: once accepted, a later answer (after two-step set-up for the
+  // chosen school, say) passes straight through instead of accepting again.
+  const accepted = useRef(false);
   const acceptOnceSignedIn = useCallback(
     async (next: SignInNext): Promise<SignInNext> => {
+      if (accepted.current) return next;
+      accepted.current = true;
       try {
         const result = await unwrap(
           staffApi().POST('/api/v1/auth/invites/{token}/accept', {
@@ -131,6 +136,7 @@ export function InviteFlow({ token }: { token: string }) {
         );
         return result.next;
       } catch (error) {
+        accepted.current = false;
         setFailure(error);
         return next;
       }
@@ -148,6 +154,7 @@ export function InviteFlow({ token }: { token: string }) {
     return (
       <AuthCard title={t('signIn.title')}>
         <StepError>{t(acceptErrorKey(failure))}</StepError>
+        <BigLink href="/sign-in">{t('signIn.backToSignIn')}</BigLink>
       </AuthCard>
     );
   }
@@ -180,7 +187,7 @@ export function InviteFlow({ token }: { token: string }) {
         token={token}
         details={invite}
         onAccepted={(next) => {
-          setFlow({ step: stepFor(next), email: invite.emailMasked });
+          setFlow({ step: stepFor(next), email: invite.emailMasked, emailMasked: true });
         }}
       />
     );

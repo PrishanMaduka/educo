@@ -27,7 +27,13 @@ import type {
 import type { QuadTenantDb, TenantProfile, TenantTx } from '@quad/db';
 
 function supportPerson(name: string, profile: TenantProfile): MePerson {
-  return { name, firstName: firstNameOf(name), theme: 'system', locale: profile.locale };
+  return {
+    name,
+    firstName: firstNameOf(name),
+    theme: 'system',
+    locale: profile.locale,
+    roleNames: [],
+  };
 }
 
 /** A support visit has no account or membership: it cannot change one or list its devices. */
@@ -160,7 +166,7 @@ export class MeService {
     profile: TenantProfile,
   ): Promise<MePerson> {
     const member = auth.userId === null ? null : await this.repository.member(tx, auth.userId);
-    if (member === null) {
+    if (member === null || auth.userId === null) {
       throw new UnauthorizedError();
     }
     return {
@@ -168,6 +174,7 @@ export class MeService {
       firstName: firstNameOf(member.name),
       theme: member.theme,
       locale: member.locale ?? profile.locale,
+      roleNames: await this.repository.roleNames(tx, auth.userId),
     };
   }
 

@@ -12,6 +12,7 @@ Name | Type | Description | Notes
 **firstName** | **String** |  | 
 **theme** | **String** |  | 
 **locale** | **String** |  | 
+**roleNames** | **List&lt;String&gt;** |  | 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

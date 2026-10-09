@@ -3523,6 +3523,7 @@ export interface components {
                 /** @enum {string} */
                 theme: "system" | "light" | "dark";
                 locale: string;
+                roleNames: string[];
             };
             school: {
                 /** Format: uuid */

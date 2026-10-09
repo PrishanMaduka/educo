@@ -27,5 +27,10 @@ void main() {
       // TODO
     });
 
+    // List<String> roleNames
+    test('to test the property `roleNames`', () async {
+      // TODO
+    });
+
   });
 }

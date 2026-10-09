@@ -58,3 +58,18 @@ export function safeNext(raw: unknown): string {
 export function signInPathFor(pathname: string, search: string): string {
   return `/sign-in?${new URLSearchParams({ next: `${pathname}${search}` }).toString()}`;
 }
+
+/**
+ * The request header the middleware sets on every portal request to the page asked for (path and
+ * query), so the portal layout can send a signed-out visitor back there after sign-in. The
+ * middleware always overwrites it, so a browser cannot choose it.
+ */
+export const PORTAL_PATH_HEADER = 'x-quad-path';
+
+/**
+ * Where the portal layout sends a visit whose session the API no longer accepts: sign-in, then
+ * back to the page asked for (`PORTAL_PATH_HEADER`), if it is a portal page.
+ */
+export function signInAgainPath(requested: string | null): string {
+  return `/sign-in?${new URLSearchParams({ next: safeNext(requested) }).toString()}`;
+}

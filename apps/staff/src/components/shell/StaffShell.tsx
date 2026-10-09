@@ -2,81 +2,217 @@
 
 import { AppShell, type ShellNavGroup } from '@quad/ui/shell';
 import {
+  ArrowLeftRight,
+  BookOpen,
+  Bus,
+  Calculator,
   CalendarCheck,
+  CalendarRange,
+  CarFront,
+  ChartColumn,
+  ClipboardList,
+  CreditCard,
+  FileCheck,
+  Funnel,
   GraduationCap,
+  HandHeart,
+  HeartHandshake,
   House,
-  MessageSquare,
-  Settings,
+  LayoutGrid,
+  MessagesSquare,
+  Presentation,
+  Shield,
+  SlidersHorizontal,
+  Target,
+  TriangleAlert,
   Users,
-  Wallet,
+  type LucideIcon,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import { useEffect, type CSSProperties, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import type { ReactNode } from 'react';
+import { PreviewBanner } from './PreviewBanner';
+import { visibleNav } from './staff-nav';
+import { SupportBanner } from './SupportBanner';
+import { switchSchoolMenu } from './SwitchSchoolMenu';
+import { useShellActions } from './use-shell-actions';
+import { ViewAsPicker } from './ViewAsPicker';
+
+import type { Me, MeBrand, MePermissions, StaffPageId } from '@quad/contracts';
 
 import { useShellLabels } from '@/i18n/client';
-import { PLACEHOLDER_SCHOOL, PLACEHOLDER_USER } from '@/lib/placeholders';
 
-/** The staff portal's side bar, top bar and search around every /app page. */
-export function StaffShell({ children }: { children: ReactNode }) {
+/** Each page's icon (spec 03 side bar icons; lucide stands in for the drawings until D40 lands). */
+const ICONS: Record<StaffPageId, LucideIcon> = {
+  dashboard: House,
+  my_teaching: GraduationCap,
+  admissions: Funnel,
+  crm: Target,
+  communications: MessagesSquare,
+  family_connection: HeartHandshake,
+  evenings_forms: ClipboardList,
+  students: Users,
+  early_warning: TriangleAlert,
+  attendance: CalendarCheck,
+  pastoral: HandHeart,
+  courses: BookOpen,
+  timetable: LayoutGrid,
+  teachers_classes: Presentation,
+  staff_cover: ArrowLeftRight,
+  exams: FileCheck,
+  reports: ChartColumn,
+  fees: CreditCard,
+  accounting: Calculator,
+  routes: Bus,
+  pickup: CarFront,
+  academic_year: CalendarRange,
+  users_roles: Shield,
+  school_settings: SlidersHorizontal,
+};
+
+/**
+ * The school's brand as CSS variables (spec 03 "School brand colour", D32): the API computes
+ * the palette; `school-brand.css` maps these onto the token variables, taking `fillDark` in dark
+ * mode. Values only ever reach CSS variables, never class names.
+ */
+export function schoolBrandStyle(brand: MeBrand): CSSProperties {
+  return {
+    '--school-brand': brand.color,
+    '--school-brand-fill': brand.fill,
+    '--school-brand-fill-dark': brand.fillDark,
+    '--school-brand-ink': brand.ink,
+  };
+}
+
+/** Puts the brand on <html> too, so menus and toasts in portals (outside the shell) share it. */
+function useBrandOnRoot(brand: MeBrand) {
+  useEffect(() => {
+    const root = document.documentElement;
+    const style = schoolBrandStyle(brand);
+    root.setAttribute('data-school-brand', '');
+    for (const [name, value] of Object.entries(style)) root.style.setProperty(name, String(value));
+    return () => {
+      root.removeAttribute('data-school-brand');
+      for (const name of Object.keys(style)) root.style.removeProperty(name);
+    };
+  }, [brand]);
+}
+
+export interface StaffShellProps {
+  me: Me;
+  permissions: MePermissions;
+  children: ReactNode;
+}
+
+/**
+ * The staff portal's side bar, top bar, banners and profile menu around every /app page (spec 08),
+ * from `GET /me` and `GET /me/permissions`: the school's name and brand, the pages the person's
+ * role (or the previewed role) opens, the support and preview banners, View as, Switch school
+ * and Sign out.
+ */
+export function StaffShell({ me, permissions, children }: StaffShellProps) {
   const { t } = useTranslation();
   const labels = useShellLabels('staff');
   const pathname = usePathname();
   const router = useRouter();
+  const actions = useShellActions();
+  useBrandOnRoot(me.school.brand);
 
-  // TODO(M1): hide items for modules outside the school's plan and the person's permissions.
-  const groups: ShellNavGroup[] = [
+  const groups: ShellNavGroup[] = visibleNav(permissions.pages).map(({ group, pages }) => ({
+    id: group,
+    label: t(`nav.staff.group.${group}`),
+    items: pages.map((page) => ({
+      href: page.href,
+      label: t(`nav.staff.page.${page.id}`),
+      icon: ICONS[page.id],
+      exact: page.exact,
+    })),
+  }));
+  const role = me.support !== null ? t('shell.role.support') : (me.person.roleNames[0] ?? '');
+  const busy =
+    actions.signOut.isPending ||
+    actions.switchSchool.isPending ||
+    actions.backToMyView.isPending ||
+    actions.startPreview.isPending;
+  const canPreview =
+    me.support === null && (me.preview !== null || permissions.keys.includes('users.manage'));
+
+  const banner =
+    me.support !== null ? (
+      <SupportBanner
+        support={me.support}
+        exiting={actions.exitSupport.isPending}
+        onExit={() => {
+          actions.exitSupport.mutate();
+        }}
+      />
+    ) : me.preview !== null ? (
+      <PreviewBanner
+        preview={me.preview}
+        leaving={actions.backToMyView.isPending}
+        onBack={() => {
+          actions.backToMyView.mutate();
+        }}
+      />
+    ) : null;
+
+  const profileMenu = switchSchoolMenu(
+    me,
     {
-      id: 'overview',
-      label: t('nav.staff.group.overview'),
-      items: [{ href: '/app', label: t('nav.staff.home'), icon: House, exact: true }],
+      backToMyView: () => {
+        actions.backToMyView.mutate();
+      },
+      switchSchool: (tenantId) => {
+        actions.switchSchool.mutate(tenantId);
+      },
+      signOut: () => {
+        actions.signOut.mutate();
+      },
     },
-    {
-      id: 'students',
-      label: t('nav.staff.group.students'),
-      items: [
-        { href: '/app/students', label: t('nav.staff.students'), icon: Users },
-        { href: '/app/attendance', label: t('nav.staff.attendance'), icon: CalendarCheck },
-      ],
-    },
-    {
-      id: 'learning',
-      label: t('nav.staff.group.learning'),
-      items: [{ href: '/app/teaching', label: t('nav.staff.teaching'), icon: GraduationCap }],
-    },
-    {
-      id: 'relationships',
-      label: t('nav.staff.group.relationships'),
-      items: [{ href: '/app/messages', label: t('nav.staff.messages'), icon: MessageSquare }],
-    },
-    {
-      id: 'finance',
-      label: t('nav.staff.group.finance'),
-      items: [{ href: '/app/fees', label: t('nav.staff.fees'), icon: Wallet }],
-    },
-    {
-      id: 'settings',
-      label: t('nav.staff.group.settings'),
-      items: [{ href: '/app/settings', label: t('nav.staff.settings'), icon: Settings }],
-    },
-  ];
+    (key, values) => t(key, values),
+  );
 
   return (
-    <AppShell
-      variant="staff"
-      brand={{ title: PLACEHOLDER_SCHOOL.name, subtitle: t('shell.staff.subtitle') }}
-      user={{ name: PLACEHOLDER_USER.name, role: t(PLACEHOLDER_USER.roleKey) }}
-      groups={groups}
-      currentHref={pathname}
-      labels={labels}
-      linkComponent={Link}
-      onNavigate={(href) => {
-        router.push(href);
-      }}
-    >
-      {children}
-    </AppShell>
+    <div data-school-brand="" style={schoolBrandStyle(me.school.brand)}>
+      <AppShell
+        variant="staff"
+        brand={{
+          title: me.school.name,
+          subtitle: t('shell.staff.subtitle'),
+          initials: me.school.shortName,
+        }}
+        user={{ name: me.person.name, role }}
+        groups={groups}
+        currentHref={pathname}
+        labels={labels}
+        linkComponent={Link}
+        onNavigate={(href) => {
+          router.push(href);
+        }}
+        banner={banner}
+        actions={
+          canPreview ? (
+            <ViewAsPicker
+              preview={me.preview}
+              busy={busy}
+              onChoose={(choice) => {
+                actions.startPreview.mutate(choice);
+              }}
+              onBack={() => {
+                actions.backToMyView.mutate();
+              }}
+            />
+          ) : undefined
+        }
+        profileMenu={profileMenu}
+        onSignOut={() => {
+          actions.signOut.mutate();
+        }}
+      >
+        {children}
+      </AppShell>
+    </div>
   );
 }

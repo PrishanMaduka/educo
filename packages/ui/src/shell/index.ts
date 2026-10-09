@@ -2,6 +2,7 @@ export { AppShell, type AppShellProps } from './AppShell';
 export { MobileNav, type MobileNavProps } from './MobileNav';
 export { NotFoundPage, type NotFoundPageProps } from './NotFoundPage';
 export { PageHead, type PageHeadProps } from './PageHead';
+export { ProfileMenu, type ProfileMenuProps } from './ProfileMenu';
 export { Sidebar, type SidebarProps } from './Sidebar';
 export { readStored, useStoredValue, writeStored } from './stored';
 export {
@@ -23,7 +24,10 @@ export {
   type ShellLabels,
   type ShellLinkComponent,
   type ShellNavGroup,
+  type ShellMenuItem,
+  type ShellMenuSection,
   type ShellNavItem,
+  type ShellProfileMenu,
   type ShellUser,
   type ShellVariant,
 } from './types';

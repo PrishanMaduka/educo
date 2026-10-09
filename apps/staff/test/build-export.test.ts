@@ -59,14 +59,44 @@ describe('checkExport', () => {
   });
 });
 
+/**
+ * Every module a source file loads: static `import … from`, bare `import '…'`, `export … from`
+ * and dynamic `import('…')`, so a lazy import cannot slip sign-in code into the export.
+ */
+function importSourcesOf(source: string): string[] {
+  const patterns = [
+    /^\s*(?:import|export)\b[^'"`;]*?\bfrom\s*['"]([^'"]+)['"]/gm,
+    /^\s*import\s*['"]([^'"]+)['"]/gm,
+    /\bimport\s*\(\s*['"`]([^'"`]+)['"`]\s*\)/g,
+  ];
+  return patterns.flatMap((pattern) => [...source.matchAll(pattern)].map((m) => m[1] ?? ''));
+}
+
+describe('importSourcesOf', () => {
+  it('finds static, bare, re-exported and dynamic imports', () => {
+    const source = [
+      "import type { Metadata } from 'next';",
+      "import './globals.css';",
+      "export { x } from '@/lib/x';",
+      "const Flow = lazy(() => import('@/app/(auth)/flow'));",
+      'const api = await import(`@/lib/api`);',
+    ].join('\n');
+    expect(importSourcesOf(source).sort()).toEqual(
+      ['./globals.css', '@/app/(auth)/flow', '@/lib/api', '@/lib/x', 'next'].sort(),
+    );
+  });
+});
+
 describe('the root layout the export re-exports', () => {
   const layout = readFileSync(join(app, 'src/app/layout.tsx'), 'utf8');
-  const imports = [...layout.matchAll(/^import[^'"]*['"]([^'"]+)['"]/gm)].map((m) => m[1]);
+  const imports = importSourcesOf(layout);
 
   it('imports nothing from sign-in, the session or the API client', () => {
     expect(imports.length).toBeGreaterThan(0);
     for (const source of imports) {
-      expect(source).not.toMatch(/\(auth\)|@\/lib\/session|@\/lib\/api|@quad\/client|react-query/);
+      expect(source).not.toMatch(
+        /\(auth\)|@\/lib\/(?:session|api|server-session)|@\/components\/shell|@quad\/client|react-query/,
+      );
     }
   });
 

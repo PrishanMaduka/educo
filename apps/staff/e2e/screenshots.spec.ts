@@ -1,17 +1,30 @@
-import { expect, test } from '@playwright/test';
+import { expect } from '@playwright/test';
 import { saveScreenshot, schemeOf, takeScreenshots } from '@quad/config/playwright/checks';
+import { test } from '@quad/config/playwright/stack';
 
-import { withPortalCookie } from './portal-cookie';
+import { PRISHAN_STATE } from './sign-in-as';
 
 // Review screenshots for docs/screenshots/m0 (QUAD_SCREENSHOTS=1 pnpm --filter @quad/staff e2e screenshots).
 test.describe('screenshots', () => {
   test.skip(!takeScreenshots, 'Set QUAD_SCREENSHOTS=1 to write the review screenshots');
 
-  test('/app', async ({ page, context, baseURL }, testInfo) => {
-    await withPortalCookie(context, baseURL ?? '');
-    await page.goto('/app');
-    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-    await saveScreenshot(page, testInfo, 'm0', 'staff-app');
+  // docs/screenshots/m1/shell-<width>-<scheme>.png: the signed-in shell (Task 20), signed in
+  // through the stack as Prishan, at 1440 px in light and 390 px in dark, still.
+  test.describe('signed in', () => {
+    test.use({ storageState: PRISHAN_STATE });
+
+    test('/app (shell)', async ({ page }, testInfo) => {
+      const width = page.viewportSize()?.width;
+      const scheme = schemeOf(testInfo);
+      test.skip(
+        !(width === 1440 && scheme === 'light') && !(width === 390 && scheme === 'dark'),
+        'Reviewed at 1440 px in light and 390 px in dark',
+      );
+      await page.emulateMedia({ reducedMotion: 'reduce' });
+      await page.goto('/app');
+      await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+      await saveScreenshot(page, testInfo, 'm1', 'shell');
+    });
   });
 
   // docs/screenshots/landing/app-<width>-<scheme>.png, still (reduced motion), to set beside the

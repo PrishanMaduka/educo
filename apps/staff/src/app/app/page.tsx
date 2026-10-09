@@ -1,17 +1,20 @@
-import { greetingPeriod, type GreetingResult } from '@quad/domain';
+import { type GreetingResult } from '@quad/domain';
 import { formatDate } from '@quad/ui';
+import { redirect } from 'next/navigation';
 
 import { Greeting } from './_components/Greeting';
 
 import type { Metadata } from 'next';
 
+import { NoAccess } from '@/components/shell/NoAccess';
+import { accessOf, hrefOf, roleNameOf } from '@/components/shell/staff-nav';
 import { t, type MessageKey } from '@/i18n';
-import { PLACEHOLDER_SCHOOL, PLACEHOLDER_USER } from '@/lib/placeholders';
+import { requireSignedIn } from '@/lib/server-session';
 
-// The greeting follows the time of day, so the page renders on each request, never at build time.
+// The greeting follows the time of day and the session, so the page renders on each request.
 export const dynamic = 'force-dynamic';
 
-export const metadata: Metadata = { title: t('nav.staff.home') };
+export const metadata: Metadata = { title: t('nav.staff.page.dashboard') };
 
 const greetingKey: Record<GreetingResult['word'], MessageKey> = {
   'Good morning': 'greeting.morning',
@@ -20,16 +23,31 @@ const greetingKey: Record<GreetingResult['word'], MessageKey> = {
   Hello: 'greeting.hello',
 };
 
-export default function StaffHome() {
-  // Computed once on the server and passed down, so the client renders the same period (no hydration mismatch).
-  const now = new Date();
-  const { period, word } = greetingPeriod(now, PLACEHOLDER_SCHOOL.timeZone);
+/**
+ * The Dashboard (spec 08). Sign-in lands here; a role without the Dashboard starts on its own
+ * home page instead (teachers on My teaching, front desk on Attendance).
+ */
+export default async function StaffHome() {
+  const session = await requireSignedIn();
+  if (session.kind !== 'ready') return null;
+  const { me, permissions } = session;
+  if (accessOf(permissions.pages, 'dashboard') === 'hidden') {
+    if (permissions.home !== 'dashboard') redirect(hrefOf(permissions.home));
+    return (
+      <NoAccess
+        page="dashboard"
+        roleName={roleNameOf(me) ?? t('shell.role.support')}
+        home={permissions.home}
+      />
+    );
+  }
+  // The API computes the greeting in the school's time zone (D27 follow-up).
   return (
     <Greeting
-      period={period}
-      greeting={t(greetingKey[word])}
-      firstName={PLACEHOLDER_USER.firstName}
-      dateLine={formatDate(now, PLACEHOLDER_SCHOOL.timeZone, 'weekday')}
+      period={me.greeting.period}
+      greeting={t(greetingKey[me.greeting.word])}
+      firstName={me.person.firstName}
+      dateLine={formatDate(new Date(), me.school.timeZone, 'weekday')}
       summary={t('home.staff.summaryPlaceholder')}
     />
   );

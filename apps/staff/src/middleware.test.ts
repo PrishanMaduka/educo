@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import { PORTAL_PATH_HEADER } from './lib/session';
 import { middleware } from './middleware';
 
 function request(path: string, cookie?: string): NextRequest {
@@ -39,6 +40,17 @@ describe('staff middleware', () => {
       expect(response.headers.get('location')).toBeNull();
     },
   );
+
+  it('tells the portal layout which page was asked for, overriding any header the browser sent', () => {
+    const response = middleware(
+      new NextRequest(new URL('/app/fees?term=2', 'http://localhost:3000'), {
+        headers: { cookie: 'quad_sid=abc', [PORTAL_PATH_HEADER]: 'https://evil.example' },
+      }),
+    );
+    expect(response.headers.get(`x-middleware-request-${PORTAL_PATH_HEADER}`)).toBe(
+      '/app/fees?term=2',
+    );
+  });
 
   it('leaves pages outside the portal alone', () => {
     for (const path of ['/', '/sign-in', '/apps', '/about', '/healthz']) {

@@ -6,10 +6,10 @@ import { useTranslation } from 'react-i18next';
 
 import { AuthCard } from '../../../_components/AuthCard';
 import { StepError } from '../../../_components/bits';
-import { errorKeyFor } from '../../../_components/error-copy';
 import { InvalidLink } from '../../../_components/InvalidLink';
 
 import { ApiError, staffApi, unwrap } from '@/lib/api';
+import { errorKeyFor } from '@/lib/error-copy';
 
 /**
  * Redeems the support link once the page has loaded (a link preview that fetches the page

@@ -7,12 +7,12 @@ import { useTranslation } from 'react-i18next';
 
 import { AuthCard } from './AuthCard';
 import { BigButton, StepError } from './bits';
-import { errorKeyFor, fieldError } from './error-copy';
 import { QrCode } from './QrCode';
 
 import type { SignInNext } from '@quad/contracts';
 
 import { staffApi, unwrap } from '@/lib/api';
+import { errorKeyFor, fieldError } from '@/lib/error-copy';
 
 export interface TwoStepSetupProps {
   inviteToken?: string;
@@ -40,7 +40,9 @@ export function TwoStepSetup({ inviteToken, onSetUp }: TwoStepSetupProps) {
   const { t } = useTranslation();
   const [code, setCode] = useState('');
   const [missing, setMissing] = useState(false);
-  // A query, so React's double effects in development start one authenticator, not two.
+  // A query, so React's double effects in development start one authenticator, not two. Each
+  // call mints a new pending secret, so it never runs again by itself: not on focus, on a
+  // reconnect or on a remount while the card is up (after an error too).
   const started = useQuery({
     queryKey: ['me', 'totp', 'start'],
     queryFn: () =>
@@ -49,6 +51,8 @@ export function TwoStepSetup({ inviteToken, onSetUp }: TwoStepSetupProps) {
     gcTime: 0,
     retry: false,
     refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchOnMount: false,
   });
   const confirm = useMutation({
     mutationFn: (value: string) =>

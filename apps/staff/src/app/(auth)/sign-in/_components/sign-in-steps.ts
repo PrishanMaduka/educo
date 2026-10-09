@@ -25,6 +25,11 @@ export interface SignInState {
   readonly step: SignInStep;
   /** The work email typed at the first step (shown, and sent with the password). */
   readonly email: string;
+  /**
+   * True when `email` is the invite's masked address (`n•••@school.lk`): shown on the card only,
+   * never put back in the email field.
+   */
+  readonly emailMasked?: boolean;
 }
 
 export type SignInEvent =
@@ -73,7 +78,7 @@ export function signInReducer(state: SignInState, event: SignInEvent): SignInSta
       return { step: { name: 'password' }, email: event.email };
     case 'change_email':
     case 'back':
-      return { ...state, step: { name: 'email' } };
+      return { step: { name: 'email' }, email: state.emailMasked === true ? '' : state.email };
     case 'answered':
       return { ...state, step: stepFor(event.next) };
     case 'two_step_set_up':

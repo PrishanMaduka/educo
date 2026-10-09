@@ -8,9 +8,9 @@ import { useTranslation } from 'react-i18next';
 
 import { AuthCard } from './AuthCard';
 import { BackButton, BigButton, StepError } from './bits';
-import { errorKeyFor, fieldError, isFieldError } from './error-copy';
 
 import { staffApi, unwrapEmpty } from '@/lib/api';
+import { errorKeyFor, fieldError, isFieldError } from '@/lib/error-copy';
 
 export interface ForgotStepProps {
   email: string;

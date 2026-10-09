@@ -1,9 +1,9 @@
+import { ApiError } from './api';
+
 import type { MessageKey } from '@/i18n';
 
-import { ApiError } from '@/lib/api';
-
 /**
- * What the sign-in pages say for an API error, from its `code` (spec 06) only: the API answers a
+ * What the sign-in pages and the portal shell say for an API error, from its `code` (spec 06) only: the API answers a
  * wrong password, an unknown email and a disabled account alike, so the copy never hints at
  * which it was.
  */
@@ -17,6 +17,7 @@ const BY_CODE: Readonly<Record<string, MessageKey>> = {
   unavailable: 'error.signInUnavailable',
   invalid_link: 'link.invalid.title',
   forbidden: 'error.notYourSchool',
+  preview_read_only: 'error.previewReadOnly',
 };
 
 /** The message key for a failed call; anything unexpected (a network error too) is generic. */
@@ -35,4 +36,13 @@ export function isFieldError(error: unknown): boolean {
   return (
     error instanceof ApiError && error.code === 'validation' && Object.keys(error.fields).length > 0
   );
+}
+
+/** A toast for a failed shell action: the API's field message for a validation answer, else the code's copy. */
+export function messageFor(error: unknown, translate: (key: MessageKey) => string): string {
+  if (error instanceof ApiError && error.code === 'validation') {
+    const first = Object.values(error.fields)[0];
+    if (first !== undefined) return first;
+  }
+  return translate(errorKeyFor(error));
 }

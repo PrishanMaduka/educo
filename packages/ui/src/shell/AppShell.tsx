@@ -17,6 +17,7 @@ import type {
   ShellLabels,
   ShellLinkComponent,
   ShellNavGroup,
+  ShellProfileMenu,
   ShellUser,
   ShellVariant,
 } from './types';
@@ -32,6 +33,14 @@ export interface AppShellProps {
   linkComponent?: ShellLinkComponent;
   /** Goes to a page chosen in the search palette. */
   onNavigate: (href: string) => void;
+  /** Bars under the top bar that stay in view, for example the support and preview banners. */
+  banner?: ReactNode;
+  /** Desktop-only top bar controls, for example **View as**. */
+  actions?: ReactNode;
+  /** The profile button's menu (Switch school, Sign out). */
+  profileMenu?: ShellProfileMenu;
+  /** The side bar's Sign out button. */
+  onSignOut?: () => void;
   children: ReactNode;
 }
 
@@ -48,6 +57,10 @@ export function AppShell({
   labels,
   linkComponent,
   onNavigate,
+  banner,
+  actions,
+  profileMenu,
+  onSignOut,
   children,
 }: AppShellProps) {
   const collapsed = useStoredValue(RAIL_STORAGE_KEY) === 'collapsed';
@@ -78,6 +91,7 @@ export function AppShell({
     navLabel: labels.nav,
     signOutLabel: labels.signOut,
     linkComponent,
+    onSignOut,
   };
 
   return (
@@ -116,21 +130,26 @@ export function AppShell({
         }
       >
         <div className="flex min-w-0 flex-col">
-          <Topbar
-            labels={labels}
-            user={user}
-            collapsed={collapsed}
-            onToggleCollapsed={() => {
-              applyRail(!collapsed);
-              writeStored(RAIL_STORAGE_KEY, collapsed ? 'expanded' : 'collapsed');
-            }}
-            onOpenSearch={() => {
-              setSearchOpen(true);
-            }}
-            onOpenAskQuad={() => {
-              // TODO(M10): open the Ask Quad panel.
-            }}
-          />
+          <div className="sticky top-0 z-20">
+            <Topbar
+              labels={labels}
+              user={user}
+              actions={actions}
+              profileMenu={profileMenu}
+              collapsed={collapsed}
+              onToggleCollapsed={() => {
+                applyRail(!collapsed);
+                writeStored(RAIL_STORAGE_KEY, collapsed ? 'expanded' : 'collapsed');
+              }}
+              onOpenSearch={() => {
+                setSearchOpen(true);
+              }}
+              onOpenAskQuad={() => {
+                // TODO(M10): open the Ask Quad panel.
+              }}
+            />
+            {banner}
+          </div>
           <main
             id="main"
             tabIndex={-1}

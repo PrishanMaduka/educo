@@ -71,6 +71,10 @@ locals {
 
   node_user = "1000:1000"
 
+  # Server components call the API through the public origin (CloudFront routes /api/v1) until
+  # M12 adds service discovery (OQ16, spec 02 "Web server (run time)").
+  api_internal_url = var.public_web_url
+
   tasks = {
     api = {
       cpu         = var.services.api.cpu
@@ -115,7 +119,7 @@ locals {
       user        = local.node_user
       command     = null
       ports       = [3000]
-      environment = merge({ APP_ENV = var.environment, HOSTNAME = "0.0.0.0", PORT = "3000", SENTRY_ENVIRONMENT = var.environment, OTEL_SERVICE_NAME = "quad-staff" }, local.otel_endpoint)
+      environment = merge({ APP_ENV = var.environment, HOSTNAME = "0.0.0.0", PORT = "3000", SENTRY_ENVIRONMENT = var.environment, OTEL_SERVICE_NAME = "quad-staff", API_INTERNAL_URL = local.api_internal_url }, local.otel_endpoint)
       secrets     = merge({ SENTRY_DSN = "${local.sentry_dsn_arn}:staff::" }, local.otel_headers)
       volumes     = { tmp = "/tmp", next-cache = "/app/apps/staff/.next/cache" }
       health      = local.web_health
@@ -127,7 +131,7 @@ locals {
       user        = local.node_user
       command     = null
       ports       = [3001]
-      environment = merge({ APP_ENV = var.environment, HOSTNAME = "0.0.0.0", PORT = "3001", SENTRY_ENVIRONMENT = var.environment, OTEL_SERVICE_NAME = "quad-console" }, local.otel_endpoint)
+      environment = merge({ APP_ENV = var.environment, HOSTNAME = "0.0.0.0", PORT = "3001", SENTRY_ENVIRONMENT = var.environment, OTEL_SERVICE_NAME = "quad-console", API_INTERNAL_URL = local.api_internal_url }, local.otel_endpoint)
       secrets     = merge({ SENTRY_DSN = "${local.sentry_dsn_arn}:console::" }, local.otel_headers)
       volumes     = { tmp = "/tmp", next-cache = "/app/apps/console/.next/cache" }
       health      = local.web_health

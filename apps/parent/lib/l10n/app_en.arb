@@ -1,12 +1,37 @@
 {
   "@@locale": "en",
-  "navStaffHome": "Home",
-  "navStaffStudents": "Students",
-  "navStaffAttendance": "Attendance",
-  "navStaffTeaching": "Teaching",
-  "navStaffFees": "Fees",
-  "navStaffMessages": "Messages",
-  "navStaffSettings": "Settings",
+  "navStaffGroupOverview": "Overview",
+  "navStaffGroupPreAdmission": "Pre-admission",
+  "navStaffGroupRelationships": "Relationships",
+  "navStaffGroupStudentInformation": "Student information",
+  "navStaffGroupLearning": "Learning",
+  "navStaffGroupFinance": "Finance",
+  "navStaffGroupTransport": "Transport",
+  "navStaffGroupSettings": "Settings",
+  "navStaffPageDashboard": "Dashboard",
+  "navStaffPageMyTeaching": "My teaching",
+  "navStaffPageAdmissions": "Admissions pipeline",
+  "navStaffPageCrm": "CRM & leads",
+  "navStaffPageCommunications": "Communications",
+  "navStaffPageFamilyConnection": "Family connection",
+  "navStaffPageEveningsForms": "Evenings & forms",
+  "navStaffPageStudents": "Students",
+  "navStaffPageEarlyWarning": "Early warning",
+  "navStaffPageAttendance": "Attendance",
+  "navStaffPagePastoral": "Pastoral care",
+  "navStaffPageCourses": "Courses & gradebook",
+  "navStaffPageTimetable": "Timetable",
+  "navStaffPageTeachersClasses": "Teachers & classes",
+  "navStaffPageStaffCover": "Staff cover",
+  "navStaffPageExams": "Exams",
+  "navStaffPageReports": "Reports",
+  "navStaffPageFees": "Fees & invoicing",
+  "navStaffPageAccounting": "Accounting",
+  "navStaffPageRoutes": "Routes",
+  "navStaffPagePickup": "Pickup",
+  "navStaffPageAcademicYear": "Academic year",
+  "navStaffPageUsersRoles": "Users & roles",
+  "navStaffPageSchoolSettings": "School settings",
   "navConsoleOverview": "Overview",
   "navConsoleSchools": "Schools",
   "navConsolePlans": "Plans",
@@ -17,12 +42,6 @@
   "navParentPayments": "Payments",
   "navParentMessages": "Messages",
   "navParentMore": "More",
-  "navStaffGroupOverview": "Overview",
-  "navStaffGroupStudents": "Student information",
-  "navStaffGroupLearning": "Learning",
-  "navStaffGroupRelationships": "Relationships",
-  "navStaffGroupFinance": "Finance",
-  "navStaffGroupSettings": "Settings",
   "navConsoleGroupPlatform": "Platform",
   "navConsoleGroupOperations": "Operations",
   "themeSystem": "System",
@@ -160,6 +179,84 @@
   "shellConsoleTitle": "Quad",
   "shellConsoleSubtitle": "Platform owner, all schools",
   "shellStaffSubtitle": "Staff portal · powered by Quad",
+  "shellProfileMenu": "Your profile",
+  "shellProfileSwitchSchool": "Switch school",
+  "shellProfilePaused": "Paused",
+  "shellRoleSupport": "Quad support",
+  "shellPausedTitle": "This school is paused right now",
+  "supportBanner": "Support view: you’re in {school} as {name} from Quad. Everything you do here is logged in the school’s audit log.",
+  "@supportBanner": {
+    "placeholders": {
+      "school": {
+        "type": "Object"
+      },
+      "name": {
+        "type": "Object"
+      }
+    }
+  },
+  "supportExit": "Exit to platform",
+  "previewBannerTitle": "Previewing as {role}",
+  "@previewBannerTitle": {
+    "placeholders": {
+      "role": {
+        "type": "Object"
+      }
+    }
+  },
+  "previewBannerWithSample": "Previewing as {role} · {name}",
+  "@previewBannerWithSample": {
+    "placeholders": {
+      "role": {
+        "type": "Object"
+      },
+      "name": {
+        "type": "Object"
+      }
+    }
+  },
+  "previewBannerDetail": "You see the menu, pages and actions this role has. Pages marked “View only” can’t be changed by this role.",
+  "previewBack": "Back to my view",
+  "previewPickerLabel": "View as role",
+  "previewPickerSelf": "View as: you",
+  "previewPickerRole": "View as: {role}",
+  "@previewPickerRole": {
+    "placeholders": {
+      "role": {
+        "type": "Object"
+      }
+    }
+  },
+  "noAccessTitle": "{page} isn’t part of the {role} role",
+  "@noAccessTitle": {
+    "placeholders": {
+      "page": {
+        "type": "Object"
+      },
+      "role": {
+        "type": "Object"
+      }
+    }
+  },
+  "noAccessBody": "People with this role won’t see this page in the menu. A school admin can change what the role can do in Users & roles.",
+  "noAccessHome": "Go to {page}",
+  "@noAccessHome": {
+    "placeholders": {
+      "page": {
+        "type": "Object"
+      }
+    }
+  },
+  "viewOnlyTag": "View only",
+  "placeholderSoonTitle": "{page} arrives soon",
+  "@placeholderSoonTitle": {
+    "placeholders": {
+      "page": {
+        "type": "Object"
+      }
+    }
+  },
+  "placeholderSoonBody": "We’re still building this part of Quad. It appears here as soon as it’s ready.",
   "homeStaffGreeting": "{greeting}, {name}",
   "@homeStaffGreeting": {
     "placeholders": {
@@ -175,7 +272,6 @@
   "homeConsoleCrumb": "Platform",
   "homeConsoleTitle": "Overview",
   "homeConsoleSummaryPlaceholder": "Once schools join Quad, this page will show how each one is doing and which need your attention first.",
-  "roleSchoolAdmin": "School admin",
   "rolePlatformOwner": "Platform owner",
   "shellConsolePlaceholderName": "Quad owner",
   "appNameParent": "Quad",
@@ -1008,6 +1104,7 @@
   "signInCodesList": "Your recovery codes",
   "signInCodesCopy": "Copy the codes",
   "signInCodesCopied": "Codes copied",
+  "signInCodesCopyFailed": "Couldn’t copy them. Select the codes and copy them yourself.",
   "signInCodesSubmit": "I’ve saved them, continue",
   "signInSchoolTitle": "Choose a school",
   "signInSchoolLede": "{email} is linked to {count, plural, one {{count} school} other {{count} schools}} on Quad. You can switch later from the menu.",

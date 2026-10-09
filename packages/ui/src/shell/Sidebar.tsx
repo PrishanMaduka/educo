@@ -37,6 +37,8 @@ export interface SidebarProps {
   linkComponent?: ShellLinkComponent;
   /** Called after a nav link is followed (the phone menu closes itself). */
   onNavigate?: () => void;
+  /** The rail's Sign out button. */
+  onSignOut?: () => void;
 }
 
 /*
@@ -167,6 +169,7 @@ export function Sidebar({
   signOutLabel,
   linkComponent,
   onNavigate,
+  onSignOut,
 }: SidebarProps) {
   return (
     <div className="rail-glow flex h-full min-h-0 flex-col">
@@ -179,10 +182,20 @@ export function Sidebar({
         <span
           className={cn(
             'grid size-[34px] shrink-0 place-items-center rounded-xl',
-            logoTile[variant],
+            // The initials are text, so they sit on the fill that carries brand-ink at 4.5:1.
+            brand.initials ? 'bg-brand-fill' : logoTile[variant],
           )}
         >
-          <QuadMark variant="white" size={25} aria-hidden="true" />
+          {brand.initials ? (
+            <span
+              aria-hidden="true"
+              className="text-[12px] font-extrabold tracking-[0.02em] text-brand-ink"
+            >
+              {brand.initials}
+            </span>
+          ) : (
+            <QuadMark variant="white" size={25} aria-hidden="true" />
+          )}
         </span>
         <div className={cn('min-w-0', collapsible && 'rail-collapsed:sr-only')}>
           <p
@@ -242,6 +255,7 @@ export function Sidebar({
         <button
           type="button"
           aria-label={signOutLabel}
+          onClick={onSignOut}
           className={cn(
             'grid size-9 shrink-0 cursor-pointer place-items-center rounded-full border border-rail-ink/20 bg-transparent text-rail-ink hover:bg-rail-2 max-[899px]:size-11',
             transition,

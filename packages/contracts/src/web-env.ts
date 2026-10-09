@@ -77,6 +77,41 @@ export function parseWebPublicEnv(source: Record<string, string | undefined>): W
   return result.data;
 }
 
+/**
+ * Runtime variables the staff and console servers read (spec 02 "Web server (run time)"), not
+ * the browser: `API_INTERNAL_URL` is the API origin server components call (OQ16). Locally it
+ * defaults to the API on :4000; staging and production must set it.
+ */
+export const WebServerEnvSchema = z
+  .object({
+    APP_ENV: optional(z.enum(['local', 'staging', 'production'])).transform(
+      (value) => value ?? 'local',
+    ),
+    API_INTERNAL_URL: optional(origin),
+  })
+  .superRefine((env, ctx) => {
+    if (env.APP_ENV !== 'local' && env.API_INTERNAL_URL === undefined) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['API_INTERNAL_URL'],
+        message: `Required when APP_ENV is ${env.APP_ENV}`,
+      });
+    }
+  })
+  .transform((env) => ({ API_INTERNAL_URL: env.API_INTERNAL_URL ?? 'http://localhost:4000' }));
+
+export type WebServerEnv = z.infer<typeof WebServerEnvSchema>;
+
+/** Parses the web servers' runtime variables, or throws with every problem listed. */
+export function parseWebServerEnv(source: Record<string, string | undefined>): WebServerEnv {
+  const result = WebServerEnvSchema.safeParse(source);
+  if (!result.success) {
+    const problems = result.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`);
+    throw new Error(`Invalid web server environment variables:\n  ${problems.join('\n  ')}`);
+  }
+  return result.data;
+}
+
 /** The surfaces that answer on the public internet (spec 20, edge). */
 export type RobotsSurface = 'staff' | 'api' | 'console';
 

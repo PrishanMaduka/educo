@@ -1,7 +1,7 @@
 import { robotsTagFor } from '@quad/contracts/web-env';
 import { NextResponse, type NextRequest } from 'next/server';
 
-import { hasSessionCookie, signInPathFor } from '@/lib/session';
+import { hasSessionCookie, PORTAL_PATH_HEADER, signInPathFor } from '@/lib/session';
 
 // The Node.js runtime reads APP_ENV when the server runs, so one image serves every environment.
 // The matcher covers every page and route handler (`/healthz` included) and skips hashed static
@@ -15,17 +15,25 @@ const TOKEN_PAGE = /^\/sign-in\/(?:reset|invite|support)\/[^/]+\/?$/;
 
 /**
  * - A visit to the portal without the session cookie goes to `/sign-in?next=<page>` (307). The
- *   cookie is only a hint: the API still checks the session on every call.
+ *   cookie is only a hint: the API still checks the session on every call. With the cookie, the
+ *   page asked for goes to the layout in `PORTAL_PATH_HEADER`.
  * - The signed-link pages get `Referrer-Policy: no-referrer` and at least `X-Robots-Tag: noindex`,
  *   so the token never leaves in a Referer header or reaches a search index.
  * - `X-Robots-Tag` where the staff app must not be indexed (spec 20).
  */
 export function middleware(request: NextRequest): NextResponse {
   const { pathname, search } = request.nextUrl;
-  if (PORTAL.test(pathname) && !hasSessionCookie((name) => request.cookies.get(name)?.value)) {
+  const isPortal = PORTAL.test(pathname);
+  if (isPortal && !hasSessionCookie((name) => request.cookies.get(name)?.value)) {
     return NextResponse.redirect(new URL(signInPathFor(pathname, search), request.url), 307);
   }
-  const response = NextResponse.next();
+  let response = NextResponse.next();
+  if (isPortal) {
+    // The layout redirects an expired session to sign-in, back to this page (`?next=`).
+    const headers = new Headers(request.headers);
+    headers.set(PORTAL_PATH_HEADER, `${pathname}${search}`);
+    response = NextResponse.next({ request: { headers } });
+  }
   const robotsTag = robotsTagFor(process.env.APP_ENV, 'staff');
   if (TOKEN_PAGE.test(pathname)) {
     response.headers.set('referrer-policy', 'no-referrer');

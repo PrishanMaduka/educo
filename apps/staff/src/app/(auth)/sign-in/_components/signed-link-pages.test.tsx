@@ -1,15 +1,16 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { fake, resetFake } from '../../../../../test/fake-api';
-import { AuthProviders } from '../../_components/AuthProviders';
 import { InviteFlow } from '../invite/[token]/_components/InviteFlow';
 import { ResetPassword } from '../reset/[token]/_components/ResetPassword';
 import { SupportRedeem } from '../support/[token]/_components/SupportRedeem';
 
 import type * as Api from '@/lib/api';
 import type { ReactNode } from 'react';
+
+import { Providers as AuthProviders } from '@/components/Providers';
 
 vi.mock('@/lib/api', async (importOriginal) => {
   const actual = await importOriginal<typeof Api>();
@@ -143,6 +144,102 @@ describe('the invite link page', () => {
     ]);
     expect(fake.requests[1]?.body).toMatchObject({ inviteToken: TOKEN });
     expect(fake.requests[2]).toMatchObject({ body: {}, csrf: 'csrf-1' });
+  });
+
+  it('accepts once, even when the chosen school then asks for two-step and the flow goes on', async () => {
+    const school = {
+      tenantId: '0190a000-0000-7000-8000-0000000000b2',
+      name: 'Kandy Hill Academy',
+      shortName: 'KHA',
+      logoUrl: null,
+      brand: { color: '#1B7F53', fill: '#1B7F53', fillDark: '#2FA36E', ink: '#FFFFFF' },
+      roleNames: ['Teacher'],
+      suspended: false,
+      suspendReason: null,
+    };
+    resetFake({
+      [`GET /api/v1/auth/invites/${TOKEN}`]: details(false),
+      'POST /api/v1/auth/password': { status: 200, body: { next: 'choose_school' } },
+      [`POST /api/v1/auth/invites/${TOKEN}/accept`]: [
+        { status: 200, body: { next: 'choose_school' } },
+        INVALID,
+      ],
+      'GET /api/v1/auth/memberships': { status: 200, body: { items: [school] } },
+      'POST /api/v1/auth/select-school': {
+        status: 403,
+        body: { code: 'two_step_required', message: 'x' },
+      },
+      'POST /api/v1/me/totp': [
+        {
+          status: 200,
+          body: {
+            otpauthUri: 'otpauth://totp/Quad:n?secret=JBSWY3DPEHPK3PXP&issuer=Quad',
+            recoveryCodes: null,
+            next: null,
+          },
+        },
+        { status: 200, body: { otpauthUri: null, recoveryCodes: ['abcde-fghjk'], next: 'done' } },
+      ],
+      'GET /api/v1/me': { status: 200, body: { school: { name: 'Kandy Hill Academy' } } },
+    });
+    withProviders(<InviteFlow token={TOKEN} />);
+    await userEvent.click(await screen.findByRole('button', { name: 'Sign in to accept' }));
+    await userEvent.type(screen.getByLabelText('Work email'), 'nadeesha@kandyhill.lk');
+    await userEvent.click(screen.getByRole('button', { name: 'Continue' }));
+    await userEvent.type(await screen.findByLabelText('Password'), 'a long passphrase');
+    await userEvent.click(screen.getByRole('button', { name: 'Sign in' }));
+    await userEvent.click(await screen.findByRole('button', { name: /Kandy Hill Academy/ }));
+    expect(await heading('Turn on two-step sign-in')).toBeInTheDocument();
+    fireEvent.paste(await screen.findByRole('textbox', { name: 'Digit 1 of 6' }), {
+      clipboardData: { getData: () => '123456' },
+    });
+    await userEvent.click(await screen.findByRole('button', { name: 'I’ve saved them, continue' }));
+    expect(await heading(/Opening/)).toBeInTheDocument();
+    expect(screen.queryByText('This link isn’t valid any more')).toBeNull();
+    expect(
+      fake.requests.filter(
+        (request) => request.key === `POST /api/v1/auth/invites/${TOKEN}/accept`,
+      ),
+    ).toHaveLength(1);
+  });
+
+  it('offers a way back to sign in when accepting fails', async () => {
+    resetFake({
+      [`GET /api/v1/auth/invites/${TOKEN}`]: details(false),
+      'POST /api/v1/auth/password': { status: 200, body: { next: 'done' } },
+      [`POST /api/v1/auth/invites/${TOKEN}/accept`]: {
+        status: 401,
+        body: { code: 'unauthorized', message: 'x' },
+      },
+    });
+    withProviders(<InviteFlow token={TOKEN} />);
+    await userEvent.click(await screen.findByRole('button', { name: 'Sign in to accept' }));
+    await userEvent.type(screen.getByLabelText('Work email'), 'nadeesha@kandyhill.lk');
+    await userEvent.click(screen.getByRole('button', { name: 'Continue' }));
+    await userEvent.type(await screen.findByLabelText('Password'), 'a long passphrase');
+    await userEvent.click(screen.getByRole('button', { name: 'Sign in' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent('Sign in with the account');
+    expect(screen.getByRole('link', { name: 'Back to sign in' })).toHaveAttribute(
+      'href',
+      '/sign-in',
+    );
+  });
+
+  it('never fills the email step with the masked address after a new account sets its password', async () => {
+    resetFake({
+      [`GET /api/v1/auth/invites/${TOKEN}`]: details(true),
+      [`POST /api/v1/auth/invites/${TOKEN}/accept`]: { status: 200, body: { next: 'two_step' } },
+    });
+    withProviders(<InviteFlow token={TOKEN} />);
+    await userEvent.type(
+      await screen.findByLabelText('Choose a password'),
+      'a long first passphrase',
+    );
+    await userEvent.click(screen.getByRole('button', { name: 'Accept and set up my account' }));
+    expect(await heading('Two-step sign-in')).toBeInTheDocument();
+    expect(screen.getByText('n•••@kandyhill.lk')).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: /Change/ }));
+    expect(await screen.findByLabelText('Work email')).toHaveValue('');
   });
 
   it('says a refused invite link is not valid any more, naming no school', async () => {

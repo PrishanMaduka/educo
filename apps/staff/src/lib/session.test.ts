@@ -5,6 +5,7 @@ import {
   hasSessionCookie,
   lastSchoolFrom,
   safeNext,
+  signInAgainPath,
   signInPathFor,
 } from './session';
 
@@ -92,5 +93,16 @@ describe('signInPathFor', () => {
       '/sign-in?next=%2Fapp%2Fstudents%3Fyear%3D7',
     );
     expect(signInPathFor('/app', '')).toBe('/sign-in?next=%2Fapp');
+  });
+});
+
+describe('signInAgainPath', () => {
+  it('sends an expired session to sign-in, back to the portal page asked for', () => {
+    expect(signInAgainPath('/app/fees?term=2')).toBe('/sign-in?next=%2Fapp%2Ffees%3Fterm%3D2');
+  });
+
+  it('falls back to /app for anything that is not a portal page', () => {
+    expect(signInAgainPath(null)).toBe('/sign-in?next=%2Fapp');
+    expect(signInAgainPath('https://evil.example/app')).toBe('/sign-in?next=%2Fapp');
   });
 });

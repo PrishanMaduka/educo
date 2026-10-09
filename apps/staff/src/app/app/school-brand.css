@@ -1,0 +1,42 @@
+/*
+ * The school's brand in the portal (spec 03 "School brand colour"; D32). StaffShell sets the
+ * palette the API computed as inline variables (--school-brand, --school-brand-fill,
+ * --school-brand-fill-dark, --school-brand-ink) with data-school-brand, on the shell and on
+ * <html>; here they replace the token variables, so `bg-brand-fill`, `text-brand-ink` and the
+ * rest follow the school. Dark mode takes the dark fill and keeps the dark brand-ink token.
+ */
+[data-school-brand] {
+  --quad-brand: var(--school-brand);
+  --quad-brand-fill: var(--school-brand-fill);
+  --quad-brand-soft: color-mix(in srgb, var(--school-brand) 13%, var(--quad-surface));
+}
+
+/* Light: the API's ink on the light fill. */
+:root[data-theme='light'] [data-school-brand],
+:root[data-theme='light'][data-school-brand] {
+  --quad-brand-ink: var(--school-brand-ink);
+}
+
+/* Dark: the lightened fill, also for the brand colour itself, so it stays readable on navy. */
+:root[data-theme='dark'] [data-school-brand],
+:root[data-theme='dark'][data-school-brand] {
+  --quad-brand: var(--school-brand-fill-dark);
+  --quad-brand-fill: var(--school-brand-fill-dark);
+  --quad-brand-soft: color-mix(in srgb, var(--school-brand-fill-dark) 13%, var(--quad-surface));
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme='dark']) [data-school-brand],
+  :root:not([data-theme='dark'])[data-school-brand] {
+    --quad-brand-ink: var(--school-brand-ink);
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) [data-school-brand],
+  :root:not([data-theme='light'])[data-school-brand] {
+    --quad-brand: var(--school-brand-fill-dark);
+    --quad-brand-fill: var(--school-brand-fill-dark);
+    --quad-brand-soft: color-mix(in srgb, var(--school-brand-fill-dark) 13%, var(--quad-surface));
+  }
+}

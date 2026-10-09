@@ -8,9 +8,11 @@ import { cn } from '../lib/cn';
 import { focusRing, ICON_STROKE, transition } from '../lib/motion';
 
 import { MobileNavTrigger } from './MobileNav';
+import { ProfileMenu } from './ProfileMenu';
 import { ThemeToggle } from './ThemeToggle';
 
-import type { ShellLabels, ShellUser } from './types';
+import type { ShellLabels, ShellProfileMenu, ShellUser } from './types';
+import type { ReactNode } from 'react';
 
 export interface TopbarProps {
   labels: ShellLabels;
@@ -19,6 +21,10 @@ export interface TopbarProps {
   onToggleCollapsed: () => void;
   onOpenSearch: () => void;
   onOpenAskQuad: () => void;
+  /** Desktop-only controls before the theme button, for example **View as** (spec 08). */
+  actions?: ReactNode;
+  /** The profile button's menu; without it the button only shows who is signed in. */
+  profileMenu?: ShellProfileMenu;
 }
 
 /** Round 38 px buttons (prototype `.iconbtn`), 44 px touch targets below the 900 px shell breakpoint. */
@@ -28,7 +34,10 @@ const round =
 const kbd =
   'rounded-[5px] font-sans border border-b-2 border-line-strong bg-surface px-[5px] text-[11px] leading-[1.5] font-semibold text-ink-2';
 
-/** Sticky, translucent top bar (spec 03 shell): menu or collapse, search (Ctrl K), Ask Quad, theme, notifications, profile. */
+/**
+ * Translucent top bar (spec 03 shell): menu or collapse, search (Ctrl K), Ask Quad, desktop
+ * actions, theme, notifications, profile. `AppShell` keeps it (and any banner) stuck to the top.
+ */
 export function Topbar({
   labels,
   user,
@@ -36,9 +45,11 @@ export function Topbar({
   onToggleCollapsed,
   onOpenSearch,
   onOpenAskQuad,
+  actions,
+  profileMenu,
 }: TopbarProps) {
   return (
-    <header className="sticky top-0 z-20 flex min-h-16 items-center gap-3 border-b border-dashed border-line-strong bg-canvas/85 px-6 py-2.5 backdrop-blur-[10px] max-[899px]:gap-2 max-[899px]:px-4">
+    <header className="flex min-h-16 items-center gap-3 border-b border-dashed border-line-strong bg-canvas/85 px-6 py-2.5 backdrop-blur-[10px] max-[899px]:gap-2 max-[899px]:px-4">
       <MobileNavTrigger asChild>
         <IconButton
           icon={Menu}
@@ -91,22 +102,29 @@ export function Topbar({
           {labels.askQuadShortcut}
         </kbd>
       </button>
+      {actions ? (
+        <div className="flex shrink-0 items-center gap-2 max-[899px]:hidden">{actions}</div>
+      ) : null}
       <ThemeToggle label={labels.themeToggle} describe={labels.themeCurrent} className={round} />
       <IconButton icon={Bell} label={labels.notifications} className={round} />
-      <button
-        type="button"
-        aria-label={labels.profile}
-        className={cn(
-          'flex shrink-0 cursor-pointer items-center gap-2.5 rounded-full border-0 bg-transparent p-0 pl-1.5 text-left',
-          focusRing,
-        )}
-      >
-        <Avatar name={user.name} decorative className="max-[899px]:size-11" />
-        <span className="max-[899px]:hidden">
-          <span className="block text-[13px] leading-tight font-bold text-ink">{user.name}</span>
-          <span className="block text-[11.5px] text-ink-2">{user.role}</span>
-        </span>
-      </button>
+      {profileMenu ? (
+        <ProfileMenu user={user} menu={profileMenu} labels={labels} />
+      ) : (
+        <button
+          type="button"
+          aria-label={labels.profile}
+          className={cn(
+            'flex shrink-0 cursor-pointer items-center gap-2.5 rounded-full border-0 bg-transparent p-0 pl-1.5 text-left',
+            focusRing,
+          )}
+        >
+          <Avatar name={user.name} decorative className="max-[899px]:size-11" />
+          <span className="max-[899px]:hidden">
+            <span className="block text-[13px] leading-tight font-bold text-ink">{user.name}</span>
+            <span className="block text-[11.5px] text-ink-2">{user.role}</span>
+          </span>
+        </button>
+      )}
     </header>
   );
 }

@@ -35,6 +35,16 @@ describe('OtpBoxes', () => {
     for (const box of boxes()) expect(box).toHaveAttribute('inputmode', 'numeric');
   });
 
+  it('shares the row equally between however many boxes `length` asks for', () => {
+    render(<Harness length={4} label="4-digit code" />);
+    const group = screen.getByRole('group', { name: '4-digit code' });
+    expect(boxes()).toHaveLength(4);
+    expect(screen.getByRole('textbox', { name: 'Digit 4 of 4' })).toBeInTheDocument();
+    // No fixed column count: a flex row whose boxes all grow alike.
+    expect(group.className).not.toMatch(/grid-cols-/);
+    for (const box of boxes()) expect(box).toHaveClass('flex-1');
+  });
+
   it('moves to the next box as each digit is typed, and calls onComplete with all six', async () => {
     const onComplete = vi.fn();
     render(<Harness onComplete={onComplete} />);

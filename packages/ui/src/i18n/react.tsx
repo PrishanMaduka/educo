@@ -35,6 +35,7 @@ export function useShellLabels(variant: ShellVariant): ShellLabels {
     themeCurrent: (choice) => t('theme.current', { theme: t(`theme.${choice}`) }),
     notifications: t('shell.notifications.open'),
     profile: t('shell.profile.open'),
+    profileMenu: t('shell.profile.menu'),
     signOut: t('auth.signOut'),
   };
 }

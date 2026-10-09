@@ -120,7 +120,7 @@ export function OtpBoxes({
 
   return (
     <div className={cn('flex flex-col gap-1.5', className)}>
-      <div role="group" aria-label={label} className="grid grid-cols-6 gap-2">
+      <div role="group" aria-label={label} className="flex gap-2">
         {digits.map((digit, index) => (
           <input
             // The boxes are fixed positions, so the index is their identity.
@@ -152,7 +152,7 @@ export function OtpBoxes({
               event.target.select();
             }}
             className={cn(
-              'h-14 w-full min-w-0 rounded-input border-[1.5px] border-line-strong bg-surface-2 text-center text-[22px] font-bold text-ink',
+              'h-14 w-full min-w-0 flex-1 basis-0 rounded-input border-[1.5px] border-line-strong bg-surface-2 text-center text-[22px] font-bold text-ink',
               'outline-none focus-visible:border-brand focus-visible:ring-4 focus-visible:ring-brand-soft',
               'disabled:cursor-not-allowed disabled:opacity-50',
               error && 'border-bad',

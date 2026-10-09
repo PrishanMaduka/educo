@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { parseWebPublicEnv, robotsTagFor } from './web-env';
+import { parseWebPublicEnv, parseWebServerEnv, robotsTagFor } from './web-env';
 
 describe('parseWebPublicEnv', () => {
   it('uses local defaults when nothing is set', () => {
@@ -107,5 +107,29 @@ describe('robotsTagFor', () => {
     ['Production', 'staff', 'noindex, nofollow'],
   ] as const)('APP_ENV=%s on %s gives %s', (appEnv, surface, expected) => {
     expect(robotsTagFor(appEnv, surface)).toBe(expected);
+  });
+});
+
+describe('parseWebServerEnv (API_INTERNAL_URL, OQ16)', () => {
+  it('defaults to the local API when nothing is set', () => {
+    expect(parseWebServerEnv({})).toEqual({ API_INTERNAL_URL: 'http://localhost:4000' });
+    expect(parseWebServerEnv({ APP_ENV: 'local', API_INTERNAL_URL: '' })).toEqual({
+      API_INTERNAL_URL: 'http://localhost:4000',
+    });
+  });
+
+  it('takes an http(s) origin, dropping a trailing slash', () => {
+    expect(
+      parseWebServerEnv({ APP_ENV: 'staging', API_INTERNAL_URL: 'https://staging.quad-edu.com/' }),
+    ).toEqual({ API_INTERNAL_URL: 'https://staging.quad-edu.com' });
+  });
+
+  it('refuses a URL with a path, and a missing one outside local', () => {
+    expect(() => parseWebServerEnv({ API_INTERNAL_URL: 'http://api:4000/api/v1' })).toThrow(
+      /API_INTERNAL_URL/,
+    );
+    expect(() => parseWebServerEnv({ APP_ENV: 'production' })).toThrow(
+      /API_INTERNAL_URL: Required when APP_ENV is production/,
+    );
   });
 });

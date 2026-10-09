@@ -45,6 +45,8 @@ export interface ShellLabels {
   themeCurrent: (choice: ThemeChoice) => string;
   notifications: string;
   profile: string;
+  /** The profile menu's name for screen readers ("Your profile"). */
+  profileMenu: string;
   signOut: string;
 }
 
@@ -58,6 +60,33 @@ export interface ShellBrand {
   subtitle: string;
   /** Small outlined tag after the title, for example "Console". */
   badge?: string;
+  /** The school's short name on the brand tile (spec 08: logo or initials), instead of the Quad mark. */
+  initials?: string;
+}
+
+/** One choice in the profile menu. */
+export interface ShellMenuItem {
+  id: string;
+  label: string;
+  icon?: LucideIcon;
+  /** A short note after the label, for example "Paused". */
+  hint?: string;
+  disabled?: boolean;
+  onSelect: () => void;
+}
+
+/** A group of choices in the profile menu, with an optional heading ("Switch school"). */
+export interface ShellMenuSection {
+  id: string;
+  label?: string;
+  items: ShellMenuItem[];
+}
+
+/** The top bar's profile menu (spec 08): where the person is, then their choices. */
+export interface ShellProfileMenu {
+  /** Shown at the top, for example the current school. */
+  heading?: string;
+  sections: ShellMenuSection[];
 }
 
 /** Whether a nav item is the current page. */

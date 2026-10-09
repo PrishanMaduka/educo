@@ -1,13 +1,16 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { focusManager, onlineManager } from '@tanstack/react-query';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { fake, resetFake } from '../../../../../test/fake-api';
-import { AuthProviders } from '../../_components/AuthProviders';
 
+import { RecoveryCodes } from './RecoveryCodes';
 import { SignInFlow, type SignInFlowProps } from './SignInFlow';
 
 import type * as Api from '@/lib/api';
+
+import { Providers as AuthProviders } from '@/components/Providers';
 
 vi.mock('@/lib/api', async (importOriginal) => {
   const actual = await importOriginal<typeof Api>();
@@ -307,5 +310,44 @@ describe('SignInFlow', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Verify and sign in' }));
     expect(await heading('Choose a school')).toBeInTheDocument();
     expect(fake.requests[2]?.body).toEqual({ recoveryCode: 'abcde-fghjk', trustDevice: true });
+  });
+
+  it('starts one authenticator only, even after the connection drops and comes back', async () => {
+    resetFake({
+      'POST /api/v1/auth/password': { status: 200, body: { next: 'two_step_setup' } },
+      'POST /api/v1/me/totp': { status: 503, body: { code: 'unavailable', message: 'x' } },
+    });
+    renderFlow();
+    await passEmailAndPassword();
+    expect(await heading('Turn on two-step sign-in')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(fake.requests.some((request) => request.key === 'POST /api/v1/me/totp')).toBe(true);
+    });
+    act(() => {
+      onlineManager.setOnline(false);
+      onlineManager.setOnline(true);
+      focusManager.setFocused(false);
+      focusManager.setFocused(true);
+    });
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(fake.requests.filter((request) => request.key === 'POST /api/v1/me/totp')).toHaveLength(
+      1,
+    );
+    focusManager.setFocused(undefined);
+  });
+});
+
+describe('RecoveryCodes', () => {
+  it('says so when the codes could not be copied', async () => {
+    const writeText = vi.fn().mockRejectedValue(new Error('denied'));
+    Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true });
+    render(
+      <AuthProviders>
+        <RecoveryCodes codes={['abcde-fghjk']} onContinue={vi.fn()} />
+      </AuthProviders>,
+    );
+    await userEvent.click(screen.getByRole('button', { name: 'Copy the codes' }));
+    expect(await screen.findByText(/Couldn’t copy them/)).toBeInTheDocument();
+    expect(writeText).toHaveBeenCalledWith('abcde-fghjk');
   });
 });

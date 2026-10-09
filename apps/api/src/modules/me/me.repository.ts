@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { and, eq, isNull, roles, users } from '@quad/db';
+import { and, asc, desc, eq, isNull, roles, userRoles, users } from '@quad/db';
 
 import type { MeUpdateInput, RoleScope, ThemeChoice } from '@quad/contracts';
 import type { TenantTx } from '@quad/db';
@@ -38,6 +38,17 @@ export class MeRepository {
       .where(eq(users.id, userId))
       .returning({ id: users.id });
     return rows.length > 0;
+  }
+
+  /** The member's role names in the session's school, primary first. */
+  async roleNames(tx: TenantTx, userId: string): Promise<string[]> {
+    const rows = await tx
+      .select({ name: roles.name })
+      .from(userRoles)
+      .innerJoin(roles, and(eq(roles.tenantId, userRoles.tenantId), eq(roles.id, userRoles.roleId)))
+      .where(eq(userRoles.userId, userId))
+      .orderBy(desc(userRoles.primary), asc(roles.name));
+    return rows.map((row) => row.name);
   }
 
   async roleName(tx: TenantTx, roleId: string): Promise<string | null> {

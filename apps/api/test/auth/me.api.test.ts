@@ -59,7 +59,14 @@ describe('GET /me', () => {
     expect(response.statusCode).toBe(200);
     const me = Me.parse(response.json());
     expect(me).toEqual({
-      person: { name: 'Prishan Maduka', firstName: 'Prishan', theme: 'system', locale: 'en-LK' },
+      person: {
+        name: 'Prishan Maduka',
+        firstName: 'Prishan',
+        theme: 'system',
+        locale: 'en-LK',
+        // This school's roles only, never the other school's Teacher.
+        roleNames: ['School admin'],
+      },
       school: {
         id: school.id,
         name: 'Colombo International School',
@@ -131,7 +138,7 @@ describe('GET /me', () => {
     const staff = await insertPlatformUser(db(), 'Ruwan Mendis');
     const visit = await insertSupportVisit(db(), staff, school.id);
     const me = Me.parse((await inject('GET', '/me', sessionHeaders(visit))).json());
-    expect(me.person).toMatchObject({ name: 'Ruwan Mendis', firstName: 'Ruwan' });
+    expect(me.person).toMatchObject({ name: 'Ruwan Mendis', firstName: 'Ruwan', roleNames: [] });
     expect(me.support).toEqual({
       schoolName: 'Colombo International School',
       platformUserName: 'Ruwan Mendis',
@@ -155,6 +162,7 @@ describe('PATCH /me', () => {
       firstName: 'Prishan',
       theme: 'dark',
       locale: 'si-LK',
+      roleNames: [],
     });
     // A null locale goes back to the school's.
     const reset = await inject('PATCH', '/me', sessionHeaders(session), { locale: null });

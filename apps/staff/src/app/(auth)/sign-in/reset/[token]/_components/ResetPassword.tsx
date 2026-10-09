@@ -7,10 +7,10 @@ import { useTranslation } from 'react-i18next';
 
 import { AuthCard } from '../../../_components/AuthCard';
 import { BigButton, BigLink, ShowPasswordButton, StepError } from '../../../_components/bits';
-import { errorKeyFor, fieldError, isFieldError } from '../../../_components/error-copy';
 import { InvalidLink } from '../../../_components/InvalidLink';
 
 import { ApiError, staffApi, unwrapEmpty } from '@/lib/api';
+import { errorKeyFor, fieldError, isFieldError } from '@/lib/error-copy';
 
 /**
  * The password reset link (spec 05 step 5): choose a new password. The API checks the link

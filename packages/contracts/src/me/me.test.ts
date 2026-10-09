@@ -15,7 +15,13 @@ const SCHOOL_ID = '0192a6f4-1b2c-7d3e-8f40-123456789abc';
 const ROLE_ID = '0192a6f4-1b2c-7d3e-8f40-123456789abd';
 
 const me = {
-  person: { name: 'Prishan Maduka', firstName: 'Prishan', theme: 'system', locale: 'en-LK' },
+  person: {
+    name: 'Prishan Maduka',
+    firstName: 'Prishan',
+    theme: 'system',
+    locale: 'en-LK',
+    roleNames: ['School admin'],
+  },
   school: {
     id: SCHOOL_ID,
     name: 'Colombo International School',
@@ -44,6 +50,12 @@ const pathOf = (result: { success: boolean; error?: { issues: { path: unknown[] 
 describe('Me', () => {
   it('accepts the signed-in person, their school and the greeting', () => {
     expect(Me.safeParse(me).success).toBe(true);
+  });
+
+  it('needs the person’s role names in this school (the profile menu and no-access page)', () => {
+    const person: Partial<typeof me.person> = { ...me.person };
+    delete person.roleNames;
+    expect(pathOf(Me.safeParse({ ...me, person }))).toEqual(['person', 'roleNames']);
   });
 
   it('accepts the preview and support banners', () => {

@@ -25,6 +25,8 @@ class MePerson {
     required  this.theme,
 
     required  this.locale,
+
+    required  this.roleNames,
   });
 
   @JsonKey(
@@ -75,6 +77,18 @@ class MePerson {
 
 
 
+  @JsonKey(
+    
+    name: r'roleNames',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final List<String> roleNames;
+
+
+
 
 
     @override
@@ -82,14 +96,16 @@ class MePerson {
       other.name == name &&
       other.firstName == firstName &&
       other.theme == theme &&
-      other.locale == locale;
+      other.locale == locale &&
+      other.roleNames == roleNames;
 
     @override
     int get hashCode =>
         name.hashCode +
         firstName.hashCode +
         theme.hashCode +
-        locale.hashCode;
+        locale.hashCode +
+        roleNames.hashCode;
 
   factory MePerson.fromJson(Map<String, dynamic> json) => _$MePersonFromJson(json);
 

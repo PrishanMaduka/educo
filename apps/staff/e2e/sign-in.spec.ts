@@ -11,7 +11,6 @@ import { test } from '@quad/config/playwright/stack';
 
 const PRISHAN = 'prishan.maduka@colombo-intl.local';
 const RUWAN = 'ruwan.mendis@quad.local';
-const NADEESHA = 'nadeesha.jayasinghe@colombo-intl.local';
 const GREETING = /^(Good morning|Good afternoon|Good evening|Hello), Prishan$/;
 
 const title = (page: Page, name: string | RegExp) => page.getByRole('heading', { level: 1, name });
@@ -77,7 +76,8 @@ test.describe('staff sign-in', () => {
       page.getByText(`${RUWAN} is linked to 2 schools on Quad.`, { exact: false }),
     ).toBeVisible();
     await page.getByRole('button', { name: /Kandy Hill Academy/ }).click();
-    await expect(page).toHaveURL('/app');
+    // A teacher's home is My teaching: /app sends them there (Task 20).
+    await expect(page).toHaveURL('/app/teaching');
   });
 
   test('offers no Google or Microsoft sign-in (D37)', async ({ page }) => {
@@ -88,9 +88,14 @@ test.describe('staff sign-in', () => {
     await expect(page.getByText(/google|microsoft/i)).toHaveCount(0);
   });
 
-  test('a wrong password says so, without saying whether the account exists', async ({ page }) => {
+  test('a wrong password says so, without saying whether the account exists', async ({
+    page,
+  }, testInfo) => {
+    // An address with no account, new for each project and retry: the answer is the same as for
+    // a real account's wrong password (no account hints), and no seeded person is ever locked.
+    const email = `no.account.${testInfo.project.name}.${String(testInfo.retry)}@colombo-intl.local`;
     await page.goto('/sign-in');
-    await enterEmail(page, NADEESHA);
+    await enterEmail(page, email);
     await enterPassword(page, 'not the right password');
     await expect(page.getByRole('main').getByRole('alert')).toHaveText(
       'That email and password don’t match. Check them and try again.',

@@ -224,6 +224,8 @@ export const NOT_READ_BY_THE_API: readonly string[] = [
   'NEXT_PUBLIC_TURNSTILE_SITE_KEY',
   'NEXT_PUBLIC_PLAUSIBLE_DOMAIN',
   'NEXT_PUBLIC_QUAD_PRELAUNCH',
+  // Read by the staff and console servers only (spec 02 "Web server (run time)", OQ16).
+  'API_INTERNAL_URL',
 ];
 
 /**

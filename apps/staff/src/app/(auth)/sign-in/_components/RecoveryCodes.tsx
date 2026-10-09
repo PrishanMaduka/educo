@@ -1,12 +1,19 @@
 'use client';
 
-import { Button } from '@quad/ui';
+import { Button, cn } from '@quad/ui';
 import { Copy } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AuthCard } from './AuthCard';
 import { BigButton } from './bits';
+
+/** Writes to the clipboard; rejects where there is none (`navigator.clipboard` is secure-context only). */
+function copyText(text: string): Promise<void> {
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- undefined outside secure contexts
+  if (navigator.clipboard === undefined) return Promise.reject(new Error('No clipboard'));
+  return navigator.clipboard.writeText(text);
+}
 
 /** After set-up (spec 05): the 10 recovery codes, shown once, with Copy. */
 export function RecoveryCodes({
@@ -17,7 +24,7 @@ export function RecoveryCodes({
   onContinue: () => void;
 }) {
   const { t } = useTranslation();
-  const [copied, setCopied] = useState(false);
+  const [copy, setCopy] = useState<'idle' | 'copied' | 'failed'>('idle');
   return (
     <AuthCard title={t('signIn.codes.title')} lede={t('signIn.codes.lede')}>
       <ol
@@ -35,15 +42,29 @@ export function RecoveryCodes({
           variant="secondary"
           icon={Copy}
           onClick={() => {
-            void navigator.clipboard.writeText(codes.join('\n')).then(() => {
-              setCopied(true);
-            });
+            // The clipboard can be refused (permissions) or missing (an insecure page): say so,
+            // so the person copies the codes by hand.
+            copyText(codes.join('\n')).then(
+              () => {
+                setCopy('copied');
+              },
+              () => {
+                setCopy('failed');
+              },
+            );
           }}
         >
           {t('signIn.codes.copy')}
         </Button>
-        <span aria-live="polite" className="text-[13px] font-semibold text-good">
-          {copied ? t('signIn.codes.copied') : null}
+        <span
+          aria-live="polite"
+          className={cn('text-[13px] font-semibold', copy === 'failed' ? 'text-bad' : 'text-good')}
+        >
+          {copy === 'copied'
+            ? t('signIn.codes.copied')
+            : copy === 'failed'
+              ? t('signIn.codes.copyFailed')
+              : null}
         </span>
       </div>
       <BigButton onClick={onContinue}>{t('signIn.codes.submit')}</BigButton>

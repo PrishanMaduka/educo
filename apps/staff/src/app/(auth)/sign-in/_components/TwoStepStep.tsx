@@ -7,11 +7,11 @@ import { useTranslation } from 'react-i18next';
 
 import { AuthCard } from './AuthCard';
 import { AccountChip, BigButton, LinkButton, StepError } from './bits';
-import { errorKeyFor, fieldError } from './error-copy';
 
 import type { SignInNext } from '@quad/contracts';
 
 import { staffApi, unwrap } from '@/lib/api';
+import { errorKeyFor, fieldError } from '@/lib/error-copy';
 
 export interface TwoStepStepProps {
   email: string;

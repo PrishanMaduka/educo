@@ -29,6 +29,8 @@ export const MePerson = z.object({
   theme: ThemeChoice,
   /** BCP 47: the person's own locale, or the school's when they have not chosen one. */
   locale: z.string(),
+  /** Their roles in this school, primary first; empty in a support visit (no membership). */
+  roleNames: z.array(z.string()),
 });
 export type MePerson = z.infer<typeof MePerson>;
 

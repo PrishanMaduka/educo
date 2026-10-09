@@ -7,11 +7,11 @@ import { useTranslation } from 'react-i18next';
 
 import { AuthCard } from './AuthCard';
 import { AccountChip, BigButton, LinkButton, ShowPasswordButton, StepError } from './bits';
-import { errorKeyFor, fieldError, isFieldError } from './error-copy';
 
 import type { SignInNext } from '@quad/contracts';
 
 import { staffApi, unwrap } from '@/lib/api';
+import { errorKeyFor, fieldError, isFieldError } from '@/lib/error-copy';
 
 export interface PasswordStepProps {
   email: string;

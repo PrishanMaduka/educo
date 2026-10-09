@@ -8,11 +8,11 @@ import { useTranslation } from 'react-i18next';
 
 import { AuthCard } from './AuthCard';
 import { StepError } from './bits';
-import { errorKeyFor } from './error-copy';
 
 import type { SignInMembership } from '@quad/contracts';
 
 import { ApiError, staffApi, unwrap, unwrapEmpty } from '@/lib/api';
+import { errorKeyFor } from '@/lib/error-copy';
 
 export interface ChooseSchoolProps {
   email: string;
