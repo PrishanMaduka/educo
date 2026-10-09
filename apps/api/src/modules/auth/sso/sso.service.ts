@@ -13,7 +13,7 @@ import {
 import { formatMessage } from '../../../common/delivery/templates/render';
 import { AppError, ForbiddenError } from '../../../common/errors';
 import { errorForLog } from '../../../observability/logger';
-import { CLOCK, CONFIG, LOGGER, TENANT_DB } from '../../../tokens';
+import { CLOCK, CONFIG, ERROR_REPORTER, LOGGER, TENANT_DB } from '../../../tokens';
 import { AccountAudit } from '../account-audit.service';
 import { AuthRepository } from '../auth.repository';
 import { LockoutService } from '../lockout.service';
@@ -27,6 +27,7 @@ import type { SchoolSso } from '../auth.repository';
 import type { SignInClient, SignInOutcome } from '../sign-in.service';
 import type { OpenedSsoState, SsoState } from './sso-state';
 import type { Config } from '../../../config';
+import type { ErrorReporter } from '../../../observability/sentry';
 import type { Clock } from '../../../tokens';
 import type { SsoProvider, SsoSignInError, SsoStartInput } from '@quad/contracts';
 import type { QuadTenantDb } from '@quad/db';
@@ -83,6 +84,7 @@ export class SsoService {
     @Inject(CONFIG) private readonly config: Config,
     @Inject(CLOCK) private readonly now: Clock,
     @Inject(LOGGER) private readonly logger: Logger,
+    @Inject(ERROR_REPORTER) private readonly reporter: ErrorReporter,
   ) {
     this.stateCookies = new SsoStateCookies(config.SESSION_SECRET);
   }
@@ -122,16 +124,25 @@ export class SsoService {
 
   /**
    * `GET /auth/sso/:provider/callback`. Every outcome is a redirect (I-5): signed in at the next
-   * step, or sent back with an `SsoSignInError`. Unexpected failures still throw (500).
+   * step, or sent back with an `SsoSignInError`. An unexpected failure is sent back as
+   * `sso_unfinished` too, never as a JSON page: it is logged at error level (`sso_callback_failed`)
+   * and reported like any 500, so an outage is not hidden. Nothing logged names the query.
    */
   async callback(request: SsoCallbackRequest): Promise<SsoCallbackResult> {
     try {
       return { signedIn: await this.signInWith(request) };
     } catch (error) {
       const refused = refusalOf(error);
-      if (refused === null) throw error;
-      this.logger.info({ metric: 'sso_callback_refused', refused }, 'An SSO sign-in was refused');
-      return { refused };
+      if (refused !== null) {
+        this.logger.info({ metric: 'sso_callback_refused', refused }, 'An SSO sign-in was refused');
+        return { refused };
+      }
+      this.logger.error(
+        { metric: 'sso_callback_failed', error: errorForLog(error) },
+        'An SSO callback failed with an unexpected error',
+      );
+      this.reporter.capture(error);
+      return { refused: 'sso_unfinished' };
     }
   }
 
@@ -285,7 +296,7 @@ export class SsoService {
   }
 }
 
-/** The `SsoSignInError` for a refusal, or null for an unexpected error. */
+/** The `SsoSignInError` for an expected refusal, or null for an unexpected error. */
 function refusalOf(error: unknown): SsoSignInError | null {
   if (error instanceof SsoRefusal) return error.code;
   if (!(error instanceof AppError)) return null;

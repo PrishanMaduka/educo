@@ -34,7 +34,9 @@ export function emailDomainOf(email: string): string {
 
 /**
  * Whether the provider vouches that the ID token's email belongs to the person (spec 05 step 2,
- * D32). Google: `email_verified` is `true`. Microsoft: only `xms_edov` is `true`; `email` in an
+ * D32). Google: `email_verified` is `true` and the account is in the email's own Workspace (`hd`
+ * equals the email's domain, any case), so a consumer Google account holding a work address is
+ * refused here, before any account lookup. Microsoft: only `xms_edov` is `true`; `email` in an
  * Entra token is whatever the user's own tenant set, and `email_verified` is never sent, so
  * trusting either would let any Entra tenant claim any address (nOAuth). Decided before any
  * account is looked up.
@@ -43,7 +45,11 @@ export function providerVouchesForEmail(provider: SsoProvider, claims: SsoClaims
   if (typeof claims.email !== 'string' || claims.email === '') return false;
   switch (provider) {
     case 'google':
-      return claims.email_verified === true;
+      return (
+        claims.email_verified === true &&
+        typeof claims.hd === 'string' &&
+        claims.hd.toLowerCase() === emailDomainOf(claims.email)
+      );
     case 'microsoft':
       return claims.xms_edov === true;
   }

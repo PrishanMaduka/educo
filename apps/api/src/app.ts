@@ -67,7 +67,7 @@ export async function createApp(
     trustProxy: trustHops(config.TRUST_PROXY_HOPS),
   });
   const app = await NestFactory.create<NestFastifyApplication>(
-    AppModule.forRoot(config, logger, options.overrides),
+    AppModule.forRoot(config, logger, options.overrides, options.reporter),
     adapter,
     { logger: new PinoNestLogger(logger), abortOnError: false },
   );

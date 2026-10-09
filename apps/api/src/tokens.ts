@@ -33,3 +33,5 @@ export const CONSOLE_SESSIONS = Symbol('CONSOLE_SESSIONS');
 export const PASSWORD_RESETS = Symbol('PASSWORD_RESETS');
 /** Replaces `fetch` for the OIDC clients (`openid-client` `customFetch`); unit tests only. */
 export const OIDC_FETCH = Symbol('OIDC_FETCH');
+/** Where unexpected errors go (`ErrorReporter`, Sentry in `main.ts`), for errors a route handles. */
+export const ERROR_REPORTER = Symbol('ERROR_REPORTER');

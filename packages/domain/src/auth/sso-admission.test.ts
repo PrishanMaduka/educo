@@ -23,16 +23,50 @@ describe('emailDomainOf', () => {
 
 describe('providerVouchesForEmail (who may say an email is the person’s)', () => {
   it.each<[string, SsoProvider, SsoClaims, boolean]>([
-    ['Google, verified', 'google', { email: 'a@x.test', email_verified: true }, true],
-    ['Google, not verified', 'google', { email: 'a@x.test', email_verified: false }, false],
+    [
+      'Google, verified, Workspace hd is the email domain',
+      'google',
+      { email: 'a@x.test', email_verified: true, hd: 'x.test' },
+      true,
+    ],
+    [
+      'Google, hd in another case',
+      'google',
+      { email: 'a@X.Test', email_verified: true, hd: 'x.TEST' },
+      true,
+    ],
+    [
+      'Google, verified but no hd (a consumer account holding the work address)',
+      'google',
+      { email: 'a@x.test', email_verified: true },
+      false,
+    ],
+    [
+      'Google, hd of another domain',
+      'google',
+      { email: 'a@x.test', email_verified: true, hd: 'other.test' },
+      false,
+    ],
+    [
+      'Google, hd not a string',
+      'google',
+      { email: 'a@x.test', email_verified: true, hd: true },
+      false,
+    ],
+    [
+      'Google, not verified',
+      'google',
+      { email: 'a@x.test', email_verified: false, hd: 'x.test' },
+      false,
+    ],
     [
       'Google, verified as a string',
       'google',
-      { email: 'a@x.test', email_verified: 'true' },
+      { email: 'a@x.test', email_verified: 'true', hd: 'x.test' },
       false,
     ],
-    ['Google, no word on it', 'google', { email: 'a@x.test' }, false],
-    ['Google, no email', 'google', { email_verified: true }, false],
+    ['Google, no word on it', 'google', { email: 'a@x.test', hd: 'x.test' }, false],
+    ['Google, no email', 'google', { email_verified: true, hd: 'x.test' }, false],
     // Entra never sends email_verified; only xms_edov says the domain owner verified the email.
     ['Microsoft, xms_edov true', 'microsoft', { email: 'a@x.test', xms_edov: true }, true],
     ['Microsoft, no xms_edov', 'microsoft', { email: 'a@x.test' }, false],

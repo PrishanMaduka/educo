@@ -6,6 +6,8 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vites
 
 import { AuthRepository } from '../../src/modules/auth/auth.repository';
 import { lockoutKey } from '../../src/modules/auth/lockout.service';
+import { TENANT_DB } from '../../src/tokens';
+import { captureLogs } from '../app';
 import { fakeSubjectFor, startFakeOidcIssuer } from '../fakes/oidc-issuer';
 import { Browser, setCookie } from '../helpers/browser';
 import { useDatabaseApp } from '../helpers/database-app';
@@ -23,6 +25,7 @@ import type { FakeOidcIssuer, FakeSignIn } from '../fakes/oidc-issuer';
 import type { SchoolSeed } from '../helpers/identity';
 import type { PasswordAccount } from '../helpers/sign-in';
 import type { SsoProvider, SsoSignInError, TenantStatus, TwoStepRule } from '@quad/contracts';
+import type { QuadTenantDb } from '@quad/db';
 import type { LightMyRequestResponse as Response } from 'fastify';
 
 /**
@@ -52,8 +55,20 @@ afterAll(async () => {
   await redis.quit();
 });
 
+/** Every log line of the app, and every error it reports to error tracking. */
+const logs = captureLogs();
+const reported: unknown[] = [];
+
 const { db, app } = useDatabaseApp(() => ({ OIDC_FAKE_ISSUER_URL: fake().url }), {
   overrides: { now: () => clock },
+  logger: logs.logger,
+  reporter: {
+    capture: (error) => {
+      reported.push(error);
+      return undefined;
+    },
+    flush: () => Promise.resolve(true),
+  },
 });
 
 beforeEach(() => {
@@ -169,8 +184,26 @@ async function auditIn(tenantId: string, action: string) {
   return rows;
 }
 
-/** Failure audits are written after the response (`setImmediate`); give them time to land. */
-const afterTheResponse = () => new Promise((resolve) => setTimeout(resolve, 150));
+/**
+ * Failure audits are written after the response (`setImmediate`), so "no audit row" needs a
+ * positive control: another member's audited refusal in the same school is awaited first, and
+ * only then is `userId`'s absence checked.
+ */
+async function expectNoFailureAudit(school: SchoolSeed, domain: string, userId: string) {
+  const control = await insertPasswordAccount(db(), { email: freshEmail('elsewhere.test') });
+  const controlUser = await insertMember(db(), school.id, control.id);
+  await signInWithSso(new Browser(app), freshEmail(domain), {
+    signIn: { email: control.email, hd: 'elsewhere.test' },
+  });
+  await vi.waitFor(async () => {
+    const actors = (await auditIn(school.id, 'auth.sign_in_failed')).map(
+      (row) => row.actor_user_id,
+    );
+    expect(actors).toContain(controlUser);
+  });
+  const actors = (await auditIn(school.id, 'auth.sign_in_failed')).map((row) => row.actor_user_id);
+  expect(actors).not.toContain(userId);
+}
 
 const signedInSchool = async (browser: Browser): Promise<string | null> => {
   const me = await browser.get('/me');
@@ -440,6 +473,26 @@ describe('GET /auth/sso/:provider/callback: sent back with sso_unfinished', () =
     expectSentBack(await callback(replay, location), replay, 'sso_unfinished');
   });
 
+  it('an unexpected error (logged and reported, never a JSON 500 page)', async () => {
+    const { browser, url } = await started();
+    const location = await authorize(url);
+    const definers = app().get<QuadTenantDb>(TENANT_DB).definers;
+    const failure = new Error('The signed_token_uses insert failed.');
+    const consume = vi.spyOn(definers, 'consumeSignedToken').mockRejectedValueOnce(failure);
+    logs.lines.length = 0;
+    try {
+      expectSentBack(await callback(browser, location), browser, 'sso_unfinished');
+    } finally {
+      consume.mockRestore();
+    }
+    expect(reported).toContain(failure);
+    const failed = logs.lines.filter((line) => line.metric === 'sso_callback_failed');
+    expect(failed).toMatchObject([{ level: 'error', error: { message: failure.message } }]);
+    // Never the query string: no code or state in any line.
+    const code = location.searchParams.get('code') ?? '';
+    expect(JSON.stringify(logs.lines)).not.toContain(code);
+  });
+
   it('a replayed state cookie with a fresh code (the state is single use)', async () => {
     const { browser, url } = await started();
     const replay = browser.clone();
@@ -531,20 +584,25 @@ describe('GET /auth/sso/:provider/callback: sent back with sso_refused, nothing 
     await expectRefused(response, browser, account.id);
   });
 
-  it('an unvouched token for a locked account: the plain refusal, no lookup and no audit', async () => {
-    const { school, domain } = await ssoSchool();
-    const { account } = await staffAt(school, domain);
-    await db().platform.query(`update accounts set status = 'locked' where id = $1`, [account.id]);
-    const browser = new Browser(app);
+  it.each<[string, FakeSignIn]>([
+    ['an unverified email', { emailVerified: false }],
+    ['no Workspace hd', { hd: null }],
+  ])(
+    'a Google token with %s for a locked account: the plain refusal, no lookup and no audit',
+    async (_name, signIn) => {
+      const { school, domain } = await ssoSchool();
+      const { account, userId } = await staffAt(school, domain);
+      await db().platform.query(`update accounts set status = 'locked' where id = $1`, [
+        account.id,
+      ]);
+      const browser = new Browser(app);
 
-    const response = await signInWithSso(browser, account.email, {
-      signIn: { emailVerified: false },
-    });
+      const response = await signInWithSso(browser, account.email, { signIn });
 
-    await expectRefused(response, browser, account.id);
-    await afterTheResponse();
-    expect(await auditIn(school.id, 'auth.sign_in_failed')).toEqual([]);
-  });
+      await expectRefused(response, browser, account.id);
+      await expectNoFailureAudit(school, domain, userId);
+    },
+  );
 
   it("a member whose email is outside the school's sso_domain (audited)", async () => {
     const { school, domain } = await ssoSchool();

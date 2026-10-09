@@ -19,6 +19,7 @@ import { SesWebhookModule } from './webhooks/ses/ses-webhook.module';
 import type { DeliveryQueue } from './common/delivery/delivery.service';
 import type { Config } from './config';
 import type { PasswordResetRequests } from './modules/auth/password-reset-requests';
+import type { ErrorReporter } from './observability/sentry';
 import type { Clock } from './tokens';
 import type { SnsFetchers } from './webhooks/ses/ses-webhook.module';
 import type { DynamicModule, Type } from '@nestjs/common';
@@ -43,11 +44,16 @@ export interface AppOverrides {
 /** The root module. Area modules (`src/modules/<area>`) are added to `imports`. */
 @Module({})
 export class AppModule {
-  static forRoot(config: Config, logger: Logger, overrides: AppOverrides = {}): DynamicModule {
+  static forRoot(
+    config: Config,
+    logger: Logger,
+    overrides: AppOverrides = {},
+    reporter?: ErrorReporter,
+  ): DynamicModule {
     return {
       module: AppModule,
       imports: [
-        CoreModule.forRoot(config, logger, overrides.now),
+        CoreModule.forRoot(config, logger, overrides.now, reporter),
         DatabaseModule,
         RedisModule,
         // First: its AuthGuard must run before any other global guard (Task 12).
