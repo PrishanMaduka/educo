@@ -197,6 +197,16 @@ describe('loadConfig', () => {
     ]);
   });
 
+  it('reads DATABASE_PLATFORM_POOL_MAX as a whole number from 1 to 50, default 2', () => {
+    expect(loadConfig(localEnv()).DATABASE_PLATFORM_POOL_MAX).toBe(2);
+    expect(
+      loadConfig(localEnv({ DATABASE_PLATFORM_POOL_MAX: '5' })).DATABASE_PLATFORM_POOL_MAX,
+    ).toBe(5);
+    expect(configErrorOf(localEnv({ DATABASE_PLATFORM_POOL_MAX: '0' })).problems).toEqual([
+      { variable: 'DATABASE_PLATFORM_POOL_MAX', problem: 'must be a whole number from 1 to 50' },
+    ]);
+  });
+
   it('reads TRUST_PROXY_HOPS as a small whole number, default 0', () => {
     expect(loadConfig(localEnv()).TRUST_PROXY_HOPS).toBe(0);
     expect(loadConfig(localEnv({ TRUST_PROXY_HOPS: '2' })).TRUST_PROXY_HOPS).toBe(2);

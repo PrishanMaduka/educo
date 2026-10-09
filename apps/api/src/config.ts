@@ -96,6 +96,8 @@ const ConfigSchema = z.object({
   DATABASE_URL: req(postgresUrl),
   DATABASE_PLATFORM_URL: req(postgresUrl),
   DATABASE_POOL_MAX: opt(integer(1, 500)),
+  // The quad_platform pool (withPlatform, console routes): small, since console traffic is small.
+  DATABASE_PLATFORM_POOL_MAX: withDefault(integer(1, 50), '2'),
 
   // Redis
   REDIS_URL: req(redisUrl),

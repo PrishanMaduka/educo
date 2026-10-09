@@ -26,6 +26,7 @@ import type { Logger } from 'pino';
       useFactory: (config: Config, logger: Logger): QuadPlatformDb =>
         createPlatformDb({
           platformUrl: config.DATABASE_PLATFORM_URL,
+          poolMax: config.DATABASE_PLATFORM_POOL_MAX,
           onPoolError: (error) => {
             logger.warn(
               { error: errorForLog(error) },
