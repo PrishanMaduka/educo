@@ -22,11 +22,6 @@ export interface EffectivePermissionsInput {
   readonly preview?: RoleGrant;
   /** True in a Quad support session ("Open as school admin"). */
   readonly support?: boolean;
-  /**
-   * The signed-in member's own sensitive keys (from their real roles), which cap a preview.
-   * A support session ignores it: the support cap applies instead.
-   */
-  readonly adminSensitive: readonly SensitiveKey[];
 }
 
 /** Support never sees safeguarding or medical records, whatever the role (spec 05). */
@@ -50,16 +45,17 @@ function inPlan(module: PermissionModule, planModules: readonly PlanModule[]): b
  * - a row whose module is outside the school's plan is dropped (`settings` is always in);
  * - `users.manage` comes with `settings.edit` (OQ3);
  * - a preview uses the previewed role instead of the member's own, and keeps only the sensitive
- *   keys the member holds (spec 06, spec 08: previewing never grants a sensitive key);
+ *   keys some role in `roles` holds (spec 06, spec 08: previewing never grants a sensitive key);
  * - a support session uses the `admin` defaults minus `sensitive.safeguarding` and
  *   `sensitive.medical`, whatever the roles; a preview inside it is capped the same way.
  *
  * Scope (`own_classes`, `campus`) is not applied here: it filters rows, not keys (M3/M5).
  */
-export function effectivePermissions(input: EffectivePermissionsInput): Set<PermissionKey> {
+export function effectivePermissions(input: EffectivePermissionsInput): ReadonlySet<PermissionKey> {
   const { planModules, preview, support = false } = input;
   const own = support ? [SUPPORT] : input.roles;
-  const ownSensitive = support ? SUPPORT.sensitive : input.adminSensitive;
+  // The cap on a preview is derived here, never passed in: the member's own keys, or support's.
+  const ownSensitive = own.flatMap((grant) => grant.sensitive);
   const grants: readonly RoleGrant[] = preview
     ? [
         {

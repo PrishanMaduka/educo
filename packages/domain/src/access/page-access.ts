@@ -34,6 +34,7 @@ function accessOf(
 ): PageAccess {
   const inPlan = page.planModule === undefined || planModules.includes(page.planModule);
   if (!inPlan || !isPageVisible(page, perms)) return 'hidden';
+  if (page.fullWhen) return page.fullWhen.some((key) => perms.has(key)) ? 'full' : 'view_only';
   if (page.requires.kind !== 'view') return 'full';
   const { module } = page.requires;
   return WRITE_ACTIONS.some((action) => perms.has(`${module}.${action}`)) ? 'full' : 'view_only';
@@ -41,8 +42,9 @@ function accessOf(
 
 /**
  * How much of each staff page the permissions open (spec 08, Preview a role; OQ4): `hidden` when
- * the page's plan module is not in the plan or its `requires` is not met; `view_only` for a
- * `view` page when the row has View but no create, edit, delete or approve; otherwise `full`.
+ * the page's plan module is not in the plan or its `requires` is not met; for a page with
+ * `fullWhen`, `full` only with one of those keys; for a `view` page, `view_only` when the row has
+ * View but no create, edit, delete or approve; otherwise `full`.
  * Returns every page in side bar order, frozen.
  */
 export function pageAccess(

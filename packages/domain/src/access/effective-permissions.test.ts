@@ -1,6 +1,6 @@
 import { PermissionKey, PermissionModule, PlanModule, SensitiveKey } from '@quad/contracts';
 import fc from 'fast-check';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, expectTypeOf, it } from 'vitest';
 
 import { effectivePermissions } from './effective-permissions';
 import { rowOf } from './matrix';
@@ -30,11 +30,14 @@ const arbRole: fc.Arbitrary<RoleGrant> = fc.record({ matrix: arbMatrix, sensitiv
 const arbPlan = fc.subarray([...PlanModule.options]);
 
 describe('effectivePermissions (spec 05)', () => {
+  it('returns a read-only set', () => {
+    expectTypeOf(effectivePermissions).returns.toEqualTypeOf<ReadonlySet<PermissionKey>>();
+  });
+
   it('gives nothing without roles', () => {
     const perms = effectivePermissions({
       roles: [],
       planModules: EVERY_MODULE,
-      adminSensitive: [],
     });
     expect(perms.size).toBe(0);
   });
@@ -43,7 +46,6 @@ describe('effectivePermissions (spec 05)', () => {
     const perms = effectivePermissions({
       roles: [systemRoleMatrix('finance')],
       planModules: EVERY_MODULE,
-      adminSensitive: [],
     });
     expect(sorted(perms)).toEqual(
       sorted([
@@ -66,7 +68,6 @@ describe('effectivePermissions (spec 05)', () => {
     const perms = effectivePermissions({
       roles: [systemRoleMatrix('teacher'), role({ fees: rowOf('10000') }, ['export_data'])],
       planModules: EVERY_MODULE,
-      adminSensitive: [],
     });
     expect(perms.has('lms.edit')).toBe(true);
     expect(perms.has('fees.view')).toBe(true);
@@ -78,7 +79,6 @@ describe('effectivePermissions (spec 05)', () => {
     const perms = effectivePermissions({
       roles: [role({ crm: rowOf('01111') })],
       planModules: EVERY_MODULE,
-      adminSensitive: [],
     });
     expect(perms.size).toBe(0);
   });
@@ -88,7 +88,6 @@ describe('effectivePermissions (spec 05)', () => {
       const perms = effectivePermissions({
         roles: [systemRoleMatrix('admin')],
         planModules: ['admissions', 'sis', 'fees', 'parent'],
-        adminSensitive: [],
       });
       for (const m of ['crm', 'lms', 'finance', 'transport'] as const) {
         expect(perms.has(`${m}.view`), m).toBe(false);
@@ -101,7 +100,6 @@ describe('effectivePermissions (spec 05)', () => {
       const perms = effectivePermissions({
         roles: [systemRoleMatrix('admin')],
         planModules: [],
-        adminSensitive: [],
       });
       expect(sorted(perms)).toEqual(
         sorted([
@@ -123,7 +121,6 @@ describe('effectivePermissions (spec 05)', () => {
       const perms = effectivePermissions({
         roles: [systemRoleMatrix('teacher')],
         planModules: ['lms'],
-        adminSensitive: [],
       });
       expect(perms.has('attendance.view')).toBe(false);
       expect(perms.has('lms.view')).toBe(true);
@@ -140,7 +137,6 @@ describe('effectivePermissions (spec 05)', () => {
       const perms = effectivePermissions({
         roles: [systemRoleMatrix(key)],
         planModules: EVERY_MODULE,
-        adminSensitive: [],
       });
       expect(perms.has('users.manage')).toBe(expected);
     });
@@ -149,7 +145,6 @@ describe('effectivePermissions (spec 05)', () => {
       const perms = effectivePermissions({
         roles: [role({ settings: rowOf('10100') })],
         planModules: [],
-        adminSensitive: [],
       });
       expect(perms.has('users.manage')).toBe(true);
     });
@@ -161,7 +156,6 @@ describe('effectivePermissions (spec 05)', () => {
         roles: [systemRoleMatrix('admin')],
         planModules: EVERY_MODULE,
         preview: systemRoleMatrix('finance'),
-        adminSensitive: ['safeguarding', 'medical', 'finance_reports', 'export_data'],
       });
       expect(perms.has('fees.approve')).toBe(true);
       expect(perms.has('lms.view')).toBe(false);
@@ -169,15 +163,33 @@ describe('effectivePermissions (spec 05)', () => {
       expect(perms.has('sensitive.safeguarding')).toBe(false);
     });
 
-    it("keeps only the previewed role's sensitive keys the admin also holds", () => {
+    it("keeps only the previewed role's sensitive keys the member's own roles hold", () => {
       const perms = effectivePermissions({
-        roles: [role({ settings: rowOf('11111') })],
+        roles: [role({ settings: rowOf('11111') }, ['export_data'])],
         planModules: EVERY_MODULE,
         preview: role({ sis: rowOf('11000') }, ['medical', 'export_data']),
-        adminSensitive: ['export_data'],
       });
       expect(perms.has('sensitive.export_data')).toBe(true);
       expect(perms.has('sensitive.medical')).toBe(false);
+    });
+
+    it('a teacher previewing a role with safeguarding gets no safeguarding', () => {
+      const perms = effectivePermissions({
+        roles: [systemRoleMatrix('teacher')],
+        planModules: EVERY_MODULE,
+        preview: role({ sis: rowOf('11000') }, ['safeguarding']),
+      });
+      expect(perms.has('sis.create')).toBe(true);
+      expect(perms.has('sensitive.safeguarding')).toBe(false);
+    });
+
+    it("caps by the keys of all the member's roles together", () => {
+      const perms = effectivePermissions({
+        roles: [role({}, ['medical']), role({}, ['export_data'])],
+        planModules: EVERY_MODULE,
+        preview: role({}, ['medical', 'export_data', 'safeguarding']),
+      });
+      expect(sorted(perms)).toEqual(['sensitive.export_data', 'sensitive.medical']);
     });
 
     it('still drops modules outside the plan', () => {
@@ -185,24 +197,21 @@ describe('effectivePermissions (spec 05)', () => {
         roles: [systemRoleMatrix('admin')],
         planModules: ['sis'],
         preview: systemRoleMatrix('finance'),
-        adminSensitive: [],
       });
       expect(sorted(perms)).toEqual(['sis.view']);
     });
 
-    it('never adds a sensitive key the admin lacks (property)', () => {
+    it('never yields a sensitive key that no role in roles holds (property)', () => {
       fc.assert(
         fc.property(
           fc.array(arbRole, { maxLength: 3 }),
           arbPlan,
           arbRole,
-          arbSensitive,
-          (roles, planModules, preview, adminSensitive) => {
-            const perms = effectivePermissions({ roles, planModules, preview, adminSensitive });
+          (roles, planModules, preview) => {
+            const perms = effectivePermissions({ roles, planModules, preview });
+            const held = new Set(roles.flatMap((r) => r.sensitive));
             for (const key of SensitiveKey.options) {
-              if (!adminSensitive.includes(key)) {
-                expect(perms.has(`sensitive.${key}`)).toBe(false);
-              }
+              if (!held.has(key)) expect(perms.has(`sensitive.${key}`)).toBe(false);
             }
           },
         ),
@@ -216,16 +225,13 @@ describe('effectivePermissions (spec 05)', () => {
         roles: [systemRoleMatrix('teacher')],
         planModules: EVERY_MODULE,
         support: true,
-        adminSensitive: [],
       });
       const admin = effectivePermissions({
         roles: [systemRoleMatrix('admin')],
         planModules: EVERY_MODULE,
-        adminSensitive: [],
       });
-      admin.delete('sensitive.safeguarding');
-      admin.delete('sensitive.medical');
-      expect(sorted(perms)).toEqual(sorted(admin));
+      const hidden = new Set(['sensitive.safeguarding', 'sensitive.medical']);
+      expect(sorted(perms)).toEqual(sorted([...admin].filter((key) => !hidden.has(key))));
       expect(perms.has('users.manage')).toBe(true);
     });
 
@@ -234,7 +240,6 @@ describe('effectivePermissions (spec 05)', () => {
         roles: [],
         planModules: ['sis'],
         support: true,
-        adminSensitive: [],
       });
       expect(perms.has('sis.delete')).toBe(true);
       expect(perms.has('fees.view')).toBe(false);
@@ -246,7 +251,6 @@ describe('effectivePermissions (spec 05)', () => {
         planModules: EVERY_MODULE,
         support: true,
         preview: systemRoleMatrix('admin'),
-        adminSensitive: ['safeguarding', 'medical', 'finance_reports', 'export_data'],
       });
       expect(perms.has('sensitive.safeguarding')).toBe(false);
       expect(perms.has('sensitive.medical')).toBe(false);
@@ -259,15 +263,8 @@ describe('effectivePermissions (spec 05)', () => {
           fc.array(arbRole, { maxLength: 3 }),
           arbPlan,
           fc.option(arbRole, { nil: undefined }),
-          arbSensitive,
-          (roles, planModules, preview, adminSensitive) => {
-            const perms = effectivePermissions({
-              roles,
-              planModules,
-              preview,
-              adminSensitive,
-              support: true,
-            });
+          (roles, planModules, preview) => {
+            const perms = effectivePermissions({ roles, planModules, preview, support: true });
             expect(perms.has('sensitive.safeguarding')).toBe(false);
             expect(perms.has('sensitive.medical')).toBe(false);
           },
@@ -282,16 +279,9 @@ describe('effectivePermissions (spec 05)', () => {
         fc.array(arbRole, { maxLength: 3 }),
         arbPlan,
         fc.option(arbRole, { nil: undefined }),
-        arbSensitive,
         fc.boolean(),
-        (roles, planModules, preview, adminSensitive, support) => {
-          const perms = effectivePermissions({
-            roles,
-            planModules,
-            preview,
-            adminSensitive,
-            support,
-          });
+        (roles, planModules, preview, support) => {
+          const perms = effectivePermissions({ roles, planModules, preview, support });
           for (const key of perms) {
             const [module] = key.split('.');
             if (module !== 'sensitive' && module !== 'users') {
@@ -306,8 +296,7 @@ describe('effectivePermissions (spec 05)', () => {
   it('leaves its inputs alone', () => {
     const roles = [systemRoleMatrix('teacher')];
     const planModules = [...EVERY_MODULE];
-    const adminSensitive = ['medical'] as const;
-    effectivePermissions({ roles, planModules, adminSensitive });
+    effectivePermissions({ roles, planModules });
     expect(roles).toEqual([systemRoleMatrix('teacher')]);
     expect(planModules).toEqual([...EVERY_MODULE]);
   });

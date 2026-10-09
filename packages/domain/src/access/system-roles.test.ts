@@ -32,7 +32,8 @@ describe('systemRoleMatrix (spec 05 School roles; prototype rolePerms where the 
     ['teacher', [NONE, NONE, VIEW, '11100', '11100', NONE, NONE, NONE, NONE], [], 'own_classes'],
     [
       'counsellor',
-      [NONE, '11000', '11000', NONE, NONE, NONE, NONE, NONE, NONE],
+      // Follows the prototype preview: no CRM; reads attendance.
+      [NONE, NONE, '11000', VIEW, NONE, NONE, NONE, NONE, NONE],
       ['medical'],
       'school',
     ],

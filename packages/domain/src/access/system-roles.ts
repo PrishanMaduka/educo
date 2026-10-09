@@ -87,8 +87,10 @@ const SYSTEM_ROLES: Readonly<Record<SystemRoleKey, SystemRoleDefaults>> = Object
   admissions: defaults({ admissions: WORK, crm: WORK, sis: VIEW }),
   // Own classes: registers, gradebook, reports, moments, behaviour; reads students.
   teacher: defaults({ sis: VIEW, attendance: WORK, lms: WORK }, [], 'own_classes'),
-  // Pastoral and medical; safeguarding only when granted.
-  counsellor: defaults({ crm: '11000', sis: '11000' }, ['medical']),
+  // Pastoral and medical; safeguarding only when granted. Follows the prototype's preview, not its
+  // rolePerms: no CRM; sis view and create (pastoral notes, early warning), so Students is View
+  // only (it needs sis.edit to be full); reads attendance.
+  counsellor: defaults({ sis: '11000', attendance: VIEW }, ['medical']),
   // Attendance (late arrivals, so writes too), the pickup page, read contact details.
   frontdesk: defaults({ sis: VIEW, attendance: WORK, transport: VIEW }),
 });

@@ -10,7 +10,7 @@ import type { PageAccess, PermissionKey, StaffPage, SystemRoleKey } from '@quad/
 const EVERY_MODULE = PlanModule.options;
 
 const permsOf = (key: SystemRoleKey, planModules: readonly PlanModule[] = EVERY_MODULE) =>
-  effectivePermissions({ roles: [systemRoleMatrix(key)], planModules, adminSensitive: [] });
+  effectivePermissions({ roles: [systemRoleMatrix(key)], planModules });
 
 /** The pages a role can open, in side bar order, with their access. */
 function openPages(key: SystemRoleKey): [StaffPageId, PageAccess][] {
@@ -98,21 +98,24 @@ describe('pageAccess (spec 08, Preview a role; OQ4)', () => {
       [
         ...full('my_teaching', 'communications'),
         ['students', 'view_only'],
-        ...full('attendance', 'pastoral', ...LEARNING),
+        ...full('attendance', 'pastoral', 'courses'),
+        // Timetable, staffing and cover are run by approvers (fullWhen lms.approve).
+        ['timetable', 'view_only'],
+        ['teachers_classes', 'view_only'],
+        ['staff_cover', 'view_only'],
+        ...full('exams', 'reports'),
       ],
     ],
     [
       'counsellor',
-      full(
-        'dashboard',
-        'crm',
-        'communications',
-        'family_connection',
-        'evenings_forms',
-        'students',
-        'early_warning',
-        'pastoral',
-      ),
+      [
+        ['communications', 'full'],
+        // sis view and create, no edit: Students is View only (fullWhen sis.edit).
+        ['students', 'view_only'],
+        ['early_warning', 'full'],
+        ['attendance', 'view_only'],
+        ['pastoral', 'full'],
+      ],
     ],
     [
       'frontdesk',
@@ -149,6 +152,14 @@ describe('pageAccess (spec 08, Preview a role; OQ4)', () => {
       'full',
     );
     expect(accessMap(new Set(['fees.view', 'fees.delete']), EVERY_MODULE).get('fees')).toBe('full');
+  });
+
+  it('with fullWhen, is full only with one of its keys', () => {
+    const lms = (...keys: PermissionKey[]) =>
+      accessMap(new Set<PermissionKey>(['lms.view', ...keys]), EVERY_MODULE).get('timetable');
+    expect(lms()).toBe('view_only');
+    expect(lms('lms.create', 'lms.edit', 'lms.delete')).toBe('view_only');
+    expect(lms('lms.approve')).toBe('full');
   });
 
   it('never makes an any-of page View only', () => {
