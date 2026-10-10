@@ -36,11 +36,19 @@ export async function expectNoSeriousA11yViolations(page: Page): Promise<void> {
 
 /**
  * axe once nothing moves: cards and pages fade in, and axe would otherwise sample a colour
- * halfway (a brand-fill button read at 4.48:1 mid fade, in staff journey 19).
+ * halfway (a brand-fill button read at 4.48:1 mid fade, in staff journey 19). Endless
+ * decorations are not waited for, since they never stop: the evening greeting's twinkling stars
+ * (`gs-star`, D38) would otherwise hang every signed-in check run after dark in Colombo.
  */
 export async function expectAccessibleOnceStill(page: Page): Promise<void> {
   await page.waitForFunction(() =>
-    document.getAnimations().every((animation) => animation.playState !== 'running'),
+    document
+      .getAnimations()
+      .every(
+        (animation) =>
+          animation.playState !== 'running' ||
+          animation.effect?.getComputedTiming().iterations === Infinity,
+      ),
   );
   await expectNoSeriousA11yViolations(page);
 }
