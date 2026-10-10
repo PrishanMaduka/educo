@@ -55,7 +55,7 @@
       "outputs": ["playwright-report/**"]
     },
     "@quad/console#e2e": {
-      "dependsOn": ["build", "@quad/api#build", "@quad/staff#e2e"],
+      "dependsOn": ["build", "@quad/api#build", "@quad/staff#build", "@quad/staff#e2e"],
       "cache": false,
       "passThroughEnv": [
         "CI",

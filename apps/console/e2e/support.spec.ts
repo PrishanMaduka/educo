@@ -10,7 +10,10 @@ const OPEN_AS = `Open ${SCHOOL} as school admin`;
 
 test.use({ storageState: OWNER_STATE });
 
-/** The staff portal is not part of the console's stack: answer its support link here. */
+/**
+ * Answers the staff portal's support link here, so this journey stops at the link's shape; the
+ * whole visit, through the real portal, is `journeys/support-banner.spec.ts`.
+ */
 async function catchStaffPortal(page: Page) {
   await page.route('http://localhost:3000/**', (route) =>
     route.fulfill({ status: 200, contentType: 'text/html', body: '<title>Staff portal</title>' }),

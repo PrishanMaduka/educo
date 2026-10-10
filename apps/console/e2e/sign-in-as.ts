@@ -16,10 +16,12 @@ export const QUAD_STAFF = {
  * limit is the API's per-email one on `POST /platform/auth/password` (`PER_EMAIL` in
  * `platform-auth.controller.ts`: 10 per address in 15 minutes); each test sends its own client
  * address, so the per-IP bucket never binds. CI retries a failed test once, so a journey's calls
- * count twice at worst; the global sign-in is not retried. Password calls per address in one CI
- * run, at worst:
- * - owner: 1 global sign-in + 2 × 3 projects of Sign out = 7;
- * - support: 2 × 3 projects of the sign-in journey = 6.
+ * count twice at worst; the global sign-ins are not retried. Password calls per address in one
+ * CI run, at worst:
+ * - owner: 1 global sign-in + 2 × (3 projects of journey 42, which ends with Sign out, + 1
+ *   desktop-light wrong password beside an unknown address) = 9;
+ * - support: 1 global sign-in (the support visit journey's state) + 2 × 3 projects of the
+ *   sign-in journey = 7.
  * Add a password journey only where its person stays under 10.
  */
 export const PASSWORD_JOURNEY_PROJECTS: readonly string[] = [
@@ -31,6 +33,14 @@ export const PASSWORD_JOURNEY_PROJECTS: readonly string[] = [
 /** Where the owner's shared signed-in state is kept for the run (`global-sign-in.ts`). */
 export const OWNER_STATE = fileURLToPath(
   new URL('../test-results/.auth/owner.json', import.meta.url),
+);
+
+/**
+ * Where Quad support's shared signed-in state is kept for the run (`global-sign-in.ts`). Opening
+ * a support visit leaves the console session as it is, so parallel journeys can share it.
+ */
+export const SUPPORT_STATE = fileURLToPath(
+  new URL('../test-results/.auth/support.json', import.meta.url),
 );
 
 async function postJson(

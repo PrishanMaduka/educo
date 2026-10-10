@@ -7,7 +7,7 @@ import {
 } from '@quad/config/playwright/checks';
 import { test } from '@quad/config/playwright/stack';
 
-import { OWNER_STATE, PASSWORD_JOURNEY_PROJECTS, QUAD_STAFF, signInThroughApi } from './sign-in-as';
+import { OWNER_STATE, QUAD_STAFF } from './sign-in-as';
 
 const isPhone = (width: number | undefined): boolean => (width ?? 0) < 900;
 
@@ -95,28 +95,4 @@ test.describe('console shell', () => {
     await page.reload();
     await expect(html).toHaveAttribute('data-theme', 'dark');
   });
-});
-
-test.describe('console sign out', () => {
-  test(
-    'Sign out ends the session: the console then sends every page to sign-in',
-    { tag: '@webkit' },
-    async ({ page, context }, testInfo) => {
-      test.skip(
-        !PASSWORD_JOURNEY_PROJECTS.includes(testInfo.project.name),
-        'Password journeys run in three projects (the per-email limit)',
-      );
-      // Its own session, so the shared owner session stays signed in for the other journeys.
-      await signInThroughApi(context.request, QUAD_STAFF.owner.email);
-      await page.goto('/');
-      await expect(page.getByRole('heading', { level: 1, name: 'Overview' })).toBeVisible();
-      await page.getByRole('button', { name: 'Open your profile menu' }).click();
-      const menu = page.getByRole('dialog', { name: 'Your profile' });
-      await expect(menu.getByText(QUAD_STAFF.owner.name).first()).toBeVisible();
-      await menu.getByRole('button', { name: 'Sign out' }).click();
-      await expect(page).toHaveURL(/\/sign-in$/);
-      await page.goto('/schools');
-      await expect(page).toHaveURL(/\/sign-in\?next=%2Fschools$/);
-    },
-  );
 });

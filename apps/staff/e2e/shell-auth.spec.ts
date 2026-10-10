@@ -1,4 +1,4 @@
-import { expect, type Page } from '@playwright/test';
+import { expect } from '@playwright/test';
 import {
   expectCanvas,
   expectNoSeriousA11yViolations,
@@ -9,42 +9,18 @@ import { test } from '@quad/config/playwright/stack';
 import { deriveBrand } from '@quad/tokens';
 
 import { PASSWORD_JOURNEY_PROJECTS, PEOPLE, PRISHAN_STATE, signInThroughApi } from './sign-in-as';
+import { GREETING, brandVariable, isPhone, openNav, openProfileMenu, title } from './steps';
 
 /*
  * The signed-in portal shell against the e2e stack (spec 05, spec 08): the school's name, brand
  * and the role's menu from GET /me and /me/permissions, the profile menu (Switch school, Sign
- * out), Preview a role and the no-access and View only pages. Journeys that only read share
+ * out) and the no-access and View only pages. Switch school is journey 18 and Preview a role
+ * journey 50 (`journeys/`, Task 26). Journeys that only read share
  * Prishan's session from `global-sign-in.ts`; the ones that change a session sign in on their
  * own, as other people where they can, on `PASSWORD_JOURNEY_PROJECTS` (the API's per-email limit
  * on password calls, 10 per address in 15 minutes, is counted there). `@webkit` journeys also run
  * in the CI-only WebKit project (D27): the session cookie and focus return.
  */
-
-const GREETING = /^(Good morning|Good afternoon|Good evening|Hello), Prishan$/;
-const isPhone = (page: Page) => (page.viewportSize()?.width ?? 0) < 900;
-const title = (page: Page, name: string | RegExp) => page.getByRole('heading', { level: 1, name });
-
-/** The side bar's navigation: the rail on desktop, the slide-over menu on phones. */
-async function openNav(page: Page) {
-  if (!isPhone(page)) return page.getByRole('complementary', { name: 'Side bar' });
-  await page.getByRole('button', { name: 'Open menu' }).click();
-  return page.getByRole('dialog', { name: 'Menu' });
-}
-
-async function openProfileMenu(page: Page) {
-  await page.getByRole('button', { name: 'Open your profile menu' }).click();
-  return page.getByRole('dialog', { name: 'Your profile' });
-}
-
-/** The value a token variable resolves to inside the shell. */
-const tokenValue = (page: Page, name: string) =>
-  page
-    .locator('[data-school-brand]')
-    .first()
-    .evaluate(
-      (element, variable) => getComputedStyle(element).getPropertyValue(variable).trim(),
-      name,
-    );
 
 test.describe('signed out', () => {
   test(
@@ -93,7 +69,7 @@ test.describe('the shell, signed in as the school admin', () => {
     await expect(title(page, GREETING)).toBeVisible();
     const scheme = schemeOf(testInfo);
     const expected = deriveBrand('#DD4A42', scheme).brandFill.toLowerCase();
-    expect((await tokenValue(page, '--quad-brand-fill')).toLowerCase()).toBe(expected);
+    expect((await brandVariable(page, '--quad-brand-fill')).toLowerCase()).toBe(expected);
   });
 
   test('/app fits the screen, uses the canvas colour and passes axe', async ({
@@ -325,89 +301,4 @@ test.describe('signing out', () => {
       await expect(page).toHaveURL('/sign-in?next=%2Fapp');
     },
   );
-});
-
-test.describe('Switch school', () => {
-  test('a teacher at two schools switches from the profile menu, and the portal takes that school’s brand', async ({
-    page,
-  }, testInfo) => {
-    test.skip(
-      !PASSWORD_JOURNEY_PROJECTS.includes(testInfo.project.name),
-      'Ruwan signs in with a password: see PASSWORD_JOURNEY_PROJECTS for the per-email limit',
-    );
-    await signInThroughApi(page.request, PEOPLE.ruwan, 'Colombo International School');
-    await page.goto('/app/teaching');
-    await expect(page.getByText('My teaching arrives soon')).toBeVisible();
-    const menu = await openProfileMenu(page);
-    await expect(menu.getByText('Switch school')).toBeVisible();
-    // The portal reloads in the new school (on the same teacher's home, so wait for the load).
-    const reloaded = page.waitForEvent('load');
-    await menu.getByRole('button', { name: 'Kandy Hill Academy' }).click();
-    await reloaded;
-    await expect(page).toHaveURL('/app/teaching');
-    const expected = deriveBrand('#2BB0A0', schemeOf(testInfo)).brandFill.toLowerCase();
-    expect((await tokenValue(page, '--quad-brand-fill')).toLowerCase()).toBe(expected);
-    const nav = await openNav(page);
-    await expect(nav.getByText('Kandy Hill Academy')).toBeVisible();
-
-    // Kandy Hill's plan has no transport, so Routes names the plan, not the Teacher role (D52).
-    await page.goto('/app/transport/routes');
-    await expect(title(page, 'Routes isn’t included in your school’s plan')).toBeVisible();
-    await expect(
-      page.getByText(
-        'Your school’s plan doesn’t include this. Ask Quad support if you’d like to add it.',
-      ),
-    ).toBeVisible();
-    await expect(page.getByRole('link', { name: 'Go to My teaching' })).toBeVisible();
-  });
-});
-
-test.describe('Preview a role', () => {
-  test('an admin views the portal as a teacher, then goes back to their own view', async ({
-    page,
-  }, testInfo) => {
-    test.skip(isPhone(page), 'View as is in the top bar on desktop only (spec 08)');
-    test.skip(
-      testInfo.project.name !== 'desktop-light',
-      'Prishan signs in with a password: one project only, see PASSWORD_JOURNEY_PROJECTS for the per-email limit',
-    );
-    await signInThroughApi(page.request, PEOPLE.prishan);
-    await page.goto('/app');
-    await expect(title(page, GREETING)).toBeVisible();
-
-    await page.getByRole('combobox', { name: 'View as role' }).click();
-    await page.getByRole('option', { name: 'View as: Teacher' }).click();
-    await expect(page).toHaveURL('/app/teaching');
-    const banner = page.getByRole('status').filter({ hasText: 'Previewing as Teacher' });
-    await expect(banner).toContainText(/Previewing as Teacher · \S+/);
-    const nav = page.getByRole('complementary', { name: 'Side bar' });
-    await expect(nav.getByRole('link', { name: 'Users & roles' })).toHaveCount(0);
-
-    await page.goto('/app/settings/users');
-    await expect(title(page, 'Users & roles isn’t part of the Teacher role')).toBeVisible();
-
-    // Switch school is a write the preview refuses: the menu offers Back to my view instead.
-    const menu = await openProfileMenu(page);
-    await expect(menu.getByRole('button', { name: 'Back to my view' })).toBeVisible();
-    await page.keyboard.press('Escape');
-
-    await banner.getByRole('button', { name: 'Back to my view' }).click();
-    await expect(page).toHaveURL('/app');
-    await expect(title(page, GREETING)).toBeVisible();
-    await expect(page.getByText('Previewing as')).toHaveCount(0);
-
-    // The Preview a role card on Users & roles (Task 21) does the same from the page, in this
-    // same session (no second password call).
-    await page.goto('/app/settings/users');
-    const card = page.getByRole('region', { name: 'Preview a role' });
-    await expect(card.getByText(/· opens on My teaching$/).first()).toBeVisible();
-    await card.getByRole('button', { name: 'Preview as Finance officer' }).click();
-    await expect(page).toHaveURL('/app');
-    const financeBanner = page
-      .getByRole('status')
-      .filter({ hasText: 'Previewing as Finance officer' });
-    await expect(financeBanner).toBeVisible();
-    await financeBanner.getByRole('button', { name: 'Back to my view' }).click();
-    await expect(page.getByText('Previewing as')).toHaveCount(0);
-  });
 });
