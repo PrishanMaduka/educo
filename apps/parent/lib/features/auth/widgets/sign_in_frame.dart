@@ -131,7 +131,10 @@ class SignInButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.colors;
     return ConstrainedBox(
-      constraints: const BoxConstraints(minHeight: 52),
+      constraints: const BoxConstraints(
+        minHeight: 52,
+        minWidth: double.infinity,
+      ),
       child: FilledButton(
         onPressed: busy ? null : onPressed,
         style: FilledButton.styleFrom(

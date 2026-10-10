@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:quad_parent/app.dart';
+import 'package:quad_parent/core/api.dart';
 import 'package:quad_parent/core/cache_wipe.dart';
 import 'package:quad_parent/core/clock.dart';
 import 'package:quad_parent/core/install_marker.dart';
 import 'package:quad_parent/core/lock/lock_controller.dart';
 import 'package:quad_parent/core/secure_store.dart';
-import 'package:quad_parent/app.dart';
-import 'package:quad_parent/core/api.dart';
 import 'package:quad_parent/features/auth/screens/welcome_screen.dart';
 import 'package:quad_parent/l10n/app_localizations.dart';
 
@@ -15,7 +15,7 @@ import '../../helpers/auth_fakes.dart';
 import '../../helpers/pump_app.dart';
 import '../../helpers/sign_in_data.dart';
 
-final l10n = lookupAppLocalizations(const Locale('en'));
+final AppLocalizations l10n = lookupAppLocalizations(const Locale('en'));
 
 /// What happened, in order: each request as `<route> <bearer>`, and `wipe`.
 typedef Log = List<String>;

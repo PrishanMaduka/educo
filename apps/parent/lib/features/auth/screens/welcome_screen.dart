@@ -63,7 +63,10 @@ class WelcomeScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 10),
                     ConstrainedBox(
-                      constraints: const BoxConstraints(minHeight: 52),
+                      constraints: const BoxConstraints(
+                        minHeight: 52,
+                        minWidth: double.infinity,
+                      ),
                       child: OutlinedButton(
                         onPressed: () => _inviteSoon(context),
                         style: OutlinedButton.styleFrom(
@@ -138,31 +141,40 @@ class _Headline extends StatelessWidget {
     return Semantics(
       label: l10n.parentWelcomeHeadline(l10n.parentWelcomeHeadlineGood),
       excludeSemantics: true,
-      child: Text.rich(
-        TextSpan(
-          style: style,
-          children: [
-            TextSpan(text: parts.first),
-            WidgetSpan(
-              alignment: PlaceholderAlignment.baseline,
-              baseline: TextBaseline.alphabetic,
-              child: Transform.rotate(
-                angle: -0.035,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 9),
-                  decoration: BoxDecoration(
-                    color: c.brandFill,
-                    borderRadius: BorderRadius.circular(QuadTokens.radiusPill),
-                  ),
-                  child: Text(
-                    l10n.parentWelcomeHeadlineGood,
-                    style: style.copyWith(color: c.brandInk),
+      // A 38 px display line is already large: it grows to 1.4× so the
+      // sentence stays readable at 390 px with text at 200% (the body text
+      // around it scales fully).
+      child: MediaQuery.withClampedTextScaling(
+        maxScaleFactor: 1.4,
+        child: Text.rich(
+          TextSpan(
+            style: style,
+            children: [
+              TextSpan(text: parts.first),
+              WidgetSpan(
+                alignment: PlaceholderAlignment.baseline,
+                baseline: TextBaseline.alphabetic,
+                child: Transform.rotate(
+                  angle: -0.035,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 9),
+                    decoration: BoxDecoration(
+                      color: c.brandFill,
+                      borderRadius: BorderRadius.circular(
+                        QuadTokens.radiusPill,
+                      ),
+                    ),
+                    child: Text(
+                      l10n.parentWelcomeHeadlineGood,
+                      softWrap: false,
+                      style: style.copyWith(color: c.brandInk),
+                    ),
                   ),
                 ),
               ),
-            ),
-            if (parts.length > 1) TextSpan(text: parts.last),
-          ],
+              if (parts.length > 1) TextSpan(text: parts.last),
+            ],
+          ),
         ),
       ),
     );

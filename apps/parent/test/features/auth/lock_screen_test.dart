@@ -12,7 +12,7 @@ import '../../helpers/auth_fakes.dart';
 import '../../helpers/pump_app.dart';
 import '../../helpers/sign_in_data.dart';
 
-final l10n = lookupAppLocalizations(const Locale('en'));
+final AppLocalizations l10n = lookupAppLocalizations(const Locale('en'));
 
 /// A device signed in earlier with Face ID on: it opens on the lock.
 Future<FakeLocalAuth> openLocked(

@@ -1,12 +1,14 @@
 import 'auth_fakes.dart';
 
+typedef School = ({String id, String name, String shortName});
+
 /// Sample schools (made-up data, D34's cast).
-const greenfield = (
+const School greenfield = (
   id: '0190a000-0000-7000-8000-000000000001',
   name: 'Greenfield International School',
   shortName: 'GIS',
 );
-const riverside = (
+const School riverside = (
   id: '0190a000-0000-7000-8000-000000000002',
   name: 'Riverside Primary',
   shortName: 'RP',
@@ -19,8 +21,6 @@ const greenBrand = {
   'fillDark': '#3FB884',
   'ink': '#FFFFFF',
 };
-
-typedef School = ({String id, String name, String shortName});
 
 /// `GET /me` for a parent in [school], with [others] to switch to.
 Map<String, Object?> meJson({
@@ -75,7 +75,7 @@ Map<String, Object?> membershipJson(
   'kind': 'guardian',
 };
 
-const signedInJson = {
+const Map<String, Object> signedInJson = {
   'status': 'signed_in',
   'firstName': 'Priya',
   'memberships': <Object>[],
@@ -90,13 +90,16 @@ Map<String, Object?> chooseSchoolJson(List<Map<String, Object?>> schools) => {
   'accessToken': 'select',
 };
 
-const notFoundJson = {'status': 'not_found', 'memberships': <Object>[]};
+const Map<String, Object> notFoundJson = {
+  'status': 'not_found',
+  'memberships': <Object>[],
+};
 
 FakeReply error(int status, String code, [Map<String, String>? fields]) =>
     FakeReply(status, {
       'code': code,
       'message': 'From the API',
-      if (fields != null) 'fields': fields,
+      'fields': ?fields,
     });
 
 /// The routes a sign-in needs, with [overrides] on top.

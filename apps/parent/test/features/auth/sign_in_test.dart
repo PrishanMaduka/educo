@@ -18,7 +18,7 @@ import '../../helpers/auth_fakes.dart';
 import '../../helpers/pump_app.dart';
 import '../../helpers/sign_in_data.dart';
 
-final l10n = lookupAppLocalizations(const Locale('en'));
+final AppLocalizations l10n = lookupAppLocalizations(const Locale('en'));
 
 /// A signed-out device on Welcome, answering from [routes].
 Future<(FakeApi, MemorySecureStore)> openWelcome(
@@ -42,6 +42,7 @@ Future<(FakeApi, MemorySecureStore)> openWelcome(
 
 Future<void> tapText(WidgetTester tester, String text) async {
   await tester.ensureVisible(find.text(text));
+  await tester.pump();
   await tester.tap(find.text(text));
 }
 
@@ -327,7 +328,7 @@ void main() {
   });
 
   group('Found you', () {
-    testWidgets('wears the school\'s brand; the steps before are Quad\'s', (
+    testWidgets("wears the school's brand; the steps before are Quad's", (
       tester,
     ) async {
       await openWelcome(tester);

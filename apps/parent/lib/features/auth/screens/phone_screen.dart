@@ -109,20 +109,13 @@ class _PhoneScreenState extends ConsumerState<PhoneScreen> {
         if (_useEmail)
           field
         else
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(
-                width: 120,
-                child: CountryPicker(
-                  value: _country,
-                  label: l10n.parentSignInCountryCode,
-                  onChanged: (country) => setState(() => _country = country),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(child: field),
-            ],
+          _PhoneRow(
+            country: CountryPicker(
+              value: _country,
+              label: l10n.parentSignInCountryCode,
+              onChanged: (country) => setState(() => _country = country),
+            ),
+            number: field,
           ),
         SignInError(message: _error),
         const SizedBox(height: 16),
@@ -138,6 +131,33 @@ class _PhoneScreenState extends ConsumerState<PhoneScreen> {
               : l10n.parentSignInUseEmail,
           onPressed: _sending ? null : _switchMode,
         ),
+      ],
+    );
+  }
+}
+
+/// The country code beside the number, or above it when the text is large
+/// (so "+94" is never cut off at 390 px and 200% text).
+class _PhoneRow extends StatelessWidget {
+  const new({required this.country, required this.number});
+
+  final Widget country;
+  final Widget number;
+
+  @override
+  Widget build(BuildContext context) {
+    if (MediaQuery.textScalerOf(context).scale(1) > 1.3) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [country, const SizedBox(height: 8), number],
+      );
+    }
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(width: 120, child: country),
+        const SizedBox(width: 8),
+        Expanded(child: number),
       ],
     );
   }

@@ -40,7 +40,7 @@ void main() {
     expect(theme.colorScheme.primary, const Color(0xFF1A7A50));
   });
 
-  test('without a school the theme is Quad\'s own (D13)', () {
+  test("without a school the theme is Quad's own (D13)", () {
     expect(
       quadTheme(Brightness.light).extension<QuadColors>()?.brandFill,
       QuadColors.light.brandFill,
