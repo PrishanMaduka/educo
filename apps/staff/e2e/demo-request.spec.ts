@@ -1,4 +1,4 @@
-import { expect, type Page } from '@playwright/test';
+import { expect, type Page, type TestInfo } from '@playwright/test';
 import { expectNoSeriousA11yViolations, expectNoSideScroll } from '@quad/config/playwright/checks';
 import { Mailpit } from '@quad/config/playwright/mailpit';
 import { test } from '@quad/config/playwright/stack';
@@ -12,9 +12,15 @@ import { test } from '@quad/config/playwright/stack';
  * export's email form is `landing.spec.ts`'s.
  */
 
-/** An address no other run or project uses, so Mailpit finds this test's email. */
-function requesterEmail(project: string, retry: number): string {
-  const run = `${project}-${String(retry)}-${String(Date.now())}`.replace(/[^a-z0-9-]/gi, '');
+/**
+ * An address no other test, project, retry or run uses, so Mailpit finds this test's email. The
+ * test id is in it: the school and parent tests run in parallel and can start in the same
+ * millisecond.
+ */
+function requesterEmail(testInfo: TestInfo): string {
+  const run = [testInfo.testId, testInfo.project.name, String(testInfo.retry), String(Date.now())]
+    .join('-')
+    .replace(/[^a-z0-9-]/gi, '');
   return `demo+${run}@example.test`;
 }
 
@@ -32,7 +38,7 @@ test.describe('demo requests on the live landing page', () => {
     page,
   }, testInfo) => {
     const cloudflare = cloudflareRequests(page);
-    const email = requesterEmail(testInfo.project.name, testInfo.retry);
+    const email = requesterEmail(testInfo);
     const since = new Date(Date.now() - 1000);
     await page.goto('/#demo');
     const form = page.locator('#demo form').filter({ visible: true });
@@ -68,7 +74,7 @@ test.describe('demo requests on the live landing page', () => {
   });
 
   test('a parent’s request reaches Quad as a parent’s', async ({ page }, testInfo) => {
-    const email = requesterEmail(testInfo.project.name, testInfo.retry);
+    const email = requesterEmail(testInfo);
     const since = new Date(Date.now() - 1000);
     await page.goto('/?view=parent#demo');
     const form = page.locator('#demo form').filter({ visible: true });
