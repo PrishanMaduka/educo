@@ -366,8 +366,25 @@ read -rs SEED && aws secretsmanager put-secret-value --secret-id quad-staging/en
 The seed password is the staging password of the seeded sample accounts: 10 characters or more,
 and never the local placeholder from `.env.example`. Outside local, the seed refuses that
 placeholder or an empty value, and the api refuses the placeholder if it is ever given one.
-`FIELD_ENCRYPTION_KEY` needs nothing: Terraform generates it. These secrets keep their hand-set
-values across applies, like `SENTRY_DSN` ([check](#placeholder-secrets-stay-untouched)).
+`FIELD_ENCRYPTION_KEY` needs nothing: Terraform generates it (64 characters; the API needs 32 or
+more). Never rotate it before M12's KMS adapter: a new key leaves every encrypted field, such as
+the TOTP secrets, unreadable. These secrets keep their hand-set values across applies, like
+`SENTRY_DSN` ([check](#placeholder-secrets-stay-untouched)).
+
+Before the first deploy, check:
+- [ ] `quad-staging/env/JWT_PRIVATE_KEY` and `JWT_PUBLIC_KEY` hold one Ed25519 pair (PEM), not the
+  `.env.example` pair, which the API recognises and refuses outside local.
+- [ ] `quad-staging/env/SEED_PASSWORD` is set: 10 characters or more, not the local placeholder.
+- [ ] `quad-staging/env/FIELD_ENCRYPTION_KEY` exists (Terraform made it); leave it alone.
+- [ ] Nothing sets `DEV_FIXED_OTP` for staging (no task definition, secret or tfvars entry). The api
+  refuses to boot with it unless `APP_ENV=local` (D46, D54), so staging sign-in always needs a real
+  authenticator code (staff two-step and the console) or a real SMS code (parents).
+
+Known gap: the seed gives each seeded staff and console account an authenticator with a new
+random secret, and nobody holds those secrets on staging, so no seeded person can pass two-step
+there yet. Every seeded staff account needs the code (it has an authenticator), and the console
+always does. Decide how staging gets its first usable authenticator (for example the console's
+reset TOTP, which arrives with Platform users in M2) before relying on staging sign-in for demos.
 
 `scripts/ecs-deploy.mjs` reads the cluster, subnets and security groups from SSM
 (`/quad/staging/deploy/*`) and fails unless the one-off task's container exits 0. Run the three

@@ -10,10 +10,12 @@ Every school's staff use the same address, and the only way to sign in is the wo
 2. **Password.** The password (with Show/Hide), then "Keep me signed in on this device". `POST /auth/password` answers a wrong password, an unknown email and a disabled account the same way. Passwords are Argon2id with at least 10 characters (the school can set more) and are checked against a breached-password list (k-anonymity API).
 3. **Two-step.** Required when the rule of any school the person belongs to covers their role there (the strictest rule wins, because one account opens all of them). TOTP (authenticator app) with 10 recovery codes. "Trust this device for 30 days" is optional and starts unticked (D51).
 4. **Choose a school.** The API reads the account's active staff memberships (`auth_memberships`). None: "This account isn't linked to a school yet. Ask your school's admin to invite you." One: open it. Several: a list of schools (logo, name, your role) and "Remember my choice on this device". The session stores `active_tenant_id`; the staff portal then loads that school's branding.
-5. **Forgot password.** A signed email link (see [Tenant-less entry points](#tenant-less-entry-points)) valid for 30 minutes, single use; all sessions are revoked on reset.
+5. **Forgot password.** A signed email link (see [Tenant-less entry points](#tenant-less-entry-points)) valid for 30 minutes, single use; all sessions are revoked on reset. The link is account-level, so its `tid` is null (the only purpose that may have none); a reset an admin starts from Users & roles carries the school's id for the audit.
 6. **Lockout.** Five failures in 15 minutes lock the account for 15 minutes and email the user.
 
 Switching school (profile menu → the other schools) re-checks the membership, rotates the session id and reloads `/app`. Signing out ends the session for every school.
+
+**Staff invites.** An invite link (purpose `staff_invite`) lives 7 days and works once; Resend issues a new link and retires the old one. A new account (one the invitation created, with no password yet) chooses its password, and sets up two-step when a school's rule asks, on the invite page, and that opens the school: the one case besides the support session where a link leads to a session. An existing account signs in first, then accepts (D32).
 
 The sign-in page may remember the last school on the device (a non-sensitive `quad_last_school` cookie holding its name and logo URL) to say "Welcome back to Colombo International School". It never pre-selects a tenant on the server.
 
@@ -31,7 +33,7 @@ Reference: the sign-in and lock screens in `design/parent.html` (the welcome scr
 1. **Welcome:** "Sign in" and "I have an invite code".
 2. **Phone or email.** A mobile number with its country code, validated per country (9 digits after +94, without the leading 0). Only Sri Lanka (`+94`) is accepted for now (OQ12, product owner); the country list is data, and more countries are added only by owner decision (D35). "Use email instead" switches to an email address. Copy: "We'll send you a 6-digit code. Use the mobile number the school has on file for you."
 3. **OTP.** The API sends a 6-digit code by SMS (or email), valid for 10 minutes, only to a number or address that belongs to a guardian or relative account (D39): an unknown number gets the same answer and no SMS. Rate limit: 3 per 15 minutes per number or address, 10 per day. Resend after 30 s. Email OTP is also offered when the guardian has an email and no SMS is delivered within 60 s. The response is the same whether or not the number is known. After 60 s without a code the app says "Didn't get a code? Use the mobile number your school has on file."
-4. **Found you.** On a valid OTP the API finds the account with that phone (or email) and returns its guardian and relative memberships (`auth_memberships`). The app shows "You're signed in. Welcome, {first name}. We found {n} children at {school}." with the children's avatars. With several schools it shows the school picker first. An unknown number never gets a code, so a code it guesses is simply wrong (D39); the `not_found` answer remains only for an account whose parent memberships ended after its code was sent.
+4. **Found you.** Until students exist (M4, shown in the app from M6) the app says "Welcome, {first name}. You're connected to {school}." and adds the children line when the API returns children. On a valid OTP the API finds the account with that phone (or email) and returns its guardian and relative memberships (`auth_memberships`). The app shows "You're signed in. Welcome, {first name}. We found {n} children at {school}." with the children's avatars. With several schools it shows the school picker first. An unknown number never gets a code, so a code it guesses is simply wrong (D39); the `not_found` answer remains only for an account whose parent memberships ended after its code was sent.
 5. **Tokens:** an access JWT (15 minutes; claims: sub, tid, kind, roles hash) and a rotating refresh token (60 days) kept in `flutter_secure_storage`. Reusing an old refresh token revokes the whole token family.
 6. **Face ID / fingerprint** (`local_auth`): "Unlock with Face ID?" (Turn on / Not now), then "Allow notifications?". Biometric unlock then gates opening the app, re-opening it after 5 minutes in the background, and approving payments. "Use passcode" falls back to the device passcode.
 7. Signing out on one device revokes that device's refresh family and push token, and wipes the local cache.
@@ -44,6 +46,7 @@ Reference: the sign-in and lock screens in `design/parent.html` (the welcome scr
 - **Phone or email already in use.** Changing a membership's phone or email (by the school, by import, or through a parent's approved contact change) to a value that belongs to another account is refused with "This number is already used by another Quad account. Ask Quad support to merge them." Support merges accounts in the console with a logged reason. A parent's own contact changes go to the school for review first (see [09](09-parent-app.md#profile)).
 - **Changing your own sign-in.** Changing the account's phone or email needs an OTP to the new value and the current two-step method, and emails the old address.
 - **Leaving a school.** Deactivating a membership revokes that school's sessions and tokens; the account and other memberships stay.
+- **Sign out everywhere** (a school admin, from Users & roles) ends the member's sessions and parent tokens in that school only, and forgets every trusted device of the account, so two-step is asked again on each (D53). A password reset ends every session in every school.
 
 ### Tenant-less entry points
 The tenant comes from the session or token (the membership chosen at sign-in). The only exceptions are the entry points below, which find the tenant from a **verified signed token** or one of the named security-definer lookups ([04](04-data-model.md#tenant-less-lookups-security-definer-functions)). Never from plain request input, the URL or the host.
@@ -51,7 +54,7 @@ The tenant comes from the session or token (the membership chosen at sign-in). T
 | Entry point | How the tenant is found |
 |---|---|
 | Sign-in | `auth_memberships(account_id)` after the password or OTP step; the chosen membership goes on the session |
-| Signed links: password reset, staff invite, guardian invite, relative invite, support session, calendar feed, links in emails | A token `base64url(payload).base64url(HMAC-SHA256(payload, LINK_SIGNING_SECRET))` with payload `{purpose, tid, sub, exp, nonce}`. The server checks the signature, purpose and expiry; single-use purposes record the nonce in `signed_token_uses`. Only then is `tid` used. A token never grants a session by itself; the person still signs in (except the support session, which is created by the console) |
+| Signed links: password reset, staff invite, guardian invite, relative invite, support session, calendar feed, links in emails | A token `base64url(payload).base64url(HMAC-SHA256(payload, LINK_SIGNING_SECRET))` with payload `{purpose, tid, sub, exp, nonce}`. The server checks the signature, purpose and expiry; single-use purposes record the nonce in `signed_token_uses`. Only then is `tid` used. A token never grants a session by itself; the person still signs in, except the support session (created by the console) and a new invitee's first password set on the staff invite page (D32). `tid` is null only for an account-level password reset |
 | Payment webhooks (PayHere, Stripe) | Verify the gateway signature first, then `tenant_by_gateway_account(provider, account_id)` |
 | Public admissions enquiry form | `tenant_by_embed_key(key)`; rate-limited and captcha-checked |
 | Demo requests from the landing page | Platform level, no tenant (`platform_leads`) |
@@ -72,7 +75,7 @@ Rules: every tenant-less route lives in `apps/api/src/public/**` or `apps/api/sr
 | `finance` | Finance officer | Fees, finance, read students |
 | `admissions` | Admissions officer | Admissions, CRM, read students |
 | `teacher` | Teacher | Own classes: registers, gradebook, reports for own subjects, moments, behaviour; read timetable |
-| `counsellor` | Counsellor | Pastoral and medical; safeguarding only if they hold the sensitive key |
+| `counsellor` | Counsellor | Pastoral and medical (the system role holds `sensitive.medical`; `safeguarding` is off); safeguarding only if they hold the sensitive key |
 | `frontdesk` | Front desk | Attendance (late arrivals), visitors, pickup-pass scanner, read contact details |
 
 Assignments in Teachers & classes give extra scope automatically:
@@ -86,7 +89,13 @@ Custom roles come from the role builder in the console or the staff portal (User
 ### Permission matrix
 Modules (rows): `admissions`, `crm`, `sis` (student records), `attendance`, `lms`, `fees`, `finance`, `transport`, `settings`. Actions (columns): `view`, `create`, `edit`, `delete`, `approve`. The rules mirror the prototype: unchecking View clears the whole row, and checking any other action checks View. A module that is not in the school's plan is shown with a "Not in plan" pill and cannot be granted.
 
-Sensitive keys (off by default, all access logged): `safeguarding`, `medical`, `finance_reports`, `export_data`.
+Sensitive keys (off by default, all access logged): `safeguarding`, `medical`, `finance_reports`, `export_data`. The system roles' defaults are fixed in `packages/domain` (`systemRoleMatrix`): the School admin holds all four, and the Counsellor holds `medical` (D32).
+
+**Managing users** (`users.manage`: Users & roles, invites, role changes, Preview a role) is not a matrix cell. It comes with `settings.edit`, so the Principal, whose settings row is view only, does not have it.
+
+**Page access.** The staff portal's pages and who sees them are data (`STAFF_PAGES` in `packages/contracts`), decided by `pageAccess` in `packages/domain` and returned by `GET /me/permissions`. A page needs `view` on its module (Students `sis.view`, Fees `fees.view` and so on). Pages with no single module: Dashboard needs `view` on any of admissions, CRM, fees, finance or settings; Communications is for every staff role; My teaching needs `lms.create`; Early warning `sis.create`; Pastoral care `sis.create` or `lms.create`; Users & roles `users.manage`. A page whose row has only `view` shows **View only**, and a page hidden by the school's plan says so (D52).
+
+**Scopes.** The role scopes `campus` and `own_classes` are stored from M1 and enforced as row filters with campuses and class assignments (M3, M5); until then every role acts on the whole school.
 
 **"Sign in as" is console-only.** Schools cannot impersonate their own staff. Quad support can, through support access below. School admins manage accounts with Remind (two-step), Reset password and Sign out everywhere (see [08](08-staff-portal.md#users--roles)).
 

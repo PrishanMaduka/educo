@@ -4,8 +4,9 @@ The public landing page at `https://quad-edu.com/`, the sign-in entry, demo requ
 
 ## Where it lives
 
-- `apps/staff`, route group `(public)`: `/`, `/about`, `/security`, `/sign-in`, `/legal/*`, the `/p/*` "Get the Quad app" fallback, `/sitemap.xml`, `/robots.txt` and the `/.well-known/*` app-link files ([02 → Paths](02-architecture.md#paths-on-quad-educom-d14-d15)).
+- `apps/staff`, route group `(public)`: `/`, `/about`, `/security`, `/legal/*`, the `/p/*` "Get the Quad app" fallback, `/sitemap.xml`, `/robots.txt` and the `/.well-known/*` app-link files ([02 → Paths](02-architecture.md#paths-on-quad-educom-d14-d15)).
 - Public pages are statically rendered (Next.js static generation) and served through CloudFront. Until the AWS deploy exists, a static export of `/`, `/about`, `/security`, the legal pages and `/sitemap.xml` is served from GitHub Pages instead (D30, [Pre-launch site](#pre-launch-site)). They load no signed-in code: the staff portal bundle starts under `/app`.
+- `/sign-in` and its signed-link pages (`/sign-in/{reset,invite,support}/{token}`) live in their own route group, `(auth)`, with the app tokens (the `design/admin.html` sign-in screen is their reference), not in `(public)`. Like `/app`, they stay out of the static export (D32). M1b's sign-in dialog on the landing page uses the public palette.
 - Quad-branded only. No school branding appears on public pages (the school is not known yet). The sample schools in the pictures ("Greenfield International", "St. Clare's Academy") are fictional.
 - A signed-in visitor who opens `/` sees the landing page with **Open {school}** in place of **Sign in**, linking to `/app`.
 

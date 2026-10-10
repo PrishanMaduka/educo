@@ -37,7 +37,7 @@ Platform tables have no RLS policy and are reached only from console routes and 
 | `grading_scales` | id, name, bands jsonb (`[{label:'A*', min:90}, …]`) |
 | `platform_users` | id, name, email (unique), role enum(`owner`,`admin`,`support`,`billing`,`readonly`), password_hash, totp_secret_enc, totp_enabled, totp_last_step, status, locked_until, last_sign_in_at |
 | `platform_audit` | id, actor_platform_user_id, action, target_type, target_id, tenant_id (nullable), ip, user_agent, meta jsonb, at |
-| `support_sessions` | id, platform_user_id, tenant_id, reason, started_at, ended_at |
+| `support_sessions` | id, platform_user_id, tenant_id, reason, started_at, ended_at, expires_at (60 minutes after the link is made), token_hash (bytea, unique, nullable: SHA-256 of the visit's cookie, set once on redemption). A support visit never has a `sessions` row (D32) |
 | `school_health_snapshots` | id, tenant_id, date, staff_weekly_active_pct, parent_app_pct, admin_last_sign_in_at, open_tickets, seats_used_pct, payment_status, score, level enum(`thriving`,`watch`,`at_risk`,`paused`) |
 | `support_tickets` | id, tenant_id, opened_by_user_id, channel enum(`in_app`,`email`), subject, body, status enum(`open`,`waiting`,`closed`), priority, assignee_platform_user_id, opened_at, closed_at |
 | `school_checkins` | id, tenant_id, with_user_id, with_name, at, how enum(`phone`,`video`,`visit`), notes, owner_platform_user_id, invite_sent bool, status enum(`planned`,`done`,`cancelled`), outcome |
@@ -49,14 +49,22 @@ Platform tables have no RLS policy and are reached only from console routes and 
 
 ## Identity (tenant-scoped unless noted)
 
+Identity rows fall into three classes besides the platform tables (D32):
+- **Account tables** (`accounts`, `credentials`, `sessions`, `trusted_devices`): global rows with no `tenant_id`, ENABLE and FORCE row level security and one policy, `account_isolation`, on `app.account_id` (the key is `id` on `accounts` and `account_id` on the others). Code reaches them through `withAccount(accountId, …)` (optionally with a school), and lookups before anyone is known go through the definers below (`account_by_identifier`, `session_by_token`, `refresh_family`). Console sessions (`platform_user_id` set) are read only through `withPlatform`.
+- **The open table** `otp_challenges`: no RLS (no account exists until the code is verified), and nothing readable in it: the subject and the code are HMAC-keyed hashes.
+- **Tenant tables** **[T]**, as everywhere else.
+
+The definers also need to read some of these rows: a `definer_read` policy (`FOR SELECT TO quad_owner USING (true)`) exists on exactly `accounts`, `sessions`, `users`, `user_roles` and `roles`, and `quad_app` still sees only its own rows (D32, amending D24). Hashes are `bytea`.
+
 | Table | Key columns |
 |---|---|
-| `accounts` (global, no tenant_id) | id, email citext (unique, nullable), phone_e164 (unique, nullable; at least one of the two), status enum(`active`,`locked`,`disabled`), created_at, last_sign_in_at. One per person across every school |
-| `users` **[T][S]** | id, tenant_id, account_id, kind enum(`staff`,`guardian`,`relative`), name, email, phone_e164, avatar_file_id, status enum(`invited`,`active`,`deactivated`), locale, theme, last_sign_in_at; unique (tenant_id, account_id). This is the person's **membership** in one school |
-| `credentials` (global) | account_id, password_hash (argon2id), totp_secret_enc, totp_enabled, recovery_codes_hash[]. One password and one authenticator for all of a person's schools |
-| `sessions` | id, account_id or platform_user_id, active_tenant_id (nullable until a school is chosen), active_user_id, kind enum(`web`,`mobile`,`console`), refresh_hash, device_name, ip, user_agent, created_at, last_seen_at, expires_at, revoked_at |
+| `accounts` (account table) | id, email citext (unique, nullable), phone_e164 (unique, nullable; at least one of the two), status enum(`active`,`locked`,`disabled`), locked_until (the lockout's end), created_at, last_sign_in_at. One per person across every school |
+| `users` **[T][S]** | id, tenant_id, account_id, kind enum(`staff`,`guardian`,`relative`), name, email, phone_e164, avatar_file_id, status enum(`invited`,`active`,`deactivated`), locale (null: the school's), theme enum(`system`,`light`,`dark`), last_sign_in_at, invite_sent_at, invite_nonce (the one staff invite link that still works), accepted_at; unique (tenant_id, account_id). This is the person's **membership** in one school |
+| `credentials` (account table) | account_id, password_hash (argon2id), totp_secret_enc, totp_enabled, totp_last_step (the last accepted TOTP step, so a code never works twice), recovery_codes_hash[], password_changed_at (reset links signed before it are refused). One password and one authenticator for all of a person's schools |
+| `sessions` (account table) | id, account_id or platform_user_id (exactly one), active_tenant_id (nullable until a school is chosen), active_user_id, kind enum(`web`,`mobile`,`console`), stage enum(`two_step`,`two_step_setup`,`choose_school`,`active`), token_hash (bytea, unique: SHA-256 of the session cookie; null for mobile refresh families), refresh_hash (mobile: SHA-256 of the current refresh secret), refresh_generation, keep_signed_in, sign_in_method enum(`password`), preview_role_id, preview_sample_user_id, support_session_id, device_name, ip, user_agent, created_at, last_seen_at, expires_at, revoked_at. `active_user_id`, `preview_role_id` and `preview_sample_user_id` are composite foreign keys with `active_tenant_id` |
 | `devices` **[T]** | id, user_id, platform enum(`ios`,`android`), fcm_token, app_version, biometric_enabled, last_seen_at |
-| `otp_challenges` | id, phone_e164 or email, code_hash, purpose, attempts, expires_at |
+| `otp_challenges` (open table) | id, subject_hash (HMAC-SHA256 of the normalised phone or email), channel enum(`sms`,`email`), code_hash (HMAC-SHA256 over the challenge id and the code), purpose, attempts, expires_at, created_at. Both hashes are keyed from `SESSION_SECRET` |
+| `trusted_devices` (account table) | id, account_id, token_hash (bytea, unique: SHA-256 of the "Trust this device for 30 days" cookie), created_at, expires_at, revoked_at |
 | `roles` **[T]** | id, tenant_id, key, name, description, color, system bool, scope enum(`school`,`campus`,`own_classes`), base_role_key |
 | `role_permissions` **[T]** | role_id, module, actions bit(5) (view, create, edit, delete, approve) |
 | `role_sensitive` **[T]** | role_id, key enum(`safeguarding`,`medical`,`finance_reports`,`export_data`) |
@@ -68,8 +76,8 @@ Platform tables have no RLS policy and are reached only from console routes and 
 | `notification_prefs` **[T]** | user_id, channel, category enum(`absence`,`rewards`,`finance`,`news`,`moments`,`messages`,`events`), enabled |
 | `staff_office_hours` **[T]** | id, user_id, weekday (1–5), starts, ends (`HH:mm`). Slots for "Ask for a 10-minute chat"; default 15:00–16:00 on school days when none are set |
 | `tasks` **[T]** | id, tenant_id, user_id, title, due_on, done_at, created_at. "My tasks" on the dashboard |
-| `school_settings` **[T]** | tenant_id (pk), office_email (Reply-To for emails), office_phone, ask_quad_enabled, ask_quad_keep_conversations, ew_share_with_parents enum(`off`,`after_plan`,`automatic`), absence_alert enum(`at_time`,`immediately`), absence_alert_time (default 09:00), reminder_days int[] (default {-3,7,14}), photo_consent_default enum(`class`,`family`,`none`), family_circle_enabled, quiet_hours_enabled, quiet_from (18:00), quiet_until (07:00), quiet_weekends bool, sms_sender_id, updated_by, updated_at |
-| `audit_log` **[T]** | id, tenant_id, actor_user_id, actor_platform_user_id (support), action, target_type, target_id, meta jsonb, ip, at |
+| `school_settings` **[T]** | tenant_id (pk), office_email (Reply-To for emails), office_phone, ask_quad_enabled, ask_quad_keep_conversations, ew_share_with_parents enum(`off`,`after_plan`,`automatic`), absence_alert enum(`at_time`,`immediately`), absence_alert_time (default 09:00), reminder_days int[] (default {-3,7,14}), photo_consent_default enum(`class`,`family`,`none`), family_circle_enabled, quiet_hours_enabled, quiet_from (18:00), quiet_until (07:00), quiet_weekends bool, address, sms_sender_id, sms_sender_status enum(`requested`,`approved`; null until a school asks), updated_by, updated_at |
+| `audit_log` **[T]** | id, tenant_id, actor_user_id, actor_platform_user_id (support), support_session_id, action, target_type, target_id, meta jsonb, ip, at. Append-only (a trigger refuses update, delete and truncate) |
 
 ## Academic structure [T]
 
@@ -275,8 +283,32 @@ These are the **only** ways code finds a tenant without a session (see [05](05-a
 
 | Function | Returns | Used by |
 |---|---|---|
-| `auth_memberships(account_id)` | tenant id, tenant name, logo, colour, membership kind, role names for active memberships of active tenants | Sign-in and the school picker |
+| `auth_memberships(account_id)` | tenant id, tenant name, short name, logo, colour, membership kind, `user_id`, role names, `suspended` and `suspend_reason`, for the account's active, not removed memberships of schools in `trial`, `onboarding`, `active`, `past_due` or `suspended` (never deleted ones) | Sign-in and the school picker |
+| `account_by_identifier(email, phone)` | exactly one identifier, else refused: the account's id, status and `locked_until` | Sign-in, before anyone is known |
+| `session_by_token(hash)` | the account's live session for that cookie hash, or an active redeemed support visit (kind `support`); never a console session | Every cookie request |
+| `refresh_family(session_id)` | the account and school of a live mobile refresh family | `POST /auth/refresh` |
+| `auth_sign_in_rules(account_id)` | per active staff membership: school, two-step rule, role keys, minimum password length | Sign-in (the strictest rule wins) |
+| `consume_signed_token(nonce, purpose, expires_at)` | true only the first time a nonce is stored in `signed_token_uses` | Single-use signed links |
+| `redeem_support_session(id, hash)`, `end_support_session(hash)` | set the visit's cookie hash once; end the visit once, writing `platform_audit`, and return the visit it ended (`0020`) | `POST /auth/support-session` and its `/end` |
 | `tenant_by_gateway_account(provider, account_id)` | tenant id, gateway account id, mode | Payment webhooks, after the gateway signature is verified |
 | `tenant_by_embed_key(key)` | tenant id, enquiry form id, active | The public admissions enquiry form |
 
-Signed tokens (password reset, staff invite, guardian invite, relative invite, support session, calendar feed and email deep links) carry the tenant id inside an HMAC-signed payload, so they need no lookup function. Single-use tokens record their nonce in `signed_token_uses`.
+Signed tokens (password reset, staff invite, guardian invite, relative invite, support session, calendar feed and email deep links) carry the tenant id inside an HMAC-signed payload, so they need no lookup function. Single-use tokens record their nonce in `signed_token_uses`. An account-level password reset (Forgot password) carries no tenant id.
+
+**Tenant-scoped definers (M1).** These do not find a tenant: they take only `app.tenant_id` (set by `withTenant`) and refuse without it, and reach rows that `quad_app` cannot. Each is owned by `quad_owner`, pins `search_path = public, pg_temp`, is not executable by `PUBLIC`, is executable by `quad_app`, and has a cross-tenant test (another school's id does nothing).
+
+| Function | What it does | Migration |
+|---|---|---|
+| `current_tenant_profile()` | the current school's name, short name, status, suspend reason, time zone, locale, currency, brand colour and logo, plan modules, sign-in rules (`tenant_security`) and `country` | `0006`, `0012`, `0018` |
+| `update_current_tenant_name(expected, name)` | renames the current school only while its name is still `expected` (a compare-and-set; false otherwise), writing `tenant.renamed` to `platform_audit` | `0006`, `0019` |
+| `current_support_visit(support_session_id)` | the Quad staff member's name for a live visit to the current school | `0007` |
+| `record_support_audit(support_session_id, action, target_type, target_id, meta)` | copies an action taken in a live support visit to the current school to `platform_audit` | `0006` |
+| `ensure_account_for_email(email)` | the account for an email, or a new active one; never a second account | `0006` |
+| `member_two_step_status(user_ids)` | whether each member of the current school has two-step on | `0006` |
+| `revoke_member_sessions(user_id)` | revokes the member's sessions and refresh families in the current school | `0006` |
+| `clear_member_preview(user_id)` | clears role previews on the member's live sessions in the current school | `0015` |
+| `member_account_email(user_id)` | the member's account sign-in email | `0017` |
+| `member_has_other_memberships(user_id)` | whether the member's account has any other membership (a boolean only) | `0017` |
+| `revoke_member_trusted_devices(user_id)` | revokes every trusted device of the member's account (D53) | `0021` |
+
+Writes to account rows inside a definer go through the helper `with_account_scope`, which switches `app.account_id` to an account that belongs to the current school (or a new invitee's) for one statement and restores it on every path; `quad_app` cannot call it.

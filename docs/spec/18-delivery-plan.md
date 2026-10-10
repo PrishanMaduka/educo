@@ -343,7 +343,12 @@ To run a milestone in Claude Code, type `/build-milestone M3` (ids with a letter
 ## Progress
 - [x] M0 Foundations
 - [ ] M0b Infrastructure and staging (written and validated offline; pending first deploy, see infra/README.md)
-- [ ] M1 Auth, tenancy and permissions
+- [x] M1 Auth, tenancy and permissions (decisions in D32 and D46 to D54). Still open:
+  - the real-device Face ID and fingerprint check: the nightly `e2e:mobile` covers it once M6 replaces the stub;
+  - the WebKit journeys, which run in CI only;
+  - the token gaps for the D34 token port (lime, navy, pink, sky, orange, the `nav-*` colours, the focus ring and Bricolage);
+  - the parent app's four-tab Home (D35);
+  - the landing screenshot baseline, which is stale at the footer (D43).
 - [ ] M1b Public site
 - [ ] M2 Platform console
 - [ ] M3 Academic structure and staffing

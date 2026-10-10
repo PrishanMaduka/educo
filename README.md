@@ -183,7 +183,7 @@ Prerequisites (pinned in the repo):
 corepack enable && pnpm install
 cp .env.example .env              # safe local defaults
 docker compose up -d              # Postgres, Redis, MinIO, Mailpit, ClamAV on 127.0.0.1
-pnpm db:migrate && pnpm db:seed   # schema, then the two sample schools (accounts arrive with M1)
+pnpm db:migrate && pnpm db:seed   # schema, then the two sample schools and their people
 pnpm dev                          # API :4000 (/api/v1), staff portal :3000, console :3001
 pnpm parent:run                   # parent app (flutter run --flavor dev) on a simulator or device
 pnpm verify                       # the full quality gate, the same one CI runs
@@ -193,4 +193,18 @@ pnpm verify                       # the full quality gate, the same one CI runs
 
 If Docker Hub rate-limits image pulls, prefix the images with a registry mirror: `QUAD_IMAGE_REGISTRY=mirror.gcr.io/ docker compose up -d` (keep the trailing slash). The Postgres init script (`docker/postgres/init`) only runs on a fresh volume; `docker compose down -v` deletes the local database so it runs again.
 
-The seeded sign-ins (they arrive with M1; M0 seeds only the two schools) and the rest of the local setup are in [docs/spec/02-architecture.md → Local development](docs/spec/02-architecture.md#local-development).
+### Seeded sign-ins
+
+`pnpm db:seed` (and `pnpm db:reset`) creates two fictional schools, Colombo International School (CIS) and Kandy Hill Academy (KHA), and these people. Every staff and console account signs in with the password in `SEED_PASSWORD` in your `.env` (the seed refuses to run without it) and then a two-step code. Locally every code is `000000` (`DEV_FIXED_OTP`, which the API accepts only with `APP_ENV=local`).
+
+| Who | Where | Sign in with |
+|---|---|---|
+| Platform owner (`owner@quad.local`) | console, `localhost:3001` | email, `SEED_PASSWORD`, code |
+| Quad support (`support@quad.local`) | console, `localhost:3001` (Open as school admin) | email, `SEED_PASSWORD`, code |
+| School admin (`prishan.maduka@colombo-intl.local`, CIS) | staff portal, `localhost:3000` | email, `SEED_PASSWORD`, code |
+| Teacher (`nadeesha.jayasinghe@colombo-intl.local`, CIS) | staff portal | email, `SEED_PASSWORD`, code |
+| Finance officer (`dilini.fernando@colombo-intl.local`, CIS) | staff portal | email, `SEED_PASSWORD`, code |
+| Teacher at both schools (`ruwan.mendis@quad.local`) | staff portal, then **Choose a school** | email, `SEED_PASSWORD`, code |
+| Guardian (Dilhani Perera, `+94 77 000 0001`, CIS) | parent app (`pnpm parent:run`) | phone, then the code |
+
+Everyone uses the one address: the school comes from the signed-in person's membership, never from the URL. Staging has the same fictional people with its own `SEED_PASSWORD` and no fixed codes (D46); production is never seeded. The rest of the local setup is in [docs/spec/02-architecture.md → Local development](docs/spec/02-architecture.md#local-development).

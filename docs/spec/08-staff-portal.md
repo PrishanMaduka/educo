@@ -188,6 +188,7 @@ Settings → **School settings** (`settings.view` to see, `settings.edit` to cha
 | Tab | Settings |
 |---|---|
 | General | School name, office email (used as Reply-To on emails), office phone, address, time zone (read-only; set in the console), SMS sender ID (requested through Quad; "QUAD" until approved). Logo and colour are read-only with "Set by Quad". |
+| Sign-in | The two-step rule, minimum password length, session length and IP allowlist, read-only (managed by Quad in the console) |
 | Families | Photo consent default for new students (Class, Family only, No photos), family circle on/off, absence alert time (at a set time, default 09:00, or straight away), and invoice reminder days (default 3 days before, 7 and 14 days after) |
 | Communication | Quiet hours (on/off, from, until, include weekends) and the reply expectation shown to staff |
 | Early warning | Share with parents: Off, After a plan is started (default), Automatically |
@@ -197,7 +198,9 @@ Settings → **School settings** (`settings.view` to see, `settings.edit` to cha
 | Import data | Templates, uploads, dry runs and past import batches with rollback. Specified in [21](21-onboarding-import.md) |
 | Audit | The school's audit log: who did what and when, filters for person, action type and date range, a readable detail of each entry, and Export (CSV, needs `sensitive.export_data`). Support sessions from Quad are marked |
 
-Sign-in rules (two-step, password length, session length, IP allowlist) are shown read-only with "Managed by Quad. Ask support to change them."
+Sign-in rules (two-step, password length, session length, IP allowlist) are shown read-only, on their own **Sign-in** tab, with "Managed by Quad. Ask support to change them."
+
+From M1 the page has three tabs: **General**, **Sign-in** (read-only) and **Audit** (`?tab=general|sign-in|audit`). Every other tab appears with the feature that owns it, and `PATCH /settings` with it; until then the summary line reads them from `GET /settings`.
 
 ## Notifications panel
 Grouped by today and earlier: absences, payments, messages, cover requests, form replies, changes from parents and system notices. "Mark all read". Each item links to where you act on it.

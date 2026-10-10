@@ -2,6 +2,8 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
+**Status (2026-10-10): complete.** All 28 tasks are done and M1 is ticked in spec 18. Task 8 (SSO) was built and then removed by D37; the decisions as built are D32 and D46 to D54 in spec 02.
+
 **Goal:** Everyone signs in at one domain. Staff use identifier-first sign-in at `quad-edu.com/sign-in` (work email and password, TOTP, forgot password, lockout, **Choose a school**; no Google or Microsoft sign-in, D37). Quad staff sign in to the console with email, password and TOTP. Parents sign in to the Flutter app with an OTP, then JWT with refresh rotation and biometric unlock. Every tenant table has FORCE RLS. Every route is guarded by `@Can`/`@Module`. School admins manage **Users & roles**, the **School settings** shell and the **Audit** view, and can **Preview a role**. Quad support enters a school only through a reasoned, logged, 60-minute support session with a banner. Journeys 17, 18, 19, 42, 43 (web and enquiry parts) and 50 are green in `pnpm verify`.
 
 **Architecture:**
@@ -220,7 +222,7 @@ Notes:
 **D32** (Task 1 creates the row with the area headings above, then appends under Tables and lookups): account tables with RLS on `app.account_id` and `withAccount` (OQ1); `otp_challenges` as the only open table, with HMAC-keyed `code_hash` and `subject_hash`; the account and open table classes in `findTenancyViolations`; migration order `0003_platform_access`, `0004_accounts`; the new columns and `trusted_devices`.
 
 Steps:
-- [ ] **Step 1: Write failing tests.**
+- [x] **Step 1: Write failing tests.**
   - `migration.test.ts`:
     - every table is classified;
     - a probe account table without FORCE fails with `<name>: FORCE ROW LEVEL SECURITY missing`;
@@ -231,13 +233,13 @@ Steps:
     - with no account set it sees none;
     - inserting a `sessions` row for B under A fails WITH CHECK.
   - `client-reset.api.test.ts`: after a transaction that took an advisory lock and a temp table, the next checkout holds neither.
-- [ ] **Step 2: Run them to see them fail.** `pnpm --filter @quad/db test:api`. Expected: FAIL.
-- [ ] **Step 3: Implement.**
+- [x] **Step 2: Run them to see them fail.** `pnpm --filter @quad/db test:api`. Expected: FAIL.
+- [x] **Step 3: Implement.**
   - Add the enums to `@quad/contracts` `enums.ts`: `AccountStatus`, `SsoProvider`, `SessionKind`, `SessionStage`, `OtpChannel`, `PlatformRole`, `TwoStepRule`, `PlanModule`, `MembershipKind`, `MembershipStatus`, `RoleScope`, `SensitiveKey`.
   - Run `pnpm db:generate` for the platform schema (`0003_platform_access`), then again for the account schema (`0004_accounts`). Append an `accountRlsSql(table, keyColumn)` helper's output (ENABLE, FORCE, policy, grants) and the triggers.
   - Add the D32 row skeleton and this task's bullets.
-- [ ] **Step 4: Run the checks.** `pnpm db:migrate && pnpm --filter @quad/db test && pnpm --filter @quad/db test:api`. Expected: PASS.
-- [ ] **Step 5: Commit.** `feat(db): account and platform access tables with account-scoped RLS`.
+- [x] **Step 4: Run the checks.** `pnpm db:migrate && pnpm --filter @quad/db test && pnpm --filter @quad/db test:api`. Expected: PASS.
+- [x] **Step 5: Commit.** `feat(db): account and platform access tables with account-scoped RLS`.
 
 **Acceptance:** M1 Accept bullet "the app role cannot read another tenant's rows even with a raw query" (the account half). The migration test now covers every table.
 
@@ -272,17 +274,17 @@ Other notes:
 - `devices`, `staff_profiles`, `guardians` and `guardian_invites` are not created in M1. They arrive with M3 and M6, the milestones that write them.
 
 Steps:
-- [ ] **Step 1: Write failing tests** (`identity-tenant.api.test.ts`, two real tenants through `quad_app`). For each table:
+- [x] **Step 1: Write failing tests** (`identity-tenant.api.test.ts`, two real tenants through `quad_app`). For each table:
   - a row written under A is invisible under B;
   - writing with B's `tenant_id` while in A fails;
   - with no `app.tenant_id`, `select count(*)` is 0;
   - a raw `quad_app` pool query with `set_config('app.tenant_id', A)` returns only A's rows (Review Focus #4, tenant part).
   - Also: `audit_log` refuses UPDATE and DELETE (this is the only test of that trigger; Task 15 does not repeat it).
   - Also: a `sessions` row whose `active_user_id` belongs to another tenant fails the composite FK.
-- [ ] **Step 2: Run them to see them fail.** Expected: FAIL.
-- [ ] **Step 3: Implement** with `pnpm db:generate` plus `tenantRlsSql` for each table.
-- [ ] **Step 4: Run the checks.** `pnpm db:migrate && pnpm --filter @quad/db test:api`. Expected: PASS, with `findTenancyViolations` empty.
-- [ ] **Step 5: Commit.** `feat(db): tenant identity, roles, school settings and audit tables with FORCE RLS`.
+- [x] **Step 2: Run them to see them fail.** Expected: FAIL.
+- [x] **Step 3: Implement** with `pnpm db:generate` plus `tenantRlsSql` for each table.
+- [x] **Step 4: Run the checks.** `pnpm db:migrate && pnpm --filter @quad/db test:api`. Expected: PASS, with `findTenancyViolations` empty.
+- [x] **Step 5: Commit.** `feat(db): tenant identity, roles, school settings and audit tables with FORCE RLS`.
 
 **Acceptance:** M1 Scope "RLS policies with FORCE ROW LEVEL SECURITY on every tenant table, with the migration test from M0 covering them all". Accept: "the app role cannot read another tenant's rows even with a raw query".
 
@@ -333,7 +335,7 @@ Steps:
 - `auth_memberships` returns suspended schools and the columns `short_name`, `user_id`, `suspended` and `suspend_reason`.
 
 Steps:
-- [ ] **Step 1: Write failing tests** (`definers.api.test.ts`, plus `migration.test.ts`).
+- [x] **Step 1: Write failing tests** (`definers.api.test.ts`, plus `migration.test.ts`).
   - `auth_memberships`:
     - returns A and B for a two-school account and omits a deactivated membership;
     - omits a `deleted` tenant;
@@ -353,13 +355,13 @@ Steps:
   - As `quad_app`, `select * from tenant_security` still fails with permission denied.
   - `definer_read` gives `quad_app` nothing: as `quad_app` with no setting, `accounts`, `sessions`, `users`, `user_roles` and `roles` return 0 rows; under A they return only A's rows.
   - `migration.test.ts`: a probe `definer_read` policy on a sixth table fails, and one `TO quad_app` or `FOR ALL` on a listed table fails.
-- [ ] **Step 2: Run them to see them fail.** Expected: FAIL.
-- [ ] **Step 3: Implement** the SQL and the typed `DefinerCalls` methods:
+- [x] **Step 2: Run them to see them fail.** Expected: FAIL.
+- [x] **Step 3: Implement** the SQL and the typed `DefinerCalls` methods:
   - tenant-less: `authMemberships`, `accountByIdentifier`, `sessionByToken`, `ssoMethodsForDomain`, `authSignInRules`, `consumeSignedToken`, `redeemSupportSession`, `endSupportSession`, `tenantByEmbedKey`, `tenantByGatewayAccount`;
   - inside `withTenant` through a `tx` helper: `currentTenantProfile`, `updateCurrentTenantName`, `recordSupportAudit`, `ensureAccountForEmail`, `memberTwoStepStatus`, `revokeMemberSessions`.
   - Append the D32 bullets.
-- [ ] **Step 4: Run the checks.** `pnpm db:migrate && pnpm --filter @quad/db test && pnpm --filter @quad/db test:api`. Expected: PASS.
-- [ ] **Step 5: Commit.** `feat(db): security-definer lookups for sign-in, tenant profile and signed tokens`.
+- [x] **Step 4: Run the checks.** `pnpm db:migrate && pnpm --filter @quad/db test && pnpm --filter @quad/db test:api`. Expected: PASS.
+- [x] **Step 5: Commit.** `feat(db): security-definer lookups for sign-in, tenant profile and signed tokens`.
 
 **Acceptance:** M1 Scope "`auth_memberships` … `tenant_by_embed_key` and `tenant_by_gateway_account` stubs with tests".
 
@@ -423,7 +425,7 @@ Follow `quad-coding-standards` and `quad-domain-logic` (the expiry and purpose r
 **D32** (append): Signed links: the payload format, the `SIGNED_LINK_RULES` TTLs, `tid` null for account-level `password_reset`. Crypto: Argon2id through `@node-rs/argon2` (`m=19456, t=2, p=1`); `FieldCipher` AES-256-GCM with HKDF from `FIELD_ENCRYPTION_KEY`, required in every environment until M12's KMS adapter (`KMS_KEY_ID`) replaces it; JWT and field keys required from M1, with local-only placeholders; the breach check fails open. Pinned versions of the packages installed here.
 
 Steps:
-- [ ] **Step 1: Write failing tests.**
+- [x] **Step 1: Write failing tests.**
   - Domain: table-driven tests for `signedLinkStatus`, including the exact expiry instant (`exp == now` is expired) and every purpose, plus a `fast-check` property that a payload never verifies under a different purpose.
   - Unit tests:
     - a round trip works;
@@ -435,10 +437,10 @@ Steps:
     - the breach fake flags `password123`;
     - the config refuses the placeholder key in `staging` and refuses a key under 32 characters.
   - The infra test asserts the new secrets exist and that the task definition passes them to api and worker.
-- [ ] **Step 2: Run them to see them fail.** Expected: FAIL.
-- [ ] **Step 3: Implement.** Include the spec 02 cell, the `tasks.tf` comment and the D32 bullets.
-- [ ] **Step 4: Run the checks.** `pnpm --filter @quad/domain test && pnpm --filter @quad/api test && node scripts/infra-check.mjs --only modules/app`. Expected: PASS.
-- [ ] **Step 5: Commit.** `feat(api): signed links, field encryption, Argon2id passwords and token keys`.
+- [x] **Step 2: Run them to see them fail.** Expected: FAIL.
+- [x] **Step 3: Implement.** Include the spec 02 cell, the `tasks.tf` comment and the D32 bullets.
+- [x] **Step 4: Run the checks.** `pnpm --filter @quad/domain test && pnpm --filter @quad/api test && node scripts/infra-check.mjs --only modules/app`. Expected: PASS.
+- [x] **Step 5: Commit.** `feat(api): signed links, field encryption, Argon2id passwords and token keys`.
 
 **Acceptance:** Accept "a tampered or reused signed link is refused" (unit level). M1 Scope "signed-link tokens (HMAC-SHA256, purpose, tid, subject, expiry, nonce, single use)".
 
@@ -471,17 +473,17 @@ Steps:
 **D32** (append under Configuration): pinned `nodemailer` version.
 
 Steps:
-- [ ] **Step 1: Write failing tests.**
+- [x] **Step 1: Write failing tests.**
   - Rate limit: the 21st call in a minute is refused, and the window resets on a fixed clock.
   - A key function limits per subject, and the Redis key holds no raw email (no `@`).
   - Templates render with no unfilled ICU arguments.
   - The SMTP adapter delivers to Mailpit (api test, compose Mailpit).
   - The job is idempotent on its id.
   - The log SMS output contains no full number.
-- [ ] **Step 2: Run them to see them fail.** Expected: FAIL.
-- [ ] **Step 3: Implement.**
-- [ ] **Step 4: Run the checks.** `pnpm --filter @quad/api test && pnpm --filter @quad/api test:api -- delivery`. Expected: PASS.
-- [ ] **Step 5: Commit.** `feat(api): Redis rate limits and queued email and SMS delivery`.
+- [x] **Step 2: Run them to see them fail.** Expected: FAIL.
+- [x] **Step 3: Implement.**
+- [x] **Step 4: Run the checks.** `pnpm --filter @quad/api test && pnpm --filter @quad/api test:api -- delivery`. Expected: PASS.
+- [x] **Step 5: Commit.** `feat(api): Redis rate limits and queued email and SMS delivery`.
 
 ## Phase 3: Auth API flows
 
@@ -568,7 +570,7 @@ Steps:
 **D32** (append): Sessions: opaque 32-byte cookie, SHA-256 in the database, Redis cache for 30 s; `__Host-` names, but `quad_sid` and `quad_console_sid` without `Secure` when `APP_ENV=local`; double-submit CSRF in `__Host-quad_csrf` (`quad_csrf` locally); `stage` on the session row for the sign-in steps. Access: the `@Authenticated()` marker and its routes (`/me*`, `/auth/sign-out`, `/auth/select-school`, `/school/branding`); `@PlatformController()`; the API computes the school brand palette with `@quad/tokens` `deriveBrand` (a new allowed `apps/api` → `@quad/tokens` import, colour maths only); `GreetingPeriod` in `@quad/contracts`. Pinned `@fastify/cookie` version.
 
 Steps:
-- [ ] **Step 1: Write failing tests.** The table above, plus:
+- [x] **Step 1: Write failing tests.** The table above, plus:
   - an expired idle session is 401;
   - a revoked session is 401 within one request (cache invalidation);
   - a deactivated membership and a deleted tenant are 401;
@@ -581,10 +583,10 @@ Steps:
   - a socket with no Origin and no token gets no rooms;
   - `AuditService`: a rolled-back change leaves no audit row; a support context writes one `audit_log` and one `platform_audit` row;
   - `PlatformAuditService` writes one `platform_audit` row per write.
-- [ ] **Step 2: Run them to see them fail.** Expected: FAIL.
-- [ ] **Step 3: Implement.** Register `@fastify/cookie`. Declare the routes in `me.routes.ts`, list them in `src/openapi/document.ts`, and run `pnpm api:client`. Append the D32 bullets.
-- [ ] **Step 4: Run the checks.** `pnpm --filter @quad/api test && pnpm --filter @quad/ui test && pnpm --filter @quad/api test:api -- auth me realtime audit && pnpm codegen:check`. Expected: PASS.
-- [ ] **Step 5: Commit.** `feat(api): server-side sessions, auth guard, CSRF, audit writing and authenticated sockets`.
+- [x] **Step 2: Run them to see them fail.** Expected: FAIL.
+- [x] **Step 3: Implement.** Register `@fastify/cookie`. Declare the routes in `me.routes.ts`, list them in `src/openapi/document.ts`, and run `pnpm api:client`. Append the D32 bullets.
+- [x] **Step 4: Run the checks.** `pnpm --filter @quad/api test && pnpm --filter @quad/ui test && pnpm --filter @quad/api test:api -- auth me realtime audit && pnpm codegen:check`. Expected: PASS.
+- [x] **Step 5: Commit.** `feat(api): server-side sessions, auth guard, CSRF, audit writing and authenticated sockets`.
 
 ### Task 7: Staff sign-in: identify, password, two-step, lockout, Choose a school, forgot and reset
 
@@ -632,11 +634,11 @@ New-device email tests (`new-device.api.test.ts`): queued once after a sign-in w
 **D32** (append under Sessions): lockout failures in the Redis sorted set `lockout:{accountId}` (15-minute TTL), with `accounts.locked_until` persisting the lock. Pinned `otplib` version.
 
 Steps:
-- [ ] **Step 1: Write the domain tests** (table-driven, boundaries at exactly 5 failures and at 15:00 minutes), then the API tests above, plus Review Focus #1 and #2 (cookie side).
-- [ ] **Step 2: Run them to see them fail.** Expected: FAIL.
-- [ ] **Step 3: Implement.** Then `pnpm api:client`. Append the D32 bullet.
-- [ ] **Step 4: Run the checks.** `pnpm --filter @quad/domain test && pnpm --filter @quad/api test:api -- auth && pnpm codegen:check`. Expected: PASS.
-- [ ] **Step 5: Commit.** `feat(auth): identifier-first staff sign-in with two-step, lockout, school choice and password reset`.
+- [x] **Step 1: Write the domain tests** (table-driven, boundaries at exactly 5 failures and at 15:00 minutes), then the API tests above, plus Review Focus #1 and #2 (cookie side).
+- [x] **Step 2: Run them to see them fail.** Expected: FAIL.
+- [x] **Step 3: Implement.** Then `pnpm api:client`. Append the D32 bullet.
+- [x] **Step 4: Run the checks.** `pnpm --filter @quad/domain test && pnpm --filter @quad/api test:api -- auth && pnpm codegen:check`. Expected: PASS.
+- [x] **Step 5: Commit.** `feat(auth): identifier-first staff sign-in with two-step, lockout, school choice and password reset`.
 
 **Acceptance:**
 - Accept "`/auth/identify` returns the same response for unknown emails".
@@ -677,11 +679,11 @@ Steps:
 **D32** (append under Configuration): `OIDC_FAKE_ISSUER_URL` (local only). Pinned `openid-client` and `jose` versions.
 
 Steps:
-- [ ] **Step 1: Write the tests against the fake issuer.**
-- [ ] **Step 2: Run them to see them fail.** Expected: FAIL.
-- [ ] **Step 3: Implement with `openid-client`.** Then `pnpm api:client`. Append the D32 bullet.
-- [ ] **Step 4: Run the checks.** `pnpm --filter @quad/api test && pnpm --filter @quad/api test:api -- sso`. Expected: PASS.
-- [ ] **Step 5: Commit.** `feat(auth): Google and Microsoft SSO with PKCE and a fake issuer for tests`.
+- [x] **Step 1: Write the tests against the fake issuer.**
+- [x] **Step 2: Run them to see them fail.** Expected: FAIL.
+- [x] **Step 3: Implement with `openid-client`.** Then `pnpm api:client`. Append the D32 bullet.
+- [x] **Step 4: Run the checks.** `pnpm --filter @quad/api test && pnpm --filter @quad/api test:api -- sso`. Expected: PASS.
+- [x] **Step 5: Commit.** `feat(auth): Google and Microsoft SSO with PKCE and a fake issuer for tests`.
 
 ### Task 9: Parent OTP sign-in, JWT access tokens and refresh rotation
 
@@ -725,11 +727,11 @@ The access JWT (EdDSA, 15 min) carries `sub` (membership id), `acc`, `tid`, `kin
 **D32** (append under Sessions): parent JWT EdDSA, 15 min; refresh `{sid}.{generation}.{secret}`, a 60-day family, revoked on reuse; relative tokens reach only refresh and sign-out in M1; the bearer kind rule (guardian and relative only).
 
 Steps:
-- [ ] **Step 1: Write the tests.**
-- [ ] **Step 2: Run them to see them fail.** Expected: FAIL.
-- [ ] **Step 3: Implement.** Then `pnpm api:client` (the Dart client changes too). Append the D32 bullet.
-- [ ] **Step 4: Run the checks.** `pnpm --filter @quad/domain test && pnpm --filter @quad/api test:api -- otp refresh bearer && pnpm codegen:check`. Expected: PASS.
-- [ ] **Step 5: Commit.** `feat(auth): parent OTP sign-in with EdDSA access tokens and rotating refresh families`.
+- [x] **Step 1: Write the tests.**
+- [x] **Step 2: Run them to see them fail.** Expected: FAIL.
+- [x] **Step 3: Implement.** Then `pnpm api:client` (the Dart client changes too). Append the D32 bullet.
+- [x] **Step 4: Run the checks.** `pnpm --filter @quad/domain test && pnpm --filter @quad/api test:api -- otp refresh bearer && pnpm codegen:check`. Expected: PASS.
+- [x] **Step 5: Commit.** `feat(auth): parent OTP sign-in with EdDSA access tokens and rotating refresh families`.
 
 ### Task 10: Console sign-in under `/platform/auth/*`
 
@@ -850,17 +852,17 @@ Commit `feat(domain): permission matrix, effective permissions and staff page ac
 | `DELETE /me/role-preview` | `@Authenticated` (with a preview) | Audit `role_preview.ended` |
 
 Steps:
-- [ ] **Step 1: Write the tests.**
+- [x] **Step 1: Write the tests.**
   - Probe tests for 403 `forbidden`, `module_not_in_plan`, `school_suspended`, the support + safeguarding refusal (Accept) and `preview_read_only`; `@Can` with two keys passes on either.
   - `POST /auth/sign-out` works for a suspended school.
   - A preview POST without `X-CSRF-Token` gets the CSRF 403, not `preview_read_only`.
   - The preview cases moved here from Tasks 6 and 7: `GET /me` reflects an active preview; `PATCH /me` gives 403 `preview_read_only`; `POST /me/totp` is refused in preview.
   - A permission change through the role tables is visible on the next request (no stale cache).
   - The route-walk test; the endpoint tests.
-- [ ] **Step 2: Run them to see them fail.** Expected: FAIL.
-- [ ] **Step 3: Implement.** The probe module is imported only by tests, never by `AppModule`, so the OpenAPI document is unchanged.
-- [ ] **Step 4: Run the checks.** `pnpm --filter @quad/api test && pnpm --filter @quad/api test:api -- guards me && pnpm codegen:check`. Expected: PASS.
-- [ ] **Step 5: Commit.** `feat(api): permission, module, sensitive and preview guards with /me/permissions`.
+- [x] **Step 2: Run them to see them fail.** Expected: FAIL.
+- [x] **Step 3: Implement.** The probe module is imported only by tests, never by `AppModule`, so the OpenAPI document is unchanged.
+- [x] **Step 4: Run the checks.** `pnpm --filter @quad/api test && pnpm --filter @quad/api test:api -- guards me && pnpm codegen:check`. Expected: PASS.
+- [x] **Step 5: Commit.** `feat(api): permission, module, sensitive and preview guards with /me/permissions`.
 
 **Acceptance:**
 - Accept "Cross-tenant and wrong-role tests fail with 403/404".
@@ -1361,8 +1363,8 @@ Commit `test(e2e): sign-in, invite, console, signed-link and role-preview journe
 ### Task 27: Gate, screenshots and review
 
 Steps:
-- [ ] **Step 1: Run the gates.** `pnpm verify && pnpm build`, then `NEXT_PUBLIC_QUAD_PRELAUNCH=true pnpm --filter @quad/staff build:export && pnpm --filter @quad/staff e2e:export`. Expected: all PASS.
-- [ ] **Step 2: Take the screenshots** at 1440×900 and 390×844, light and dark, into `docs/screenshots/m1/`:
+- [x] **Step 1: Run the gates.** `pnpm verify && pnpm build`, then `NEXT_PUBLIC_QUAD_PRELAUNCH=true pnpm --filter @quad/staff build:export && pnpm --filter @quad/staff e2e:export`. Expected: all PASS.
+- [x] **Step 2: Take the screenshots** at 1440×900 and 390×844, light and dark, into `docs/screenshots/m1/`:
   - `/sign-in` (each step);
   - Choose a school;
   - `/app` with CIS and with KHA branding;
@@ -1373,10 +1375,10 @@ Steps:
   - the console sign-in, Schools with the reason drawer, and the Audit log.
 
   Compare each with the prototype at the same size and fix visible differences.
-- [ ] **Step 3: Check the parent app.** The Flutter goldens are reviewed, plus a simulator screenshot when one is available (otherwise noted as a gap).
-- [ ] **Step 4: Compare the export.** The export's landing at 1440 and 390, light and dark, matches `docs/screenshots/landing/` (no M1 change).
-- [ ] **Step 5: Review.** Run `quad-review`, `/code-review` and `/security-review` on the whole M1 diff, and fix the findings.
-- [ ] **Step 6: Commit.** `docs(screenshots): M1 sign-in, portal, settings and console screens`.
+- [x] **Step 3: Check the parent app.** The Flutter goldens are reviewed, plus a simulator screenshot when one is available (otherwise noted as a gap).
+- [x] **Step 4: Compare the export.** The export's landing at 1440 and 390, light and dark, matches `docs/screenshots/landing/` (no M1 change).
+- [x] **Step 5: Review.** Run `quad-review`, `/code-review` and `/security-review` on the whole M1 diff, and fix the findings.
+- [x] **Step 6: Commit.** `docs(screenshots): M1 sign-in, portal, settings and console screens`.
 
 ## Phase 12: Docs
 
