@@ -53,12 +53,21 @@ const APP_LINK_ROUTES = ['p', 'p.html', '.well-known'];
  * Text that means a file needs the live site (D57): an API call, the Turnstile script, the sign-in
  * dialog, or a link to the sign-in page. The export aliases `(public)/_live` to stubs, so none of
  * these should ever reach it.
+ *
+ * The scan is plain text, so it only works while API paths stay literal: the typed client writes
+ * every path as one string (`/api/v1/...`). A path assembled from pieces (`'/api/' + version`)
+ * would escape the `/api/v1/` check, so never build one.
+ *
+ * A link to sign-in is written three ways: `href="/sign-in` in HTML, `href:"/sign-in` in bundled
+ * scripts (minified JSX props) and `"href":"/sign-in` in RSC payloads (JSON).
  */
 const LIVE_ONLY = [
   { text: '/api/v1/', what: 'a call to the API' },
   { text: 'challenges.cloudflare.com', what: 'Turnstile' },
   { text: 'data-signin-dialog', what: 'the sign-in dialog' },
   { text: 'href="/sign-in', what: 'a link to sign-in' },
+  { text: 'href:"/sign-in', what: 'a link to sign-in in a script' },
+  { text: '"href":"/sign-in', what: 'a link to sign-in in an RSC payload' },
 ];
 
 /** The files the scan reads: pages, scripts and the RSC payloads. */

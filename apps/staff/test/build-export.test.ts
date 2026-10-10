@@ -75,6 +75,14 @@ describe('checkExport', () => {
     expect(checkExport(dir)).toEqual([
       'index.html contains data-signin-dialog (the sign-in dialog)',
       'legal/terms.txt contains href="/sign-in (a link to sign-in)',
+      'legal/terms.txt contains "href":"/sign-in (a link to sign-in in an RSC payload)',
+    ]);
+  });
+
+  it('refuses a sign-in link in a bundled script', () => {
+    put('_next/static/chunks/app/page-2.js', 'jsx("a",{href:"/sign-in?next=%2Fapp",children:t})');
+    expect(checkExport(dir)).toEqual([
+      '_next/static/chunks/app/page-2.js contains href:"/sign-in (a link to sign-in in a script)',
     ]);
   });
 
