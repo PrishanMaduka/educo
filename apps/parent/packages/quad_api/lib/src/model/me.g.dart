@@ -11,14 +11,7 @@ Me _$MeFromJson(Map<String, dynamic> json) => $checkedCreate('Me', json, (
 ) {
   $checkKeys(
     json,
-    requiredKeys: const [
-      'person',
-      'school',
-      'memberships',
-      'preview',
-      'support',
-      'greeting',
-    ],
+    requiredKeys: const ['person', 'school', 'memberships', 'greeting'],
   );
   final val = Me(
     person: $checkedConvert(
@@ -37,11 +30,11 @@ Me _$MeFromJson(Map<String, dynamic> json) => $checkedCreate('Me', json, (
     ),
     preview: $checkedConvert(
       'preview',
-      (v) => MePreview.fromJson(v as Map<String, dynamic>),
+      (v) => v == null ? null : MePreview.fromJson(v as Map<String, dynamic>),
     ),
     support: $checkedConvert(
       'support',
-      (v) => MeSupport.fromJson(v as Map<String, dynamic>),
+      (v) => v == null ? null : MeSupport.fromJson(v as Map<String, dynamic>),
     ),
     greeting: $checkedConvert(
       'greeting',
@@ -55,7 +48,7 @@ Map<String, dynamic> _$MeToJson(Me instance) => <String, dynamic>{
   'person': instance.person.toJson(),
   'school': instance.school.toJson(),
   'memberships': instance.memberships.map((e) => e.toJson()).toList(),
-  'preview': instance.preview.toJson(),
-  'support': instance.support.toJson(),
+  'preview': ?instance.preview?.toJson(),
+  'support': ?instance.support?.toJson(),
   'greeting': instance.greeting.toJson(),
 };

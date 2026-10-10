@@ -30,9 +30,9 @@ class Me {
 
     required  this.memberships,
 
-    required  this.preview,
+     this.preview,
 
-    required  this.support,
+     this.support,
 
     required  this.greeting,
   });
@@ -76,24 +76,24 @@ class Me {
   @JsonKey(
     
     name: r'preview',
-    required: true,
+    required: false,
     includeIfNull: false,
   )
 
 
-  final MePreview preview;
+  final MePreview? preview;
 
 
 
   @JsonKey(
     
     name: r'support',
-    required: true,
+    required: false,
     includeIfNull: false,
   )
 
 
-  final MeSupport support;
+  final MeSupport? support;
 
 
 

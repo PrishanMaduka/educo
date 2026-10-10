@@ -23,7 +23,7 @@ class MePreview {
 
     required  this.roleName,
 
-    required  this.sampleUser,
+     this.sampleUser,
   });
 
   @JsonKey(
@@ -53,12 +53,12 @@ class MePreview {
   @JsonKey(
     
     name: r'sampleUser',
-    required: true,
+    required: false,
     includeIfNull: false,
   )
 
 
-  final MePreviewSampleUser sampleUser;
+  final MePreviewSampleUser? sampleUser;
 
 
 

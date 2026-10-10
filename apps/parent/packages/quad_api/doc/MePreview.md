@@ -10,7 +10,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **roleId** | **String** |  | 
 **roleName** | **String** |  | 
-**sampleUser** | [**MePreviewSampleUser**](MePreviewSampleUser.md) |  | 
+**sampleUser** | [**MePreviewSampleUser**](MePreviewSampleUser.md) |  | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

@@ -113,7 +113,42 @@ export function parentSpec(document, tags = PARENT_TAGS) {
   for (const name of Object.keys(all)) {
     if (reached.has(name)) schemas[name] = all[name];
   }
-  return { ...document, paths, components: { ...document.components, schemas } };
+  return {
+    ...document,
+    paths,
+    components: { ...document.components, schemas: dartNullableObjects(schemas) },
+  };
+}
+
+/**
+ * A copy of `value` in which no object schema requires a property typed `['object', 'null']`
+ * (Task 25). openapi-generator 7.10's dart-dio ignores the `null` in a 3.1 type list when it
+ * turns an inline object into a model, so `Me.preview` came out as a required `MePreview` and
+ * `GET /me` (preview and support null) failed to parse. A property it does not require becomes
+ * nullable in Dart; the API still always sends it. Nullable primitives already work.
+ * @template T
+ * @param {T} value
+ * @returns {T}
+ */
+export function dartNullableObjects(value) {
+  if (Array.isArray(value)) return /** @type {T} */ (value.map(dartNullableObjects));
+  if (typeof value !== 'object' || value === null) return value;
+  /** @type {Record<string, unknown>} */
+  const copy = {};
+  for (const [key, child] of Object.entries(value)) copy[key] = dartNullableObjects(child);
+  const { properties, required } = /** @type {{ properties?: unknown, required?: unknown }} */ (
+    copy
+  );
+  if (typeof properties === 'object' && properties !== null && Array.isArray(required)) {
+    const nullable = Object.entries(properties)
+      .filter(([, schema]) => {
+        const type = /** @type {{ type?: unknown }} */ (schema)?.type;
+        return Array.isArray(type) && type.includes('object') && type.includes('null');
+      })
+      .map(([name]) => name);
+    copy['required'] = required.filter((name) => !nullable.includes(name));
+  }
+  return /** @type {T} */ (copy);
 }
 
 /**

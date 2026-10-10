@@ -3,7 +3,13 @@ import { resolve } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
-import { EXCLUDED_TAGS, PARENT_TAGS, parentSpec, platformLeaks } from '../parent-openapi.mjs';
+import {
+  EXCLUDED_TAGS,
+  PARENT_TAGS,
+  dartNullableObjects,
+  parentSpec,
+  platformLeaks,
+} from '../parent-openapi.mjs';
 
 const ref = (name: string) => ({ $ref: `#/components/schemas/${name}` });
 const json = (name: string) => ({ content: { 'application/json': { schema: ref(name) } } });
@@ -55,6 +61,43 @@ describe('parentSpec (the parent app’s client, M9)', () => {
     const before = JSON.stringify(document);
     parentSpec(document);
     expect(JSON.stringify(document)).toBe(before);
+  });
+});
+
+describe('dartNullableObjects (Task 25: GET /me with no preview)', () => {
+  const nullable = {
+    type: 'object',
+    properties: {
+      name: { type: 'string' },
+      preview: {
+        type: ['object', 'null'],
+        properties: { sample: { type: ['object', 'null'], properties: {} } },
+        required: ['sample'],
+      },
+      brandColor: { type: ['string', 'null'] },
+    },
+    required: ['name', 'preview', 'brandColor'],
+  };
+
+  it('stops requiring a nullable object, at any depth, so the Dart field is nullable', () => {
+    expect(dartNullableObjects(nullable)).toEqual({
+      ...nullable,
+      properties: {
+        ...nullable.properties,
+        preview: { ...nullable.properties.preview, required: [] },
+      },
+      required: ['name', 'brandColor'],
+    });
+  });
+
+  it('is applied to the parent slice and leaves the input as it was', () => {
+    const withMe = {
+      ...document,
+      components: { schemas: { ...document.components.schemas, Me: nullable } },
+    };
+    const before = JSON.stringify(withMe);
+    expect(parentSpec(withMe).components.schemas['Me']).toEqual(dartNullableObjects(nullable));
+    expect(JSON.stringify(withMe)).toBe(before);
   });
 });
 
