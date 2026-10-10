@@ -1,15 +1,8 @@
-import { expect, type Page } from '@playwright/test';
-import { expectNoSeriousA11yViolations, expectNoSideScroll } from '@quad/config/playwright/checks';
+import { expect } from '@playwright/test';
+import { expectAccessibleOnceStill, expectNoSideScroll } from '@quad/config/playwright/checks';
 import { test } from '@quad/config/playwright/stack';
 
 import { OWNER_STATE, PASSWORD_JOURNEY_PROJECTS, QUAD_STAFF } from './sign-in-as';
-
-/** The card has faded in (axe would otherwise sample it mid-animation). */
-async function settled(page: Page) {
-  await page.waitForFunction(() =>
-    document.getAnimations().every((animation) => animation.playState !== 'running'),
-  );
-}
 
 test.describe('console sign-in (spec 05, D37)', () => {
   test(
@@ -94,8 +87,7 @@ test.describe('console sign-in (spec 05, D37)', () => {
     await expect(
       page.getByText('Every sign-in to the platform console is recorded in the audit log.'),
     ).toBeVisible();
-    await settled(page);
     await expectNoSideScroll(page);
-    await expectNoSeriousA11yViolations(page);
+    await expectAccessibleOnceStill(page);
   });
 });

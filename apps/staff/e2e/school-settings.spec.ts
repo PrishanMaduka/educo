@@ -1,7 +1,7 @@
 import { expect, type Page, type TestInfo } from '@playwright/test';
 import {
   expectCanvas,
-  expectNoSeriousA11yViolations,
+  expectAccessibleOnceStill,
   expectNoSideScroll,
   saveScreenshot,
   schemeOf,
@@ -83,7 +83,7 @@ test.describe('School settings, as the school admin', () => {
     await expect(page.getByRole('button', { name: 'Save school details' })).toHaveCount(0);
     await expectNoSideScroll(page);
     await expectCanvas(page, schemeOf(testInfo));
-    await expectNoSeriousA11yViolations(page);
+    await expectAccessibleOnceStill(page);
   });
 
   test('saves the address, shows it in the audit log, then puts it back', async ({
@@ -143,7 +143,7 @@ test.describe('School settings, as the school admin', () => {
     await expect(page.getByRole('tabpanel').getByRole('textbox')).toHaveCount(0);
     await expectNoSideScroll(page);
     await expectCanvas(page, schemeOf(testInfo));
-    await expectNoSeriousA11yViolations(page);
+    await expectAccessibleOnceStill(page);
   });
 
   test('Audit lists who did what, filters it, and passes axe', async ({ page }, testInfo) => {
@@ -158,7 +158,7 @@ test.describe('School settings, as the school admin', () => {
     await expect(openButtons(page).first()).toBeVisible();
     await expectNoSideScroll(page);
     await expectCanvas(page, schemeOf(testInfo));
-    await expectNoSeriousA11yViolations(page);
+    await expectAccessibleOnceStill(page);
     await page.getByRole('button', { name: 'Clear filters' }).first().click();
     await expect(page.getByRole('button', { name: 'Clear filters' })).toHaveCount(0);
   });
@@ -186,7 +186,7 @@ test.describe('School settings, as the school admin', () => {
         name: name.replace('Open the details of ', ''),
       });
       await expect(drawer.getByText('When', { exact: true })).toBeVisible();
-      await expectNoSeriousA11yViolations(page);
+      await expectAccessibleOnceStill(page);
       await drawer.getByRole('button', { name: 'Back to the log' }).click();
       await expect(drawer).toBeHidden();
       await expect(first).toBeFocused();

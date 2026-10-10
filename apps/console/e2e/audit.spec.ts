@@ -1,5 +1,5 @@
 import { expect } from '@playwright/test';
-import { expectNoSeriousA11yViolations, expectNoSideScroll } from '@quad/config/playwright/checks';
+import { expectAccessibleOnceStill, expectNoSideScroll } from '@quad/config/playwright/checks';
 import { test } from '@quad/config/playwright/stack';
 
 import { OWNER_STATE, QUAD_STAFF } from './sign-in-as';
@@ -22,7 +22,7 @@ test.describe('Audit log (spec 07)', () => {
     await expect(list.getByRole('button', { name: /^Open the details of / }).first()).toBeVisible();
     await expect(list.getByText(QUAD_STAFF.owner.name).first()).toBeVisible();
     await expectNoSideScroll(page);
-    await expectNoSeriousA11yViolations(page);
+    await expectAccessibleOnceStill(page);
   });
 
   test(
@@ -34,7 +34,7 @@ test.describe('Audit log (spec 07)', () => {
       await entry.click();
       const drawer = page.getByRole('dialog');
       await expect(drawer.getByText('IP address')).toBeVisible();
-      await expectNoSeriousA11yViolations(page);
+      await expectAccessibleOnceStill(page);
       await drawer.getByRole('button', { name: 'Back to the log' }).click();
       await expect(drawer).toBeHidden();
       await expect(entry).toBeFocused();

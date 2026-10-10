@@ -1,5 +1,5 @@
 import { expect, type Page } from '@playwright/test';
-import { expectNoSeriousA11yViolations, expectNoSideScroll } from '@quad/config/playwright/checks';
+import { expectAccessibleOnceStill, expectNoSideScroll } from '@quad/config/playwright/checks';
 import { test } from '@quad/config/playwright/stack';
 
 import { OWNER_STATE } from './sign-in-as';
@@ -27,7 +27,7 @@ test.describe('Open as school admin (spec 05 → Support access)', () => {
     await expect(page.getByText(/schools? (is|are) on Quad\./)).toBeVisible();
     await expect(page.getByText(SCHOOL).filter({ visible: true }).first()).toBeVisible();
     await expectNoSideScroll(page);
-    await expectNoSeriousA11yViolations(page);
+    await expectAccessibleOnceStill(page);
   });
 
   test('a reason is always required, then the console follows the single-use link into the staff portal', async ({
@@ -40,7 +40,7 @@ test.describe('Open as school admin (spec 05 → Support access)', () => {
     await expect(drawer).toBeVisible();
     await drawer.getByRole('button', { name: OPEN_AS }).click();
     await expect(drawer.getByText(/at least 10 characters/)).toBeVisible();
-    await expectNoSeriousA11yViolations(page);
+    await expectAccessibleOnceStill(page);
 
     await drawer
       .getByRole('textbox', { name: 'Why are you opening this school?' })

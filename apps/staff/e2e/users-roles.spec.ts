@@ -1,7 +1,7 @@
 import { expect, type Page, type TestInfo } from '@playwright/test';
 import {
   expectCanvas,
-  expectNoSeriousA11yViolations,
+  expectAccessibleOnceStill,
   expectNoSideScroll,
   saveScreenshot,
   schemeOf,
@@ -26,9 +26,9 @@ const PATH = '/app/settings/users';
 const isPhone = (page: Page) => (page.viewportSize()?.width ?? 0) < 1024;
 const title = (page: Page) => page.getByRole('heading', { level: 1, name: 'Users & roles' });
 
-/** A fictional address no other test or project uses. */
+/** A fictional address no other test, project, retry or repeat (`--repeat-each`) uses. */
 const addressFor = (testInfo: TestInfo, who: string) =>
-  `${who}.${testInfo.project.name}.r${String(testInfo.retry)}@colombo-intl.local`;
+  `${who}.${testInfo.project.name}.r${String(testInfo.retry)}.x${String(testInfo.repeatEachIndex)}@colombo-intl.local`;
 
 /** The people list as the page shows it at this width: the table, or the cards on phones. */
 const people = (page: Page) =>
@@ -73,7 +73,7 @@ test.describe('Users & roles, as the school admin', () => {
     await expect(page.getByText(/Sign in as/)).toHaveCount(0);
     await expectNoSideScroll(page);
     await expectCanvas(page, schemeOf(testInfo));
-    await expectNoSeriousA11yViolations(page);
+    await expectAccessibleOnceStill(page);
   });
 
   test('search and role chips narrow the list', async ({ page }) => {
@@ -117,7 +117,7 @@ test.describe('Users & roles, as the school admin', () => {
         'nadeesha.jayasinghe@colombo-intl.local: This person is already a member of staff here.',
       ),
     ).toBeVisible();
-    await expectNoSeriousA11yViolations(page);
+    await expectAccessibleOnceStill(page);
   });
 
   test(
@@ -148,7 +148,7 @@ test.describe('Users & roles, as the school admin', () => {
       await page.getByRole('button', { name: 'Deactivate' }).click();
       const drawer = page.getByRole('dialog', { name: /^Deactivate .+\?$/ });
       await expect(drawer).toBeVisible();
-      await expectNoSeriousA11yViolations(page);
+      await expectAccessibleOnceStill(page);
       // Cancel keeps them, and focus goes back to the menu button.
       await drawer.getByRole('button', { name: 'Cancel' }).click();
       await expect(drawer).toBeHidden();
@@ -184,7 +184,7 @@ test.describe('Users & roles, as the school admin', () => {
     await expect(page.getByText(/^Built-in role\./)).toBeVisible();
     await expectNoSideScroll(page);
     await expectCanvas(page, schemeOf(testInfo));
-    await expectNoSeriousA11yViolations(page);
+    await expectAccessibleOnceStill(page);
   });
 
   test('creates a role from Teacher, then edits it with the save bar', async ({
@@ -195,7 +195,7 @@ test.describe('Users & roles, as the school admin', () => {
     await page.getByRole('link', { name: 'New role' }).click();
     await expect(page.getByRole('heading', { level: 1, name: 'New role' })).toBeVisible();
     await expectNoSideScroll(page);
-    await expectNoSeriousA11yViolations(page);
+    await expectAccessibleOnceStill(page);
 
     await page.getByLabel('Role name').fill(name);
     await page.getByRole('radio', { name: 'Teal' }).click();

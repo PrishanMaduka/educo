@@ -1,7 +1,7 @@
 import { expect } from '@playwright/test';
 import {
   expectCanvas,
-  expectNoSeriousA11yViolations,
+  expectAccessibleOnceStill,
   expectNoSideScroll,
   schemeOf,
 } from '@quad/config/playwright/checks';
@@ -48,7 +48,7 @@ test.describe('console shell', () => {
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
     await expectNoSideScroll(page);
     await expectCanvas(page, schemeOf(testInfo));
-    await expectNoSeriousA11yViolations(page);
+    await expectAccessibleOnceStill(page);
   });
 
   test('the side bar uses the console rail and the lilac active item', async ({ page }) => {
@@ -79,7 +79,7 @@ test.describe('console shell', () => {
     await expect(page.getByRole('link', { name: 'Go to Home' })).toHaveAttribute('href', '/');
     await expectNoSideScroll(page);
     await expectCanvas(page, schemeOf(testInfo));
-    await expectNoSeriousA11yViolations(page);
+    await expectAccessibleOnceStill(page);
   });
 
   test('the theme button cycles system, light and dark', async ({ page }) => {

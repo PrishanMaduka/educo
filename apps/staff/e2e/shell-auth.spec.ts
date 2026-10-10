@@ -1,7 +1,7 @@
 import { expect } from '@playwright/test';
 import {
   expectCanvas,
-  expectNoSeriousA11yViolations,
+  expectAccessibleOnceStill,
   expectNoSideScroll,
   schemeOf,
 } from '@quad/config/playwright/checks';
@@ -79,7 +79,7 @@ test.describe('the shell, signed in as the school admin', () => {
     await expect(title(page, GREETING)).toBeVisible();
     await expectNoSideScroll(page);
     await expectCanvas(page, schemeOf(testInfo));
-    await expectNoSeriousA11yViolations(page);
+    await expectAccessibleOnceStill(page);
   });
 
   test('a page still being built says it arrives soon, and passes axe', async ({ page }) => {
@@ -88,7 +88,7 @@ test.describe('the shell, signed in as the school admin', () => {
     await expect(page.getByText('Fees & invoicing arrives soon')).toBeVisible();
     await expect(page).toHaveTitle(/Fees & invoicing/);
     await expectNoSideScroll(page);
-    await expectNoSeriousA11yViolations(page);
+    await expectAccessibleOnceStill(page);
   });
 
   test('an unknown path shows the 404 page with a way home', async ({ page }, testInfo) => {
@@ -98,7 +98,7 @@ test.describe('the shell, signed in as the school admin', () => {
     await expect(page.getByRole('link', { name: 'Go to Home' })).toHaveAttribute('href', '/app');
     await expectNoSideScroll(page);
     await expectCanvas(page, schemeOf(testInfo));
-    await expectNoSeriousA11yViolations(page);
+    await expectAccessibleOnceStill(page);
   });
 
   test(
@@ -112,7 +112,7 @@ test.describe('the shell, signed in as the school admin', () => {
       await expect(menu.getByRole('button', { name: 'Sign out' })).toBeVisible();
       // Prishan is in one school, so there is nothing to switch to.
       await expect(menu.getByText('Switch school')).toHaveCount(0);
-      await expectNoSeriousA11yViolations(page);
+      await expectAccessibleOnceStill(page);
       await page.keyboard.press('Escape');
       await expect(menu).toBeHidden();
       await expect(page.getByRole('button', { name: 'Open your profile menu' })).toBeFocused();
@@ -273,7 +273,7 @@ test.describe('a teacher', () => {
       'href',
       '/app/teaching',
     );
-    await expectNoSeriousA11yViolations(page);
+    await expectAccessibleOnceStill(page);
 
     // A page the role can only read: the View only tag in place of actions.
     await page.goto('/app/timetable');
