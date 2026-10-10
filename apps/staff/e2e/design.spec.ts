@@ -45,11 +45,11 @@ test.describe('/design style guide', () => {
     const first = page.locator('section[aria-labelledby]').first();
     await expect(first.locator('[data-theme="light"]')).toHaveCSS(
       'background-color',
-      'rgb(250, 248, 245)',
+      'rgb(247, 245, 240)',
     );
     await expect(first.locator('[data-theme="dark"]')).toHaveCSS(
       'background-color',
-      'rgb(19, 20, 42)',
+      'rgb(15, 19, 48)',
     );
   });
 

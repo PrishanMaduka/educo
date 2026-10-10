@@ -1,8 +1,8 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, type Page, type TestInfo } from '@playwright/test';
 
-/** Spec 03 canvas colours: light #FAF8F5 and dark #13142A. */
-export const CANVAS = { light: 'rgb(250, 248, 245)', dark: 'rgb(19, 20, 42)' } as const;
+/** Spec 03 canvas colours (D34): light #F7F5F0 and dark #0F1330. */
+export const CANVAS = { light: 'rgb(247, 245, 240)', dark: 'rgb(15, 19, 48)' } as const;
 
 /** "light" or "dark", from the project's colour scheme. */
 export function schemeOf(testInfo: TestInfo): 'light' | 'dark' {

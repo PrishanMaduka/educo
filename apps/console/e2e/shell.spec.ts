@@ -51,23 +51,19 @@ test.describe('console shell', () => {
     await expectAccessibleOnceStill(page);
   });
 
-  test('the side bar uses the console rail and the lilac active item', async ({ page }) => {
+  test('the side bar is Quad navy and the active item is Quad lime (D34)', async ({
+    page,
+  }, testInfo) => {
     test.skip(isPhone(page.viewportSize()?.width), 'Phones use the slide-over menu');
     await page.goto('/');
     const rail = page.getByRole('complementary', { name: 'Side bar' });
-    // Console rail #15173A light, #0C0D20 dark (spec 03); the active item is the lilac gold token.
-    const railColour = await rail.evaluate((el) => getComputedStyle(el).backgroundColor);
-    expect(['rgb(21, 23, 58)', 'rgb(12, 13, 32)']).toContain(railColour);
+    // The same navy as every school's portal: #101632 light, #0A0D24 dark (spec 03).
+    const navy = { light: 'rgb(16, 22, 50)', dark: 'rgb(10, 13, 36)' }[schemeOf(testInfo)];
+    await expect(rail).toHaveCSS('background-color', navy);
+    // The console has no school, so the active pill is the default brand: lime with navy text.
     const active = rail.getByRole('link', { name: 'Overview' });
-    const lilac = await page.evaluate(() => {
-      const probe = document.createElement('span');
-      probe.style.color = 'var(--quad-gold)';
-      document.body.append(probe);
-      const colour = getComputedStyle(probe).color;
-      probe.remove();
-      return colour;
-    });
-    await expect(active).toHaveCSS('background-color', lilac);
+    await expect(active).toHaveCSS('background-color', 'rgb(200, 241, 105)');
+    await expect(active).toHaveCSS('color', 'rgb(16, 22, 50)');
   });
 
   test('an unknown path shows the 404 page with a way home', async ({ page }, testInfo) => {
