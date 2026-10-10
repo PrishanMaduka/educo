@@ -6,7 +6,7 @@ enum ApiProblem {
   /// No answer: offline, a timeout, or the API is down.
   offline,
 
-  /// 400 `validation`: see [apiFieldOf] for the field.
+  /// 400 `validation`: a field the API refused.
   validation,
 
   /// 400 `invalid_code`: a wrong, expired or used-up code.
@@ -38,16 +38,6 @@ ApiProblem apiProblemOf(Object error) {
     'account_locked' => ApiProblem.locked,
     _ => response.statusCode == 429 ? ApiProblem.rateLimited : ApiProblem.other,
   };
-}
-
-/// The first field a 400 `validation` names (`phone`, `email`, `code`).
-String? apiFieldOf(Object error) {
-  if (error is! DioException) return null;
-  final data = error.response?.data;
-  if (data is! Map) return null;
-  final fields = data['fields'];
-  if (fields is! Map || fields.isEmpty) return null;
-  return fields.keys.first.toString();
 }
 
 String? _codeOf(Object? data) {
