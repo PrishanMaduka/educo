@@ -158,7 +158,7 @@ final class CurrentMeProvider
   }
 }
 
-String _$currentMeHash() => r'2e7e4410061d4e95d7599a8eeacec93da6e2dc02';
+String _$currentMeHash() => r'b333ed057e3b9b1662a7684ebe334e093f838673';
 
 /// The school's brand once its `GET /me` has answered, or null for Quad's
 /// own (D13: the welcome and sign-in steps are Quad-branded; a switch shows
