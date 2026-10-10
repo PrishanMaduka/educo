@@ -3841,6 +3841,130 @@
           "email"
         ],
         "additionalProperties": false
+      },
+      "DemoRequestBody": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 2,
+                "maxLength": 120
+              },
+              "email": {
+                "type": "string",
+                "maxLength": 254,
+                "pattern": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$"
+              },
+              "school": {
+                "type": "string",
+                "minLength": 2,
+                "maxLength": 120
+              },
+              "country": {
+                "type": "string",
+                "maxLength": 80
+              },
+              "students": {
+                "type": "string",
+                "enum": [
+                  "under_300",
+                  "300_1000",
+                  "1000_2500",
+                  "over_2500"
+                ]
+              },
+              "curriculum": {
+                "type": "string",
+                "enum": [
+                  "ib",
+                  "cambridge",
+                  "edexcel",
+                  "american",
+                  "national",
+                  "other"
+                ]
+              },
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "school"
+                ]
+              },
+              "turnstileToken": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2048
+              },
+              "website": {
+                "type": "string",
+                "maxLength": 2048
+              }
+            },
+            "required": [
+              "name",
+              "email",
+              "school",
+              "students",
+              "curriculum",
+              "kind",
+              "turnstileToken"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 2,
+                "maxLength": 120
+              },
+              "email": {
+                "type": "string",
+                "maxLength": 254,
+                "pattern": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$"
+              },
+              "school": {
+                "type": "string",
+                "minLength": 2,
+                "maxLength": 120
+              },
+              "city": {
+                "type": "string",
+                "maxLength": 80
+              },
+              "note": {
+                "type": "string",
+                "maxLength": 1000
+              },
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "parent"
+                ]
+              },
+              "turnstileToken": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2048
+              },
+              "website": {
+                "type": "string",
+                "maxLength": 2048
+              }
+            },
+            "required": [
+              "name",
+              "email",
+              "school",
+              "kind",
+              "turnstileToken"
+            ],
+            "additionalProperties": false
+          }
+        ]
       }
     },
     "parameters": {}
@@ -7301,6 +7425,59 @@
             }
           },
           "429": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/public/demo-requests": {
+      "post": {
+        "summary": "A school’s demo request or a parent’s \"tell my school\" request from the landing page, with a Turnstile token (5 an hour per address, 3 a day per email). The same empty 202 for a new or repeated request",
+        "tags": [
+          "public"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DemoRequestBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "The request was received"
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "503": {
             "description": "Error",
             "content": {
               "application/json": {

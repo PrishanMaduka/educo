@@ -3582,6 +3582,71 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/public/demo-requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** A school’s demo request or a parent’s "tell my school" request from the landing page, with a Turnstile token (5 an hour per address, 3 a day per email). The same empty 202 for a new or repeated request */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["DemoRequestBody"];
+                };
+            };
+            responses: {
+                /** @description The request was received */
+                202: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -4465,6 +4530,30 @@ export interface components {
             phone?: string;
             childName?: string;
             message?: string;
+        };
+        DemoRequestBody: {
+            name: string;
+            email: string;
+            school: string;
+            country?: string;
+            /** @enum {string} */
+            students: "under_300" | "300_1000" | "1000_2500" | "over_2500";
+            /** @enum {string} */
+            curriculum: "ib" | "cambridge" | "edexcel" | "american" | "national" | "other";
+            /** @enum {string} */
+            kind: "school";
+            turnstileToken: string;
+            website?: string;
+        } | {
+            name: string;
+            email: string;
+            school: string;
+            city?: string;
+            note?: string;
+            /** @enum {string} */
+            kind: "parent";
+            turnstileToken: string;
+            website?: string;
         };
     };
     responses: never;

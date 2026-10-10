@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, expectTypeOf, it } from 'vitest';
 
 import {
   DemoRequestBody,
@@ -113,6 +113,17 @@ describe('the first problem to tell the visitor', () => {
 describe('DemoRequestBody (the API body, spec 06 POST /public/demo-requests)', () => {
   const token = { turnstileToken: 'XXXX.DUMMY.TOKEN.XXXX' };
 
+  it('keeps the checked text fields typed as strings, not any (checked by tsc)', () => {
+    type School = Extract<DemoRequestBody, { kind: 'school' }>;
+    type Parent = Extract<DemoRequestBody, { kind: 'parent' }>;
+    expectTypeOf<School['name']>().toEqualTypeOf<string>();
+    expectTypeOf<School['email']>().toEqualTypeOf<string>();
+    expectTypeOf<School['school']>().toEqualTypeOf<string>();
+    expectTypeOf<School['country']>().toEqualTypeOf<string | undefined>();
+    expectTypeOf<Parent['city']>().toEqualTypeOf<string | undefined>();
+    expectTypeOf<Parent['note']>().toEqualTypeOf<string | undefined>();
+  });
+
   it('accepts a school request and a parent request, told apart by kind', () => {
     expect(DemoRequestBody.parse({ kind: 'school', ...school, ...token })).toEqual({
       kind: 'school',
@@ -129,9 +140,33 @@ describe('DemoRequestBody (the API body, spec 06 POST /public/demo-requests)', (
   it('checks each kind with its own form rules', () => {
     // A parent's request has no curriculum; a school's has no note.
     expect(DemoRequestBody.safeParse({ kind: 'school', ...parent, ...token }).success).toBe(false);
-    expect(DemoRequestBody.parse({ kind: 'parent', ...school, ...token })).not.toHaveProperty(
-      'curriculum',
-    );
+    const parentWithSchoolFields = DemoRequestBody.safeParse({
+      kind: 'parent',
+      ...school,
+      ...token,
+    });
+    expect(parentWithSchoolFields.error?.issues.map((issue) => issue.code)).toEqual([
+      'unrecognized_keys',
+    ]);
+  });
+
+  // Nothing in the body may pick a school (D16): unknown keys are refused, never stripped.
+  it.each([
+    ['tenantId', '0192a6f4-1b2c-7d3e-8f40-123456789abd'],
+    ['tenant_id', '0192a6f4-1b2c-7d3e-8f40-123456789abd'],
+    ['schoolId', '0192a6f4-1b2c-7d3e-8f40-123456789abd'],
+    ['school_id', '0192a6f4-1b2c-7d3e-8f40-123456789abd'],
+    ['source', 'console'],
+    ['status', 'won'],
+  ])('refuses an extra %s key in either kind', (key, value) => {
+    for (const body of [
+      { kind: 'school', ...school, ...token },
+      { kind: 'parent', ...parent, ...token },
+    ]) {
+      const result = DemoRequestBody.safeParse({ ...body, [key]: value });
+      expect(result.success).toBe(false);
+      expect(result.error?.issues.map((issue) => issue.code)).toEqual(['unrecognized_keys']);
+    }
   });
 
   it('refuses a missing, empty or oversized Turnstile token', () => {

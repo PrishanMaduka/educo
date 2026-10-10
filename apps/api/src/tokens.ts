@@ -37,3 +37,5 @@ export const OTP_SENDS = Symbol('OTP_SENDS');
 export const ERROR_REPORTER = Symbol('ERROR_REPORTER');
 /** Verifies demo form Turnstile tokens (`TurnstileVerifier`; tests pass `FakeTurnstile`). */
 export const TURNSTILE = Symbol('TURNSTILE');
+/** Queues the emails about a stored demo request (`DemoRequestEmails`; tests pass a fake). */
+export const DEMO_REQUEST_EMAILS = Symbol('DEMO_REQUEST_EMAILS');

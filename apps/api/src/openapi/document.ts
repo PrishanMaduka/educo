@@ -12,6 +12,7 @@ import { platformAuthRoutes } from '../platform/auth/platform-auth.routes';
 import { platformSupportRoutes } from '../platform/support/support.routes';
 import { platformTenantsRoutes } from '../platform/tenants/tenants.routes';
 import { authRoutes } from '../public/auth/auth.routes';
+import { demoRequestsRoutes } from '../public/demo-requests/demo-requests.routes';
 import { enquiryRoutes } from '../public/enquiry/enquiry.routes';
 import { supportSessionRoutes } from '../public/signed-links/support-session.routes';
 import { sesWebhookRoutes } from '../webhooks/ses/ses-webhook.routes';
@@ -41,6 +42,7 @@ export const API_ROUTES: readonly ApiRoute[] = [
   ...schoolRoutes,
   ...auditRoutes,
   ...enquiryRoutes,
+  ...demoRequestsRoutes,
 ];
 
 export type OpenApiDocument = ReturnType<OpenApiGeneratorV31['generateDocument']>;

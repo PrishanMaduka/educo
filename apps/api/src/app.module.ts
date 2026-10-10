@@ -16,6 +16,7 @@ import { SchoolModule } from './modules/school/school.module';
 import { UsersModule } from './modules/users/users.module';
 import { OpenApiController } from './openapi/openapi.controller';
 import { PlatformModule } from './platform/platform.module';
+import { DemoRequestsModule } from './public/demo-requests/demo-requests.module';
 import { EnquiryModule } from './public/enquiry/enquiry.module';
 import { RealtimeModule } from './realtime/realtime.module';
 import { RedisModule } from './redis/redis.module';
@@ -26,6 +27,7 @@ import type { Config } from './config';
 import type { OtpSendRequests } from './modules/auth/otp/otp-sends';
 import type { PasswordResetRequests } from './modules/auth/password-reset-requests';
 import type { ErrorReporter } from './observability/sentry';
+import type { DemoRequestEmails } from './public/demo-requests/demo-request-emails';
 import type { Clock } from './tokens';
 import type { SnsFetchers } from './webhooks/ses/ses-webhook.module';
 import type { DynamicModule, Type } from '@nestjs/common';
@@ -41,6 +43,8 @@ export interface AppOverrides {
   readonly passwordResets?: PasswordResetRequests;
   /** Records sign-in code requests instead of adding BullMQ jobs (`test/fakes/otp-sends.ts`). */
   readonly otpSends?: OtpSendRequests;
+  /** Records demo request emails instead of queuing them (`test/fakes/demo-request-emails.ts`). */
+  readonly demoRequestEmails?: DemoRequestEmails;
   /**
    * Test-only modules added after the app's own (probe routes behind the real guards, fakes for
    * providers a later task owns). `AppModule` never lists them, so the OpenAPI document is
@@ -82,6 +86,7 @@ export class AppModule {
         SchoolModule,
         AuditLogModule,
         EnquiryModule,
+        DemoRequestsModule.register(overrides.demoRequestEmails),
         ...(overrides.testModules ?? []),
       ],
       controllers: [OpenApiController],

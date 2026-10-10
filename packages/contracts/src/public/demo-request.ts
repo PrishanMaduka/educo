@@ -72,7 +72,12 @@ const antiSpam = {
  * Refuses hidden characters (D32) after trimming: these values reach the sales email subject and
  * the console Leads list. Only the parent's note may hold line breaks.
  */
-function plainText<T extends z.ZodTypeAny>(schema: T, { lineBreaks = false } = {}) {
+function plainText<Out extends string | undefined, In>(
+  schema: z.ZodType<Out, z.ZodTypeDef, In>,
+  { lineBreaks = false } = {},
+) {
+  // Typed by its output, not as a generic `ZodTypeAny`: on that, `superRefine` would type the
+  // field `any` in `DemoRequestBody`.
   return schema.superRefine((value, ctx) => {
     if (typeof value === 'string' && hasHiddenCharacter(value, { lineBreaks })) {
       ctx.addIssue({
@@ -91,7 +96,9 @@ const parent = SchoolIntroRequestSchema.shape;
 /**
  * The body of `POST /public/demo-requests` (spec 06): the school's or the parent's form, told
  * apart by `kind`, plus the anti-spam fields. It refuses hidden characters in the text fields
- * (D32); the forms keep using the two schemas above.
+ * (D32); the forms keep using the two schemas above. Both variants are strict: an unknown key
+ * (a `tenantId`, a `status`) is refused with 400, never stripped, so nothing in the body can
+ * pretend to pick a school or a lead's state (D16, D57).
  */
 export const DemoRequestBody = z.discriminatedUnion('kind', [
   DemoRequestSchema.extend({
@@ -101,7 +108,7 @@ export const DemoRequestBody = z.discriminatedUnion('kind', [
     school: plainText(school.school),
     country: plainText(school.country),
     ...antiSpam,
-  }),
+  }).strict(),
   SchoolIntroRequestSchema.extend({
     kind: z.literal('parent'),
     name: plainText(parent.name),
@@ -110,7 +117,7 @@ export const DemoRequestBody = z.discriminatedUnion('kind', [
     city: plainText(parent.city),
     note: plainText(parent.note, { lineBreaks: true }),
     ...antiSpam,
-  }),
+  }).strict(),
 ]);
 export type DemoRequestBody = z.infer<typeof DemoRequestBody>;
 
