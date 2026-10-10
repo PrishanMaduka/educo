@@ -338,7 +338,8 @@ test.describe('landing page', () => {
 
   test('a school’s demo request checks the fields, then opens an email to support', async ({
     page,
-  }) => {
+  }, testInfo) => {
+    test.skip(!isPrelaunch(testInfo), 'After launch the form sends to Quad: demo-request.spec.ts');
     await catchEmails(page);
     await page.goto('/#demo');
     const form = page.locator('#demo form').filter({ visible: true });
@@ -375,7 +376,10 @@ test.describe('landing page', () => {
     await expect(page).toHaveURL(/\/#demo$/);
   });
 
-  test('a parent’s request goes to support with the school and the note', async ({ page }) => {
+  test('a parent’s request goes to support with the school and the note', async ({
+    page,
+  }, testInfo) => {
+    test.skip(!isPrelaunch(testInfo), 'After launch the form sends to Quad: demo-request.spec.ts');
     await catchEmails(page);
     await page.goto('/?view=parent#demo');
     const form = page.locator('#demo form').filter({ visible: true });

@@ -11,7 +11,7 @@ import type { NextConfig } from 'next';
  * same components while the portal, the health check, the middleware and the server
  * instrumentation stay out. Build it with `pnpm --filter @quad/staff build:export`.
  */
-const env = parseWebPublicEnv(process.env);
+const env = parseWebPublicEnv(process.env, { demoForm: true });
 if (!env.NEXT_PUBLIC_QUAD_PRELAUNCH) {
   throw new Error('The static export is the pre-launch site: set NEXT_PUBLIC_QUAD_PRELAUNCH=true.');
 }

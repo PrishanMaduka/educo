@@ -8,7 +8,7 @@ import { apiRewrites } from './src/lib/api-rewrites';
 import type { NextConfig } from 'next';
 
 // Spec 02 "Web public (build time)": refuse to build with invalid public variables.
-const env = parseWebPublicEnv(process.env);
+const env = parseWebPublicEnv(process.env, { demoForm: true });
 
 const config: NextConfig = {
   reactStrictMode: true,

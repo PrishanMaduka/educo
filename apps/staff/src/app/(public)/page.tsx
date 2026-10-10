@@ -39,7 +39,7 @@ export default function LandingPage() {
         <Circle />
         <Wellbeing />
         <More />
-        <Demo />
+        <Demo prelaunch={prelaunch} />
       </main>
       <Footer prelaunch={prelaunch} />
     </>

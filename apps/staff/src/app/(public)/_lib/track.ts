@@ -1,5 +1,5 @@
 /** The public site's analytics events (D57, owner OQ3): GA4's snake_case names, no parameters. */
-export type PublicEvent = 'sign_in_opened';
+export type PublicEvent = 'sign_in_opened' | 'demo_requested' | 'parent_request_sent';
 
 /**
  * Counts a public-site event. Sends nothing yet.

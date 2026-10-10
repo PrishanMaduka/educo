@@ -1,3 +1,6 @@
+import type { DemoFormRequest } from './demo-checks';
+import type { DemoRequest } from '@quad/contracts/public';
+
 /**
  * Translated text for the pre-launch request emails (decision log D30). The server translates
  * it with markers where the values go, so the browser needs no i18n code.
@@ -37,4 +40,47 @@ export function buildRequestMailto(
   const subject = fillSlot(text.subject, text.marker.slot, school);
   const body = [text.intro, '', ...lines].join('\r\n');
   return `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+}
+
+/** The form labels a request's email needs (`DemoFormLabels` carries them). */
+export interface RequestMailLabels {
+  name: string;
+  email: string;
+  school: string;
+  place: string;
+  students: string;
+  curriculum: string;
+  noteInEmail: string;
+  studentsOptions: Readonly<Record<DemoRequest['students'], string>>;
+  curriculumOptions: Readonly<Record<DemoRequest['curriculum'], string>>;
+  mail: MailText;
+}
+
+/**
+ * A checked request as a `mailto:` link (D30): the pre-launch form opens it, and the live form
+ * offers it when the request cannot be sent (D57).
+ */
+export function requestMailto(
+  to: string,
+  labels: RequestMailLabels,
+  request: DemoFormRequest,
+): string {
+  const fields: [string, string | undefined][] =
+    request.kind === 'school'
+      ? [
+          [labels.name, request.name],
+          [labels.email, request.email],
+          [labels.school, request.school],
+          [labels.place, request.country],
+          [labels.students, labels.studentsOptions[request.students]],
+          [labels.curriculum, labels.curriculumOptions[request.curriculum]],
+        ]
+      : [
+          [labels.name, request.name],
+          [labels.email, request.email],
+          [labels.school, request.school],
+          [labels.place, request.city],
+          [labels.noteInEmail, request.note],
+        ];
+  return buildRequestMailto(to, request.school, fields, labels.mail);
 }

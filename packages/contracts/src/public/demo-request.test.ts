@@ -4,8 +4,10 @@ import {
   DemoRequestBody,
   DemoRequestSchema,
   demoRequestProblem,
+  demoRequestProblemAt,
   SchoolIntroRequestSchema,
   schoolIntroProblem,
+  schoolIntroProblemAt,
 } from './demo-request';
 
 const school = {
@@ -107,6 +109,34 @@ describe('the first problem to tell the visitor', () => {
       code: 'other',
       fields: ['note'],
     });
+  });
+});
+
+describe('the problem at the paths the API refused (400 validation `fields`)', () => {
+  it('gives the same message and fields as the form check, in the same order', () => {
+    expect(demoRequestProblemAt(['email', 'school'])).toEqual({
+      code: 'name_and_school',
+      fields: ['school'],
+    });
+    expect(schoolIntroProblemAt(['email'])).toEqual({ code: 'email', fields: ['email'] });
+    expect(demoRequestProblemAt(['curriculum'])).toEqual({
+      code: 'other',
+      fields: ['curriculum'],
+    });
+    expect(schoolIntroProblemAt(['note'])).toEqual({ code: 'other', fields: ['note'] });
+  });
+
+  it('reads the first segment of a dotted path, and marks nothing for a path off the form', () => {
+    expect(schoolIntroProblemAt(['name.0'])).toEqual({
+      code: 'name_and_school',
+      fields: ['name'],
+    });
+    expect(demoRequestProblemAt(['_root', 'turnstileToken'])).toEqual({
+      code: 'other',
+      fields: [],
+    });
+    // A parent's form has no students field, so it is never marked there.
+    expect(schoolIntroProblemAt(['students'])).toEqual({ code: 'other', fields: [] });
   });
 });
 

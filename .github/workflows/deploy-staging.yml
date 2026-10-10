@@ -103,6 +103,9 @@ jobs:
           REGISTRY: ${{ steps.ecr.outputs.registry }}
           GIT_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
           SENTRY_DSN: ${{ matrix.image == 'staff' && vars.SENTRY_DSN_STAFF || matrix.image == 'console' && vars.SENTRY_DSN_CONSOLE || '' }}
+          # The demo form's Turnstile site key (public, so a variable): the staff build refuses to
+          # run without it outside local (D57).
+          TURNSTILE_SITE_KEY: ${{ vars.TURNSTILE_SITE_KEY }}
         run: |
           ref="$REGISTRY/quad/$IMAGE:$DEPLOY_SHA"
           # ECR tags are immutable, so a re-run for the same commit reuses the pushed image. A
@@ -117,6 +120,9 @@ jobs:
             args+=(--build-arg NEXT_PUBLIC_APP_ENV=staging)
             args+=(--build-arg NEXT_PUBLIC_API_URL=https://staging.quad-edu.com)
             args+=(--build-arg "NEXT_PUBLIC_SENTRY_DSN=$SENTRY_DSN")
+          fi
+          if [ "$IMAGE" = staff ]; then
+            args+=(--build-arg "NEXT_PUBLIC_TURNSTILE_SITE_KEY=$TURNSTILE_SITE_KEY")
           fi
           node scripts/docker-build.mjs "$IMAGE" --tag "$ref" --push "${args[@]}"
 

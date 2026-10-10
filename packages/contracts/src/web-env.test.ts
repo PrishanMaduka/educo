@@ -110,6 +110,49 @@ describe('parseWebPublicEnv', () => {
   });
 });
 
+describe('parseWebPublicEnv for the staff app, which serves the demo form (D57)', () => {
+  const staging = {
+    NEXT_PUBLIC_APP_ENV: 'staging',
+    NEXT_PUBLIC_API_URL: 'https://staging.quad-edu.com',
+  };
+
+  it('requires the Turnstile site key outside local while the live form is built', () => {
+    for (const appEnv of ['staging', 'production']) {
+      expect(() =>
+        parseWebPublicEnv({ ...staging, NEXT_PUBLIC_APP_ENV: appEnv }, { demoForm: true }),
+      ).toThrow(/NEXT_PUBLIC_TURNSTILE_SITE_KEY: Required/);
+      expect(() =>
+        parseWebPublicEnv(
+          { ...staging, NEXT_PUBLIC_APP_ENV: appEnv, NEXT_PUBLIC_TURNSTILE_SITE_KEY: '' },
+          { demoForm: true },
+        ),
+      ).toThrow(/NEXT_PUBLIC_TURNSTILE_SITE_KEY: Required/);
+    }
+    expect(
+      parseWebPublicEnv(
+        { ...staging, NEXT_PUBLIC_TURNSTILE_SITE_KEY: '0x4AAAAAAAreal-site-key' },
+        { demoForm: true },
+      ).NEXT_PUBLIC_TURNSTILE_SITE_KEY,
+    ).toBe('0x4AAAAAAAreal-site-key');
+  });
+
+  it('needs no site key locally (the dummy token) or for the pre-launch site (email form)', () => {
+    expect(
+      parseWebPublicEnv({}, { demoForm: true }).NEXT_PUBLIC_TURNSTILE_SITE_KEY,
+    ).toBeUndefined();
+    expect(
+      parseWebPublicEnv(
+        { ...staging, NEXT_PUBLIC_APP_ENV: 'production', NEXT_PUBLIC_QUAD_PRELAUNCH: 'true' },
+        { demoForm: true },
+      ).NEXT_PUBLIC_QUAD_PRELAUNCH,
+    ).toBe(true);
+  });
+
+  it('leaves the console, which has no demo form, without the requirement', () => {
+    expect(parseWebPublicEnv(staging).NEXT_PUBLIC_APP_ENV).toBe('staging');
+  });
+});
+
 describe('robotsTagFor', () => {
   it.each([
     ['local', 'console', 'noindex, nofollow'],

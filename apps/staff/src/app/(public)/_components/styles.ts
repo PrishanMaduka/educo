@@ -1,3 +1,4 @@
+import { cn } from '@quad/ui';
 import { cva } from 'class-variance-authority';
 
 /*
@@ -91,3 +92,6 @@ export const tintCard = cva('rounded-[28px] p-[clamp(20px,2.6vw,32px)] text-site
 
 /** The first card on a page rises into the navy header. */
 export const lift = 'relative z-[2] mt-[clamp(-72px,-5vw,-44px)]';
+
+/** A link inside the demo panel's navy card (the support address, the email fallback). */
+export const inlineLink = cn('text-site-lime', focusRing);

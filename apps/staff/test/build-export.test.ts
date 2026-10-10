@@ -206,8 +206,21 @@ describe('the pre-launch stubs', () => {
     const stubs = await import('../site-export/prelaunch');
     expect(stubs.LiveSignIn({ label: 'Sign in' })).toBeNull();
     expect(stubs.SignedInHint({ openSchool: { before: 'Open ', after: '' } })).toBeNull();
-    expect(() => stubs.TurnstileField()).toThrow(/pre-launch/);
-    expect(() => stubs.submitDemoRequest()).toThrow(/pre-launch/);
+    expect(() => stubs.TurnstileField({ setup: { dummyToken: 'token' }, active: true })).toThrow(
+      /pre-launch/,
+    );
+    expect(() =>
+      stubs.submitDemoRequest({
+        kind: 'parent',
+        name: 'Sample Parent',
+        email: 'name@example.com',
+        school: 'Sample School',
+        turnstileToken: 'token',
+      }),
+    ).toThrow(/pre-launch/);
+    expect(() => {
+      stubs.prepareDemoRequest();
+    }).toThrow(/pre-launch/);
   });
 
   it('are what the export build aliases (public)/_live to', () => {

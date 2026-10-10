@@ -41,9 +41,11 @@ RUN pnpm install --offline --frozen-lockfile --filter "@quad/${APP}..."
 ARG NEXT_PUBLIC_APP_ENV=
 ARG NEXT_PUBLIC_API_URL=
 ARG NEXT_PUBLIC_SENTRY_DSN=
+ARG NEXT_PUBLIC_TURNSTILE_SITE_KEY=
 ENV NEXT_PUBLIC_APP_ENV=${NEXT_PUBLIC_APP_ENV} \
     NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL} \
-    NEXT_PUBLIC_SENTRY_DSN=${NEXT_PUBLIC_SENTRY_DSN}
+    NEXT_PUBLIC_SENTRY_DSN=${NEXT_PUBLIC_SENTRY_DSN} \
+    NEXT_PUBLIC_TURNSTILE_SITE_KEY=${NEXT_PUBLIC_TURNSTILE_SITE_KEY}
 # next/font downloads the Google font files during the build. `public/` is optional, so an empty
 # one is created for the COPY below.
 RUN --mount=type=secret,id=proxy_ca,required=false \

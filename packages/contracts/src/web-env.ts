@@ -82,11 +82,37 @@ export const WebPublicEnvSchema = z
 
 export type WebPublicEnv = z.infer<typeof WebPublicEnvSchema>;
 
+export interface WebPublicEnvOptions {
+  /**
+   * The app serves the public demo form (staff). Outside local, while the live form is built
+   * (the pre-launch flag is off), it then needs `NEXT_PUBLIC_TURNSTILE_SITE_KEY`: without it the
+   * form could not get a token and every request would fail (D57). Locally the form sends the
+   * dummy token instead; the console has no form.
+   */
+  demoForm?: boolean;
+}
+
 /** Parses the public variables, or throws with every problem listed (the build stops). */
-export function parseWebPublicEnv(source: Record<string, string | undefined>): WebPublicEnv {
+export function parseWebPublicEnv(
+  source: Record<string, string | undefined>,
+  { demoForm = false }: WebPublicEnvOptions = {},
+): WebPublicEnv {
   const result = WebPublicEnvSchema.safeParse(source);
-  if (!result.success) {
-    const problems = result.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`);
+  const problems = result.success
+    ? []
+    : result.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`);
+  if (
+    result.success &&
+    demoForm &&
+    result.data.NEXT_PUBLIC_APP_ENV !== 'local' &&
+    !result.data.NEXT_PUBLIC_QUAD_PRELAUNCH &&
+    result.data.NEXT_PUBLIC_TURNSTILE_SITE_KEY === undefined
+  ) {
+    problems.push(
+      `NEXT_PUBLIC_TURNSTILE_SITE_KEY: Required for the demo form when NEXT_PUBLIC_APP_ENV is ${result.data.NEXT_PUBLIC_APP_ENV}`,
+    );
+  }
+  if (!result.success || problems.length > 0) {
     throw new Error(`Invalid public environment variables:\n  ${problems.join('\n  ')}`);
   }
   return result.data;

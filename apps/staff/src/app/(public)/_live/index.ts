@@ -6,5 +6,10 @@
  */
 export { LiveSignIn, LiveSignInHost } from './LiveSignIn';
 export { SignedInHint } from './SignedInHint';
-export { submitDemoRequest } from './submitDemoRequest';
-export { TurnstileField } from './TurnstileField';
+export {
+  prepareDemoRequest,
+  submitDemoRequest,
+  type DemoRequestOutcome,
+} from './submitDemoRequest';
+export { TurnstileField, type TurnstileHandle, type TurnstileSetup } from './TurnstileField';
+export type { TurnstileApi, TurnstileRenderOptions } from './turnstile-loader';

@@ -4,7 +4,7 @@ import type * as Live from '../../src/app/(public)/_live';
  * The pre-launch stand-ins for `src/app/(public)/_live` (D57). site-export/next.config.ts aliases
  * that folder here, so the export compiles none of the live code: no sign-in flow, API client or
  * Turnstile. Each stub has the live export's type. The pre-launch pages never render the live
- * pieces (Sign in opens the coming-soon note, the forms open an email), so the components show
+ * pieces (Sign in opens the coming-soon note, the forms open an email: `DemoForm`'s `mailto` mode), so the components show
  * nothing and the actions throw if anything ever calls them.
  */
 
@@ -21,4 +21,7 @@ export const SignedInHint: typeof Live.SignedInHint = () => null;
 export const TurnstileField: typeof Live.TurnstileField = () => refuse('Turnstile');
 
 export const submitDemoRequest: typeof Live.submitDemoRequest = () =>
+  refuse('Sending a demo request to Quad');
+
+export const prepareDemoRequest: typeof Live.prepareDemoRequest = () =>
   refuse('Sending a demo request to Quad');

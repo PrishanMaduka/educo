@@ -1,3 +1,4 @@
+import { TURNSTILE_DUMMY_TOKEN } from '@quad/contracts';
 import { cn } from '@quad/ui';
 
 import { FloatingDoodle } from '../_art/Doodle';
@@ -6,13 +7,30 @@ import { site } from '../_art/people';
 import { CONTACT_EMAIL } from '../_lib/site';
 
 import { AppBadges } from './AppBadges';
-import { DemoForm, type DemoFormLabels } from './DemoForm';
+import {
+  DemoForm,
+  type AroundEmail,
+  type DemoFormDelivery,
+  type DemoFormLabels,
+  type DemoSendLabels,
+} from './DemoForm';
 import { display, onlyParent, onlySchool, wrap } from './styles';
 
-import { SLOT_MARKER, t } from '@/i18n';
+import { SLOT_MARKER, splitAround, t } from '@/i18n';
+import { publicEnv } from '@/lib/public-env';
 
 // Markers the browser replaces with the visitor's values (none of them occurs in a translation).
 const MARKER = { slot: SLOT_MARKER, label: '⁣label⁣', value: '⁣value⁣' } as const;
+
+/**
+ * A message split around the support address, which the form turns into the email fallback link.
+ * A translation without the address gets the link after it.
+ */
+function aroundEmail(message: string): AroundEmail {
+  if (!message.includes(CONTACT_EMAIL)) return { before: `${message} `, after: '' };
+  const [before, after] = splitAround(message, CONTACT_EMAIL);
+  return { before, after };
+}
 
 function formLabels(variant: 'school' | 'parent'): DemoFormLabels {
   const isSchool = variant === 'school';
@@ -60,14 +78,49 @@ function formLabels(variant: 'school' | 'parent'): DemoFormLabels {
   };
 }
 
+/** The endpoint form's own copy (D57), sent to the browser only when the form sends to Quad. */
+function sendLabels(variant: 'school' | 'parent'): DemoSendLabels {
+  const [noteBefore, noteAfter] = splitAround(
+    t('public.demo.noteProtected', { link: SLOT_MARKER }),
+    SLOT_MARKER,
+  );
+  return {
+    sending: t('public.demo.sending'),
+    thanks: variant === 'school' ? t('public.demo.thanks') : t('public.demo.thanksParent'),
+    captchaFailed: t('error.captchaFailed'),
+    rateLimited: aroundEmail(t('public.demo.error.rateLimited')),
+    unavailable: aroundEmail(t('error.captchaUnavailable')),
+    honeypot: t('public.demo.field.website'),
+    protectedNote: { before: noteBefore, link: t('public.demo.privacyLink'), after: noteAfter },
+  };
+}
+
 const WAVERS = [
   { who: 'maya', size: 'size-[84px]', motion: '' },
   { who: 'okafor', size: 'size-16', motion: '[animation-duration:3.5s] [animation-delay:.3s]' },
   { who: 'priya', size: 'size-16', motion: '[animation-duration:4s] [animation-delay:.6s]' },
 ] as const;
 
+/**
+ * How the forms send (D57): before launch an email (D30); after, Quad's endpoint with Turnstile.
+ * A local build without a site key sends the dummy token the local verifier accepts; elsewhere
+ * the build already refused to run without one (`parseWebPublicEnv`).
+ */
+function delivery(prelaunch: boolean, variant: 'school' | 'parent'): DemoFormDelivery {
+  if (prelaunch) return { mode: 'mailto' };
+  const siteKey = publicEnv.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+  if (siteKey === undefined && publicEnv.NEXT_PUBLIC_APP_ENV !== 'local') {
+    throw new Error('NEXT_PUBLIC_TURNSTILE_SITE_KEY is required outside local (D57).');
+  }
+  return {
+    mode: 'endpoint',
+    turnstile: siteKey === undefined ? { dummyToken: TURNSTILE_DUMMY_TOKEN } : { siteKey },
+    sendLabels: sendLabels(variant),
+  };
+}
+
 /** The demo panel (spec 19): a demo for schools, or a note to your child's school for parents. */
-export function Demo() {
+export function Demo({ prelaunch }: { prelaunch: boolean }) {
   const title = cn(display, 'text-[clamp(42px,6vw,96px)] leading-[.9]');
   const lede = 'm-0 max-w-[28em] text-[19px] leading-[1.5]';
   const cheer = <Face who="maya" mood="laugh" />;
@@ -140,6 +193,7 @@ export function Demo() {
                 to={CONTACT_EMAIL}
                 labels={formLabels('school')}
                 cheer={cheer}
+                {...delivery(prelaunch, 'school')}
               />
             </div>
             <div className={onlyParent}>
@@ -148,6 +202,7 @@ export function Demo() {
                 to={CONTACT_EMAIL}
                 labels={formLabels('parent')}
                 cheer={cheer}
+                {...delivery(prelaunch, 'parent')}
               />
             </div>
           </div>

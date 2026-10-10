@@ -345,6 +345,14 @@ describe('deploy-staging.yml', () => {
     expect(script).toContain(':$DEPLOY_SHA');
     expect(script).toContain('NEXT_PUBLIC_APP_ENV=staging');
     expect(script).toContain('NEXT_PUBLIC_API_URL=https://staging.quad-edu.com');
+    // The staff build refuses to run without the demo form's Turnstile site key outside local
+    // (D57); the key is public, so it is a repository variable, and only staff has the form.
+    expect(script).toMatch(
+      /if \[ "\$IMAGE" = staff \]; then\s+args\+=\(--build-arg "NEXT_PUBLIC_TURNSTILE_SITE_KEY=\$TURNSTILE_SITE_KEY"\)/,
+    );
+    expect(job?.steps?.find((step) => step.name === 'Build and push the image')?.env).toMatchObject(
+      { TURNSTILE_SITE_KEY: '${{ vars.TURNSTILE_SITE_KEY }}' },
+    );
     // Same digests, pulled through the mirror (M5).
     expect(job?.env?.QUAD_IMAGE_REGISTRY).toBe('mirror.gcr.io/');
     expect(JSON.stringify(job)).toContain('vars.SENTRY_DSN_STAFF');

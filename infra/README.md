@@ -258,6 +258,7 @@ world-readable, and the protections below must exist before any role ARN becomes
    | `OTEL_EXPORTER_OTLP_ENDPOINT` | the Grafana Cloud OTLP gateway URL (empty leaves tracing off); the staging plan and apply pass it as `-var otel_exporter_endpoint` | 6c, before the plan and apply roles |
    | `AWS_STAGING_DEPLOY_ROLE_ARN` | staging output `deploy_role_arn` | 9 (setting it switches the deploy on) |
    | `SENTRY_DSN_STAFF`, `SENTRY_DSN_CONSOLE` | the `quad-staff` and `quad-console` DSNs (built into the browser bundle) | 10 |
+   | `TURNSTILE_SITE_KEY` | the site key of the Turnstile widget for `quad-edu.com` and `staging.quad-edu.com` (public, built into the staff bundle; the staff build refuses to run without it, D57) | 7 |
    | `IOS_UPLOAD_ENABLED`, `PLAY_UPLOAD_ENABLED` | `true` once the store accounts and the secrets below exist | [5](#5-accounts-and-keys-to-create) |
 
    `TF_GLOBAL_STATE_READ_ROLE_ARN` and `AWS_TOOLING_PLAN_ROLE_ARN` are reserved names for a future
@@ -339,11 +340,16 @@ registry=$(terraform -chdir=infra/envs/staging output -json ecr_repository_urls 
 aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin "$registry"
 node scripts/docker-build.mjs api     --tag "$registry/quad/api:bootstrap"     --push
 node scripts/docker-build.mjs clamav  --tag "$registry/quad/clamav:bootstrap"  --push
-for app in staff console; do
-  node scripts/docker-build.mjs "$app" --tag "$registry/quad/$app:bootstrap" --push \
-    --build-arg NEXT_PUBLIC_APP_ENV=staging --build-arg NEXT_PUBLIC_API_URL=https://staging.quad-edu.com
-done
+node scripts/docker-build.mjs staff   --tag "$registry/quad/staff:bootstrap"   --push \
+  --build-arg NEXT_PUBLIC_APP_ENV=staging --build-arg NEXT_PUBLIC_API_URL=https://staging.quad-edu.com \
+  --build-arg NEXT_PUBLIC_TURNSTILE_SITE_KEY=<site key>
+node scripts/docker-build.mjs console --tag "$registry/quad/console:bootstrap" --push \
+  --build-arg NEXT_PUBLIC_APP_ENV=staging --build-arg NEXT_PUBLIC_API_URL=https://staging.quad-edu.com
 ```
+The staff build refuses to run without `NEXT_PUBLIC_TURNSTILE_SITE_KEY` outside local (D57): use
+the site key of the Turnstile widget whose secret step 8 stores, never one of Cloudflare's test keys.
+It is public, so set the same value as the repository variable `TURNSTILE_SITE_KEY`, which
+`deploy-staging.yml` passes to every later staff build.
 The worker, migrate, seed and db-bootstrap tasks run the api image.
 
 ### Step 8. Bootstrap the database roles, migrate and seed (staging administrator)

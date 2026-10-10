@@ -739,6 +739,7 @@
   "publicDemoFieldCurriculum": "Curriculum",
   "publicDemoFieldNote": "A note to the school (optional)",
   "publicDemoFieldNotePlaceholder": "Why you’d like Quad at your school",
+  "publicDemoFieldWebsite": "Leave this empty",
   "publicDemoStudentsUnder300": "Under 300",
   "publicDemoStudents3001000": "300–1,000",
   "publicDemoStudents10002500": "1,000–2,500",
@@ -752,6 +753,15 @@
   "publicDemoSchoolSubmit": "Request a demo",
   "publicDemoParentSubmit": "Send to my school",
   "publicDemoNote": "We’ll only use this to arrange a walkthrough.",
+  "publicDemoNoteProtected": "We’ll only use this to arrange a walkthrough. Protected by Cloudflare Turnstile; see our {link}.",
+  "@publicDemoNoteProtected": {
+    "placeholders": {
+      "link": {
+        "type": "Object"
+      }
+    }
+  },
+  "publicDemoPrivacyLink": "privacy policy",
   "publicDemoSchoolErrorNameAndSchool": "Add your name and your school.",
   "publicDemoSchoolErrorEmail": "Enter a work email like name@school.org.",
   "publicDemoParentErrorNameAndSchool": "Add your name and your child’s school.",
@@ -768,6 +778,9 @@
     }
   },
   "publicDemoAgain": "Send another",
+  "publicDemoSending": "Sending…",
+  "publicDemoThanks": "Thank you. We’ll email you within one working day to find a time.",
+  "publicDemoThanksParent": "Thank you. We’ll get in touch with your child’s school.",
   "publicDemoSchoolMailSubject": "Demo request: {school}",
   "@publicDemoSchoolMailSubject": {
     "placeholders": {

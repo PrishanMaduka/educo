@@ -130,6 +130,17 @@ export interface PublicFormProblem<Field extends string> {
   fields: Field[];
 }
 
+/** The problem with a form whose `bad` fields failed, in spec 19's order. */
+function problemIn<Field extends string>(
+  bad: ReadonlySet<unknown>,
+  rest: readonly Field[],
+): PublicFormProblem<Field | 'name' | 'school' | 'email'> {
+  const nameAndSchool = (['name', 'school'] as const).filter((field) => bad.has(field));
+  if (nameAndSchool.length > 0) return { code: 'name_and_school', fields: nameAndSchool };
+  if (bad.has('email')) return { code: 'email', fields: ['email'] };
+  return { code: 'other', fields: rest.filter((field) => bad.has(field)) };
+}
+
 function firstProblem<Field extends string>(
   schema: z.ZodType,
   input: unknown,
@@ -137,19 +148,35 @@ function firstProblem<Field extends string>(
 ): PublicFormProblem<Field | 'name' | 'school' | 'email'> | null {
   const result = schema.safeParse(input);
   if (result.success) return null;
-  const bad = new Set(result.error.issues.map((issue) => issue.path[0]));
-  const nameAndSchool = (['name', 'school'] as const).filter((field) => bad.has(field));
-  if (nameAndSchool.length > 0) return { code: 'name_and_school', fields: nameAndSchool };
-  if (bad.has('email')) return { code: 'email', fields: ['email'] };
-  return { code: 'other', fields: rest.filter((field) => bad.has(field)) };
+  return problemIn(new Set(result.error.issues.map((issue) => issue.path[0])), rest);
 }
+
+/** The fields named by the API's dotted `fields` paths (`email`, `note`, `_root`). */
+const fieldsAt = (paths: readonly string[]) => new Set(paths.map((path) => path.split('.')[0]));
+
+const SCHOOL_REST = ['country', 'students', 'curriculum'] as const;
+const PARENT_REST = ['city', 'note'] as const;
 
 /** The first problem with a school's demo form, or null when it is ready to send. */
 export function demoRequestProblem(input: unknown) {
-  return firstProblem(DemoRequestSchema, input, ['country', 'students', 'curriculum'] as const);
+  return firstProblem(DemoRequestSchema, input, SCHOOL_REST);
 }
 
 /** The first problem with a parent's form, or null when it is ready to send. */
 export function schoolIntroProblem(input: unknown) {
-  return firstProblem(SchoolIntroRequestSchema, input, ['city', 'note'] as const);
+  return firstProblem(SchoolIntroRequestSchema, input, PARENT_REST);
+}
+
+/**
+ * What to tell the visitor when the API refused a school's request with 400 `validation`: the
+ * same message and marked fields as `demoRequestProblem`, from the refused paths. A path off the
+ * form (`_root`, `turnstileToken`) marks nothing and gives `other`.
+ */
+export function demoRequestProblemAt(paths: readonly string[]) {
+  return problemIn(fieldsAt(paths), SCHOOL_REST);
+}
+
+/** `demoRequestProblemAt` for a parent's request. */
+export function schoolIntroProblemAt(paths: readonly string[]) {
+  return problemIn(fieldsAt(paths), PARENT_REST);
 }
