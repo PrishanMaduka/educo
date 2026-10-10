@@ -1,6 +1,9 @@
+import { registryEntry } from '@quad/contracts/cookies';
 import { describe, expect, it } from 'vitest';
 
 import {
+  CSRF_COOKIES,
+  SESSION_COOKIES,
   csrfTokenFrom,
   hasSessionCookie,
   lastSchoolFrom,
@@ -10,6 +13,15 @@ import {
   signInNoticeFrom,
   signInPathFor,
 } from './session';
+
+describe('the staff cookie names', () => {
+  it('are the API names from the cookie registry (D57)', () => {
+    expect(CSRF_COOKIES).toEqual(['quad_csrf', '__Host-quad_csrf']);
+    expect(CSRF_COOKIES).toEqual(registryEntry('csrf').names);
+    expect(SESSION_COOKIES).toEqual(['quad_sid', '__Host-quad_sid']);
+    expect(SESSION_COOKIES).toEqual(registryEntry('session').names);
+  });
+});
 
 describe('hasSessionCookie', () => {
   it('sees the staff session cookie under its local and its __Host- name', () => {

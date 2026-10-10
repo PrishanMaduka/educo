@@ -1,3 +1,4 @@
+import { findRegistryEntry } from '@quad/contracts/cookies';
 import { describe, expect, it } from 'vitest';
 
 import {
@@ -10,6 +11,12 @@ import {
 } from './theme';
 
 describe('theme', () => {
+  it('keeps its storage keys, which the cookie registry lists (D57)', () => {
+    expect([THEME_STORAGE_KEY, RAIL_STORAGE_KEY]).toEqual(['quad-theme', 'quad-rail']);
+    expect(findRegistryEntry(THEME_STORAGE_KEY, 'local_storage')?.id).toBe('theme');
+    expect(findRegistryEntry(RAIL_STORAGE_KEY, 'local_storage')?.id).toBe('rail');
+  });
+
   it('cycles system, light, dark and back', () => {
     expect(nextTheme('system')).toBe('light');
     expect(nextTheme('light')).toBe('dark');

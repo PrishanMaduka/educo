@@ -1,5 +1,7 @@
 import { createHash, randomBytes } from 'node:crypto';
 
+import { LAST_SCHOOL_COOKIE, cookieNameIn } from '@quad/contracts';
+
 import type { Config } from '../../config';
 import type { CookieSerializeOptions } from '@fastify/cookie';
 import type { FastifyReply } from 'fastify';
@@ -30,25 +32,25 @@ export interface CookieNames {
 
 /**
  * The remembered school on the sign-in page (spec 05): non-sensitive (its name and logo URL, no
- * id), readable by the page, and the same name everywhere.
+ * id), readable by the page, and the same name everywhere. Named in the cookie registry (D57).
  */
-export const LAST_SCHOOL_COOKIE = 'quad_last_school';
+export { LAST_SCHOOL_COOKIE };
 /** How long the remembered school stays: a school year. */
 const LAST_SCHOOL_SECONDS = 365 * 24 * 60 * 60;
 
 /**
- * The cookie names (spec 05, D32). Outside local they carry the `__Host-` prefix, which the
- * browser accepts only with `Secure`, `Path=/` and no `Domain`, so no subdomain can set or shadow
- * them. Locally the API runs on plain http, so they drop the prefix and `Secure`.
+ * The cookie names (spec 05, D32), from the one cookie registry in contracts (D57), which the
+ * Cookies page also renders. Outside local they carry the `__Host-` prefix, which the browser
+ * accepts only with `Secure`, `Path=/` and no `Domain`, so no subdomain can set or shadow them.
+ * Locally the API runs on plain http, so they drop the prefix and `Secure`.
  */
 export function cookieNames(appEnv: AppEnv): CookieNames {
-  const prefix = appEnv === 'local' ? '' : '__Host-';
   return {
-    session: `${prefix}quad_sid`,
-    consoleSession: `${prefix}quad_console_sid`,
-    consoleCsrf: `${prefix}quad_console_csrf`,
-    csrf: `${prefix}quad_csrf`,
-    trustedDevice: `${prefix}quad_trusted`,
+    session: cookieNameIn('session', appEnv),
+    consoleSession: cookieNameIn('consoleSession', appEnv),
+    consoleCsrf: cookieNameIn('consoleCsrf', appEnv),
+    csrf: cookieNameIn('csrf', appEnv),
+    trustedDevice: cookieNameIn('trustedDevice', appEnv),
   };
 }
 

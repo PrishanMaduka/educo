@@ -1,3 +1,4 @@
+import { registryEntry } from '@quad/contracts/cookies';
 import { describe, expect, it } from 'vitest';
 
 import { CONSOLE_CSRF_COOKIES, safeNext, signInPathFor } from './session';
@@ -46,5 +47,6 @@ describe('signInPathFor', () => {
 describe('CONSOLE_CSRF_COOKIES', () => {
   it('names only the console’s cookie, never the staff portal’s on the same host', () => {
     expect(CONSOLE_CSRF_COOKIES).toEqual(['quad_console_csrf', '__Host-quad_console_csrf']);
+    expect(CONSOLE_CSRF_COOKIES).toEqual(registryEntry('consoleCsrf').names);
   });
 });

@@ -82,6 +82,8 @@
   "errorNotYourSchool": "You can’t open that school with this account.",
   "errorAuthenticatorExists": "You already have an authenticator app set up.",
   "errorSignInUnavailable": "We can’t sign you in right now. Try again in a minute.",
+  "errorCaptchaFailed": "We couldn’t check that you’re not a robot. Try again.",
+  "errorCaptchaUnavailable": "We couldn’t send your request just now. Try again in a minute, or email support@quad-edu.com.",
   "errorInvalidSignInCode": "That code didn’t work. Check the latest code we sent you, or ask for a new one.",
   "errorAlreadyInSchool": "You’re already in this school.",
   "errorPhoneNotAccepted": "Enter a Sri Lankan mobile number, like +94 77 123 4567.",
@@ -745,6 +747,7 @@
   "publicDemoParentErrorNameAndSchool": "Add your name and your child’s school.",
   "publicDemoParentErrorEmail": "Enter an email like name@example.com.",
   "publicDemoErrorOther": "Check the fields marked in pink.",
+  "publicDemoErrorRateLimited": "You’ve sent a few requests already. Try again in an hour, or email support@quad-edu.com.",
   "publicDemoSent": "Your email app should open with your request ready to send.",
   "publicDemoFallback": "If it doesn’t open, email us at {email}.",
   "@publicDemoFallback": {

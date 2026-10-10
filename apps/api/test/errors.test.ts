@@ -7,6 +7,8 @@ import { sendError, toErrorResponse } from '../src/common/error.filter';
 import {
   AppError,
   BusinessRuleError,
+  CaptchaFailedError,
+  CaptchaUnavailableError,
   ConflictError,
   ForbiddenError,
   InvariantError,
@@ -46,6 +48,26 @@ describe('AppError hierarchy', () => {
     expect(error).toBeInstanceOf(AppError);
     expect(error.status).toBe(status);
     expect(error.code).toBe(code);
+  });
+});
+
+describe("the demo forms' Turnstile errors (M1b, D57)", () => {
+  it('answers a refused check with 400 captcha_failed and the en.json copy', () => {
+    const error = new CaptchaFailedError();
+    expect([error.status, error.code, error.message]).toEqual([
+      400,
+      'captcha_failed',
+      'We couldn’t check that you’re not a robot. Try again.',
+    ]);
+  });
+
+  it('answers an unreachable Cloudflare with 503 captcha_unavailable and the email fallback', () => {
+    const error = new CaptchaUnavailableError();
+    expect([error.status, error.code, error.message]).toEqual([
+      503,
+      'captcha_unavailable',
+      'We couldn’t send your request just now. Try again in a minute, or email support@quad-edu.com.',
+    ]);
   });
 });
 

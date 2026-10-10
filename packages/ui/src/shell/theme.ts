@@ -1,11 +1,13 @@
+import { RAIL_STORAGE_KEY, THEME_STORAGE_KEY } from '@quad/contracts/cookie-names';
+
 /** The person's theme choice. "system" follows the device (prefers-color-scheme). */
 export type ThemeChoice = 'system' | 'light' | 'dark';
 
-/** localStorage key for the theme choice. */
-export const THEME_STORAGE_KEY = 'quad-theme';
-
-/** localStorage key for the side bar ("collapsed" or "expanded"). */
-export const RAIL_STORAGE_KEY = 'quad-rail';
+/**
+ * localStorage keys for the theme choice and the side bar ("collapsed" or "expanded"), named in
+ * the cookie registry (D57).
+ */
+export { RAIL_STORAGE_KEY, THEME_STORAGE_KEY };
 
 export const THEME_CHOICES: readonly ThemeChoice[] = ['system', 'light', 'dark'];
 

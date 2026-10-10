@@ -1,8 +1,16 @@
 import { runInNewContext } from 'node:vm';
 
+import { findRegistryEntry } from '@quad/contracts/cookies';
 import { describe, expect, it } from 'vitest';
 
-import { initialView, viewBootstrapScript, viewUrl } from './view';
+import { initialView, VIEW_STORAGE_KEY, viewBootstrapScript, viewUrl } from './view';
+
+describe('VIEW_STORAGE_KEY', () => {
+  it('keeps its name, which the cookie registry lists (D57)', () => {
+    expect(VIEW_STORAGE_KEY).toBe('quad-site-view');
+    expect(findRegistryEntry(VIEW_STORAGE_KEY, 'local_storage')?.id).toBe('siteView');
+  });
+});
 
 describe('viewUrl', () => {
   it('adds ?view=parent for parents and keeps the rest of the address', () => {

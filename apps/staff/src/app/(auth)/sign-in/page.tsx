@@ -1,3 +1,4 @@
+import { LAST_SCHOOL_COOKIE } from '@quad/contracts/cookie-names';
 import { cookies } from 'next/headers';
 
 import { SignInFlow } from './_components/SignInFlow';
@@ -19,7 +20,7 @@ export default async function SignInPage({
   const [query, jar] = await Promise.all([searchParams, cookies()]);
   return (
     <SignInFlow
-      lastSchool={lastSchoolFrom(jar.get('quad_last_school')?.value)}
+      lastSchool={lastSchoolFrom(jar.get(LAST_SCHOOL_COOKIE)?.value)}
       next={safeNext(query.next)}
       notice={signInNoticeFrom(query.notice)}
     />

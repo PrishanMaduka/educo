@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  DemoRequestBody,
   DemoRequestSchema,
   demoRequestProblem,
   SchoolIntroRequestSchema,
@@ -106,5 +107,75 @@ describe('the first problem to tell the visitor', () => {
       code: 'other',
       fields: ['note'],
     });
+  });
+});
+
+describe('DemoRequestBody (the API body, spec 06 POST /public/demo-requests)', () => {
+  const token = { turnstileToken: 'XXXX.DUMMY.TOKEN.XXXX' };
+
+  it('accepts a school request and a parent request, told apart by kind', () => {
+    expect(DemoRequestBody.parse({ kind: 'school', ...school, ...token })).toEqual({
+      kind: 'school',
+      ...school,
+      ...token,
+    });
+    expect(DemoRequestBody.parse({ kind: 'parent', ...parent, ...token })).toEqual({
+      kind: 'parent',
+      ...parent,
+      ...token,
+    });
+  });
+
+  it('checks each kind with its own form rules', () => {
+    // A parent's request has no curriculum; a school's has no note.
+    expect(DemoRequestBody.safeParse({ kind: 'school', ...parent, ...token }).success).toBe(false);
+    expect(DemoRequestBody.parse({ kind: 'parent', ...school, ...token })).not.toHaveProperty(
+      'curriculum',
+    );
+  });
+
+  it('refuses a missing, empty or oversized Turnstile token', () => {
+    for (const turnstileToken of [undefined, '', 'x'.repeat(2049)]) {
+      const result = DemoRequestBody.safeParse({ kind: 'school', ...school, turnstileToken });
+      expect(result.success).toBe(false);
+      expect(result.error?.issues.map((issue) => issue.path[0])).toEqual(['turnstileToken']);
+    }
+    expect(
+      DemoRequestBody.safeParse({ kind: 'school', ...school, turnstileToken: 'x'.repeat(2048) })
+        .success,
+    ).toBe(true);
+  });
+
+  it('refuses an unknown or missing kind', () => {
+    expect(DemoRequestBody.safeParse({ kind: 'teacher', ...school, ...token }).success).toBe(false);
+    expect(DemoRequestBody.safeParse({ ...school, ...token }).success).toBe(false);
+  });
+
+  it('refuses a parent note of 1,001 characters at the note', () => {
+    const result = DemoRequestBody.safeParse({
+      kind: 'parent',
+      ...parent,
+      ...token,
+      note: 'x'.repeat(1001),
+    });
+    expect(result.success).toBe(false);
+    expect(result.error?.issues.map((issue) => issue.path[0])).toEqual(['note']);
+  });
+
+  it('accepts a filled honeypot, so a bot is not told; the service drops the request', () => {
+    expect(
+      DemoRequestBody.parse({
+        kind: 'school',
+        ...school,
+        ...token,
+        website: 'https://spam.example',
+      }).website,
+    ).toBe('https://spam.example');
+    expect(
+      DemoRequestBody.parse({ kind: 'parent', ...parent, ...token, website: '' }).website,
+    ).toBe('');
+    expect(DemoRequestBody.parse({ kind: 'parent', ...parent, ...token })).not.toHaveProperty(
+      'website',
+    );
   });
 });

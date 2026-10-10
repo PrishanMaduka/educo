@@ -138,6 +138,26 @@ export class RateLimitedError extends AppError {
 }
 
 /**
+ * 400 when Turnstile refuses a demo form's token: a failed check, or a token issued for another
+ * hostname or action (M1b, D57). The page resets the widget so the visitor can try again.
+ */
+export class CaptchaFailedError extends AppError {
+  constructor() {
+    super('captcha_failed', formatMessage('error.captchaFailed'), 400);
+  }
+}
+
+/**
+ * 503 when Cloudflare's check cannot be reached in time. The demo form fails closed (D57,
+ * OQ-T7): nothing is stored, and the message offers the support address instead.
+ */
+export class CaptchaUnavailableError extends AppError {
+  constructor() {
+    super('captcha_unavailable', formatMessage('error.captchaUnavailable'), 503);
+  }
+}
+
+/**
  * 401 for a sign-in that fails: an unknown email, a wrong password or a disabled account all
  * get this one answer, so the response never says whether an account exists (spec 05).
  */

@@ -34,8 +34,8 @@ const person = {
 
 /**
  * A school's demo request from the landing page ("I run a school"; spec 19 "Demo requests", spec
- * 06 `POST /public/demo-requests`). The page and the API share it. The Turnstile token and
- * honeypot arrive with the endpoint (M1b).
+ * 06 `POST /public/demo-requests`). The page and the API share it; the API body adds the
+ * Turnstile token and honeypot (`DemoRequestBody`).
  */
 export const DemoRequestSchema = z.object({
   ...person,
@@ -55,6 +55,26 @@ export const SchoolIntroRequestSchema = z.object({
   note: optionalText(1000),
 });
 export type SchoolIntroRequest = z.infer<typeof SchoolIntroRequestSchema>;
+
+/**
+ * What the API needs beyond the form (D57): the Turnstile token the browser widget produced, and
+ * `website`, the honeypot a person never sees. The schema accepts any honeypot value, so a bot is
+ * never told it was caught; the service drops a filled one and answers 202 as usual.
+ */
+const antiSpam = {
+  turnstileToken: z.string().min(1).max(2048),
+  website: z.string().optional(),
+};
+
+/**
+ * The body of `POST /public/demo-requests` (spec 06): the school's or the parent's form, told
+ * apart by `kind`, plus the anti-spam fields. The forms keep using the two schemas above.
+ */
+export const DemoRequestBody = z.discriminatedUnion('kind', [
+  DemoRequestSchema.extend({ kind: z.literal('school'), ...antiSpam }),
+  SchoolIntroRequestSchema.extend({ kind: z.literal('parent'), ...antiSpam }),
+]);
+export type DemoRequestBody = z.infer<typeof DemoRequestBody>;
 
 /** What to tell the visitor: one message at a time, in the order spec 19 gives them. */
 export type PublicFormProblemCode = 'name_and_school' | 'email' | 'other';

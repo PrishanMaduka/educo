@@ -4,10 +4,13 @@
  * browser.
  */
 
+import { VIEW_STORAGE_KEY } from '@quad/contracts/cookie-names';
+
 export type SiteView = 'school' | 'parent';
 
 export const VIEW_PARAM = 'view';
-export const VIEW_STORAGE_KEY = 'quad-site-view';
+/** The remembered view in `localStorage`, named in the cookie registry (D57). */
+export { VIEW_STORAGE_KEY };
 
 /** The address for a view: `?view=parent` for parents; schools, the default, drop the parameter. */
 export function viewUrl(href: string, view: SiteView): string {

@@ -2,11 +2,12 @@ import { createApiClient } from '@quad/client';
 import { Me, MePermissions } from '@quad/contracts';
 
 import { ApiError, unwrap } from './api';
+import { SESSION_COOKIES } from './session';
 
 import type { ZodType } from 'zod';
 
 /** The session cookies the API reads (spec 05; D32): `quad_sid` locally, `__Host-` elsewhere. */
-const SESSION_COOKIES: ReadonlySet<string> = new Set(['quad_sid', '__Host-quad_sid']);
+const SESSION_COOKIE_NAMES: ReadonlySet<string> = new Set(SESSION_COOKIES);
 
 /**
  * What the portal layout knows about the visit before it renders anything:
@@ -33,7 +34,7 @@ export function sessionCookieHeader(
   cookies: readonly { readonly name: string; readonly value: string }[],
 ): string {
   return cookies
-    .filter((cookie) => SESSION_COOKIES.has(cookie.name))
+    .filter((cookie) => SESSION_COOKIE_NAMES.has(cookie.name))
     .map((cookie) => `${cookie.name}=${cookie.value}`)
     .join('; ');
 }

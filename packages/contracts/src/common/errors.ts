@@ -13,7 +13,9 @@ import { z } from 'zod';
  * `already_member` (an invited address already belongs to a member of the school), and, from
  * fix round 1, `own_role_locked` (nobody changes a role they hold themselves). Task 15 adds
  * `family_member` (422): an invited address belongs to a guardian or relative of the school,
- * whose one membership there can never become staff.
+ * whose one membership there can never become staff. M1b (D57) adds the demo forms' Turnstile
+ * answers: `captcha_failed` (400) when the check refuses the token, and `captcha_unavailable`
+ * (503) when Cloudflare cannot be reached in time (it fails closed).
  */
 export const ErrorCode = z.enum([
   'validation',
@@ -41,6 +43,8 @@ export const ErrorCode = z.enum([
   'two_step_required',
   'preview_read_only',
   'rate_limited',
+  'captcha_failed',
+  'captcha_unavailable',
   'unavailable',
   'internal',
 ]);

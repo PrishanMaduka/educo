@@ -1,4 +1,5 @@
 import { safeReturnPath } from '@quad/client';
+import { CONSOLE_CSRF_COOKIE, hostPrefixedNames } from '@quad/contracts/cookie-names';
 
 /**
  * What the console knows about its session without asking the API (spec 05; D32). The console's
@@ -7,11 +8,11 @@ import { safeReturnPath } from '@quad/client';
  * `GET /platform/me` in the browser (D50).
  */
 
-/** The console's double-submit CSRF cookie: locally the staff portal shares the host. */
-export const CONSOLE_CSRF_COOKIES: readonly string[] = [
-  'quad_console_csrf',
-  '__Host-quad_console_csrf',
-];
+/**
+ * The console's double-submit CSRF cookie: locally the staff portal shares the host. Named in the
+ * cookie registry (D57).
+ */
+export const CONSOLE_CSRF_COOKIES: readonly string[] = hostPrefixedNames(CONSOLE_CSRF_COOKIE);
 
 const SIGN_IN = /^\/sign-in(?:[/?#]|$)/;
 

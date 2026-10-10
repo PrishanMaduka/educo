@@ -35,8 +35,13 @@ describe('contracts', () => {
     ).toBe(true);
     expect(ErrorCode.options).toContain('app_update_required');
     // 22 until Task 13 added last_admin, system_role_locked, already_member and own_role_locked;
-    // Task 15 added family_member.
-    expect(ErrorCode.options).toHaveLength(27);
+    // Task 15 added family_member; M1b added captcha_failed and captcha_unavailable.
+    expect(ErrorCode.options).toHaveLength(29);
+  });
+
+  it('has captcha_failed (400) and captcha_unavailable (503) for the demo forms (M1b, D57)', () => {
+    expect(ErrorCode.parse('captcha_failed')).toBe('captcha_failed');
+    expect(ErrorCode.parse('captcha_unavailable')).toBe('captcha_unavailable');
   });
 
   it('has invalid_link for every refused signed link (spec 05, one message for every cause)', () => {

@@ -1,14 +1,17 @@
 import { cookieValue, safeReturnPath } from '@quad/client';
+import { CSRF_COOKIE, SESSION_COOKIE, hostPrefixedNames } from '@quad/contracts/cookie-names';
 
 /**
  * What the staff app knows about the staff session without asking the API (spec 05; D32). The
- * cookies are the API's: `quad_sid` and `quad_csrf` locally, with the `__Host-` prefix elsewhere.
- * Their presence is only a hint for routing; the API checks every request.
+ * cookies are the API's: `quad_sid` and `quad_csrf` locally, with the `__Host-` prefix elsewhere,
+ * both named in the cookie registry (D57). Their presence is only a hint for routing; the API
+ * checks every request.
  */
 
-const SESSION_COOKIES = ['quad_sid', '__Host-quad_sid'] as const;
+/** The staff session cookie under its local and its `__Host-` name. */
+export const SESSION_COOKIES: readonly string[] = hostPrefixedNames(SESSION_COOKIE);
 /** The staff portal's double-submit CSRF cookie (the console has its own, D32). */
-export const CSRF_COOKIES = ['quad_csrf', '__Host-quad_csrf'] as const;
+export const CSRF_COOKIES: readonly string[] = hostPrefixedNames(CSRF_COOKIE);
 
 /** The longest school name the sign-in page repeats from the remembered-school cookie. */
 const LAST_SCHOOL_MAX = 120;
