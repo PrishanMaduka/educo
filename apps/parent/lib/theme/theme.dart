@@ -26,6 +26,17 @@ ThemeData quadTheme(Brightness brightness, {MeBrand? brand}) {
     // Control edges meet 3:1 on cards (spec 03 `field-line`).
     outline: c.fieldLine,
     outlineVariant: c.line,
+    // Material 3 tints raised surfaces with primary; Quad's cards stay white.
+    surfaceTint: Colors.transparent,
+  );
+  // Material falls back to `primary` (the brand fill) for text and icons on
+  // the page. A light school colour, Quad lime included, is about 1.2:1 there,
+  // so text and icons take `brandText` (4.5:1 on every surface) and controls
+  // take `field-line`, `switch-off` and the blue `focus` (spec 03, D56).
+  const selected = WidgetState.selected;
+  final fieldBorder = OutlineInputBorder(
+    borderRadius: BorderRadius.circular(QuadTokens.radiusInput),
+    borderSide: BorderSide(color: c.fieldLine, width: 1.5),
   );
   return ThemeData(
     useMaterial3: true,
@@ -35,6 +46,62 @@ ThemeData quadTheme(Brightness brightness, {MeBrand? brand}) {
     fontFamily: QuadTokens.fontSans,
     textTheme: _textTheme(c),
     extensions: [c],
+    textButtonTheme: TextButtonThemeData(
+      style: TextButton.styleFrom(foregroundColor: c.brandText),
+    ),
+    outlinedButtonTheme: OutlinedButtonThemeData(
+      style: OutlinedButton.styleFrom(
+        foregroundColor: c.ink,
+        side: BorderSide(color: c.lineStrong, width: 1.5),
+        shape: const StadiumBorder(),
+      ),
+    ),
+    iconButtonTheme: IconButtonThemeData(
+      style: ButtonStyle(
+        foregroundColor: WidgetStateProperty.resolveWith(
+          (states) => states.contains(selected) ? c.brandText : c.ink2,
+        ),
+      ),
+    ),
+    progressIndicatorTheme: ProgressIndicatorThemeData(
+      color: c.brandText,
+      linearTrackColor: c.surface2,
+      circularTrackColor: Colors.transparent,
+    ),
+    textSelectionTheme: TextSelectionThemeData(
+      cursorColor: c.ink,
+      selectionColor: c.focus.withValues(alpha: 0.25),
+      selectionHandleColor: c.focus,
+    ),
+    inputDecorationTheme: InputDecorationTheme(
+      border: fieldBorder,
+      enabledBorder: fieldBorder,
+      focusedBorder: fieldBorder.copyWith(
+        borderSide: BorderSide(color: c.focus, width: 2),
+      ),
+      errorBorder: fieldBorder.copyWith(
+        borderSide: BorderSide(color: c.bad, width: 1.5),
+      ),
+      focusedErrorBorder: fieldBorder.copyWith(
+        borderSide: BorderSide(color: c.bad, width: 2),
+      ),
+    ),
+    checkboxTheme: CheckboxThemeData(
+      side: BorderSide(color: c.fieldLine, width: 1.5),
+      fillColor: WidgetStateProperty.resolveWith(
+        (states) => states.contains(selected) ? c.brandFill : c.surface,
+      ),
+      checkColor: WidgetStatePropertyAll(c.brandInk),
+    ),
+    switchTheme: SwitchThemeData(
+      trackColor: WidgetStateProperty.resolveWith(
+        (states) => states.contains(selected) ? c.brandFill : c.switchOff,
+      ),
+      thumbColor: WidgetStateProperty.resolveWith(
+        (states) => states.contains(selected) ? c.brandInk : c.surface,
+      ),
+      trackOutlineColor: const WidgetStatePropertyAll(Colors.transparent),
+    ),
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
         backgroundColor: c.brandFill,

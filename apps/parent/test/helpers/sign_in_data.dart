@@ -37,9 +37,34 @@ const Map<String, Object> greenBrand = {
   },
 };
 
+/// The palette the API computes for a school with no colour: Quad lime with
+/// navy ink (spec 03 worked example, D56).
+const Map<String, Object> limeBrand = {
+  'color': '#C8F169',
+  'light': {
+    'fill': '#C8F169',
+    'fillStrong': '#D0F37E',
+    'ink': '#101632',
+    'text': '#5E7131',
+    'soft': '#F6FDE7',
+    'railActive': '#C8F169',
+    'railActiveInk': '#101632',
+  },
+  'dark': {
+    'fill': '#C8F169',
+    'fillStrong': '#D0F37E',
+    'ink': '#101632',
+    'text': '#C8F169',
+    'soft': '#37434B',
+    'railActive': '#C8F169',
+    'railActiveInk': '#101632',
+  },
+};
+
 /// `GET /me` for a parent in [school], with [others] to switch to.
 Map<String, Object?> meJson({
   School school = greenfield,
+  Map<String, Object> brand = greenBrand,
   String firstName = 'Priya',
   List<School> others = const [],
   bool othersSuspended = false,
@@ -56,7 +81,7 @@ Map<String, Object?> meJson({
     'name': school.name,
     'shortName': school.shortName,
     'timeZone': 'Asia/Colombo',
-    'brand': greenBrand,
+    'brand': brand,
   },
   'memberships': [
     for (final other in others)

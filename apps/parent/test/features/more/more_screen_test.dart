@@ -16,6 +16,7 @@ import 'package:quad_parent/l10n/app_localizations.dart';
 import 'package:quad_parent/theme/tokens.g.dart';
 
 import '../../helpers/auth_fakes.dart';
+import '../../helpers/contrast.dart';
 import '../../helpers/pump_app.dart';
 import '../../helpers/sign_in_data.dart';
 
@@ -31,6 +32,7 @@ Future<(FakeApi, MemorySecureStore, Log)> openMore(
   bool othersSuspended = false,
   Map<String, FakeRoute> routes = const {},
   FutureOr<FakeReply> Function()? riversideMe,
+  Map<String, Object> brand = greenBrand,
 }) async {
   final log = <String>[];
   var school = greenfield;
@@ -50,6 +52,7 @@ Future<(FakeApi, MemorySecureStore, Log)> openMore(
               200,
               meJson(
                 school: school,
+                brand: brand,
                 others: [
                   for (final other in [greenfield, ...others])
                     if (other != school) other,
@@ -212,6 +215,31 @@ void main() {
     expect(
       find.text(l10n.parentMoreSwitchSchoolIntro(riverside.name)),
       findsOneWidget,
+    );
+  });
+
+  testWidgets('Retry reads 4.5:1 on the page in a lime school', (tester) async {
+    await openMore(
+      tester,
+      others: [riverside],
+      brand: limeBrand,
+      riversideMe: () => const FakeReply(500),
+    );
+    await tester.tap(find.text(l10n.parentMoreSwitchSchool));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(riverside.name));
+    await tester.pumpAndSettle();
+
+    final retry = tester.widget<RichText>(
+      find.descendant(
+        of: find.widgetWithText(TextButton, l10n.parentSignInRetry),
+        matching: find.byType(RichText),
+      ),
+    );
+    final colour = retry.text.style!.color!;
+    expect(
+      contrast(colour, QuadColors.light.canvas),
+      greaterThanOrEqualTo(4.5),
     );
   });
 

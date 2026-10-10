@@ -117,7 +117,15 @@ class _CodeBoxesState extends State<CodeBoxes> {
               showCursor: false,
               // The digits show in the boxes; the field's own text is hidden.
               style: const TextStyle(color: Colors.transparent),
-              decoration: const InputDecoration.collapsed(hintText: null),
+              // No edges of its own: the boxes show focus (the theme's
+              // field borders would otherwise draw around the whole row).
+              decoration: const InputDecoration(
+                isCollapsed: true,
+                border: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                disabledBorder: InputBorder.none,
+              ),
             ),
           ),
         ),
