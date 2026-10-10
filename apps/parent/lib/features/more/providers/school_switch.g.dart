@@ -11,8 +11,10 @@ part of 'school_switch.dart';
 /// **Switch school** in More (spec 05 One parent, two schools; spec 09).
 ///
 /// The auth controller wipes the previous school's cache before the new
-/// school's token is used; then `GET /me` is loaded afresh, so the brand,
-/// name and everything else come from the new school.
+/// school's token is used, and starts a new school session, so `GET /me`
+/// (the brand, the name, the schools to switch to) loads afresh with nothing
+/// of the previous school in between. Once the switch succeeds, a failing
+/// `GET /me` is the new school's to retry, not a failed switch.
 
 @ProviderFor(SchoolSwitch)
 final schoolSwitchProvider = SchoolSwitchProvider._();
@@ -20,15 +22,19 @@ final schoolSwitchProvider = SchoolSwitchProvider._();
 /// **Switch school** in More (spec 05 One parent, two schools; spec 09).
 ///
 /// The auth controller wipes the previous school's cache before the new
-/// school's token is used; then `GET /me` is loaded afresh, so the brand,
-/// name and everything else come from the new school.
+/// school's token is used, and starts a new school session, so `GET /me`
+/// (the brand, the name, the schools to switch to) loads afresh with nothing
+/// of the previous school in between. Once the switch succeeds, a failing
+/// `GET /me` is the new school's to retry, not a failed switch.
 final class SchoolSwitchProvider
     extends $AsyncNotifierProvider<SchoolSwitch, void> {
   /// **Switch school** in More (spec 05 One parent, two schools; spec 09).
   ///
   /// The auth controller wipes the previous school's cache before the new
-  /// school's token is used; then `GET /me` is loaded afresh, so the brand,
-  /// name and everything else come from the new school.
+  /// school's token is used, and starts a new school session, so `GET /me`
+  /// (the brand, the name, the schools to switch to) loads afresh with nothing
+  /// of the previous school in between. Once the switch succeeds, a failing
+  /// `GET /me` is the new school's to retry, not a failed switch.
   SchoolSwitchProvider._()
     : super(
         from: null,
@@ -48,13 +54,15 @@ final class SchoolSwitchProvider
   SchoolSwitch create() => SchoolSwitch();
 }
 
-String _$schoolSwitchHash() => r'd67ff39be054aa8d86f70d5b5bfea5c9b301b5a4';
+String _$schoolSwitchHash() => r'41c98131284d9f55f3fbe2d13fecea1014db4dac';
 
 /// **Switch school** in More (spec 05 One parent, two schools; spec 09).
 ///
 /// The auth controller wipes the previous school's cache before the new
-/// school's token is used; then `GET /me` is loaded afresh, so the brand,
-/// name and everything else come from the new school.
+/// school's token is used, and starts a new school session, so `GET /me`
+/// (the brand, the name, the schools to switch to) loads afresh with nothing
+/// of the previous school in between. Once the switch succeeds, a failing
+/// `GET /me` is the new school's to retry, not a failed switch.
 
 abstract class _$SchoolSwitch extends $AsyncNotifier<void> {
   FutureOr<void> build();

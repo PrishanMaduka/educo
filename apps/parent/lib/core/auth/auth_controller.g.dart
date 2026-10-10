@@ -68,7 +68,7 @@ final class AuthControllerProvider
   }
 }
 
-String _$authControllerHash() => r'6494c9d95ecdabb9b607b487fc2f3446b283600e';
+String _$authControllerHash() => r'fcff32da9ad8dd48381708974d3c9934942b15c3';
 
 /// The parent's session (spec 05 Parent app, spec 09 Cache security).
 ///

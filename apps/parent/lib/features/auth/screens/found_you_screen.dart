@@ -23,7 +23,7 @@ class FoundYouScreen extends ConsumerWidget {
     if (result?.status == OtpVerifyResultStatusEnum.notFound) {
       return const _NotFound();
     }
-    return switch (ref.watch(meProvider)) {
+    return switch (ref.watch(currentMeProvider)) {
       AsyncData(:final value) => _SignedIn(me: value),
       AsyncError() => SignInCentered(
         children: [
@@ -35,7 +35,7 @@ class FoundYouScreen extends ConsumerWidget {
           const SizedBox(height: 20),
           SignInButton(
             label: l10n.parentSignInRetry,
-            onPressed: () => ref.invalidate(meProvider),
+            onPressed: () => reloadCurrentMe(ref),
           ),
         ],
       ),

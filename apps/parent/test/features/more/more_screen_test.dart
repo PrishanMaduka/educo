@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -9,7 +11,9 @@ import 'package:quad_parent/core/install_marker.dart';
 import 'package:quad_parent/core/lock/lock_controller.dart';
 import 'package:quad_parent/core/secure_store.dart';
 import 'package:quad_parent/features/auth/screens/welcome_screen.dart';
+import 'package:quad_parent/features/more/screens/more_screen.dart';
 import 'package:quad_parent/l10n/app_localizations.dart';
+import 'package:quad_parent/theme/tokens.g.dart';
 
 import '../../helpers/auth_fakes.dart';
 import '../../helpers/pump_app.dart';
@@ -26,6 +30,7 @@ Future<(FakeApi, MemorySecureStore, Log)> openMore(
   List<School> others = const [],
   bool othersSuspended = false,
   Map<String, FakeRoute> routes = const {},
+  FutureOr<FakeReply> Function()? riversideMe,
 }) async {
   final log = <String>[];
   var school = greenfield;
@@ -39,17 +44,19 @@ Future<(FakeApi, MemorySecureStore, Log)> openMore(
       (_) => const FakeReply(200, {'accessToken': 'a1', 'refreshToken': 'r1'}),
     ),
     'GET /api/v1/me': logged(
-      (_) => FakeReply(
-        200,
-        meJson(
-          school: school,
-          others: [
-            for (final other in [greenfield, ...others])
-              if (other != school) other,
-          ],
-          othersSuspended: othersSuspended,
-        ),
-      ),
+      (_) => school == riverside && riversideMe != null
+          ? riversideMe()
+          : FakeReply(
+              200,
+              meJson(
+                school: school,
+                others: [
+                  for (final other in [greenfield, ...others])
+                    if (other != school) other,
+                ],
+                othersSuspended: othersSuspended,
+              ),
+            ),
     ),
     'POST /api/v1/auth/select-school': logged((request) {
       school = bodyOf(request)['tenantId'] == riverside.id
@@ -135,6 +142,78 @@ void main() {
       expect(store.values[SecureKey.refreshToken], 'r1');
     },
   );
+
+  testWidgets('nothing of the previous school shows while the new one loads', (
+    tester,
+  ) async {
+    final riversideMe = Completer<FakeReply>();
+    await openMore(
+      tester,
+      others: [riverside],
+      riversideMe: () => riversideMe.future,
+    );
+    QuadColors colours() =>
+        Theme.of(tester.element(find.byType(MoreScreen)))
+            .extension<QuadColors>()!;
+    expect(colours().brandFill, const Color(0xFF1B7F53));
+    await tester.tap(find.text(l10n.parentMoreSwitchSchool));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text(riverside.name));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    // The theme animates for 200 ms, and the sheet closes.
+    await tester.pump(const Duration(milliseconds: 500));
+
+    // Quad's own brand, and no school list to switch from, until Riverside
+    // answers.
+    expect(colours().brandFill, QuadColors.light.brandFill);
+    expect(find.text(l10n.parentMoreSwitchSchool), findsNothing);
+    expect(find.text(greenfield.name), findsNothing);
+
+    riversideMe.complete(
+      FakeReply(200, meJson(school: riverside, others: [greenfield])),
+    );
+    await tester.pumpAndSettle();
+    expect(colours().brandFill, const Color(0xFF1B7F53));
+    expect(find.text(l10n.parentMoreSwitchSchool), findsOneWidget);
+  });
+
+  testWidgets('a switch whose school then fails to load is still a switch', (
+    tester,
+  ) async {
+    var attempts = 0;
+    await openMore(
+      tester,
+      others: [riverside],
+      riversideMe: () => ++attempts == 1
+          ? const FakeReply(500)
+          : FakeReply(200, meJson(school: riverside, others: [greenfield])),
+    );
+    await tester.tap(find.text(l10n.parentMoreSwitchSchool));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text(riverside.name));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text(l10n.parentMoreSwitchSchoolDone(riverside.name)),
+      findsOneWidget,
+    );
+    expect(find.text(l10n.parentMoreSwitchSchoolFailed), findsNothing);
+    expect(find.text(l10n.parentSignInFoundLoadFailed), findsOneWidget);
+
+    await tester.tap(find.text(l10n.parentSignInRetry));
+    await tester.pumpAndSettle();
+
+    expect(find.text(l10n.parentSignInFoundLoadFailed), findsNothing);
+    await tester.tap(find.text(l10n.parentMoreSwitchSchool));
+    await tester.pumpAndSettle();
+    expect(
+      find.text(l10n.parentMoreSwitchSchoolIntro(riverside.name)),
+      findsOneWidget,
+    );
+  });
 
   testWidgets('a paused school is listed but cannot be opened', (tester) async {
     final (api, _, _) = await openMore(

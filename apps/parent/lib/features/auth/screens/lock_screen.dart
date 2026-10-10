@@ -45,7 +45,10 @@ class _LockScreenState extends ConsumerState<LockScreen> {
     final l10n = AppLocalizations.of(context);
     final c = context.colors;
     final text = Theme.of(context).textTheme;
-    final school = ref.watch(meProvider).value?.school;
+    // Live from `GET /me` for now. When the offline cache lands (M6), the
+    // cached branding of the last school (spec 09 Splash) replaces this, so
+    // the lock needs no request before it is unlocked.
+    final school = ref.watch(currentMeProvider).value?.school;
     final kind = ref.watch(biometricKindProvider).value;
     final (unlockLabel, tapLabel, icon) = switch (kind) {
       BiometricKind.face => (

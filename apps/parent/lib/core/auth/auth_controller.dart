@@ -35,6 +35,9 @@ class AuthController extends _$AuthController implements AccessTokens {
   /// Bumped whenever a session starts or ends, so an answer that arrives for
   /// an older session is dropped.
   int _epoch = 0;
+
+  /// Counts sign-ins and switches for [SignedIn.school].
+  int _school = 0;
   late Future<void> _restored;
 
   @override
@@ -75,6 +78,9 @@ class AuthController extends _$AuthController implements AccessTokens {
         await _begin(
           accessToken: _present(result.accessToken),
           refreshToken: _present(result.refreshToken),
+          tenantId: result.memberships.length == 1
+              ? result.memberships.single.tenantId
+              : null,
         );
       case OtpVerifyResultStatusEnum.chooseSchool:
         _epoch++;
@@ -109,6 +115,7 @@ class AuthController extends _$AuthController implements AccessTokens {
     await _begin(
       accessToken: tokens.accessToken,
       refreshToken: _present(tokens.refreshToken),
+      tenantId: tenantId,
     );
   }
 
@@ -138,6 +145,8 @@ class AuthController extends _$AuthController implements AccessTokens {
       throw StateError('The session ended during the switch.');
     }
     _accessToken = tokens.accessToken;
+    // A new school: what was loaded for the previous one is not reused.
+    state = SignedIn(tenantId: tenantId, school: ++_school);
   });
 
   /// Revokes this device's family (and, from M6, its push token), then wipes
@@ -239,12 +248,13 @@ class AuthController extends _$AuthController implements AccessTokens {
   Future<void> _begin({
     required String accessToken,
     required String refreshToken,
+    String? tenantId,
   }) => _exclusive(() async {
     final epoch = ++_epoch;
     _selectToken = null;
     if (!await _storeRefreshToken(refreshToken, epoch)) return;
     _accessToken = accessToken;
-    state = const SignedIn();
+    state = SignedIn(tenantId: tenantId, school: ++_school);
   });
 
   /// Writes [refreshToken] for the session [epoch]. False, with nothing left

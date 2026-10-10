@@ -35,14 +35,10 @@ class _SwitchSchoolSheetState extends ConsumerState<SwitchSchoolSheet> {
     final navigator = Navigator.of(context);
     setState(() => _opening = school.tenantId);
     try {
-      final me = await ref
-          .read(schoolSwitchProvider.notifier)
-          .to(school.tenantId);
+      await ref.read(schoolSwitchProvider.notifier).to(school.tenantId);
       navigator.pop();
       messenger.showSnackBar(
-        SnackBar(
-          content: Text(l10n.parentMoreSwitchSchoolDone(me.school.name)),
-        ),
+        SnackBar(content: Text(l10n.parentMoreSwitchSchoolDone(school.name))),
       );
     } on Object {
       if (!mounted) return;

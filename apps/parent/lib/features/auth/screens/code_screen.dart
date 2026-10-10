@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:quad_api/quad_api.dart';
 import 'package:quad_parent/core/api_problem.dart';
+import 'package:quad_parent/core/clock.dart';
 import 'package:quad_parent/features/auth/providers/sign_in_flow.dart';
 import 'package:quad_parent/features/auth/widgets/code_boxes.dart';
 import 'package:quad_parent/features/auth/widgets/sign_in_frame.dart';
@@ -28,7 +29,6 @@ class CodeScreen extends ConsumerStatefulWidget {
 class _CodeScreenState extends ConsumerState<CodeScreen> {
   final _code = TextEditingController();
   Timer? _timer;
-  Duration _waited = Duration.zero;
   var _checking = false;
   var _resending = false;
   String? _error;
@@ -46,11 +46,18 @@ class _CodeScreenState extends ConsumerState<CodeScreen> {
     super.dispose();
   }
 
+  /// When the code was (last) sent. The time left is read from the clock,
+  /// because timers stop while the app is in the background (the parent
+  /// reading the SMS); the periodic timer only repaints.
+  late DateTime _sentAt;
+
+  Duration get _waited => ref.read(clockProvider)().difference(_sentAt);
+
   void _startClock() {
     _timer?.cancel();
-    _waited = Duration.zero;
+    _sentAt = ref.read(clockProvider)();
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      setState(() => _waited += const Duration(seconds: 1));
+      setState(() {});
       if (_waited >= CodeScreen.hintAfter) timer.cancel();
     });
   }
@@ -122,7 +129,8 @@ class _CodeScreenState extends ConsumerState<CodeScreen> {
     final c = context.colors;
     final subject = ref.watch(signInFlowProvider).subject;
     final to = subject?.email ?? maskPhone(subject?.phone ?? '');
-    final left = CodeScreen.resendAfter - _waited;
+    final waited = _waited;
+    final left = CodeScreen.resendAfter - waited;
     return SignInFrame(
       onBack: _checking
           ? null
@@ -172,7 +180,7 @@ class _CodeScreenState extends ConsumerState<CodeScreen> {
             label: l10n.parentSignInCodeResend,
             onPressed: _resending ? null : _resend,
           ),
-        if (!_checking && _waited >= CodeScreen.hintAfter) ...[
+        if (!_checking && waited >= CodeScreen.hintAfter) ...[
           const SizedBox(height: 12),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -192,7 +200,7 @@ class _CodeScreenState extends ConsumerState<CodeScreen> {
   }
 
   static String _clock(Duration left) {
-    final seconds = left.inSeconds;
+    final seconds = (left.inMilliseconds / 1000).ceil();
     return '${seconds ~/ 60}:${(seconds % 60).toString().padLeft(2, '0')}';
   }
 }

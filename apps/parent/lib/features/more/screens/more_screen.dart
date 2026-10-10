@@ -33,7 +33,8 @@ class _MoreScreenState extends ConsumerState<MoreScreen> {
     final l10n = AppLocalizations.of(context);
     final text = Theme.of(context).textTheme;
     final c = context.colors;
-    final me = ref.watch(meProvider).value;
+    final current = ref.watch(currentMeProvider);
+    final me = current.value;
     final others = me?.memberships ?? const [];
     return TabPage(
       header: Semantics(
@@ -42,6 +43,28 @@ class _MoreScreenState extends ConsumerState<MoreScreen> {
       ),
       children: [
         QuadEmptyState(message: l10n.parentMorePlaceholder),
+        // After a switch the new school may fail to load: the parent is in
+        // it, and can try again.
+        if (current.hasError &&
+            !current.isLoading &&
+            current.error is! NotSignedIn) ...[
+          const SizedBox(height: 16),
+          Semantics(
+            liveRegion: true,
+            child: Text(
+              l10n.parentSignInFoundLoadFailed,
+              style: text.bodyLarge,
+            ),
+          ),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton(
+              onPressed: () => reloadCurrentMe(ref),
+              style: TextButton.styleFrom(minimumSize: const Size(44, 44)),
+              child: Text(l10n.parentSignInRetry),
+            ),
+          ),
+        ],
         const SizedBox(height: 20),
         Padding(
           padding: const EdgeInsets.fromLTRB(4, 0, 4, 8),

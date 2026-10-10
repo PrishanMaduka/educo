@@ -20,6 +20,9 @@ import '../../helpers/sign_in_data.dart';
 
 final AppLocalizations l10n = lookupAppLocalizations(const Locale('en'));
 
+/// The device clock of the last [openWelcome]; tests move it by hand.
+late FakeClock clock;
+
 /// A signed-out device on Welcome, answering from [routes].
 Future<(FakeApi, MemorySecureStore)> openWelcome(
   WidgetTester tester, {
@@ -28,13 +31,9 @@ Future<(FakeApi, MemorySecureStore)> openWelcome(
 }) async {
   final api = FakeApi(signInRoutes(routes));
   final store = MemorySecureStore();
+  clock = FakeClock(mondayMorning);
   await tester.pumpWidget(
-    appWith(
-      clock: FakeClock(mondayMorning),
-      store: store,
-      api: api,
-      localAuth: localAuth,
-    ),
+    appWith(clock: clock, store: store, api: api, localAuth: localAuth),
   );
   await tester.pumpAndSettle();
   return (api, store);
@@ -263,13 +262,16 @@ void main() {
 
       expect(find.text(l10n.parentSignInCodeResendIn('0:30')), findsOneWidget);
       expect(find.text(l10n.parentSignInCodeResend), findsNothing);
-      await tester.pump(const Duration(seconds: 29));
+      clock.advance(const Duration(seconds: 29));
+      await tester.pump(const Duration(seconds: 1));
       expect(find.text(l10n.parentSignInCodeResendIn('0:01')), findsOneWidget);
+      clock.advance(const Duration(seconds: 1));
       await tester.pump(const Duration(seconds: 1));
       expect(find.text(l10n.parentSignInCodeResend), findsOneWidget);
       expect(find.text(l10n.parentSignInCodeNoCode), findsNothing);
 
-      await tester.pump(const Duration(seconds: 30));
+      clock.advance(const Duration(seconds: 30));
+      await tester.pump(const Duration(seconds: 1));
       expect(find.text(l10n.parentSignInCodeNoCode), findsOneWidget);
 
       await tapText(tester, l10n.parentSignInCodeResend);
@@ -277,6 +279,19 @@ void main() {
       expect(api.to('POST /api/v1/auth/otp/request'), hasLength(2));
       expect(find.text(l10n.parentSignInCodeResent), findsOneWidget);
       expect(find.text(l10n.parentSignInCodeResendIn('0:30')), findsOneWidget);
+    });
+
+    testWidgets('counts from when the code was sent, not timer ticks', (
+      tester,
+    ) async {
+      await openWelcome(tester);
+      await sendCode(tester);
+
+      // Away in the SMS app: timers do not run in the background.
+      clock.advance(const Duration(seconds: 31));
+      await tester.pump(const Duration(seconds: 1));
+
+      expect(find.text(l10n.parentSignInCodeResend), findsOneWidget);
     });
 
     testWidgets('several schools open the school picker', (tester) async {
@@ -409,15 +424,22 @@ void main() {
       List<Map<String, Object?>> schools, {
       Map<String, FakeRoute> routes = const {},
     }) async {
+      var chosen = greenfield;
       final (api, _) = await openWelcome(
         tester,
         routes: {
           'POST /api/v1/auth/otp/verify': (_) =>
               FakeReply(200, chooseSchoolJson(schools)),
-          'POST /api/v1/auth/select-school': (_) => const FakeReply(200, {
-            'accessToken': 'school',
-            'refreshToken': 'r2',
-          }),
+          'POST /api/v1/auth/select-school': (request) {
+            chosen = bodyOf(request)['tenantId'] == riverside.id
+                ? riverside
+                : greenfield;
+            return const FakeReply(200, {
+              'accessToken': 'school',
+              'refreshToken': 'r2',
+            });
+          },
+          'GET /api/v1/me': (_) => FakeReply(200, meJson(school: chosen)),
           ...routes,
         },
       );
@@ -441,6 +463,22 @@ void main() {
       expect(bodyOf(request)['tenantId'], riverside.id);
       expect(bearerOf(request), 'Bearer select');
       expect(find.byType(FoundYouScreen), findsOneWidget);
+    });
+
+    testWidgets('never shows another school\'s answer as the chosen one', (
+      tester,
+    ) async {
+      await openPicker(
+        tester,
+        [membershipJson(greenfield), membershipJson(riverside)],
+        routes: {'GET /api/v1/me': (_) => FakeReply(200, meJson())},
+      );
+
+      await tapText(tester, riverside.name);
+      await tester.pumpAndSettle();
+
+      expect(find.text(greenfield.name), findsNothing);
+      expect(find.text(l10n.parentSignInFoundLoadFailed), findsOneWidget);
     });
 
     testWidgets('lists a paused school but cannot open it', (tester) async {
