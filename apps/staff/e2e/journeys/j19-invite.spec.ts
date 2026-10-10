@@ -61,8 +61,17 @@ test('J19: an invited teacher sets a password and two-step, signs in, changes ro
   // The admin invites the teacher.
   await page.goto(PATH);
   await expect(title(page, 'Users & roles')).toBeVisible();
+  // Invite staff stays disabled (at half opacity) until the roles arrive, then fades in over
+  // 150 ms; axe must not read it halfway (4.48:1). The people load first too.
+  const invite = page.getByRole('button', { name: 'Invite staff' });
+  await expect(invite).toBeEnabled();
+  await expect(
+    isNarrowPeople(page)
+      ? page.getByRole('list', { name: 'Staff accounts' })
+      : page.getByRole('table', { name: 'Staff accounts' }),
+  ).toBeVisible();
   await expectAccessibleOnceStill(page);
-  await page.getByRole('button', { name: 'Invite staff' }).click();
+  await invite.click();
   const drawer = page.getByRole('dialog', { name: 'Invite staff' });
   await drawer.getByLabel('Email addresses').fill(email);
   await expect(drawer.getByRole('combobox', { name: 'Role' })).toHaveText(/Teacher/);
