@@ -137,9 +137,13 @@ class SignInButton extends StatelessWidget {
       ),
       child: FilledButton(
         onPressed: busy ? null : onPressed,
+        // Sign-in is Quad-branded, pink with navy text, in every school and
+        // theme (D13, D34); the school colour takes over after sign-in.
         style: FilledButton.styleFrom(
-          disabledBackgroundColor: c.brandFill,
-          disabledForegroundColor: c.brandInk,
+          backgroundColor: c.pink,
+          foregroundColor: c.navy,
+          disabledBackgroundColor: c.pink,
+          disabledForegroundColor: c.navy,
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
         ),
         child: busy
@@ -147,7 +151,7 @@ class SignInButton extends StatelessWidget {
                 dimension: 22,
                 child: CircularProgressIndicator(
                   strokeWidth: 2.5,
-                  color: c.brandInk,
+                  color: c.navy,
                   semanticsLabel: label,
                 ),
               )

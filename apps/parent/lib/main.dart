@@ -13,7 +13,10 @@ Future<void> main() async {
   LicenseRegistry.addLicense(() async* {
     yield LicenseEntryWithLineBreaks([
       'Figtree',
-    ], await rootBundle.loadString('assets/fonts/OFL.txt'));
+    ], await rootBundle.loadString('assets/fonts/OFL-Figtree.txt'));
+    yield LicenseEntryWithLineBreaks([
+      'Bricolage Grotesque',
+    ], await rootBundle.loadString('assets/fonts/OFL-BricolageGrotesque.txt'));
   });
   void run() => runApp(
     ProviderScope(

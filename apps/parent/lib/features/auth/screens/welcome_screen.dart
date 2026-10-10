@@ -131,7 +131,7 @@ class _Headline extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final parts = l10n.parentWelcomeHeadline(_slot).split(_slot);
     final style = TextStyle(
-      fontFamily: QuadTokens.fontSans,
+      fontFamily: QuadTokens.fontDisplay,
       fontSize: 38,
       height: 1.1,
       fontWeight: FontWeight.w800,
@@ -159,7 +159,8 @@ class _Headline extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 9),
                     decoration: BoxDecoration(
-                      color: c.brandFill,
+                      // Quad pink before sign-in (D13, D34), not the brand.
+                      color: c.pink,
                       borderRadius: BorderRadius.circular(
                         QuadTokens.radiusPill,
                       ),
@@ -167,7 +168,7 @@ class _Headline extends StatelessWidget {
                     child: Text(
                       l10n.parentWelcomeHeadlineGood,
                       softWrap: false,
-                      style: style.copyWith(color: c.brandInk),
+                      style: style.copyWith(color: c.navy),
                     ),
                   ),
                 ),
@@ -197,7 +198,7 @@ class _CircleOfPeople extends StatelessWidget {
           painter: _CirclePainter(
             ring: c.rail2,
             outline: c.rail,
-            people: [c.c1, c.c2, c.c3, c.c4, c.c5, c.brandFill],
+            people: [c.c1, c.c2, c.c3, c.c4, c.c5, c.lime],
           ),
         ),
       ),

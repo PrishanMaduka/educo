@@ -15,11 +15,26 @@ const School riverside = (
 );
 
 /// The palette the API computes for a green school (spec 03, D32).
-const greenBrand = {
+const Map<String, Object> greenBrand = {
   'color': '#1B7F53',
-  'fill': '#1B7F53',
-  'fillDark': '#3FB884',
-  'ink': '#FFFFFF',
+  'light': {
+    'fill': '#1B7F53',
+    'fillStrong': '#176D47',
+    'ink': '#FFFFFF',
+    'text': '#19764D',
+    'soft': '#DBEBE3',
+    'railActive': '#1B7F53',
+    'railActiveInk': '#FFFFFF',
+  },
+  'dark': {
+    'fill': '#1B7F53',
+    'fillStrong': '#176D47',
+    'ink': '#FFFFFF',
+    'text': '#5DA485',
+    'soft': '#183148',
+    'railActive': '#1B7F53',
+    'railActiveInk': '#FFFFFF',
+  },
 };
 
 /// `GET /me` for a parent in [school], with [others] to switch to.

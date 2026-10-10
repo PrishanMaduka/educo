@@ -3,7 +3,8 @@ import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-/// Loads every font in the app's FontManifest (Figtree and Material icons).
+/// Loads every font in the app's FontManifest (Figtree, Bricolage Grotesque
+/// and Material icons).
 Future<void> loadAppFonts() async {
   TestWidgetsFlutterBinding.ensureInitialized();
   final manifest = json.decode(

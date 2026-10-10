@@ -47,7 +47,8 @@ flutter:
     - assets/brand/
     - assets/greeting/
     - assets/icons/
-    - assets/fonts/OFL.txt
+    - assets/fonts/OFL-BricolageGrotesque.txt
+    - assets/fonts/OFL-Figtree.txt
   fonts:
     - family: Figtree
       fonts:
@@ -60,4 +61,14 @@ flutter:
         - asset: assets/fonts/Figtree-Bold.ttf
           weight: 700
         - asset: assets/fonts/Figtree-ExtraBold.ttf
+          weight: 800
+    # Static instances of Google Fonts' variable Bricolage Grotesque (opsz 24, wdth 100), made with
+    # fontTools' instancer: Flutter picks a file by weight. The web loads the variable file.
+    - family: Bricolage Grotesque
+      fonts:
+        - asset: assets/fonts/BricolageGrotesque-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/BricolageGrotesque-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/BricolageGrotesque-ExtraBold.ttf
           weight: 800

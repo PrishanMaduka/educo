@@ -23,7 +23,8 @@ ThemeData quadTheme(Brightness brightness, {MeSchoolBrand? brand}) {
     onSurface: c.ink,
     onSurfaceVariant: c.ink2,
     surfaceContainerHighest: c.surface2,
-    outline: c.lineStrong,
+    // Control edges meet 3:1 on cards (spec 03 `field-line`).
+    outline: c.fieldLine,
     outlineVariant: c.line,
   );
   return ThemeData(
@@ -50,24 +51,29 @@ ThemeData quadTheme(Brightness brightness, {MeSchoolBrand? brand}) {
   );
 }
 
-/// [base] with the school's brand, as the staff portal applies it
-/// (`school-brand.css`): the API computed the palette (spec 03 "School brand
-/// colour", D32), so nothing is derived here beyond the same 13% tint. Light
-/// mode takes the colour, the fill and its ink; dark mode takes the dark fill
-/// for both and keeps the dark `brandInk` token.
+/// [base] with the school's brand for [brightness], as the staff portal
+/// applies it: the API derived every brand token for both themes with
+/// `deriveBrand` (spec 03 "School brand colour", D56), so nothing is derived
+/// here. Navy, the petals, status colours and focus stay Quad's.
 QuadColors withSchoolBrand(
   QuadColors base,
   MeSchoolBrand brand,
   Brightness brightness,
 ) {
-  final isDark = brightness == Brightness.dark;
-  final colour = _hex(isDark ? brand.fillDark : brand.color);
-  final fill = _hex(isDark ? brand.fillDark : brand.fill);
+  final t = brightness == Brightness.dark ? brand.dark : brand.light;
+  final fill = _hex(t.fill);
+  final fillStrong = _hex(t.fillStrong);
   return base.copyWith(
-    brand: colour,
+    brand: fill,
+    brandStrong: fillStrong,
+    brandSoft: _hex(t.soft),
+    brandInk: _hex(t.ink),
     brandFill: fill,
-    brandInk: isDark ? null : _hex(brand.ink),
-    brandSoft: Color.lerp(base.surface, colour, 0.13),
+    brandFillStrong: fillStrong,
+    brandText: _hex(t.text),
+    brandRaw: _hex(brand.color),
+    railActive: _hex(t.railActive),
+    railActiveInk: _hex(t.railActiveInk),
   );
 }
 
@@ -75,10 +81,12 @@ QuadColors withSchoolBrand(
 Color _hex(String value) =>
     Color(0xFF000000 | int.parse(value.substring(1), radix: 16));
 
-/// The parent app's type scale (sizes from design/parent.html).
+/// The parent app's type scale (sizes from design/parent.html): Bricolage
+/// Grotesque speaks (titles), Figtree works (everything else), spec 03 "Type".
 TextTheme _textTheme(QuadColors c) => TextTheme(
   // Greeting and page titles: 22 px, 800.
   headlineSmall: TextStyle(
+    fontFamily: QuadTokens.fontDisplay,
     fontSize: 22,
     height: 1.2,
     fontWeight: FontWeight.w800,

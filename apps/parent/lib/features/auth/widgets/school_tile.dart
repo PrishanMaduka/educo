@@ -115,7 +115,7 @@ class SchoolMark extends StatelessWidget {
             child: Text(
               shortName,
               style: TextStyle(
-                fontFamily: QuadTokens.fontSans,
+                fontFamily: QuadTokens.fontDisplay,
                 fontSize: size * 0.36,
                 fontWeight: FontWeight.w800,
                 color: foreground ?? c.ink,
