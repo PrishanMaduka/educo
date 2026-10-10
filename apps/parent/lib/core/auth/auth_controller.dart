@@ -7,6 +7,7 @@ import 'package:quad_parent/core/api.dart';
 import 'package:quad_parent/core/auth/auth_state.dart';
 import 'package:quad_parent/core/auth/token_interceptor.dart';
 import 'package:quad_parent/core/cache_wipe.dart';
+import 'package:quad_parent/core/install_marker.dart';
 import 'package:quad_parent/core/lock/lock_controller.dart';
 import 'package:quad_parent/core/secure_store.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -18,8 +19,10 @@ part 'auth_controller.g.dart';
 /// The refresh token lives in [SecureStore]; the access token only in memory.
 /// Refreshes are single flight, and a refresh and a school switch never
 /// overlap: the API has no grace window, so presenting a rotated-out refresh
-/// token even once revokes the whole family (D32). A refused refresh (reuse,
-/// revocation, or a family past its 60 days) signs out and wipes the device.
+/// token even once revokes the whole family (D32). Sign-out and a new
+/// session's first write join the same queue, so nothing lands after a wipe.
+/// A refused refresh (401: reuse, revocation, or a family past its 60 days)
+/// signs out and wipes the device.
 @Riverpod(keepAlive: true)
 class AuthController extends _$AuthController implements AccessTokens {
   static const Map<String, Object> _public = {TokenInterceptor.skipAuth: true};
@@ -113,6 +116,7 @@ class AuthController extends _$AuthController implements AccessTokens {
   /// token; the refresh token stays. The previous school's cache is wiped
   /// before the new token is used (spec 09).
   Future<void> switchSchool(String tenantId) => _exclusive(() async {
+    final epoch = _epoch;
     var token = _accessToken ?? await _refresh(null);
     if (token == null) throw StateError('There is no session to switch.');
     SelectSchoolTokens tokens;
@@ -125,17 +129,26 @@ class AuthController extends _$AuthController implements AccessTokens {
       tokens = await _selectSchool(tenantId, token);
     }
     final refreshToken = tokens.refreshToken;
-    if (refreshToken != null) {
-      await _store.write(SecureKey.refreshToken, refreshToken);
-    }
+    final stillHere = refreshToken == null
+        ? epoch == _epoch
+        : await _storeRefreshToken(refreshToken, epoch);
+    if (!stillHere) throw StateError('The session ended during the switch.');
     await ref.read(cacheWipeProvider)();
+    if (epoch != _epoch) {
+      throw StateError('The session ended during the switch.');
+    }
     _accessToken = tokens.accessToken;
   });
 
   /// Revokes this device's family (and, from M6, its push token), then wipes
   /// the device (spec 05 step 7).
-  Future<void> signOut() async {
-    final token = _accessToken ?? await refreshAfter(null);
+  ///
+  /// It waits for a refresh or switch in flight, so it revokes with the token
+  /// that came out of it and no write lands after the wipe.
+  Future<void> signOut() => _exclusive(() async {
+    final token = state is SignedIn
+        ? _accessToken ?? await _refresh(null)
+        : null;
     if (token != null) {
       try {
         await _auth.apiV1AuthSignOutPost(
@@ -148,13 +161,20 @@ class AuthController extends _$AuthController implements AccessTokens {
       }
     }
     await _end();
-  }
+  });
 
   AuthApi get _auth => ref.read(quadApiProvider).getAuthApi();
 
   SecureStore get _store => ref.read(secureStoreProvider);
 
   Future<void> _restore() async {
+    final marker = ref.read(installMarkerProvider);
+    if (await marker.isFreshInstall()) {
+      // The iOS Keychain outlives an uninstall: a previous install's session
+      // must not come back (spec 09 Cache security).
+      await _store.wipe();
+      await marker.markInstalled();
+    }
     String? refreshToken;
     try {
       refreshToken = await _store.read(SecureKey.refreshToken);
@@ -178,6 +198,7 @@ class AuthController extends _$AuthController implements AccessTokens {
     if (current != null && current != rejected) return current;
     final epoch = _epoch;
     final refreshToken = await _store.read(SecureKey.refreshToken);
+    if (epoch != _epoch) return null;
     if (refreshToken == null) {
       await _end();
       return null;
@@ -191,15 +212,14 @@ class AuthController extends _$AuthController implements AccessTokens {
         ),
       );
     } on DioException catch (error) {
-      final status = error.response?.statusCode;
-      // 401: reused, revoked or expired; 400: a token the API cannot read.
-      // Anything else (offline, 429, 5xx) keeps the session for a retry.
-      if ((status == 401 || status == 400) && epoch == _epoch) await _end();
+      // Only 401 means the family is gone (reused, revoked or expired).
+      // Anything else (offline, 400, 429, 5xx) keeps the session; the
+      // request fails and a later one tries again.
+      if (error.response?.statusCode == 401 && epoch == _epoch) await _end();
       return null;
     }
-    if (epoch != _epoch) return null;
     // Stored before it is used, so a crash never leaves the old one behind.
-    await _store.write(SecureKey.refreshToken, pair.refreshToken);
+    if (!await _storeRefreshToken(pair.refreshToken, epoch)) return null;
     _accessToken = pair.accessToken;
     return pair.accessToken;
   }
@@ -219,12 +239,23 @@ class AuthController extends _$AuthController implements AccessTokens {
   Future<void> _begin({
     required String accessToken,
     required String refreshToken,
-  }) async {
-    _epoch++;
+  }) => _exclusive(() async {
+    final epoch = ++_epoch;
     _selectToken = null;
-    await _store.write(SecureKey.refreshToken, refreshToken);
+    if (!await _storeRefreshToken(refreshToken, epoch)) return;
     _accessToken = accessToken;
     state = const SignedIn();
+  });
+
+  /// Writes [refreshToken] for the session [epoch]. False, with nothing left
+  /// in the store, when that session ended before or during the write.
+  Future<bool> _storeRefreshToken(String refreshToken, int epoch) async {
+    if (epoch != _epoch) return false;
+    await _store.write(SecureKey.refreshToken, refreshToken);
+    if (epoch == _epoch) return true;
+    // A wipe ran while the write was on its way: take it back out.
+    await _store.delete(SecureKey.refreshToken);
+    return false;
   }
 
   /// Signs out on this device and wipes it (spec 09 Cache security).
@@ -241,7 +272,9 @@ class AuthController extends _$AuthController implements AccessTokens {
     }
   }
 
-  /// Runs [body] after every earlier refresh or switch has finished.
+  /// Runs [body] after every earlier refresh, switch, sign-in write or
+  /// sign-out has finished. Bodies call [_refresh] directly, never
+  /// [refreshAfter], which would wait on this queue.
   Future<T> _exclusive<T>(Future<T> Function() body) {
     final run = _tail.then((_) => body());
     _tail = run.then<void>((_) {}, onError: (Object _) {});

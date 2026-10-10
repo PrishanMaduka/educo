@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:quad_parent/app.dart';
 import 'package:quad_parent/core/clock.dart';
+import 'package:quad_parent/core/install_marker.dart';
 import 'package:quad_parent/core/lock/lock_controller.dart';
 import 'package:quad_parent/core/secure_store.dart';
 
@@ -27,6 +28,7 @@ Widget appWith({
   overrides: [
     clockProvider.overrideWithValue(() => clock.now),
     secureStoreProvider.overrideWithValue(store),
+    installMarkerProvider.overrideWithValue(MemoryInstallMarker()),
     localAuthProvider.overrideWithValue(localAuth ?? FakeLocalAuth()),
   ],
   child: const QuadApp(),

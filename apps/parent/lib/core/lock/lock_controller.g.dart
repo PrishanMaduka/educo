@@ -102,7 +102,7 @@ final class LockControllerProvider
   }
 }
 
-String _$lockControllerHash() => r'ee4aaf3455d135ea6dd6e42eea214d57e7e2bd81';
+String _$lockControllerHash() => r'e5b8ecdb7dd53ecca796b0ac37a2ed403d6de45e';
 
 /// The lock screen (spec 09 Re-lock): with biometrics on, the app locks at
 /// launch and when it comes back after more than [relockAfter] in the

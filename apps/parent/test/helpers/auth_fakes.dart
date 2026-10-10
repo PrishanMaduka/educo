@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:local_auth/local_auth.dart';
@@ -11,6 +11,7 @@ import 'package:local_auth_platform_interface/local_auth_platform_interface.dart
 import 'package:quad_parent/core/api.dart';
 import 'package:quad_parent/core/cache_wipe.dart';
 import 'package:quad_parent/core/clock.dart';
+import 'package:quad_parent/core/install_marker.dart';
 import 'package:quad_parent/core/lock/lock_controller.dart';
 import 'package:quad_parent/core/secure_store.dart';
 
@@ -23,8 +24,16 @@ class MemorySecureStore implements SecureStore {
   /// Makes [write] throw, as a locked Keychain would.
   bool failWrites = false;
 
+  /// Keys whose [read] throws, as an unreadable Keychain item would.
+  final Set<SecureKey> failReads = {};
+
   @override
-  Future<String?> read(SecureKey key) async => values[key];
+  Future<String?> read(SecureKey key) async {
+    if (failReads.contains(key)) {
+      throw PlatformException(code: 'unreadable');
+    }
+    return values[key];
+  }
 
   @override
   Future<void> write(SecureKey key, String value) async {
@@ -37,6 +46,19 @@ class MemorySecureStore implements SecureStore {
 
   @override
   Future<void> wipe() async => values.clear();
+}
+
+/// [InstallMarker] in memory; installed (a later launch) by default.
+class MemoryInstallMarker implements InstallMarker {
+  new({this.installed = true});
+
+  bool installed;
+
+  @override
+  Future<bool> isFreshInstall() async => !installed;
+
+  @override
+  Future<void> markInstalled() async => installed = true;
 }
 
 /// One answer from [FakeApi].
@@ -131,6 +153,7 @@ class FakeClock {
 /// biometric prompt and the clock.
 ProviderContainer authContainer({
   required MemorySecureStore store,
+  MemoryInstallMarker? installMarker,
   FakeApi? api,
   FakeLocalAuth? localAuth,
   FakeClock? clock,
@@ -138,6 +161,9 @@ ProviderContainer authContainer({
   final container = ProviderContainer(
     overrides: [
       secureStoreProvider.overrideWithValue(store),
+      installMarkerProvider.overrideWithValue(
+        installMarker ?? MemoryInstallMarker(),
+      ),
       localAuthProvider.overrideWithValue(localAuth ?? FakeLocalAuth()),
       if (clock != null) clockProvider.overrideWithValue(() => clock.now),
       // Plain unit tests have no Flutter binding, so no image cache.

@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:quad_parent/core/clock.dart';
 import 'package:quad_parent/core/secure_store.dart';
@@ -46,8 +47,17 @@ class LockController extends _$LockController {
   /// Reads the setting at launch; the auth controller calls this before it
   /// reports a restored session, so no tab shows before the lock.
   Future<void> restoreAtLaunch() async {
-    final on = await ref.read(secureStoreProvider).read(SecureKey.biometricsOn);
-    final isOn = on == 'true';
+    final bool isOn;
+    try {
+      isOn =
+          await ref.read(secureStoreProvider).read(SecureKey.biometricsOn) ==
+          'true';
+    } on PlatformException {
+      // The setting could not be read but a session exists: lock, the safer
+      // way round. The device passcode still opens the app.
+      state = const LockState(biometricsOn: true, locked: true);
+      return;
+    }
     state = LockState(biometricsOn: isOn, locked: isOn);
   }
 

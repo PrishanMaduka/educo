@@ -29,6 +29,7 @@ class _Family {
   int generation = 0;
   int refreshes = 0;
   Completer<void>? gate;
+  Completer<void>? selectGate;
 
   /// Set to answer every refresh with this instead of rotating.
   FakeReply? refuse;
@@ -53,7 +54,10 @@ class _Family {
     _ping: (request) => bearerOf(request) == 'Bearer a$generation'
         ? const FakeReply(200, {'ok': true})
         : _unauthorized,
-    _selectSchool: (request) => const FakeReply(200, {'accessToken': 'school'}),
+    _selectSchool: (request) async {
+      await selectGate?.future;
+      return const FakeReply(200, {'accessToken': 'school'});
+    },
     _signOut: (request) => const FakeReply(204),
   });
 }
@@ -83,8 +87,15 @@ void main() {
     family = _Family();
   });
 
-  Future<ProviderContainer> signedIn({FakeApi? api}) async {
-    final container = authContainer(store: store, api: api ?? family.api);
+  Future<ProviderContainer> signedIn({
+    FakeApi? api,
+    MemoryInstallMarker? installMarker,
+  }) async {
+    final container = authContainer(
+      store: store,
+      api: api ?? family.api,
+      installMarker: installMarker,
+    );
     await container.read(authControllerProvider.notifier).restored;
     return container;
   }
@@ -101,6 +112,24 @@ void main() {
         container.read(authControllerProvider.notifier).accessToken,
         isNull,
       );
+    });
+
+    test('a fresh install wipes a session left in the Keychain', () async {
+      store.values[SecureKey.biometricsOn] = 'true';
+      final marker = MemoryInstallMarker(installed: false);
+      final container = await signedIn(installMarker: marker);
+
+      expect(container.read(authControllerProvider), isA<SignedOut>());
+      expect(store.values, isEmpty);
+      expect(marker.installed, isTrue);
+    });
+
+    test('an unreadable biometrics setting opens on the lock', () async {
+      store.failReads.add(SecureKey.biometricsOn);
+      final container = await signedIn();
+
+      expect(container.read(authControllerProvider), isA<SignedIn>());
+      expect(container.read(lockControllerProvider).locked, isTrue);
     });
 
     test('no refresh token means signed out', () async {
@@ -207,6 +236,22 @@ void main() {
     test('a refresh that cannot reach the API keeps the session', () async {
       final container = await signedIn();
       family.refuse = const FakeReply(0);
+
+      await expectLater(
+        dioOf(container).get<Object>('/api/v1/ping'),
+        throwsA(isA<DioException>()),
+      );
+
+      expect(container.read(authControllerProvider), isA<SignedIn>());
+      expect(store.values[SecureKey.refreshToken], 'r0');
+    });
+
+    test('a refresh answered 400 keeps the session', () async {
+      final container = await signedIn();
+      family.refuse = const FakeReply(400, {
+        'code': 'validation',
+        'message': 'Check the highlighted fields.',
+      });
 
       await expectLater(
         dioOf(container).get<Object>('/api/v1/ping'),
@@ -365,6 +410,53 @@ void main() {
       await auth.signOut();
 
       expect(family.api.to(_signOut).map(bearerOf), ['Bearer a1']);
+      expect(container.read(authControllerProvider), isA<SignedOut>());
+      expect(store.values, isEmpty);
+      expect(auth.accessToken, isNull);
+    });
+
+    test('waits for a refresh in flight and revokes with its token', () async {
+      final container = await signedIn();
+      final auth = container.read(authControllerProvider.notifier);
+      await dioOf(container).get<Object>('/api/v1/ping');
+      // a1 expires; a request's 401 starts a refresh that the gate holds.
+      family.api.routes[_ping] = (request) => bearerOf(request) == 'Bearer a2'
+          ? const FakeReply(200, {'ok': true})
+          : _unauthorized;
+      family.gate = Completer<void>();
+      final request = dioOf(container).get<Object>('/api/v1/ping');
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+
+      final signingOut = auth.signOut();
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+      expect(family.api.to(_signOut), isEmpty);
+      family.gate!.complete();
+      await Future.wait([
+        signingOut,
+        request.catchError((Object _) => request),
+      ]);
+
+      expect(family.api.to(_signOut).map(bearerOf), ['Bearer a2']);
+      expect(container.read(authControllerProvider), isA<SignedOut>());
+      expect(store.values, isEmpty);
+      expect(auth.accessToken, isNull);
+    });
+
+    test('waits for a school switch and revokes with its token', () async {
+      final container = await signedIn();
+      final auth = container.read(authControllerProvider.notifier);
+      await auth.refreshAfter(null);
+      family.selectGate = Completer<void>();
+      final switching = auth.switchSchool('t2');
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+
+      final signingOut = auth.signOut();
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+      expect(family.api.to(_signOut), isEmpty);
+      family.selectGate!.complete();
+      await Future.wait([switching, signingOut]);
+
+      expect(family.api.to(_signOut).map(bearerOf), ['Bearer school']);
       expect(container.read(authControllerProvider), isA<SignedOut>());
       expect(store.values, isEmpty);
       expect(auth.accessToken, isNull);

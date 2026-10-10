@@ -23,6 +23,7 @@ dependencies:
     path: packages/quad_api
   riverpod_annotation: 4.0.7
   sentry_flutter: 9.30.1
+  shared_preferences: 2.5.5
 
 dev_dependencies:
   # analyzer 14.5 removed a setter build_runner 2.16.1 still uses; drop with the next build_runner.
