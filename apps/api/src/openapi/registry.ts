@@ -70,7 +70,7 @@ export function named<T extends z.ZodTypeAny>(name: string, schema: T): T {
  * schema) refers to one component. `named` returns a renamed copy, which a schema built from the
  * original in packages/contracts never sees. Only OpenAPI metadata changes; validation does not.
  */
-function nameNested(name: string, schema: z.ZodTypeAny): void {
+function nameNested(name: string, schema: z.ZodType<unknown, z.ZodTypeDef, unknown>): void {
   const def: z.ZodTypeDef = schema._def;
   def.openapi = { ...def.openapi, _internal: { ...def.openapi?._internal, refId: name } };
 }
