@@ -90,6 +90,18 @@ describe('dartNullableObjects (Task 25: GET /me with no preview)', () => {
     });
   });
 
+  it('leaves a nullable $ref or anyOf alone (only the inline form is handled)', () => {
+    const referenced = {
+      type: 'object',
+      properties: {
+        viaAnyOf: { anyOf: [{ $ref: '#/components/schemas/Brand' }, { type: 'null' }] },
+        viaRef: { $ref: '#/components/schemas/Brand', nullable: true },
+      },
+      required: ['viaAnyOf', 'viaRef'],
+    };
+    expect(dartNullableObjects(referenced)).toEqual(referenced);
+  });
+
   it('is applied to the parent slice and leaves the input as it was', () => {
     const withMe = {
       ...document,

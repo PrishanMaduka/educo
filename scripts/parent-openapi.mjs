@@ -126,6 +126,11 @@ export function parentSpec(document, tags = PARENT_TAGS) {
  * turns an inline object into a model, so `Me.preview` came out as a required `MePreview` and
  * `GET /me` (preview and support null) failed to parse. A property it does not require becomes
  * nullable in Dart; the API still always sends it. Nullable primitives already work.
+ *
+ * Only the inline form is handled, because it is the only one the API's document has (Zod's
+ * `.nullable()` on an object). A nullable `$ref` (`anyOf: [{ $ref }, { type: 'null' }]`, or a
+ * `$ref` with `nullable`) stays required; if one appears, check its generated Dart field and
+ * extend this.
  * @template T
  * @param {T} value
  * @returns {T}
