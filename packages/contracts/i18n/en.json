@@ -255,6 +255,7 @@
   "public.nav.getApp": "Get the app",
   "public.nav.menu": "Menu",
   "public.signIn": "Sign in",
+  "public.openSchool": "Open {school}",
   "public.view.label": "Choose your view",
   "public.view.school": "I run a school",
   "public.view.parent": "I’m a parent",

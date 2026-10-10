@@ -1,9 +1,13 @@
-import { expect, test, type Page, type TestInfo } from '@playwright/test';
+import { readFileSync } from 'node:fs';
+
+import { expect, test, type BrowserContext, type Page, type TestInfo } from '@playwright/test';
 import {
   expectNoSeriousA11yViolations,
   expectNoSideScroll,
   schemeOf,
 } from '@quad/config/playwright/checks';
+
+import { PRISHAN_STATE } from './sign-in-as';
 
 /*
  * The public landing page (spec 19). Runs against the staff app's server build and, through
@@ -174,6 +178,46 @@ test.describe('landing page', () => {
     await dialog.getByRole('button', { name: 'Close sign-in' }).click();
     await expect(dialog).toBeHidden();
     await expect(page).toHaveURL('/');
+  });
+
+  test('a signed-in visitor sees Open {school} in place of every Sign in, and it opens /app', async ({
+    page,
+  }, testInfo) => {
+    test.skip(isPrelaunch(testInfo), 'Before launch there is no sign-in');
+    // Prishan's session from the global sign-in, read only (D57: GET /me decides).
+    const state: unknown = JSON.parse(readFileSync(PRISHAN_STATE, 'utf8'));
+    const { cookies } = state as { cookies: Parameters<BrowserContext['addCookies']>[0] };
+    await page.context().addCookies(cookies);
+    await page.goto('/');
+    const open = page.getByRole('link', { name: 'Open Colombo International School' });
+    // All four entries switch: the top bar's (in the closed menu at 1100 px and below, so not
+    // exposed), the menu's, the hero's and the footer's.
+    await expect(page.locator('a[data-open-school]')).toHaveCount(4);
+    await expect(open).toHaveCount(isNarrow(page) ? 2 : 3);
+    await expect(page.locator('[data-signin]')).toHaveCount(0);
+    for (const link of await open.all()) await expect(link).toHaveAttribute('href', '/app');
+    // A school's full name fits beside the top bar's links, and the links pass axe.
+    await expectNoSideScroll(page);
+    await expectAccessibleOnceStill(page);
+    await open.last().click();
+    await expect(page).toHaveURL('/app');
+  });
+
+  test('the pre-launch export never asks the API who is signed in', async ({ page }, testInfo) => {
+    test.skip(!isPrelaunch(testInfo), 'Only the static export leaves the API out');
+    // A CSRF cookie, as a visitor signed in to the live portal would carry.
+    const baseURL = testInfo.project.use.baseURL;
+    if (baseURL === undefined) throw new Error('The export config has no baseURL.');
+    await page.context().addCookies([{ name: 'quad_csrf', value: 'token', url: baseURL }]);
+    const asked: string[] = [];
+    page.on('request', (request) => {
+      if (request.url().includes('/api/v1/')) asked.push(request.url());
+    });
+    await page.goto('/');
+    await expect(page.getByRole('button', { name: 'Sign in' }).first()).toBeAttached();
+    await page.waitForLoadState('networkidle');
+    expect(asked).toEqual([]);
+    await expect(page.getByRole('link', { name: /^Open / })).toHaveCount(0);
   });
 
   test('Sign in shows the coming-soon note before launch, and Escape closes it', async ({

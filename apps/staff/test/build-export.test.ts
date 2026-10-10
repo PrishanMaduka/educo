@@ -205,7 +205,7 @@ describe('the pre-launch stubs', () => {
   it('show nothing, and refuse to send a demo request or load Turnstile', async () => {
     const stubs = await import('../site-export/prelaunch');
     expect(stubs.LiveSignIn({ label: 'Sign in' })).toBeNull();
-    expect(stubs.SignedInHint()).toBeNull();
+    expect(stubs.SignedInHint({ openSchool: { before: 'Open ', after: '' } })).toBeNull();
     expect(() => stubs.TurnstileField()).toThrow(/pre-launch/);
     expect(() => stubs.submitDemoRequest()).toThrow(/pre-launch/);
   });

@@ -1,6 +1,9 @@
 import { ErrorBodySchema } from '@quad/contracts';
 
+import { cookieValue } from './cookies';
 import { createApiClient, type ApiClient } from './fetcher';
+
+export { cookieValue };
 
 /**
  * The typed client as the staff portal and the console use it in the browser (spec 06, D32):
@@ -23,19 +26,6 @@ export class ApiError extends Error {
     super(message);
     this.name = 'ApiError';
   }
-}
-
-/**
- * The value of the first of `names` in a `Cookie`-style header (`document.cookie`), or null.
- * Each app names its own cookies: locally the portal and the console share `localhost`.
- */
-export function cookieValue(cookieHeader: string, names: readonly string[]): string | null {
-  for (const part of cookieHeader.split(';')) {
-    const at = part.indexOf('=');
-    if (at === -1) continue;
-    if (names.includes(part.slice(0, at).trim())) return part.slice(at + 1).trim();
-  }
-  return null;
 }
 
 export interface BrowserApiOptions {

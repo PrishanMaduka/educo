@@ -436,6 +436,14 @@
   "publicNavGetApp": "Get the app",
   "publicNavMenu": "Menu",
   "publicSignIn": "Sign in",
+  "publicOpenSchool": "Open {school}",
+  "@publicOpenSchool": {
+    "placeholders": {
+      "school": {
+        "type": "Object"
+      }
+    }
+  },
   "publicViewLabel": "Choose your view",
   "publicViewSchool": "I run a school",
   "publicViewParent": "I’m a parent",

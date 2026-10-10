@@ -3,6 +3,8 @@
 import dynamic from 'next/dynamic';
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 
+import { useOpenSchool } from './open-school';
+
 /** The address that opens the sign-in dialog on the landing page (`/#signin`, D57). */
 const SIGN_IN_HASH = '#signin';
 
@@ -23,9 +25,18 @@ let openHost: Open | null = null;
 
 /**
  * A Sign in entry on the live site (spec 19 "Sign-in"): a button that opens the sign-in dialog.
- * Without a dialog host on the page it goes to the sign-in page instead.
+ * Without a dialog host on the page it goes to the sign-in page instead. For a signed-in visitor
+ * (`SignedInHint`) it is a link "Open {school}" to `/app`.
  */
 export function LiveSignIn({ label, className }: { label: string; className?: string }): ReactNode {
+  const openSchool = useOpenSchool();
+  if (openSchool !== null) {
+    return (
+      <a href="/app" data-open-school="" className={className}>
+        {openSchool}
+      </a>
+    );
+  }
   return (
     <button
       type="button"
