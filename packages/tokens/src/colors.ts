@@ -270,4 +270,3 @@ const dark: ColorSet = {
  * and its active item and primary action are the default brand, Quad lime.
  */
 export const colors = { light, dark } as const;
-

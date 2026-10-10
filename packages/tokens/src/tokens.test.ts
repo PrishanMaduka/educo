@@ -97,7 +97,14 @@ describe('colour tokens', () => {
   });
 
   it('keep the side bar section colours 5.4:1 on rail-2 and navy in both themes (D40)', () => {
-    const navs = ['nav-lime', 'nav-orange', 'nav-pink', 'nav-sky', 'nav-violet', 'nav-mist'] as const;
+    const navs = [
+      'nav-lime',
+      'nav-orange',
+      'nav-pink',
+      'nav-sky',
+      'nav-violet',
+      'nav-mist',
+    ] as const;
     for (const mode of ['light', 'dark'] as const) {
       for (const nav of navs) {
         for (const bg of [colors[mode]['rail-2'], colors[mode].navy]) {
@@ -128,7 +135,9 @@ describe('colour tokens', () => {
       expect(contrastRatio(c.focus, c.surface)).toBeGreaterThanOrEqual(3);
       expect(contrastRatio(c.focus, c.canvas)).toBeGreaterThanOrEqual(3);
       for (const a of ['lime', 'pink', 'sky', 'orange'] as const) {
-        expect(contrastRatio(c[`${a}-ink`], c[`${a}-soft`]), `${mode} ${a}`).toBeGreaterThanOrEqual(7);
+        expect(contrastRatio(c[`${a}-ink`], c[`${a}-soft`]), `${mode} ${a}`).toBeGreaterThanOrEqual(
+          7,
+        );
       }
       for (const step of [0, 1, 2, 3] as const) {
         expect(contrastRatio(c[`heat-${step}-ink`], c[`heat-${step}`])).toBeGreaterThanOrEqual(4.5);

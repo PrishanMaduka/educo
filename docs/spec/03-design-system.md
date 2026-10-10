@@ -15,7 +15,7 @@ The app design system is defined in `design/system.html` with the shared files `
 
 Tokens are defined once in TypeScript. `pnpm tokens:build` generates (1) a Tailwind v4 CSS file with an `@theme` block and the light and dark CSS variables for web, and (2) `apps/parent/lib/theme/tokens.g.dart` (a `QuadTokens` class plus `ThemeExtension`s for light and dark) for the Flutter app. The names match `design/system/tokens.css`.
 
-**Porting rule.** The existing names in `packages/tokens/src/colors.ts` stay, so components keep compiling, and their values change to the ones below. The new tokens are added, and `deriveBrand()` is replaced by the rules in `design/system/brand.js` ([School brand colour](#school-brand-colour)). Until that port lands, the values in `packages/tokens` are the old palette A. The port is a D34 follow-up.
+**Porting rule.** The existing names in `packages/tokens/src/colors.ts` stay, so components keep compiling, and their values change to the ones below. The new tokens are added, and `deriveBrand()` is replaced by the rules in `design/system/brand.js` ([School brand colour](#school-brand-colour)). The port is done ([D56](02-architecture.md#decision-log)).
 
 ### Colour: existing names, new values
 
@@ -74,7 +74,7 @@ Status text and icons (`good`, `warn`, `bad`, `info`) are 4.5:1 or more on `canv
 | `lime-soft`, `pink-soft`, `sky-soft`, `orange-soft` | `#EDF8CC`, `#FFE3EF`, `#DCF1FF`, `#FFE8D2` | `#37434B`, `#452D5A`, `#243E6A`, `#453645` | Accent tints |
 | `lime-ink`, `pink-ink`, `sky-ink`, `orange-ink` | `#3D5410`, `#8A1D4C`, `#0D4F7A`, `#7A3A07` | `#D8F59A`, `#FFB3D3`, `#A8DDFF`, `#FFC694` | Text on the accent tints, 7:1 or more |
 | `gold-ink` | `#3D5410` | `#D8F59A` | Text in the highlight colour |
-| `heat-0`…`heat-3` | `#FFD4E7`, `#ECFACB`, `#DBF69E`, `#C8F169` | `#683A6A`, `#4C5D50`, `#819C5B`, `#C8F169` | Family connection heatmap: none, a little, some, a lot. Added with that screen |
+| `heat-0`…`heat-3` | `#FFD4E7`, `#ECFACB`, `#DBF69E`, `#C8F169` | `#683A6A`, `#4C5D50`, `#819C5B`, `#C8F169` | Family connection heatmap: none, a little, some, a lot |
 | `heat-0-ink`…`heat-3-ink` | `#101632` (all four) | `#F7F5F0`, `#F7F5F0`, `#101632`, `#101632` | Text on each heat step |
 | `focus` | `#2F6BFF` | `#7FA6FF` | Focus rings, in every school |
 | `scrim` | `rgba(16,22,50,.45)` | `rgba(5,8,26,.6)` | Behind drawers and dialogs |
@@ -112,7 +112,7 @@ A school picks one colour in the console (Branding). Inside its staff portal, an
 | Maroon `#7A1F3D` | `#7A1F3D` · white / `#9B576E` · white | `#7A1F3D` / `#B58292` | `#EADBE0` / `#2B1D43` | `#964E66` / `#924760` |
 | Orange `#D9640B` | `#BF580A` · white / same | `#A94E09` / `#E08037` | `#F9E6D8` / `#3E2B39` | `#BF580A` |
 
-- **Runtime.** Web writes the derived values for both themes into one `<style id="quad-brand">` (`:root{…}`, the dark media query and `:root[data-theme="dark"]{…}`), so switching theme needs no recalculation and a published brand change re-themes the page live (`tenant.branding.updated`). Flutter applies the same derived values to its `QuadColors` theme extension. Whether it gets them from a Dart port of `deriveBrand()`, tested against the same cases as the TypeScript one, or as derived values from the API is decided with the token port (a D34 follow-up).
+- **Runtime** ([D56](02-architecture.md#decision-log)). The API derives the tokens with `deriveBrand()` from `packages/tokens` and sends them for both themes (`brand` in `GET /me` and the sign-in school list: `color`, plus `light` and `dark` with `fill`, `fillStrong`, `ink`, `text`, `soft`, `railActive` and `railActiveInk`). Web sets them as inline variables (`--school-light-<token>`, `--school-dark-<token>`) on the staff shell and `<html>` with `data-school-brand`, and the generated theme maps them onto the token variables for the light, dark and system themes, so switching theme needs no recalculation and a published brand change re-themes the page live (`tenant.branding.updated`). Flutter copies the same values into its `QuadColors` theme extension (`withSchoolBrand`) and has no derivation code of its own.
 - **What does not take the school colour:** the side bar background, focus rings, Ask Quad (navy with a lime spark in every school), toasts, status colours, categories, illustrations and the Quad logo. In the parent app, sign-in screens are Quad-branded (navy and pink) and the school colour applies after sign-in (D13).
 
 ### Type
@@ -240,7 +240,7 @@ A small flat illustration (faces or doodles) or icon, a Bricolage title, one war
 - **The day ring** (parent Today): one arc per period, filled as the day goes, with the child's photo or initials inside.
 
 ### Heatmap
-The staff Family connection heatmap uses `heat-0` (pink, no contact) to `heat-3` (lime, a lot), with the matching `heat-N-ink` text (were coral and teal). The tokens are added to `packages/tokens` with that screen.
+The staff Family connection heatmap uses `heat-0` (pink, no contact) to `heat-3` (lime, a lot), with the matching `heat-N-ink` text (were coral and teal). The tokens are in `packages/tokens` (D56).
 
 ### Ask Quad
 - **Staff and console:** the top-bar pill and a floating pill at the bottom right, both `navy-card` with cream text and a lime spark, the same in every school. The floating pill moves up 92 px when a sticky save bar is shown, and is hidden while the panel is open.

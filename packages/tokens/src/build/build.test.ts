@@ -31,7 +31,9 @@ describe('theme.css', () => {
 
   it('defines the dark theme for data-theme and for the system setting', () => {
     expect(theme).toMatch(/\[data-theme="dark"\] \{[^}]*--quad-canvas: #0F1330;/);
-    expect(theme).toMatch(/\[data-theme="dark"\] \{[^}]*--quad-shadow-card: 0 1px 2px rgba\(0,0,0,.3\)/);
+    expect(theme).toMatch(
+      /\[data-theme="dark"\] \{[^}]*--quad-shadow-card: 0 1px 2px rgba\(0,0,0,.3\)/,
+    );
     expect(theme).toMatch(
       /@media \(prefers-color-scheme: dark\) \{\s*:root:not\(\[data-theme="light"\]\) \{[^}]*--quad-canvas: #0F1330;/,
     );
