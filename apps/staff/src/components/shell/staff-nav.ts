@@ -2,6 +2,7 @@ import {
   STAFF_PAGES,
   type Me,
   type PageAccess,
+  type PageHiddenBy,
   type StaffNavGroup,
   type StaffPage,
   type StaffPageAccess,
@@ -25,6 +26,11 @@ export interface NavGroup {
 /** How much of a page the person gets (`GET /me/permissions` `pages`); unlisted means hidden. */
 export function accessOf(access: readonly StaffPageAccess[], id: StaffPageId): PageAccess {
   return access.find((entry) => entry.id === id)?.access ?? 'hidden';
+}
+
+/** Why a page is hidden (`GET /me/permissions` `pages[].hiddenBy`, D52); `role` when unsaid. */
+export function hiddenByOf(access: readonly StaffPageAccess[], id: StaffPageId): PageHiddenBy {
+  return access.find((entry) => entry.id === id)?.hiddenBy ?? 'role';
 }
 
 /**

@@ -195,4 +195,23 @@ describe('PageAccess', () => {
     expect(StaffPageAccess.safeParse({ id: 'canteen', access: 'full' }).success).toBe(false);
     expect(StaffPageAccess.safeParse({ id: 'fees', access: 'read' }).success).toBe(false);
   });
+
+  it('says why a hidden page is hidden: the plan or the role (D52)', () => {
+    expect(StaffPageAccess.parse({ id: 'fees', access: 'hidden', hiddenBy: 'plan' })).toEqual({
+      id: 'fees',
+      access: 'hidden',
+      hiddenBy: 'plan',
+    });
+    expect(StaffPageAccess.parse({ id: 'fees', access: 'hidden', hiddenBy: 'role' }).hiddenBy).toBe(
+      'role',
+    );
+    const unknown = StaffPageAccess.safeParse({ id: 'fees', access: 'hidden', hiddenBy: 'url' });
+    expect(unknown.error?.issues[0]?.path).toEqual(['hiddenBy']);
+  });
+
+  it('gives a reason only for a hidden page', () => {
+    const open = StaffPageAccess.safeParse({ id: 'fees', access: 'full', hiddenBy: 'plan' });
+    expect(open.success).toBe(false);
+    expect(open.error?.issues[0]?.path).toEqual(['hiddenBy']);
+  });
 });

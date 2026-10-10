@@ -3683,6 +3683,8 @@ export interface components {
                 id: "dashboard" | "my_teaching" | "admissions" | "crm" | "communications" | "family_connection" | "evenings_forms" | "students" | "early_warning" | "attendance" | "pastoral" | "courses" | "timetable" | "teachers_classes" | "staff_cover" | "exams" | "reports" | "fees" | "accounting" | "routes" | "pickup" | "academic_year" | "users_roles" | "school_settings";
                 /** @enum {string} */
                 access: "hidden" | "view_only" | "full";
+                /** @enum {string} */
+                hiddenBy?: "plan" | "role";
             }[];
             /** @enum {string} */
             home: "dashboard" | "my_teaching" | "admissions" | "crm" | "communications" | "family_connection" | "evenings_forms" | "students" | "early_warning" | "attendance" | "pastoral" | "courses" | "timetable" | "teachers_classes" | "staff_cover" | "exams" | "reports" | "fees" | "accounting" | "routes" | "pickup" | "academic_year" | "users_roles" | "school_settings";

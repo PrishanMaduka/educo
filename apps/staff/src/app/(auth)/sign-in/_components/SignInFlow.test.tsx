@@ -78,6 +78,10 @@ describe('SignInFlow', () => {
     await passEmailAndPassword();
 
     expect(await heading('Two-step sign-in')).toBeInTheDocument();
+    // D51: unticked by default, which is safer on a shared school computer.
+    expect(
+      screen.getByRole('checkbox', { name: 'Trust this device for 30 days' }),
+    ).not.toBeChecked();
     fireEvent.paste(screen.getByRole('textbox', { name: 'Digit 1 of 6' }), {
       clipboardData: { getData: () => '000000' },
     });
@@ -97,7 +101,7 @@ describe('SignInFlow', () => {
       keepSignedIn: true,
     });
     expect(fake.requests[1]).toMatchObject({
-      body: { code: '000000', trustDevice: true },
+      body: { code: '000000', trustDevice: false },
       csrf: 'staff-csrf',
     });
   });
@@ -321,7 +325,26 @@ describe('SignInFlow', () => {
     await userEvent.type(screen.getByLabelText('Recovery code'), ' abcde-fghjk ');
     await userEvent.click(screen.getByRole('button', { name: 'Verify and sign in' }));
     expect(await heading('Choose a school')).toBeInTheDocument();
-    expect(fake.requests[2]?.body).toEqual({ recoveryCode: 'abcde-fghjk', trustDevice: true });
+    expect(fake.requests[2]?.body).toEqual({ recoveryCode: 'abcde-fghjk', trustDevice: false });
+  });
+
+  it('trusts the device only when the person ticks the box (D51)', async () => {
+    resetFake({
+      'POST /api/v1/auth/password': { status: 200, body: { next: 'two_step' } },
+      'POST /api/v1/auth/totp/verify': { status: 200, body: { next: 'choose_school' } },
+      'GET /api/v1/auth/memberships': { status: 200, body: { items: [CIS, KHA] } },
+    });
+    renderFlow();
+    await passEmailAndPassword();
+    const trust = await screen.findByRole('checkbox', { name: 'Trust this device for 30 days' });
+    expect(trust).not.toBeChecked();
+    await userEvent.click(trust);
+    expect(trust).toBeChecked();
+    fireEvent.paste(screen.getByRole('textbox', { name: 'Digit 1 of 6' }), {
+      clipboardData: { getData: () => '000000' },
+    });
+    expect(await heading('Choose a school')).toBeInTheDocument();
+    expect(fake.requests[1]?.body).toEqual({ code: '000000', trustDevice: true });
   });
 
   it('starts one authenticator only, even after the connection drops and comes back', async () => {

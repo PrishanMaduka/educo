@@ -93,6 +93,45 @@ describe('GET /me/permissions', () => {
     expect(pageOf(body, 'students')?.access).toBe('full');
   });
 
+  it("says plan for a page hidden by the school's plan, even for an admin (D52)", async () => {
+    const at = await school(['sis']);
+    const admin = await staffAs(at, 'admin');
+    const body = MePermissions.parse((await permissionsOf(admin.session)).json());
+    expect(pageOf(body, 'fees')).toEqual({ id: 'fees', access: 'hidden', hiddenBy: 'plan' });
+    expect(pageOf(body, 'students')).toEqual({ id: 'students', access: 'full' });
+  });
+
+  it('says role for a page in the plan that the role does not open (D52)', async () => {
+    const at = await school();
+    const teacher = await staffAs(at, 'teacher', 'own_classes');
+    const body = MePermissions.parse((await permissionsOf(teacher.session)).json());
+    expect(pageOf(body, 'fees')).toEqual({ id: 'fees', access: 'hidden', hiddenBy: 'role' });
+    expect(pageOf(body, 'school_settings')?.hiddenBy).toBe('role');
+    expect(pageOf(body, 'courses')?.hiddenBy).toBeUndefined();
+  });
+
+  it('says plan when a page is outside both the plan and the role (D52)', async () => {
+    const at = await school(['sis', 'lms']);
+    const teacher = await staffAs(at, 'teacher', 'own_classes');
+    const body = MePermissions.parse((await permissionsOf(teacher.session)).json());
+    expect(pageOf(body, 'fees')?.hiddenBy).toBe('plan');
+  });
+
+  it("reads each school's own plan: another school's smaller plan never leaks (D52)", async () => {
+    const a = await school(EVERY_MODULE);
+    const b = await school(['sis']);
+    const inA = await staffAs(a, 'teacher', 'own_classes');
+    const inB = await signedInMember(db(), b, { accountId: inA.accountId });
+    await assignRole(db(), b.id, inB.userId, await insertSystemRole(db(), b.id, 'admin'));
+
+    const bodyA = MePermissions.parse((await permissionsOf(inA.session)).json());
+    expect(pageOf(bodyA, 'fees')?.hiddenBy).toBe('role');
+    expect(bodyA.pages.some((page) => page.hiddenBy === 'plan')).toBe(false);
+    const bodyB = MePermissions.parse((await permissionsOf(inB.session)).json());
+    expect(pageOf(bodyB, 'fees')?.hiddenBy).toBe('plan');
+    expect(pageOf(bodyB, 'courses')?.hiddenBy).toBe('plan');
+  });
+
   it('reflects an active preview: the previewed role, and only keys the admin holds', async () => {
     const at = await school();
     const lead = await signedInMember(db(), at);

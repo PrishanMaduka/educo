@@ -6,7 +6,7 @@ import type { PermissionKey } from '@quad/contracts';
 import type { Metadata } from 'next';
 
 import { NoAccess } from '@/components/shell/NoAccess';
-import { accessOf, roleNameOf } from '@/components/shell/staff-nav';
+import { accessOf, hiddenByOf, roleNameOf } from '@/components/shell/staff-nav';
 import { t } from '@/i18n';
 import { requireSignedIn } from '@/lib/server-session';
 
@@ -31,6 +31,7 @@ export default async function UsersRolesPage({ searchParams }: UsersRolesPagePro
         page="users_roles"
         roleName={roleNameOf(me) ?? t('shell.role.support')}
         home={permissions.home}
+        hiddenBy={hiddenByOf(permissions.pages, 'users_roles')}
       />
     );
   }

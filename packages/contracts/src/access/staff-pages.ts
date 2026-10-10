@@ -53,13 +53,30 @@ export type StaffPageId = z.infer<typeof StaffPageId>;
 
 /**
  * How much of a page a person gets: `hidden` (not in the menu; opening it shows "{Page} isn't
- * part of the {role} role"), `view_only` (the **View only** tag, no action buttons) or `full`.
+ * part of the {role} role", or "{Page} isn't included in your school's plan", D52), `view_only`
+ * (the **View only** tag, no action buttons) or `full`.
  */
 export const PageAccess = z.enum(['hidden', 'view_only', 'full']);
 export type PageAccess = z.infer<typeof PageAccess>;
 
-/** One page and how much of it a person gets (`GET /me/permissions` `pages`, side bar order). */
-export const StaffPageAccess = z.object({ id: StaffPageId, access: PageAccess });
+/**
+ * Why a page is hidden (D52): `plan` when the school's plan doesn't include it (this wins when the
+ * role doesn't open it either), `role` when the plan includes it but the role doesn't open it.
+ */
+export const PageHiddenBy = z.enum(['plan', 'role']);
+export type PageHiddenBy = z.infer<typeof PageHiddenBy>;
+
+/**
+ * One page and how much of it a person gets (`GET /me/permissions` `pages`, side bar order), and
+ * for a hidden page why (`hiddenBy`, which the API always sends on a hidden page and never on an
+ * open one).
+ */
+export const StaffPageAccess = z
+  .object({ id: StaffPageId, access: PageAccess, hiddenBy: PageHiddenBy.optional() })
+  .refine((page) => page.hiddenBy === undefined || page.access === 'hidden', {
+    message: 'Only a hidden page has a reason.',
+    path: ['hiddenBy'],
+  });
 export type StaffPageAccess = z.infer<typeof StaffPageAccess>;
 
 /**

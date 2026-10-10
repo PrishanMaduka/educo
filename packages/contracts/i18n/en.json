@@ -146,6 +146,8 @@
   "noAccess.title": "{page} isn’t part of the {role} role",
   "noAccess.body": "People with this role won’t see this page in the menu. A school admin can change what the role can do in Users & roles.",
   "noAccess.home": "Go to {page}",
+  "noAccess.plan.title": "{page} isn’t included in your school’s plan",
+  "noAccess.plan.body": "Your school’s plan doesn’t include this. Ask Quad support if you’d like to add it.",
   "viewOnly.tag": "View only",
   "placeholder.soon.title": "{page} arrives soon",
   "placeholder.soon.body": "We’re still building this part of Quad. It appears here as soon as it’s ready.",

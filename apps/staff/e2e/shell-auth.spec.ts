@@ -349,6 +349,16 @@ test.describe('Switch school', () => {
     expect((await tokenValue(page, '--quad-brand-fill')).toLowerCase()).toBe(expected);
     const nav = await openNav(page);
     await expect(nav.getByText('Kandy Hill Academy')).toBeVisible();
+
+    // Kandy Hill's plan has no transport, so Routes names the plan, not the Teacher role (D52).
+    await page.goto('/app/transport/routes');
+    await expect(title(page, 'Routes isn’t included in your school’s plan')).toBeVisible();
+    await expect(
+      page.getByText(
+        'Your school’s plan doesn’t include this. Ask Quad support if you’d like to add it.',
+      ),
+    ).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Go to My teaching' })).toBeVisible();
   });
 });
 

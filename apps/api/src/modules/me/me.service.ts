@@ -96,7 +96,9 @@ export class MeService {
 
   /**
    * `GET /me/permissions` (spec 05, 06): the keys `access` holds, every staff page with how much
-   * of it opens, the home page and the preview banner. Staff permissions are for the staff
+   * of it opens (and, when hidden, whether the plan or the role hides it, D52), the home page and
+   * the preview banner. The plan is the session's school's, read inside `withTenant` with the
+   * permissions (`PermissionsService.forRequest`), never from the request. Staff permissions are for the staff
    * portal, so a parent's token is refused (403): parents are not role-based.
    */
   async permissions(auth: RequestAuth, access: RequestAccess): Promise<MePermissions> {

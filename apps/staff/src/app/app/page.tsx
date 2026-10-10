@@ -7,7 +7,7 @@ import { Greeting } from './_components/Greeting';
 import type { Metadata } from 'next';
 
 import { NoAccess } from '@/components/shell/NoAccess';
-import { accessOf, hrefOf, roleNameOf } from '@/components/shell/staff-nav';
+import { accessOf, hiddenByOf, hrefOf, roleNameOf } from '@/components/shell/staff-nav';
 import { t, type MessageKey } from '@/i18n';
 import { requireSignedIn } from '@/lib/server-session';
 
@@ -38,6 +38,7 @@ export default async function StaffHome() {
         page="dashboard"
         roleName={roleNameOf(me) ?? t('shell.role.support')}
         home={permissions.home}
+        hiddenBy={hiddenByOf(permissions.pages, 'dashboard')}
       />
     );
   }

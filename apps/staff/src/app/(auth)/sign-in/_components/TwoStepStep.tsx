@@ -25,14 +25,14 @@ const CODE = /^\d{6}$/;
 /**
  * Step 3 (spec 05): the authenticator code (six boxes that fill themselves from a paste or
  * autofill, and send once full), or one of the 10 recovery codes, and "Trust this device for 30
- * days".
+ * days", which starts unticked: safer on a shared school computer (D51).
  */
 export function TwoStepStep({ email, inviteToken, onAnswer, onChangeEmail }: TwoStepStepProps) {
   const { t } = useTranslation();
   const [mode, setMode] = useState<'app' | 'recovery'>('app');
   const [code, setCode] = useState('');
   const [recoveryCode, setRecoveryCode] = useState('');
-  const [trustDevice, setTrustDevice] = useState(true);
+  const [trustDevice, setTrustDevice] = useState(false);
   const [missing, setMissing] = useState<string | null>(null);
   const verify = useMutation({
     mutationFn: (proof: { code: string } | { recoveryCode: string }) =>

@@ -1,7 +1,7 @@
 import { STAFF_PAGES, type StaffPageAccess } from '@quad/contracts';
 import { describe, expect, it } from 'vitest';
 
-import { accessOf, hrefOf, pageAtPath, roleNameOf, visibleNav } from './staff-nav';
+import { accessOf, hiddenByOf, hrefOf, pageAtPath, roleNameOf, visibleNav } from './staff-nav';
 
 const all = (access: StaffPageAccess['access']): StaffPageAccess[] =>
   STAFF_PAGES.map((page) => ({ id: page.id, access }));
@@ -76,5 +76,19 @@ describe('roleNameOf', () => {
       }),
     ).toBe('Teacher');
     expect(roleNameOf({ person: { ...person, roleNames: [] }, preview: null })).toBeNull();
+  });
+});
+
+describe('hiddenByOf (D52)', () => {
+  it('reads why a page is hidden, and says role when the API gives no reason', () => {
+    const access: StaffPageAccess[] = [
+      { id: 'fees', access: 'hidden', hiddenBy: 'plan' },
+      { id: 'crm', access: 'hidden', hiddenBy: 'role' },
+      { id: 'exams', access: 'hidden' },
+    ];
+    expect(hiddenByOf(access, 'fees')).toBe('plan');
+    expect(hiddenByOf(access, 'crm')).toBe('role');
+    expect(hiddenByOf(access, 'exams')).toBe('role');
+    expect(hiddenByOf(access, 'routes')).toBe('role');
   });
 });

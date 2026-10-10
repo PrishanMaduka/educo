@@ -4,7 +4,7 @@ import { SchoolSettings } from './_components/SchoolSettings';
 import type { Metadata } from 'next';
 
 import { NoAccess } from '@/components/shell/NoAccess';
-import { accessOf, roleNameOf } from '@/components/shell/staff-nav';
+import { accessOf, hiddenByOf, roleNameOf } from '@/components/shell/staff-nav';
 import { t } from '@/i18n';
 import { requireSignedIn } from '@/lib/server-session';
 
@@ -30,6 +30,7 @@ export default async function SchoolSettingsPage({ searchParams }: SchoolSetting
         page="school_settings"
         roleName={roleNameOf(me) ?? t('shell.role.support')}
         home={permissions.home}
+        hiddenBy={hiddenByOf(permissions.pages, 'school_settings')}
       />
     );
   }

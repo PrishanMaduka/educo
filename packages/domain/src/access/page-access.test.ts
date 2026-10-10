@@ -2,7 +2,7 @@ import { PlanModule, STAFF_PAGES, StaffPageId } from '@quad/contracts';
 import { describe, expect, it } from 'vitest';
 
 import { effectivePermissions } from './effective-permissions';
-import { isPageVisible, pageAccess } from './page-access';
+import { isPageVisible, modulesRead, pageAccess } from './page-access';
 import { systemRoleMatrix } from './system-roles';
 
 import type { PageAccess, PermissionKey, StaffPage, SystemRoleKey } from '@quad/contracts';
@@ -138,6 +138,48 @@ describe('pageAccess (spec 08, Preview a role; OQ4)', () => {
     expect(access.get('my_teaching')).toBe('full');
   });
 
+  /** `pageAccess`'s reason for each hidden page, by page id (D52). */
+  const hiddenByMap = (perms: ReadonlySet<PermissionKey>, planModules: readonly PlanModule[]) =>
+    new Map(pageAccess(perms, planModules).map((p) => [p.id, p.hiddenBy]));
+
+  it('says a page is hidden by the plan when its module is outside the plan (D52)', () => {
+    const reasons = hiddenByMap(permsOf('admin', ['sis']), ['sis']);
+    expect(reasons.get('fees')).toBe('plan');
+    expect(reasons.get('routes')).toBe('plan');
+    expect(reasons.get('courses')).toBe('plan');
+    expect(reasons.get('students')).toBeUndefined();
+  });
+
+  it('says plan, not role, when the page is outside both (D52)', () => {
+    const reasons = hiddenByMap(permsOf('teacher', ['sis', 'lms']), ['sis', 'lms']);
+    expect(reasons.get('fees')).toBe('plan');
+    expect(reasons.get('admissions')).toBe('plan');
+  });
+
+  it('says role when the plan includes the page but the role does not open it (D52)', () => {
+    const reasons = hiddenByMap(permsOf('teacher'), EVERY_MODULE);
+    expect(reasons.get('fees')).toBe('role');
+    expect(reasons.get('school_settings')).toBe('role');
+    expect(reasons.get('courses')).toBeUndefined();
+  });
+
+  it('says plan for a page with no plan module of its own when every row it reads is outside the plan (D52)', () => {
+    // Pastoral reads sis.create or lms.create, and has no single plan module.
+    expect(hiddenByMap(permsOf('admin', ['fees']), ['fees']).get('pastoral')).toBe('plan');
+    expect(hiddenByMap(permsOf('finance', ['sis']), ['sis']).get('pastoral')).toBe('role');
+    // Dashboard reads settings.view among others, and Settings is in every plan.
+    expect(hiddenByMap(new Set(), []).get('dashboard')).toBe('role');
+    expect(hiddenByMap(new Set(), []).get('users_roles')).toBe('role');
+  });
+
+  it('gives every hidden page a reason and no open page one (D52)', () => {
+    for (const planModules of [EVERY_MODULE, ['sis'] as const, [] as const]) {
+      for (const entry of pageAccess(permsOf('frontdesk', planModules), planModules)) {
+        expect(entry.hiddenBy === undefined).toBe(entry.access !== 'hidden');
+      }
+    }
+  });
+
   it('shows Communications to every staff role, with no permissions at all', () => {
     const access = accessMap(new Set(), []);
     expect(StaffPageId.options.filter((id) => access.get(id) !== 'hidden')).toEqual([
@@ -186,5 +228,17 @@ describe('isPageVisible', () => {
     ['users_roles', ['users.manage'], true],
   ])('%s with %j: %s (permissions only; the plan is pageAccess’s job)', (id, keys, visible) => {
     expect(isPageVisible(page(id), new Set(keys))).toBe(visible);
+  });
+});
+
+describe('modulesRead (D52)', () => {
+  it.each<[StaffPageId, string[]]>([
+    ['communications', []],
+    ['fees', ['fees']],
+    ['pastoral', ['sis', 'lms']],
+    ['dashboard', ['admissions', 'crm', 'fees', 'finance', 'settings']],
+    ['users_roles', ['settings']],
+  ])('%s reads %j', (id, rows) => {
+    expect(modulesRead(page(id))).toEqual(rows);
   });
 });

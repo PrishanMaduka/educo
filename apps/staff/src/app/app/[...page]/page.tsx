@@ -6,7 +6,7 @@ import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 
 import { NoAccess } from '@/components/shell/NoAccess';
-import { accessOf, pageAtPath, roleNameOf } from '@/components/shell/staff-nav';
+import { accessOf, hiddenByOf, pageAtPath, roleNameOf } from '@/components/shell/staff-nav';
 import { ViewOnlyTag } from '@/components/shell/ViewOnlyTag';
 import { t } from '@/i18n';
 import { requireSignedIn } from '@/lib/server-session';
@@ -28,7 +28,8 @@ export async function generateMetadata(props: PortalPageProps): Promise<Metadata
 /**
  * Every staff page in the side bar that is not built yet (spec 08 Navigation): "{Page} arrives
  * soon", with the **View only** tag for a role that can only read it, or the no-access page
- * for a page outside the role. Built pages get their own routes, which take precedence.
+ * for a page outside the role or the school's plan (D52). Built pages get their own routes,
+ * which take precedence.
  */
 export default async function PortalPage(props: PortalPageProps) {
   const page = await pageOf(props);
@@ -43,6 +44,7 @@ export default async function PortalPage(props: PortalPageProps) {
         page={page.id}
         roleName={roleNameOf(me) ?? t('shell.role.support')}
         home={permissions.home}
+        hiddenBy={hiddenByOf(permissions.pages, page.id)}
       />
     );
   }

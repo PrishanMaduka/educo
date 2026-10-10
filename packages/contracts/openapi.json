@@ -483,6 +483,13 @@
                     "view_only",
                     "full"
                   ]
+                },
+                "hiddenBy": {
+                  "type": "string",
+                  "enum": [
+                    "plan",
+                    "role"
+                  ]
                 }
               },
               "required": [

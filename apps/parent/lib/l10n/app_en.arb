@@ -247,6 +247,15 @@
       }
     }
   },
+  "noAccessPlanTitle": "{page} isn’t included in your school’s plan",
+  "@noAccessPlanTitle": {
+    "placeholders": {
+      "page": {
+        "type": "Object"
+      }
+    }
+  },
+  "noAccessPlanBody": "Your school’s plan doesn’t include this. Ask Quad support if you’d like to add it.",
   "viewOnlyTag": "View only",
   "placeholderSoonTitle": "{page} arrives soon",
   "@placeholderSoonTitle": {
