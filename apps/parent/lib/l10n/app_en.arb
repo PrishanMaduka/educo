@@ -1204,6 +1204,7 @@
   "signInPasswordTitle": "Welcome back",
   "signInPasswordLabel": "Password",
   "signInPasswordMissing": "Enter your password.",
+  "signInPasswordPlaceholder": "Enter your password",
   "signInPasswordShow": "Show",
   "signInPasswordHide": "Hide",
   "signInPasswordShowLabel": "Show password",

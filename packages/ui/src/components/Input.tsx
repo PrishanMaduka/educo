@@ -8,6 +8,8 @@ import type { ComponentProps, ReactNode } from 'react';
 
 export interface InputProps extends ComponentProps<'input'> {
   label?: string;
+  /** A small action on the label's row, such as Forgot password? (see Field). */
+  labelAside?: ReactNode;
   hint?: string;
   error?: string;
   /** Class for the wrapping field. `className` goes on the input itself. */
@@ -18,6 +20,7 @@ export interface InputProps extends ComponentProps<'input'> {
 
 export function Input({
   label,
+  labelAside,
   hint,
   error,
   fieldClassName,
@@ -27,7 +30,14 @@ export function Input({
   ...rest
 }: InputProps) {
   return (
-    <Field label={label} hint={hint} error={error} className={fieldClassName} id={id}>
+    <Field
+      label={label}
+      labelAside={labelAside}
+      hint={hint}
+      error={error}
+      className={fieldClassName}
+      id={id}
+    >
       {({ id: controlId, describedBy }) => {
         const input = (
           <input

@@ -211,7 +211,7 @@ export function Sidebar({
               </span>
             ) : null}
           </p>
-          <p className="m-0 line-clamp-2 text-[11px] leading-[1.35] font-semibold text-rail-ink-2">
+          <p className="m-0 truncate text-[11px] leading-[1.35] font-semibold text-rail-ink-2">
             {brand.subtitle}
           </p>
         </div>

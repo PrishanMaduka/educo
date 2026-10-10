@@ -73,6 +73,12 @@ export function PasswordStep({
       <form noValidate onSubmit={submit} className="flex flex-col gap-3.5">
         <Input
           label={t('signIn.password.label')}
+          labelAside={
+            <LinkButton onClick={onForgot} className="text-xs">
+              {t('signIn.password.forgot')}
+            </LinkButton>
+          }
+          placeholder={t('signIn.password.placeholder')}
           type={shown ? 'text' : 'password'}
           name="password"
           autoComplete="current-password"
@@ -94,7 +100,6 @@ export function PasswordStep({
             />
           }
         />
-        <LinkButton onClick={onForgot}>{t('signIn.password.forgot')}</LinkButton>
         <Checkbox
           label={t('signIn.password.keep')}
           checked={keepSignedIn}

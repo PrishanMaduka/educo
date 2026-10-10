@@ -9,6 +9,8 @@ import type { ReactNode } from 'react';
 
 export interface FieldProps {
   label?: string;
+  /** A small action on the label's row, at its end, such as Forgot password?. */
+  labelAside?: ReactNode;
   hint?: string;
   error?: string;
   className?: string;
@@ -18,7 +20,15 @@ export interface FieldProps {
 }
 
 /** Label, control slot, hint and error message for form controls. Internal building block of Input, Textarea and Select. */
-export function Field({ label, hint, error, className, children, id: idProp }: FieldProps) {
+export function Field({
+  label,
+  labelAside,
+  hint,
+  error,
+  className,
+  children,
+  id: idProp,
+}: FieldProps) {
   const generated = useId();
   const id = idProp ?? generated;
   // The hint gives way to an error, so it is only referenced while it is shown.
@@ -28,9 +38,12 @@ export function Field({ label, hint, error, className, children, id: idProp }: F
   return (
     <div className={cn('flex min-w-0 flex-col gap-[5px]', className)}>
       {label ? (
-        <label htmlFor={id} className="text-xs font-bold text-ink-2">
-          {label}
-        </label>
+        <div className="flex items-baseline justify-between gap-3">
+          <label htmlFor={id} className="text-xs font-bold text-ink-2">
+            {label}
+          </label>
+          {labelAside}
+        </div>
       ) : null}
       {children({ id, describedBy })}
       {hint && !error ? (

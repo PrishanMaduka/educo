@@ -75,6 +75,7 @@ export function CredentialsStep({ email, onEmailChange, onAnswer }: CredentialsS
         />
         <Input
           label={t('signIn.password.label')}
+          placeholder={t('signIn.password.placeholder')}
           type={shown ? 'text' : 'password'}
           name="password"
           autoComplete="current-password"

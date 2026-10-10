@@ -21,6 +21,22 @@ describe('Input', () => {
     expect(input).toHaveClass('pr-16');
   });
 
+  it('puts a label-row action, such as Forgot password?, beside the label, not in its name', () => {
+    render(
+      <Input
+        label="Password"
+        labelAside={<button type="button">Forgot password?</button>}
+        end={<button type="button">Show</button>}
+      />,
+    );
+    const input = screen.getByLabelText('Password', { selector: 'input' });
+    expect(input).toHaveAccessibleName('Password');
+    const forgot = screen.getByRole('button', { name: 'Forgot password?' });
+    const label = screen.getByText('Password', { selector: 'label' });
+    expect(label.parentElement).toContainElement(forgot);
+    expect(input.parentElement).not.toContainElement(forgot);
+  });
+
   it('works without a visible label when given an aria-label', () => {
     render(<Input aria-label="Search students" />);
     expect(screen.getByRole('textbox', { name: 'Search students' })).toBeInTheDocument();

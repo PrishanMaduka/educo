@@ -36,7 +36,7 @@ export function NoAccess({ page, roleName, home, hiddenBy = 'role' }: NoAccessPr
       <span className="grid size-14 place-items-center rounded-full bg-surface-2 text-ink-2">
         <Shield aria-hidden="true" strokeWidth={2} className="size-[26px]" />
       </span>
-      <h1 className="m-0 text-[26px] leading-[1.2] font-extrabold tracking-[-0.02em] text-balance text-ink">
+      <h1 className="m-0 text-[30px] leading-[1.12] font-extrabold tracking-[-0.02em] text-balance text-ink">
         {title}
       </h1>
       <p className="m-0 text-[15px] text-ink-2">{body}</p>

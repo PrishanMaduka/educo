@@ -648,6 +648,7 @@
   "signIn.password.title": "Welcome back",
   "signIn.password.label": "Password",
   "signIn.password.missing": "Enter your password.",
+  "signIn.password.placeholder": "Enter your password",
   "signIn.password.show": "Show",
   "signIn.password.hide": "Hide",
   "signIn.password.showLabel": "Show password",

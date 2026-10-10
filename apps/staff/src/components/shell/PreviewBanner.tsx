@@ -34,7 +34,8 @@ export function PreviewBanner({ preview, onBack, leaving }: PreviewBannerProps) 
         <span className="grid size-[30px] shrink-0 place-items-center rounded-full bg-gold-soft text-ink">
           <Shield aria-hidden="true" strokeWidth={2} className="size-4" />
         </span>
-        <div className="min-w-0 flex-1">
+        {/* A basis, so on a phone the words keep the row and Back to my view wraps below. */}
+        <div className="min-w-0 flex-1 basis-56">
           <p className="m-0 font-extrabold">{title}</p>
           <p className="m-0 text-[12.5px] text-ink-2">{t('preview.banner.detail')}</p>
         </div>
