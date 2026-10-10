@@ -3,8 +3,8 @@
  *   @import 'tailwindcss';
  *   @import '@quad/ui/app.css';
  * It brings in the generated token theme, the @quad/ui keyframes, scans this package for classes, and sets the
- * page defaults. Colours come only from the tokens. The app must put next/font's Figtree variable
- * (--font-figtree) on <html>.
+ * page defaults. Colours come only from the tokens. The app must put next/font's Figtree and
+ * Bricolage Grotesque variables (--font-figtree, --font-bricolage) on <html>.
  */
 @import '@quad/tokens/theme.css';
 @import './styles.css';
@@ -12,9 +12,11 @@
 
 @source './';
 
-/* next/font gives Figtree a generated family name, so the token stack points at its variable. */
+/* next/font gives each font a generated family name, so the token stacks point at its variable. */
 @theme inline {
   --font-sans: var(--font-figtree), system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display:
+    var(--font-bricolage), var(--font-figtree), system-ui, -apple-system, 'Segoe UI', sans-serif;
 }
 
 @layer base {
@@ -43,11 +45,11 @@
   }
 }
 
-/* Spec 03 Type: the lilac marker under a key word in greetings. */
+/* Spec 03 Type: the lime marker under a key word in greetings. */
 @utility marker-highlight {
   white-space: nowrap;
   padding: 0 0.06em;
-  box-shadow: inset 0 -0.3em 0 var(--color-gold-soft);
+  box-shadow: inset 0 -0.32em 0 var(--color-gold-soft);
 }
 
 /* Prototype `.rail`: a soft light in the top-left corner of the side bar. */
