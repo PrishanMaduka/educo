@@ -22,7 +22,7 @@ export function QrCode({ text, label }: { text: string; label: string }) {
       aria-label={label}
       viewBox={`0 0 ${size} ${size}`}
       shapeRendering="crispEdges"
-      className="size-44 rounded-lg bg-site-white text-site-navy"
+      className="size-44 rounded-lg bg-on-navy text-navy"
     >
       <path d={path} fill="currentColor" />
     </svg>

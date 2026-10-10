@@ -58,9 +58,9 @@ test(
     // A teacher's home is My teaching (Task 20).
     await expect(page).toHaveURL('/app/teaching');
     await expect(page.getByText('My teaching arrives soon')).toBeVisible();
-    expect((await brandVariable(page, '--school-brand')).toUpperCase()).toBe('#2BB0A0');
+    expect((await brandVariable(page, '--quad-brand-raw')).toUpperCase()).toBe('#2BB0A0');
     expect((await brandVariable(page, '--quad-brand-fill')).toLowerCase()).toBe(
-      deriveBrand('#2BB0A0', scheme).brandFill.toLowerCase(),
+      deriveBrand('#2BB0A0', scheme).fill.toLowerCase(),
     );
     const nav = await openNav(page);
     await expect(nav.getByText(KHA)).toBeVisible();
@@ -86,9 +86,9 @@ test(
     await menu.getByRole('button', { name: CIS }).click();
     await reloaded;
     await expect(page.getByText('My teaching arrives soon')).toBeVisible();
-    expect((await brandVariable(page, '--school-brand')).toUpperCase()).toBe('#DD4A42');
+    expect((await brandVariable(page, '--quad-brand-raw')).toUpperCase()).toBe('#DD4A42');
     expect((await brandVariable(page, '--quad-brand-fill')).toLowerCase()).toBe(
-      deriveBrand('#DD4A42', scheme).brandFill.toLowerCase(),
+      deriveBrand('#DD4A42', scheme).fill.toLowerCase(),
     );
     const after = await sessionCookie(page);
     expect(after).toBeDefined();

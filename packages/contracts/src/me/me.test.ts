@@ -27,7 +27,27 @@ const me = {
     name: 'Colombo International School',
     shortName: 'CIS',
     timeZone: 'Asia/Colombo',
-    brand: { color: '#1F6F5C', fill: '#1F6F5C', fillDark: '#5FBFA6', ink: '#FFFFFF' },
+    brand: {
+      color: '#1F6F5C',
+      light: {
+        fill: '#1F6F5C',
+        fillStrong: '#1B5F4F',
+        ink: '#FFFFFF',
+        text: '#1F6F5C',
+        soft: '#DBE8E5',
+        railActive: '#23725F',
+        railActiveInk: '#FFFFFF',
+      },
+      dark: {
+        fill: '#2C7866',
+        fillStrong: '#266758',
+        ink: '#FFFFFF',
+        text: '#699F92',
+        soft: '#192D4A',
+        railActive: '#1F6F5C',
+        railActiveInk: '#FFFFFF',
+      },
+    },
   },
   memberships: [
     {
@@ -74,10 +94,13 @@ describe('Me', () => {
   it('refuses a brand colour that is not a hex colour, at its path', () => {
     const result = Me.safeParse({
       ...me,
-      school: { ...me.school, brand: { ...me.school.brand, fill: 'teal' } },
+      school: {
+        ...me.school,
+        brand: { ...me.school.brand, light: { ...me.school.brand.light, fill: 'teal' } },
+      },
     });
     expect(result.success).toBe(false);
-    expect(pathOf(result)).toEqual(['school', 'brand', 'fill']);
+    expect(pathOf(result)).toEqual(['school', 'brand', 'light', 'fill']);
   });
 
   it('refuses an unknown greeting period', () => {

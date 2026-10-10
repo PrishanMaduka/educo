@@ -19,7 +19,7 @@ export function Switch({ label, id, className, ...rest }: SwitchProps) {
       <RadixSwitch.Root
         id={controlId}
         className={cn(
-          'relative h-[22px] w-10 shrink-0 cursor-pointer rounded-pill bg-ink-3 data-[state=checked]:bg-brand-fill',
+          'relative h-[22px] w-10 shrink-0 cursor-pointer rounded-pill bg-switch-off data-[state=checked]:bg-brand-fill',
           'disabled:cursor-not-allowed disabled:opacity-50 max-sm:after:absolute max-sm:after:-inset-2.5 max-sm:after:content-[""]',
           transition,
           focusRing,

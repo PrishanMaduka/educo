@@ -9,6 +9,7 @@ import 'package:quad_api/src/model/me_preview.dart';
 import 'package:quad_api/src/model/me_preview_sample_user.dart';
 import 'package:quad_api/src/model/me_school.dart';
 import 'package:quad_api/src/model/me_school_brand.dart';
+import 'package:quad_api/src/model/me_school_brand_light.dart';
 import 'package:quad_api/src/model/me_support.dart';
 import 'package:quad_api/src/model/me_update_input.dart';
 import 'package:quad_api/src/model/otp_request_input.dart';
@@ -71,6 +72,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return MeSchool.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'MeSchoolBrand':
           return MeSchoolBrand.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'MeSchoolBrandLight':
+          return MeSchoolBrandLight.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'MeSupport':
           return MeSupport.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'MeUpdateInput':

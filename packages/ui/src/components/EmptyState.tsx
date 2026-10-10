@@ -23,7 +23,7 @@ export function EmptyState({ icon: Icon, title, description, action, className }
           <Icon aria-hidden="true" strokeWidth={ICON_STROKE} className="size-6" />
         </span>
       ) : null}
-      <p className="m-0 text-[15px] font-bold text-ink">{title}</p>
+      <p className="m-0 font-display text-[15px] font-bold text-ink">{title}</p>
       {description ? (
         <p className="m-0 max-w-[40ch] text-[13px] text-ink-2">{description}</p>
       ) : null}

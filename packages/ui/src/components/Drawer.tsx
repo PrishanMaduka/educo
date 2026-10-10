@@ -35,7 +35,7 @@ export function Stepper({ steps, current, label = uiText['ui.drawer.steps'] }: S
               className={cn(
                 'grid size-6 shrink-0 place-items-center rounded-full border text-xs font-bold',
                 state === 'current' && 'border-brand-fill bg-brand-fill text-brand-ink',
-                state === 'done' && 'border-brand bg-brand-soft text-brand',
+                state === 'done' && 'border-brand-text bg-brand-soft text-brand-text',
                 state === 'todo' && 'border-line-strong bg-surface text-ink-2',
               )}
             >
@@ -202,7 +202,7 @@ export function Drawer({
                   {eyebrow}
                 </p>
               ) : null}
-              <Dialog.Title className="m-0 text-[22px] leading-tight font-bold tracking-tight text-ink">
+              <Dialog.Title className="m-0 font-display text-[22px] leading-tight font-bold tracking-tight text-ink">
                 {title}
               </Dialog.Title>
               {subtitle ? (

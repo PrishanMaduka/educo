@@ -13,6 +13,7 @@ import type { SignInMembership } from '@quad/contracts';
 
 import { ApiError, staffApi, unwrap, unwrapEmpty } from '@/lib/api';
 import { errorKeyFor } from '@/lib/error-copy';
+import { schoolBrandStyle } from '@/lib/school-brand';
 
 export interface ChooseSchoolProps {
   email: string;
@@ -21,7 +22,7 @@ export interface ChooseSchoolProps {
   onTwoStepRequired: () => void;
 }
 
-/** The school's logo, or its short name on its own brand colour (inline CSS variables only). */
+/** The school's logo, or its short name on its own brand fill (inline CSS variables only). */
 function SchoolMark({ school }: { school: SignInMembership }) {
   if (school.logoUrl !== null) {
     return (
@@ -36,8 +37,9 @@ function SchoolMark({ school }: { school: SignInMembership }) {
   return (
     <span
       aria-hidden="true"
-      style={{ '--school-fill': school.brand.fill, '--school-ink': school.brand.ink }}
-      className="grid size-10 shrink-0 place-items-center rounded-xl bg-(--school-fill) text-[13px] font-bold text-(--school-ink)"
+      data-school-brand=""
+      style={schoolBrandStyle(school.brand)}
+      className="grid size-10 shrink-0 place-items-center rounded-xl bg-brand-fill text-[13px] font-bold text-brand-ink"
     >
       {school.shortName}
     </span>
@@ -96,7 +98,7 @@ export function ChooseSchool({ email, onOpened, onTwoStepRequired }: ChooseSchoo
               }}
               className={cn(
                 'grid w-full cursor-pointer grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-[14px] border border-line bg-surface px-3 py-2.5 text-left text-ink',
-                'hover:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand',
+                'hover:border-brand-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus',
                 'disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:border-line',
               )}
             >

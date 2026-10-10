@@ -3,6 +3,7 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:quad_api/src/model/me_school_brand_light.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'me_school_brand.g.dart';
@@ -20,11 +21,9 @@ class MeSchoolBrand {
 
     required  this.color,
 
-    required  this.fill,
+    required  this.light,
 
-    required  this.fillDark,
-
-    required  this.ink,
+    required  this.dark,
   });
 
   @JsonKey(
@@ -41,37 +40,25 @@ class MeSchoolBrand {
 
   @JsonKey(
     
-    name: r'fill',
+    name: r'light',
     required: true,
     includeIfNull: false,
   )
 
 
-  final String fill;
+  final MeSchoolBrandLight light;
 
 
 
   @JsonKey(
     
-    name: r'fillDark',
+    name: r'dark',
     required: true,
     includeIfNull: false,
   )
 
 
-  final String fillDark;
-
-
-
-  @JsonKey(
-    
-    name: r'ink',
-    required: true,
-    includeIfNull: false,
-  )
-
-
-  final String ink;
+  final MeSchoolBrandLight dark;
 
 
 
@@ -80,16 +67,14 @@ class MeSchoolBrand {
     @override
     bool operator ==(Object other) => identical(this, other) || other is MeSchoolBrand &&
       other.color == color &&
-      other.fill == fill &&
-      other.fillDark == fillDark &&
-      other.ink == ink;
+      other.light == light &&
+      other.dark == dark;
 
     @override
     int get hashCode =>
         color.hashCode +
-        fill.hashCode +
-        fillDark.hashCode +
-        ink.hashCode;
+        light.hashCode +
+        dark.hashCode;
 
   factory MeSchoolBrand.fromJson(Map<String, dynamic> json) => _$MeSchoolBrandFromJson(json);
 

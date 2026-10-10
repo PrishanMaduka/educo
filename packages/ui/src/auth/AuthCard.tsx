@@ -40,16 +40,16 @@ export function AuthCard({ title, eyebrow, lede, top, icon, children, className 
     >
       {top}
       {icon ? (
-        <div className="grid size-[60px] place-items-center rounded-[18px] bg-brand-soft text-brand-strong">
+        <div className="grid size-[60px] place-items-center rounded-[18px] bg-brand-soft text-brand-text">
           {icon}
         </div>
       ) : null}
-      {eyebrow ? <p className="m-0 text-[13px] font-bold text-brand-strong">{eyebrow}</p> : null}
+      {eyebrow ? <p className="m-0 text-[13px] font-bold text-brand-text">{eyebrow}</p> : null}
       <h1
         id="auth-title"
         ref={heading}
         tabIndex={-1}
-        className="m-0 text-[30px] leading-[1.1] font-extrabold tracking-[-0.03em] text-ink outline-none max-[860px]:text-[26px]"
+        className="m-0 font-display text-[30px] leading-[1.1] font-extrabold tracking-[-0.03em] text-ink outline-none max-[860px]:text-[26px]"
       >
         {title}
       </h1>

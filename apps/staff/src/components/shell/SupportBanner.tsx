@@ -33,7 +33,7 @@ export function SupportBanner({ support, onExit, exiting }: SupportBannerProps) 
         disabled={exiting}
         className={cn(
           'min-h-9 cursor-pointer rounded-full border border-rail-ink/40 bg-rail-ink/15 px-3.5 font-bold text-rail-ink hover:bg-rail-ink/25 disabled:cursor-not-allowed disabled:opacity-60 max-[899px]:min-h-11',
-          'outline-none focus-visible:ring-2 focus-visible:ring-rail-ink',
+          'outline-none focus-visible:ring-2 focus-visible:ring-focus',
         )}
       >
         {t('support.exit')}

@@ -36,7 +36,7 @@ export function Greeting({ period, greeting, firstName, dateLine, summary }: Gre
         <p className="m-0 text-[13px] font-bold text-ink-2">{dateLine}</p>
         <h1
           id="greeting-title"
-          className="mt-1.5 mb-2.5 text-[clamp(30px,3.4vw,44px)] leading-[1.15] font-extrabold tracking-[-0.02em] text-balance text-ink"
+          className="mt-1.5 mb-2.5 font-display text-[clamp(30px,3.4vw,44px)] leading-[1.15] font-extrabold tracking-[-0.02em] text-balance text-ink"
         >
           {before}
           <span className="marker-highlight">{firstName}</span>

@@ -22,8 +22,8 @@ import {
  * name and colour. The landing here is the normal build (NEXT_PUBLIC_QUAD_PRELAUNCH unset), whose
  * Sign in is a link to /app, which sends a signed-out visitor to /sign-in?next=/app (D30); the
  * pre-launch export's coming-soon note is `landing.spec.ts`'s. CIS has no logo in the seed, so its
- * tile is its short name on its brand fill. The brand is the shell's `--school-brand` variable
- * (Task 20; the plan's `--brand`), the seed's #DD4A42. One password call per run of it for
+ * tile is its short name on its brand fill. The brand is the shell's brand-raw token
+ * (`--quad-brand-raw`), the seed's saved #DD4A42 (kept by D34). One password call per run of it for
  * Prishan (`PASSWORD_JOURNEY_PROJECTS`).
  */
 
@@ -59,9 +59,9 @@ test(
 
     await expect(page).toHaveURL('/app');
     await expect(title(page, GREETING)).toBeVisible();
-    expect((await brandVariable(page, '--school-brand')).toUpperCase()).toBe(CIS_BRAND);
+    expect((await brandVariable(page, '--quad-brand-raw')).toUpperCase()).toBe(CIS_BRAND);
     expect((await brandVariable(page, '--quad-brand-fill')).toLowerCase()).toBe(
-      deriveBrand(CIS_BRAND, schemeOf(testInfo)).brandFill.toLowerCase(),
+      deriveBrand(CIS_BRAND, schemeOf(testInfo)).fill.toLowerCase(),
     );
     const nav = await openNav(page);
     await expect(nav.getByText(CIS)).toBeVisible();

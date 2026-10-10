@@ -20,7 +20,7 @@ export function PageHead({ crumb, title, description, actions }: PageHeadProps) 
             {crumb}
           </p>
         ) : null}
-        <h1 className="m-0 text-[30px] leading-[1.15] font-extrabold tracking-[-0.02em] text-balance text-ink">
+        <h1 className="m-0 font-display text-[30px] leading-[1.15] font-extrabold tracking-[-0.02em] text-balance text-ink">
           {title}
         </h1>
         {description ? (

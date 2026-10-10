@@ -3,6 +3,7 @@ import { greetingPeriod } from '@quad/domain';
 import { deriveBrand } from '@quad/tokens';
 import { describe, expect, it } from 'vitest';
 
+import { brandPalette } from '../../src/common/branding/brand-palette';
 import { useDatabaseApp } from '../helpers/database-app';
 import {
   insertAccount,
@@ -72,12 +73,7 @@ describe('GET /me', () => {
         name: 'Colombo International School',
         shortName: 'CIS',
         timeZone: 'Asia/Colombo',
-        brand: {
-          color: '#1F6F5C',
-          fill: deriveBrand('#1F6F5C', 'light').brandFill,
-          fillDark: deriveBrand('#1F6F5C', 'dark').brandFill,
-          ink: deriveBrand('#1F6F5C', 'light').brandInk,
-        },
+        brand: brandPalette('#1F6F5C'),
       },
       // Staff memberships of other schools only: not this one, not the guardian one.
       memberships: [
@@ -97,11 +93,13 @@ describe('GET /me', () => {
     expect(me.greeting).toEqual({ period: 'morning', word: 'Good morning' });
   });
 
-  it("gives a school with no brand colour Quad's default brand", async () => {
+  it("gives a school with no brand colour Quad's default brand, Quad lime", async () => {
     const school = await insertSchool(db());
     const { session } = await signedInMember(db(), school);
     const me = Me.parse((await inject('GET', '/me', sessionHeaders(session))).json());
-    expect(me.school.brand.fill).toBe(deriveBrand(me.school.brand.color, 'light').brandFill);
+    expect(me.school.brand.color).toBe('#C8F169');
+    expect(me.school.brand.light.fill).toBe(deriveBrand(null, 'light').fill);
+    expect(me.school.brand.dark.ink).toBe(deriveBrand(null, 'dark').ink);
   });
 
   it('answers 401 unauthorized without a session', async () => {

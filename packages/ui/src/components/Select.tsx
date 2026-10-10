@@ -122,7 +122,7 @@ export function Select({
                       )}
                     >
                       <RadixSelect.ItemText>{option.label}</RadixSelect.ItemText>
-                      <RadixSelect.ItemIndicator className="ml-auto text-brand">
+                      <RadixSelect.ItemIndicator className="ml-auto text-brand-text">
                         <Check aria-hidden="true" strokeWidth={ICON_STROKE} className="size-4" />
                       </RadixSelect.ItemIndicator>
                     </RadixSelect.Item>

@@ -24,7 +24,7 @@ export function Card({ title, actions, flush = false, className, children, ...re
       {title || actions ? (
         <header className="flex items-center gap-2.5 border-b border-line px-[18px] py-3.5">
           {title ? (
-            <h2 id={headingId} className="flex-1 text-[15px] font-bold text-ink">
+            <h2 id={headingId} className="flex-1 font-display text-[15px] font-bold text-ink">
               {title}
             </h2>
           ) : (

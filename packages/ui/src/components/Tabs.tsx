@@ -44,7 +44,7 @@ export function Tabs({ label, tabs, value, defaultValue, onValueChange, classNam
             disabled={tab.disabled}
             className={cn(
               '-mb-px inline-flex cursor-pointer items-center gap-1.5 border-b-2 border-transparent px-3.5 py-2.5 font-semibold whitespace-nowrap text-ink-2 max-sm:min-h-11',
-              'hover:text-ink data-[state=active]:border-brand-fill data-[state=active]:text-ink disabled:cursor-not-allowed disabled:opacity-50',
+              'hover:text-ink data-[state=active]:border-brand-text data-[state=active]:text-ink disabled:cursor-not-allowed disabled:opacity-50',
               transition,
               focusRing,
             )}

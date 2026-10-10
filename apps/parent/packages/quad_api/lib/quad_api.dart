@@ -24,6 +24,7 @@ export 'package:quad_api/src/model/me_preview.dart';
 export 'package:quad_api/src/model/me_preview_sample_user.dart';
 export 'package:quad_api/src/model/me_school.dart';
 export 'package:quad_api/src/model/me_school_brand.dart';
+export 'package:quad_api/src/model/me_school_brand_light.dart';
 export 'package:quad_api/src/model/me_support.dart';
 export 'package:quad_api/src/model/me_update_input.dart';
 export 'package:quad_api/src/model/otp_request_input.dart';

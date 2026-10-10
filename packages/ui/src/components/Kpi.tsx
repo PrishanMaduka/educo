@@ -16,7 +16,7 @@ export interface KpiProps {
 }
 
 const tile: Record<KpiTone, string> = {
-  brand: 'bg-brand-soft text-brand-strong',
+  brand: 'bg-brand-soft text-brand-text',
   good: 'bg-good-soft text-good',
   warn: 'bg-warn-soft text-warn',
   bad: 'bg-bad-soft text-bad',
@@ -40,7 +40,9 @@ export function Kpi({ label, value, delta, icon: Icon, tone = 'brand', className
       ) : null}
       <dl className="min-w-0">
         <dt className="text-[12.5px] font-semibold text-ink-2">{label}</dt>
-        <dd className="mt-0.5 text-2xl leading-[1.1] font-bold text-ink tabular-nums">{value}</dd>
+        <dd className="mt-0.5 font-display text-2xl leading-[1.1] font-bold text-ink tabular-nums">
+          {value}
+        </dd>
         {delta ? <dd className="mt-1 text-xs text-ink-2">{delta}</dd> : null}
       </dl>
     </div>

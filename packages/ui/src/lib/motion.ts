@@ -4,7 +4,7 @@ export const transition =
 
 /** Spec 03 Accessibility: visible 2 px brand focus ring with a 2 px offset. */
 export const focusRing =
-  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand focus-visible:outline-solid';
+  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus focus-visible:outline-solid';
 
 /** Spec 03 Icons: Lucide at stroke width 1.9. */
 export const ICON_STROKE = 1.9;

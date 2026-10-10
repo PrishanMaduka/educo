@@ -1,20 +1,25 @@
-import { colors, deriveBrand } from '@quad/tokens';
+import { deriveBrand, type BrandMode } from '@quad/tokens';
 
-import type { MeBrand } from '@quad/contracts';
+import type { MeBrand, MeBrandTheme } from '@quad/contracts';
+
+function brandTheme(brandColor: string | null, mode: BrandMode): MeBrandTheme {
+  const { fill, fillStrong, ink, text, soft, railActive, railActiveInk } = deriveBrand(
+    brandColor,
+    mode,
+  );
+  return { fill, fillStrong, ink, text, soft, railActive, railActiveInk };
+}
 
 /**
- * The school's brand colours for the web shell (spec 03 "School brand colour"; D32): colour
- * maths only, from `deriveBrand` in `@quad/tokens`, so the API and the apps agree. A school
- * with no colour gets Quad's default brand. Dark mode keeps the `brand-ink` token for text on
- * `fillDark`, so only the light ink is returned.
+ * The school's brand tokens for both themes (spec 03 "School brand colour"; D34, D56): colour
+ * maths only, from `deriveBrand` in `@quad/tokens`, so the staff portal and the parent app apply
+ * the same values and never derive them. A school with no colour, an invalid one or a legacy
+ * prototype colour gets Quad lime; a saved colour is kept.
  */
 export function brandPalette(brandColor: string | null): MeBrand {
-  const hex = brandColor ?? colors.light.brand;
-  const light = deriveBrand(hex, 'light');
   return {
-    color: light.brand,
-    fill: light.brandFill,
-    fillDark: deriveBrand(hex, 'dark').brandFill,
-    ink: light.brandInk,
+    color: deriveBrand(brandColor, 'light').raw,
+    light: brandTheme(brandColor, 'light'),
+    dark: brandTheme(brandColor, 'dark'),
   };
 }

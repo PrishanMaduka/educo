@@ -20,7 +20,7 @@ export function Checkbox({ label, id, className, ...rest }: CheckboxProps) {
       <RadixCheckbox.Root
         id={controlId}
         className={cn(
-          'relative grid size-[18px] shrink-0 cursor-pointer place-items-center rounded-[5px] border border-ink-3 bg-surface text-brand-ink',
+          'relative grid size-[18px] shrink-0 cursor-pointer place-items-center rounded-[5px] border border-field-line bg-surface text-brand-ink',
           'data-[state=checked]:border-brand-fill data-[state=checked]:bg-brand-fill data-[state=indeterminate]:border-brand-fill data-[state=indeterminate]:bg-brand-fill',
           'disabled:cursor-not-allowed disabled:opacity-50 after:absolute after:-inset-3.5 after:content-[""]',
           transition,

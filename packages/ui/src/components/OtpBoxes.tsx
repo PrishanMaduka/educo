@@ -152,8 +152,8 @@ export function OtpBoxes({
               event.target.select();
             }}
             className={cn(
-              'h-14 w-full min-w-0 flex-1 basis-0 rounded-input border-[1.5px] border-line-strong bg-surface-2 text-center text-[22px] font-bold text-ink',
-              'outline-none focus-visible:border-brand focus-visible:ring-4 focus-visible:ring-brand-soft',
+              'h-14 w-full min-w-0 flex-1 basis-0 rounded-input border-[1.5px] border-field-line bg-surface-2 text-center text-[22px] font-bold text-ink',
+              'outline-none focus-visible:border-focus focus-visible:ring-3 focus-visible:ring-focus/25',
               'disabled:cursor-not-allowed disabled:opacity-50',
               error && 'border-bad',
               transition,

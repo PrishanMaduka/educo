@@ -95,7 +95,7 @@ export function Topbar({
         <Sparkles
           aria-hidden="true"
           strokeWidth={ICON_STROKE}
-          className="size-4 shrink-0 text-brand"
+          className="size-4 shrink-0 text-brand-text"
         />
         <span className="max-[899px]:sr-only">{labels.askQuad}</span>
         <kbd aria-hidden="true" className={cn(kbd, 'ml-1 max-[899px]:hidden')}>

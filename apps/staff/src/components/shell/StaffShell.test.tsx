@@ -42,7 +42,27 @@ const ME: Me = {
     name: 'Colombo International School',
     shortName: 'CIS',
     timeZone: 'Asia/Colombo',
-    brand: { color: '#2BB0A0', fill: '#1F7F73', fillDark: '#4CC9B8', ink: '#FFFFFF' },
+    brand: {
+      color: '#2BB0A0',
+      light: {
+        fill: '#2BB0A0',
+        fillStrong: '#49BBAD',
+        ink: '#101632',
+        text: '#1D786D',
+        soft: '#DDF2F0',
+        railActive: '#2BB0A0',
+        railActiveInk: '#101632',
+      },
+      dark: {
+        fill: '#2BB0A0',
+        fillStrong: '#49BBAD',
+        ink: '#101632',
+        text: '#33B3A4',
+        soft: '#1B3A57',
+        railActive: '#2BB0A0',
+        railActiveInk: '#101632',
+      },
+    },
   },
   memberships: [
     {
@@ -135,10 +155,13 @@ describe('StaffShell', () => {
     const { container } = renderShell();
     const scope = container.querySelector('[data-school-brand]');
     expect(scope).not.toBeNull();
-    expect(scope?.getAttribute('style')).toContain('--school-brand: #2BB0A0');
-    expect(scope?.getAttribute('style')).toContain('--school-brand-fill: #1F7F73');
-    expect(scope?.getAttribute('style')).toContain('--school-brand-fill-dark: #4CC9B8');
-    expect(scope?.getAttribute('style')).toContain('--school-brand-ink: #FFFFFF');
+    const style = scope?.getAttribute('style') ?? '';
+    expect(style).toContain('--school-light-brand-raw: #2BB0A0');
+    expect(style).toContain('--school-light-brand-fill: #2BB0A0');
+    expect(style).toContain('--school-light-brand-ink: #101632');
+    expect(style).toContain('--school-light-brand-text: #1D786D');
+    expect(style).toContain('--school-dark-brand-text: #33B3A4');
+    expect(style).toContain('--school-dark-rail-active-ink: #101632');
     expect(container.innerHTML).not.toMatch(/class="[^"]*#[0-9a-f]{6}/i);
     expect(document.documentElement).toHaveAttribute('data-school-brand');
   });

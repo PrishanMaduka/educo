@@ -17,6 +17,7 @@ doc/MePreview.md
 doc/MePreviewSampleUser.md
 doc/MeSchool.md
 doc/MeSchoolBrand.md
+doc/MeSchoolBrandLight.md
 doc/MeSupport.md
 doc/MeUpdateInput.md
 doc/OtpRequestInput.md
@@ -60,6 +61,7 @@ lib/src/model/me_preview.dart
 lib/src/model/me_preview_sample_user.dart
 lib/src/model/me_school.dart
 lib/src/model/me_school_brand.dart
+lib/src/model/me_school_brand_light.dart
 lib/src/model/me_support.dart
 lib/src/model/me_update_input.dart
 lib/src/model/otp_request_input.dart
@@ -93,6 +95,7 @@ test/me_memberships_inner_test.dart
 test/me_person_test.dart
 test/me_preview_sample_user_test.dart
 test/me_preview_test.dart
+test/me_school_brand_light_test.dart
 test/me_school_brand_test.dart
 test/me_school_test.dart
 test/me_support_test.dart

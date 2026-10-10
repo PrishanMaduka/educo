@@ -216,24 +216,95 @@
                     "type": "string",
                     "pattern": "^#[0-9A-Fa-f]{6}$"
                   },
-                  "fill": {
-                    "type": "string",
-                    "pattern": "^#[0-9A-Fa-f]{6}$"
+                  "light": {
+                    "type": "object",
+                    "properties": {
+                      "fill": {
+                        "type": "string",
+                        "pattern": "^#[0-9A-Fa-f]{6}$"
+                      },
+                      "fillStrong": {
+                        "type": "string",
+                        "pattern": "^#[0-9A-Fa-f]{6}$"
+                      },
+                      "ink": {
+                        "type": "string",
+                        "pattern": "^#[0-9A-Fa-f]{6}$"
+                      },
+                      "text": {
+                        "type": "string",
+                        "pattern": "^#[0-9A-Fa-f]{6}$"
+                      },
+                      "soft": {
+                        "type": "string",
+                        "pattern": "^#[0-9A-Fa-f]{6}$"
+                      },
+                      "railActive": {
+                        "type": "string",
+                        "pattern": "^#[0-9A-Fa-f]{6}$"
+                      },
+                      "railActiveInk": {
+                        "type": "string",
+                        "pattern": "^#[0-9A-Fa-f]{6}$"
+                      }
+                    },
+                    "required": [
+                      "fill",
+                      "fillStrong",
+                      "ink",
+                      "text",
+                      "soft",
+                      "railActive",
+                      "railActiveInk"
+                    ]
                   },
-                  "fillDark": {
-                    "type": "string",
-                    "pattern": "^#[0-9A-Fa-f]{6}$"
-                  },
-                  "ink": {
-                    "type": "string",
-                    "pattern": "^#[0-9A-Fa-f]{6}$"
+                  "dark": {
+                    "type": "object",
+                    "properties": {
+                      "fill": {
+                        "type": "string",
+                        "pattern": "^#[0-9A-Fa-f]{6}$"
+                      },
+                      "fillStrong": {
+                        "type": "string",
+                        "pattern": "^#[0-9A-Fa-f]{6}$"
+                      },
+                      "ink": {
+                        "type": "string",
+                        "pattern": "^#[0-9A-Fa-f]{6}$"
+                      },
+                      "text": {
+                        "type": "string",
+                        "pattern": "^#[0-9A-Fa-f]{6}$"
+                      },
+                      "soft": {
+                        "type": "string",
+                        "pattern": "^#[0-9A-Fa-f]{6}$"
+                      },
+                      "railActive": {
+                        "type": "string",
+                        "pattern": "^#[0-9A-Fa-f]{6}$"
+                      },
+                      "railActiveInk": {
+                        "type": "string",
+                        "pattern": "^#[0-9A-Fa-f]{6}$"
+                      }
+                    },
+                    "required": [
+                      "fill",
+                      "fillStrong",
+                      "ink",
+                      "text",
+                      "soft",
+                      "railActive",
+                      "railActiveInk"
+                    ]
                   }
                 },
                 "required": [
                   "color",
-                  "fill",
-                  "fillDark",
-                  "ink"
+                  "light",
+                  "dark"
                 ]
               }
             },
@@ -835,24 +906,95 @@
                       "type": "string",
                       "pattern": "^#[0-9A-Fa-f]{6}$"
                     },
-                    "fill": {
-                      "type": "string",
-                      "pattern": "^#[0-9A-Fa-f]{6}$"
+                    "light": {
+                      "type": "object",
+                      "properties": {
+                        "fill": {
+                          "type": "string",
+                          "pattern": "^#[0-9A-Fa-f]{6}$"
+                        },
+                        "fillStrong": {
+                          "type": "string",
+                          "pattern": "^#[0-9A-Fa-f]{6}$"
+                        },
+                        "ink": {
+                          "type": "string",
+                          "pattern": "^#[0-9A-Fa-f]{6}$"
+                        },
+                        "text": {
+                          "type": "string",
+                          "pattern": "^#[0-9A-Fa-f]{6}$"
+                        },
+                        "soft": {
+                          "type": "string",
+                          "pattern": "^#[0-9A-Fa-f]{6}$"
+                        },
+                        "railActive": {
+                          "type": "string",
+                          "pattern": "^#[0-9A-Fa-f]{6}$"
+                        },
+                        "railActiveInk": {
+                          "type": "string",
+                          "pattern": "^#[0-9A-Fa-f]{6}$"
+                        }
+                      },
+                      "required": [
+                        "fill",
+                        "fillStrong",
+                        "ink",
+                        "text",
+                        "soft",
+                        "railActive",
+                        "railActiveInk"
+                      ]
                     },
-                    "fillDark": {
-                      "type": "string",
-                      "pattern": "^#[0-9A-Fa-f]{6}$"
-                    },
-                    "ink": {
-                      "type": "string",
-                      "pattern": "^#[0-9A-Fa-f]{6}$"
+                    "dark": {
+                      "type": "object",
+                      "properties": {
+                        "fill": {
+                          "type": "string",
+                          "pattern": "^#[0-9A-Fa-f]{6}$"
+                        },
+                        "fillStrong": {
+                          "type": "string",
+                          "pattern": "^#[0-9A-Fa-f]{6}$"
+                        },
+                        "ink": {
+                          "type": "string",
+                          "pattern": "^#[0-9A-Fa-f]{6}$"
+                        },
+                        "text": {
+                          "type": "string",
+                          "pattern": "^#[0-9A-Fa-f]{6}$"
+                        },
+                        "soft": {
+                          "type": "string",
+                          "pattern": "^#[0-9A-Fa-f]{6}$"
+                        },
+                        "railActive": {
+                          "type": "string",
+                          "pattern": "^#[0-9A-Fa-f]{6}$"
+                        },
+                        "railActiveInk": {
+                          "type": "string",
+                          "pattern": "^#[0-9A-Fa-f]{6}$"
+                        }
+                      },
+                      "required": [
+                        "fill",
+                        "fillStrong",
+                        "ink",
+                        "text",
+                        "soft",
+                        "railActive",
+                        "railActiveInk"
+                      ]
                     }
                   },
                   "required": [
                     "color",
-                    "fill",
-                    "fillDark",
-                    "ink"
+                    "light",
+                    "dark"
                   ]
                 },
                 "roleNames": {
@@ -977,24 +1119,95 @@
                       "type": "string",
                       "pattern": "^#[0-9A-Fa-f]{6}$"
                     },
-                    "fill": {
-                      "type": "string",
-                      "pattern": "^#[0-9A-Fa-f]{6}$"
+                    "light": {
+                      "type": "object",
+                      "properties": {
+                        "fill": {
+                          "type": "string",
+                          "pattern": "^#[0-9A-Fa-f]{6}$"
+                        },
+                        "fillStrong": {
+                          "type": "string",
+                          "pattern": "^#[0-9A-Fa-f]{6}$"
+                        },
+                        "ink": {
+                          "type": "string",
+                          "pattern": "^#[0-9A-Fa-f]{6}$"
+                        },
+                        "text": {
+                          "type": "string",
+                          "pattern": "^#[0-9A-Fa-f]{6}$"
+                        },
+                        "soft": {
+                          "type": "string",
+                          "pattern": "^#[0-9A-Fa-f]{6}$"
+                        },
+                        "railActive": {
+                          "type": "string",
+                          "pattern": "^#[0-9A-Fa-f]{6}$"
+                        },
+                        "railActiveInk": {
+                          "type": "string",
+                          "pattern": "^#[0-9A-Fa-f]{6}$"
+                        }
+                      },
+                      "required": [
+                        "fill",
+                        "fillStrong",
+                        "ink",
+                        "text",
+                        "soft",
+                        "railActive",
+                        "railActiveInk"
+                      ]
                     },
-                    "fillDark": {
-                      "type": "string",
-                      "pattern": "^#[0-9A-Fa-f]{6}$"
-                    },
-                    "ink": {
-                      "type": "string",
-                      "pattern": "^#[0-9A-Fa-f]{6}$"
+                    "dark": {
+                      "type": "object",
+                      "properties": {
+                        "fill": {
+                          "type": "string",
+                          "pattern": "^#[0-9A-Fa-f]{6}$"
+                        },
+                        "fillStrong": {
+                          "type": "string",
+                          "pattern": "^#[0-9A-Fa-f]{6}$"
+                        },
+                        "ink": {
+                          "type": "string",
+                          "pattern": "^#[0-9A-Fa-f]{6}$"
+                        },
+                        "text": {
+                          "type": "string",
+                          "pattern": "^#[0-9A-Fa-f]{6}$"
+                        },
+                        "soft": {
+                          "type": "string",
+                          "pattern": "^#[0-9A-Fa-f]{6}$"
+                        },
+                        "railActive": {
+                          "type": "string",
+                          "pattern": "^#[0-9A-Fa-f]{6}$"
+                        },
+                        "railActiveInk": {
+                          "type": "string",
+                          "pattern": "^#[0-9A-Fa-f]{6}$"
+                        }
+                      },
+                      "required": [
+                        "fill",
+                        "fillStrong",
+                        "ink",
+                        "text",
+                        "soft",
+                        "railActive",
+                        "railActiveInk"
+                      ]
                     }
                   },
                   "required": [
                     "color",
-                    "fill",
-                    "fillDark",
-                    "ink"
+                    "light",
+                    "dark"
                   ]
                 },
                 "suspended": {

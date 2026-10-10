@@ -6,7 +6,7 @@ import { describe, expect, it } from 'vitest';
 import { focusRing } from './motion';
 
 describe('focusRing', () => {
-  it('is the one place the 2 px brand outline with 2 px offset is spelled out', () => {
+  it('is the one place the 2 px blue focus outline with 2 px offset is spelled out', () => {
     expect(focusRing).toContain('focus-visible:outline-2');
     expect(focusRing).toContain('focus-visible:outline-offset-2');
     const dir = join(__dirname, '../components');

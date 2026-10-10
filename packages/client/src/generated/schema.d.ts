@@ -3641,9 +3641,24 @@ export interface components {
                 timeZone: string;
                 brand: {
                     color: string;
-                    fill: string;
-                    fillDark: string;
-                    ink: string;
+                    light: {
+                        fill: string;
+                        fillStrong: string;
+                        ink: string;
+                        text: string;
+                        soft: string;
+                        railActive: string;
+                        railActiveInk: string;
+                    };
+                    dark: {
+                        fill: string;
+                        fillStrong: string;
+                        ink: string;
+                        text: string;
+                        soft: string;
+                        railActive: string;
+                        railActiveInk: string;
+                    };
                 };
             };
             memberships: {
@@ -3766,9 +3781,24 @@ export interface components {
                 logoUrl: string | null;
                 brand: {
                     color: string;
-                    fill: string;
-                    fillDark: string;
-                    ink: string;
+                    light: {
+                        fill: string;
+                        fillStrong: string;
+                        ink: string;
+                        text: string;
+                        soft: string;
+                        railActive: string;
+                        railActiveInk: string;
+                    };
+                    dark: {
+                        fill: string;
+                        fillStrong: string;
+                        ink: string;
+                        text: string;
+                        soft: string;
+                        railActive: string;
+                        railActiveInk: string;
+                    };
                 };
                 roleNames: string[];
                 suspended: boolean;
@@ -3803,9 +3833,24 @@ export interface components {
                 logoUrl: string | null;
                 brand: {
                     color: string;
-                    fill: string;
-                    fillDark: string;
-                    ink: string;
+                    light: {
+                        fill: string;
+                        fillStrong: string;
+                        ink: string;
+                        text: string;
+                        soft: string;
+                        railActive: string;
+                        railActiveInk: string;
+                    };
+                    dark: {
+                        fill: string;
+                        fillStrong: string;
+                        ink: string;
+                        text: string;
+                        soft: string;
+                        railActive: string;
+                        railActiveInk: string;
+                    };
                 };
                 suspended: boolean;
                 suspendReason: string | null;

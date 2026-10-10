@@ -24,7 +24,7 @@ const pillVariants = cva(
 /** The status dot carries the tone colour, the text stays ink so it passes AA in both themes. */
 const dotTone = {
   neutral: 'bg-ink-3',
-  brand: 'bg-brand',
+  brand: 'bg-brand-text',
   good: 'bg-good',
   warn: 'bg-warn',
   bad: 'bg-bad',

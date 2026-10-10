@@ -68,8 +68,13 @@ test.describe('the shell, signed in as the school admin', () => {
     await page.goto('/app');
     await expect(title(page, GREETING)).toBeVisible();
     const scheme = schemeOf(testInfo);
-    const expected = deriveBrand('#DD4A42', scheme).brandFill.toLowerCase();
-    expect((await brandVariable(page, '--quad-brand-fill')).toLowerCase()).toBe(expected);
+    const derived = deriveBrand('#DD4A42', scheme);
+    expect((await brandVariable(page, '--quad-brand-fill')).toLowerCase()).toBe(
+      derived.fill.toLowerCase(),
+    );
+    expect((await brandVariable(page, '--quad-rail-active')).toLowerCase()).toBe(
+      derived.railActive.toLowerCase(),
+    );
   });
 
   test('/app fits the screen, uses the canvas colour and passes axe', async ({

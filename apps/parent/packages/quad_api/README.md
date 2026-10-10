@@ -97,6 +97,7 @@ Class | Method | HTTP request | Description
  - [MePreviewSampleUser](doc/MePreviewSampleUser.md)
  - [MeSchool](doc/MeSchool.md)
  - [MeSchoolBrand](doc/MeSchoolBrand.md)
+ - [MeSchoolBrandLight](doc/MeSchoolBrandLight.md)
  - [MeSupport](doc/MeSupport.md)
  - [MeUpdateInput](doc/MeUpdateInput.md)
  - [OtpRequestInput](doc/OtpRequestInput.md)

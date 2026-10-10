@@ -71,7 +71,7 @@ export function RolesTab({
       <Card flush>
         <RolesList roles={roles.items} selectedId={role.id} onSelect={choose} />
         <div className="border-b border-line px-[18px] py-3.5">
-          <h2 className="m-0 text-[17px] font-bold text-ink">{role.name}</h2>
+          <h2 className="m-0 font-display text-[17px] font-bold text-ink">{role.name}</h2>
           <p className="m-0 mt-0.5 text-[12.5px] text-ink-2">
             {role.system ? t('roles.systemNote') : t('roles.customNote')}
           </p>

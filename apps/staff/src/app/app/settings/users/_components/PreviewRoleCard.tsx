@@ -38,7 +38,7 @@ export function PreviewRoleCard({ roles, busy, onPreview }: PreviewRoleCardProps
               }}
               className={cn(
                 'flex w-full cursor-pointer items-center gap-2.5 rounded-xl border border-line bg-surface px-3 py-2.5 text-left hover:bg-surface-2 disabled:cursor-not-allowed disabled:opacity-60 max-sm:min-h-11',
-                'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand',
+                'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus',
               )}
             >
               <Avatar name={role.name} size="sm" decorative />

@@ -209,7 +209,7 @@ function Builder({
           {t('roles.newPage.back')}
         </Link>
         <div>
-          <h1 className="m-0 text-[30px] leading-[1.15] font-extrabold tracking-[-0.02em] text-ink">
+          <h1 className="m-0 font-display text-[30px] leading-[1.15] font-extrabold tracking-[-0.02em] text-ink">
             {t('roles.new')}
           </h1>
           <p className="m-0 mt-1.5 max-w-[70ch] text-[15px] text-ink-2">
@@ -264,7 +264,7 @@ function Builder({
                         }}
                         className={cn(
                           'grid size-8 cursor-pointer place-items-center rounded-lg border-2 text-surface max-sm:size-11',
-                          'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand',
+                          'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus',
                           swatch.className,
                           chosen ? 'border-ink' : 'border-transparent',
                         )}
@@ -316,7 +316,7 @@ function Builder({
                   key={scope}
                   className={cn(
                     'flex cursor-pointer items-start gap-2.5 rounded-xl border px-3 py-2.5',
-                    field.value === scope ? 'border-brand bg-brand-soft' : 'border-line',
+                    field.value === scope ? 'border-brand-text bg-brand-soft' : 'border-line',
                   )}
                 >
                   <input

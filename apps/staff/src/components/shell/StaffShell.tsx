@@ -31,7 +31,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useEffect, type CSSProperties, type ReactNode } from 'react';
+import { useEffect, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { PreviewBanner } from './PreviewBanner';
@@ -45,6 +45,7 @@ import type { MessageKey } from '@/i18n';
 import type { Me, MeBrand, MePermissions, StaffPageId } from '@quad/contracts';
 
 import { useShellLabels } from '@/i18n/client';
+import { schoolBrandStyle } from '@/lib/school-brand';
 import { portalNoticeFrom, type PortalNotice } from '@/lib/session';
 
 /** Each page's icon (spec 03 side bar icons; lucide stands in for the drawings until D40 lands). */
@@ -74,20 +75,6 @@ const ICONS: Record<StaffPageId, LucideIcon> = {
   users_roles: Shield,
   school_settings: SlidersHorizontal,
 };
-
-/**
- * The school's brand as CSS variables (spec 03 "School brand colour", D32): the API computes
- * the palette; `school-brand.css` maps these onto the token variables, taking `fillDark` in dark
- * mode. Values only ever reach CSS variables, never class names.
- */
-export function schoolBrandStyle(brand: MeBrand): CSSProperties {
-  return {
-    '--school-brand': brand.color,
-    '--school-brand-fill': brand.fill,
-    '--school-brand-fill-dark': brand.fillDark,
-    '--school-brand-ink': brand.ink,
-  };
-}
 
 /** The sentence for each portal notice: fixed copy, never text from the address. */
 const NOTICE_COPY: Record<PortalNotice, MessageKey> = {

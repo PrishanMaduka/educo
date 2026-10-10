@@ -12,18 +12,13 @@ void main() {
       // TODO
     });
 
-    // String fill
-    test('to test the property `fill`', () async {
+    // MeSchoolBrandLight light
+    test('to test the property `light`', () async {
       // TODO
     });
 
-    // String fillDark
-    test('to test the property `fillDark`', () async {
-      // TODO
-    });
-
-    // String ink
-    test('to test the property `ink`', () async {
+    // MeSchoolBrandLight dark
+    test('to test the property `dark`', () async {
       // TODO
     });
 

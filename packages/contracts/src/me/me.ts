@@ -9,16 +9,30 @@ import { ThemeChoice } from '../enums';
 import { Greeting } from './greeting';
 
 /**
- * The school's brand colours, computed by the API with `deriveBrand` from `@quad/tokens`
- * (spec 03 "School brand colour"; D32): `color` is the school's colour, `fill` the light-mode
- * fill that carries `ink` text at 4.5:1, and `fillDark` the dark-mode fill. Dark mode keeps the
- * `brand-ink` token for text on the fill.
+ * The school's brand tokens for one theme, computed by the API with `deriveBrand` from
+ * `@quad/tokens` (spec 03 "School brand colour"; D34, D56): the fill and hover fill that carry
+ * `ink` text at 4.5:1, the brand as text, the tint, and the active side-bar item with its ink.
+ */
+export const MeBrandTheme = z.object({
+  fill: HexColor,
+  fillStrong: HexColor,
+  ink: HexColor,
+  text: HexColor,
+  soft: HexColor,
+  railActive: HexColor,
+  railActiveInk: HexColor,
+});
+export type MeBrandTheme = z.infer<typeof MeBrandTheme>;
+
+/**
+ * The school's brand: `color` is the colour it stands for (`brand-raw`; Quad lime when the school
+ * has none), and `light` and `dark` are the derived tokens for each theme. The apps apply these
+ * values as they are and never derive them (D56).
  */
 export const MeBrand = z.object({
   color: HexColor,
-  fill: HexColor,
-  fillDark: HexColor,
-  ink: HexColor,
+  light: MeBrandTheme,
+  dark: MeBrandTheme,
 });
 export type MeBrand = z.infer<typeof MeBrand>;
 

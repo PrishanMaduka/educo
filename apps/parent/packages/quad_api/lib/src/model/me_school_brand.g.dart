@@ -8,15 +8,17 @@ part of 'me_school_brand.dart';
 
 MeSchoolBrand _$MeSchoolBrandFromJson(Map<String, dynamic> json) =>
     $checkedCreate('MeSchoolBrand', json, ($checkedConvert) {
-      $checkKeys(
-        json,
-        requiredKeys: const ['color', 'fill', 'fillDark', 'ink'],
-      );
+      $checkKeys(json, requiredKeys: const ['color', 'light', 'dark']);
       final val = MeSchoolBrand(
         color: $checkedConvert('color', (v) => v as String),
-        fill: $checkedConvert('fill', (v) => v as String),
-        fillDark: $checkedConvert('fillDark', (v) => v as String),
-        ink: $checkedConvert('ink', (v) => v as String),
+        light: $checkedConvert(
+          'light',
+          (v) => MeSchoolBrandLight.fromJson(v as Map<String, dynamic>),
+        ),
+        dark: $checkedConvert(
+          'dark',
+          (v) => MeSchoolBrandLight.fromJson(v as Map<String, dynamic>),
+        ),
       );
       return val;
     });
@@ -24,7 +26,6 @@ MeSchoolBrand _$MeSchoolBrandFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$MeSchoolBrandToJson(MeSchoolBrand instance) =>
     <String, dynamic>{
       'color': instance.color,
-      'fill': instance.fill,
-      'fillDark': instance.fillDark,
-      'ink': instance.ink,
+      'light': instance.light.toJson(),
+      'dark': instance.dark.toJson(),
     };

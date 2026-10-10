@@ -61,8 +61,8 @@ export function Field({
 }
 
 export const controlClasses =
-  'w-full min-w-0 rounded-lg border border-line-strong bg-surface px-[11px] text-ink placeholder:text-ink-2 ' +
-  'focus-visible:border-brand ' +
+  'w-full min-w-0 rounded-lg border border-field-line bg-surface px-[11px] text-ink placeholder:text-ink-2 ' +
+  'hover:border-ink-3 focus-visible:border-focus focus-visible:ring-3 focus-visible:ring-focus/25 ' +
   focusRing +
   ' ' +
   'disabled:cursor-not-allowed disabled:opacity-50 max-sm:min-h-11';

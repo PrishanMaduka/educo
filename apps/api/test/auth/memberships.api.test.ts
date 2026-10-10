@@ -1,7 +1,7 @@
 import { SignInMembershipList } from '@quad/contracts';
-import { deriveBrand } from '@quad/tokens';
 import { describe, expect, it } from 'vitest';
 
+import { brandPalette } from '../../src/common/branding/brand-palette';
 import { Browser } from '../helpers/browser';
 import { useDatabaseApp } from '../helpers/database-app';
 import { insertMember, insertRole, insertSchool, setSchoolStatus } from '../helpers/identity';
@@ -42,12 +42,7 @@ describe('GET /auth/memberships (spec 05 step 5: Choose a school)', () => {
         name: 'Colombo International School',
         shortName: 'CIS',
         logoUrl: null,
-        brand: {
-          color: '#1F6F5C',
-          fill: deriveBrand('#1F6F5C', 'light').brandFill,
-          fillDark: deriveBrand('#1F6F5C', 'dark').brandFill,
-          ink: deriveBrand('#1F6F5C', 'light').brandInk,
-        },
+        brand: brandPalette('#1F6F5C'),
         roleNames: ['School admin'],
         suspended: false,
         suspendReason: null,

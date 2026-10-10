@@ -42,15 +42,12 @@ export interface SidebarProps {
 }
 
 /*
- * Active item (spec 03 shell, prototype `.nav a.on`). The staff prototype puts white text on the school's
- * rail-active coral, which is 4.09:1 in light and 2.54:1 in dark, so the staff pill uses the brand-fill pair
- * (4.54:1 and 6.44:1) instead. The console keeps its lilac pill with rail-coloured text (5.19:1 and 8.06:1).
+ * Active item (spec 03 "Staff and console shell"; D34): a `rail-active` pill with `rail-active-ink`
+ * text, the school colour lifted to stand out 3:1 from the navy bar, with 4.5:1 text. The console
+ * has no school, so it takes the default, Quad lime with navy text.
  */
-const activeItem: Record<ShellVariant, string> = {
-  staff: 'bg-brand-fill text-brand-ink shadow-md hover:bg-brand-fill',
-  console: 'bg-gold font-extrabold text-rail shadow-md hover:bg-gold',
-};
-const activeDot: Record<ShellVariant, string> = { staff: 'bg-gold', console: 'bg-rail' };
+const activeItem = 'bg-rail-active font-bold text-rail-active-ink shadow-md hover:bg-rail-active';
+const activeDot = 'bg-rail-active-ink';
 /* Prototype `.brand b`: the school's name wraps to two lines; the console's short "Quad" title sits on one. */
 const brandTitle: Record<ShellVariant, string> = {
   staff: 'line-clamp-2 text-[14.5px] leading-[1.25]',
@@ -66,7 +63,6 @@ function NavLink({
   active,
   collapsible,
   collapsed,
-  variant,
   linkComponent: Link = 'a',
   onNavigate,
 }: {
@@ -74,7 +70,6 @@ function NavLink({
   active: boolean;
   collapsible: boolean;
   collapsed: boolean;
-  variant: ShellVariant;
   linkComponent?: ShellLinkComponent | 'a';
   onNavigate?: () => void;
 }) {
@@ -89,7 +84,7 @@ function NavLink({
         transition,
         focusRing,
         collapsible && 'rail-collapsed:justify-center rail-collapsed:px-0',
-        active && activeItem[variant],
+        active && activeItem,
       )}
     >
       <Icon aria-hidden="true" strokeWidth={ICON_STROKE} className="size-[18px] shrink-0" />
@@ -112,7 +107,7 @@ function NavLink({
           aria-hidden="true"
           className={cn(
             'absolute top-1/2 right-3 -mt-[3px] size-1.5 rounded-full',
-            activeDot[variant],
+            activeDot,
             collapsible && 'rail-collapsed:hidden',
           )}
         />
@@ -232,7 +227,6 @@ export function Sidebar({
                   active={isActiveHref(item, currentHref)}
                   collapsible={collapsible}
                   collapsed={collapsed}
-                  variant={variant}
                   linkComponent={linkComponent}
                   onNavigate={onNavigate}
                 />

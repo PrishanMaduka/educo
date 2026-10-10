@@ -8,7 +8,7 @@ import { cn } from '../lib/cn';
 import type { ComponentProps, ReactNode } from 'react';
 
 const linkClasses =
-  'inline-flex min-h-6 items-center cursor-pointer self-start rounded-sm border-0 bg-transparent p-0 text-[13px] font-semibold text-brand-strong underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand';
+  'inline-flex min-h-6 items-center cursor-pointer self-start rounded-sm border-0 bg-transparent p-0 text-[13px] font-semibold text-brand-text underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus';
 
 /** A text button in a sign-in card: Forgot password?, Use a recovery code. */
 export function LinkButton({ className, ...rest }: ComponentProps<'button'>) {
@@ -64,7 +64,7 @@ export function ShowPasswordButton({
       aria-label={shown ? labels.hideLabel : labels.showLabel}
       aria-pressed={shown}
       onClick={onToggle}
-      className="h-9 min-w-11 cursor-pointer rounded-md border-0 bg-transparent px-2 text-[12.5px] font-semibold text-brand-strong focus-visible:outline-2 focus-visible:outline-brand"
+      className="h-9 min-w-11 cursor-pointer rounded-md border-0 bg-transparent px-2 text-[12.5px] font-semibold text-brand-text focus-visible:outline-2 focus-visible:outline-focus"
     >
       {shown ? labels.hide : labels.show}
     </button>

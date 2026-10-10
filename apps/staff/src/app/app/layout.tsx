@@ -1,5 +1,3 @@
-import './school-brand.css';
-
 import type { ReactNode } from 'react';
 
 import { Providers } from '@/components/Providers';

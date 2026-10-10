@@ -21,41 +21,43 @@ export interface AuthArtProps {
  */
 export function AuthArt({ titleStart, titleHighlight, body, product, stats = [] }: AuthArtProps) {
   return (
-    <div className="relative isolate flex flex-col justify-between gap-6 overflow-hidden bg-site-navy p-11 text-site-on-navy max-[860px]:p-6">
+    <div className="relative isolate flex flex-col justify-between gap-6 overflow-hidden bg-navy p-11 text-on-navy max-[860px]:p-6">
       <div
         aria-hidden="true"
-        className="absolute -right-[180px] -bottom-[200px] -z-10 size-[520px] rounded-full bg-[radial-gradient(closest-side,color-mix(in_srgb,var(--color-site-lime)_30%,transparent),transparent)]"
+        className="absolute -right-[180px] -bottom-[200px] -z-10 size-[520px] rounded-full bg-[radial-gradient(closest-side,color-mix(in_srgb,var(--color-lime)_30%,transparent),transparent)]"
       />
       <div
         aria-hidden="true"
-        className="absolute inset-0 -z-10 bg-[radial-gradient(var(--color-site-on-navy)_1px,transparent_1px)] bg-size-[22px_22px] opacity-10 [mask-image:linear-gradient(180deg,transparent,var(--color-ink)_45%,transparent)]"
+        className="absolute inset-0 -z-10 bg-[radial-gradient(var(--color-on-navy)_1px,transparent_1px)] bg-size-[22px_22px] opacity-10 [mask-image:linear-gradient(180deg,transparent,var(--color-ink)_45%,transparent)]"
       />
       <div className="flex items-center gap-3">
         <QuadLogo variant="white" size={34} />
         {product ? (
-          <span className="rounded-pill bg-site-lime px-2.5 py-0.5 text-[11px] font-extrabold tracking-[0.08em] text-site-navy uppercase">
+          <span className="rounded-pill bg-lime px-2.5 py-0.5 text-[11px] font-extrabold tracking-[0.08em] text-navy uppercase">
             {product}
           </span>
         ) : null}
       </div>
       <div className="max-w-[560px]">
-        <p className="m-0 mb-3.5 text-[clamp(34px,4vw,52px)] leading-[1.02] font-extrabold tracking-[-0.04em] max-[860px]:text-[32px]">
+        <p className="m-0 mb-3.5 font-display text-[clamp(34px,4vw,52px)] leading-[1.02] font-extrabold tracking-[-0.04em] max-[860px]:text-[32px]">
           {titleStart}{' '}
-          <span className="inline-block -rotate-2 rounded-pill bg-site-lime px-[0.24em] text-site-navy">
+          <span className="inline-block -rotate-2 rounded-pill bg-lime px-[0.24em] text-navy">
             {titleHighlight}
           </span>
         </p>
-        <p className="m-0 text-base text-site-on-navy-2">{body}</p>
+        <p className="m-0 text-base text-on-navy-2">{body}</p>
       </div>
       {stats.length > 0 ? (
         <ul className="m-0 flex list-none flex-wrap gap-3 p-0 max-[860px]:hidden">
           {stats.map((stat) => (
             <li
               key={stat.label}
-              className="min-w-28 rounded-[18px] border border-site-navy-line bg-site-navy-2 px-4 py-3"
+              className="min-w-28 rounded-[18px] border border-navy-line bg-navy-2 px-4 py-3"
             >
-              <b className="block text-[22px] font-extrabold text-site-lime">{stat.value}</b>
-              <span className="text-xs text-site-on-navy-2">{stat.label}</span>
+              <b className="block font-display text-[22px] font-extrabold text-lime">
+                {stat.value}
+              </b>
+              <span className="text-xs text-on-navy-2">{stat.label}</span>
             </li>
           ))}
         </ul>

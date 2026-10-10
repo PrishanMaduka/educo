@@ -117,7 +117,7 @@ export function DropdownFilter({
           'inline-flex h-[38px] max-w-full max-sm:h-11 items-center gap-1 rounded-[10px] border pr-2 pl-3 text-[13.5px]',
           transition,
           active
-            ? 'border-brand/45 bg-brand-soft text-ink'
+            ? 'border-brand-text/45 bg-brand-soft text-ink'
             : 'border-line-strong bg-surface text-ink hover:border-ink-3',
         )}
       >
@@ -236,7 +236,7 @@ export function DropdownFilter({
                         {option.count}
                       </span>
                     )}
-                    <span className="grid w-4 flex-none text-brand">
+                    <span className="grid w-4 flex-none text-brand-text">
                       {selected ? (
                         <Check aria-hidden="true" strokeWidth={ICON_STROKE} className="size-4" />
                       ) : null}

@@ -18,7 +18,27 @@ const ME: Me = {
     name: 'Colombo International School',
     shortName: 'CIS',
     timeZone: 'Asia/Colombo',
-    brand: { color: '#DD4A42', fill: '#D0463E', fillDark: '#FF7A6E', ink: '#FFFFFF' },
+    brand: {
+      color: '#DD4A42',
+      light: {
+        fill: '#D0463E',
+        fillStrong: '#B33C35',
+        ink: '#FFFFFF',
+        text: '#B73D37',
+        soft: '#FAE2E1',
+        railActive: '#D0463E',
+        railActiveInk: '#FFFFFF',
+      },
+      dark: {
+        fill: '#D0463E',
+        fillStrong: '#B33C35',
+        ink: '#FFFFFF',
+        text: '#E5756F',
+        soft: '#3F2644',
+        railActive: '#D0463E',
+        railActiveInk: '#FFFFFF',
+      },
+    },
   },
   memberships: [],
   preview: null,
@@ -114,7 +134,13 @@ describe('fetchPortalSession', () => {
   it('refuses a /me the contract does not accept, so no unchecked brand value reaches a style', async () => {
     const forged = {
       ...ME,
-      school: { ...ME.school, brand: { ...ME.school.brand, fill: 'red; background: url(x)' } },
+      school: {
+        ...ME.school,
+        brand: {
+          ...ME.school.brand,
+          light: { ...ME.school.brand.light, fill: 'red; background: url(x)' },
+        },
+      },
     };
     await expect(
       fetchPortalSession({
