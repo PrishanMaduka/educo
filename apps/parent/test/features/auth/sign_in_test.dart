@@ -465,7 +465,7 @@ void main() {
       expect(find.byType(FoundYouScreen), findsOneWidget);
     });
 
-    testWidgets('never shows another school\'s answer as the chosen one', (
+    testWidgets("never shows another school's answer as the chosen one", (
       tester,
     ) async {
       await openPicker(
