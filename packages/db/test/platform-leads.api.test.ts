@@ -183,10 +183,24 @@ describe('record_demo_request (security definer, D16, D57)', () => {
       students_band: '1000_2500',
       curriculum: 'cambridge',
       country: null,
-      user_agent: null,
     });
     expect(rows[0]?.created_at).toEqual(before?.created_at);
     expect(rows[0]!.updated_at.getTime()).toBeGreaterThan(before!.updated_at.getTime());
+  });
+
+  it("keeps the first request's IP hash and user agent on a repeat (the abuse signal, D57)", async () => {
+    const first = await record(schoolRequest);
+    await record({
+      ...schoolRequest,
+      name: 'Sample Person Two',
+      ipHash: createHash('sha256').update('198.51.100.9').digest(),
+      userAgent: 'Other/1.0',
+    });
+    const rows = await leads();
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toMatchObject({ id: first.leadId, name: 'Sample Person Two' });
+    expect(rows[0]?.ip_hash.equals(ipHash)).toBe(true);
+    expect(rows[0]?.user_agent).toBe('Mozilla/5.0 (test)');
   });
 
   it('inserts a new lead once the earlier one is more than 24 hours old', async () => {

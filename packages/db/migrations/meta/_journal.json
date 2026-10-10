@@ -162,6 +162,13 @@
       "when": 1791633927697,
       "tag": "0022_platform_leads",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1791635477290,
+      "tag": "0023_keep_first_lead_signal",
+      "breakpoints": true
     }
   ]
 }
