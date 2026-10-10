@@ -8,6 +8,7 @@ import {
   takeScreenshots,
 } from '@quad/config/playwright/checks';
 import { test } from '@quad/config/playwright/stack';
+import { School } from '@quad/contracts';
 
 import { PRISHAN_STATE } from './sign-in-as';
 
@@ -43,6 +44,25 @@ async function pick(page: Page, filter: string, option: string) {
   await page.getByRole('option', { name: option, exact: true }).click();
 }
 
+/**
+ * Sets the school's address through the API, as the page would: the version from `GET /school`
+ * as If-Match, and the CSRF cookie echoed. Works whatever state the page was left in.
+ */
+async function restoreAddress(page: Page, address: string) {
+  const school = await page.request.get('/api/v1/school');
+  expect(school.ok()).toBe(true);
+  const { address: current, etag } = School.parse(await school.json());
+  const wanted = address === '' ? null : address;
+  if (current === wanted) return;
+  const { cookies } = await page.context().storageState();
+  const csrf = cookies.find((cookie) => cookie.name === 'quad_csrf')?.value ?? '';
+  const saved = await page.request.patch('/api/v1/school', {
+    data: { address: wanted },
+    headers: { 'if-match': etag, 'x-csrf-token': csrf },
+  });
+  expect(saved.ok()).toBe(true);
+}
+
 /** An address no other run or project writes. */
 const addressFor = (testInfo: TestInfo) =>
   `1 Test Lane, ${testInfo.project.name} r${String(testInfo.retry)}`;
@@ -75,28 +95,26 @@ test.describe('School settings, as the school admin', () => {
     const field = page.getByLabel('Address');
     await expect(field).toBeVisible();
     const before = await field.inputValue();
-    await field.fill(address);
-    await expect(page.getByText('Unsaved changes to the school’s details')).toBeVisible();
-    await page.getByRole('button', { name: 'Save school details' }).click();
-    await expect(page.getByText('School details saved')).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Save school details' })).toHaveCount(0);
+    try {
+      await field.fill(address);
+      await expect(page.getByText('Unsaved changes to the school’s details')).toBeVisible();
+      await page.getByRole('button', { name: 'Save school details' }).click();
+      await expect(page.getByText('School details saved')).toBeVisible();
+      await expect(page.getByRole('button', { name: 'Save school details' })).toHaveCount(0);
 
-    await page.getByRole('tab', { name: 'Audit' }).click();
-    await expect(page).toHaveURL(/\?tab=audit$/);
-    await pick(page, 'Action', 'Changed School settings');
-    await openButtons(page).first().click();
-    const drawer = page.getByRole('dialog', { name: 'Changed School settings: address' });
-    await expect(drawer.getByRole('row', { name: /Address/ })).toContainText(address);
-    await expect(drawer.getByText('Prishan Maduka')).toBeVisible();
-    await drawer.getByRole('button', { name: 'Back to the log' }).click();
-    await expect(drawer).toBeHidden();
-
-    // Put it back, so the next run starts where this one did.
-    await page.getByRole('tab', { name: 'General' }).click();
-    await page.getByLabel('Address').fill(before);
-    await page.getByRole('button', { name: 'Save school details' }).click();
-    await expect(page.getByText('School details saved')).toBeVisible();
-    await expect(page.getByLabel('Address')).toHaveValue(before);
+      await page.getByRole('tab', { name: 'Audit' }).click();
+      await expect(page).toHaveURL(/\?tab=audit$/);
+      await pick(page, 'Action', 'Changed School settings');
+      await openButtons(page).first().click();
+      const drawer = page.getByRole('dialog', { name: 'Changed School settings: address' });
+      await expect(drawer.getByRole('row', { name: /Address/ })).toContainText(address);
+      await expect(drawer.getByText('Prishan Maduka')).toBeVisible();
+      await drawer.getByRole('button', { name: 'Back to the log' }).click();
+      await expect(drawer).toBeHidden();
+    } finally {
+      // Put it back whatever happened above, so the next run starts where this one did.
+      await restoreAddress(page, before);
+    }
   });
 
   test('asks before leaving with unsaved changes, and Discard puts them back', async ({ page }) => {
@@ -145,7 +163,7 @@ test.describe('School settings, as the school admin', () => {
     await expect(page.getByRole('button', { name: 'Clear filters' })).toHaveCount(0);
   });
 
-  test('exports the filtered log as a CSV file', async ({ page }) => {
+  test('exports the filtered log as a CSV file', { tag: '@webkit' }, async ({ page }) => {
     await page.goto(`${PATH}?tab=audit`);
     await expect(openButtons(page).first()).toBeVisible();
     await pick(page, 'Action', 'Signed in');

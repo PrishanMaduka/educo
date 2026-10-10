@@ -222,6 +222,20 @@ describe('School settings: General', () => {
     expect(free.defaultPrevented).toBe(false);
   });
 
+  it('refuses to change tab while there are unsaved changes, and keeps them', async () => {
+    renderPage();
+    await userEvent.type(await screen.findByLabelText('Address'), 'Kandy');
+    await userEvent.click(screen.getByRole('tab', { name: 'Audit' }));
+    expect(await screen.findByText('Save or discard your changes first')).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: 'General' })).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getByLabelText('Address')).toHaveValue('Kandy');
+    expect(window.location.search).toBe('');
+
+    await userEvent.click(screen.getByRole('button', { name: 'Discard changes' }));
+    await userEvent.click(screen.getByRole('tab', { name: 'Audit' }));
+    expect(screen.getByRole('tab', { name: 'Audit' })).toHaveAttribute('aria-selected', 'true');
+  });
+
   it('is read-only without settings.edit', async () => {
     renderPage({ canEdit: false });
     expect(await screen.findByLabelText('School name')).toHaveAttribute('readonly');
@@ -312,6 +326,19 @@ describe('School settings: Audit', () => {
     });
   });
 
+  it('keeps the filters when you leave the tab and come back', async () => {
+    renderPage({ initialTab: 'audit' });
+    await table().findByRole('row', { name: /Signed in/ });
+    await userEvent.click(screen.getByRole('button', { name: /^Action/ }));
+    await userEvent.click(await screen.findByRole('option', { name: 'Signed in' }));
+    await userEvent.click(screen.getByRole('tab', { name: 'Sign-in' }));
+    await userEvent.click(screen.getByRole('tab', { name: 'Audit' }));
+    expect(await screen.findByRole('button', { name: 'Clear filters' })).toBeInTheDocument();
+    expect(fake.sent.filter((r) => r.key === 'GET /api/v1/audit').at(-1)?.query).toMatchObject({
+      action: 'auth.sign_in',
+    });
+  });
+
   it('sends the date range as a UTC instant from the school’s midnight', async () => {
     renderPage({ initialTab: 'audit' });
     await table().findByRole('row', { name: /Signed in/ });
@@ -332,7 +359,12 @@ describe('School settings: Audit', () => {
     const createObjectURL = vi.fn(() => 'blob:audit');
     const revokeObjectURL = vi.fn();
     Object.assign(URL, { createObjectURL, revokeObjectURL });
-    const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
+    const attached: boolean[] = [];
+    const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function (
+      this: HTMLAnchorElement,
+    ) {
+      attached.push(this.isConnected);
+    });
     fake.answers['GET /api/v1/audit'] = [
       { status: 200, body: LOG },
       {
@@ -355,6 +387,27 @@ describe('School settings: Audit', () => {
     expect(exported?.query).toEqual({});
     expect(createObjectURL).toHaveBeenCalledOnce();
     expect(click).toHaveBeenCalledOnce();
+    // In the document when clicked (Firefox and older Safari ignore a detached link), then gone.
+    expect(attached).toEqual([true]);
+    expect(document.querySelector('a[download]')).toBeNull();
+    await waitFor(() => {
+      expect(revokeObjectURL).toHaveBeenCalledWith('blob:audit');
+    });
+  });
+
+  it('treats an answer with no file as a failure', async () => {
+    const createObjectURL = vi.fn(() => 'blob:audit');
+    Object.assign(URL, { createObjectURL, revokeObjectURL: vi.fn() });
+    fake.answers['GET /api/v1/audit'] = [
+      { status: 200, body: LOG },
+      { status: 200, text: '', headers: { 'content-type': 'text/csv; charset=utf-8' } },
+    ];
+    renderPage({ initialTab: 'audit', canExport: true });
+    await table().findByRole('row', { name: /Signed in/ });
+    await userEvent.click(screen.getByRole('button', { name: 'Export CSV' }));
+    expect(await screen.findByText(/Something went wrong on our side/)).toBeInTheDocument();
+    expect(screen.queryByText('Audit log exported')).toBeNull();
+    expect(createObjectURL).not.toHaveBeenCalled();
   });
 
   it('says why an export was refused', async () => {

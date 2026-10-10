@@ -28,6 +28,8 @@ export interface GeneralFormProps {
   canEdit: boolean;
   /** The office email field's id, which the page's "Add an office email" focuses. */
   officeEmailId: string;
+  /** Told when the form gains or loses unsaved changes, so the page can hold its tabs. */
+  onDirtyChange: (dirty: boolean) => void;
 }
 
 const FORM_ID = 'school-general';
@@ -41,7 +43,7 @@ const isGeneralField = (key: string): key is (typeof GENERAL_FIELDS)[number] =>
  * with a save bar while there are changes, as in the prototype's profile page (D49); leaving with
  * unsaved changes asks first.
  */
-export function GeneralForm({ school, canEdit, officeEmailId }: GeneralFormProps) {
+export function GeneralForm({ school, canEdit, officeEmailId, onDirtyChange }: GeneralFormProps) {
   const { t } = useTranslation();
   const toast = useToast();
   const save = useSaveSchool();
@@ -53,6 +55,9 @@ export function GeneralForm({ school, canEdit, officeEmailId }: GeneralFormProps
   const { register, handleSubmit, reset, setError, formState } = form;
   const dirty = canEdit && formState.isDirty;
   useLeaveGuard(dirty, t('common.leaveUnsaved'));
+  useEffect(() => {
+    onDirtyChange(dirty);
+  }, [dirty, onDirtyChange]);
 
   // A new version read from the API (another admin's save) becomes the starting point; fields
   // being changed here keep what was typed. Query data keeps its identity until it changes.

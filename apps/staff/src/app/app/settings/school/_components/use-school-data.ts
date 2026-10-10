@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 
 import type { AuditAction, School, SchoolUpdateInput } from '@quad/contracts';
 
-import { ApiError, staffApi, unwrap } from '@/lib/api';
+import { ApiError, staffApi, unwrap, unwrapEmpty } from '@/lib/api';
 
 const SCHOOL = ['school'] as const;
 const AUDIT = ['audit'] as const;
@@ -62,10 +62,9 @@ export function useSaveSchool() {
 }
 
 /** `GET /audit`, newest first, page by page. */
-export function useAuditLog(filter: AuditQuery, enabled: boolean) {
+export function useAuditLog(filter: AuditQuery) {
   return useInfiniteQuery({
     queryKey: [...AUDIT, 'list', filter],
-    enabled,
     initialPageParam: undefined as string | undefined,
     queryFn: async ({ pageParam }) => {
       const page = await unwrap(
@@ -89,10 +88,9 @@ export function useAuditLog(filter: AuditQuery, enabled: boolean) {
 }
 
 /** `GET /audit/people`: the person filter's choices. */
-export function useAuditPeople(enabled: boolean) {
+export function useAuditPeople() {
   return useQuery({
     queryKey: [...AUDIT, 'people'],
-    enabled,
     queryFn: () => unwrap(staffApi().GET('/api/v1/audit/people')),
   });
 }
@@ -112,14 +110,16 @@ export function useExportAudit() {
         headers: { accept: 'text/csv' },
         parseAs: 'blob',
       });
-      if (!response.ok || data === undefined) {
-        // The error body is JSON even when CSV was asked for.
-        await unwrap(Promise.resolve({ error, response }));
+      // A refusal's body is JSON even when CSV was asked for.
+      await unwrapEmpty(Promise.resolve({ error, response }));
+      // An export always has its heading row, so no file at all is a failure, never a success.
+      if (data === undefined || data.size === 0) {
+        throw new ApiError('internal', response.status, {}, 'The export had no file');
       }
       return { blob: data, name: filenameOf(response) };
     },
     onSuccess: async ({ blob, name }) => {
-      if (blob !== undefined) download(blob, name);
+      download(blob, name);
       toast.show(t('schoolSettings.audit.exported'));
       await queries.invalidateQueries({ queryKey: AUDIT });
     },
@@ -132,11 +132,20 @@ function filenameOf(response: Response): string {
   return /filename="([^"]+)"/.exec(header)?.[1] ?? 'quad-audit.csv';
 }
 
+/**
+ * Saves `blob` as a file. The link is in the document while it is clicked (Firefox and older
+ * Safari ignore a detached one), and the URL lives until the browser has started the download.
+ */
 function download(blob: Blob, name: string): void {
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
   link.download = name;
+  link.hidden = true;
+  document.body.append(link);
   link.click();
-  URL.revokeObjectURL(url);
+  link.remove();
+  window.setTimeout(() => {
+    URL.revokeObjectURL(url);
+  }, 0);
 }

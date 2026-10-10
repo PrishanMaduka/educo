@@ -1,12 +1,12 @@
 'use client';
 
-import { Button, Card, EmptyState, Tabs } from '@quad/ui';
+import { Button, Card, EmptyState, Tabs, useToast } from '@quad/ui';
 import { PageHead } from '@quad/ui/shell';
 import { Mail, MessageSquareText, SlidersHorizontal } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { AuditTab } from './AuditTab';
+import { ALL_AUDIT, AuditTab, type AuditView } from './AuditTab';
 import { GeneralForm } from './GeneralForm';
 import { SCHOOL_SETTINGS_TABS, schoolSettingsHref, type SchoolSettingsTab } from './school-tabs';
 import { summarySentence } from './settings-summary';
@@ -34,7 +34,11 @@ const OFFICE_EMAIL_ID = 'school-office-email';
  */
 export function SchoolSettings({ initialTab, timeZone, canEdit, canExport }: SchoolSettingsProps) {
   const { t } = useTranslation();
+  const toast = useToast();
   const [tab, setTab] = useState<SchoolSettingsTab>(initialTab);
+  // Kept here, so they outlive their tab: Radix unmounts the panels that are not shown.
+  const [generalDirty, setGeneralDirty] = useState(false);
+  const [audit, setAudit] = useState<AuditView>(ALL_AUDIT);
   const school = useSchool();
 
   const show = (next: SchoolSettingsTab) => {
@@ -132,7 +136,13 @@ export function SchoolSettings({ initialTab, timeZone, canEdit, canExport }: Sch
         value={tab}
         onValueChange={(value) => {
           const next = SCHOOL_SETTINGS_TABS.find((candidate) => candidate === value);
-          if (next !== undefined) show(next);
+          if (next === undefined || next === tab) return;
+          // Leaving General would unmount it and lose the changes: they wait to be saved.
+          if (generalDirty) {
+            toast.show(t('roles.toast.saveFirst'));
+            return;
+          }
+          show(next);
         }}
         tabs={[
           {
@@ -146,6 +156,7 @@ export function SchoolSettings({ initialTab, timeZone, canEdit, canExport }: Sch
                   school={school.data}
                   canEdit={canEdit}
                   officeEmailId={OFFICE_EMAIL_ID}
+                  onDirtyChange={setGeneralDirty}
                 />
               ),
           },
@@ -158,7 +169,14 @@ export function SchoolSettings({ initialTab, timeZone, canEdit, canExport }: Sch
           {
             value: 'audit',
             label: t('schoolSettings.tab.audit'),
-            panel: <AuditTab active={tab === 'audit'} timeZone={timeZone} canExport={canExport} />,
+            panel: (
+              <AuditTab
+                view={audit}
+                onViewChange={setAudit}
+                timeZone={timeZone}
+                canExport={canExport}
+              />
+            ),
           },
         ]}
       />
