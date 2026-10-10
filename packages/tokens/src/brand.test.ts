@@ -215,35 +215,73 @@ describe('deriveBrand: steps', () => {
 });
 
 /** Spec 03 "Guarantees, for any input colour in both themes". */
+function expectGuarantees(colour: string, mode: BrandMode): void {
+  const d = deriveBrand(colour, mode);
+  const base = BRAND_BASE[mode];
+  const at = `${colour} ${mode}`;
+  // Button and badge text 4.5:1 on the fill and the hover fill.
+  expect(contrastRatio(d.fill, d.ink), at).toBeGreaterThanOrEqual(4.5);
+  expect(contrastRatio(d.fillStrong, d.ink), at).toBeGreaterThanOrEqual(4.5);
+  // Brand text and icons 4.5:1 on every page surface and on brand-soft.
+  for (const bg of [base.surface, base.canvas, base.surface2, d.soft]) {
+    expect(contrastRatio(d.text, bg), at).toBeGreaterThanOrEqual(4.5);
+  }
+  // Captions (ink-3) 4.5:1 on brand-soft.
+  expect(contrastRatio(base.ink3, d.soft), at).toBeGreaterThanOrEqual(4.5);
+  // The active side-bar item 3:1 against the bar, with 4.5:1 text.
+  expect(contrastRatio(d.railActive, base.rail), at).toBeGreaterThanOrEqual(3);
+  expect(contrastRatio(d.railActive, d.railActiveInk), at).toBeGreaterThanOrEqual(4.5);
+  // Dark-mode fills 3:1 against cards.
+  if (mode === 'dark') {
+    expect(contrastRatio(d.fill, base.surface), at).toBeGreaterThanOrEqual(3);
+  }
+  // The measured checks agree.
+  expect(d.checks.ink, at).toBeGreaterThanOrEqual(4.5);
+  expect(d.checks.text, at).toBeGreaterThanOrEqual(4.5);
+  expect(d.checks.rail, at).toBeGreaterThanOrEqual(4.5);
+}
+
+/** A small deterministic generator (mulberry32), so the sweep is the same on every run. */
+function seededColours(seed: number, count: number): string[] {
+  let state = seed;
+  const next = (): number => {
+    state = (state + 0x6d2b79f5) | 0;
+    let t = Math.imul(state ^ (state >>> 15), 1 | state);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+  return Array.from(
+    { length: count },
+    () =>
+      `#${Math.floor(next() * 0x1000000)
+        .toString(16)
+        .padStart(6, '0')
+        .toUpperCase()}`,
+  );
+}
+
 describe('deriveBrand: contrast guarantees', () => {
-  const EDGES = ['#FFFFFF', '#000000', '#FFFF00', '#101632', '#DD4A42', '#2BB0A0', '#808080'];
+  const EDGES = [
+    '#FFFFFF',
+    '#FEFEFE',
+    '#000000',
+    '#010101',
+    '#FFFF00',
+    '#101632',
+    '#DD4A42',
+    '#2BB0A0',
+    '#808080',
+  ];
   const COLOURS = [...BRAND_PALETTE.map((p) => p.hex), ...EDGES];
   const cases = MODES.flatMap((mode) => COLOURS.map((colour) => [colour, mode] as const));
 
   it.each(cases)('%s in %s meets every limit', (colour, mode) => {
-    const d = deriveBrand(colour, mode);
-    const base = BRAND_BASE[mode];
-    // Button and badge text 4.5:1 on the fill and the hover fill.
-    expect(contrastRatio(d.fill, d.ink)).toBeGreaterThanOrEqual(4.5);
-    expect(contrastRatio(d.fillStrong, d.ink)).toBeGreaterThanOrEqual(4.5);
-    // Brand text and icons 4.5:1 on every page surface and on brand-soft.
-    for (const bg of [base.surface, base.canvas, base.surface2, d.soft]) {
-      expect(contrastRatio(d.text, bg)).toBeGreaterThanOrEqual(4.5);
-    }
-    // Captions (ink-3) 4.5:1 on brand-soft.
-    expect(contrastRatio(base.ink3, d.soft)).toBeGreaterThanOrEqual(4.5);
-    // The active side-bar item 3:1 against the bar, with 4.5:1 text.
-    expect(contrastRatio(d.railActive, base.rail)).toBeGreaterThanOrEqual(3);
-    expect(contrastRatio(d.railActive, d.railActiveInk)).toBeGreaterThanOrEqual(4.5);
-    // The measured checks agree.
-    expect(d.checks.ink).toBeGreaterThanOrEqual(4.5);
-    expect(d.checks.text).toBeGreaterThanOrEqual(4.5);
-    expect(d.checks.rail).toBeGreaterThanOrEqual(4.5);
+    expectGuarantees(colour, mode);
   });
 
-  it.each(COLOURS)('%s in dark mode fills 3:1 or more against the card', (colour) => {
-    expect(
-      contrastRatio(deriveBrand(colour, 'dark').fill, BRAND_BASE.dark.surface),
-    ).toBeGreaterThan(2.99);
+  it('holds for 400 seeded colours in both themes', () => {
+    for (const colour of seededColours(20261010, 400)) {
+      for (const mode of MODES) expectGuarantees(colour, mode);
+    }
   });
 });

@@ -765,6 +765,23 @@ describe('POST /auth/support-session/end (Exit to platform)', () => {
 });
 
 describe('GET /platform/tenants', () => {
+  it('shows the colour each school’s portal uses: Quad lime for none or a legacy one', async () => {
+    const none = await insertSchool(db(), { name: 'Aaab No Colour School' });
+    const legacy = await insertSchool(db(), {
+      name: 'Aaac Legacy Colour School',
+      brandColor: '#2F6FED',
+    });
+    const quad = await consoleAs('readonly');
+
+    const list = PlatformTenantList.parse(
+      (await quad.browser.get('/platform/tenants?limit=200')).json(),
+    );
+
+    const colourOf = (id: string) => list.items.find((item) => item.id === id)?.brandColor;
+    expect(colourOf(none.id)).toBe('#C8F169');
+    expect(colourOf(legacy.id)).toBe('#C8F169');
+  });
+
   it('lists the schools by name with id, short name, status and colour, never deleted ones', async () => {
     const live = await insertSchool(db(), {
       name: 'Aaaa Support Test School',

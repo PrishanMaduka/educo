@@ -1,12 +1,9 @@
-import { deriveBrand, type BrandMode } from '@quad/tokens';
+import { deriveBrand, type DerivedBrand } from '@quad/tokens';
 
 import type { MeBrand, MeBrandTheme } from '@quad/contracts';
 
-function brandTheme(brandColor: string | null, mode: BrandMode): MeBrandTheme {
-  const { fill, fillStrong, ink, text, soft, railActive, railActiveInk } = deriveBrand(
-    brandColor,
-    mode,
-  );
+function brandTheme(derived: DerivedBrand): MeBrandTheme {
+  const { fill, fillStrong, ink, text, soft, railActive, railActiveInk } = derived;
   return { fill, fillStrong, ink, text, soft, railActive, railActiveInk };
 }
 
@@ -17,9 +14,10 @@ function brandTheme(brandColor: string | null, mode: BrandMode): MeBrandTheme {
  * prototype colour gets Quad lime; a saved colour is kept.
  */
 export function brandPalette(brandColor: string | null): MeBrand {
+  const light = deriveBrand(brandColor, 'light');
   return {
-    color: deriveBrand(brandColor, 'light').raw,
-    light: brandTheme(brandColor, 'light'),
-    dark: brandTheme(brandColor, 'dark'),
+    color: light.raw,
+    light: brandTheme(light),
+    dark: brandTheme(deriveBrand(brandColor, 'dark')),
   };
 }

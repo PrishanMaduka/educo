@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { HexColor } from '@quad/contracts';
+import { resolveBrandColour } from '@quad/tokens';
 
 import { decodeCursor, pageOf } from '../../common/pagination/cursor';
 import { PLATFORM_DB } from '../tokens';
@@ -11,14 +11,13 @@ import type { PlatformTenant, PlatformTenantList, PlatformTenantListQuery } from
 import type { QuadPlatformDb } from '@quad/db';
 
 function toPlatformTenant(row: PlatformTenantRow): PlatformTenant {
-  // A colour stored in another shape is shown as none rather than failing the list.
-  const brandColor = HexColor.safeParse(row.brandColor);
   return {
     id: row.id,
     name: row.name,
     shortName: row.shortName,
     status: row.status,
-    brandColor: brandColor.success ? brandColor.data : null,
+    // The colour the school's portal uses (D56): Quad lime for none, an invalid or a legacy one.
+    brandColor: resolveBrandColour(row.brandColor),
   };
 }
 
