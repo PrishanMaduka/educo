@@ -28,6 +28,18 @@ export type SchoolHealthLevel = z.infer<typeof SchoolHealthLevel>;
 export const EmailSuppressionReason = z.enum(['bounce', 'complaint', 'manual']);
 export type EmailSuppressionReason = z.infer<typeof EmailSuppressionReason>;
 
+/** What a demo request asked for (D57 `platform_leads.kind`): a school's demo, or a parent's intro. */
+export const LeadKind = z.enum(['school_demo', 'parent_intro']);
+export type LeadKind = z.infer<typeof LeadKind>;
+
+/** Where a lead came from (spec 04 `platform_leads.source`). */
+export const LeadSource = z.enum(['landing', 'referral', 'event', 'manual']);
+export type LeadSource = z.infer<typeof LeadSource>;
+
+/** Where a lead stands with Quad's team (spec 04 `platform_leads.status`). */
+export const LeadStatus = z.enum(['new', 'contacted', 'demo_booked', 'won', 'lost']);
+export type LeadStatus = z.infer<typeof LeadStatus>;
+
 /** A person's global account status (spec 04 `accounts.status`; also `platform_users.status`). */
 export const AccountStatus = z.enum(['active', 'locked', 'disabled']);
 export type AccountStatus = z.infer<typeof AccountStatus>;

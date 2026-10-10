@@ -10,6 +10,8 @@ export const PLATFORM_TABLES: readonly string[] = Object.freeze([
   'platform_users',
   // Append-only: a trigger refuses UPDATE, DELETE and TRUNCATE.
   'platform_audit',
+  // Written only through record_demo_request (D16, D57); M2's console reads it.
+  'platform_leads',
   'support_sessions',
   'signed_token_uses',
   // School code reads these three through security-definer functions only (D24).

@@ -25,6 +25,8 @@ export type {
   AccountSessionLookup,
   AuthMembership,
   DefinerCalls,
+  DemoRequestRecord,
+  RecordedDemoRequest,
   RefreshFamily,
   SessionLookup,
   SupportSessionLookup,

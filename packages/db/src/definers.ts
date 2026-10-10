@@ -4,9 +4,11 @@ import type { TenantTx } from './tenant';
 import type {
   AccountStatus,
   EmailSuppressionReason,
+  LeadKind,
   MembershipKind,
   SessionKind,
   SessionStage,
+  StudentsBand,
   TenantStatus,
   TwoStepRule,
 } from '@quad/contracts';
@@ -142,6 +144,32 @@ export interface SupportVisit {
   readonly platformUserName: string;
 }
 
+/**
+ * One demo request as `record_demo_request` stores it (D57). The API has already checked the
+ * body and hashed the IP address; this layer only passes the values on.
+ */
+export interface DemoRequestRecord {
+  readonly kind: LeadKind;
+  readonly name: string;
+  readonly email: string;
+  readonly school: string;
+  /** Null for a parent's request. */
+  readonly students: StudentsBand | null;
+  readonly curriculum: string | null;
+  readonly country: string | null;
+  readonly city: string | null;
+  readonly note: string | null;
+  /** 32 bytes: a keyed SHA-256 of the IP address, never the address. */
+  readonly ipHash: Buffer;
+  readonly userAgent: string | null;
+}
+
+/** The lead a demo request wrote: new, or the one from the last 24 hours it updated. */
+export interface RecordedDemoRequest {
+  readonly leadId: string;
+  readonly created: boolean;
+}
+
 /** `tenant_by_embed_key` (D16). A stub until M4: always null. */
 export interface EmbedKeyTenant {
   readonly tenantId: string;
@@ -172,6 +200,11 @@ export interface DefinerCalls {
     readonly reason: EmailSuppressionReason;
     readonly source: string;
   }): Promise<void>;
+  /**
+   * Adds a lead, or updates the same email's lead of the same kind that is still new and less
+   * than 24 hours old (`record_demo_request`, D57). Two requests at once give one lead.
+   */
+  recordDemoRequest(input: DemoRequestRecord): Promise<RecordedDemoRequest>;
   /** Active memberships of live schools, suspended ones included and flagged. */
   authMemberships(accountId: string): Promise<AuthMembership[]>;
   accountByIdentifier(identifier: AccountIdentifier): Promise<AccountLookup | null>;
@@ -353,6 +386,28 @@ export function createDefinerCalls(pool: pg.Pool): DefinerCalls {
   return {
     recordEmailSuppression: async ({ address, reason, source }) => {
       await pool.query('select record_email_suppression($1, $2, $3)', [address, reason, source]);
+    },
+
+    recordDemoRequest: async (input) => {
+      const { rows } = await pool.query<{ lead_id: string; created: boolean }>(
+        'select lead_id, created from record_demo_request($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)',
+        [
+          input.kind,
+          input.name,
+          input.email,
+          input.school,
+          input.students,
+          input.curriculum,
+          input.country,
+          input.city,
+          input.note,
+          input.ipHash,
+          input.userAgent,
+        ],
+      );
+      const [row] = rows;
+      if (!row) throw new UnexpectedDefinerRowError('record_demo_request');
+      return { leadId: row.lead_id, created: row.created };
     },
 
     authMemberships: async (accountId) => {

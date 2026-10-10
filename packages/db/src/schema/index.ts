@@ -5,6 +5,7 @@ export * from './account/sessions';
 export * from './account/trusted-devices';
 export * from './platform/email-suppressions';
 export * from './platform/platform-audit';
+export * from './platform/platform-leads';
 export * from './platform/platform-users';
 export * from './platform/signed-token-uses';
 export * from './platform/support-sessions';
