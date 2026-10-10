@@ -917,6 +917,10 @@ name servers are replaced by the four Route 53 ones, so the records above stop b
 - **Cutting over:** when production is ready (M12), CloudFront serves `/` (spec 19). Delegate as
   in Step 4, let the production records point the apex and `www` at CloudFront, then switch the
   Pages site off (**Settings → Pages → Unpublish**, and disable the `Pages` workflow).
+- **Production web builds** must pass `--build-arg NEXT_PUBLIC_APP_ENV=production`, with
+  `NEXT_PUBLIC_API_URL` and `NEXT_PUBLIC_TURNSTILE_SITE_KEY`: an unset `NEXT_PUBLIC_APP_ENV` counts as
+  `local`, so the staff build would accept a missing site key and ship the demo form's dummy token
+  (D57).
 - **Keeping Pages live after delegation** (for example if staging is set up first): before you
   change the name servers, add the apex A and AAAA records and the `www` CNAME above to
   `infra/envs/global`, and extend its CAA record with `0 issue "letsencrypt.org"`. The global root

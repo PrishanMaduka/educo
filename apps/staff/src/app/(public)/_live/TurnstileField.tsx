@@ -74,13 +74,17 @@ function turnstileWidget(siteKey: string, container: HTMLElement) {
             appearance: 'interaction-only',
             theme: pageTheme(),
             'response-field': false,
+            'refresh-expired': 'auto',
             callback: (next) => {
               token = next;
               failure = null;
               settle();
             },
-            'error-callback': (code) => {
-              fail(new Error(`Turnstile reported error ${code}.`));
+            // Turnstile retries by itself after most errors, so a waiting submit keeps waiting
+            // (up to TOKEN_WAIT_MS) for the token that retry brings. Only a script that cannot
+            // load fails at once.
+            'error-callback': () => {
+              token = null;
             },
             'expired-callback': () => {
               token = null;

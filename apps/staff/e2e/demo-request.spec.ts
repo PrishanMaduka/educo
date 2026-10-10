@@ -61,6 +61,9 @@ test.describe('demo requests on the live landing page', () => {
 
     const confirmation = await new Mailpit().waitForMessage({ to: email, since });
     expect(confirmation.subject).toBe('We’ve got your demo request');
+    // The e2e stack's build has no site key, so Turnstile never loads here: this only proves the
+    // dummy-token path. Loading on the first focus, and not before, is proven by the unit tests
+    // (DemoForm.test.tsx, TurnstileField.test.tsx and turnstile-loader.test.ts).
     expect(cloudflare).toEqual([]);
   });
 

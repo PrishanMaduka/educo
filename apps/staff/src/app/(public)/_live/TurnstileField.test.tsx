@@ -75,6 +75,7 @@ describe('TurnstileField with a site key', () => {
       appearance: 'interaction-only',
       theme: 'dark',
       'response-field': false,
+      'refresh-expired': 'auto',
     });
   });
 
@@ -119,15 +120,47 @@ describe('TurnstileField with a site key', () => {
     await expect(token).resolves.toBe('token-1');
   });
 
-  it('refuses a token when the widget reports an error or the token expired', async () => {
+  it('keeps waiting through a widget error, so Turnstile’s own retry can still give a token', async () => {
     const { api, widgets } = fakeTurnstile();
     const handle = createRef<TurnstileHandle>();
     render(<TurnstileField ref={handle} setup={{ siteKey: 'site-key' }} active />);
     await scriptLoads(api);
-    const token = handle.current?.token();
+    let settled: string | undefined;
+    const token = handle.current?.token().then(
+      (value) => (settled = value),
+      () => (settled = 'rejected'),
+    );
     widgets[0]?.['error-callback']('300030');
-    await expect(token).rejects.toThrow(/Turnstile/);
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(settled).toBeUndefined();
 
+    widgets[0]?.callback('token-after-retry');
+    await token;
+    expect(settled).toBe('token-after-retry');
+  });
+
+  it('gives up when no token comes within the wait, error or not', async () => {
+    const { api, widgets } = fakeTurnstile();
+    const handle = createRef<TurnstileHandle>();
+    render(<TurnstileField ref={handle} setup={{ siteKey: 'site-key' }} active />);
+    await scriptLoads(api);
+    vi.useFakeTimers({ toFake: ['setTimeout'] });
+    try {
+      const token = handle.current?.token();
+      widgets[0]?.['error-callback']('300030');
+      vi.advanceTimersByTime(60_000);
+      await expect(token).rejects.toThrow(/in time/);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('drops an expired token and waits for the next one', async () => {
+    const { api, widgets } = fakeTurnstile();
+    const handle = createRef<TurnstileHandle>();
+    render(<TurnstileField ref={handle} setup={{ siteKey: 'site-key' }} active />);
+    await scriptLoads(api);
     widgets[0]?.callback('token-1');
     widgets[0]?.['expired-callback']();
     let late: string | undefined;
@@ -137,6 +170,10 @@ describe('TurnstileField with a site key', () => {
       .catch(() => undefined);
     await Promise.resolve();
     expect(late).toBeUndefined();
+    widgets[0]?.callback('token-2');
+    await vi.waitFor(() => {
+      expect(late).toBe('token-2');
+    });
   });
 
   it('refuses a token when Cloudflare’s script cannot load', async () => {

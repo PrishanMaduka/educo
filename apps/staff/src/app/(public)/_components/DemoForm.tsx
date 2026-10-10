@@ -140,6 +140,9 @@ export function DemoForm({
   const [done, setDone] = useState<{ emailHref: string } | { thanks: true } | null>(null);
   const [sending, setSending] = useState(false);
   const [focused, setFocused] = useState(false);
+  // One request at a time, from the first submit until its outcome is shown: `sending` is state,
+  // so a second submit while the checks chunk loads would not see it yet.
+  const inFlight = useRef(false);
   const live = delivery.mode === 'endpoint';
   const sendLabels = delivery.mode === 'endpoint' ? delivery.sendLabels : null;
 
@@ -241,7 +244,11 @@ export function DemoForm({
 
   const onSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (sending) return;
+    if (inFlight.current) return;
+    inFlight.current = true;
+    const settle = () => {
+      inFlight.current = false;
+    };
     const values = Object.fromEntries(new FormData(event.currentTarget));
     const website = typeof values.website === 'string' ? values.website : '';
     const handle = (loaded: Checks) => {
@@ -251,15 +258,17 @@ export function DemoForm({
           message: labels.errors[checked.problem.code],
           fields: checked.problem.fields,
         });
+        settle();
         return;
       }
       if (sendLabels) {
-        void send(loaded, checked.request, website, sendLabels);
+        void send(loaded, checked.request, website, sendLabels).finally(settle);
         return;
       }
       const href = mailtoFor(checked.request);
       showDone({ emailHref: href });
       openEmail(href);
+      settle();
     };
     // Usually loaded on the first focus already, so the email opens in the visitor's own click.
     if (checks) {
@@ -268,6 +277,7 @@ export function DemoForm({
     }
     loadChecks().then(handle, () => {
       // Offline before the checks arrived: the plain address still reaches Quad.
+      settle();
       const href = `mailto:${to}`;
       if (sendLabels) {
         setProblem({ fallback: sendLabels.unavailable, href, fields: [] });

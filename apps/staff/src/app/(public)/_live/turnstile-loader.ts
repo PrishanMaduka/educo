@@ -12,6 +12,8 @@ export interface TurnstileRenderOptions {
   theme: 'light' | 'dark' | 'auto';
   /** Off: the token comes through `callback`, so no hidden input joins the form's values. */
   'response-field': boolean;
+  /** `auto`: Cloudflare renews an expired token by itself (the default, set so it stays so). */
+  'refresh-expired': 'auto' | 'manual' | 'never';
   callback: (token: string) => void;
   'error-callback': (code: string) => void;
   'expired-callback': () => void;

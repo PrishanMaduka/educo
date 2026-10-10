@@ -1,5 +1,5 @@
 import { DemoRequestBody } from '@quad/contracts/public';
-import { act, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -72,7 +72,7 @@ function sendLabels(variant: 'school' | 'parent'): DemoSendLabels {
       : 'Thank you. We’ll get in touch with your child’s school.',
     captchaFailed: 'We couldn’t check that you’re not a robot. Try again.',
     rateLimited: {
-      before: 'You’ve sent a few requests already. Try again in an hour, or email ',
+      before: 'You’ve sent a few requests already. Try again later, or email ',
       after: '.',
     },
     unavailable: {
@@ -403,7 +403,7 @@ describe('DemoForm sending to Quad (spec 19 "Demo requests", D57)', () => {
     [
       '429',
       () => Promise.resolve(answer(429, { code: 'rate_limited', message: 'x' })),
-      'You’ve sent a few requests already. Try again in an hour, or email support@quad-edu.com.',
+      'You’ve sent a few requests already. Try again later, or email support@quad-edu.com.',
     ],
     [
       '503',
@@ -509,6 +509,50 @@ describe('DemoForm sending to Quad (spec 19 "Demo requests", D57)', () => {
       'href',
       '/legal/privacy#website',
     );
+  });
+});
+
+describe('DemoForm while its checks are still loading', () => {
+  beforeEach(() => {
+    fetchMock.mockReset();
+    vi.stubGlobal('fetch', fetchMock);
+  });
+  afterEach(() => {
+    vi.doUnmock('../_lib/demo-checks');
+    vi.unstubAllGlobals();
+  });
+
+  it('sends one request for two quick submits', async () => {
+    // A fresh form module whose checks chunk arrives only when the test says so.
+    vi.resetModules();
+    let release: () => void = () => undefined;
+    const gate = new Promise<void>((resolve) => (release = resolve));
+    vi.doMock('../_lib/demo-checks', async (importOriginal) => {
+      await gate;
+      return importOriginal();
+    });
+    const { DemoForm: LoadingForm } = await import('./DemoForm');
+    fetchMock.mockResolvedValue(answer(202));
+    const { container } = render(
+      <LoadingForm
+        variant="school"
+        to="support@quad-edu.com"
+        labels={labels('school')}
+        cheer={null}
+        mode="endpoint"
+        turnstile={{ dummyToken: DUMMY }}
+        sendLabels={sendLabels('school')}
+      />,
+    );
+    await fillSchool();
+    const form = container.querySelector('form');
+    if (form === null) throw new Error('No form.');
+    fireEvent.submit(form);
+    fireEvent.submit(form);
+
+    release();
+    expect(await screen.findByRole('status')).toBeVisible();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 });
 
