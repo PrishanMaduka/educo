@@ -18,6 +18,9 @@ enum ApiProblem {
   /// 403 `account_locked`.
   locked,
 
+  /// 403 `school_suspended`: the school is paused on Quad (spec 07).
+  schoolSuspended,
+
   /// 401: the token was refused.
   unauthorized,
 
@@ -36,6 +39,7 @@ ApiProblem apiProblemOf(Object error) {
     'invalid_code' => ApiProblem.invalidCode,
     'rate_limited' => ApiProblem.rateLimited,
     'account_locked' => ApiProblem.locked,
+    'school_suspended' => ApiProblem.schoolSuspended,
     _ => response.statusCode == 429 ? ApiProblem.rateLimited : ApiProblem.other,
   };
 }

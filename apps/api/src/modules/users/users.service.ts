@@ -290,7 +290,9 @@ export class UsersService {
 
   /**
    * `POST /users/:id/sign-out-everywhere`: ends the member's sessions in this school only
-   * (OQ10), web sessions and refresh families alike; their other schools are left alone.
+   * (OQ10), web sessions and refresh families alike; their other schools' sessions are left
+   * alone. Their trusted devices are forgotten too (D53): those are per account, so the next
+   * sign-in anywhere asks for the two-step code again.
    */
   async signOutEverywhere(auth: RequestAuth, userId: string, ip: string): Promise<void> {
     const actor = auditActorOf(schoolOf(auth), ip);
@@ -298,6 +300,7 @@ export class UsersService {
       const found = await this.repository.member(tx, userId);
       if (found === null) throw new NotFoundError();
       await this.db.definers.revokeMemberSessions(tx, userId);
+      await this.db.definers.revokeMemberTrustedDevices(tx, userId);
       await this.record(tx, actor, 'user.signed_out_everywhere', userId, {});
       return found.accountId;
     });

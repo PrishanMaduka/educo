@@ -44,8 +44,8 @@ function personOf(auth: RequestAuth): PersonAuth {
  * Two-step with an authenticator app (spec 05 step 4): the code step at sign-in, recovery codes
  * (single use), trusted devices, and setting up an authenticator (`POST /me/totp`). Secrets are
  * sealed with the field cipher; recovery codes are stored only as Argon2id hashes. A wrong code
- * counts toward the lockout like a wrong password. `DEV_FIXED_OTP` is accepted only when it is
- * set, which the config refuses in production.
+ * counts toward the lockout like a wrong password. `DEV_FIXED_OTP` is accepted only with
+ * `APP_ENV=local` (`TotpCodes.devFixedCode`, D46).
  */
 @Injectable()
 export class TwoStepService {
@@ -75,6 +75,7 @@ export class TwoStepService {
     if (account.status === 'locked' || this.lockout.isLocked(account, now)) {
       throw new AccountLockedError();
     }
+    const byRecoveryCode = input.code === undefined;
     const accepted =
       input.code === undefined
         ? await this.useRecoveryCode(person.accountId, input.recoveryCode ?? '')
@@ -84,6 +85,7 @@ export class TwoStepService {
       throw new InvalidCodeError();
     }
     await this.lockout.clear(person.accountId);
+    if (byRecoveryCode) await this.auditRecoveryCode(person.accountId, client.ip);
     const trustedByCookie = await this.signIn.trustedByCookie(
       person.accountId,
       client.trustedToken,
@@ -226,6 +228,23 @@ export class TwoStepService {
       }
     }
     return false;
+  }
+
+  /**
+   * Audits `auth.recovery_code_used` in every school where the account is staff (whole-M1
+   * review), whichever step the sign-in goes to next, so a sign-in without the authenticator is
+   * visible in each school's log. The code is used up already, so a failed audit is logged, not
+   * thrown: throwing would cost the person a code and the sign-in.
+   */
+  private async auditRecoveryCode(accountId: string, ip: string): Promise<void> {
+    try {
+      await this.accountAudit.recordInStaffSchools(accountId, ip, 'auth.recovery_code_used');
+    } catch (error) {
+      this.logger.warn(
+        { metric: 'recovery_code_audit_failed', error: errorForLog(error) },
+        'A sign-in with a recovery code could not be audited',
+      );
+    }
   }
 
   /** Stores a new trusted device (its SHA-256 only) and gives the cookie for it. */

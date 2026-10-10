@@ -40,11 +40,13 @@ class _SchoolPickerState extends ConsumerState<SchoolPickerScreen> {
       setState(() {
         _opening = null;
         // A 401 (the 5 minutes ran out) signs out: the screen says so.
-        if (apiProblemOf(error) != ApiProblem.unauthorized) {
-          _error = apiProblemOf(error) == ApiProblem.offline
-              ? l10n.parentSignInErrorOffline
-              : l10n.parentSignInSchoolFailed;
-        }
+        _error = switch (apiProblemOf(error)) {
+          ApiProblem.unauthorized => null,
+          ApiProblem.offline => l10n.parentSignInErrorOffline,
+          // Paused after the list was shown (spec 07): say so, not "try again".
+          ApiProblem.schoolSuspended => l10n.parentSignInSchoolSuspended,
+          _ => l10n.parentSignInSchoolFailed,
+        };
       });
     }
   }

@@ -309,7 +309,10 @@ function describeIssue(issue: z.ZodIssue): string {
 
 type RawEnv = Readonly<Record<string, string | undefined>>;
 
-/** Rules for staging and production: real secrets and passwords, no local-only flags (D22). */
+/**
+ * Rules for staging and production: real secrets and passwords, no local-only flags (D22), and no
+ * `DEV_FIXED_OTP` (D46).
+ */
 function environmentRules(env: RawEnv): ConfigProblem[] {
   const appEnv = blank(env.APP_ENV);
   if (appEnv !== 'staging' && appEnv !== 'production') {
@@ -349,10 +352,9 @@ function environmentRules(env: RawEnv): ConfigProblem[] {
       problems.push({ variable: name, problem: 'uses the local compose password' });
     }
   }
-  if (appEnv === 'production') {
-    if (blank(env.DEV_FIXED_OTP) !== undefined) {
-      problems.push({ variable: 'DEV_FIXED_OTP', problem: 'must not be set in production' });
-    }
+  // Fixed sign-in codes are local only (D46): staging needs a real second factor too.
+  if (blank(env.DEV_FIXED_OTP) !== undefined) {
+    problems.push({ variable: 'DEV_FIXED_OTP', problem: 'must not be set outside local (D46)' });
   }
   return problems;
 }
@@ -439,7 +441,7 @@ function deliveryRules(env: RawEnv): ConfigProblem[] {
 
 /**
  * Parses the environment. Throws `ConfigError` listing every missing or invalid variable at
- * once, plus the production refusal of `DEV_FIXED_OTP`.
+ * once, plus the refusal of `DEV_FIXED_OTP` outside local (D46).
  */
 export function loadConfig(env: NodeJS.ProcessEnv): Config {
   const parsed = ConfigSchema.safeParse(env);

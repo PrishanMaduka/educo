@@ -76,7 +76,7 @@ export class OtpService {
    * `POST /auth/otp/request`: within the limits of `otpSendDecision` (3 per 15 minutes, 10 per
    * day, 30 s between codes; otherwise 429 with `Retry-After`), stores a challenge that lives
    * 10 minutes and queues the code by SMS or email. The code is random unless `fixedOtpFor`
-   * gives one (local and staging, or the store-review number).
+   * gives one (local only, or the store-review number).
    */
   async request(input: OtpRequestInput): Promise<void> {
     const subject = subjectOf(input);

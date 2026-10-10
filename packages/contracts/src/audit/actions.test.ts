@@ -10,6 +10,7 @@ describe('audit action keys', () => {
       'auth.sign_out',
       'auth.password_reset',
       'auth.two_step_enabled',
+      'auth.recovery_code_used',
       'user.invited',
       'user.invite_accepted',
       'user.role_changed',

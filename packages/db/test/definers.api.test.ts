@@ -19,6 +19,7 @@ import {
   insertSession,
   insertSupportSession,
   insertTenant,
+  insertTrustedDevice,
   insertUser,
   insertUserRole,
   randomTokenHash,
@@ -54,6 +55,7 @@ const DEFINERS = [
   'ensure_account_for_email(citext)',
   'member_two_step_status(uuid[])',
   'revoke_member_sessions(uuid)',
+  'revoke_member_trusted_devices(uuid)',
   'redeem_support_session(uuid, bytea)',
   'end_support_session(bytea)',
   'tenant_by_embed_key(text)',
@@ -1058,6 +1060,48 @@ describe('revoke_member_sessions', () => {
     });
     await withTenant(schoolA.id, (tx) => definers.revokeMemberSessions(tx, outsiderInB.id));
     expect(await revokedById([session.id])).toEqual(new Map([[session.id, false]]));
+  });
+});
+
+describe('revoke_member_trusted_devices (D53: Sign out everywhere also forgets trusted devices)', () => {
+  async function revokedById(ids: readonly string[]): Promise<Map<string, boolean>> {
+    const rows = await platformRows<{ id: string; revoked: boolean }>(
+      'select id, revoked_at is not null as revoked from trusted_devices where id = any($1::uuid[])',
+      [ids],
+    );
+    return new Map(rows.map((row) => [row.id, row.revoked]));
+  }
+
+  it("under A revokes every trusted device of the member's account (they are per account), and no one else's", async () => {
+    const member = await insertAccount(withAccount);
+    const inA = await insertUser(withTenant, schoolA.id, member.id);
+    await insertUser(withTenant, schoolB.id, member.id);
+    const first = await insertTrustedDevice(withAccount, member.id);
+    const second = await insertTrustedDevice(withAccount, member.id);
+    const others = await insertTrustedDevice(withAccount, colleague.id);
+
+    await withTenant(schoolA.id, (tx) => definers.revokeMemberTrustedDevices(tx, inA.id));
+
+    expect(await revokedById([first.id, second.id, others.id])).toEqual(
+      new Map([
+        [first.id, true],
+        [second.id, true],
+        [others.id, false],
+      ]),
+    );
+  });
+
+  it("does nothing under A for B's user id (cross-tenant)", async () => {
+    const device = await insertTrustedDevice(withAccount, outsider.id);
+    await withTenant(schoolA.id, (tx) => definers.revokeMemberTrustedDevices(tx, outsiderInB.id));
+    expect(await revokedById([device.id])).toEqual(new Map([[device.id, false]]));
+  });
+
+  it('refuses to run without a school (app.tenant_id)', async () => {
+    const cause = await failure(
+      asApp((client) => client.query('select revoke_member_trusted_devices($1)', [outsiderInB.id])),
+    );
+    expect(cause).toMatchObject({ code: '42501' });
   });
 });
 

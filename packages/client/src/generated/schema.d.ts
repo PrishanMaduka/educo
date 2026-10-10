@@ -1734,7 +1734,7 @@ export interface paths {
                     limit?: number;
                     actor?: string;
                     tenantId?: string;
-                    action?: "tenant.renamed" | "support_session.started" | "support_session.ended" | "auth.password_accepted" | "auth.sign_in" | "auth.sign_in_failed" | "auth.two_step_setup_started" | "auth.two_step_enabled" | "auth.sign_out" | "audit.exported" | "auth.password_reset" | "user.invited" | "user.invite_accepted" | "user.role_changed" | "user.deactivated" | "user.reactivated" | "user.two_step_reminded" | "user.password_reset_sent" | "user.signed_out_everywhere" | "role.created" | "role.updated" | "role.deleted" | "role.permissions_changed" | "role_preview.started" | "role_preview.ended" | "settings.updated" | "sensitive.accessed";
+                    action?: "tenant.renamed" | "support_session.started" | "support_session.ended" | "auth.password_accepted" | "auth.sign_in" | "auth.sign_in_failed" | "auth.two_step_setup_started" | "auth.two_step_enabled" | "auth.sign_out" | "audit.exported" | "auth.password_reset" | "auth.recovery_code_used" | "user.invited" | "user.invite_accepted" | "user.role_changed" | "user.deactivated" | "user.reactivated" | "user.two_step_reminded" | "user.password_reset_sent" | "user.signed_out_everywhere" | "role.created" | "role.updated" | "role.deleted" | "role.permissions_changed" | "role_preview.started" | "role_preview.ended" | "settings.updated" | "sensitive.accessed";
                     from?: string;
                     to?: string;
                 };
@@ -3395,7 +3395,7 @@ export interface paths {
                     cursor?: string;
                     limit?: number;
                     actor?: string;
-                    action?: "auth.sign_in" | "auth.sign_in_failed" | "auth.sign_out" | "auth.password_reset" | "auth.two_step_enabled" | "user.invited" | "user.invite_accepted" | "user.role_changed" | "user.deactivated" | "user.reactivated" | "user.two_step_reminded" | "user.password_reset_sent" | "user.signed_out_everywhere" | "role.created" | "role.updated" | "role.deleted" | "role.permissions_changed" | "role_preview.started" | "role_preview.ended" | "settings.updated" | "support_session.started" | "support_session.ended" | "audit.exported" | "sensitive.accessed";
+                    action?: "auth.sign_in" | "auth.sign_in_failed" | "auth.sign_out" | "auth.password_reset" | "auth.two_step_enabled" | "auth.recovery_code_used" | "user.invited" | "user.invite_accepted" | "user.role_changed" | "user.deactivated" | "user.reactivated" | "user.two_step_reminded" | "user.password_reset_sent" | "user.signed_out_everywhere" | "role.created" | "role.updated" | "role.deleted" | "role.permissions_changed" | "role_preview.started" | "role_preview.ended" | "settings.updated" | "support_session.started" | "support_session.ended" | "audit.exported" | "sensitive.accessed";
                     from?: string;
                     to?: string;
                 };

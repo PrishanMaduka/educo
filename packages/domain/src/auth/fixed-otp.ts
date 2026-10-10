@@ -1,6 +1,6 @@
 export interface FixedOtpConfig {
   readonly appEnv: 'local' | 'staging' | 'production';
-  /** `DEV_FIXED_OTP`: every code, in local and staging only (the config refuses it in production). */
+  /** `DEV_FIXED_OTP`: every code, in local only (D46; the config refuses it anywhere else). */
   readonly devFixedOtp?: string | null;
   /** `STORE_REVIEW_PHONE` (E.164): the app-store review account's number (spec 09, 20). */
   readonly storeReviewPhone?: string | null;
@@ -32,11 +32,11 @@ export function isStoreReviewSubject(
  * The fixed sign-in code for `subject`, or null when it gets a random one (spec 16: the
  * store-review and development back doors stay narrow). `STORE_REVIEW_OTP` goes to
  * `STORE_REVIEW_PHONE` only, in every environment, never to an email; `DEV_FIXED_OTP` applies to
- * everyone else in local and staging, and never in production.
+ * everyone else in local only, never in staging or production (D46).
  */
 export function fixedOtpFor(config: FixedOtpConfig, subject: OtpSubject): string | null {
   const reviewOtp = config.storeReviewOtp ?? null;
   if (reviewOtp !== null && isStoreReviewSubject(config, subject)) return reviewOtp;
   const devFixedOtp = config.devFixedOtp ?? null;
-  return config.appEnv !== 'production' && devFixedOtp !== null ? devFixedOtp : null;
+  return config.appEnv === 'local' && devFixedOtp !== null ? devFixedOtp : null;
 }

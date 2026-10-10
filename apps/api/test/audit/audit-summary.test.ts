@@ -17,6 +17,10 @@ describe('auditSummary', () => {
   it.each([
     [{ action: 'auth.sign_in' }, 'Signed in'],
     [
+      { action: 'auth.recovery_code_used' },
+      'Used a recovery code instead of the authenticator app',
+    ],
+    [
       { action: 'user.invited', targetType: 'user', targetName: 'Nadeesha Jayasinghe' },
       'Invited Nadeesha Jayasinghe',
     ],

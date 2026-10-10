@@ -596,7 +596,50 @@ describe('POST /users/:id/reset-password', () => {
   });
 });
 
+/** Trusts a new device for the account ("Trust this device for 30 days"); its id. */
+async function trustDevice(accountId: string): Promise<string> {
+  const { rows } = await db().platform.query<{ id: string }>(
+    `insert into trusted_devices (account_id, token_hash, expires_at)
+     values ($1, decode(md5(random()::text), 'hex'), now() + interval '30 days') returning id`,
+    [accountId],
+  );
+  return rows[0]?.id ?? '';
+}
+
+async function trustedRevoked(id: string): Promise<boolean> {
+  const { rows } = await db().platform.query<{ revoked: boolean }>(
+    'select revoked_at is not null as revoked from trusted_devices where id = $1',
+    [id],
+  );
+  return rows[0]?.revoked ?? false;
+}
+
 describe('POST /users/:id/sign-out-everywhere', () => {
+  it("also forgets every trusted device of the member's account, so two-step is asked again (D53)", async () => {
+    const { admin, teacher } = await arrange();
+    const other = await arrange();
+    const laptop = await trustDevice(teacher.accountId);
+    const phone = await trustDevice(teacher.accountId);
+    const someoneElses = await trustDevice(other.teacher.accountId);
+
+    const response = await as(admin)('POST', `/users/${teacher.userId}/sign-out-everywhere`);
+
+    expect(response.statusCode).toBe(204);
+    expect(await trustedRevoked(laptop)).toBe(true);
+    expect(await trustedRevoked(phone)).toBe(true);
+    expect(await trustedRevoked(someoneElses)).toBe(false);
+  });
+
+  it("leaves another school's member's trusted devices alone (404 across schools)", async () => {
+    const a = await arrange();
+    const b = await arrange();
+    const device = await trustDevice(b.teacher.accountId);
+    expect(
+      (await as(a.admin)('POST', `/users/${b.teacher.userId}/sign-out-everywhere`)).statusCode,
+    ).toBe(404);
+    expect(await trustedRevoked(device)).toBe(false);
+  });
+
   it("ends the member's sessions in this school only (OQ10), audited (204)", async () => {
     const { school, admin, teacher } = await arrange();
     const elsewhere = await schoolWithRoles(db());

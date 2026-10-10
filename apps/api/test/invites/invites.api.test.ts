@@ -582,6 +582,29 @@ describe('POST /auth/invites/:token/accept', () => {
     expect((await owner.get('/me')).json()).toMatchObject({ school: { name: elsewhere.name } });
   });
 
+  it('answers 403 preview_read_only while the session previews a role, and accepts nothing (whole-M1 review)', async () => {
+    const { school, admin } = await arrange();
+    const elsewhere = await schoolWithRoles(db());
+    const existing = await insertPasswordAccount(db());
+    await insertMember(db(), elsewhere.id, existing.id);
+    await invite(admin, school, [existing.email]);
+    const token = linkTokenOf(delivery, existing.email, 'staff_invite');
+    const owner = new Browser(app);
+    await owner.post('/auth/password', { email: existing.email, password: existing.password });
+    const { rows } = await db().platform.query<{ id: string }>(
+      'select id from sessions where account_id = $1 and revoked_at is null',
+      [existing.id],
+    );
+    await setPreview(db(), rows[0]?.id ?? '', elsewhere.roles.finance);
+
+    const refused = await accept(token, {}, owner);
+
+    expect(refused.statusCode).toBe(403);
+    expect(refused.json()).toMatchObject({ code: 'preview_read_only' });
+    expect((await membership(school.id, existing.email))[0]?.status).toBe('invited');
+    expect(await auditIn('user.invite_accepted', school.id)).toEqual([]);
+  });
+
   it('treats an existing account without a password as existing: no password is set from the link (I3)', async () => {
     const { school, admin } = await arrange();
     const elsewhere = await schoolWithRoles(db());

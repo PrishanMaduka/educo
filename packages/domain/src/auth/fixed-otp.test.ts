@@ -8,20 +8,20 @@ const PARENT_PHONE = '+94770000001';
 const review = { storeReviewPhone: REVIEW_PHONE, storeReviewOtp: REVIEW_CODE } as const;
 
 describe('fixedOtpFor (spec 16: fixed codes for development and store review only)', () => {
-  it.each(['local', 'staging'] as const)(
-    'gives DEV_FIXED_OTP for any phone or email in %s',
+  it('gives DEV_FIXED_OTP for any phone or email in local', () => {
+    const config = { appEnv: 'local', devFixedOtp: '000000' } as const;
+    expect(fixedOtpFor(config, { phone: PARENT_PHONE })).toBe('000000');
+    expect(fixedOtpFor(config, { email: 'dilhani@example.test' })).toBe('000000');
+  });
+
+  it.each(['staging', 'production'] as const)(
+    'never gives DEV_FIXED_OTP in %s: fixed codes are local only (D46; the config refuses it too)',
     (appEnv) => {
       const config = { appEnv, devFixedOtp: '000000' };
-      expect(fixedOtpFor(config, { phone: PARENT_PHONE })).toBe('000000');
-      expect(fixedOtpFor(config, { email: 'dilhani@example.test' })).toBe('000000');
+      expect(fixedOtpFor(config, { phone: PARENT_PHONE })).toBeNull();
+      expect(fixedOtpFor(config, { email: 'dilhani@example.test' })).toBeNull();
     },
   );
-
-  it('never gives DEV_FIXED_OTP in production (the config refuses it too)', () => {
-    expect(
-      fixedOtpFor({ appEnv: 'production', devFixedOtp: '000000' }, { phone: PARENT_PHONE }),
-    ).toBeNull();
-  });
 
   it.each(['local', 'staging', 'production'] as const)(
     'gives nothing in %s without a fixed code',

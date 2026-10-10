@@ -87,7 +87,7 @@ To run a milestone in Claude Code, type `/build-milestone M3` (ids with a letter
 - `/auth/password` answers an unknown email the same way as a wrong password; `select-school` refuses a tenant the account is not a member of; a tampered or reused signed link is refused.
 - Cross-tenant and wrong-role tests fail with 403/404; the app role cannot read another tenant's rows even with a raw query.
 - The support banner shows in support view; safeguarding routes refuse support sessions.
-- `DEV_FIXED_OTP` is refused at boot when `APP_ENV=production`.
+- `DEV_FIXED_OTP` is refused at boot unless `APP_ENV=local` (D46), so staging and production need a real second factor.
 
 **Prompt:**
 > Build milestone M1 from docs/spec/18-delivery-plan.md (read 02 Tenancy, 04, 05, 06, 08 Users & roles and School settings, and 16). Implement every sign-in flow, sessions, signed-link tokens, RBAC with the permission matrix, plan and module guards, FORCE RLS on all tenant tables, Settings → Users & roles, the School settings screen shell, the Audit view, the audit logs and support access. Write API integration tests for every flow, including cross-tenant and wrong-role denials, and add journeys 17, 18, 19, 42 and 43. Run pnpm verify.

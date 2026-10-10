@@ -360,3 +360,49 @@ describe('POST /auth/password (spec 05 step 3)', () => {
     expect(refused.statusCode).toBe(429);
   });
 });
+
+describe("POST /auth/password ends the browser's previous session (whole-M1 review)", () => {
+  async function staff(): Promise<{ email: string; password: string; tenantId: string }> {
+    const school = await insertSchool(db());
+    const account = await insertPasswordAccount(db());
+    await insertMember(db(), school.id, account.id);
+    return { email: account.email, password: account.password, tenantId: school.id };
+  }
+
+  it("signs out another person's session that this browser still held: the old cookie gets 401", async () => {
+    const first = await staff();
+    const second = await staff();
+    const browser = new Browser(app);
+    await signIn(browser, { email: first.email, password: first.password });
+    const old = browser.clone();
+    expect((await old.get('/me')).statusCode).toBe(200);
+    const before = await auditRows(db(), 'auth.sign_out');
+
+    const response = await signIn(browser, { email: second.email, password: second.password });
+
+    expect(response.json()).toEqual({ next: 'done' });
+    expect((await old.get('/me')).statusCode).toBe(401);
+    expect((await browser.get('/me')).statusCode).toBe(200);
+    const audits = (await auditRows(db(), 'auth.sign_out')).slice(before.length);
+    expect(audits.map((row) => row.tenant_id)).toEqual([first.tenantId]);
+  });
+
+  it('ends the same person’s earlier session when they sign in again', async () => {
+    const person = await staff();
+    const browser = new Browser(app);
+    await signIn(browser, { email: person.email, password: person.password });
+    const old = browser.clone();
+    await signIn(browser, { email: person.email, password: person.password });
+    expect((await old.get('/me')).statusCode).toBe(401);
+    expect((await browser.get('/me')).statusCode).toBe(200);
+  });
+
+  it('leaves the session alone when the password is wrong', async () => {
+    const person = await staff();
+    const browser = new Browser(app);
+    await signIn(browser, { email: person.email, password: person.password });
+    const refused = await signIn(browser, { email: person.email, password: 'not-the-password' });
+    expect(refused.statusCode).toBe(401);
+    expect((await browser.get('/me')).statusCode).toBe(200);
+  });
+});

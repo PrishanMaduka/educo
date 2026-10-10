@@ -249,14 +249,15 @@ describe('loadConfig', () => {
     expect(error.message).toContain('DEV_FIXED_OTP');
   });
 
-  it('allows the local-only flags in staging', () => {
-    const config = loadConfig(
-      productionEnv({
-        APP_ENV: 'staging',
-        DEV_FIXED_OTP: '000000',
-      }),
-    );
-    expect(config.DEV_FIXED_OTP).toBe('000000');
+  it('refuses DEV_FIXED_OTP in staging: fixed codes are local only (D46)', () => {
+    const error = configErrorOf(productionEnv({ APP_ENV: 'staging', DEV_FIXED_OTP: '000000' }));
+    expect(error.problems).toEqual([
+      { variable: 'DEV_FIXED_OTP', problem: 'must not be set outside local (D46)' },
+    ]);
+  });
+
+  it('accepts DEV_FIXED_OTP in local', () => {
+    expect(loadConfig(localEnv({ DEV_FIXED_OTP: '000000' })).DEV_FIXED_OTP).toBe('000000');
   });
 });
 

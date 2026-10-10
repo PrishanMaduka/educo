@@ -531,6 +531,25 @@ void main() {
       expect(find.text(l10n.parentSignInSchoolFailed), findsOneWidget);
     });
 
+    testWidgets('says the school is paused when it was paused meanwhile', (
+      tester,
+    ) async {
+      await openPicker(
+        tester,
+        [membershipJson(greenfield), membershipJson(riverside)],
+        routes: {
+          'POST /api/v1/auth/select-school': (_) =>
+              error(403, 'school_suspended'),
+        },
+      );
+
+      await tapText(tester, greenfield.name);
+      await tester.pumpAndSettle();
+
+      expect(find.text(l10n.parentSignInSchoolSuspended), findsOneWidget);
+      expect(find.text(l10n.parentSignInSchoolFailed), findsNothing);
+    });
+
     testWidgets('with no school to open, says so', (tester) async {
       await openPicker(tester, []);
 

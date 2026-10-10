@@ -15,7 +15,12 @@ import { Public } from '../../common/guards/public.decorator';
 import { RelativeAccess } from '../../common/guards/relative-access.decorator';
 import { AllowWhileSuspended } from '../../common/guards/tenant-status.guard';
 import { RateLimit } from '../../common/rate-limit/rate-limit.decorator';
-import { clearSessionCookies } from '../../common/session/cookies';
+import {
+  clearSessionCookies,
+  cookieNames,
+  hashSessionToken,
+  isSessionTokenShape,
+} from '../../common/session/cookies';
 import { Auth } from '../../common/session/request-auth';
 import { ZodValidationPipe } from '../../common/zod.pipe';
 import { AuthService } from '../../modules/auth/auth.service';
@@ -73,6 +78,12 @@ export class AuthController {
     @Res({ passthrough: true }) reply: FastifyReply,
   ): Promise<SignInResult> {
     const outcome = await this.signIn.password(body, signInClientOf(request, this.config.APP_ENV));
+    // The password is right: whatever session this browser held before (another person's on a
+    // shared computer, or an earlier one of theirs) ends now, as on the console (whole-M1 review).
+    const previous = request.cookies[cookieNames(this.config.APP_ENV).session];
+    if (isSessionTokenShape(previous)) {
+      await this.supportSessions.leavePrevious(hashSessionToken(previous), request.ip);
+    }
     applySignInCookies(reply, this.config.APP_ENV, outcome);
     return { next: outcome.next };
   }

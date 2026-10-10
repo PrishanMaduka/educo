@@ -11,6 +11,9 @@ export const AuditAction = z.enum([
   'auth.sign_out',
   'auth.password_reset',
   'auth.two_step_enabled',
+  // A recovery code was used instead of the authenticator app at the two-step step (whole-M1
+  // review), in every school where the account is staff. Never the code.
+  'auth.recovery_code_used',
   'user.invited',
   'user.invite_accepted',
   'user.role_changed',

@@ -551,7 +551,7 @@ describe('POST /auth/otp/verify (spec 05 parent app step 4)', () => {
 });
 
 describe('fixed codes (spec 16)', () => {
-  describe('DEV_FIXED_OTP (local and staging only)', () => {
+  describe('DEV_FIXED_OTP (local only, D46)', () => {
     const fixedDelivery = new RecordingDelivery();
     const fixedSends = new RecordingOtpSends(fixedDelivery);
     const fixed = useDatabaseApp(

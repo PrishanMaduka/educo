@@ -17,6 +17,7 @@ const SUMMARIES: Readonly<Record<AuditAction | PlatformAuditAction, MessageKey>>
   'auth.sign_out': 'audit.summary.signOut',
   'auth.password_reset': 'audit.summary.passwordReset',
   'auth.two_step_enabled': 'audit.summary.twoStepEnabled',
+  'auth.recovery_code_used': 'audit.summary.recoveryCodeUsed',
   'auth.password_accepted': 'audit.summary.passwordAccepted',
   'auth.two_step_setup_started': 'audit.summary.twoStepSetupStarted',
   'user.invited': 'audit.summary.userInvited',

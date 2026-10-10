@@ -85,7 +85,8 @@ export class SupportSessionService {
    * Leaves whatever the browser's previous staff cookie names, once a link has been redeemed and
    * before the visit's cookie replaces it (Task 17, D32): a member's session is signed out on the
    * server (`auth.sign_out` in its school), and an earlier support visit is ended. Otherwise the
-   * replaced cookie would stay valid, unseen, until it expired. Anything else is ignored.
+   * replaced cookie would stay valid, unseen, until it expired. Anything else is ignored. A
+   * staff password sign-in calls it too, once the password is right (whole-M1 review).
    *
    * The visit is already redeemed by then, so a failure here never fails the request: that would
    * leave a visit nobody holds a cookie for. It is logged (the kind of session only, no person or

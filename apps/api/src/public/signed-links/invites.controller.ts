@@ -1,7 +1,8 @@
 import { Body, Controller, Get, HttpCode, Inject, Param, Post, Req, Res } from '@nestjs/common';
 import { InviteAcceptInput, InviteTokenParams } from '@quad/contracts';
 
-import { CsrfError } from '../../common/errors';
+import { formatMessage } from '../../common/delivery/templates/render';
+import { CsrfError, ForbiddenError } from '../../common/errors';
 import { Public } from '../../common/guards/public.decorator';
 import { CSRF_HEADER, CsrfTokens } from '../../common/session/csrf';
 import { RequestAuthenticator } from '../../common/session/request-auth';
@@ -60,7 +61,9 @@ export class InvitesController {
   /**
    * The staff browser session on this request once two-step is done, or null. The route is
    * public (a new invitee has no session), so the CSRF check `AuthGuard` makes on cookie writes
-   * is made here for a session that counts.
+   * is made here for a session that counts. For the same reason `PreviewReadOnlyGuard` never
+   * runs here, so a session previewing a role is refused here too, after the CSRF check as there
+   * (403 `preview_read_only`; whole-M1 review).
    */
   private async signedIn(request: FastifyRequest): Promise<SignedInAccount | null> {
     const auth = await this.authenticator.fromRequest(request);
@@ -68,6 +71,9 @@ export class InvitesController {
     const stage = auth.stage === 'active' || auth.stage === 'choose_school' ? auth.stage : null;
     if (stage === null) return null;
     if (!this.csrf.verify(auth.tokenHash, request.headers[CSRF_HEADER])) throw new CsrfError();
+    if (auth.previewRoleId !== null) {
+      throw new ForbiddenError('preview_read_only', formatMessage('error.previewReadOnly'));
+    }
     return { accountId: auth.accountId, stage };
   }
 }

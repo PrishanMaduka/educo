@@ -134,6 +134,26 @@ describe('POST /auth/totp/verify (spec 05 step 4)', () => {
     ).toBe(200);
   });
 
+  it('audits auth.recovery_code_used in every staff school when a recovery code signs in (whole-M1 review)', async () => {
+    const before = await auditRows(db(), 'auth.recovery_code_used');
+    const { account, browser } = await atTwoStep({ recoveryCodes: ['abcde-fghjk'], schools: 2 });
+    expect(
+      (await browser.post('/auth/totp/verify', { recoveryCode: 'abcde-fghjk' })).json(),
+    ).toEqual({
+      next: 'choose_school',
+    });
+    const rows = (await auditRows(db(), 'auth.recovery_code_used')).slice(before.length);
+    expect(rows).toHaveLength(2);
+    expect(rows.every((row) => row.target_id === account.id)).toBe(true);
+  });
+
+  it('audits no recovery code for a sign-in with the authenticator code', async () => {
+    const before = await auditRows(db(), 'auth.recovery_code_used');
+    const { account, browser } = await atTwoStep({ recoveryCodes: ['abcde-fghjk'] });
+    await browser.post('/auth/totp/verify', { code: await totpCode(secretOf(account), clock) });
+    expect(await auditRows(db(), 'auth.recovery_code_used')).toHaveLength(before.length);
+  });
+
   it('trusts the device for 30 days when asked, so the next sign-in skips the code', async () => {
     const { account, browser } = await atTwoStep();
     const response = await browser.post('/auth/totp/verify', {
@@ -426,7 +446,7 @@ describe('POST /me/totp (set up an authenticator)', () => {
   });
 });
 
-describe('DEV_FIXED_OTP (local and staging only)', () => {
+describe('DEV_FIXED_OTP (local only, D46)', () => {
   const fixed = useDatabaseApp({ DEV_FIXED_OTP: '000000' }, { overrides: { now: () => clock } });
 
   it('accepts the fixed code when it is set', async () => {
