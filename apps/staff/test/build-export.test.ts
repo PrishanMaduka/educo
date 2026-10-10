@@ -66,7 +66,14 @@ describe('checkExport', () => {
 
   it('refuses a page that loads Turnstile', () => {
     put('about.html', '<script src="https://challenges.cloudflare.com/turnstile/v0/api.js">');
-    expect(checkExport(dir)).toEqual(['about.html contains challenges.cloudflare.com (Turnstile)']);
+    expect(checkExport(dir)).toEqual([
+      'about.html contains //challenges.cloudflare.com (Turnstile)',
+    ]);
+  });
+
+  it('lets the cookie notice name Cloudflare’s host in its text, which loads nothing', () => {
+    put('legal/cookies.html', '<p>Cloudflare runs the check on challenges.cloudflare.com.</p>');
+    expect(checkExport(dir)).toEqual([]);
   });
 
   it('refuses the sign-in dialog and sign-in links, in pages and in RSC payloads', () => {

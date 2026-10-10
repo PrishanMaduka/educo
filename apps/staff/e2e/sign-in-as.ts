@@ -20,7 +20,8 @@ export const PEOPLE = {
  * its own client address. Each run starts with an empty rate-limit store (the stack's own Redis
  * database), and CI retries a failed test once (`retries: 1`), so a journey's calls count twice
  * at worst. The global sign-in is not retried. Password calls per address in one CI run, at worst:
- * - Prishan: 1 global sign-in + 2 × 3 projects of journey 17 = 7;
+ * - Prishan: 1 global sign-in + 2 × 3 projects of journey 17 + 2 × 1 project of the cookie audit
+ *   (`cookie-audit.spec.ts`, desktop-light only) = 9;
  * - Ruwan: 2 × 3 projects of journey 18 (Choose a school, then Switch school) = 6;
  * - Nadeesha: 2 × 4 projects of the teacher's journey = 8;
  * - Dilini: 2 × 3 projects of Sign out = 6;

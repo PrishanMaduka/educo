@@ -65,7 +65,9 @@ const APP_LINK_ROUTES = ['p', 'p.html', '.well-known'];
  */
 const LIVE_ONLY = [
   { text: '/api/v1/', what: 'a call to the API' },
-  { text: 'challenges.cloudflare.com', what: 'Turnstile' },
+  // A URL on Cloudflare's host, as a script or frame would load it; the cookie notice names the
+  // host in its text, which loads nothing (D57).
+  { text: '//challenges.cloudflare.com', what: 'Turnstile' },
   { text: 'data-signin-dialog', what: 'the sign-in dialog' },
   { text: 'href="/sign-in', what: 'a link to sign-in' },
   { text: 'href:"/sign-in', what: 'a link to sign-in in a script' },

@@ -60,7 +60,7 @@ export const cookiesPage: ArticleContent = {
   summary:
     'Quad sets only the cookies it needs to work, and this website uses analytics cookies only if you accept them.',
   description:
-    'Every cookie and storage key Quad uses: what each does and how long it stays, Google Analytics only if you accept, and how to change your choice.',
+    'The cookies and storage Quad uses, and Google Analytics, only if you accept: what each does, how long it stays, and how to change your choice.',
   updated: { date: '2026-10-10', version: '0.1' },
   layout: 'legal',
   inShort: [

@@ -105,9 +105,10 @@ test('the browser holds only the cookies and storage keys the Cookies page lists
     cookies.filter((cookie) => findRegistryEntry(cookie.name)?.category === 'analytics'),
   ).toEqual([]);
   expect(cookies.some((cookie) => cookie.name.startsWith('_ga'))).toBe(false);
-  // The audit saw the cookies it set out to see, so the checks above were not vacuous.
+  // The audit saw the cookies it set out to see, so the checks above were not vacuous. Prishan has
+  // one school, so there is no "remember this school" choice and no `quad_last_school`.
   expect(new Set(cookies.map((cookie) => findRegistryEntry(cookie.name)?.id))).toEqual(
-    new Set(['session', 'csrf', 'trustedDevice', 'lastSchool']),
+    new Set(['session', 'csrf', 'trustedDevice']),
   );
   expect(new Set(keys)).toEqual(
     new Set([registryEntry('theme').names[0], registryEntry('siteView').names[0]]),
