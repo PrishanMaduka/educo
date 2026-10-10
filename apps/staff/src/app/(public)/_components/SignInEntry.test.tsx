@@ -58,9 +58,13 @@ describe('SignInEntry before launch', () => {
 });
 
 describe('SignInEntry after launch', () => {
-  it('links to the portal and has no note', () => {
+  it('is a button for the sign-in dialog and has no note', () => {
     render(<SignInEntry label="Sign in" look="link" prelaunch={false} comingSoon={comingSoon} />);
-    expect(screen.getByRole('link', { name: 'Sign in' })).toHaveAttribute('href', '/app');
+    expect(screen.getByRole('button', { name: 'Sign in' })).toHaveAttribute(
+      'aria-haspopup',
+      'dialog',
+    );
+    expect(screen.queryByRole('link', { name: 'Sign in' })).toBeNull();
     expect(screen.queryByRole('dialog', { hidden: true })).toBeNull();
   });
 });

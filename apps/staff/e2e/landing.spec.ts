@@ -125,19 +125,65 @@ test.describe('landing page', () => {
     );
   });
 
+  test('Sign in opens the sign-in dialog, and Escape closes it back to Sign in (D57)', async ({
+    page,
+  }, testInfo) => {
+    test.skip(isPrelaunch(testInfo), 'Before launch Sign in opens the coming-soon note');
+    await page.goto('/');
+    if (isNarrow(page)) await page.getByRole('button', { name: 'Menu' }).click();
+    const signIn = page
+      .locator('header')
+      .getByRole('button', { name: 'Sign in' })
+      .filter({ visible: true });
+    await expect(signIn).toHaveAttribute('aria-haspopup', 'dialog');
+    await signIn.click();
+    const dialog = page.getByRole('dialog', { name: 'Sign in to Quad' });
+    await expect(dialog).toBeVisible();
+    await expect(dialog.getByLabel('Work email')).toBeFocused();
+    await expect(dialog.getByText('Parents: use the Quad app.')).toBeVisible();
+    await expect(dialog.getByRole('img', { name: 'App Store, coming soon' })).toBeVisible();
+    await expect(dialog.getByRole('link')).toHaveCount(0);
+    await expectNoSideScroll(page);
+    await expectAccessibleOnceStill(page);
+    // Tab stays inside the modal dialog.
+    for (let i = 0; i < 6; i += 1) {
+      await page.keyboard.press('Tab');
+      expect(await dialog.evaluate((node) => node.contains(document.activeElement))).toBe(true);
+    }
+    await page.keyboard.press('Escape');
+    await expect(dialog).toBeHidden();
+    await expect(signIn).toBeFocused();
+
+    // The hero's "Sign in to your school" opens it too; a click on the backdrop closes it.
+    if (isNarrow(page)) await page.keyboard.press('Escape');
+    const hero = page.getByRole('button', { name: 'Sign in to your school' });
+    await hero.click();
+    await expect(dialog).toBeVisible();
+    await page.mouse.click(4, 4);
+    await expect(dialog).toBeHidden();
+    await expect(hero).toBeFocused();
+  });
+
+  test('/#signin opens the sign-in dialog, and closing it takes #signin off the address', async ({
+    page,
+  }, testInfo) => {
+    test.skip(isPrelaunch(testInfo), 'Before launch there is no sign-in dialog');
+    await page.goto('/#signin');
+    const dialog = page.getByRole('dialog', { name: 'Sign in to Quad' });
+    await expect(dialog).toBeVisible();
+    await dialog.getByRole('button', { name: 'Close sign-in' }).click();
+    await expect(dialog).toBeHidden();
+    await expect(page).toHaveURL('/');
+  });
+
   test('Sign in shows the coming-soon note before launch, and Escape closes it', async ({
     page,
   }, testInfo) => {
+    test.skip(!isPrelaunch(testInfo), 'After launch Sign in opens the sign-in dialog');
     await page.goto('/');
     if (isNarrow(page)) await page.getByRole('button', { name: 'Menu' }).click();
     const header = page.locator('header');
-    if (!isPrelaunch(testInfo)) {
-      await expect(header.getByRole('link', { name: 'Sign in' }).first()).toHaveAttribute(
-        'href',
-        '/app',
-      );
-      return;
-    }
+    await expect(page.locator('[data-signin-dialog]')).toHaveCount(0);
     const signIn = header.getByRole('button', { name: 'Sign in' }).filter({ visible: true });
     await signIn.click();
     const note = page.getByRole('dialog', { name: 'Sign-in opens when schools go live' });
@@ -164,7 +210,14 @@ test.describe('landing page', () => {
     for (const path of ['/', '/about']) {
       await page.goto(path);
       if (!isPrelaunch(testInfo)) {
-        await expect(footer.getByRole('link', { name: 'Sign in' })).toHaveAttribute('href', '/app');
+        // After launch it opens the sign-in dialog, on the landing page and the other pages.
+        const signIn = footer.getByRole('button', { name: 'Sign in' });
+        await signIn.click();
+        const dialog = page.getByRole('dialog', { name: 'Sign in to Quad' });
+        await expect(dialog).toBeVisible();
+        await page.keyboard.press('Escape');
+        await expect(dialog).toBeHidden();
+        await expect(signIn).toBeFocused();
         continue;
       }
       await expect(footer.locator('a[href="/app"]')).toHaveCount(0);

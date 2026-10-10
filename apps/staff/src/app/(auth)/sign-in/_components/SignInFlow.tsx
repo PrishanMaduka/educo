@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useReducer } from 'react';
+import { useCallback, useReducer, type ReactNode } from 'react';
 
 import { CheckInbox } from './CheckInbox';
 import { ChooseSchool } from './ChooseSchool';
@@ -36,6 +36,8 @@ export interface SignInFlowProps {
   /** Replaces the email step's title and lede (the invite page). */
   emailTitle?: string;
   emailLede?: string;
+  /** Replaces the email step's line for parents (the landing page's sign-in dialog). */
+  emailParents?: ReactNode;
   /** Opens the portal; a full page load by default, so it starts with the school's branding. */
   onOpen?: (path: string) => void;
 }
@@ -57,6 +59,7 @@ export function SignInFlow({
   beforeSchool,
   emailTitle,
   emailLede,
+  emailParents,
   onOpen = openPage,
 }: SignInFlowProps) {
   const [state, dispatch] = useReducer(signInReducer, initial ?? initialSignIn());
@@ -90,6 +93,7 @@ export function SignInFlow({
           notice={notice}
           title={emailTitle}
           lede={emailLede}
+          parents={emailParents}
           onSubmit={(address) => {
             dispatch({ type: 'email_entered', email: address });
           }}

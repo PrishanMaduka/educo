@@ -34,7 +34,6 @@ describe('Footer', () => {
       ['Modules', '#more'],
       ['In the app', '#more'],
       ['Book a demo', '#demo'],
-      ['Sign in', '/app'],
       ['Security & trust', '/security'],
       ['About', '/about'],
       ['support@quad-edu.com', 'mailto:support@quad-edu.com'],
@@ -42,6 +41,11 @@ describe('Footer', () => {
       ['Terms', '/legal/terms'],
     ]);
     expect(within(nav).getByText('Colombo, Sri Lanka')).toBeInTheDocument();
+    // Sign in opens the sign-in dialog on the live site (D57).
+    expect(within(nav).getByRole('button', { name: 'Sign in' })).toHaveAttribute(
+      'aria-haspopup',
+      'dialog',
+    );
   });
 
   it('opens the coming-soon note from Sign in before launch, instead of linking the portal', async () => {

@@ -449,6 +449,8 @@
   "publicComingSoonTitle": "Sign-in opens when schools go live",
   "publicComingSoonBody": "Quad is getting ready for its first schools. Once your school is on Quad, you’ll sign in here with your work email. Until then, book a demo and we’ll show you around.",
   "publicComingSoonClose": "Close",
+  "publicSignInDialogClose": "Close sign-in",
+  "publicSignInDialogParents": "Parents: use the Quad app.",
   "publicBadgesAppStoreLabel": "App Store, coming soon",
   "publicBadgesAppStoreLead": "Coming soon to the",
   "publicBadgesAppStoreName": "App Store",

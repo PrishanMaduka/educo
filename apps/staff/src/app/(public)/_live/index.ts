@@ -4,7 +4,7 @@
  * pre-launch export aliases this folder to site-export/prelaunch, so none of it is compiled there.
  * Lint refuses the API client, React Query, `(auth)` and `@/lib/api` anywhere else in `(public)`.
  */
-export { LiveSignIn } from './LiveSignIn';
+export { LiveSignIn, LiveSignInHost } from './LiveSignIn';
 export { SignedInHint } from './SignedInHint';
 export { submitDemoRequest } from './submitDemoRequest';
 export { TurnstileField } from './TurnstileField';

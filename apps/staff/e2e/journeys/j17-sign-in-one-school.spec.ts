@@ -9,8 +9,6 @@ import {
   brandVariable,
   closeNav,
   enterCode,
-  enterEmail,
-  enterPassword,
   expectAccessibleOnceStill,
   openNav,
   title,
@@ -20,8 +18,8 @@ import {
  * Journey 17 (spec 17), "Sign-in, one school": Prishan opens Sign in on the landing page, enters
  * her email, password and the code 000000, and lands in /app with Colombo International School's
  * name and colour. The landing here is the normal build (NEXT_PUBLIC_QUAD_PRELAUNCH unset), whose
- * Sign in is a link to /app, which sends a signed-out visitor to /sign-in?next=/app (D30); the
- * pre-launch export's coming-soon note is `landing.spec.ts`'s. CIS has no logo in the seed, so its
+ * Sign in opens the M1 flow in a dialog on the landing page (D57); the pre-launch export's
+ * coming-soon note is `landing.spec.ts`'s. CIS has no logo in the seed, so its
  * tile is its short name on its brand fill. The brand is the shell's brand-raw token
  * (`--quad-brand-raw`), the seed's saved #DD4A42 (kept by D34). One password call per run of it for
  * Prishan (`PASSWORD_JOURNEY_PROJECTS`).
@@ -43,18 +41,23 @@ test(
     if (isNarrowLanding(page)) await page.getByRole('button', { name: 'Menu' }).click();
     const signIn = page
       .locator('header')
-      .getByRole('link', { name: 'Sign in', exact: true })
+      .getByRole('button', { name: 'Sign in', exact: true })
       .filter({ visible: true });
-    await expect(signIn).toHaveAttribute('href', '/app');
     await signIn.click();
-    await expect(page).toHaveURL('/sign-in?next=%2Fapp');
-    await expect(title(page, 'Sign in to Quad')).toBeVisible();
-    await expectAccessibleOnceStill(page);
+    // The M1 flow in the landing page's dialog (D57).
+    await expect(page.getByRole('dialog', { name: 'Sign in to Quad' })).toBeVisible();
+    // The dialog is named by each step's title, so it is found by its marker from here on.
+    const dialog = page.locator('[data-signin-dialog]');
+    await expect(page).toHaveURL('/');
 
-    await enterEmail(page, PEOPLE.prishan);
+    // The landing page has its own Work email (the demo form), so each step is found in the dialog.
+    await dialog.getByLabel('Work email').fill(PEOPLE.prishan);
+    await dialog.getByRole('button', { name: 'Continue' }).click();
+    await expect(dialog.getByRole('heading', { name: 'Welcome back' })).toBeVisible();
     // The password step shows the address typed on the email step.
-    await expect(page.getByText(PEOPLE.prishan)).toBeVisible();
-    await enterPassword(page, stack.seedPassword);
+    await expect(dialog.getByText(PEOPLE.prishan)).toBeVisible();
+    await dialog.getByLabel('Password', { exact: true }).fill(stack.seedPassword);
+    await dialog.getByRole('button', { name: 'Sign in' }).click();
     await enterCode(page, stack.fixedCode);
 
     await expect(page).toHaveURL('/app');

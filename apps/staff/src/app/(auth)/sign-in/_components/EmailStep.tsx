@@ -3,7 +3,7 @@
 import { SignInEmail } from '@quad/contracts';
 import { Input } from '@quad/ui';
 import { AuthCard } from '@quad/ui/auth';
-import { useState, type FormEvent } from 'react';
+import { useState, type FormEvent, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { BigButton } from './bits';
@@ -20,6 +20,8 @@ export interface EmailStepProps {
   /** Replaces the title and lede, for the invite page. */
   title?: string;
   lede?: string;
+  /** Replaces the line for parents under the form (the landing page's dialog adds the app badges). */
+  parents?: ReactNode;
 }
 
 /** Step 1 (spec 05): the work email. Nothing is looked up; the password always comes next. */
@@ -30,6 +32,7 @@ export function EmailStep({
   onSubmit,
   title,
   lede,
+  parents,
 }: EmailStepProps) {
   const { t } = useTranslation();
   const [value, setValue] = useState(email);
@@ -79,7 +82,7 @@ export function EmailStep({
         />
         <BigButton type="submit">{t('signIn.email.submit')}</BigButton>
       </form>
-      <p className="m-0 text-[13px] text-ink-2">{t('signIn.parents')}</p>
+      {parents ?? <p className="m-0 text-[13px] text-ink-2">{t('signIn.parents')}</p>}
     </AuthCard>
   );
 }

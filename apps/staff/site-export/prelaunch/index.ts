@@ -14,6 +14,8 @@ function refuse(what: string): never {
 
 export const LiveSignIn: typeof Live.LiveSignIn = () => null;
 
+export const LiveSignInHost: typeof Live.LiveSignInHost = () => null;
+
 export const SignedInHint: typeof Live.SignedInHint = () => null;
 
 export const TurnstileField: typeof Live.TurnstileField = () => refuse('Turnstile');
