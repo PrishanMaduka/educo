@@ -1,5 +1,7 @@
+import { EmailJobSchema } from '../../common/delivery/email';
+
+import type { AnyQueueEmailInput } from '../../common/delivery/delivery.service';
 import type { DemoRequestBody } from '@quad/contracts';
-import type { Logger } from 'pino';
 
 type AntiSpamField = 'turnstileToken' | 'website';
 
@@ -8,52 +10,54 @@ export type DemoRequestDetails =
   | Omit<Extract<DemoRequestBody, { kind: 'school' }>, AntiSpamField>
   | Omit<Extract<DemoRequestBody, { kind: 'parent' }>, AntiSpamField>;
 
-/** `sales` goes to `SALES_INBOX`; `confirm` goes to the requester (Task 5 renders both). */
-export type DemoRequestEmailKind = 'sales' | 'confirm';
-
-/** One email about a stored lead. The job id holds only the lead id, never personal data. */
-export interface DemoRequestEmail {
-  /** `demo-request.<leadId>.<sales|confirm>`: one `send-email` job per id. */
-  readonly jobId: string;
-  readonly kind: DemoRequestEmailKind;
+/** The lead a request stored: new, or the one from the last 24 hours it updated. */
+export interface StoredLead {
   readonly leadId: string;
-  readonly request: DemoRequestDetails;
+  readonly created: boolean;
 }
 
-/**
- * Queues the emails about a demo request (`DEMO_REQUEST_EMAILS`; tests pass a recording fake).
- * Spec 06's `demo-request-received` job is realised as one `send-email` job per email (OQ-T4).
- */
-export interface DemoRequestEmails {
-  queue(email: DemoRequestEmail): Promise<void>;
+/** Where the emails go and link to. */
+export interface DemoRequestEmailSettings {
+  /** `SALES_INBOX` (`support@quad-edu.com` outside local, OQ2). */
+  readonly salesInbox: string;
+  /** `CONSOLE_URL`, for the lead's link (its Leads view arrives in M2, OQ-T5). */
+  readonly consoleUrl: string;
 }
 
-/**
- * The emails a stored request sends (D57): the sales email every time, so sales sees each
- * repeat, and the requester's confirmation only for a new lead, so a repeat within 24 hours does
- * not send a second one.
- */
-export function demoRequestEmailsFor(
-  leadId: string,
-  created: boolean,
-): readonly Pick<DemoRequestEmail, 'jobId' | 'kind'>[] {
-  const kinds: readonly DemoRequestEmailKind[] = created ? ['sales', 'confirm'] : ['sales'];
-  return kinds.map((kind) => ({ jobId: `demo-request.${leadId}.${kind}`, kind }));
-}
+/** Whether the email queue can take `address`: the form's check is looser (`josé@…` passes it). */
+const isSendable = (address: string): boolean => EmailJobSchema.shape.to.safeParse(address).success;
 
 /**
- * Until Task 5 adds the two templates and `SALES_INBOX`: logs that an email is owed (the lead
- * id only) instead of sending it. The lead itself is stored. Task 5 replaces this provider with
- * one that queues `send-email` jobs through `DELIVERY`.
+ * The emails a stored request sends (D57; spec 06's `demo-request-received` is these
+ * `send-email` jobs, OQ-T4). Job ids hold only ids, never personal data.
+ * - The sales email to `SALES_INBOX`, every time, so sales sees each repeat. Its id ends with
+ *   `requestId`, unique per request: BullMQ keeps one job per id, so a repeat that reused the
+ *   first one's id would be dropped while that one is pending, retrying or kept as failed.
+ * - The confirmation to the requester, for a new lead only, with the lead's own id, so it is sent
+ *   at most once per lead. Its only parameter is the kind: nothing typed reaches it. An address
+ *   the queue cannot take (the form allows a few more) gets none; sales still hears.
+ * - Nothing to the school, for a parent's request too (OQ1): no address comes from the school name.
  */
-export class UnsentDemoRequestEmails implements DemoRequestEmails {
-  constructor(private readonly logger: Logger) {}
-
-  queue(email: DemoRequestEmail): Promise<void> {
-    this.logger.warn(
-      { metric: 'demo_request_email_unsent', jobId: email.jobId },
-      'Demo request email not sent: its template arrives with Task 5',
-    );
-    return Promise.resolve();
-  }
+export function demoRequestEmailJobs(
+  lead: StoredLead,
+  request: DemoRequestDetails,
+  settings: DemoRequestEmailSettings,
+  requestId: string,
+): AnyQueueEmailInput[] {
+  const sales: AnyQueueEmailInput = {
+    jobId: `demo-request.${lead.leadId}.sales.${requestId}`,
+    to: settings.salesInbox,
+    template: 'demo_request_sales',
+    params: { ...request, link: new URL(`/leads/${lead.leadId}`, settings.consoleUrl).href },
+  };
+  if (!lead.created || !isSendable(request.email)) return [sales];
+  return [
+    sales,
+    {
+      jobId: `demo-request.${lead.leadId}.confirm`,
+      to: request.email,
+      template: 'demo_request_confirmation',
+      params: { kind: request.kind },
+    },
+  ];
 }

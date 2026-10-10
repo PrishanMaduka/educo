@@ -155,6 +155,43 @@ describe('scripts/e2e-stack.mjs', () => {
       /^http:\/\/localhost:3000\/sign-in\/reset\//,
     );
 
+    // A parent's demo request (M1b Task 5): the sales email reaches SALES_INBOX (the local
+    // default) and the parent gets the fixed confirmation, with nothing they typed in it.
+    const run = `${String(process.pid)}-${String(Date.now())}`;
+    const parent = `parent+${run}@example.test`;
+    const school = `Sample School ${run}`;
+    const demo = await fetch(`http://localhost:${String(PORT_A)}/api/v1/public/demo-requests`, {
+      method: 'POST',
+      // A per-run address (TRUST_PROXY_HOPS=1), so reruns never meet the per-IP limit.
+      headers: {
+        'content-type': 'application/json',
+        'x-forwarded-for': `198.51.100.${String(process.pid % 250)}`,
+      },
+      body: JSON.stringify({
+        kind: 'parent',
+        name: `Sample Parent ${run}`,
+        email: parent,
+        school,
+        note: `Typed note ${run}`,
+        // Cloudflare's published dummy token, which the local offline verifier accepts.
+        turnstileToken: 'XXXX.DUMMY.TOKEN.XXXX',
+      }),
+    });
+    expect(demo.status).toBe(202);
+    const sales = await new Mailpit().waitForMessage({
+      to: 'sales@quad.local',
+      since,
+      subject: `From a parent: ${school}`,
+    });
+    expect(sales.text).toContain(`Note: Typed note ${run}`);
+    const confirmation = await new Mailpit().waitForMessage({ to: parent, since });
+    expect(confirmation.text).toContain('Our team will get in touch with the school');
+    for (const typed of [school, `Sample Parent ${run}`, `Typed note ${run}`]) {
+      expect(`${confirmation.subject}\n${confirmation.text}\n${confirmation.html}`).not.toContain(
+        typed,
+      );
+    }
+
     stack.child.kill('SIGTERM');
     await stack.exited;
     expect(await databaseExists(database)).toBe(false);

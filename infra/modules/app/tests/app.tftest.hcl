@@ -123,6 +123,7 @@ variables {
   tooling_account_id = "210987654321"
 
   turnstile_expected_hostname = "staging.quad-edu.com"
+  sales_inbox                 = "support@quad-edu.com"
 }
 
 # Assertions compare structured values through jsonencode, because Terraform's == is
@@ -335,6 +336,7 @@ run "api_runs_behind_two_proxies" {
         "S3_REGION", "S3_BUCKET_PRIVATE", "S3_BUCKET_PUBLIC", "CDN_URL", "CLAMAV_HOST", "CLAMAV_PORT",
         "EMAIL_PROVIDER", "SES_REGION", "SES_CONFIGURATION_SET", "SES_SNS_TOPIC_ARN", "EMAIL_FROM_DOMAIN",
         "OTEL_SERVICE_NAME", "SENTRY_ENVIRONMENT", "KMS_KEY_ID", "TURNSTILE_EXPECTED_HOSTNAME",
+        "SALES_INBOX",
       ])) &&
       jsonencode(sort([for s in jsondecode(aws_ecs_task_definition.this["api"].container_definitions)[0].secrets : s.name])) ==
       jsonencode(sort([
@@ -456,6 +458,29 @@ run "turnstile_hostname_must_be_a_bare_host_name" {
   }
 
   expect_failures = [var.turnstile_expected_hostname]
+}
+
+run "sales_inbox_reaches_api_and_worker" {
+  command = apply
+
+  assert {
+    condition = alltrue([
+      for service in ["api", "worker"] :
+      { for e in jsondecode(aws_ecs_task_definition.this[service].container_definitions)[0].environment : e.name => e.value }["SALES_INBOX"] == "support@quad-edu.com" &&
+      !contains([for s in jsondecode(aws_ecs_task_definition.this[service].container_definitions)[0].secrets : s.name], "SALES_INBOX")
+    ])
+    error_message = "The api and worker get SALES_INBOX as plain environment (D57: required outside local; not a secret)."
+  }
+}
+
+run "sales_inbox_must_be_one_email_address" {
+  command = plan
+
+  variables {
+    sales_inbox = "support@quad-edu.com, other@example.com"
+  }
+
+  expect_failures = [var.sales_inbox]
 }
 
 run "the_field_key_cannot_be_rotated_before_m12" {

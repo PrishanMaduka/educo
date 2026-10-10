@@ -368,6 +368,8 @@ read -rs TURNSTILE && aws secretsmanager put-secret-value --secret-id quad-stagi
 The Turnstile secret comes from the Cloudflare Turnstile widget for the public site (Cloudflare
 dashboard, Turnstile, the widget's settings). `TURNSTILE_EXPECTED_HOSTNAME` is not a secret: the
 module sets it from `turnstile_expected_hostname` (`staging.quad-edu.com` in `envs/staging`).
+`SALES_INBOX`, where demo request notifications go, is not a secret either: the module sets it
+from `sales_inbox` (`support@quad-edu.com` in `envs/staging`, the owner's choice, OQ2).
 The seed password is the staging password of the seeded sample accounts: 10 characters or more,
 and never the local placeholder from `.env.example`. Outside local, the seed refuses that
 placeholder or an empty value, and the api refuses the placeholder if it is ever given one.

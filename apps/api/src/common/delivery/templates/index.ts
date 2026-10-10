@@ -1,3 +1,5 @@
+import { demoRequestConfirmationEmail } from './demo-request-confirmation';
+import { demoRequestSalesEmail } from './demo-request-sales';
 import { emailOtpEmail } from './email-otp';
 import { lockoutEmail } from './lockout';
 import { newDeviceEmail } from './new-device';
@@ -12,7 +14,10 @@ import type { z } from 'zod';
 export type { EmailSender, RenderOptions, RenderedEmail } from './email-template';
 export type { RenderedSms } from './sms-otp';
 
-/** Every email Quad sends in M1, by template id (the job name in the `send-email` queue). */
+/**
+ * Every email Quad sends, by template id (the job name in the `send-email` queue): M1's, and the
+ * demo request's two (M1b, D57).
+ */
 export const EMAIL_TEMPLATE_IDS = [
   'staff_invite',
   'password_reset',
@@ -20,6 +25,8 @@ export const EMAIL_TEMPLATE_IDS = [
   'two_step_reminder',
   'new_device',
   'email_otp',
+  'demo_request_sales',
+  'demo_request_confirmation',
 ] as const;
 export type EmailTemplateId = (typeof EMAIL_TEMPLATE_IDS)[number];
 
@@ -30,6 +37,8 @@ export const EMAIL_TEMPLATES = {
   two_step_reminder: twoStepReminderEmail,
   new_device: newDeviceEmail,
   email_otp: emailOtpEmail,
+  demo_request_sales: demoRequestSalesEmail,
+  demo_request_confirmation: demoRequestConfirmationEmail,
 } as const satisfies Record<EmailTemplateId, EmailTemplate>;
 /** The parameters a caller passes for template `T`. */
 export type EmailParams<T extends EmailTemplateId> = z.input<(typeof EMAIL_TEMPLATES)[T]['params']>;

@@ -11,6 +11,7 @@ const TENANT = '0193e6a1-0000-7000-8000-000000000001';
 const SETTINGS = {
   fromDomain: 'mail.quad-edu.com',
   publicWebUrl: 'http://localhost:3000',
+  consoleUrl: 'http://localhost:3001',
   supportInbox: null,
 };
 

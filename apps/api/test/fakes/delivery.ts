@@ -2,6 +2,7 @@ import { prepareEmailJob, prepareSmsJob } from '../../src/common/delivery/delive
 import { currentRequestContext } from '../../src/common/request-context';
 
 import type {
+  AnyQueueEmailInput,
   DeliveryQueue,
   QueueEmailInput,
   QueueSmsInput,
@@ -26,6 +27,14 @@ export class RecordingDelivery implements DeliveryQueue {
   queueEmail<T extends EmailTemplateId>(input: QueueEmailInput<T>): Promise<void> {
     const prepared = prepareEmailJob(input, currentRequestContext()?.tenantId ?? null);
     this.emails.push(prepared);
+    return Promise.resolve();
+  }
+
+  /** All or none, as the real queue: every email is checked before any is recorded. */
+  queueEmails(inputs: readonly AnyQueueEmailInput[]): Promise<void> {
+    const tenantId = currentRequestContext()?.tenantId ?? null;
+    const prepared = inputs.map((input) => prepareEmailJob(input, tenantId));
+    this.emails.push(...prepared);
     return Promise.resolve();
   }
 

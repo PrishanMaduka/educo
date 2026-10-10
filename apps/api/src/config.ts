@@ -164,6 +164,8 @@ const ConfigSchema = z.object({
   SES_SNS_TOPIC_ARN: opt(snsTopicArn),
   EMAIL_FROM_DOMAIN: opt(text),
   SUPPORT_INBOX: opt(z.string().email({ message: 'must be an email address' })),
+  // Where demo request notifications go (D57, OQ2): required outside local; locally unset means
+  // `LOCAL_SALES_INBOX`, which Mailpit catches (`salesInboxOf`).
   SALES_INBOX: opt(z.string().email({ message: 'must be an email address' })),
 
   // SMS
@@ -487,6 +489,23 @@ function turnstileRules(env: RawEnv): ConfigProblem[] {
   return problems;
 }
 
+/** The demo request notifications' inbox locally when `SALES_INBOX` is unset (Mailpit catches it). */
+export const LOCAL_SALES_INBOX = 'sales@quad.local';
+
+/** `SALES_INBOX`, or locally `LOCAL_SALES_INBOX` (outside local the config requires it). */
+export function salesInboxOf(config: Config): string {
+  return config.SALES_INBOX ?? LOCAL_SALES_INBOX;
+}
+
+/** Outside local, demo request notifications need a real inbox (`support@quad-edu.com`, OQ2). */
+function salesInboxRules(env: RawEnv): ConfigProblem[] {
+  const appEnv = blank(env.APP_ENV);
+  if ((appEnv === 'staging' || appEnv === 'production') && blank(env.SALES_INBOX) === undefined) {
+    return [{ variable: 'SALES_INBOX', problem: 'must be set outside local' }];
+  }
+  return [];
+}
+
 /**
  * Parses the environment. Throws `ConfigError` listing every missing or invalid variable at
  * once, plus the refusal of `DEV_FIXED_OTP` outside local (D46).
@@ -504,6 +523,7 @@ export function loadConfig(env: NodeJS.ProcessEnv): Config {
     ...storeReviewRules(env),
     ...deliveryRules(env),
     ...turnstileRules(env),
+    ...salesInboxRules(env),
     ...environmentRules(env),
   );
   if (problems.length > 0 || !parsed.success) {

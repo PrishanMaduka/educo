@@ -38,6 +38,8 @@ locals {
     KMS_KEY_ID = var.field_kms_key_arn
     # The hostname Turnstile siteverify must report for a demo form token (D57).
     TURNSTILE_EXPECTED_HOSTNAME = var.turnstile_expected_hostname
+    # Where demo request notifications go (D57, OQ2); not a secret.
+    SALES_INBOX = var.sales_inbox
   }, local.otel_endpoint)
 
   sentry_dsn_arn = aws_secretsmanager_secret.app["SENTRY_DSN"].arn

@@ -7,7 +7,7 @@ import { PLATFORM_DB } from '../../src/platform/tokens';
 import { TENANT_DB, TURNSTILE } from '../../src/tokens';
 import { captureLogs } from '../app';
 import { localEnv } from '../env';
-import { RecordingDemoRequestEmails } from '../fakes/demo-request-emails';
+import { RecordingDelivery } from '../fakes/delivery';
 import { Browser, randomIp } from '../helpers/browser';
 import { useDatabaseApp } from '../helpers/database-app';
 import { insertSchool, sessionHeaders, signedInMember } from '../helpers/identity';
@@ -23,12 +23,22 @@ const NOW = Date.UTC(2026, 9, 10, 3, 30, 1);
 const HOUR_RETRY_AFTER = '1799';
 const DAY_RETRY_AFTER = '73799';
 
-const emails = new RecordingDemoRequestEmails();
+const delivery = new RecordingDelivery();
 const logs = captureLogs();
 const { app, db } = useDatabaseApp(
   {},
-  { logger: logs.logger, overrides: { now: () => NOW, demoRequestEmails: emails } },
+  { logger: logs.logger, overrides: { now: () => NOW, delivery } },
 );
+
+/** `.env.example`'s local default: with SALES_INBOX unset, local sends go to Mailpit's inbox. */
+const SALES_INBOX = 'sales@quad.local';
+
+/** The email jobs queued for one lead, in order. */
+const jobsFor = (leadId: string) =>
+  delivery.emails.filter(({ jobId }) => jobId.startsWith(`demo-request.${leadId}.`));
+/** A sales job id: the lead, then a per-request part, so a repeat is never dropped. */
+const SALES_ID = (leadId: string) =>
+  new RegExp(`^demo-request\\.${leadId}\\.sales\\.[0-9a-f-]{36}$`);
 
 afterEach(() => {
   vi.restoreAllMocks();
@@ -130,26 +140,61 @@ describe('POST /public/demo-requests: a school or parent asks for a demo (spec 0
       converted_tenant_id: null,
     });
     if (lead === undefined) throw new Error('no lead');
-    expect(emails.jobIdsFor(lead.id)).toEqual([
-      `demo-request.${lead.id}.sales`,
-      `demo-request.${lead.id}.confirm`,
-    ]);
-    const queued = emails.queued.filter((email) => email.leadId === lead.id);
-    expect(queued.map((email) => email.kind)).toEqual(['sales', 'confirm']);
-    // The emails get the request as parsed, without the anti-spam fields.
-    expect(queued[0]?.request).toEqual({
-      kind: 'school',
-      name: 'Sample Person',
-      email: body.email,
-      school: 'Sample School',
-      country: 'Portugal',
-      students: '300_1000',
-      curriculum: 'ib',
+    const [sales, confirm, ...more] = jobsFor(lead.id);
+    expect(more).toEqual([]);
+    expect(sales?.jobId).toMatch(SALES_ID(lead.id));
+    // The sales email gets the request as parsed, without the anti-spam fields.
+    expect(sales?.job).toEqual({
+      to: SALES_INBOX,
+      tenantId: null,
+      school: null,
+      template: 'demo_request_sales',
+      params: {
+        kind: 'school',
+        name: 'Sample Person',
+        email: body.email,
+        school: 'Sample School',
+        country: 'Portugal',
+        students: '300_1000',
+        curriculum: 'ib',
+        link: `http://localhost:3001/leads/${lead.id}`,
+      },
     });
+    // The confirmation carries only the kind: nothing the visitor typed.
+    expect(confirm).toEqual({
+      jobId: `demo-request.${lead.id}.confirm`,
+      job: {
+        to: body.email,
+        tenantId: null,
+        school: null,
+        template: 'demo_request_confirmation',
+        params: { kind: 'school' },
+      },
+    });
+  });
+
+  it('logs each stored lead with its id, whether it is new and its kind, and nothing personal', async () => {
+    const browser = new Browser(app);
+    const body = parentRequest();
+    const before = logs.lines.length;
+
+    expect((await browser.post(ROUTE, body)).statusCode).toBe(202);
+
+    const [lead] = await leadsFor(body.email);
+    if (lead === undefined) throw new Error('no lead');
+    const lines = logs.lines.slice(before);
+    expect(lines).toContainEqual(
+      expect.objectContaining({ leadId: lead.id, created: true, kind: 'parent_intro' }),
+    );
+    const text = JSON.stringify(lines);
+    for (const personal of [body.email, body.name, body.school, browser.ip]) {
+      expect(text).not.toContain(personal);
+    }
   });
 
   it('stores a parent request as a parent_intro lead with its city and note', async () => {
     const body = parentRequest();
+    const queuedBefore = delivery.emails.length;
 
     const response = await new Browser(app).post(ROUTE, body);
 
@@ -167,10 +212,13 @@ describe('POST /public/demo-requests: a school or parent asks for a demo (spec 0
       country: null,
     });
     if (lead === undefined) throw new Error('no lead');
-    expect(emails.jobIdsFor(lead.id)).toEqual([
-      `demo-request.${lead.id}.sales`,
-      `demo-request.${lead.id}.confirm`,
+    // Exactly two emails, to SALES_INBOX and to the parent; nothing to the school (OQ1).
+    expect(delivery.emails.slice(queuedBefore)).toEqual(jobsFor(lead.id));
+    expect(jobsFor(lead.id).map(({ job }) => [job.template, job.to])).toEqual([
+      ['demo_request_sales', SALES_INBOX],
+      ['demo_request_confirmation', body.email],
     ]);
+    expect(jobsFor(lead.id)[1]?.job.params).toEqual({ kind: 'parent' });
   });
 
   it('stores the IP only as HMAC-SHA256 under the HKDF "quad lead ip" key, never the address', async () => {
@@ -240,7 +288,7 @@ describe('POST /public/demo-requests: a school or parent asks for a demo (spec 0
       ['an unknown kind', schoolRequest({ kind: 'teacher' }), 'kind'],
     ])('answers 400 validation for %s, storing and sending nothing', async (_case, body, field) => {
       const verify = vi.spyOn(turnstile(), 'verify');
-      const queuedBefore = emails.queued.length;
+      const queuedBefore = delivery.emails.length;
 
       const response = await new Browser(app).post(ROUTE, body);
 
@@ -250,7 +298,7 @@ describe('POST /public/demo-requests: a school or parent asks for a demo (spec 0
         fields: { [field]: expect.any(String) as unknown },
       });
       expect(verify).not.toHaveBeenCalled();
-      expect(emails.queued.length).toBe(queuedBefore);
+      expect(delivery.emails.length).toBe(queuedBefore);
       if (typeof body.email === 'string') expect(await leadsFor(body.email)).toEqual([]);
     });
 
@@ -275,19 +323,19 @@ describe('POST /public/demo-requests: a school or parent asks for a demo (spec 0
   describe('captcha', () => {
     it('answers 400 captcha_failed for a refused token, with no lead and no email', async () => {
       const body = schoolRequest({ turnstileToken: 'fail' });
-      const queuedBefore = emails.queued.length;
+      const queuedBefore = delivery.emails.length;
 
       const response = await new Browser(app).post(ROUTE, body);
 
       expect(response.statusCode).toBe(400);
       expect(response.json()).toMatchObject({ code: 'captcha_failed' });
       expect(await leadsFor(body.email)).toEqual([]);
-      expect(emails.queued.length).toBe(queuedBefore);
+      expect(delivery.emails.length).toBe(queuedBefore);
     });
 
     it('answers 503 captcha_unavailable when Cloudflare cannot answer (fail closed), with no lead and no email', async () => {
       const body = parentRequest({ turnstileToken: 'unavailable' });
-      const queuedBefore = emails.queued.length;
+      const queuedBefore = delivery.emails.length;
       const before = logs.lines.length;
 
       const response = await new Browser(app).post(ROUTE, body);
@@ -295,7 +343,7 @@ describe('POST /public/demo-requests: a school or parent asks for a demo (spec 0
       expect(response.statusCode).toBe(503);
       expect(response.json()).toMatchObject({ code: 'captcha_unavailable' });
       expect(await leadsFor(body.email)).toEqual([]);
-      expect(emails.queued.length).toBe(queuedBefore);
+      expect(delivery.emails.length).toBe(queuedBefore);
       expect(logs.lines.slice(before)).toContainEqual(
         expect.objectContaining({ metric: 'demo_request_captcha_unavailable' }),
       );
@@ -306,7 +354,7 @@ describe('POST /public/demo-requests: a school or parent asks for a demo (spec 0
     it('answers 202 to a filled website field without asking Turnstile, storing or sending anything', async () => {
       const verify = vi.spyOn(turnstile(), 'verify');
       const body = schoolRequest({ website: 'https://spam.example' });
-      const queuedBefore = emails.queued.length;
+      const queuedBefore = delivery.emails.length;
       const before = logs.lines.length;
 
       const response = await new Browser(app).post(ROUTE, body);
@@ -315,7 +363,7 @@ describe('POST /public/demo-requests: a school or parent asks for a demo (spec 0
       expect(response.body).toBe('');
       expect(verify).not.toHaveBeenCalled();
       expect(await leadsFor(body.email)).toEqual([]);
-      expect(emails.queued.length).toBe(queuedBefore);
+      expect(delivery.emails.length).toBe(queuedBefore);
       const lines = logs.lines.slice(before);
       expect(lines).toContainEqual(expect.objectContaining({ metric: 'demo_request_honeypot' }));
       expect(JSON.stringify(lines)).not.toContain(body.email);
@@ -329,6 +377,43 @@ describe('POST /public/demo-requests: a school or parent asks for a demo (spec 0
   });
 
   describe('rate limits', () => {
+    it('counts a refused captcha against the IP: after 5 fail tokens a valid 6th request gets 429', async () => {
+      const browser = new Browser(app);
+      for (let sent = 0; sent < 5; sent += 1) {
+        const refused = await browser.post(ROUTE, schoolRequest({ turnstileToken: 'fail' }));
+        expect(refused.statusCode).toBe(400);
+        expect(refused.json()).toMatchObject({ code: 'captcha_failed' });
+      }
+      const sixth = schoolRequest();
+
+      const limited = await browser.post(ROUTE, sixth);
+
+      expect(limited.statusCode).toBe(429);
+      expect(limited.json()).toMatchObject({ code: 'rate_limited' });
+      expect(limited.headers['retry-after']).toBe(HOUR_RETRY_AFTER);
+      expect(await leadsFor(sixth.email)).toEqual([]);
+    });
+
+    it('counts an email only once its captcha passes, so no one can use up a prospect’s requests', async () => {
+      const email = freshEmail();
+      for (let sent = 0; sent < 4; sent += 1) {
+        const refused = await new Browser(app).post(
+          ROUTE,
+          schoolRequest({ email, turnstileToken: 'fail' }),
+        );
+        expect(refused.statusCode).toBe(400);
+      }
+      // A honeypot hit does not count either.
+      expect(
+        (await new Browser(app).post(ROUTE, schoolRequest({ email, website: 'x' }))).statusCode,
+      ).toBe(202);
+
+      const real = await new Browser(app).post(ROUTE, schoolRequest({ email }));
+
+      expect(real.statusCode).toBe(202);
+      expect(await leadsFor(email)).toHaveLength(1);
+    });
+
     it('answers the 6th request in an hour from one IP with 429 rate_limited and Retry-After', async () => {
       const browser = new Browser(app);
       for (let sent = 0; sent < 5; sent += 1) {
@@ -354,12 +439,18 @@ describe('POST /public/demo-requests: a school or parent asks for a demo (spec 0
         expect((await new Browser(app).post(ROUTE, schoolRequest({ email }))).statusCode).toBe(202);
       }
 
+      const verify = vi.spyOn(turnstile(), 'verify');
+      const queuedBefore = delivery.emails.length;
+
       const limited = await new Browser(app).post(ROUTE, parentRequest({ email }));
 
       expect(limited.statusCode).toBe(429);
       expect(limited.json()).toMatchObject({ code: 'rate_limited' });
       expect(limited.headers['retry-after']).toBe(DAY_RETRY_AFTER);
+      // Counted after the captcha (D57), and nothing is stored or sent.
+      expect(verify).toHaveBeenCalledOnce();
       expect(await leadsFor(email)).toHaveLength(1);
+      expect(delivery.emails.length).toBe(queuedBefore);
     });
 
     it('counts A@x.com and a@x.com (and padded or other-case spellings) as one email', async () => {
@@ -406,11 +497,20 @@ describe('POST /public/demo-requests: a school or parent asks for a demo (spec 0
       expect(others).toEqual([]);
       expect(lead).toMatchObject({ name: 'Sample Person Again', students_band: 'over_2500' });
       if (lead === undefined) throw new Error('no lead');
-      expect(emails.jobIdsFor(lead.id)).toEqual([
-        `demo-request.${lead.id}.sales`,
-        `demo-request.${lead.id}.confirm`,
-        `demo-request.${lead.id}.sales`,
-      ]);
+      const [firstSales, confirm, repeatSales, ...more] = jobsFor(lead.id).map(
+        ({ jobId }) => jobId,
+      );
+      expect(more).toEqual([]);
+      expect(confirm).toBe(`demo-request.${lead.id}.confirm`);
+      expect(firstSales).toMatch(SALES_ID(lead.id));
+      expect(repeatSales).toMatch(SALES_ID(lead.id));
+      // A job id of its own, so BullMQ never drops the repeat as a duplicate of the first
+      // sales email while that one is pending, retrying or kept as failed.
+      expect(repeatSales).not.toBe(firstSales);
+      expect(jobsFor(lead.id)[2]?.job.params).toMatchObject({
+        name: 'Sample Person Again',
+        students: 'over_2500',
+      });
     });
   });
 
@@ -464,9 +564,9 @@ describe('POST /public/demo-requests: a school or parent asks for a demo (spec 0
       const [lead] = await leadsFor(signedIn.email);
       expect(lead).toMatchObject({ converted_tenant_id: null, owner_platform_user_id: null });
       if (lead === undefined) throw new Error('no lead');
-      const queued = emails.queued.filter((email) => email.leadId === lead.id);
+      const queued = jobsFor(lead.id);
       expect(queued).toHaveLength(2);
-      expect(queued.map((email) => email.tenantId)).toEqual([null, null]);
+      expect(queued.map(({ job }) => job.tenantId)).toEqual([null, null]);
     });
   });
 });

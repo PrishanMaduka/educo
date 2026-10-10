@@ -1,14 +1,20 @@
+import { randomUUID } from 'node:crypto';
+
 import { Inject, Injectable } from '@nestjs/common';
 
-import { CaptchaFailedError, CaptchaUnavailableError } from '../../common/errors';
-import { CONFIG, DEMO_REQUEST_EMAILS, LOGGER, TENANT_DB, TURNSTILE } from '../../tokens';
+import { CaptchaFailedError, CaptchaUnavailableError, RateLimitedError } from '../../common/errors';
+import { RateLimitService } from '../../common/rate-limit/rate-limit.service';
+import { salesInboxOf } from '../../config';
+import { CLOCK, CONFIG, DELIVERY, LOGGER, TENANT_DB, TURNSTILE } from '../../tokens';
 
-import { demoRequestEmailsFor } from './demo-request-emails';
+import { demoRequestEmailJobs } from './demo-request-emails';
 import { leadIpHasher } from './lead-ip-hash';
 
-import type { DemoRequestDetails, DemoRequestEmails } from './demo-request-emails';
+import type { DemoRequestDetails, DemoRequestEmailSettings } from './demo-request-emails';
+import type { DeliveryQueue } from '../../common/delivery/delivery.service';
 import type { TurnstileVerifier } from '../../common/turnstile/turnstile';
 import type { Config } from '../../config';
+import type { Clock } from '../../tokens';
 import type { DemoRequestBody, LeadKind } from '@quad/contracts';
 import type { DemoRequestRecord, QuadTenantDb } from '@quad/db';
 import type { Logger } from 'pino';
@@ -19,6 +25,20 @@ export interface DemoRequestSubmission {
   /** `request.ip`, from Fastify's `trustProxy` (`TRUST_PROXY_HOPS`); never X-Forwarded-For. */
   readonly ip: string;
   readonly userAgent: string | undefined;
+}
+
+/**
+ * OQ4: 3 a day per email, so the confirmation cannot be used to flood an inbox. Counted after
+ * Turnstile (D57), so no one can use up a prospect's requests without solving the captcha.
+ */
+const PER_EMAIL = { limit: 3, windowSeconds: 24 * 60 * 60 } as const;
+
+/**
+ * The per-email rate-limit subject: trimmed, NFKC-normalised and lower-cased, so `A@x.com`,
+ * ` a@x.com ` and a full-width spelling are one subject. Only its HMAC reaches Redis.
+ */
+export function normalisedEmail(email: string): string {
+  return email.normalize('NFKC').trim().toLowerCase();
 }
 
 /** `platform_leads.user_agent` holds at most 400 characters. */
@@ -81,21 +101,25 @@ function recordOf(
 @Injectable()
 export class DemoRequestsService {
   private readonly hashIp: (ip: string) => Buffer;
+  private readonly emailSettings: DemoRequestEmailSettings;
 
   constructor(
     @Inject(TENANT_DB) private readonly db: QuadTenantDb,
     @Inject(TURNSTILE) private readonly turnstile: TurnstileVerifier,
-    @Inject(DEMO_REQUEST_EMAILS) private readonly emails: DemoRequestEmails,
+    @Inject(DELIVERY) private readonly delivery: DeliveryQueue,
+    private readonly limits: RateLimitService,
+    @Inject(CLOCK) private readonly now: Clock,
     @Inject(LOGGER) private readonly logger: Logger,
     @Inject(CONFIG) config: Config,
   ) {
     this.hashIp = leadIpHasher(config.SESSION_SECRET);
+    this.emailSettings = { salesInbox: salesInboxOf(config), consoleUrl: config.CONSOLE_URL };
   }
 
   /**
-   * After the rate limits and the body: the honeypot, Turnstile, the lead, then its emails. A
-   * honeypot hit, a new lead and an updated one all end the same way, so the caller's 202 never
-   * tells a bot it was caught or a visitor that the email has asked before.
+   * After the per-IP limit and the body: the honeypot, Turnstile, the per-email limit, the lead,
+   * then its emails. A honeypot hit, a new lead and an updated one all end the same way, so the
+   * caller's 202 never tells a bot it was caught or a visitor that the email has asked before.
    */
   async submit({ body, ip, userAgent }: DemoRequestSubmission): Promise<void> {
     if (body.website !== undefined && body.website !== '') {
@@ -103,14 +127,41 @@ export class DemoRequestsService {
       return;
     }
     await this.verifyCaptcha(body.turnstileToken, ip);
+    await this.countEmail(body.email);
 
     const details = detailsOf(body);
     const lead = await this.db.definers.recordDemoRequest(
       recordOf(details, this.hashIp(ip), cutUserAgent(userAgent)),
     );
-    for (const email of demoRequestEmailsFor(lead.leadId, lead.created)) {
-      await this.emails.queue({ ...email, leadId: lead.leadId, request: details });
-    }
+    this.logger.info(
+      { leadId: lead.leadId, created: lead.created, kind: LEAD_KINDS[details.kind] },
+      'Demo request stored',
+    );
+    // Both emails in one transaction: a failure never leaves sales told and the requester not.
+    await this.delivery.queueEmails(
+      demoRequestEmailJobs(lead, details, this.emailSettings, randomUUID()),
+    );
+  }
+
+  /**
+   * The per-email limit, as `@RateLimit` would count it (HMAC subject, fixed window, 429 with
+   * Retry-After). Fails open when Redis cannot answer, as every route limit does (D32).
+   */
+  private async countEmail(email: string): Promise<void> {
+    const subject = this.limits.hashSubject(normalisedEmail(email));
+    const result = await this.limits
+      .hit(`demo-request:email:h:${subject}`, PER_EMAIL.limit, PER_EMAIL.windowSeconds, this.now())
+      .catch((error: unknown) => {
+        this.logger.warn(
+          {
+            metric: 'rate_limit_unavailable',
+            reason: error instanceof Error ? error.name : 'unknown',
+          },
+          'Rate limits skipped: Redis did not answer',
+        );
+        return null;
+      });
+    if (result !== null && !result.allowed) throw new RateLimitedError(result.retryAfter);
   }
 
   private async verifyCaptcha(token: string, remoteIp: string): Promise<void> {

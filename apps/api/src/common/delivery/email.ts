@@ -50,6 +50,8 @@ export interface EmailSettings {
   /** `EMAIL_FROM_DOMAIN`: mail comes from `no-reply@` this domain. */
   readonly fromDomain: string;
   readonly publicWebUrl: string;
+  /** `CONSOLE_URL`: the only other origin an email may link to, in mail for Quad's team. */
+  readonly consoleUrl: string;
   /** `SUPPORT_INBOX`: Reply-To for account mail (spec 12). */
   readonly supportInbox: string | null;
 }
@@ -61,6 +63,7 @@ export function emailSettingsOf(config: Config): EmailSettings {
   return {
     fromDomain: config.EMAIL_FROM_DOMAIN ?? DEFAULT_FROM_DOMAIN,
     publicWebUrl: config.PUBLIC_WEB_URL,
+    consoleUrl: config.CONSOLE_URL,
     supportInbox: config.SUPPORT_INBOX ?? null,
   };
 }
@@ -70,13 +73,15 @@ const oneLine = (value: string): string => value.replace(/[\r\n]+/g, ' ').trim()
 
 /**
  * Renders a job into a message. School mail is From "{School} via Quad" with the school office
- * as Reply-To; account mail is From "Quad" with the support inbox as Reply-To (D19, spec 12).
+ * as Reply-To; account mail is From "Quad" with the support inbox as Reply-To (D19, spec 12),
+ * unless its template names the Reply-To (the demo request's sales email: the requester, D57).
  */
 export function buildEmailMessage(job: EmailJob, settings: EmailSettings): EmailMessage {
   const school = job.school === null ? null : oneLine(job.school.name);
   const rendered = EMAIL_TEMPLATES[job.template].render(job.params, {
     school,
     publicWebUrl: settings.publicWebUrl,
+    consoleUrl: settings.consoleUrl,
   });
   return {
     to: job.to,
@@ -87,7 +92,7 @@ export function buildEmailMessage(job: EmailJob, settings: EmailSettings): Email
           : formatMessage('email.from.school', { school }),
       address: `no-reply@${settings.fromDomain}`,
     },
-    replyTo: job.school === null ? settings.supportInbox : job.school.replyTo,
+    replyTo: rendered.replyTo ?? (job.school === null ? settings.supportInbox : job.school.replyTo),
     subject: oneLine(rendered.subject),
     text: rendered.text,
     html: rendered.html,

@@ -5,9 +5,19 @@ import { z } from 'zod';
 
 import { buildEmailMessage } from '../../src/common/delivery/email';
 import { SmtpEmail } from '../../src/common/delivery/smtp-email';
+import { demoRequestEmailJobs } from '../../src/public/demo-requests/demo-request-emails';
+
+import type { EmailSettings } from '../../src/common/delivery/email';
 
 const SMTP_URL = process.env.SMTP_URL ?? 'smtp://localhost:1025';
 const MAILPIT_URL = process.env.MAILPIT_URL ?? 'http://localhost:8025';
+
+const SETTINGS: EmailSettings = {
+  fromDomain: 'mail.quad-edu.com',
+  publicWebUrl: 'http://localhost:3000',
+  consoleUrl: 'http://localhost:3001',
+  supportInbox: 'support@quad-edu.com',
+};
 
 const AddressSchema = z.object({ Name: z.string(), Address: z.string() });
 const MailpitMessageSchema = z.object({
@@ -60,11 +70,7 @@ describe('the SMTP adapter against the compose Mailpit', () => {
           days: 7,
         },
       },
-      {
-        fromDomain: 'mail.quad-edu.com',
-        publicWebUrl: 'http://localhost:3000',
-        supportInbox: null,
-      },
+      { ...SETTINGS, supportInbox: null },
     );
     await transport.send(message);
 
@@ -91,16 +97,54 @@ describe('the SMTP adapter against the compose Mailpit', () => {
           template: 'email_otp',
           params: { code: '482913', minutes: 10 },
         },
-        {
-          fromDomain: 'mail.quad-edu.com',
-          publicWebUrl: 'http://localhost:3000',
-          supportInbox: 'support@quad-edu.com',
-        },
+        SETTINGS,
       ),
     );
     const delivered = await deliveredTo(to);
     expect(delivered.From).toEqual({ Name: 'Quad', Address: 'no-reply@mail.quad-edu.com' });
     expect(delivered.ReplyTo).toEqual([{ Name: '', Address: 'support@quad-edu.com' }]);
     expect(delivered.Subject).toContain('482913');
+  });
+
+  it('delivers a parent request to SALES_INBOX with Reply-To the parent, and the parent a confirmation with no typed text', async () => {
+    const id = randomBytes(6).toString('hex');
+    const salesInbox = `sales-${id}@quad.local`;
+    const requester = `parent-${id}@example.test`;
+    const lead = '0193e6a1-0000-7000-8000-00000000abcd';
+    const jobs = demoRequestEmailJobs(
+      { leadId: lead, created: true },
+      {
+        kind: 'parent',
+        name: `Typed Name ${id}`,
+        email: requester,
+        school: `Typed School ${id}`,
+        city: 'Lisbon',
+        note: `Typed note ${id} <b>bold</b>`,
+      },
+      { salesInbox, consoleUrl: SETTINGS.consoleUrl },
+      '0193e6a1-0000-7000-8000-00000000ffff',
+    );
+    for (const { to, template, params } of jobs) {
+      await transport.send(
+        buildEmailMessage({ to, tenantId: null, school: null, template, params }, SETTINGS),
+      );
+    }
+
+    const sales = await deliveredTo(salesInbox);
+    expect(sales.From).toEqual({ Name: 'Quad', Address: 'no-reply@mail.quad-edu.com' });
+    expect(sales.ReplyTo).toEqual([{ Name: '', Address: requester }]);
+    expect(sales.Subject).toBe(`From a parent: Typed School ${id}`);
+    expect(sales.Text).toContain(`Name: Typed Name ${id}`);
+    expect(sales.Text).toContain(`http://localhost:3001/leads/${lead}`);
+    expect(sales.HTML).toContain(`Typed note ${id} &lt;b&gt;bold&lt;/b&gt;`);
+
+    const confirmation = await deliveredTo(requester);
+    expect(confirmation.From).toEqual({ Name: 'Quad', Address: 'no-reply@mail.quad-edu.com' });
+    expect(confirmation.ReplyTo).toEqual([{ Name: '', Address: 'support@quad-edu.com' }]);
+    expect(confirmation.Text).toContain('Our team will get in touch with the school');
+    const whole = JSON.stringify(confirmation);
+    expect(whole).not.toContain(`Typed Name ${id}`);
+    expect(whole).not.toContain(`Typed School ${id}`);
+    expect(whole).not.toContain(`Typed note ${id}`);
   });
 });

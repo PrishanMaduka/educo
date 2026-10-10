@@ -12,6 +12,7 @@ import { formatMessage } from '../../src/common/delivery/templates/render';
 import type { EmailTemplateId } from '../../src/common/delivery/templates';
 
 const WEB = 'http://localhost:3000';
+const CONSOLE = 'http://localhost:3001';
 const SCHOOL = 'Colombo International School';
 
 /** One valid set of parameters per template; every template must appear here. */
@@ -32,20 +33,34 @@ const SAMPLES: Record<EmailTemplateId, Record<string, unknown>> = {
     link: `${WEB}/app/me/sessions`,
   },
   email_otp: { code: '482913', minutes: 10 },
+  demo_request_sales: {
+    kind: 'school',
+    name: 'Sample Person',
+    email: 'sample.person@example.test',
+    school: 'Sample School',
+    students: 'under_300',
+    curriculum: 'national',
+    link: `${CONSOLE}/leads/0193e6a1-0000-7000-8000-00000000abcd`,
+  },
+  demo_request_confirmation: { kind: 'parent' },
 };
 
 const schoolFor = (id: EmailTemplateId): string | null =>
   EMAIL_TEMPLATES[id].sender === 'school' ? SCHOOL : null;
 
 describe('email templates', () => {
-  it('covers the six M1 emails', () => {
+  it('covers the six M1 emails and the two demo request emails', () => {
     expect(Object.keys(EMAIL_TEMPLATES).sort()).toEqual(Object.keys(SAMPLES).sort());
   });
 
   it.each(Object.keys(SAMPLES) as EmailTemplateId[])(
     '%s renders a subject, text and HTML with no unfilled ICU argument',
     (id) => {
-      const email = renderEmail(id, SAMPLES[id], { school: schoolFor(id), publicWebUrl: WEB });
+      const email = renderEmail(id, SAMPLES[id], {
+        school: schoolFor(id),
+        publicWebUrl: WEB,
+        consoleUrl: CONSOLE,
+      });
       expect(email.subject.length).toBeGreaterThan(0);
       for (const part of [email.subject, email.text, email.html]) {
         expect(part).not.toMatch(/[{}]/);

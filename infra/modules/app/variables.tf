@@ -151,6 +151,16 @@ variable "turnstile_expected_hostname" {
   }
 }
 
+variable "sales_inbox" {
+  type        = string
+  description = "SALES_INBOX: where demo request notifications go (D57, OQ2), such as support@quad-edu.com. Required outside local; not a secret."
+
+  validation {
+    condition     = can(regex("^[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*\\.[A-Za-z]{2,}$", var.sales_inbox)) && length(var.sales_inbox) <= 254
+    error_message = "sales_inbox must be one email address, such as support@quad-edu.com."
+  }
+}
+
 variable "email_from_domain" {
   type        = string
   description = "EMAIL_FROM_DOMAIN: the SES identity's domain."

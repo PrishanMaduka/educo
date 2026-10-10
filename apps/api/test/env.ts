@@ -49,6 +49,7 @@ export function productionEnv(
     // A made-up secret in Cloudflare's shape, not a test key (those are refused outside local).
     TURNSTILE_SECRET_KEY: '0x4AAAAAAAtest-only-turnstile-secret',
     TURNSTILE_EXPECTED_HOSTNAME: 'quad-edu.com',
+    SALES_INBOX: 'support@quad-edu.com',
     ...overrides,
   });
 }

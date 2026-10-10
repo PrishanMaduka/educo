@@ -21,3 +21,13 @@ export const TimeZone = z.string().refine(
   },
   { message: 'must be an IANA time zone' },
 );
+
+/** One line a visitor typed (a name, a school): never a line break, so it can sit in a subject. */
+export const TypedLine = z
+  .string()
+  .trim()
+  .min(1)
+  .max(200)
+  .regex(/^[^\r\n\u2028\u2029]*$/, { message: 'must be one line' });
+/** A note a visitor typed: line breaks allowed. */
+export const TypedNote = z.string().trim().min(1).max(1000);

@@ -1,4 +1,4 @@
-import { Queue } from 'bullmq';
+import { FlowProducer, Queue } from 'bullmq';
 
 import { currentRequestContext } from '../request-context';
 
@@ -24,6 +24,9 @@ export interface QueueEmailInput<T extends EmailTemplateId> {
   readonly school?: SchoolSender;
 }
 
+/** A `QueueEmailInput` for any one template (a list may mix templates). */
+export type AnyQueueEmailInput = { [T in EmailTemplateId]: QueueEmailInput<T> }[EmailTemplateId];
+
 export interface QueueSmsInput<T extends SmsTemplateId> {
   readonly jobId: string;
   /** E.164. */
@@ -38,6 +41,12 @@ export interface QueueSmsInput<T extends SmsTemplateId> {
  */
 export interface DeliveryQueue {
   queueEmail<T extends EmailTemplateId>(input: QueueEmailInput<T>): Promise<void>;
+  /**
+   * Queues several emails all or none: each is checked first, then all are added in one Redis
+   * transaction, so a failure never leaves one sent and another lost. An id already queued
+   * keeps its job, as with `queueEmail`.
+   */
+  queueEmails(inputs: readonly AnyQueueEmailInput[]): Promise<void>;
   queueSms<T extends SmsTemplateId>(input: QueueSmsInput<T>): Promise<void>;
 }
 
@@ -111,6 +120,7 @@ export interface BullDeliveryOptions {
  */
 export class BullDelivery implements DeliveryQueue, BeforeApplicationShutdown {
   private readonly queues = new Map<string, Queue>();
+  private flows: FlowProducer | undefined;
 
   constructor(
     private readonly redis: Redis,
@@ -122,6 +132,22 @@ export class BullDelivery implements DeliveryQueue, BeforeApplicationShutdown {
     await this.queue(EMAIL_QUEUE).add(job.template, job, { ...optionsFor(job.template), jobId });
   }
 
+  async queueEmails(inputs: readonly AnyQueueEmailInput[]): Promise<void> {
+    const tenantId = currentRequestContext()?.tenantId ?? null;
+    const prepared = inputs.map((input) => prepareEmailJob(input, tenantId));
+    if (prepared.length === 0) return;
+    // `FlowProducer.addBulk` adds jobs with no children in one MULTI; `Queue.addBulk` uses a
+    // plain pipeline in this BullMQ version, which is not all-or-nothing.
+    await this.flowProducer().addBulk(
+      prepared.map(({ jobId, job }) => ({
+        name: job.template,
+        queueName: EMAIL_QUEUE,
+        data: job,
+        opts: { ...optionsFor(job.template), jobId },
+      })),
+    );
+  }
+
   async queueSms<T extends SmsTemplateId>(input: QueueSmsInput<T>): Promise<void> {
     const { jobId, job } = prepareSmsJob(input, currentRequestContext()?.tenantId ?? null);
     await this.queue(SMS_QUEUE).add(job.template, job, { ...optionsFor(job.template), jobId });
@@ -131,11 +157,24 @@ export class BullDelivery implements DeliveryQueue, BeforeApplicationShutdown {
   async close(): Promise<void> {
     const queues = [...this.queues.values()];
     this.queues.clear();
-    await Promise.all(queues.map((queue) => queue.close()));
+    const flows = this.flows;
+    this.flows = undefined;
+    await Promise.all([...queues.map((queue) => queue.close()), flows?.close()]);
   }
 
   async beforeApplicationShutdown(): Promise<void> {
     await this.close();
+  }
+
+  private flowProducer(): FlowProducer {
+    if (this.flows === undefined) {
+      this.flows = new FlowProducer({
+        connection: this.redis,
+        ...(this.options.prefix === undefined ? {} : { prefix: this.options.prefix }),
+      });
+      this.flows.on('error', this.options.onError ?? (() => undefined));
+    }
+    return this.flows;
   }
 
   private queue(name: string): Queue {

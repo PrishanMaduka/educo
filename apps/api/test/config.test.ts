@@ -10,8 +10,10 @@ import {
   ConfigError,
   CONFIG_VARIABLES,
   LOCAL_DEV_SECRETS,
+  LOCAL_SALES_INBOX,
   NOT_READ_BY_THE_API,
   loadConfig,
+  salesInboxOf,
 } from '../src/config';
 
 import { TEST_JWT_KEYS, localEnv, productionEnv } from './env';
@@ -55,6 +57,8 @@ describe('loadConfig', () => {
     const config = loadConfig(parseEnv(ENV_EXAMPLE));
     expect(config.APP_ENV).toBe('local');
     expect(config.SESSION_SECRET).toBe(LOCAL_DEV_SECRETS.SESSION_SECRET);
+    // Lead notifications go to Mailpit locally (OQ2).
+    expect(config.SALES_INBOX).toBe(LOCAL_SALES_INBOX);
   });
 
   it('never reads DATABASE_OWNER_URL (migrations only)', () => {
@@ -486,6 +490,33 @@ describe('loadConfig: JWT_PUBLIC_KEY_PREVIOUS (key rotation overlap, Task 9 fix 
   ])('refuses %s', (_case, value) => {
     expect(configErrorOf(localEnv({ JWT_PUBLIC_KEY_PREVIOUS: value })).problems).toEqual([
       { variable: 'JWT_PUBLIC_KEY_PREVIOUS', problem: 'must be an Ed25519 public key (SPKI PEM)' },
+    ]);
+  });
+});
+
+describe('loadConfig: SALES_INBOX (M1b Task 5, OQ2)', () => {
+  it('may be unset locally: demo request emails then go to the local default inbox', () => {
+    expect(loadConfig(localEnv()).SALES_INBOX).toBeUndefined();
+    expect(salesInboxOf(loadConfig(localEnv()))).toBe(LOCAL_SALES_INBOX);
+    expect(LOCAL_SALES_INBOX).toBe('sales@quad.local');
+    expect(salesInboxOf(loadConfig(localEnv({ SALES_INBOX: 'leads@quad.local' })))).toBe(
+      'leads@quad.local',
+    );
+  });
+
+  it('is required in staging and production', () => {
+    for (const appEnv of ['staging', 'production']) {
+      expect(
+        configErrorOf(productionEnv({ APP_ENV: appEnv, SALES_INBOX: '' })).problems,
+        appEnv,
+      ).toEqual([{ variable: 'SALES_INBOX', problem: 'must be set outside local' }]);
+    }
+    expect(loadConfig(productionEnv()).SALES_INBOX).toBe('support@quad-edu.com');
+  });
+
+  it('must be an email address', () => {
+    expect(configErrorOf(productionEnv({ SALES_INBOX: 'support' })).problems).toEqual([
+      { variable: 'SALES_INBOX', problem: 'must be an email address' },
     ]);
   });
 });

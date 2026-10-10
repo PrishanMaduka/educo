@@ -120,6 +120,72 @@ describe('queued email and SMS on the compose Redis', () => {
     ).rejects.toThrow();
   });
 
+  describe('queueEmails: several emails in one Redis transaction', () => {
+    const LEAD = `0193e6a1-0000-7000-8000-${randomBytes(6).toString('hex')}`;
+    const sales = (suffix: string) => ({
+      jobId: `demo-request.${LEAD}.sales.${suffix}`,
+      to: 'sales@quad.local',
+      template: 'demo_request_sales' as const,
+      params: {
+        kind: 'parent' as const,
+        name: 'Sample Parent',
+        email: 'sample.parent@example.test',
+        school: 'Sample School',
+        link: `http://localhost:3001/leads/${LEAD}`,
+      },
+    });
+    const confirm = {
+      jobId: `demo-request.${LEAD}.confirm`,
+      to: 'sample.parent@example.test',
+      template: 'demo_request_confirmation' as const,
+      params: { kind: 'parent' as const },
+    };
+
+    it('adds every email, each with the delivery options', async () => {
+      await inSchool(null, () => delivery.queueEmails([sales('a'), confirm]));
+
+      const added = await Promise.all([
+        emails.getJob(sales('a').jobId),
+        emails.getJob(confirm.jobId),
+      ]);
+      expect(added.map((job): unknown => job?.data)).toEqual([
+        {
+          to: 'sales@quad.local',
+          tenantId: null,
+          school: null,
+          template: 'demo_request_sales',
+          params: sales('a').params,
+        },
+        {
+          to: 'sample.parent@example.test',
+          tenantId: null,
+          school: null,
+          template: 'demo_request_confirmation',
+          params: { kind: 'parent' },
+        },
+      ]);
+      for (const job of added) {
+        expect(job?.opts).toMatchObject({ attempts: 5, removeOnComplete: true });
+      }
+    });
+
+    it('adds none when one of them is not valid', async () => {
+      const bad = { ...confirm, jobId: `demo-request.${LEAD}.bad`, to: 'not an address' };
+      await expect(inSchool(null, () => delivery.queueEmails([sales('b'), bad]))).rejects.toThrow();
+      expect(await emails.getJob(sales('b').jobId)).toBeUndefined();
+      expect(await emails.getJob(bad.jobId)).toBeUndefined();
+    });
+
+    it('keeps one job per id: an id queued before is not added twice, the new one is', async () => {
+      await inSchool(null, () => delivery.queueEmails([sales('c'), confirm]));
+      const confirms = (await emails.getJobs(['waiting'])).filter(
+        (job) => job.id === confirm.jobId,
+      );
+      expect(confirms).toHaveLength(1);
+      expect(await emails.getJob(sales('c').jobId)).toBeDefined();
+    });
+  });
+
   it('queues an SMS job for the OTP', async () => {
     const jobId = `otp.${randomBytes(6).toString('hex')}`;
     await inSchool(null, () =>
@@ -189,6 +255,7 @@ describe('queued email and SMS on the compose Redis', () => {
       settings: {
         fromDomain: 'mail.quad-edu.com',
         publicWebUrl: 'http://localhost:3000',
+        consoleUrl: 'http://localhost:3001',
         supportInbox: null,
       },
     });

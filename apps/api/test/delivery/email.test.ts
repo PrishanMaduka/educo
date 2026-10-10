@@ -15,6 +15,7 @@ import type { EmailJob } from '../../src/common/delivery/email';
 const SETTINGS = {
   fromDomain: 'mail.quad-edu.com',
   publicWebUrl: 'http://localhost:3000',
+  consoleUrl: 'http://localhost:3001',
   supportInbox: 'support@quad-edu.com',
 };
 

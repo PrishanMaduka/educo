@@ -974,6 +974,99 @@
       }
     }
   },
+  "emailDemoRequestSalesSubjectSchool": "Demo request: {schoolName}",
+  "@emailDemoRequestSalesSubjectSchool": {
+    "placeholders": {
+      "schoolName": {
+        "type": "Object"
+      }
+    }
+  },
+  "emailDemoRequestSalesSubjectParent": "From a parent: {schoolName}",
+  "@emailDemoRequestSalesSubjectParent": {
+    "placeholders": {
+      "schoolName": {
+        "type": "Object"
+      }
+    }
+  },
+  "emailDemoRequestSalesIntroSchool": "A school asked for a demo on Quad’s website.",
+  "emailDemoRequestSalesIntroParent": "From a parent: Quad’s team follows up with the school. Nothing has been sent to the school.",
+  "emailDemoRequestSalesFieldName": "Name: {name}",
+  "@emailDemoRequestSalesFieldName": {
+    "placeholders": {
+      "name": {
+        "type": "Object"
+      }
+    }
+  },
+  "emailDemoRequestSalesFieldEmail": "Email: {email}",
+  "@emailDemoRequestSalesFieldEmail": {
+    "placeholders": {
+      "email": {
+        "type": "Object"
+      }
+    }
+  },
+  "emailDemoRequestSalesFieldSchool": "School: {schoolName}",
+  "@emailDemoRequestSalesFieldSchool": {
+    "placeholders": {
+      "schoolName": {
+        "type": "Object"
+      }
+    }
+  },
+  "emailDemoRequestSalesFieldCountry": "Country: {country}",
+  "@emailDemoRequestSalesFieldCountry": {
+    "placeholders": {
+      "country": {
+        "type": "Object"
+      }
+    }
+  },
+  "emailDemoRequestSalesFieldStudents": "Students: {students}",
+  "@emailDemoRequestSalesFieldStudents": {
+    "placeholders": {
+      "students": {
+        "type": "Object"
+      }
+    }
+  },
+  "emailDemoRequestSalesFieldCurriculum": "Curriculum: {curriculum}",
+  "@emailDemoRequestSalesFieldCurriculum": {
+    "placeholders": {
+      "curriculum": {
+        "type": "Object"
+      }
+    }
+  },
+  "emailDemoRequestSalesFieldCity": "City: {city}",
+  "@emailDemoRequestSalesFieldCity": {
+    "placeholders": {
+      "city": {
+        "type": "Object"
+      }
+    }
+  },
+  "emailDemoRequestSalesFieldNote": "Note: {note}",
+  "@emailDemoRequestSalesFieldNote": {
+    "placeholders": {
+      "note": {
+        "type": "Object"
+      }
+    }
+  },
+  "emailDemoRequestSalesReply": "Reply to this email to write to the person who asked.",
+  "emailDemoRequestSalesAction": "Open in the console",
+  "emailDemoRequestSalesConsoleSoon": "The Leads view arrives with the console, so this link may not open yet.",
+  "emailDemoRequestSalesFooter": "Quad sent this because someone used the demo form on Quad’s website.",
+  "emailDemoRequestConfirmationSubjectSchool": "We’ve got your demo request",
+  "emailDemoRequestConfirmationSubjectParent": "We’ve got your message about your child’s school",
+  "emailDemoRequestConfirmationBodySchool": "Thanks for asking for a demo of Quad. We’ll email you within one working day to find a time.",
+  "emailDemoRequestConfirmationBodyParent": "Thanks for telling us about your child’s school. Our team will get in touch with the school; we never contact other families.",
+  "emailDemoRequestConfirmationNotYou": "If you didn’t ask for this, tell us at support@quad-edu.com and we won’t contact you.",
+  "emailDemoRequestConfirmationFooter": "You’re getting this email because this address was given on Quad’s website. Questions? Write to support@quad-edu.com.",
+  "emailDemoRequestConfirmationPrivacy": "How we use your details",
   "smsOtp": "{code} is your Quad sign-in code. It expires in {minutes, plural, one {{minutes} minute} other {{minutes} minutes}}. Don’t share it with anyone.",
   "@smsOtp": {
     "placeholders": {
