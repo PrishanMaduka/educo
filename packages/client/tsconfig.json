@@ -5,17 +5,8 @@
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "declaration": false,
-    "types": [
-      "node"
-    ],
-    "lib": [
-      "ES2023",
-      "DOM",
-      "DOM.Iterable"
-    ]
+    "types": ["node"],
+    "lib": ["ES2023", "DOM", "DOM.Iterable"]
   },
-  "include": [
-    "src/**/*.ts",
-    "vitest.config.ts"
-  ]
+  "include": ["src/**/*.ts", "vitest.config.ts"]
 }

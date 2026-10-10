@@ -9,7 +9,6 @@ import { useTranslation } from 'react-i18next';
 
 import { BigButton, StepError } from './bits';
 
-
 import type { SignInNext } from '@quad/contracts';
 
 import { staffApi, unwrap } from '@/lib/api';

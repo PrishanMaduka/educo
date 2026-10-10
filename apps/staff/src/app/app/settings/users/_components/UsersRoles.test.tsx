@@ -1,9 +1,8 @@
+import { fake, resetFake } from '@quad/config/vitest/fake-api';
 import { useQueryClient } from '@tanstack/react-query';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-
-import { fake, resetFake } from '@quad/config/vitest/fake-api';
 
 import { UsersRoles, type UsersRolesProps } from './UsersRoles';
 

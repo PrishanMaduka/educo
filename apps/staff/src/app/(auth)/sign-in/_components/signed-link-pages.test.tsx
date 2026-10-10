@@ -1,8 +1,8 @@
+import { fake, resetFake } from '@quad/config/vitest/fake-api';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { fake, resetFake } from '@quad/config/vitest/fake-api';
 import { InviteFlow } from '../invite/[token]/_components/InviteFlow';
 import { ResetPassword } from '../reset/[token]/_components/ResetPassword';
 import { SupportRedeem } from '../support/[token]/_components/SupportRedeem';

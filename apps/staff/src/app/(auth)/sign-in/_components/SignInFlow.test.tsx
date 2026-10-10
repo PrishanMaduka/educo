@@ -1,9 +1,8 @@
+import { fake, resetFake } from '@quad/config/vitest/fake-api';
 import { focusManager, onlineManager } from '@tanstack/react-query';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-
-import { fake, resetFake } from '@quad/config/vitest/fake-api';
 
 import { RecoveryCodes } from './RecoveryCodes';
 import { SignInFlow, type SignInFlowProps } from './SignInFlow';

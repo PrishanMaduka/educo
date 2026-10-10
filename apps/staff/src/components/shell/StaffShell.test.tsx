@@ -1,8 +1,7 @@
+import { fake, resetFake } from '@quad/config/vitest/fake-api';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-
-import { fake, resetFake } from '@quad/config/vitest/fake-api';
 
 import { StaffShell } from './StaffShell';
 

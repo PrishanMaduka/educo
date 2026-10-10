@@ -1,7 +1,6 @@
+import { fake, resetFake } from '@quad/config/vitest/fake-api';
 import { act, renderHook, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-
-import { fake, resetFake } from '@quad/config/vitest/fake-api';
 
 import { useShellActions } from './use-shell-actions';
 
