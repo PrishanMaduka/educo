@@ -1,4 +1,5 @@
-import { SchoolSettings, SCHOOL_SETTINGS_TABS } from './_components/SchoolSettings';
+import { SCHOOL_SETTINGS_TABS } from './_components/school-tabs';
+import { SchoolSettings } from './_components/SchoolSettings';
 
 import type { Metadata } from 'next';
 
