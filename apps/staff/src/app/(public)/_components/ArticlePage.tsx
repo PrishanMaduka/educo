@@ -13,6 +13,8 @@ import { TopBar } from './TopBar';
 
 import type { ArticleContent } from '../_lib/article';
 
+import { publicEnv } from '@/lib/public-env';
+
 /**
  * An About, Security & trust or legal page in design option A, "Story cards" (D41, D45): the top
  * bar, the navy header with the one `<h1>` and the big Quad mark, then the sections as cards on
@@ -34,7 +36,7 @@ export function ArticlePage({ content }: { content: ArticleContent }) {
           </div>
         </div>
       </main>
-      <Footer homeHref="/" />
+      <Footer homeHref="/" prelaunch={publicEnv.NEXT_PUBLIC_QUAD_PRELAUNCH} />
     </>
   );
 }

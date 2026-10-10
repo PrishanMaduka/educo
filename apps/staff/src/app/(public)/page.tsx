@@ -8,9 +8,8 @@ import { Ticker } from './_components/Ticker';
 import { TopBar } from './_components/TopBar';
 import { Wellbeing } from './_components/Wellbeing';
 import { publicPageMetadata, publicViewport } from './_lib/page-meta';
-import { themeSwitchLabels } from './_lib/public-labels';
+import { comingSoonLabels, themeSwitchLabels } from './_lib/public-labels';
 
-import type { ComingSoonLabels } from './_components/SignInEntry';
 import type { Metadata, Viewport } from 'next';
 
 import { t } from '@/i18n';
@@ -28,13 +27,7 @@ export const viewport: Viewport = publicViewport;
 export default function LandingPage() {
   const prelaunch = publicEnv.NEXT_PUBLIC_QUAD_PRELAUNCH;
   const theme = themeSwitchLabels();
-  const comingSoon: ComingSoonLabels = {
-    badge: t('public.comingSoon.badge'),
-    title: t('public.comingSoon.title'),
-    body: t('public.comingSoon.body'),
-    close: t('public.comingSoon.close'),
-    bookDemo: t('public.cta.school'),
-  };
+  const comingSoon = comingSoonLabels();
   return (
     <>
       <SkipLink />
@@ -48,7 +41,7 @@ export default function LandingPage() {
         <More />
         <Demo />
       </main>
-      <Footer />
+      <Footer prelaunch={prelaunch} />
     </>
   );
 }

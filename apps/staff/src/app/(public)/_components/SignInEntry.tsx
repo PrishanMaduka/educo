@@ -4,7 +4,7 @@ import { cn } from '@quad/ui';
 import { X } from 'lucide-react';
 import { useEffect, useId, useRef } from 'react';
 
-import { button, focusRing } from './styles';
+import { button, focusRing, footerLink } from './styles';
 
 export interface ComingSoonLabels {
   badge: string;
@@ -25,13 +25,16 @@ export function SignInEntry({
   menuClassName,
   prelaunch,
   comingSoon,
+  demoHref = '#demo',
 }: {
   label: string;
-  look: 'nav' | 'menu' | 'link';
+  look: 'nav' | 'menu' | 'link' | 'footer';
   /** The class for the menu look, from the menu. */
   menuClassName?: string;
   prelaunch: boolean;
   comingSoon: ComingSoonLabels;
+  /** Where the note's Book a demo goes: the demo section, via the landing page from other pages. */
+  demoHref?: '#demo' | '/#demo';
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const openerRef = useRef<HTMLButtonElement>(null);
@@ -63,6 +66,7 @@ export function SignInEntry({
       'cursor-pointer border-0 bg-transparent p-0 font-bold text-site-lime underline underline-offset-[3px]',
       focusRing,
     ),
+    footer: cn(footerLink, 'cursor-pointer border-0 bg-transparent px-0 text-left'),
   }[look];
 
   if (!prelaunch) {
@@ -117,7 +121,7 @@ export function SignInEntry({
         </p>
         <div className="mt-5 flex flex-wrap gap-3">
           <a
-            href="#demo"
+            href={demoHref}
             className={cn(button({ size: 'sm' }), 'bg-site-lime')}
             onClick={() => {
               returnsFocus.current = false;

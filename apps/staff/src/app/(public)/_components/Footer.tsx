@@ -2,9 +2,11 @@ import { QuadLogo } from '@quad/tokens/logo';
 import { cn } from '@quad/ui';
 
 import { COMPANY } from '../_lib/company';
+import { comingSoonLabels } from '../_lib/public-labels';
 import { CONTACT_EMAIL } from '../_lib/site';
 
-import { focusRing, onlyParent, onlySchool, wrap } from './styles';
+import { SignInEntry } from './SignInEntry';
+import { focusRing, footerLink, onlyParent, onlySchool, wrap } from './styles';
 
 import { t } from '@/i18n';
 
@@ -16,10 +18,15 @@ export const FOOTER_LINKS = [
   { href: '/legal/terms', label: 'public.footer.terms' },
 ] as const;
 
-/** One line in a group: a link, or plain text (the city). Labels are already translated. */
+/**
+ * One line in a group: a link, the Sign in entry, or plain text (the city). Labels are already
+ * translated.
+ */
 interface Item {
   label: string;
   href?: string;
+  /** The staff Sign in, which opens the coming-soon note before launch (D32 Pre-launch). */
+  isSignIn?: boolean;
   /** Shown in one view only (school or parent). */
   className?: string;
 }
@@ -53,7 +60,7 @@ function groups(onLanding: boolean): { title: string; card: string; items: Item[
       card: 'bg-site-pink rounded-[28px] rounded-bl-lg',
       items: [
         { href: at('demo'), label: t('public.cta.school') },
-        { href: '/app', label: t('public.signIn') },
+        { label: t('public.signIn'), isSignIn: true },
         security,
       ],
     },
@@ -74,18 +81,20 @@ function groups(onLanding: boolean): { title: string; card: string; items: Item[
   ];
 }
 
-const link = cn(
-  'inline-block rounded-sm py-1 text-site-on-vivid no-underline hover:underline',
-  focusRing,
-);
-
 /**
  * Footer (spec 19, D43 "circle quarters"): the logo and a line on the circle, then the four link
  * groups on sky, pink, lime and orange cards (one quarter of the Quad mark each), and the company
  * line with the note that the sample people are fictional. The logo goes to the top of the landing
- * page, or home from the other pages.
+ * page, or home from the other pages. Sign in is the same entry as the top bar's, so before launch
+ * it opens the coming-soon note rather than a portal the pre-launch site does not have.
  */
-export function Footer({ homeHref = '#top' }: { homeHref?: '#top' | '/' }) {
+export function Footer({
+  homeHref = '#top',
+  prelaunch,
+}: {
+  homeHref?: '#top' | '/';
+  prelaunch: boolean;
+}) {
   const onLanding = homeHref === '#top';
   return (
     <footer className="bg-site-page-bg text-site-page-ink">
@@ -113,8 +122,16 @@ export function Footer({ homeHref = '#top' }: { homeHref?: '#top' | '/' }) {
                 <ul className="m-0 list-none p-0">
                   {group.items.map((item) => (
                     <li key={`${item.label}${item.href ?? ''}`} className={item.className}>
-                      {item.href ? (
-                        <a href={item.href} className={link}>
+                      {item.isSignIn ? (
+                        <SignInEntry
+                          label={item.label}
+                          look="footer"
+                          prelaunch={prelaunch}
+                          comingSoon={comingSoonLabels()}
+                          demoHref={onLanding ? '#demo' : '/#demo'}
+                        />
+                      ) : item.href ? (
+                        <a href={item.href} className={footerLink}>
                           {item.label}
                         </a>
                       ) : (

@@ -157,6 +157,31 @@ test.describe('landing page', () => {
     await expect(page.getByLabel('Your name').filter({ visible: true })).toBeFocused();
   });
 
+  test('the footer’s Sign in opens the coming-soon note before launch', async ({
+    page,
+  }, testInfo) => {
+    const footer = page.getByRole('navigation', { name: 'About Quad' });
+    for (const path of ['/', '/about']) {
+      await page.goto(path);
+      if (!isPrelaunch(testInfo)) {
+        await expect(footer.getByRole('link', { name: 'Sign in' })).toHaveAttribute('href', '/app');
+        continue;
+      }
+      await expect(footer.locator('a[href="/app"]')).toHaveCount(0);
+      const signIn = footer.getByRole('button', { name: 'Sign in' });
+      await signIn.click();
+      const note = page.getByRole('dialog', { name: 'Sign-in opens when schools go live' });
+      await expect(note).toBeVisible();
+      await expect(note.getByRole('link', { name: 'Book a demo' })).toHaveAttribute(
+        'href',
+        path === '/' ? '#demo' : '/#demo',
+      );
+      await page.keyboard.press('Escape');
+      await expect(note).toBeHidden();
+      await expect(signIn).toBeFocused();
+    }
+  });
+
   test('the pre-launch site has no sign-in pages (D32)', async ({ page }, testInfo) => {
     test.skip(!isPrelaunch(testInfo), 'Only the static export leaves sign-in out');
     for (const path of ['/sign-in', '/sign-in/reset/a.b', '/app']) {

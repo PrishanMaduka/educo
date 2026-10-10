@@ -16,6 +16,10 @@ export const onlyParent = 'view-school:hidden';
 export const focusRing =
   'focus-visible:outline-[3px] focus-visible:outline-offset-[3px] focus-visible:outline-site-focus focus-visible:outline-solid';
 
+/** A link in the footer's coloured cards (navy ink in both themes). */
+export const footerLink =
+  'inline-block rounded-sm py-1 text-site-on-vivid no-underline hover:underline ' + focusRing;
+
 export const button = cva(
   [
     'inline-flex cursor-pointer items-center gap-3 border-0 font-bold no-underline',
