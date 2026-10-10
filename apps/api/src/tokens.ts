@@ -35,3 +35,5 @@ export const PASSWORD_RESETS = Symbol('PASSWORD_RESETS');
 export const OTP_SENDS = Symbol('OTP_SENDS');
 /** Where unexpected errors go (`ErrorReporter`, Sentry in `main.ts`), for errors a route handles. */
 export const ERROR_REPORTER = Symbol('ERROR_REPORTER');
+/** Verifies demo form Turnstile tokens (`TurnstileVerifier`; tests pass `FakeTurnstile`). */
+export const TURNSTILE = Symbol('TURNSTILE');

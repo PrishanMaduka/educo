@@ -83,6 +83,31 @@ describe('parseWebPublicEnv', () => {
       }).NEXT_PUBLIC_API_URL,
     ).toBe('https://quad-edu.com');
   });
+
+  it("refuses Cloudflare's test Turnstile site key in staging and production (D57)", () => {
+    for (const env of ['staging', 'production']) {
+      expect(
+        () =>
+          parseWebPublicEnv({
+            NEXT_PUBLIC_APP_ENV: env,
+            NEXT_PUBLIC_API_URL: 'https://quad-edu.com',
+            NEXT_PUBLIC_TURNSTILE_SITE_KEY: '1x00000000000000000000AA',
+          }),
+        env,
+      ).toThrow(/NEXT_PUBLIC_TURNSTILE_SITE_KEY: .*test key/);
+    }
+    expect(
+      parseWebPublicEnv({ NEXT_PUBLIC_TURNSTILE_SITE_KEY: '1x00000000000000000000AA' })
+        .NEXT_PUBLIC_TURNSTILE_SITE_KEY,
+    ).toBe('1x00000000000000000000AA');
+    expect(
+      parseWebPublicEnv({
+        NEXT_PUBLIC_APP_ENV: 'production',
+        NEXT_PUBLIC_API_URL: 'https://quad-edu.com',
+        NEXT_PUBLIC_TURNSTILE_SITE_KEY: '0x4AAAAAAAreal-site-key',
+      }).NEXT_PUBLIC_TURNSTILE_SITE_KEY,
+    ).toBe('0x4AAAAAAAreal-site-key');
+  });
 });
 
 describe('robotsTagFor', () => {

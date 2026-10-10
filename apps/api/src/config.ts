@@ -1,6 +1,6 @@
 import { createPrivateKey, createPublicKey } from 'node:crypto';
 
-import { LOCAL_SEED_PASSWORD } from '@quad/contracts';
+import { LOCAL_SEED_PASSWORD, isCloudflareTestSecret } from '@quad/contracts';
 import { parseInternationalPhone } from '@quad/domain';
 import { z } from 'zod';
 
@@ -50,6 +50,15 @@ const text = z.string();
 const normalisePem = (value: string): string => value.replaceAll('\\n', '\n');
 const pem = z.string().transform(normalisePem);
 const version = z.string().regex(/^\d+\.\d+\.\d+$/, { message: 'must look like 1.2.3' });
+/** A bare, lower-case host name (`quad-edu.com`, `localhost`): what siteverify reports. */
+const hostname = z
+  .string()
+  .regex(
+    /^(?=.{1,253}$)[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)*$/,
+    {
+      message: 'must be a lower-case host name such as quad-edu.com, with no scheme or port',
+    },
+  );
 const snsTopicArn = z.string().regex(/^arn:aws:sns:[a-z0-9-]+:\d{12}:[A-Za-z0-9_-]{1,256}$/, {
   message: 'must be an SNS topic ARN (arn:aws:sns:<region>:<account>:<name>)',
 });
@@ -178,9 +187,10 @@ const ConfigSchema = z.object({
   PLATFORM_STRIPE_WEBHOOK_SECRET: opt(text),
   PAYMENTS_SANDBOX: withDefault(boolean, 'false'),
 
-  // Public site
-  TURNSTILE_SITE_KEY: opt(text),
+  // Public site. The demo form's Turnstile secret, and the hostname siteverify must report;
+  // required outside local, and locally unset means the offline verifier (`turnstileRules`, D57).
   TURNSTILE_SECRET_KEY: opt(text),
+  TURNSTILE_EXPECTED_HOSTNAME: opt(hostname),
   PLAUSIBLE_DOMAIN: opt(text),
 
   // Ask Quad
@@ -223,6 +233,9 @@ export const NOT_READ_BY_THE_API: readonly string[] = [
   'NEXT_PUBLIC_SENTRY_DSN',
   'NEXT_PUBLIC_TURNSTILE_SITE_KEY',
   'NEXT_PUBLIC_PLAUSIBLE_DOMAIN',
+  // The widget's public key: the staff build reads it as NEXT_PUBLIC_TURNSTILE_SITE_KEY, and the
+  // API needs only the secret (D57).
+  'TURNSTILE_SITE_KEY',
   'NEXT_PUBLIC_QUAD_PRELAUNCH',
   // Read by the staff and console servers only (spec 02 "Web server (run time)", OQ16).
   'API_INTERNAL_URL',
@@ -440,6 +453,40 @@ function deliveryRules(env: RawEnv): ConfigProblem[] {
 }
 
 /**
+ * Turnstile (D57). Outside local the secret and the hostname must be set, and Cloudflare's
+ * published test secrets are refused (they pass or fail every token). Locally either may be unset
+ * (the offline verifier), but a secret needs the hostname, since it selects the Cloudflare verifier.
+ */
+function turnstileRules(env: RawEnv): ConfigProblem[] {
+  const problems: ConfigProblem[] = [];
+  const secret = blank(env.TURNSTILE_SECRET_KEY);
+  const host = blank(env.TURNSTILE_EXPECTED_HOSTNAME);
+  const appEnv = blank(env.APP_ENV);
+  if (appEnv === 'staging' || appEnv === 'production') {
+    if (secret === undefined) {
+      problems.push({ variable: 'TURNSTILE_SECRET_KEY', problem: 'must be set outside local' });
+    } else if (typeof secret === 'string' && isCloudflareTestSecret(secret)) {
+      problems.push({
+        variable: 'TURNSTILE_SECRET_KEY',
+        problem: 'is a Cloudflare test secret, which is for local only; set the real secret',
+      });
+    }
+    if (host === undefined) {
+      problems.push({
+        variable: 'TURNSTILE_EXPECTED_HOSTNAME',
+        problem: 'must be set outside local',
+      });
+    }
+  } else if (secret !== undefined && host === undefined) {
+    problems.push({
+      variable: 'TURNSTILE_EXPECTED_HOSTNAME',
+      problem: 'is missing (TURNSTILE_SECRET_KEY needs it)',
+    });
+  }
+  return problems;
+}
+
+/**
  * Parses the environment. Throws `ConfigError` listing every missing or invalid variable at
  * once, plus the refusal of `DEV_FIXED_OTP` outside local (D46).
  */
@@ -455,6 +502,7 @@ export function loadConfig(env: NodeJS.ProcessEnv): Config {
     ...keyFormatRules(env),
     ...storeReviewRules(env),
     ...deliveryRules(env),
+    ...turnstileRules(env),
     ...environmentRules(env),
   );
   if (problems.length > 0 || !parsed.success) {

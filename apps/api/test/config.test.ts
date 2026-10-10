@@ -489,3 +489,90 @@ describe('loadConfig: JWT_PUBLIC_KEY_PREVIOUS (key rotation overlap, Task 9 fix 
     ]);
   });
 });
+
+describe('loadConfig: Turnstile (M1b Task 3, D57)', () => {
+  const TEST_SECRET = '1x0000000000000000000000000000000AA';
+
+  it('leaves the secret and hostname unset locally, so the offline verifier is used', () => {
+    const config = loadConfig(localEnv());
+    expect(config.TURNSTILE_SECRET_KEY).toBeUndefined();
+    expect(config.TURNSTILE_EXPECTED_HOSTNAME).toBeUndefined();
+  });
+
+  it('requires the secret and the expected hostname in staging and production', () => {
+    for (const appEnv of ['staging', 'production']) {
+      const error = configErrorOf(
+        productionEnv({
+          APP_ENV: appEnv,
+          TURNSTILE_SECRET_KEY: undefined,
+          TURNSTILE_EXPECTED_HOSTNAME: '',
+        }),
+      );
+      expect(error.problems, appEnv).toEqual([
+        { variable: 'TURNSTILE_SECRET_KEY', problem: 'must be set outside local' },
+        { variable: 'TURNSTILE_EXPECTED_HOSTNAME', problem: 'must be set outside local' },
+      ]);
+    }
+  });
+
+  it("refuses Cloudflare's test secrets outside local, without echoing them", () => {
+    for (const secret of [
+      TEST_SECRET,
+      '2x0000000000000000000000000000000AA',
+      '3x0000000000000000000000000000000AA',
+    ]) {
+      const error = configErrorOf(productionEnv({ TURNSTILE_SECRET_KEY: secret }));
+      expect(error.problems).toEqual([
+        {
+          variable: 'TURNSTILE_SECRET_KEY',
+          problem: 'is a Cloudflare test secret, which is for local only; set the real secret',
+        },
+      ]);
+      expect(error.message).not.toContain(secret);
+    }
+  });
+
+  it('accepts a test or real secret locally, with the hostname it needs', () => {
+    const config = loadConfig(
+      localEnv({ TURNSTILE_SECRET_KEY: TEST_SECRET, TURNSTILE_EXPECTED_HOSTNAME: 'localhost' }),
+    );
+    expect(config.TURNSTILE_SECRET_KEY).toBe(TEST_SECRET);
+    expect(config.TURNSTILE_EXPECTED_HOSTNAME).toBe('localhost');
+    expect(configErrorOf(localEnv({ TURNSTILE_SECRET_KEY: TEST_SECRET })).problems).toEqual([
+      {
+        variable: 'TURNSTILE_EXPECTED_HOSTNAME',
+        problem: 'is missing (TURNSTILE_SECRET_KEY needs it)',
+      },
+    ]);
+  });
+
+  it('takes the expected hostname as a bare host name', () => {
+    for (const host of ['quad-edu.com', 'staging.quad-edu.com', 'localhost']) {
+      expect(
+        loadConfig(productionEnv({ TURNSTILE_EXPECTED_HOSTNAME: host }))
+          .TURNSTILE_EXPECTED_HOSTNAME,
+      ).toBe(host);
+    }
+    for (const host of [
+      'https://quad-edu.com',
+      'quad-edu.com/',
+      'quad-edu.com:443',
+      'Quad-Edu.com',
+    ]) {
+      expect(
+        configErrorOf(productionEnv({ TURNSTILE_EXPECTED_HOSTNAME: host })).problems,
+        host,
+      ).toEqual([
+        {
+          variable: 'TURNSTILE_EXPECTED_HOSTNAME',
+          problem: 'must be a lower-case host name such as quad-edu.com, with no scheme or port',
+        },
+      ]);
+    }
+  });
+
+  it('does not read TURNSTILE_SITE_KEY: the widget uses NEXT_PUBLIC_TURNSTILE_SITE_KEY', () => {
+    expect(CONFIG_VARIABLES).not.toContain('TURNSTILE_SITE_KEY');
+    expect(NOT_READ_BY_THE_API).toContain('TURNSTILE_SITE_KEY');
+  });
+});

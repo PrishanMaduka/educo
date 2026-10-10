@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { isCloudflareTestSiteKey } from './public/turnstile';
+
 /** An unset or empty variable (`NAME=` in .env) counts as missing, so the default applies. */
 const optional = <T extends z.ZodTypeAny>(schema: T) =>
   z.preprocess((value) => (value === '' ? undefined : value), schema.optional());
@@ -57,6 +59,19 @@ export const WebPublicEnvSchema = z
         code: z.ZodIssueCode.custom,
         path: ['NEXT_PUBLIC_API_URL'],
         message: `Required when NEXT_PUBLIC_APP_ENV is ${env.NEXT_PUBLIC_APP_ENV}`,
+      });
+    }
+    // Cloudflare's test site keys are public and pass or block every visitor: local only (D57).
+    const siteKey = env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+    if (
+      env.NEXT_PUBLIC_APP_ENV !== 'local' &&
+      siteKey !== undefined &&
+      isCloudflareTestSiteKey(siteKey)
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['NEXT_PUBLIC_TURNSTILE_SITE_KEY'],
+        message: `Is a Cloudflare test key, which is for local only; set the real site key for ${env.NEXT_PUBLIC_APP_ENV}`,
       });
     }
   })

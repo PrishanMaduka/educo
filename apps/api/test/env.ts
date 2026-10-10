@@ -46,6 +46,9 @@ export function productionEnv(
     SESSION_SECRET: 'p'.repeat(48),
     LINK_SIGNING_SECRET: 'l'.repeat(48),
     FIELD_ENCRYPTION_KEY: 'f'.repeat(64),
+    // A made-up secret in Cloudflare's shape, not a test key (those are refused outside local).
+    TURNSTILE_SECRET_KEY: '0x4AAAAAAAtest-only-turnstile-secret',
+    TURNSTILE_EXPECTED_HOSTNAME: 'quad-edu.com',
     ...overrides,
   });
 }
