@@ -8,17 +8,20 @@ part of 'api.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// The generated API client for this build's API_URL.
+/// The generated API client for this build's API_URL, with the parent's
+/// bearer token and refresh-on-401 ([TokenInterceptor]).
 
 @ProviderFor(quadApi)
 final quadApiProvider = QuadApiProvider._();
 
-/// The generated API client for this build's API_URL.
+/// The generated API client for this build's API_URL, with the parent's
+/// bearer token and refresh-on-401 ([TokenInterceptor]).
 
 final class QuadApiProvider
     extends $FunctionalProvider<QuadApi, QuadApi, QuadApi>
     with $Provider<QuadApi> {
-  /// The generated API client for this build's API_URL.
+  /// The generated API client for this build's API_URL, with the parent's
+  /// bearer token and refresh-on-401 ([TokenInterceptor]).
   QuadApiProvider._()
     : super(
         from: null,
@@ -52,4 +55,4 @@ final class QuadApiProvider
   }
 }
 
-String _$quadApiHash() => r'00c3238936d107524e1950d2eca7f524bf44a24a';
+String _$quadApiHash() => r'd19a19a54ccc467a8d5012dd7f4a6b360b854646';

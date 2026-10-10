@@ -162,6 +162,8 @@
   "parent.payments.placeholder": "When your school sends an invoice, you'll see it here and can pay it in a few taps.",
   "parent.messages.placeholder": "Messages from teachers and the school office will appear here.",
   "parent.more.placeholder": "Your children's profiles, school life and settings will appear here.",
+  "parent.welcome.title": "Welcome to Quad",
+  "parent.lock.title": "Welcome back",
   "public.meta.title": "Quad – School management built around the child",
   "public.meta.description": "Quad runs your whole school and keeps everyone who cares for a child close: the teacher, the coach, the nurse and the family at home, wherever home is.",
   "public.skip": "Skip to main content",
