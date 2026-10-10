@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:quad_api/quad_api.dart';
 import 'package:quad_parent/theme/tokens.g.dart';
 
-/// The app's ThemeData for [brightness], built only from the generated tokens.
-ThemeData quadTheme(Brightness brightness) {
-  final c = brightness == Brightness.dark ? QuadColors.dark : QuadColors.light;
+/// The app's ThemeData for [brightness], built only from the generated tokens
+/// and, once signed in, the school's [brand] from `GET /me` (D13).
+ThemeData quadTheme(Brightness brightness, {MeSchoolBrand? brand}) {
+  final base = brightness == Brightness.dark
+      ? QuadColors.dark
+      : QuadColors.light;
+  final c = brand == null ? base : withSchoolBrand(base, brand, brightness);
   final scheme = ColorScheme(
     brightness: brightness,
     primary: c.brandFill,
@@ -44,6 +49,31 @@ ThemeData quadTheme(Brightness brightness) {
     ),
   );
 }
+
+/// [base] with the school's brand, as the staff portal applies it
+/// (`school-brand.css`): the API computed the palette (spec 03 "School brand
+/// colour", D32), so nothing is derived here beyond the same 13% tint. Light
+/// mode takes the colour, the fill and its ink; dark mode takes the dark fill
+/// for both and keeps the dark `brandInk` token.
+QuadColors withSchoolBrand(
+  QuadColors base,
+  MeSchoolBrand brand,
+  Brightness brightness,
+) {
+  final isDark = brightness == Brightness.dark;
+  final colour = _hex(isDark ? brand.fillDark : brand.color);
+  final fill = _hex(isDark ? brand.fillDark : brand.fill);
+  return base.copyWith(
+    brand: colour,
+    brandFill: fill,
+    brandInk: isDark ? null : _hex(brand.ink),
+    brandSoft: Color.lerp(base.surface, colour, 0.13),
+  );
+}
+
+/// A `#RRGGBB` colour sent by the API (data, never a literal in code).
+Color _hex(String value) =>
+    Color(0xFF000000 | int.parse(value.substring(1), radix: 16));
 
 /// The parent app's type scale (sizes from design/parent.html).
 TextTheme _textTheme(QuadColors c) => TextTheme(

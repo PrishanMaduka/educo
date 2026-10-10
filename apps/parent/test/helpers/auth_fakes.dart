@@ -117,13 +117,21 @@ Map<String, dynamic> bodyOf(RequestOptions request) =>
 String? bearerOf(RequestOptions request) =>
     request.headers['Authorization'] as String?;
 
-/// [LocalAuthentication] that answers with [result], or throws [error].
+/// [LocalAuthentication] that answers with [result], or throws [error], on a
+/// device with [biometrics] enrolled (Face ID unless a test says otherwise).
 class FakeLocalAuth extends Fake implements LocalAuthentication {
-  new({this.result = true});
+  new({this.result = true, this.biometrics = const [BiometricType.face]});
 
   bool result;
   Exception? error;
+  List<BiometricType> biometrics;
   final List<String> reasons = [];
+
+  @override
+  Future<bool> get canCheckBiometrics async => biometrics.isNotEmpty;
+
+  @override
+  Future<List<BiometricType>> getAvailableBiometrics() async => biometrics;
 
   @override
   Future<bool> authenticate({

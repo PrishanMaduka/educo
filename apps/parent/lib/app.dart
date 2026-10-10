@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:quad_parent/core/lock/lock_controller.dart';
+import 'package:quad_parent/core/me.dart';
 import 'package:quad_parent/l10n/app_localizations.dart';
 import 'package:quad_parent/router.dart';
 import 'package:quad_parent/theme/theme.dart';
 
-/// The Quad parent app: Quad-branded theme, strings and the tab router.
+/// The Quad parent app: Quad-branded until signed in, then in the school's
+/// brand from `GET /me` (D13); strings and the tab router.
 class QuadApp extends ConsumerStatefulWidget {
   const new({super.key});
 
@@ -35,11 +37,12 @@ class _QuadAppState extends ConsumerState<QuadApp> {
 
   @override
   Widget build(BuildContext context) {
+    final brand = ref.watch(schoolBrandProvider);
     return MaterialApp.router(
       onGenerateTitle: (context) => AppLocalizations.of(context).appNameParent,
       debugShowCheckedModeBanner: false,
-      theme: quadTheme(Brightness.light),
-      darkTheme: quadTheme(Brightness.dark),
+      theme: quadTheme(Brightness.light, brand: brand),
+      darkTheme: quadTheme(Brightness.dark, brand: brand),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       routerConfig: ref.watch(routerProvider),

@@ -1,6 +1,8 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:quad_parent/app.dart';
+import 'package:quad_parent/core/api.dart';
 import 'package:quad_parent/core/clock.dart';
 import 'package:quad_parent/core/install_marker.dart';
 import 'package:quad_parent/core/lock/lock_controller.dart';
@@ -16,20 +18,31 @@ MemorySecureStore signedInStore() =>
     MemorySecureStore({SecureKey.refreshToken: 'r0'});
 
 /// The whole app with a fixed clock, signed in unless [store] says otherwise.
-Widget appAt(DateTime now, {MemorySecureStore? store}) =>
-    appWith(clock: FakeClock(now), store: store ?? signedInStore());
+Widget appAt(DateTime now, {MemorySecureStore? store, FakeApi? api}) =>
+    appWith(clock: FakeClock(now), store: store ?? signedInStore(), api: api);
 
-/// The whole app with a clock the test moves and fakes at the edges.
+/// The whole app with a clock the test moves and fakes at the edges: the
+/// HTTP client answers from [api] (404 for every route by default, so a
+/// signed-in launch keeps Quad's brand and nothing reaches the network).
 Widget appWith({
   required FakeClock clock,
   required MemorySecureStore store,
   FakeLocalAuth? localAuth,
-}) => ProviderScope(
-  overrides: [
-    clockProvider.overrideWithValue(() => clock.now),
-    secureStoreProvider.overrideWithValue(store),
-    installMarkerProvider.overrideWithValue(MemoryInstallMarker()),
-    localAuthProvider.overrideWithValue(localAuth ?? FakeLocalAuth()),
-  ],
-  child: const QuadApp(),
-);
+  FakeApi? api,
+}) {
+  final container = ProviderContainer(
+    overrides: [
+      clockProvider.overrideWithValue(() => clock.now),
+      secureStoreProvider.overrideWithValue(store),
+      installMarkerProvider.overrideWithValue(MemoryInstallMarker()),
+      localAuthProvider.overrideWithValue(localAuth ?? FakeLocalAuth()),
+    ],
+  );
+  addTearDown(container.dispose);
+  container.read(quadApiProvider).dio.httpClientAdapter =
+      api ?? FakeApi(const {});
+  return UncontrolledProviderScope(
+    container: container,
+    child: const QuadApp(),
+  );
+}

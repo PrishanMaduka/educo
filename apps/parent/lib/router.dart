@@ -3,7 +3,12 @@ import 'package:go_router/go_router.dart';
 import 'package:quad_parent/core/auth/auth_controller.dart';
 import 'package:quad_parent/core/auth/auth_state.dart';
 import 'package:quad_parent/core/lock/lock_controller.dart';
+import 'package:quad_parent/features/auth/screens/code_screen.dart';
+import 'package:quad_parent/features/auth/screens/face_id_offer_screen.dart';
+import 'package:quad_parent/features/auth/screens/found_you_screen.dart';
 import 'package:quad_parent/features/auth/screens/lock_screen.dart';
+import 'package:quad_parent/features/auth/screens/phone_screen.dart';
+import 'package:quad_parent/features/auth/screens/school_picker_screen.dart';
 import 'package:quad_parent/features/auth/screens/splash_screen.dart';
 import 'package:quad_parent/features/auth/screens/welcome_screen.dart';
 import 'package:quad_parent/features/circle/screens/circle_screen.dart';
@@ -42,6 +47,26 @@ GoRouter router(Ref ref) {
       GoRoute(
         path: '/welcome',
         builder: (context, state) => const WelcomeScreen(),
+      ),
+      GoRoute(
+        path: '/sign-in/phone',
+        builder: (context, state) => const PhoneScreen(),
+      ),
+      GoRoute(
+        path: '/sign-in/code',
+        builder: (context, state) => const CodeScreen(),
+      ),
+      GoRoute(
+        path: '/sign-in/school',
+        builder: (context, state) => const SchoolPickerScreen(),
+      ),
+      GoRoute(
+        path: '/sign-in/found',
+        builder: (context, state) => const FoundYouScreen(),
+      ),
+      GoRoute(
+        path: '/sign-in/face-id',
+        builder: (context, state) => const FaceIdOfferScreen(),
       ),
       GoRoute(path: '/lock', builder: (context, state) => const LockScreen()),
       StatefulShellRoute.indexedStack(

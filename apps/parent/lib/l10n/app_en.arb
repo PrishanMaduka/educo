@@ -288,7 +288,138 @@
   "parentMessagesPlaceholder": "Messages from teachers and the school office will appear here.",
   "parentMorePlaceholder": "Your children's profiles, school life and settings will appear here.",
   "parentWelcomeTitle": "Welcome to Quad",
+  "parentWelcomeHeadline": "Hear the {good} stuff first.",
+  "@parentWelcomeHeadline": {
+    "placeholders": {
+      "good": {
+        "type": "Object"
+      }
+    }
+  },
+  "parentWelcomeHeadlineGood": "good",
+  "parentWelcomeSubtitle": "Attendance, results, fees and messages for your children, in one app.",
+  "parentWelcomeSignIn": "Sign in",
+  "parentWelcomeInvite": "I have an invite code",
+  "parentWelcomeInviteSoon": "Invite codes arrive soon. For now, sign in with the mobile number your school has on file.",
+  "parentWelcomeBrandNote": "Your school’s name and colours appear once you’re signed in.",
+  "parentSignInBack": "Back",
+  "parentSignInPhoneTitle": "Sign in with your phone",
+  "parentSignInEmailTitle": "Sign in with email",
+  "parentSignInPhoneIntro": "We’ll send you a 6-digit code. Use the mobile number the school has on file for you.",
+  "parentSignInEmailIntro": "We’ll send you a 6-digit code. Use the email address the school has on file for you.",
+  "parentSignInCountryCode": "Country code",
+  "parentSignInMobile": "Mobile number",
+  "parentSignInEmailAddress": "Email address",
+  "parentSignInSendCode": "Send code",
+  "parentSignInUseEmail": "Use email instead",
+  "parentSignInUsePhone": "Use my phone number instead",
+  "parentSignInErrorPhone": "Enter your 9-digit mobile number without the first 0, like 77 123 4567.",
+  "parentSignInErrorEmail": "Enter your email address, like name@example.com.",
+  "parentSignInErrorTooMany": "You’ve asked for a lot of codes. Wait a few minutes, then try again.",
+  "parentSignInErrorOffline": "We can’t reach Quad. Check your connection and try again.",
+  "parentSignInErrorGeneric": "Something went wrong on our side. Try again.",
+  "parentSignInCodeTitle": "Enter the code",
+  "parentSignInCodeSentTo": "We sent it to {to}. It works for 10 minutes.",
+  "@parentSignInCodeSentTo": {
+    "placeholders": {
+      "to": {
+        "type": "Object"
+      }
+    }
+  },
+  "parentSignInCodeBoxes": "6-digit code",
+  "parentSignInCodeChecking": "Checking your code…",
+  "parentSignInCodeResendIn": "Didn’t get it? You can resend in {time}.",
+  "@parentSignInCodeResendIn": {
+    "placeholders": {
+      "time": {
+        "type": "Object"
+      }
+    }
+  },
+  "parentSignInCodeResend": "Resend the code",
+  "parentSignInCodeResent": "A new code is on its way",
+  "parentSignInCodeNoCode": "Didn’t get a code? Use the mobile number your school has on file.",
+  "parentSignInCodeWrong": "That code didn’t work. Check the latest code we sent you, or ask for a new one.",
+  "parentSignInCodeLocked": "That’s too many tries. Wait 15 minutes, then ask for a new code.",
+  "parentSignInRetry": "Try again",
+  "parentSignInFoundTitle": "You’re signed in",
+  "parentSignInFoundWelcome": "Welcome, {firstName}.",
+  "@parentSignInFoundWelcome": {
+    "placeholders": {
+      "firstName": {
+        "type": "Object"
+      }
+    }
+  },
+  "parentSignInFoundContinue": "Continue",
+  "parentSignInFoundLoading": "Opening your school…",
+  "parentSignInFoundLoadFailed": "We couldn’t open your school just now.",
+  "parentSignInNotFoundTitle": "We couldn’t find you",
+  "parentSignInNotFoundBody": "Ask your school to add this number.",
+  "parentSignInNotFoundTryAgain": "Use a different number",
+  "parentSignInSchoolTitle": "Choose a school",
+  "parentSignInSchoolIntro": "You’re in more than one school. Which one do you want to open?",
+  "parentSignInSchoolIntroNamed": "Welcome, {firstName}. You’re in more than one school. Which one do you want to open?",
+  "@parentSignInSchoolIntroNamed": {
+    "placeholders": {
+      "firstName": {
+        "type": "Object"
+      }
+    }
+  },
+  "parentSignInSchoolPaused": "Paused right now",
+  "parentSignInSchoolNone": "There’s no school to open yet. Ask your school to add this number.",
+  "parentSignInSchoolExpired": "That took a little too long, so we signed you out. Sign in again to choose your school.",
+  "parentSignInSchoolFailed": "We couldn’t open that school. Try again.",
+  "parentSignInFaceTitle": "Unlock with Face ID?",
+  "parentSignInFingerprintTitle": "Unlock with your fingerprint?",
+  "parentSignInFaceBody": "Next time, just look at your phone to open the app. You can change this later in More.",
+  "parentSignInFingerprintBody": "Next time, just touch the sensor to open the app. You can change this later in More.",
+  "parentSignInFaceTurnOn": "Turn on Face ID",
+  "parentSignInFingerprintTurnOn": "Turn on fingerprint unlock",
+  "parentSignInFaceNotNow": "Not now",
+  "parentSignInFaceOn": "Face ID is on",
+  "parentSignInFingerprintOn": "Fingerprint unlock is on",
+  "parentSignInDone": "Signed in",
   "parentLockTitle": "Welcome back",
+  "parentLockPoweredBy": "{school} Parent · powered by Quad",
+  "@parentLockPoweredBy": {
+    "placeholders": {
+      "school": {
+        "type": "Object"
+      }
+    }
+  },
+  "parentLockUnlockFace": "Unlock with Face ID",
+  "parentLockUnlockFingerprint": "Unlock with your fingerprint",
+  "parentLockUnlock": "Unlock",
+  "parentLockTapFace": "Tap to unlock with Face ID",
+  "parentLockTapFingerprint": "Tap to unlock with your fingerprint",
+  "parentLockTap": "Tap to unlock",
+  "parentLockUsePasscode": "Use passcode",
+  "parentLockReason": "Unlock Quad to see your children’s information.",
+  "parentLockFailed": "Quad is still locked. Try again.",
+  "parentMoreAccount": "Account",
+  "parentMoreSwitchSchool": "Switch school",
+  "parentMoreSwitchSchoolIntro": "You’re in {school}. Choose the school to open.",
+  "@parentMoreSwitchSchoolIntro": {
+    "placeholders": {
+      "school": {
+        "type": "Object"
+      }
+    }
+  },
+  "parentMoreSwitchSchoolDone": "You’re now in {school}",
+  "@parentMoreSwitchSchoolDone": {
+    "placeholders": {
+      "school": {
+        "type": "Object"
+      }
+    }
+  },
+  "parentMoreSwitchSchoolFailed": "We couldn’t switch school. Try again.",
+  "parentMoreSignOut": "Sign out",
   "publicMetaTitle": "Quad – School management built around the child",
   "publicMetaDescription": "Quad runs your whole school and keeps everyone who cares for a child close: the teacher, the coach, the nurse and the family at home, wherever home is.",
   "publicSkip": "Skip to main content",
