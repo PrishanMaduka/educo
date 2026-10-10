@@ -18,10 +18,11 @@ const SEED_PASSWORD = 'seeded-sign-in-test-password';
 const { db, app } = useDatabaseApp({ DEV_FIXED_OTP: '000000' });
 
 beforeAll(async () => {
-  await seedDatabase(db().ownerUrl, {
-    password: SEED_PASSWORD,
-    fieldEncryptionKey: localEnv().FIELD_ENCRYPTION_KEY ?? '',
-  });
+  await seedDatabase(
+    db().ownerUrl,
+    { password: SEED_PASSWORD, fieldEncryptionKey: localEnv().FIELD_ENCRYPTION_KEY ?? '' },
+    'local',
+  );
 });
 
 /** Signs `email` in up to the end of two-step and answers what came next. */

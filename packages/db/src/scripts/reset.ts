@@ -46,5 +46,5 @@ try {
   await client.end();
 }
 await runMigrations(ownerUrl);
-await seedDatabase(ownerUrl, seedSecrets());
+await seedDatabase(ownerUrl, seedSecrets(), 'local');
 console.log('Database reset: schema recreated, migrations applied and seed data loaded.');

@@ -368,7 +368,7 @@ and never the local placeholder from `.env.example`. Outside local, the seed ref
 placeholder or an empty value, and the api refuses the placeholder if it is ever given one.
 `FIELD_ENCRYPTION_KEY` needs nothing: Terraform generates it (64 characters; the API needs 32 or
 more). Never rotate it before M12's KMS adapter: a new key leaves every encrypted field, such as
-the TOTP secrets, unreadable. These secrets keep their hand-set values across applies, like
+the TOTP secrets people set up, unreadable. These secrets keep their hand-set values across applies, like
 `SENTRY_DSN` ([check](#placeholder-secrets-stay-untouched)).
 
 Before the first deploy, check:
@@ -380,11 +380,12 @@ Before the first deploy, check:
   refuses to boot with it unless `APP_ENV=local` (D46, D54), so staging sign-in always needs a real
   authenticator code (staff two-step and the console) or a real SMS code (parents).
 
-Known gap: the seed gives each seeded staff and console account an authenticator with a new
-random secret, and nobody holds those secrets on staging, so no seeded person can pass two-step
-there yet. Every seeded staff account needs the code (it has an authenticator), and the console
-always does. Decide how staging gets its first usable authenticator (for example the console's
-reset TOTP, which arrives with Platform users in M2) before relying on staging sign-in for demos.
+The staging seed gives the seeded staff and console accounts no authenticator (D55), and prints no
+secrets. Each sample person's first sign-in sets two-step up with a phone authenticator app: the
+page shows a QR code and a key, the first code turns it on, and then it shows the recovery codes.
+The console always asks for this; the staff portal asks wherever the school's two-step rule
+covers the person (every seeded staff account today). Running the seed task again clears these
+authenticators, which is also how to reset a sample person's two-step until M2.
 
 `scripts/ecs-deploy.mjs` reads the cluster, subnets and security groups from SSM
 (`/quad/staging/deploy/*`) and fails unless the one-off task's container exits 0. Run the three

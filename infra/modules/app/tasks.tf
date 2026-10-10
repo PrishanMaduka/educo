@@ -169,8 +169,9 @@ locals {
       volumes     = { tmp = "/tmp" }
       health      = null
     }
-    # The seed refuses any APP_ENV but local and staging, so the task must pass it. It encrypts
-    # the seeded TOTP secrets with the api's field key and sets SEED_PASSWORD (set by hand).
+    # The seed refuses any APP_ENV but local and staging, so the task must pass it. It sets
+    # SEED_PASSWORD (set by hand) and, on staging, no authenticators (D55); the field key is the
+    # api's, checked like the api checks it.
     seed = {
       cpu         = 512
       memory      = 1024

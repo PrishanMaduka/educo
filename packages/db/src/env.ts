@@ -71,11 +71,17 @@ export function seedPasswordRefusal(env: Env = process.env): string | null {
     : null;
 }
 
+/**
+ * Where the seed runs (D28): local enrols the sample people's authenticators for the fixed
+ * code; staging leaves them to set two-step up at first sign-in (D55).
+ */
+export type SeedEnvironment = 'local' | 'staging';
+
 /** What the seed needs from the environment. */
 export interface SeedSecrets {
   /** `SEED_PASSWORD`: every seeded staff member and console user signs in with it. */
   readonly password: string;
-  /** `FIELD_ENCRYPTION_KEY`, the API's own, so the API can open the seeded TOTP secrets. */
+  /** `FIELD_ENCRYPTION_KEY`, the API's own, so the API can open the seeded (local) TOTP secrets. */
   readonly fieldEncryptionKey: string;
 }
 

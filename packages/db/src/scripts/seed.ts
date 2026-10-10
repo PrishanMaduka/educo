@@ -15,5 +15,5 @@ if (refusal !== null) {
   console.error(`Seed data is for local use; the seed refuses to run: ${refusal}`);
   process.exit(1);
 }
-await seedDatabase(ownerUrl, seedSecrets());
+await seedDatabase(ownerUrl, seedSecrets(), 'local');
 console.log('Seed data is in place.');

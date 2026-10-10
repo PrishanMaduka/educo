@@ -21,7 +21,7 @@ export {
   seedSecrets,
   withDatabaseName,
 } from './env';
-export type { SeedSecrets } from './env';
+export type { SeedEnvironment, SeedSecrets } from './env';
 export { MIGRATIONS_FOLDER, runMigrations } from './migrate';
 export { createPlatformRunner } from './platform';
 export { seedDatabase } from './seed';

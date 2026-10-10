@@ -58,9 +58,9 @@ async function seededState() {
 
 describe('seed', () => {
   it('inserts the two seed schools with fixed ids, and running it twice changes nothing', async () => {
-    await seedDatabase(testDb().ownerUrl, SECRETS);
+    await seedDatabase(testDb().ownerUrl, SECRETS, 'local');
     const first = await seededState();
-    await seedDatabase(testDb().ownerUrl, SECRETS);
+    await seedDatabase(testDb().ownerUrl, SECRETS, 'local');
     expect(await seededState()).toEqual(first);
 
     const tenants = await rows(
@@ -190,7 +190,7 @@ describe('seed', () => {
     }
   });
 
-  it('turns on an authenticator for the four staff and both console users, sealed with the field key', async () => {
+  it('on local, turns on an authenticator for the four staff and both console users, sealed with the field key', async () => {
     const cipher = createFieldCipher(SECRETS.fieldEncryptionKey);
     const sealed = [
       ...(await rows<{ totp_enabled: boolean; totp_secret_enc: string }>(
@@ -216,7 +216,7 @@ describe('seed', () => {
 
   it('replaces an authenticator secret that no longer opens under the field key', async () => {
     const otherKey = 'another-seed-test-field-encryption-key-987';
-    await seedDatabase(testDb().ownerUrl, { ...SECRETS, fieldEncryptionKey: otherKey });
+    await seedDatabase(testDb().ownerUrl, { ...SECRETS, fieldEncryptionKey: otherKey }, 'local');
     const [row] = await rows<{ totp_secret_enc: string }>(
       'select totp_secret_enc from credentials where account_id = $1',
       [SEED_PEOPLE.prishan.accountId],
@@ -224,7 +224,7 @@ describe('seed', () => {
     await expect(createFieldCipher(otherKey).decrypt(row?.totp_secret_enc ?? '')).resolves.toMatch(
       /^[A-Z2-7]{32}$/,
     );
-    await seedDatabase(testDb().ownerUrl, SECRETS);
+    await seedDatabase(testDb().ownerUrl, SECRETS, 'local');
   });
 
   it('restores edited seed rows to their seed values', async () => {
@@ -233,7 +233,7 @@ describe('seed', () => {
     await testDb().platform.query(`delete from user_roles where user_id = $1`, [
       SEED_PEOPLE.prishan.memberships[0].userId,
     ]);
-    await seedDatabase(testDb().ownerUrl, SECRETS);
+    await seedDatabase(testDb().ownerUrl, SECRETS, 'local');
     expect(await rows('select name from tenants where id = $1', [KHA])).toEqual([
       { name: 'Kandy Hill Academy' },
     ]);
@@ -251,11 +251,51 @@ describe('seed', () => {
   });
 
   it('refuses to run without a password or with a short field key, writing nothing', async () => {
-    await expect(seedDatabase(testDb().ownerUrl, { ...SECRETS, password: '' })).rejects.toThrow(
-      'SEED_PASSWORD is required',
-    );
     await expect(
-      seedDatabase(testDb().ownerUrl, { ...SECRETS, fieldEncryptionKey: 'too-short' }),
+      seedDatabase(testDb().ownerUrl, { ...SECRETS, password: '' }, 'local'),
+    ).rejects.toThrow('SEED_PASSWORD is required');
+    await expect(
+      seedDatabase(testDb().ownerUrl, { ...SECRETS, fieldEncryptionKey: 'too-short' }, 'local'),
     ).rejects.toThrow(/FIELD_ENCRYPTION_KEY/);
+  });
+
+  it('on staging, leaves every seeded staff member and console user without an authenticator (D55)', async () => {
+    // Over a database the local seed enrolled, as staging was seeded before D55.
+    await testDb().platform.query(
+      `update credentials set recovery_codes_hash = '{not-a-real-code-hash}', totp_last_step = 1`,
+    );
+    await seedDatabase(testDb().ownerUrl, SECRETS, 'staging');
+    const authenticators = [
+      ...(await rows(
+        `select totp_enabled, totp_secret_enc, totp_last_step, recovery_codes_hash
+         from credentials where account_id = any($1)`,
+        [STAFF.map((person) => person.accountId)],
+      )),
+      ...(await rows(
+        `select totp_enabled, totp_secret_enc, totp_last_step, '{}'::text[] as recovery_codes_hash
+         from platform_users where id = any($1)`,
+        [Object.values(SEED_PLATFORM_USERS).map((user) => user.id)],
+      )),
+    ];
+    expect(authenticators).toHaveLength(6);
+    for (const row of authenticators) {
+      expect(row).toEqual({
+        totp_enabled: false,
+        totp_secret_enc: null,
+        totp_last_step: null,
+        recovery_codes_hash: [],
+      });
+    }
+    // They still sign in with SEED_PASSWORD; the first sign-in sets two-step up.
+    const [prishan] = await rows<{ password_hash: string }>(
+      'select password_hash from credentials where account_id = $1',
+      [SEED_PEOPLE.prishan.accountId],
+    );
+    await expect(verify(prishan?.password_hash ?? '', SECRETS.password)).resolves.toBe(true);
+
+    await seedDatabase(testDb().ownerUrl, SECRETS, 'local');
+    expect(
+      await rows('select 1 from credentials where totp_enabled and totp_secret_enc is not null'),
+    ).toHaveLength(4);
   });
 });

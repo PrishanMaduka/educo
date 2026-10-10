@@ -17,7 +17,7 @@ import {
 } from './seed-data';
 
 import type { FieldCipher } from './crypto/field-cipher';
-import type { SeedSecrets } from './env';
+import type { SeedEnvironment, SeedSecrets } from './env';
 import type { SeedPerson, SeedSchool } from './seed-data';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 
@@ -55,6 +55,22 @@ async function sealedTotpSecret(cipher: FieldCipher, existing: string | null): P
     }
   }
   return cipher.encrypt(newTotpSecret());
+}
+
+/**
+ * The authenticator columns to store. On local: an enabled one, keeping a secret that still
+ * opens, so the fixed code passes two-step. On staging: none (D55), so the first sign-in sets
+ * two-step up with the person's own phone; re-seeding clears it again.
+ */
+async function seedAuthenticator(
+  environment: SeedEnvironment,
+  cipher: FieldCipher,
+  existing: string | null,
+): Promise<{ totpSecretEnc: string | null; totpEnabled: boolean; totpLastStep?: null }> {
+  if (environment === 'local') {
+    return { totpSecretEnc: await sealedTotpSecret(cipher, existing), totpEnabled: true };
+  }
+  return { totpSecretEnc: null, totpEnabled: false, totpLastStep: null };
 }
 
 const hashPassword = (password: string) => hash(password, ARGON2ID_PARAMETERS);
@@ -103,6 +119,7 @@ async function seedPlatformUsers(
   tx: SeedTx,
   secrets: SeedSecrets,
   cipher: FieldCipher,
+  environment: SeedEnvironment,
 ): Promise<void> {
   for (const user of Object.values(SEED_PLATFORM_USERS)) {
     const [existing] = await tx
@@ -112,8 +129,7 @@ async function seedPlatformUsers(
     const values = {
       ...user,
       passwordHash: await hashPassword(secrets.password),
-      totpSecretEnc: await sealedTotpSecret(cipher, existing?.totpSecretEnc ?? null),
-      totpEnabled: true,
+      ...(await seedAuthenticator(environment, cipher, existing?.totpSecretEnc ?? null)),
       status: 'active' as const,
       lockedUntil: null,
     };
@@ -129,6 +145,7 @@ async function seedAccount(
   person: SeedPerson,
   secrets: SeedSecrets,
   cipher: FieldCipher,
+  environment: SeedEnvironment,
 ): Promise<void> {
   await actAs(tx, 'app.account_id', person.accountId);
   const account = {
@@ -150,8 +167,9 @@ async function seedAccount(
   const credential = {
     accountId: person.accountId,
     passwordHash: await hashPassword(secrets.password),
-    totpSecretEnc: await sealedTotpSecret(cipher, existing?.totpSecretEnc ?? null),
-    totpEnabled: true,
+    ...(await seedAuthenticator(environment, cipher, existing?.totpSecretEnc ?? null)),
+    // Recovery codes belong to an authenticator: none on staging (D55).
+    ...(environment === 'local' ? {} : { recoveryCodesHash: [] }),
   };
   await tx
     .insert(schema.credentials)
@@ -221,11 +239,17 @@ async function seedSchoolPeople(tx: SeedTx, school: SeedSchool): Promise<void> {
  *
  * It writes the two sample schools (branding, plan modules, two-step rule, settings defaults and
  * the seven system roles), the two console users and the sample people with their memberships.
- * Staff and console users get `secrets.password` (Argon2id) and an enabled authenticator sealed
- * with `FIELD_ENCRYPTION_KEY`, so the local fixed code passes two-step. Running it again restores
- * the seed values, keeps each authenticator secret that still opens, and leaves edited settings.
+ * Staff and console users get `secrets.password` (Argon2id). On local they also get an enabled
+ * authenticator sealed with `FIELD_ENCRYPTION_KEY`, so the local fixed code passes two-step; on
+ * staging they get none, and set two-step up at their first sign-in (D55). Running it again
+ * restores the seed values (on staging, no authenticator and no recovery codes), keeps each
+ * local authenticator secret that still opens, and leaves edited settings.
  */
-export async function seedDatabase(ownerUrl: string, secrets: SeedSecrets): Promise<void> {
+export async function seedDatabase(
+  ownerUrl: string,
+  secrets: SeedSecrets,
+  environment: SeedEnvironment,
+): Promise<void> {
   if (secrets.password === '') {
     throw new Error('SEED_PASSWORD is required: the seeded people sign in with it.');
   }
@@ -235,9 +259,9 @@ export async function seedDatabase(ownerUrl: string, secrets: SeedSecrets): Prom
   try {
     await drizzle({ client, schema }).transaction(async (tx) => {
       await seedSchools(tx);
-      await seedPlatformUsers(tx, secrets, cipher);
+      await seedPlatformUsers(tx, secrets, cipher, environment);
       for (const person of Object.values(SEED_PEOPLE) as readonly SeedPerson[]) {
-        await seedAccount(tx, person, secrets, cipher);
+        await seedAccount(tx, person, secrets, cipher, environment);
       }
       for (const school of Object.keys(SEED_TENANTS) as SeedSchool[]) {
         await seedSchoolPeople(tx, school);
