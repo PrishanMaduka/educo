@@ -1,9 +1,18 @@
 import { expect, type Page } from '@playwright/test';
-import { expectNoSeriousA11yViolations } from '@quad/config/playwright/checks';
-import { test } from '@quad/config/playwright/stack';
+import { contextOptionsFor, test } from '@quad/config/playwright/stack';
+import { Me } from '@quad/contracts';
 
-import { PEOPLE, signInThroughApi } from '../sign-in-as';
-import { GREETING, isPhone, navPages, openProfileMenu, title } from '../steps';
+import { PRISHAN_STATE, signInThroughApi } from '../sign-in-as';
+import { createStaffMember, inviteeAddress, setUpTwoStep } from '../staff-accounts';
+import {
+  auditEntries,
+  expectAccessibleOnceStill,
+  greetingFor,
+  isPhone,
+  navPages,
+  openProfileMenu,
+  title,
+} from '../steps';
 
 /*
  * Journey 50 (spec 17), "Preview a role": the school admin previews Finance officer; the menu
@@ -11,9 +20,12 @@ import { GREETING, isPhone, navPages, openProfileMenu, title } from '../steps';
  * View only; Timetable shows the no-access page; a write during the preview is 403
  * `preview_read_only`; Back to my view restores the admin's menu; the audit log has the start and
  * the end. It also keeps Task 20's View as Teacher steps (the banner, the sample, Back to my view
- * in the profile menu), in the same session. A preview changes the session, so Prishan signs in
- * on her own here, in one project (View as is desktop only, spec 08): 2 of her password calls per
- * run at worst (`PASSWORD_JOURNEY_PROJECTS`).
+ * in the profile menu), which run on desktop only: spec 08 puts the View as picker in the top
+ * bar on desktop. The Preview a role card works at every width.
+ *
+ * A preview changes the session, so the admin is a School admin this test invites (from
+ * Prishan's shared session, no password call) and signs in: one password call for an address of
+ * its own per project, retry and run, and none for Prishan.
  */
 
 const FINANCE_MENU = [
@@ -50,34 +62,52 @@ async function filterAuditBy(page: Page, action: string) {
 
 test('J50: the school admin previews Finance officer, cannot write, and goes back to their own view', async ({
   page,
+  browser,
+  stack,
 }, testInfo) => {
-  test.skip(isPhone(page), 'View as is in the top bar on desktop only (spec 08)');
-  test.skip(
-    testInfo.project.name !== 'desktop-light',
-    'Prishan signs in with a password: one project only, see PASSWORD_JOURNEY_PROJECTS for the per-email limit',
-  );
-  await signInThroughApi(page.request, PEOPLE.prishan);
+  test.slow();
+  const email = inviteeAddress(testInfo, 'preview.admin');
+  const prishan = await browser.newContext(contextOptionsFor(testInfo, 'prishan', PRISHAN_STATE));
+  try {
+    await createStaffMember(prishan.request, page.request, {
+      email,
+      role: 'School admin',
+      password: stack.seedPassword,
+    });
+  } finally {
+    await prishan.close();
+  }
+  await setUpTwoStep(page.request);
+  await page.context().clearCookies();
+  await signInThroughApi(page.request, email);
+  const me = Me.parse(await (await page.request.get('/api/v1/me')).json());
+  const greeting = greetingFor(me.person.firstName);
+
   await page.goto('/app');
-  await expect(title(page, GREETING)).toBeVisible();
+  await expect(title(page, greeting)).toBeVisible();
   const ownMenu = await navPages(page);
   expect(ownMenu).toContain('Users & roles');
 
-  // View as Teacher (Task 20): the banner names the sample, and the menu loses Users & roles.
-  await page.getByRole('combobox', { name: 'View as role' }).click();
-  await page.getByRole('option', { name: 'View as: Teacher' }).click();
-  await expect(page).toHaveURL('/app/teaching');
-  const teacherBanner = page.getByRole('status').filter({ hasText: 'Previewing as Teacher' });
-  await expect(teacherBanner).toContainText(/Previewing as Teacher · \S+/);
-  expect(await navPages(page)).not.toContain('Users & roles');
-  await page.goto('/app/settings/users');
-  await expect(title(page, 'Users & roles isn’t part of the Teacher role')).toBeVisible();
-  // Switch school is a write the preview refuses: the menu offers Back to my view instead.
-  const menu = await openProfileMenu(page);
-  await expect(menu.getByRole('button', { name: 'Back to my view' })).toBeVisible();
-  await page.keyboard.press('Escape');
-  await teacherBanner.getByRole('button', { name: 'Back to my view' }).click();
-  await expect(page).toHaveURL('/app');
-  await expect(page.getByText('Previewing as')).toHaveCount(0);
+  if (!isPhone(page)) {
+    // View as Teacher (Task 20): the banner names the sample, and the menu loses Users & roles.
+    await page.getByRole('combobox', { name: 'View as role' }).click();
+    await page.getByRole('option', { name: 'View as: Teacher' }).click();
+    await expect(page).toHaveURL('/app/teaching');
+    const teacherBanner = page.getByRole('status').filter({ hasText: 'Previewing as Teacher' });
+    await expect(teacherBanner).toContainText(/Previewing as Teacher · \S+/);
+    expect(await navPages(page)).not.toContain('Users & roles');
+    await expectAccessibleOnceStill(page);
+    await page.goto('/app/settings/users');
+    await expect(title(page, 'Users & roles isn’t part of the Teacher role')).toBeVisible();
+    // Switch school is a write the preview refuses: the menu offers Back to my view instead.
+    const menu = await openProfileMenu(page);
+    await expect(menu.getByRole('button', { name: 'Back to my view' })).toBeVisible();
+    await page.keyboard.press('Escape');
+    await teacherBanner.getByRole('button', { name: 'Back to my view' }).click();
+    await expect(page).toHaveURL('/app');
+    await expect(title(page, greeting)).toBeVisible();
+    await expect(page.getByText('Previewing as')).toHaveCount(0);
+  }
 
   // Finance officer, from the Preview a role card on Users & roles (Task 21).
   await page.goto('/app/settings/users');
@@ -88,15 +118,16 @@ test('J50: the school admin previews Finance officer, cannot write, and goes bac
   const banner = page.getByRole('status').filter({ hasText: 'Previewing as Finance officer' });
   await expect(banner).toBeVisible();
   expect(await navPages(page)).toEqual(FINANCE_MENU);
-  await expectNoSeriousA11yViolations(page);
+  await expectAccessibleOnceStill(page);
 
   await page.goto('/app/students');
   await expect(title(page, 'Students')).toBeVisible();
   await expect(page.getByText('View only', { exact: true })).toBeVisible();
+  await expectAccessibleOnceStill(page);
 
   await page.goto('/app/timetable');
   await expect(title(page, 'Timetable isn’t part of the Finance officer role')).toBeVisible();
-  await expectNoSeriousA11yViolations(page);
+  await expectAccessibleOnceStill(page);
 
   const write = await patchMeFromPage(page);
   expect(write.sentCsrf).toBe(true);
@@ -106,11 +137,11 @@ test('J50: the school admin previews Finance officer, cannot write, and goes bac
   await page.goto('/app');
   await banner.getByRole('button', { name: 'Back to my view' }).click();
   await expect(page).toHaveURL('/app');
-  await expect(title(page, GREETING)).toBeVisible();
+  await expect(title(page, greeting)).toBeVisible();
   await expect(page.getByText('Previewing as')).toHaveCount(0);
   expect(await navPages(page)).toEqual(ownMenu);
 
-  // Settings → Audit has the start and the end (the newest of each is Finance officer's).
+  // Settings → Audit has this admin's start and end (other projects' admins write there too).
   for (const [action, summary] of [
     ['Started a role preview', 'Started previewing the role Finance officer'],
     ['Ended a role preview', 'Stopped previewing the role Finance officer'],
@@ -118,10 +149,11 @@ test('J50: the school admin previews Finance officer, cannot write, and goes bac
     await page.goto('/app/settings/school?tab=audit');
     await filterAuditBy(page, action);
     await expect(
-      page
-        .getByRole('table', { name: 'Audit log entries' })
-        .getByRole('button', { name: /^Open the details of / })
+      auditEntries(page)
+        .filter({ hasText: me.person.name })
+        .getByRole('button', { name: `Open the details of ${summary}` })
         .first(),
-    ).toHaveAccessibleName(`Open the details of ${summary}`);
+    ).toBeVisible();
+    await expectAccessibleOnceStill(page);
   }
 });

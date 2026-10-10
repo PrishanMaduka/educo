@@ -34,6 +34,17 @@ export async function expectNoSeriousA11yViolations(page: Page): Promise<void> {
   expect(serious).toEqual([]);
 }
 
+/**
+ * axe once nothing moves: cards and pages fade in, and axe would otherwise sample a colour
+ * halfway (a brand-fill button read at 4.48:1 mid fade, in staff journey 19).
+ */
+export async function expectAccessibleOnceStill(page: Page): Promise<void> {
+  await page.waitForFunction(() =>
+    document.getAnimations().every((animation) => animation.playState !== 'running'),
+  );
+  await expectNoSeriousA11yViolations(page);
+}
+
 /** Whether this run should write the review screenshots (`QUAD_SCREENSHOTS=1 pnpm e2e`). */
 export const takeScreenshots = process.env.QUAD_SCREENSHOTS === '1';
 

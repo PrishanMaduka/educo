@@ -1,12 +1,15 @@
+import { Buffer } from 'node:buffer';
+
 import { expect, type Page } from '@playwright/test';
 import { expectNoSideScroll } from '@quad/config/playwright/checks';
-import { Mailpit, linkIn } from '@quad/config/playwright/mailpit';
+import { Mailpit, linkIn, tokenOf } from '@quad/config/playwright/mailpit';
 import {
   expiredTestLink,
   signTestLink,
   tamperedTestLink,
 } from '@quad/config/playwright/signed-token';
 import { contextOptionsFor, test } from '@quad/config/playwright/stack';
+import { EnquiryInput } from '@quad/contracts';
 
 import { PRISHAN_STATE } from '../sign-in-as';
 import { createStaffMember, inviteeAddress } from '../staff-accounts';
@@ -19,8 +22,9 @@ import { enterEmail, expectAccessibleOnceStill, title } from '../steps';
  * embed key is refused. The webhook steps arrive with M7 (spec 17 says "webhooks from M7"), so
  * they are `test.fixme`, not skipped. Expired and wrong-purpose links are signed by the
  * `signed-token` helper with the stack's local secret (the stack has no fake clock). The reset
- * is for a person this test invites (Prishan's shared session, no password call), so no seeded
- * person's password changes and each project has its own forgot budget (3 per address).
+ * links, good and bad, are for a person this test invites (Prishan's shared session, no password
+ * call), so no seeded person's password or session can change and each project has its own
+ * forgot budget (3 per address).
  */
 
 const CIS_ID = '01926f00-0000-7000-8000-000000000001';
@@ -28,20 +32,34 @@ const NEW_PASSWORD = 'a brand new passphrase for e2e';
 const NOT_VALID = 'This link isn’t valid any more';
 const SCHOOL_NAMES = /Colombo|Kandy|CIS\b|KHA\b/;
 const inAnHour = () => Math.floor(Date.now() / 1000) + 3600;
-const someone = '01926f00-0000-7000-8000-000000000101';
+/** No one's id: the subject of the invite and support links (no such invite or visit). */
+const NOBODY = '01926f00-0000-7000-8000-00000000dead';
+
+/** The `sub` a signed link's payload names (the account, for a reset link). */
+function subjectOf(token: string): string {
+  const [segment = ''] = token.split('.');
+  const payload: unknown = JSON.parse(Buffer.from(segment, 'base64url').toString('utf8'));
+  if (typeof payload !== 'object' || payload === null || !('sub' in payload)) {
+    throw new Error('The link has no subject.');
+  }
+  return String(payload.sub);
+}
 
 /** Every way a link is refused: forged (another key), expired, wrong purpose, tampered. */
-function badLinks(purpose: string, tid: string | null): Record<string, string> {
-  const payload = { purpose, tid, sub: someone, exp: inAnHour() };
-  return {
-    'signed with another key': signTestLink(payload, 'not the stack’s link-signing secret'),
-    'past its expiry': expiredTestLink({ purpose, tid, sub: someone }),
-    'meant for another purpose': signTestLink({
-      ...payload,
-      purpose: purpose === 'password_reset' ? 'staff_invite' : 'password_reset',
-    }),
-    'changed after signing': tamperedTestLink(payload),
-  };
+function badLinks(purpose: string, tid: string | null, sub: string): [string, string][] {
+  const payload = { purpose, tid, sub, exp: inAnHour() };
+  return [
+    ['signed with another key', signTestLink(payload, 'not the stack’s link-signing secret')],
+    ['past its expiry', expiredTestLink({ purpose, tid, sub })],
+    [
+      'meant for another purpose',
+      signTestLink({
+        ...payload,
+        purpose: purpose === 'password_reset' ? 'staff_invite' : 'password_reset',
+      }),
+    ],
+    ['changed after signing', tamperedTestLink(payload)],
+  ];
 }
 
 async function expectInvalidWithoutSchool(page: Page) {
@@ -60,11 +78,12 @@ async function chooseNewPassword(page: Page, token: string) {
 }
 
 test.describe('J43: tenant-less entry points', () => {
-  test('a reset link from the email works once, then is refused', async ({
+  test('a reset link from the email works once, then is refused, as is every bad one for the account', async ({
     page,
     browser,
     stack,
   }, testInfo) => {
+    test.slow();
     const email = inviteeAddress(testInfo, 'reset.me');
     const admin = await browser.newContext(contextOptionsFor(testInfo, 'admin', PRISHAN_STATE));
     try {
@@ -89,7 +108,7 @@ test.describe('J43: tenant-less entry points', () => {
     });
     const link = linkIn(message.text, '/sign-in/reset/');
     expect(link).not.toBeNull();
-    const token = new URL(link ?? '').pathname.split('/').pop() ?? '';
+    const token = tokenOf(link ?? '');
 
     await chooseNewPassword(page, token);
     await expect(title(page, 'Your password is changed')).toBeVisible();
@@ -99,19 +118,21 @@ test.describe('J43: tenant-less entry points', () => {
     await expectInvalidWithoutSchool(page);
     await expectNoSideScroll(page);
     await expectAccessibleOnceStill(page);
+
+    // Bad links for this same account, so a regression could only reach this test's person.
+    for (const [name, bad] of badLinks('password_reset', null, subjectOf(token))) {
+      await test.step(`a reset link ${name} is refused without naming a school`, async () => {
+        await chooseNewPassword(page, bad);
+        await expectInvalidWithoutSchool(page);
+      });
+    }
   });
 
-  for (const [name, token] of Object.entries(badLinks('password_reset', null))) {
-    test(`a reset link ${name} is refused without naming a school`, async ({ page }) => {
-      await chooseNewPassword(page, token);
-      await expectInvalidWithoutSchool(page);
-    });
-  }
-
-  for (const [name, token] of Object.entries(badLinks('staff_invite', CIS_ID))) {
+  for (const [index, [name, token]] of badLinks('staff_invite', CIS_ID, NOBODY).entries()) {
     test(`an invite link ${name} is refused without naming its school`, async ({ page }) => {
       await page.goto(`/sign-in/invite/${token}`);
       await expectInvalidWithoutSchool(page);
+      if (index === 0) await expectAccessibleOnceStill(page);
       const answer = await page.request.get(`/api/v1/auth/invites/${token}`);
       expect(answer.status()).toBe(400);
       const body = await answer.text();
@@ -120,16 +141,26 @@ test.describe('J43: tenant-less entry points', () => {
     });
   }
 
-  for (const [name, token] of Object.entries(badLinks('support_session', CIS_ID))) {
+  for (const [index, [name, token]] of badLinks('support_session', CIS_ID, NOBODY).entries()) {
     test(`a support link ${name} is refused without naming its school`, async ({ page }) => {
       await page.goto(`/sign-in/support/${token}`);
       await expectInvalidWithoutSchool(page);
+      if (index === 0) await expectAccessibleOnceStill(page);
     });
   }
 
   test('an enquiry for an unknown embed key is refused with 404', async ({ page }) => {
+    // A body the contract accepts in full, so the 404 can only be the key.
+    const enquiry = {
+      parentName: 'A parent',
+      email: 'a.parent@example.com',
+      phone: '+94 77 000 0099',
+      childName: 'A child',
+      message: 'We would like to visit the school.',
+    };
+    expect(EnquiryInput.safeParse(enquiry).success).toBe(true);
     const answer = await page.request.post('/api/v1/public/enquiry/unknown-key', {
-      data: { parentName: 'A parent', email: 'a.parent@example.com' },
+      data: enquiry,
     });
     expect(answer.status()).toBe(404);
     expect(await answer.text()).not.toMatch(SCHOOL_NAMES);

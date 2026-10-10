@@ -1,5 +1,5 @@
 import { expect, type Page } from '@playwright/test';
-import { expectNoSeriousA11yViolations, schemeOf } from '@quad/config/playwright/checks';
+import { schemeOf } from '@quad/config/playwright/checks';
 import { test } from '@quad/config/playwright/stack';
 import { deriveBrand } from '@quad/tokens';
 
@@ -52,6 +52,8 @@ test(
     await expectAccessibleOnceStill(page);
 
     await enterEmail(page, PEOPLE.prishan);
+    // The password step shows the address typed on the email step.
+    await expect(page.getByText(PEOPLE.prishan)).toBeVisible();
     await enterPassword(page, stack.seedPassword);
     await enterCode(page, stack.fixedCode);
 
@@ -65,6 +67,6 @@ test(
     await expect(nav.getByText(CIS)).toBeVisible();
     await expect(nav.getByText('CIS', { exact: true })).toBeVisible();
     await closeNav(page);
-    await expectNoSeriousA11yViolations(page);
+    await expectAccessibleOnceStill(page);
   },
 );

@@ -1,5 +1,4 @@
 import { expect, type Page } from '@playwright/test';
-import { expectNoSeriousA11yViolations } from '@quad/config/playwright/checks';
 import { contextOptionsFor, test } from '@quad/config/playwright/stack';
 
 import { PRISHAN_STATE } from '../sign-in-as';
@@ -55,11 +54,14 @@ test('J19: an invited teacher sets a password and two-step, signs in, changes ro
   browser,
   stack,
 }, testInfo) => {
+  test.slow();
   const email = inviteeAddress(testInfo);
   const password = `${stack.seedPassword} for the new teacher`;
 
   // The admin invites the teacher.
   await page.goto(PATH);
+  await expect(title(page, 'Users & roles')).toBeVisible();
+  await expectAccessibleOnceStill(page);
   await page.getByRole('button', { name: 'Invite staff' }).click();
   const drawer = page.getByRole('dialog', { name: 'Invite staff' });
   await drawer.getByLabel('Email addresses').fill(email);
@@ -80,11 +82,14 @@ test('J19: an invited teacher sets a password and two-step, signs in, changes ro
     await teacher.getByLabel('Choose a password').fill(password);
     await teacher.getByRole('button', { name: 'Accept and set up my account' }).click();
     await expect(title(teacher, 'Turn on two-step sign-in')).toBeVisible();
+    await expect(teacher.locator('code').first()).toHaveText(/\S/);
+    await expectAccessibleOnceStill(teacher);
     const key = (await teacher.locator('code').first().textContent())?.replace(/\s/g, '') ?? '';
     expect(key).toMatch(/^[A-Z2-7]{16,}$/);
     await teacher.getByRole('textbox', { name: 'Digit 1 of 6' }).click();
     await teacher.keyboard.type(stack.fixedCode);
     await expect(title(teacher, 'Save your recovery codes')).toBeVisible();
+    await expectAccessibleOnceStill(teacher);
     await teacher.getByRole('button', { name: 'I’ve saved them, continue' }).click();
     await expect(teacher).toHaveURL('/app/teaching');
 
@@ -99,7 +104,7 @@ test('J19: an invited teacher sets a password and two-step, signs in, changes ro
     const teacherMenu = await navPages(teacher);
     expect(teacherMenu).toContain('My teaching');
     expect(teacherMenu).not.toContain('Users & roles');
-    await expectNoSeriousA11yViolations(teacher);
+    await expectAccessibleOnceStill(teacher);
 
     // The admin makes them Front desk: after a reload their menu is Front desk's.
     let row = await findPerson(page, email);
@@ -107,11 +112,14 @@ test('J19: an invited teacher sets a password and two-step, signs in, changes ro
     await row.getByRole('combobox').click();
     await page.getByRole('option', { name: 'Front desk', exact: true }).click();
     await expect(page.getByText(/ is now Front desk$/)).toBeVisible();
+    // Front desk starts on Attendance (spec 08) and opens Pickup; My teaching is gone.
     await teacher.goto('/app');
-    await expect(teacher).not.toHaveURL(/\/sign-in/);
+    await expect(teacher).toHaveURL('/app/attendance');
+    await expect(title(teacher, 'Attendance')).toBeVisible();
     const frontDeskMenu = await navPages(teacher);
-    expect(frontDeskMenu).not.toEqual(teacherMenu);
+    expect(frontDeskMenu).toEqual(expect.arrayContaining(['Attendance', 'Pickup']));
     expect(frontDeskMenu).not.toContain('My teaching');
+    await expectAccessibleOnceStill(teacher);
 
     // Deactivating them ends their session: the next page goes to sign-in.
     row = await findPerson(page, email);

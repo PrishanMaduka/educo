@@ -1,5 +1,4 @@
 import { expect, type Page } from '@playwright/test';
-import { expectNoSeriousA11yViolations } from '@quad/config/playwright/checks';
 
 /*
  * The page steps the staff journeys share: the sign-in card's steps and the signed-in shell's
@@ -7,6 +6,13 @@ import { expectNoSeriousA11yViolations } from '@quad/config/playwright/checks';
  */
 
 export const GREETING = /^(Good morning|Good afternoon|Good evening|Hello), Prishan$/;
+
+/** Text matched literally inside a RegExp. */
+const literal = (text: string) => text.replace(/[\\^$.*+?()[\]{}|]/g, '\\$&');
+
+/** The /app greeting for someone whose first name is `firstName`. */
+export const greetingFor = (firstName: string) =>
+  new RegExp(`^(Good morning|Good afternoon|Good evening|Hello), ${literal(firstName)}$`);
 
 export const title = (page: Page, name: string | RegExp) =>
   page.getByRole('heading', { level: 1, name });
@@ -32,13 +38,8 @@ export async function enterCode(page: Page, code: string): Promise<void> {
   await page.keyboard.type(code);
 }
 
-/** Each step's card fades in; axe must not sample its colours halfway. */
-export async function expectAccessibleOnceStill(page: Page): Promise<void> {
-  await page.waitForFunction(() =>
-    document.getAnimations().every((animation) => animation.playState !== 'running'),
-  );
-  await expectNoSeriousA11yViolations(page);
-}
+/** axe once nothing moves (shared with the console). */
+export { expectAccessibleOnceStill } from '@quad/config/playwright/checks';
 
 /** The side bar's navigation: the rail on desktop, the slide-over menu on phones. */
 export async function openNav(page: Page) {
@@ -55,16 +56,27 @@ export async function closeNav(page: Page): Promise<void> {
   }
 }
 
-/** The page links in the navigation, in order, as their names. */
+/**
+ * The page links in the navigation, in order, as their names. It waits for the menu to show a
+ * link first, so a menu that has not rendered yet never reads as an empty one.
+ */
 export async function navPages(page: Page): Promise<string[]> {
   const nav = await openNav(page);
-  const names = await nav
-    .getByRole('navigation')
-    .getByRole('link')
-    .evaluateAll((links) => links.map((link) => link.textContent.trim()));
+  const links = nav.getByRole('navigation').getByRole('link');
+  await expect(links.first()).toBeVisible();
+  const names = await links.evaluateAll((all) => all.map((link) => link.textContent.trim()));
   await closeNav(page);
   return names;
 }
+
+/**
+ * The audit log's entries on Settings → Audit: the table's rows from 768 px, the list's items
+ * below it.
+ */
+export const auditEntries = (page: Page) =>
+  (page.viewportSize()?.width ?? 0) < 768
+    ? page.getByRole('list', { name: 'Audit log entries' }).getByRole('listitem')
+    : page.getByRole('table', { name: 'Audit log entries' }).getByRole('row');
 
 export async function openProfileMenu(page: Page) {
   await page.getByRole('button', { name: 'Open your profile menu' }).click();

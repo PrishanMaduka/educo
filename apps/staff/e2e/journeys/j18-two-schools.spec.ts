@@ -65,6 +65,7 @@ test(
     const nav = await openNav(page);
     await expect(nav.getByText(KHA)).toBeVisible();
     await closeNav(page);
+    await expectAccessibleOnceStill(page);
 
     // Kandy Hill's plan has no transport, so Routes names the plan, not the Teacher role (D52).
     await page.goto('/app/transport/routes');
@@ -75,6 +76,7 @@ test(
       ),
     ).toBeVisible();
     await expect(page.getByRole('link', { name: 'Go to My teaching' })).toBeVisible();
+    await expectAccessibleOnceStill(page);
 
     const before = await sessionCookie(page);
     expect(before).toBeDefined();
@@ -85,12 +87,16 @@ test(
     await reloaded;
     await expect(page.getByText('My teaching arrives soon')).toBeVisible();
     expect((await brandVariable(page, '--school-brand')).toUpperCase()).toBe('#DD4A42');
+    expect((await brandVariable(page, '--quad-brand-fill')).toLowerCase()).toBe(
+      deriveBrand('#DD4A42', scheme).brandFill.toLowerCase(),
+    );
     const after = await sessionCookie(page);
     expect(after).toBeDefined();
     expect(after).not.toBe(before);
     const navAfter = await openNav(page);
     await expect(navAfter.getByText(CIS)).toBeVisible();
     await closeNav(page);
+    await expectAccessibleOnceStill(page);
 
     // The old cookie no longer opens anything (a request of its own, with only that cookie).
     const old = await playwright.request.newContext({

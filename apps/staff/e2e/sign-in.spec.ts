@@ -78,7 +78,8 @@ test.describe('staff sign-in', () => {
     const token = tamperedTestLink({
       purpose: 'password_reset',
       tid: null,
-      sub: '01926f00-0000-7000-8000-000000000101',
+      // No one's account, so a regression could never reset a seeded person's password.
+      sub: '01926f00-0000-7000-8000-00000000dead',
       exp: Math.floor(Date.now() / 1000) + 30 * 60,
     });
     const response = await page.goto(`/sign-in/reset/${token}`);

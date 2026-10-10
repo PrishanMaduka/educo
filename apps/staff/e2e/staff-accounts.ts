@@ -1,5 +1,8 @@
+import { randomBytes } from 'node:crypto';
+
 import { expect, type APIRequestContext, type TestInfo } from '@playwright/test';
 import { Mailpit, linkIn, tokenOf } from '@quad/config/playwright/mailpit';
+import { STACK_FIXED_CODE } from '@quad/config/playwright/stack';
 
 /*
  * New members of staff for the journeys that write (Task 26): each test invites its own person,
@@ -8,17 +11,18 @@ import { Mailpit, linkIn, tokenOf } from '@quad/config/playwright/mailpit';
 
 /**
  * An address no other test, project, retry or run uses: `new.teacher+<run>-<project>-r<retry>`.
- * The run part keeps Mailpit's shared inbox apart between runs (each run's database is fresh).
+ * The run part (the time and 3 random bytes) keeps Mailpit's shared inbox apart between runs and
+ * between repeats of one test (each run's database is fresh).
  */
 export function inviteeAddress(testInfo: TestInfo, who = 'new.teacher'): string {
-  const run = Date.now().toString(36);
+  const run = `${Date.now().toString(36)}${randomBytes(3).toString('hex')}`;
   return `${who}+${run}-${testInfo.project.name}-r${String(testInfo.retry)}@colombo-intl.local`;
 }
 
 async function csrfOf(request: APIRequestContext): Promise<string> {
   const { cookies } = await request.storageState();
   const token = cookies.find((cookie) => cookie.name === 'quad_csrf')?.value;
-  if (token === undefined) throw new Error('The admin’s context has no CSRF cookie.');
+  if (token === undefined) throw new Error('The context has no CSRF cookie.');
   return token;
 }
 
@@ -60,4 +64,19 @@ export async function createStaffMember(
     data: { password },
   });
   expect(accepted.status(), await accepted.text()).toBe(200);
+}
+
+/**
+ * Turns on two-step for the person `invitee` just accepted an invite as (CIS asks staff for it),
+ * as the set-up card does: `POST /me/totp` to start, then the stack's fixed code to confirm.
+ */
+export async function setUpTwoStep(invitee: APIRequestContext): Promise<void> {
+  const headers = { 'x-csrf-token': await csrfOf(invitee) };
+  const started = await invitee.post('/api/v1/me/totp', { data: {}, headers });
+  expect(started.status(), await started.text()).toBe(200);
+  const confirmed = await invitee.post('/api/v1/me/totp', {
+    data: { code: STACK_FIXED_CODE },
+    headers,
+  });
+  expect(confirmed.status(), await confirmed.text()).toBe(200);
 }

@@ -1,5 +1,5 @@
 import { expect, type Page } from '@playwright/test';
-import { expectNoSeriousA11yViolations } from '@quad/config/playwright/checks';
+import { expectAccessibleOnceStill } from '@quad/config/playwright/checks';
 import { test } from '@quad/config/playwright/stack';
 
 import { PASSWORD_JOURNEY_PROJECTS, QUAD_STAFF } from '../sign-in-as';
@@ -8,20 +8,21 @@ import { PASSWORD_JOURNEY_PROJECTS, QUAD_STAFF } from '../sign-in-as';
  * Journey 42 (spec 17), "Console sign-in": owner@quad.local signs in to the console with email,
  * password and TOTP, the same in every environment; there is no Google or Microsoft button
  * (D37); a wrong TOTP code is refused; an email that is not an active platform user gets the
- * same answer as a wrong password. It also holds Task 23's Sign out journey, in the same session,
+ * same answer as a wrong password. The wrong code and the wrong password run in one project only
+ * (`WRONG_ANSWER_PROJECT`), so the owner stays clear of the lockout. It also holds Task 23's Sign out journey, in the same session,
  * so the owner's password calls per run stay at 1 + 2 × (3 + 1) = 9 (`PASSWORD_JOURNEY_PROJECTS`).
  */
 
 const WRONG_PASSWORD = 'That email and password don’t match. Check them and try again.';
 const WRONG_CODE = 'That code didn’t work. Check your authenticator app and try again.';
+/**
+ * The one project that gives the owner a wrong code and a wrong password. The lockout takes 5
+ * failures in 15 minutes (`LOCKOUT_FAILURES`), and a success clears them; even if no success
+ * ever cleared them, one wrong code and one wrong password per attempt, with CI's one retry of
+ * each, is 4 at most, so the owner can never be locked during a run.
+ */
+const WRONG_ANSWER_PROJECT = 'desktop-light';
 const title = (page: Page, name: string) => page.getByRole('heading', { level: 1, name });
-
-/** The card has faded in (axe would otherwise sample it mid-animation). */
-async function settled(page: Page) {
-  await page.waitForFunction(() =>
-    document.getAnimations().every((animation) => animation.playState !== 'running'),
-  );
-}
 
 async function enterCredentials(page: Page, email: string, password: string) {
   await page.getByLabel('Quad email').fill(email);
@@ -62,22 +63,23 @@ test.describe('J42: console sign-in', () => {
       await expect(page).toHaveURL(/\/sign-in\?next=%2F$/);
       await expect(title(page, 'Sign in to Quad')).toBeVisible();
       await expect(page.getByText(/google|microsoft/i)).toHaveCount(0);
-      await settled(page);
-      await expectNoSeriousA11yViolations(page);
+      await expectAccessibleOnceStill(page);
 
       await enterCredentials(page, QUAD_STAFF.owner.email, stack.seedPassword);
       await expect(title(page, 'Two-step sign-in')).toBeVisible();
       await expect(page.getByText(/google|microsoft/i)).toHaveCount(0);
-      // Any code but the stack's fixed one (000000) is wrong.
-      await typeCode(page, '123456');
-      await expect(page.getByRole('alert').filter({ hasText: 'code' })).toHaveText(WRONG_CODE);
-      await expect(title(page, 'Two-step sign-in')).toBeVisible();
-      await expect(page).toHaveURL(/\/sign-in/);
+      if (testInfo.project.name === WRONG_ANSWER_PROJECT) {
+        // Any code but the stack's fixed one (000000) is wrong.
+        await typeCode(page, '123456');
+        await expect(page.getByRole('alert').filter({ hasText: 'code' })).toHaveText(WRONG_CODE);
+        await expect(title(page, 'Two-step sign-in')).toBeVisible();
+        await expect(page).toHaveURL(/\/sign-in/);
+      }
 
       await typeCode(page, stack.fixedCode);
       await expect(title(page, 'Overview')).toBeVisible();
       await expect(page).toHaveURL(/:\d+\/$/);
-      await expectNoSeriousA11yViolations(page);
+      await expectAccessibleOnceStill(page);
 
       // Sign out (Task 23) ends this session: every page then goes to sign-in.
       await page.getByRole('button', { name: 'Open your profile menu' }).click();
@@ -94,7 +96,7 @@ test.describe('J42: console sign-in', () => {
     page,
   }, testInfo) => {
     test.skip(
-      testInfo.project.name !== 'desktop-light',
+      testInfo.project.name !== WRONG_ANSWER_PROJECT,
       'One wrong owner password per run: the per-email limit and the lockout (5 in 15 minutes)',
     );
     const wrong = await refusedPassword(page, QUAD_STAFF.owner.email, 'not the owner’s password');
