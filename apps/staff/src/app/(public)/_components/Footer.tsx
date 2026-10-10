@@ -16,6 +16,8 @@ export const FOOTER_LINKS = [
   { href: '/security', label: 'public.footer.security' },
   { href: '/legal/privacy', label: 'public.footer.privacy' },
   { href: '/legal/terms', label: 'public.footer.terms' },
+  { href: '/legal/dpa', label: 'public.footer.dpa' },
+  { href: '/legal/cookies', label: 'public.footer.cookies' },
 ] as const;
 
 /**
@@ -35,7 +37,14 @@ const page = (entry: (typeof FOOTER_LINKS)[number]): Item => ({
   href: entry.href,
   label: t(entry.label),
 });
-const [about, security, privacy, terms] = FOOTER_LINKS.map(page) as [Item, Item, Item, Item];
+const [about, security, privacy, terms, dpa, cookies] = FOOTER_LINKS.map(page) as [
+  Item,
+  Item,
+  Item,
+  Item,
+  Item,
+  Item,
+];
 
 /**
  * The four link groups (D43), one per quarter of the Quad mark, with the corner that points to the
@@ -76,7 +85,8 @@ function groups(onLanding: boolean): { title: string; card: string; items: Item[
     {
       title: t('public.footer.legal'),
       card: 'bg-site-orange rounded-[28px] rounded-tl-lg',
-      items: [privacy, terms],
+      // Cookie settings joins these when Google Analytics is set up (M1b Task 13).
+      items: [privacy, terms, dpa, cookies],
     },
   ];
 }

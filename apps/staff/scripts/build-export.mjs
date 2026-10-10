@@ -21,6 +21,8 @@ export const REQUIRED = [
   'security.html',
   'legal/privacy.html',
   'legal/terms.html',
+  'legal/dpa.html',
+  'legal/cookies.html',
   'sitemap.xml',
   '404.html',
   'CNAME',

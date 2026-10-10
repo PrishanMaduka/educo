@@ -2,7 +2,7 @@ import Link from 'next/link';
 
 import { COMPANY } from '../../src/app/(public)/_lib/company';
 
-import { SUBPROCESSORS, SubprocessorCards } from './subprocessors';
+import { SITE_PROCESSORS, SUBPROCESSORS, SubprocessorCards } from './subprocessors';
 
 import type { ArticleContent } from '../../src/app/(public)/_lib/article';
 
@@ -28,14 +28,14 @@ export const privacyPage: ArticleContent = {
     'Schools decide what happens to their data and Quad looks after it for them; this page explains what Quad holds, where it is kept, and how to ask about it.',
   description:
     'How Quad handles personal data: what each app holds, children’s data, AWS Mumbai storage, the companies involved, Ask Quad, retention and your rights.',
-  updated: { date: '2026-10-09', version: '0.2' },
+  updated: { date: '2026-10-10', version: '0.3' },
   layout: 'legal',
   inShort: [
     'For school data, the school is in charge. Quad stores and uses it only to run Quad for the school.',
     'School data is stored in AWS Mumbai (ap-south-1), with a copy of each daily backup in Singapore.',
     'Children’s data is never sold, never used for advertising, and never used to train AI models.',
     'Safeguarding and medical records are encrypted field by field, every view is logged, and they are never sent to Ask Quad.',
-    'Only strictly necessary cookies. No tracking or advertising cookies.',
+    'Quad sets only the cookies it needs to work. Google Analytics cookies are used on this website only if you accept them, and there are no advertising cookies.',
     <>
       Questions about your school’s records go to your school first; anything else to{' '}
       {mail(privacy)}.
@@ -188,15 +188,25 @@ export const privacyPage: ArticleContent = {
       body: (
         <>
           <p>
-            When you ask for a demo or ask us to tell your school about Quad, the form opens an
-            email to us in your own email app. We receive what you send: usually your name, email
-            address, school and anything you add. We use it only to reply and arrange a walkthrough,
-            and we delete requests that never lead to an agreement 24 months after our last contact.
+            When you ask for a demo or ask us to tell your school about Quad, the form sends your
+            request to us (before launch, it opened an email instead). We receive what you send:
+            usually your name, email address, school and anything you add, and we email you to say
+            we have it. We use it only to reply and arrange a walkthrough, and we delete requests
+            that never lead to an agreement 24 months after our last contact.
           </p>
           <p>
-            If we count visits to this website, we use Plausible Analytics, which sets no cookies
-            and collects no personal data. When the demo form starts sending requests to us
-            directly, Cloudflare Turnstile will check that a person, not a bot, is sending it.
+            Cloudflare Turnstile checks that a person, not a bot, is sending the form. To do that,
+            Cloudflare sees your IP address and some details of your browser.
+          </p>
+          <p>
+            When you ask us to tell your school about Quad, our team gets in touch with the school.
+            We don’t email the school automatically, and we never contact other families.
+          </p>
+          <p>
+            If you accept analytics cookies, we use Google Analytics to count visits to this
+            website. We don’t send your name or email to Google, and you can change your choice at
+            any time in Cookie settings. We use Google Analytics only because you agreed to it, and
+            only on this website, never in the Quad apps.
           </p>
         </>
       ),
@@ -247,12 +257,20 @@ export const privacyPage: ArticleContent = {
       icon: 'box',
       body: (
         <>
-          <p>These companies handle data for Quad, each only for the purpose shown.</p>
+          <p>These companies handle school data for Quad, each only for the purpose shown.</p>
           <SubprocessorCards />
           <p>
             We tell schools at least 30 days before we add or replace one of these companies, so
             they can raise concerns first. Email {mail(privacy)} to be told about changes.
           </p>
+          <p>
+            For visitors to this website, where we decide how data is used, this company also
+            handles data for us:
+          </p>
+          <SubprocessorCards
+            rows={SITE_PROCESSORS}
+            label="Companies that handle data for this website"
+          />
         </>
       ),
     },
@@ -346,18 +364,17 @@ export const privacyPage: ArticleContent = {
       icon: 'cookie',
       body: (
         <>
-          <p>Quad uses only cookies that are strictly necessary for it to work:</p>
-          <ul>
-            <li>a session cookie that keeps you signed in;</li>
-            <li>a security token that protects your forms (CSRF);</li>
-            <li>quad_theme, which remembers light or dark mode;</li>
-            <li>quad_last_school, which remembers the last school you opened;</li>
-            <li>Cloudflare Turnstile’s cookie, when the demo form checks for bots.</li>
-          </ul>
           <p>
-            There are no tracking or advertising cookies, so there is no cookie banner. This website
-            also remembers your theme and whether you chose the school or parent view in your
-            browser’s own storage; that never leaves your device.
+            Quad sets only the cookies it needs to work: to keep you signed in, to protect your
+            changes, to remember a device you trust and the last school you opened. This website
+            also keeps a few choices, such as light or dark mode, in your browser’s own storage,
+            which never leaves your device.
+          </p>
+          <p>
+            Google Analytics cookies are set on this website only if you accept them, and you can
+            change your choice at any time in Cookie settings. There are no advertising cookies. The{' '}
+            <Link href="/legal/cookies">cookie notice</Link> lists every cookie, what it does and
+            how long it stays.
           </p>
         </>
       ),

@@ -39,7 +39,11 @@ describe('Footer', () => {
       ['support@quad-edu.com', 'mailto:support@quad-edu.com'],
       ['Privacy', '/legal/privacy'],
       ['Terms', '/legal/terms'],
+      ['Data processing agreement', '/legal/dpa'],
+      ['Cookies', '/legal/cookies'],
     ]);
+    // Cookie settings comes with Google Analytics (Task 13); with no Measurement ID there is none.
+    expect(within(nav).queryByRole('button', { name: 'Cookie settings' })).toBeNull();
     expect(within(nav).getByText('Colombo, Sri Lanka')).toBeInTheDocument();
     // Sign in opens the sign-in dialog on the live site (D57).
     expect(within(nav).getByRole('button', { name: 'Sign in' })).toHaveAttribute(

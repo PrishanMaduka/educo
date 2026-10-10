@@ -14,6 +14,12 @@ const PAGES = [
   { path: '/security', title: 'Security & trust – Quad', h1: 'How Quad keeps school data safe.' },
   { path: '/legal/privacy', title: 'Privacy policy – Quad', h1: 'Privacy policy' },
   { path: '/legal/terms', title: 'Terms of service – Quad', h1: 'Terms of service' },
+  {
+    path: '/legal/dpa',
+    title: 'Data processing agreement – Quad',
+    h1: 'Data processing agreement',
+  },
+  { path: '/legal/cookies', title: 'Cookie notice – Quad', h1: 'Cookie notice' },
 ] as const;
 
 /** The navy header and the cream page, light and dark (spec 19 palette). */
@@ -65,7 +71,7 @@ test.describe('public pages', () => {
   }
 
   test('the legal pages show when they last changed and their version', async ({ page }) => {
-    for (const path of ['/legal/privacy', '/legal/terms']) {
+    for (const path of ['/legal/privacy', '/legal/terms', '/legal/dpa', '/legal/cookies']) {
       await page.goto(path);
       await expect(page.getByText(/^Last updated \d{1,2} \w+ 20\d\d · Version \S+$/)).toBeVisible();
     }
@@ -152,14 +158,46 @@ test.describe('public pages', () => {
       'Twilio',
       'Cloudflare (Turnstile)',
       'Grafana Labs',
-      'Plausible Analytics',
       'PayHere, Stripe',
     ]) {
       await expect(list.getByRole('heading', { name, exact: true, level: 3 })).toBeVisible();
     }
+    // Google Analytics handles data for this website, where Quad decides, not for schools (D57).
+    const site = page.getByRole('list', { name: 'Companies that handle data for this website' });
+    await expect(
+      site.getByRole('heading', { name: 'Google Analytics', exact: true, level: 3 }),
+    ).toBeVisible();
+    await expect(site.getByText(/Google Ireland Limited/)).toBeVisible();
     await expect(
       page.getByText('Email support@quad-edu.com to be told about changes'),
     ).toBeVisible();
+  });
+
+  test('the DPA says it is a draft that needs legal review before launch (D57)', async ({
+    page,
+  }) => {
+    await page.goto('/legal/dpa');
+    await expect(
+      page.getByText('Draft, version 0.1: this needs legal review before launch'),
+    ).toBeVisible();
+    await expect(page.getByRole('region', { name: 'In short' }).getByRole('listitem')).toHaveCount(
+      6,
+    );
+  });
+
+  test('the cookie notice lists the necessary cookies, then analytics only if you accept', async ({
+    page,
+  }) => {
+    await page.goto('/legal/cookies');
+    const necessary = page.getByRole('region', { name: /Strictly necessary/ });
+    await expect(
+      necessary.getByRole('heading', { name: '__Host-quad_sid', exact: true, level: 3 }),
+    ).toBeVisible();
+    const analytics = page.getByRole('region', { name: /only if you accept/ });
+    for (const name of ['_ga', '_ga_<id>']) {
+      await expect(analytics.getByRole('heading', { name, exact: true, level: 3 })).toBeVisible();
+    }
+    await expect(necessary.getByRole('heading', { name: '_ga', exact: true })).toHaveCount(0);
   });
 
   test('the footer links every page, and the top bar leads home and to the demo', async ({
@@ -171,6 +209,8 @@ test.describe('public pages', () => {
       ['Security & trust', '/security'],
       ['Privacy', '/legal/privacy'],
       ['Terms', '/legal/terms'],
+      ['Data processing agreement', '/legal/dpa'],
+      ['Cookies', '/legal/cookies'],
       ['About', '/about'],
     ] as const) {
       await footer.getByRole('link', { name, exact: true }).click();

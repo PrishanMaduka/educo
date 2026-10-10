@@ -114,6 +114,21 @@ describe('checkExport', () => {
       'portal route app.html must not be exported',
     ]);
   });
+
+  it('requires every public page, the DPA and the cookie notice included', () => {
+    expect(REQUIRED).toEqual(
+      expect.arrayContaining([
+        'about.html',
+        'security.html',
+        'legal/privacy.html',
+        'legal/terms.html',
+        'legal/dpa.html',
+        'legal/cookies.html',
+      ]),
+    );
+    rmSync(join(dir, 'legal/cookies.html'), { force: true });
+    expect(checkExport(dir)).toContain('missing legal/cookies.html');
+  });
 });
 
 /**

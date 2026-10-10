@@ -63,7 +63,7 @@ describe('company facts (D41)', () => {
   });
 
   it('reach the pages that show them', () => {
-    const [about, security, privacy, terms] = [0, 1, 2, 3].map(pageText);
+    const [about, security, privacy, terms, dpa] = [0, 1, 2, 3, 4].map(pageText);
     expect(about).toContain(COMPANY.founder.name);
     expect(about).toContain(COMPANY.founder.bio);
     expect(about).toContain(COMPANY.legalName);
@@ -74,12 +74,23 @@ describe('company facts (D41)', () => {
     expect(terms).toContain(COMPANY.governingLaw);
     expect(terms).toContain(COMPANY.liabilityCap);
     expect(terms).toContain(COMPANY.legalName);
+    expect(dpa).toContain(COMPANY.legalName);
+    expect(dpa).toContain(COMPANY.governingLaw);
+    expect(dpa).toContain(COMPANY.contact.support);
   });
 });
 
 describe('public pages', () => {
   it('are in the sitemap', () => {
-    expect(PUBLIC_PATHS).toEqual(['/', '/about', '/security', '/legal/privacy', '/legal/terms']);
+    expect(PUBLIC_PATHS).toEqual([
+      '/',
+      '/about',
+      '/security',
+      '/legal/privacy',
+      '/legal/terms',
+      '/legal/dpa',
+      '/legal/cookies',
+    ]);
   });
 
   it('each open with one plain sentence and a meta description of 155 characters or fewer', () => {

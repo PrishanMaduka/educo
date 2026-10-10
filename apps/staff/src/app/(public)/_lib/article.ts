@@ -105,6 +105,8 @@ export interface ArticleContent {
   description: string;
   /** Legal pages carry the date they last changed (`YYYY-MM-DD`) and a version. */
   updated?: { date: string; version: string };
+  /** A note shown in the header under the date, such as the DPA's draft status (D57). */
+  notice?: string;
   /**
    * How the sections are laid out: `story` (About: cards of different sizes), `promises`
    * (Security & trust: a grid of tinted cards, each a promise with the detail under it) or

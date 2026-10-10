@@ -1,4 +1,6 @@
 import { aboutPage } from '../../../../content/about';
+import { cookiesPage } from '../../../../content/legal/cookies';
+import { dpaPage } from '../../../../content/legal/dpa';
 import { privacyPage } from '../../../../content/legal/privacy';
 import { termsPage } from '../../../../content/legal/terms';
 import { securityPage } from '../../../../content/security';
@@ -11,6 +13,8 @@ export const ARTICLE_PAGES: readonly ArticleContent[] = [
   securityPage,
   privacyPage,
   termsPage,
+  dpaPage,
+  cookiesPage,
 ];
 
 /** Every public path for the sitemap (spec 19 SEO): the landing page, then the pages above. */

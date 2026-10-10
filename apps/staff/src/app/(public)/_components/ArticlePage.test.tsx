@@ -3,6 +3,8 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { aboutPage } from '../../../../content/about';
+import { cookiesPage } from '../../../../content/legal/cookies';
+import { dpaPage } from '../../../../content/legal/dpa';
 import { privacyPage } from '../../../../content/legal/privacy';
 import { termsPage } from '../../../../content/legal/terms';
 import { securityPage } from '../../../../content/security';
@@ -111,6 +113,8 @@ describe('ArticlePage, option A "Story cards" (D45)', () => {
   it.each([
     ['/legal/privacy', privacyPage],
     ['/legal/terms', termsPage],
+    ['/legal/dpa', dpaPage],
+    ['/legal/cookies', cookiesPage],
   ] as const)(
     '%s opens with "In short", then lists every section under "On this page"',
     (_path, content) => {

@@ -13,8 +13,9 @@ const LEGAL_TIME_ZONE = 'Asia/Colombo';
 /**
  * The navy header of an About, Security & trust or legal page (D45): a pill with the small mark
  * and the eyebrow, the page's one `<h1>`, the story sentence and, on legal pages, "Last updated"
- * and the version. The big Quad mark on the right is decorative; on phones it shrinks and sits
- * above the heading, and it only turns when the visitor allows motion.
+ * and the version, then any notice (the DPA's draft status). The big Quad mark on the right is
+ * decorative; on phones it shrinks and sits above the heading, and it only turns when the visitor
+ * allows motion.
  */
 export function ArticleHero({ content }: { content: ArticleContent }) {
   const { updated } = content;
@@ -49,6 +50,11 @@ export function ArticleHero({ content }: { content: ArticleContent }) {
                 date: formatDate(`${updated.date}T00:00:00Z`, LEGAL_TIME_ZONE, 'long'),
                 version: updated.version,
               })}
+            </p>
+          )}
+          {content.notice && (
+            <p className="m-0 rounded-2xl bg-site-orange px-4 py-2 text-[15px] font-bold text-site-on-vivid">
+              {content.notice}
             </p>
           )}
         </div>
