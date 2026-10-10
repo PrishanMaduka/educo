@@ -9,10 +9,10 @@ import { useTranslation } from 'react-i18next';
 import { OpenAsSchoolAdminDrawer } from '../_drawers/OpenAsSchoolAdminDrawer';
 
 import { SchoolName } from './SchoolName';
-import { useSchools } from './use-schools';
 
 import type { PlatformRole, PlatformTenant, TenantStatus } from '@quad/contracts';
 
+import { useSchools } from '@/components/data/use-schools';
 import { useConsoleMe } from '@/components/session/ConsoleSession';
 
 /** Spec 05: only these platform roles may open a school as its admin. */
@@ -51,6 +51,8 @@ export function Schools() {
         size="sm"
         icon={Eye}
         disabled={paused}
+        // 44 px to tap on phones (spec 03).
+        className="max-sm:h-11"
         title={paused ? t('console.schools.openAsPaused') : undefined}
         aria-label={t('console.schools.openAsLabel', { school: school.name })}
         onClick={() => {

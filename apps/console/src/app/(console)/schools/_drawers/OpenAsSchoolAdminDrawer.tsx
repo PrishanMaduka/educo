@@ -7,9 +7,7 @@ import { Eye, ShieldCheck } from 'lucide-react';
 import { useEffect, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { useOpenSupportSession } from '../_components/use-schools';
-
-
+import { useOpenSupportSession } from '@/components/data/use-schools';
 import { messageFor } from '@/lib/error-copy';
 import { openPage } from '@/lib/navigate';
 
@@ -26,7 +24,8 @@ const FORM_ID = 'open-as-school-admin';
  * "Open as school admin" (spec 05 → Support access; the prototype's impersonation flow). A reason
  * is always required (D22) and checked with the contract before anything is sent; the API then
  * records it and answers with a single-use link (2 minutes) into the staff portal, where the visit
- * lasts at most 60 minutes. The console then follows that link.
+ * lasts at most 60 minutes. The console then follows that link. The Drawer focuses the reason
+ * itself (an `autoFocus` here would run first and become the element focus returns to).
  */
 export function OpenAsSchoolAdminDrawer({
   school,
@@ -106,8 +105,6 @@ export function OpenAsSchoolAdminDrawer({
           name="reason"
           rows={4}
           maxLength={1000}
-          // eslint-disable-next-line jsx-a11y/no-autofocus -- the drawer exists to take the reason
-          autoFocus
           value={reason}
           error={error}
           onChange={(event) => {

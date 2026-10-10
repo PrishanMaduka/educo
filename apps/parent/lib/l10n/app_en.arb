@@ -177,7 +177,7 @@
   "shellProfileOpen": "Open your profile menu",
   "shellConsoleBadge": "Console",
   "shellConsoleTitle": "Quad",
-  "shellConsoleSubtitle": "Platform owner, all schools",
+  "shellConsoleSubtitle": "All schools",
   "shellStaffSubtitle": "Staff portal · powered by Quad",
   "shellProfileMenu": "Your profile",
   "shellProfileSwitchSchool": "Switch school",
@@ -272,8 +272,6 @@
   "homeConsoleCrumb": "Platform",
   "homeConsoleTitle": "Overview",
   "homeConsoleSummaryPlaceholder": "Once schools join Quad, this page will show how each one is doing and which need your attention first.",
-  "rolePlatformOwner": "Platform owner",
-  "shellConsolePlaceholderName": "Quad owner",
   "appNameParent": "Quad",
   "parentHomePlaceholder": "Once your school invites you, this is where you'll see your children's day, what needs you and what's coming up.",
   "parentCirclePlaceholder": "Moments that your children's teachers and family share will appear here.",
@@ -1693,5 +1691,185 @@
   "schoolSettingsAuditDetailAfter": "After",
   "schoolSettingsAuditDetailNone": "None",
   "schoolSettingsAuditDetailDetails": "Details",
-  "schoolSettingsAuditDetailClose": "Back to the log"
+  "schoolSettingsAuditDetailClose": "Back to the log",
+  "navConsoleAudit": "Audit log",
+  "rolePlatformOwner": "Platform owner",
+  "rolePlatformAdmin": "Platform admin",
+  "rolePlatformSupport": "Support",
+  "rolePlatformBilling": "Billing",
+  "rolePlatformReadonly": "Read only",
+  "consoleSessionChecking": "Checking that you’re signed in…",
+  "consoleSessionFailed": "We couldn’t check that you’re signed in.",
+  "consoleSignOutFailed": "We couldn’t sign you out. Try again.",
+  "consoleSignInPageTitle": "Sign in",
+  "consoleSignInTitle": "Sign in to Quad",
+  "consoleSignInLede": "For Quad staff at console.quad-edu.com. Schools sign in at quad-edu.com.",
+  "consoleSignInEmail": "Quad email",
+  "consoleSignInEmailInvalid": "Enter your Quad email address, like name@quad-edu.com.",
+  "consoleSignInSubmit": "Continue",
+  "consoleSignInBack": "Back",
+  "consoleSignInTwoStepLede": "Enter the 6-digit code from your authenticator app for {email}.",
+  "@consoleSignInTwoStepLede": {
+    "placeholders": {
+      "email": {
+        "type": "Object"
+      }
+    }
+  },
+  "consoleSignInSetupLede": "Quad staff always sign in with an authenticator app. Scan this code with it, then enter the 6-digit code the app shows.",
+  "consoleSignInOpening": "Opening the console…",
+  "consoleSignInFoot": "Every sign-in to the platform console is recorded in the audit log.",
+  "consoleSignInArtTitleStart": "Every school on Quad, looked after from",
+  "consoleSignInArtTitleHighlight": "one place.",
+  "consoleSignInArtBody": "Schools, plans, early warnings and support, for every school on Quad. Welcome back.",
+  "consoleSignInArtProduct": "Console",
+  "consoleSchoolsCrumb": "Platform",
+  "consoleSchoolsTitle": "Schools",
+  "consoleSchoolsSummary": "{count, plural, =0 {No schools are on Quad yet.} one {{count} school is on Quad.} other {{count} schools are on Quad.}} Each has its own data, staff and branding, and everyone signs in at quad-edu.com.",
+  "@consoleSchoolsSummary": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "consoleSchoolsSummaryLoading": "Loading the schools on Quad…",
+  "consoleSchoolsSupportNote": "To help a school, open it as its school admin. You give a reason, the visit lasts up to 60 minutes and everything you do is logged.",
+  "consoleSchoolsList": "Schools on Quad",
+  "consoleSchoolsColSchool": "School",
+  "consoleSchoolsColStatus": "Status",
+  "consoleSchoolsColActions": "Support",
+  "consoleSchoolsStatusTrial": "Trial",
+  "consoleSchoolsStatusOnboarding": "Onboarding",
+  "consoleSchoolsStatusActive": "Active",
+  "consoleSchoolsStatusPastDue": "Past due",
+  "consoleSchoolsStatusSuspended": "Suspended",
+  "consoleSchoolsStatusDeleted": "Deleted",
+  "consoleSchoolsOpenAs": "Open as school admin",
+  "consoleSchoolsOpenAsLabel": "Open {school} as school admin",
+  "@consoleSchoolsOpenAsLabel": {
+    "placeholders": {
+      "school": {
+        "type": "Object"
+      }
+    }
+  },
+  "consoleSchoolsOpenAsPaused": "A suspended school can’t be opened.",
+  "consoleSchoolsEmpty": "No schools yet",
+  "consoleSchoolsLoadFailed": "We couldn’t load the schools.",
+  "consoleSchoolsShowMore": "Show more schools",
+  "consoleSupportEyebrow": "Support access",
+  "consoleSupportTitle": "Open {school} as school admin",
+  "@consoleSupportTitle": {
+    "placeholders": {
+      "school": {
+        "type": "Object"
+      }
+    }
+  },
+  "consoleSupportBody": "You’ll see {school}’s staff portal as its school admin for up to 60 minutes. Safeguarding and medical records stay hidden. Everything you do is recorded in the school’s audit log and in Quad’s.",
+  "@consoleSupportBody": {
+    "placeholders": {
+      "school": {
+        "type": "Object"
+      }
+    }
+  },
+  "consoleSupportReason": "Why are you opening this school?",
+  "consoleSupportReasonHint": "Say what you’re helping with, in 10 to 500 characters. It’s kept in Quad’s audit log.",
+  "consoleSupportReasonPlaceholder": "For example: the principal asked for help with fee reminders (ticket 1042).",
+  "consoleSupportSubmit": "Open {school} as school admin",
+  "@consoleSupportSubmit": {
+    "placeholders": {
+      "school": {
+        "type": "Object"
+      }
+    }
+  },
+  "consoleSupportOpening": "Opening {school} as school admin…",
+  "@consoleSupportOpening": {
+    "placeholders": {
+      "school": {
+        "type": "Object"
+      }
+    }
+  },
+  "consoleSupportNotAllowed": "Your role can’t open schools. Ask a Quad admin.",
+  "consoleSupportNotFound": "This school isn’t on Quad any more.",
+  "consoleAuditCrumb": "Platform",
+  "consoleAuditTitle": "Audit log",
+  "consoleAuditSummary": "Everything Quad staff do in the console and during support visits, across every school, newest first.",
+  "consoleAuditFilters": "Filter the audit log",
+  "consoleAuditFilterPerson": "Quad staff",
+  "consoleAuditFilterSchool": "School",
+  "consoleAuditFilterAction": "Action",
+  "consoleAuditFilterWhen": "When",
+  "consoleAuditRangeToday": "Today",
+  "consoleAuditRangeLast7": "Last 7 days",
+  "consoleAuditRangeLast30": "Last 30 days",
+  "consoleAuditRangeLast90": "Last 90 days",
+  "consoleAuditClearFilters": "Clear filters",
+  "consoleAuditGroupConsole": "Console",
+  "consoleAuditGroupSignIn": "Sign-in",
+  "consoleAuditGroupSupport": "Support visits",
+  "consoleAuditGroupSchool": "In schools",
+  "consoleAuditExport": "Export CSV",
+  "consoleAuditExported": "Audit log exported",
+  "consoleAuditTable": "Audit log entries",
+  "consoleAuditColWhen": "When",
+  "consoleAuditColWho": "Who",
+  "consoleAuditColWhat": "What",
+  "consoleAuditColSchool": "School",
+  "consoleAuditNoSchool": "Platform",
+  "consoleAuditSystem": "System",
+  "consoleAuditOpen": "Open the details of {summary}",
+  "@consoleAuditOpen": {
+    "placeholders": {
+      "summary": {
+        "type": "Object"
+      }
+    }
+  },
+  "consoleAuditEmpty": "Nothing recorded yet",
+  "consoleAuditEmptyFiltered": "Nothing matches these filters",
+  "consoleAuditShowMore": "Show more entries",
+  "consoleAuditLoadFailed": "We couldn’t load the audit log.",
+  "consoleAuditLoading": "Loading the audit log…",
+  "consoleAuditDetailEyebrow": "Audit entry",
+  "consoleAuditDetailWhen": "When",
+  "consoleAuditDetailWho": "Who",
+  "consoleAuditDetailAction": "Action",
+  "consoleAuditDetailSchool": "School",
+  "consoleAuditDetailIp": "IP address",
+  "consoleAuditDetailNoIp": "Not recorded",
+  "consoleAuditDetailViaSupport": "Done during a Quad support visit, inside the school. The school’s own audit log has it too.",
+  "consoleAuditDetailDetails": "Recorded details",
+  "consoleAuditDetailClose": "Back to the log",
+  "consoleAuditActionTenantRenamed": "Renamed a school",
+  "consoleAuditActionSupportSessionStarted": "Opened a school as school admin",
+  "consoleAuditActionSupportSessionEnded": "Support visit ended",
+  "consoleAuditActionAuthPasswordAccepted": "Entered the right password",
+  "consoleAuditActionAuthSignIn": "Signed in",
+  "consoleAuditActionAuthSignInFailed": "Could not sign in",
+  "consoleAuditActionAuthTwoStepSetupStarted": "Started setting up an authenticator",
+  "consoleAuditActionAuthTwoStepEnabled": "Turned on two-step sign-in",
+  "consoleAuditActionAuthSignOut": "Signed out",
+  "consoleAuditActionAuditExported": "Exported an audit log",
+  "consoleAuditActionAuthPasswordReset": "Reset a password",
+  "consoleAuditActionUserInvited": "Invited staff",
+  "consoleAuditActionUserInviteAccepted": "Accepted an invitation",
+  "consoleAuditActionUserRoleChanged": "Changed a role",
+  "consoleAuditActionUserDeactivated": "Deactivated staff",
+  "consoleAuditActionUserReactivated": "Reactivated staff",
+  "consoleAuditActionUserTwoStepReminded": "Reminded about two-step sign-in",
+  "consoleAuditActionUserPasswordResetSent": "Sent a password reset link",
+  "consoleAuditActionUserSignedOutEverywhere": "Signed someone out everywhere",
+  "consoleAuditActionRoleCreated": "Created a role",
+  "consoleAuditActionRoleUpdated": "Changed a role’s details",
+  "consoleAuditActionRoleDeleted": "Deleted a role",
+  "consoleAuditActionRolePermissionsChanged": "Changed what a role can do",
+  "consoleAuditActionRolePreviewStarted": "Started a role preview",
+  "consoleAuditActionRolePreviewEnded": "Ended a role preview",
+  "consoleAuditActionSettingsUpdated": "Changed School settings",
+  "consoleAuditActionSensitiveAccessed": "Viewed sensitive records"
 }

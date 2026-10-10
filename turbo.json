@@ -54,6 +54,24 @@
       ],
       "outputs": ["playwright-report/**"]
     },
+    "@quad/console#e2e": {
+      "dependsOn": ["build", "@quad/api#build", "@quad/staff#e2e"],
+      "cache": false,
+      "passThroughEnv": [
+        "CI",
+        "PLAYWRIGHT_BROWSERS_PATH",
+        "QUAD_SCREENSHOTS",
+        "QUAD_E2E_WEBKIT",
+        "DATABASE_URL",
+        "DATABASE_PLATFORM_URL",
+        "DATABASE_OWNER_URL",
+        "DATABASE_ADMIN_URL",
+        "REDIS_URL",
+        "SMTP_URL",
+        "MAILPIT_URL"
+      ],
+      "outputs": ["playwright-report/**"]
+    },
     "tokens:build": {
       "outputs": ["packages/tokens/dist/**", "apps/parent/lib/theme/tokens.g.dart"]
     },

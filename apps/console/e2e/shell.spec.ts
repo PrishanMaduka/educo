@@ -1,15 +1,20 @@
-import { expect, test } from '@playwright/test';
+import { expect } from '@playwright/test';
 import {
   expectCanvas,
   expectNoSeriousA11yViolations,
   expectNoSideScroll,
   schemeOf,
 } from '@quad/config/playwright/checks';
+import { test } from '@quad/config/playwright/stack';
+
+import { OWNER_STATE, PASSWORD_JOURNEY_PROJECTS, QUAD_STAFF, signInThroughApi } from './sign-in-as';
 
 const isPhone = (width: number | undefined): boolean => (width ?? 0) < 900;
 
 test.describe('console shell', () => {
-  test('/ shows the navigation and the overview', async ({ page }) => {
+  test.use({ storageState: OWNER_STATE });
+
+  test('/ shows the navigation, the overview and the signed-in owner', async ({ page }) => {
     await page.goto('/');
     await expect(page.locator('html')).toHaveAttribute('data-app', 'console');
     await expect(page.getByRole('heading', { level: 1, name: 'Overview' })).toBeVisible();
@@ -30,7 +35,11 @@ test.describe('console shell', () => {
         'aria-current',
         'page',
       );
-      await expect(page.getByRole('complementary', { name: 'Side bar' })).toContainText('Console');
+      const rail = page.getByRole('complementary', { name: 'Side bar' });
+      await expect(rail).toContainText('Console');
+      await expect(rail).toContainText(QUAD_STAFF.owner.name);
+      await expect(rail).toContainText('Platform owner');
+      await expect(nav.getByRole('link', { name: 'Audit log' })).toHaveAttribute('href', '/audit');
     }
   });
 
@@ -86,4 +95,28 @@ test.describe('console shell', () => {
     await page.reload();
     await expect(html).toHaveAttribute('data-theme', 'dark');
   });
+});
+
+test.describe('console sign out', () => {
+  test(
+    'Sign out ends the session: the console then sends every page to sign-in',
+    { tag: '@webkit' },
+    async ({ page, context }, testInfo) => {
+      test.skip(
+        !PASSWORD_JOURNEY_PROJECTS.includes(testInfo.project.name),
+        'Password journeys run in three projects (the per-email limit)',
+      );
+      // Its own session, so the shared owner session stays signed in for the other journeys.
+      await signInThroughApi(context.request, QUAD_STAFF.owner.email);
+      await page.goto('/');
+      await expect(page.getByRole('heading', { level: 1, name: 'Overview' })).toBeVisible();
+      await page.getByRole('button', { name: 'Open your profile menu' }).click();
+      const menu = page.getByRole('dialog', { name: 'Your profile' });
+      await expect(menu.getByText(QUAD_STAFF.owner.name).first()).toBeVisible();
+      await menu.getByRole('button', { name: 'Sign out' }).click();
+      await expect(page).toHaveURL(/\/sign-in$/);
+      await page.goto('/schools');
+      await expect(page).toHaveURL(/\/sign-in\?next=%2Fschools$/);
+    },
+  );
 });

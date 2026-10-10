@@ -11,7 +11,6 @@ import type { PlatformSignInNext } from '@quad/contracts';
 import { consoleApi, unwrap } from '@/lib/api';
 import { messageFor } from '@/lib/error-copy';
 
-
 const EMAIL = /^\S+@\S+\.\S+$/;
 
 export interface CredentialsStepProps {
