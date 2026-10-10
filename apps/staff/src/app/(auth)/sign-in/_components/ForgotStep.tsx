@@ -2,11 +2,11 @@
 
 import { SignInEmail } from '@quad/contracts';
 import { Input } from '@quad/ui';
+import { AuthCard } from '@quad/ui/auth';
 import { useMutation } from '@tanstack/react-query';
 import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { AuthCard } from './AuthCard';
 import { BackButton, BigButton, StepError } from './bits';
 
 import { staffApi, unwrapEmpty } from '@/lib/api';

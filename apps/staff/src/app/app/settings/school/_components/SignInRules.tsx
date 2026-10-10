@@ -1,10 +1,8 @@
 'use client';
 
-import { Card } from '@quad/ui';
+import { Card, SettingRow } from '@quad/ui';
 import { Lock } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-
-import { SettingRow } from './SettingRow';
 
 import type { SchoolSignInRules } from '@quad/contracts';
 

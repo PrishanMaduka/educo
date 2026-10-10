@@ -1,12 +1,12 @@
 'use client';
 
 import { Checkbox, cn } from '@quad/ui';
+import { AuthCard } from '@quad/ui/auth';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { ChevronRight } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { AuthCard } from './AuthCard';
 import { StepError } from './bits';
 
 import type { SignInMembership } from '@quad/contracts';

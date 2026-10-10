@@ -1,4 +1,6 @@
-import { ApiError } from './api';
+import { ApiError, fieldError, isFieldError } from '@quad/client';
+
+export { fieldError, isFieldError };
 
 import type { MessageKey } from '@/i18n';
 
@@ -24,18 +26,6 @@ const BY_CODE: Readonly<Record<string, MessageKey>> = {
 export function errorKeyFor(error: unknown): MessageKey {
   if (error instanceof ApiError) return BY_CODE[error.code] ?? 'error.somethingWentWrong';
   return 'error.somethingWentWrong';
-}
-
-/** The API's message for one field of a `validation` answer, if it named that field. */
-export function fieldError(error: unknown, field: string): string | undefined {
-  return error instanceof ApiError && error.code === 'validation' ? error.fields[field] : undefined;
-}
-
-/** True for a `validation` answer that named a field, which the field itself shows. */
-export function isFieldError(error: unknown): boolean {
-  return (
-    error instanceof ApiError && error.code === 'validation' && Object.keys(error.fields).length > 0
-  );
 }
 
 /** A toast for a failed shell action: the API's field message for a validation answer, else the code's copy. */

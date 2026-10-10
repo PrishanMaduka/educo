@@ -1,10 +1,10 @@
 'use client';
 
+import { AuthCard } from '@quad/ui/auth';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { AuthCard } from './AuthCard';
 
 import { staffApi, unwrap } from '@/lib/api';
 

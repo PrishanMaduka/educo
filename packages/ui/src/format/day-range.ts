@@ -1,9 +1,9 @@
-/** The When filter's choices on the Audit tab (D49). */
-export const AUDIT_RANGES = ['today', 'last7', 'last30', 'last90'] as const;
-export type AuditRange = (typeof AUDIT_RANGES)[number];
+/** The When filter's choices on the audit logs (D49): today and the last 7, 30 and 90 days. */
+export const DAY_RANGES = ['today', 'last7', 'last30', 'last90'] as const;
+export type DayRange = (typeof DAY_RANGES)[number];
 
-/** How many school days each range covers, today included. */
-const DAYS: Readonly<Record<AuditRange, number>> = { today: 1, last7: 7, last30: 30, last90: 90 };
+/** How many days each range covers, today included. */
+const DAYS: Readonly<Record<DayRange, number>> = { today: 1, last7: 7, last30: 30, last90: 90 };
 
 const MINUTE = 60_000;
 
@@ -46,11 +46,12 @@ function offsetMinutes(instant: Date, timeZone: string): number {
 }
 
 /**
- * The `from` of `GET /audit` for a range: the UTC instant of midnight, school time, at the start
- * of its first day (spec 06: the portal works out instants from the school's own dates). The
+ * The `from` of an audit query for a range: the UTC instant of midnight in `timeZone` at the start
+ * of its first day (spec 06: the web apps work out instants from local dates; the portal uses the
+ * school's zone, the console the browser's). The
  * offset is read twice, so a clock change between UTC and local midnight lands on the right hour.
  */
-export function auditRangeFrom(range: AuditRange, now: Date, timeZone: string): string {
+export function dayRangeFrom(range: DayRange, now: Date, timeZone: string): string {
   const today = localDate(now, timeZone);
   const midnightAsUtc = Date.UTC(today.year, today.month - 1, today.day - (DAYS[range] - 1));
   let instant = midnightAsUtc - offsetMinutes(new Date(midnightAsUtc), timeZone) * MINUTE;

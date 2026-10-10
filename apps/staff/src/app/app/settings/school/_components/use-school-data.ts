@@ -1,6 +1,7 @@
 'use client';
 
-import { useToast } from '@quad/ui';
+import { filenameFrom } from '@quad/client';
+import { downloadBlob, useToast } from '@quad/ui';
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 
@@ -116,36 +117,12 @@ export function useExportAudit() {
       if (data === undefined || data.size === 0) {
         throw new ApiError('internal', response.status, {}, 'The export had no file');
       }
-      return { blob: data, name: filenameOf(response) };
+      return { blob: data, name: filenameFrom(response, 'quad-audit.csv') };
     },
     onSuccess: async ({ blob, name }) => {
-      download(blob, name);
+      downloadBlob(blob, name);
       toast.show(t('schoolSettings.audit.exported'));
       await queries.invalidateQueries({ queryKey: AUDIT });
     },
   });
-}
-
-/** The name the API gives the file (`quad-audit-2026-10-09.csv`). */
-function filenameOf(response: Response): string {
-  const header = response.headers.get('content-disposition') ?? '';
-  return /filename="([^"]+)"/.exec(header)?.[1] ?? 'quad-audit.csv';
-}
-
-/**
- * Saves `blob` as a file. The link is in the document while it is clicked (Firefox and older
- * Safari ignore a detached one), and the URL lives until the browser has started the download.
- */
-function download(blob: Blob, name: string): void {
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = name;
-  link.hidden = true;
-  document.body.append(link);
-  link.click();
-  link.remove();
-  window.setTimeout(() => {
-    URL.revokeObjectURL(url);
-  }, 0);
 }

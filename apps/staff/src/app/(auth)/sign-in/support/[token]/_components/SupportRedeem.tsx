@@ -1,10 +1,10 @@
 'use client';
 
+import { AuthCard } from '@quad/ui/auth';
 import { useMutation } from '@tanstack/react-query';
 import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { AuthCard } from '../../../_components/AuthCard';
 import { StepError } from '../../../_components/bits';
 import { InvalidLink } from '../../../_components/InvalidLink';
 

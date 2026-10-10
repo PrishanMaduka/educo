@@ -1,4 +1,10 @@
 export { ActionMenu, type ActionMenuItem, type ActionMenuProps } from './components/ActionMenu';
+export {
+  AuditLogTable,
+  type AuditLogRow,
+  type AuditLogTableLabels,
+  type AuditLogTableProps,
+} from './components/AuditLogTable';
 export { Avatar, type AvatarProps } from './components/Avatar';
 export { Button, buttonVariants, type ButtonProps } from './components/Button';
 export { Card, type CardProps } from './components/Card';
@@ -42,6 +48,7 @@ export {
   type PermissionMatrixRow,
   type PermissionMatrixValue,
 } from './components/PermissionMatrix';
+export { MetaList, type MetaListProps } from './components/MetaList';
 export { Pill, type PillProps } from './components/Pill';
 export {
   Segmented,
@@ -50,6 +57,7 @@ export {
   type SegmentedTone,
 } from './components/Segmented';
 export { Select, type SelectOption, type SelectProps } from './components/Select';
+export { SettingRow, type SettingRowProps } from './components/SettingRow';
 export { Sparkline, type SparklineProps } from './components/Sparkline';
 export { Switch, type SwitchProps } from './components/Switch';
 export { Table, type TableBreakpoint, type TableColumn, type TableProps } from './components/Table';
@@ -64,7 +72,10 @@ export {
 export { Tooltip, type TooltipProps } from './components/Tooltip';
 export { avatarPalette, avatarTone, initialsOf, type AvatarTone } from './lib/avatar';
 export { cn } from './lib/cn';
+export { downloadBlob } from './lib/download';
+export { metaLines, type MetaLine } from './lib/meta-lines';
 export { useLeaveGuard } from './lib/use-leave-guard';
 export { formatDate, type DateStyle } from './format/date';
+export { DAY_RANGES, dayRangeFrom, type DayRange } from './format/day-range';
 export { formatMoney, type Money } from './format/money';
 export { formatRelative } from './format/relative';

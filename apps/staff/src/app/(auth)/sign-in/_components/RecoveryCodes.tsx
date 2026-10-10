@@ -1,11 +1,11 @@
 'use client';
 
 import { Button, cn } from '@quad/ui';
+import { AuthCard } from '@quad/ui/auth';
 import { Copy } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { AuthCard } from './AuthCard';
 import { BigButton } from './bits';
 
 /** Writes to the clipboard; rejects where there is none (`navigator.clipboard` is secure-context only). */

@@ -15,6 +15,7 @@
     "lint": "eslint ."
   },
   "dependencies": {
+    "@quad/contracts": "workspace:*",
     "openapi-fetch": "0.17.0"
   },
   "peerDependencies": {

@@ -1,8 +1,8 @@
 'use client';
 
+import { AuthCard } from '@quad/ui/auth';
 import { useTranslation } from 'react-i18next';
 
-import { AuthCard } from './AuthCard';
 import { BigButton } from './bits';
 
 /** No staff membership (spec 05): what to do, from the person's side. */

@@ -1,9 +1,9 @@
 'use client';
 
+import { AuthCard } from '@quad/ui/auth';
 import { Mail } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import { AuthCard } from './AuthCard';
 import { BigButton } from './bits';
 
 /** After Forgot password: the same words whether or not the address has an account. */

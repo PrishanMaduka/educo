@@ -1,11 +1,10 @@
 'use client';
 
-import { Button, Card, EmptyState, useToast } from '@quad/ui';
+import { Button, Card, EmptyState, dayRangeFrom, useToast } from '@quad/ui';
 import { Download, ScrollText } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { auditRangeFrom } from './audit-range';
 import { AuditDetailDrawer } from './AuditDetailDrawer';
 import { AuditFilters, NO_AUDIT_FILTERS, type AuditFilterState } from './AuditFilters';
 import { AuditTable } from './AuditTable';
@@ -46,7 +45,7 @@ export function AuditTab({ view, onViewChange, timeZone, canExport }: AuditTabPr
   const setFilters = (next: AuditFilterState) => {
     onViewChange({
       filters: next,
-      from: next.range === null ? null : auditRangeFrom(next.range, new Date(), timeZone),
+      from: next.range === null ? null : dayRangeFrom(next.range, new Date(), timeZone),
     });
   };
   const query: AuditQuery = { actor: filters.actor, action: filters.action, from: view.from };

@@ -1,3 +1,5 @@
+import { cookieValue } from '@quad/client';
+
 /**
  * What the staff app knows about the staff session without asking the API (spec 05; D32). The
  * cookies are the API's: `quad_sid` and `quad_csrf` locally, with the `__Host-` prefix elsewhere.
@@ -5,7 +7,8 @@
  */
 
 const SESSION_COOKIES = ['quad_sid', '__Host-quad_sid'] as const;
-const CSRF_COOKIES = ['quad_csrf', '__Host-quad_csrf'] as const;
+/** The staff portal's double-submit CSRF cookie (the console has its own, D32). */
+export const CSRF_COOKIES = ['quad_csrf', '__Host-quad_csrf'] as const;
 
 /** The longest school name the sign-in page repeats from the remembered-school cookie. */
 const LAST_SCHOOL_MAX = 120;
@@ -17,12 +20,7 @@ export function hasSessionCookie(get: (name: string) => string | undefined): boo
 
 /** The double-submit CSRF value from `document.cookie`, which every cookie write echoes. */
 export function csrfTokenFrom(cookieHeader: string): string | null {
-  for (const part of cookieHeader.split(';')) {
-    const at = part.indexOf('=');
-    const name = part.slice(0, at).trim();
-    if ((CSRF_COOKIES as readonly string[]).includes(name)) return part.slice(at + 1).trim();
-  }
-  return null;
+  return cookieValue(cookieHeader, CSRF_COOKIES);
 }
 
 /**

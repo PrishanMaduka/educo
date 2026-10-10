@@ -1,13 +1,14 @@
 'use client';
 
 import { OtpBoxes } from '@quad/ui';
+import { AuthCard } from '@quad/ui/auth';
+import { QrCode } from '@quad/ui/auth';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { AuthCard } from './AuthCard';
 import { BigButton, StepError } from './bits';
-import { QrCode } from './QrCode';
+
 
 import type { SignInNext } from '@quad/contracts';
 

@@ -2,6 +2,7 @@
 
 import {
   ActionMenu,
+  AuditLogTable,
   Avatar,
   avatarPalette,
   avatarTone,
@@ -12,6 +13,9 @@ import {
   Chip,
   cn,
   CommandPalette,
+  DAY_RANGES,
+  dayRangeFrom,
+  downloadBlob,
   Drawer,
   DrawerClose,
   DropdownFilter,
@@ -24,12 +28,15 @@ import {
   initialsOf,
   Input,
   Kpi,
+  MetaList,
+  metaLines,
   OtpBoxes,
   PermissionMatrix,
   PetalBurstProvider,
   Pill,
   Segmented,
   Select,
+  SettingRow,
   Sparkline,
   Stepper,
   Switch,
@@ -704,6 +711,103 @@ function FormatMoneySample() {
   );
 }
 
+const SAMPLE_AUDIT = [
+  { id: 'a1', at: '2026-10-05T08:30:00.000Z', summary: 'Invited Nadeesha Jayasinghe' },
+  { id: 'a2', at: '2026-10-04T15:00:00.000Z', summary: 'Changed School settings: address' },
+];
+
+function AuditLogTableSample() {
+  const { t } = useTranslation(DESIGN_NS);
+  const toast = useToast();
+  return (
+    <Card flush>
+      <AuditLogTable
+        entries={SAMPLE_AUDIT}
+        now={new Date(SAMPLE_DATE)}
+        timeZone={SAMPLE_TIME_ZONE}
+        onOpen={(entry) => {
+          toast.show(entry.summary);
+        }}
+        who={() => (
+          <span className="inline-flex items-center gap-2">
+            <Avatar name={SAMPLE_STUDENTS[0].name} size="sm" decorative />
+            {SAMPLE_STUDENTS[0].name}
+          </span>
+        )}
+        labels={{
+          caption: t('sample.auditCaption'),
+          when: t('sample.auditWhen'),
+          who: t('sample.auditWho'),
+          what: t('sample.auditWhat'),
+          open: (summary) => t('sample.auditOpen', { summary }),
+        }}
+        empty={<EmptyState title={t('sample.auditEmpty')} />}
+      />
+    </Card>
+  );
+}
+
+const SAMPLE_META = { reason: 'Checking the fee reminders', rows: 12, filters: { action: 'auth.sign_in' } };
+
+function MetaListSample() {
+  const { t } = useTranslation(DESIGN_NS);
+  return <MetaList title={t('sample.metaTitle')} lines={metaLines(SAMPLE_META)} />;
+}
+
+function MetaLinesSample() {
+  return (
+    <Result
+      input="metaLines({ reason, rows: 12, filters: { … } })"
+      output={metaLines(SAMPLE_META)
+        .map((line) => `${line.key}: ${line.value}`)
+        .join(' · ')}
+    />
+  );
+}
+
+function SettingRowSample() {
+  const { t } = useTranslation(DESIGN_NS);
+  return (
+    <dl className="m-0 overflow-hidden rounded-xl border border-line">
+      <SettingRow label={t('sample.settingTimeZone')}>{SAMPLE_TIME_ZONE}</SettingRow>
+      <SettingRow label={t('sample.settingSession')}>{t('sample.settingSessionValue')}</SettingRow>
+    </dl>
+  );
+}
+
+function DayRangesSample() {
+  return <Result input="DAY_RANGES" output={DAY_RANGES.join(', ')} />;
+}
+
+function DayRangeFromSample() {
+  const now = new Date(SAMPLE_DATE);
+  return (
+    <Stack>
+      {DAY_RANGES.map((range) => (
+        <Result
+          key={range}
+          input={`dayRangeFrom('${range}', now, '${SAMPLE_TIME_ZONE}')`}
+          output={dayRangeFrom(range, now, SAMPLE_TIME_ZONE)}
+        />
+      ))}
+    </Stack>
+  );
+}
+
+function DownloadBlobSample() {
+  const { t } = useTranslation(DESIGN_NS);
+  return (
+    <Button
+      variant="secondary"
+      onClick={() => {
+        downloadBlob(new Blob(['when,who,what\n'], { type: 'text/csv' }), 'sample.csv');
+      }}
+    >
+      {t('sample.download')}
+    </Button>
+  );
+}
+
 export interface StyleGuideEntry {
   /** The export's name in packages/ui/src/index.ts. */
   name: string;
@@ -713,6 +817,7 @@ export interface StyleGuideEntry {
 /** One entry per value export of @quad/ui, in the order of packages/ui/src/index.ts. */
 export const STYLE_GUIDE: readonly StyleGuideEntry[] = [
   { name: 'ActionMenu', Sample: ActionMenuSample },
+  { name: 'AuditLogTable', Sample: AuditLogTableSample },
   { name: 'Avatar', Sample: AvatarSample },
   { name: 'Button', Sample: ButtonSample },
   { name: 'buttonVariants', Sample: ButtonVariantsSample },
@@ -732,10 +837,12 @@ export const STYLE_GUIDE: readonly StyleGuideEntry[] = [
   { name: 'PetalBurstProvider', Sample: PetalBurstSample },
   { name: 'usePetalBurst', Sample: PetalBurstSample },
   { name: 'OtpBoxes', Sample: OtpBoxesSample },
+  { name: 'MetaList', Sample: MetaListSample },
   { name: 'PermissionMatrix', Sample: PermissionMatrixSample },
   { name: 'Pill', Sample: PillSample },
   { name: 'Segmented', Sample: SegmentedSample },
   { name: 'Select', Sample: SelectSample },
+  { name: 'SettingRow', Sample: SettingRowSample },
   { name: 'Sparkline', Sample: SparklineSample },
   { name: 'Switch', Sample: SwitchSample },
   { name: 'Table', Sample: TableSample },
@@ -748,8 +855,12 @@ export const STYLE_GUIDE: readonly StyleGuideEntry[] = [
   { name: 'avatarTone', Sample: AvatarToneSample },
   { name: 'initialsOf', Sample: InitialsOfSample },
   { name: 'cn', Sample: CnSample },
+  { name: 'downloadBlob', Sample: DownloadBlobSample },
+  { name: 'metaLines', Sample: MetaLinesSample },
   { name: 'useLeaveGuard', Sample: LeaveGuardSample },
   { name: 'formatDate', Sample: FormatDateSample },
+  { name: 'DAY_RANGES', Sample: DayRangesSample },
+  { name: 'dayRangeFrom', Sample: DayRangeFromSample },
   { name: 'formatMoney', Sample: FormatMoneySample },
   { name: 'formatRelative', Sample: FormatRelativeSample },
 ];

@@ -69,5 +69,16 @@
   "sample.matrixTransport": "Transport",
   "sample.matrixView": "View",
   "sample.matrixCreate": "Create",
-  "sample.matrixEdit": "Edit"
+  "sample.matrixEdit": "Edit",
+  "sample.auditCaption": "Sample audit entries",
+  "sample.auditWhen": "When",
+  "sample.auditWho": "Who",
+  "sample.auditWhat": "What",
+  "sample.auditOpen": "Open the details of {summary}",
+  "sample.auditEmpty": "Nothing has happened yet",
+  "sample.metaTitle": "Recorded details",
+  "sample.settingTimeZone": "Time zone",
+  "sample.settingSession": "Session length",
+  "sample.settingSessionValue": "12 hours",
+  "sample.download": "Download a sample CSV"
 }

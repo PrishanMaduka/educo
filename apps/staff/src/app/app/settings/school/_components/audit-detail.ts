@@ -1,4 +1,5 @@
 import { AuditMetaJson } from '@quad/contracts';
+import { metaLines, type MetaLine } from '@quad/ui';
 
 /** One field of a School settings change, as stored. */
 export interface FieldChange {
@@ -25,17 +26,7 @@ export function changesOf(action: string, meta: AuditMetaJson): FieldChange[] {
     .map((field) => ({ field, before: before[field] ?? null, after: after[field] ?? null }));
 }
 
-/** The rest of an entry's `meta`, one line per key: plain values as they are, nested as JSON. */
-export function detailsOf(meta: AuditMetaJson, action?: string): { key: string; value: string }[] {
-  return Object.entries(meta)
-    .filter(([key]) => action !== 'settings.updated' || !SETTINGS_KEYS.has(key))
-    .map(([key, value]) => ({
-      key,
-      value:
-        typeof value === 'string'
-          ? value
-          : typeof value === 'number' || typeof value === 'boolean'
-            ? String(value)
-            : JSON.stringify(value),
-    }));
+/** The rest of an entry's `meta` as lines, leaving out what `changesOf` shows for a settings change. */
+export function detailsOf(meta: AuditMetaJson, action?: string): MetaLine[] {
+  return metaLines(meta, action === 'settings.updated' ? SETTINGS_KEYS : new Set());
 }

@@ -1,11 +1,11 @@
 'use client';
 
 import { Input } from '@quad/ui';
+import { AuthCard } from '@quad/ui/auth';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useCallback, useRef, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { AuthCard } from '../../../_components/AuthCard';
 import { BigButton, BigLink, ShowPasswordButton, StepError } from '../../../_components/bits';
 import { InvalidLink } from '../../../_components/InvalidLink';
 import { initialSignIn, stepFor, type SignInState } from '../../../_components/sign-in-steps';

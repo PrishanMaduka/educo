@@ -1,13 +1,12 @@
 'use client';
 
-import { Button, Drawer, DrawerClose, formatDate } from '@quad/ui';
+import { Button, Drawer, DrawerClose, MetaList, SettingRow, formatDate } from '@quad/ui';
 import { ScrollText, ShieldCheck } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { auditActionOf } from './audit-actions';
 import { changesOf, detailsOf } from './audit-detail';
 import { AuditWho } from './AuditWho';
-import { SettingRow } from './SettingRow';
 
 import type { MessageKey } from '@/i18n';
 import type { AuditEntry } from '@quad/contracts';
@@ -125,21 +124,7 @@ export function AuditDetailDrawer({ entry, open, onOpenChange, timeZone }: Audit
             </div>
           </section>
         ) : null}
-        {details.length > 0 ? (
-          <section aria-labelledby="audit-details" className="flex flex-col gap-2">
-            <h3 id="audit-details" className="m-0 text-[13px] font-bold text-ink">
-              {t('schoolSettings.audit.detail.details')}
-            </h3>
-            <dl className="m-0 flex flex-col gap-1.5 rounded-xl bg-surface-2 px-3.5 py-3">
-              {details.map((detail) => (
-                <div key={detail.key} className="flex flex-wrap gap-x-3 gap-y-0.5 text-[13px]">
-                  <dt className="font-mono text-ink-2">{detail.key}</dt>
-                  <dd className="m-0 min-w-0 font-mono break-all text-ink">{detail.value}</dd>
-                </div>
-              ))}
-            </dl>
-          </section>
-        ) : null}
+        <MetaList title={t('schoolSettings.audit.detail.details')} lines={details} />
       </div>
     </Drawer>
   );

@@ -2,10 +2,10 @@
 
 import { SignInEmail } from '@quad/contracts';
 import { Input } from '@quad/ui';
+import { AuthCard } from '@quad/ui/auth';
 import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { AuthCard } from './AuthCard';
 import { BigButton } from './bits';
 
 import type { SignInNotice } from '@/lib/session';

@@ -1,7 +1,7 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Card, Input, Pill, Textarea, useLeaveGuard, useToast } from '@quad/ui';
+import { Card, Input, Pill, SettingRow, Textarea, useLeaveGuard, useToast } from '@quad/ui';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -14,7 +14,6 @@ import {
   type GeneralFormInput,
   type GeneralFormOutput,
 } from './general-form';
-import { SettingRow } from './SettingRow';
 import { useSaveSchool, useSchool } from './use-school-data';
 
 import type { School } from '@quad/contracts';

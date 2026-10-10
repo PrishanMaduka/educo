@@ -1,11 +1,10 @@
 'use client';
 
-import { Button, DropdownFilter } from '@quad/ui';
+import { Button, DAY_RANGES, DropdownFilter, type DayRange } from '@quad/ui';
 import { CalendarRange, ListFilter, UserRound } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { AUDIT_ACTIONS, auditActionOf, groupOf } from './audit-actions';
-import { AUDIT_RANGES, type AuditRange } from './audit-range';
 
 import type { AuditAction, AuditPerson } from '@quad/contracts';
 
@@ -13,7 +12,7 @@ import type { AuditAction, AuditPerson } from '@quad/contracts';
 export interface AuditFilterState {
   readonly actor: string | null;
   readonly action: AuditAction | null;
-  readonly range: AuditRange | null;
+  readonly range: DayRange | null;
 }
 
 export const NO_AUDIT_FILTERS: AuditFilterState = { actor: null, action: null, range: null };
@@ -70,12 +69,12 @@ export function AuditFilters({ people, value, onChange }: AuditFiltersProps) {
         label={t('schoolSettings.audit.filter.when')}
         icon={CalendarRange}
         value={value.range}
-        options={AUDIT_RANGES.map((range) => ({
+        options={DAY_RANGES.map((range) => ({
           value: range,
           label: t(`schoolSettings.audit.range.${range}`),
         }))}
         onChange={(range) => {
-          set({ range: AUDIT_RANGES.find((candidate) => candidate === range) ?? null });
+          set({ range: DAY_RANGES.find((candidate) => candidate === range) ?? null });
         }}
         onClear={() => {
           set({ range: null });
