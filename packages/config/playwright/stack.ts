@@ -5,7 +5,7 @@ import { test as base } from '@playwright/test';
 
 import { stackSecrets } from './stack-secrets';
 
-import type { PlaywrightTestConfig } from '@playwright/test';
+import type { BrowserContextOptions, PlaywrightTestConfig, TestInfo } from '@playwright/test';
 
 /**
  * The e2e stack (`scripts/e2e-stack.mjs`, Task 18, D32) as Playwright sees it: a fresh database
@@ -82,6 +82,46 @@ export function clientAddressFor(testId: string, project: string, retry: number)
     .update(`${project}\u0000${testId}\u0000${String(retry)}`)
     .digest();
   return `10.${String(a)}.${String(b)}.${String(1 + (c % 254))}`;
+}
+
+/** What `contextOptionsFor` reads of a test: its id, retry and project. */
+export type ContextTestInfo = Pick<TestInfo, 'testId' | 'retry'> & {
+  readonly project: Pick<TestInfo['project'], 'name'> & {
+    readonly use: Pick<
+      BrowserContextOptions,
+      'baseURL' | 'viewport' | 'colorScheme' | 'hasTouch' | 'isMobile' | 'userAgent'
+    >;
+  };
+};
+
+/**
+ * Options for a second browser context in one test, for a journey with two people (the admin and
+ * the teacher they invite): the project's size, theme and base URL, which `browser.newContext()`
+ * does not take from the config by itself, and its own client address (`clientAddressFor` of the
+ * test id and `client`), so each person has their own per-IP sign-in bucket.
+ */
+export function contextOptionsFor(
+  testInfo: ContextTestInfo,
+  client: string,
+  storageState?: string,
+): BrowserContextOptions {
+  const { baseURL, viewport, colorScheme, hasTouch, isMobile, userAgent } = testInfo.project.use;
+  return {
+    baseURL,
+    viewport,
+    colorScheme,
+    hasTouch,
+    isMobile,
+    userAgent,
+    extraHTTPHeaders: {
+      'x-forwarded-for': clientAddressFor(
+        `${testInfo.testId}#${client}`,
+        testInfo.project.name,
+        testInfo.retry,
+      ),
+    },
+    ...(storageState === undefined ? {} : { storageState }),
+  };
 }
 
 /**

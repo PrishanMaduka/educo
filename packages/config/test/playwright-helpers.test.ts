@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 
 import { Mailpit, linkIn, recipientQuery, tokenOf } from '../playwright/mailpit';
 import { expiredTestLink, signTestLink, tamperedTestLink } from '../playwright/signed-token';
-import { clientAddressFor } from '../playwright/stack';
+import { clientAddressFor, contextOptionsFor } from '../playwright/stack';
 import { stackSecrets } from '../playwright/stack-secrets';
 
 const decode = (token: string): unknown =>
@@ -125,5 +125,46 @@ describe('clientAddressFor', () => {
       expect(last).toBeGreaterThanOrEqual(1);
       expect(last).toBeLessThanOrEqual(254);
     }
+  });
+});
+
+describe('contextOptionsFor', () => {
+  const testInfo = {
+    testId: 'test-a',
+    retry: 1,
+    project: {
+      name: 'phone-dark',
+      use: {
+        baseURL: 'http://localhost:3000',
+        viewport: { width: 390, height: 844 },
+        colorScheme: 'dark' as const,
+        hasTouch: true,
+        userAgent: 'ua',
+      },
+    },
+  };
+
+  it('opens a second person’s context like the project’s own, as its own client', () => {
+    const options = contextOptionsFor(testInfo, 'teacher');
+    expect(options).toMatchObject({
+      baseURL: 'http://localhost:3000',
+      viewport: { width: 390, height: 844 },
+      colorScheme: 'dark',
+      hasTouch: true,
+      userAgent: 'ua',
+    });
+    expect(options.extraHTTPHeaders).toEqual({
+      'x-forwarded-for': clientAddressFor('test-a#teacher', 'phone-dark', 1),
+    });
+    expect(options.extraHTTPHeaders?.['x-forwarded-for']).not.toBe(
+      clientAddressFor('test-a', 'phone-dark', 1),
+    );
+    expect(options).not.toHaveProperty('storageState');
+  });
+
+  it('takes a signed-in state when given one', () => {
+    expect(contextOptionsFor(testInfo, 'admin', '/tmp/state.json').storageState).toBe(
+      '/tmp/state.json',
+    );
   });
 });

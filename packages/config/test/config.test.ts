@@ -6,7 +6,7 @@ import tseslint from 'typescript-eslint';
 import { describe, expect, it } from 'vitest';
 
 import baseConfig from '../eslint/base.mjs';
-import { defineWebAppConfig } from '../playwright/preset';
+import { defineWebAppConfig, nextStartServer } from '../playwright/preset';
 import { vitestPreset } from '../vitest/preset';
 
 const read = (rel: string) => readFileSync(fileURLToPath(new URL(rel, import.meta.url)), 'utf8');
@@ -61,6 +61,16 @@ describe('@quad/config', () => {
       command: 'pnpm exec next start --port 3000',
       reuseExistingServer: false,
     });
+  });
+
+  it('serves another app’s build from its own folder, for a journey that crosses apps', () => {
+    expect(nextStartServer(3000, '/repo/apps/staff')).toMatchObject({
+      command: 'pnpm exec next start --port 3000',
+      cwd: '/repo/apps/staff',
+      port: 3000,
+      reuseExistingServer: false,
+    });
+    expect(nextStartServer(3001)).not.toHaveProperty('cwd');
   });
 
   it('starts no API stack unless the specs need it', () => {

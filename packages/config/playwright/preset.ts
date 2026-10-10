@@ -19,6 +19,26 @@ const desktop = { width: 1440, height: 900 };
 const phone = { width: 390, height: 844 };
 
 /**
+ * The `webServer` entry that serves a web app's production build with `next start` on `port`,
+ * from `cwd` (the config's own app when left out; another app's folder for a journey that crosses
+ * apps, such as the console's support visit into the staff portal).
+ */
+export function nextStartServer(port: number, cwd?: string): ConfigWebServer {
+  return {
+    // turbo's `e2e` depends on `build`, so the production build already exists.
+    command: `pnpm exec next start --port ${String(port)}`,
+    ...(cwd === undefined ? {} : { cwd }),
+    // A port check, not a URL: Playwright treats a 404 at the URL as "not ready".
+    port,
+    // Never reuse: a running `pnpm dev` on the same port would be tested instead of the build.
+    reuseExistingServer: false,
+    timeout: 240_000,
+    stdout: 'ignore',
+    stderr: 'pipe',
+  };
+}
+
+/**
  * Shared Playwright settings for the web apps: Chromium at 1440×900 and 390×844, each in light and dark
  * (through the system colour scheme), against the production build (from turbo's `build`) started by `webServer`.
  */
@@ -29,17 +49,7 @@ export function defineWebAppConfig({
   const baseURL = `http://localhost:${port}`;
   const isCi = Boolean(process.env.CI);
   const stackPort = typeof stack === 'object' ? stack.port : DEFAULT_STACK_PORT;
-  const nextStart: ConfigWebServer = {
-    // turbo's `e2e` depends on `build`, so the production build already exists.
-    command: `pnpm exec next start --port ${port}`,
-    // A port check, not a URL: Playwright treats a 404 at the URL as "not ready".
-    port,
-    // Never reuse: a running `pnpm dev` on the same port would be tested instead of the build.
-    reuseExistingServer: false,
-    timeout: 240_000,
-    stdout: 'ignore',
-    stderr: 'pipe',
-  };
+  const nextStart = nextStartServer(port);
   return defineConfig<StackOptions>({
     testDir: './e2e',
     fullyParallel: true,
