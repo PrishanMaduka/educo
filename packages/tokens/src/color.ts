@@ -1,6 +1,12 @@
 /** Small sRGB helpers shared by the brand derivation and the generators. */
 const HEX = /^#?([0-9a-f]{6})$/i;
 
+/** `#RRGGBB` for a 6-digit hex colour (with or without `#`, any case), or null for anything else. */
+export function parseHex(value: string | null | undefined): string | null {
+  const m = HEX.exec((value ?? '').trim());
+  return m?.[1] ? `#${m[1].toUpperCase()}` : null;
+}
+
 export function normalizeHex(hex: string): string {
   const m = HEX.exec(hex.trim());
   if (!m?.[1]) throw new RangeError(`Expected a 6-digit hex colour, got "${hex}"`);

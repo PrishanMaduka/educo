@@ -1,4 +1,4 @@
-import { colorNames, colors, type ColorSet } from '../colors';
+import { colorNames, colors } from '../colors';
 import { radius, shadow, spacing } from '../shape';
 import { fontName } from '../type';
 
@@ -14,7 +14,8 @@ function themeValues(theme: 'light' | 'dark'): Record<string, string> {
   return { ...colors[theme] };
 }
 
-const color = (hex: string): string => `Color(0xFF${hex.slice(1).toUpperCase()})`;
+const color = (value: string): string =>
+  value === 'transparent' ? 'Color(0x00000000)' : `Color(0xFF${value.slice(1).toUpperCase()})`;
 
 function instance(name: string, values: Record<string, string>): string {
   const fields = allNames.map((n) => `    ${camel(n)}: ${color(values[n] ?? '')},`);
@@ -69,11 +70,15 @@ function tokensClass(): string {
     ...spacing.map((v) => `    ${v},`),
     '  ];',
     '',
-    `  static const List<BoxShadow> shadowCard = ${shadowList(shadow.card)};`,
-    `  static const List<BoxShadow> shadowLg = ${shadowList(shadow.lg)};`,
+    ...(['light', 'dark'] as const).flatMap((theme) =>
+      (Object.keys(shadow[theme]) as (keyof typeof shadow.light)[]).map((n) => {
+        const suffix = theme === 'dark' ? 'Dark' : '';
+        return `  static const List<BoxShadow> shadow${n[0]?.toUpperCase()}${n.slice(1)}${suffix} = ${shadowList(shadow[theme][n])};`;
+      }),
+    ),
     '',
     `  static const String fontSans = '${fontName.sans}';`,
-    `  static const String fontAccent = '${fontName.accent}';`,
+    `  static const String fontDisplay = '${fontName.display}';`,
     '}',
     '',
   ].join('\n');
@@ -81,19 +86,6 @@ function tokensClass(): string {
 
 function colorsClass(): string {
   const fields = allNames.map(camel);
-  const consoleOver = (
-    rail: ColorSet['rail'],
-    rail2: string,
-    active: string,
-    theme: 'light' | 'dark',
-  ) => ({
-    ...themeValues(theme),
-    rail,
-    'rail-2': rail2,
-    'rail-active': active,
-  });
-  const cl = colors.console;
-  const cd = colors.consoleDark;
   return [
     '/// Every colour of the Quad design system, one instance per theme.',
     '/// Read it with `Theme.of(context).extension<QuadColors>()!`.',
@@ -107,9 +99,6 @@ function colorsClass(): string {
     '',
     instance('light', themeValues('light')),
     instance('dark', themeValues('dark')),
-    '  /// Console overrides: the console has its own, darker rail.',
-    instance('consoleLight', consoleOver(cl.rail, cl['rail-2'], cl['rail-active'], 'light')),
-    instance('consoleDark', consoleOver(cd.rail, cd['rail-2'], cd['rail-active'], 'dark')),
     '  @override',
     '  QuadColors copyWith({',
     ...fields.map((f) => `    Color? ${f},`),

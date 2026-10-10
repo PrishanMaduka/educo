@@ -1,7 +1,9 @@
-import { contrastRatio } from './color';
-import { MIN_CONTRAST, fillFor, fillStrongFor } from './fill';
+import { DEFAULT_BRAND, deriveBrand, type BrandMode } from './brand';
 
-/** Colour tokens from docs/spec/03-design-system.md. Values are copied exactly. */
+/**
+ * Colour tokens from docs/spec/03-design-system.md and design/system/tokens.css (D34). The names
+ * from before the redesign stay, with the redesign's values; the new names follow them.
+ */
 export const colorNames = [
   'canvas',
   'surface',
@@ -37,116 +39,235 @@ export const colorNames = [
   'c5',
   'gold',
   'gold-soft',
+  // New with the redesign (spec 03 "Colour: new tokens").
+  'surface-3',
+  'field-line',
+  'switch-off',
+  'navy',
+  'navy-2',
+  'navy-line',
+  'on-navy',
+  'on-navy-2',
+  'on-navy-3',
+  'navy-card',
+  'navy-card-ring',
+  'inverse',
+  'on-inverse',
+  'on-fill',
+  'rail-line',
+  'rail-active-ink',
+  'brand-text',
+  'brand-raw',
+  'lime',
+  'pink',
+  'sky',
+  'orange',
+  'lime-soft',
+  'pink-soft',
+  'sky-soft',
+  'orange-soft',
+  'lime-ink',
+  'pink-ink',
+  'sky-ink',
+  'orange-ink',
+  'gold-ink',
+  'heat-0',
+  'heat-1',
+  'heat-2',
+  'heat-3',
+  'heat-0-ink',
+  'heat-1-ink',
+  'heat-2-ink',
+  'heat-3-ink',
+  'focus',
+  'nav-lime',
+  'nav-orange',
+  'nav-pink',
+  'nav-sky',
+  'nav-violet',
+  'nav-mist',
 ] as const;
 
 export type TokenName = (typeof colorNames)[number];
 export type ColorSet = Record<TokenName, string>;
-export type RailOverrides = Pick<ColorSet, 'rail' | 'rail-2' | 'rail-active'>;
 
-// `brand-fill` carries `brand-ink` text (primary buttons, active nav pill, badges). `brand` keeps the
-// spec value for decoration, icons, outlines and tints. White on #DD4A42 is only 4.09:1, so the
-// light fill is darkened until it reaches 4.5:1 (spec 03 "School brand colour"). Dark: see below.
-const lightFill = fillFor('#DD4A42', '#FFFFFF', 'darken');
+/** Tokens a school's colour replaces at runtime (spec 03 "School brand colour"). */
+export const brandTokenNames = [
+  'brand',
+  'brand-strong',
+  'brand-soft',
+  'brand-ink',
+  'brand-fill',
+  'brand-fill-strong',
+  'brand-text',
+  'brand-raw',
+  'rail-active',
+  'rail-active-ink',
+] as const satisfies readonly TokenName[];
+
+export type BrandTokenName = (typeof brandTokenNames)[number];
+
+/** The brand tokens for one school colour and theme, as `deriveBrand` computes them. */
+export function brandTokens(
+  saved: string | null | undefined,
+  mode: BrandMode,
+): Record<BrandTokenName, string> {
+  const d = deriveBrand(saved, mode);
+  return {
+    // `brand` and `brand-strong` are kept for compatibility and carry the fill (as brand.js writes them).
+    brand: d.fill,
+    'brand-strong': d.fillStrong,
+    'brand-soft': d.soft,
+    'brand-ink': d.ink,
+    'brand-fill': d.fill,
+    'brand-fill-strong': d.fillStrong,
+    'brand-text': d.text,
+    'brand-raw': d.raw,
+    'rail-active': d.railActive,
+    'rail-active-ink': d.railActiveInk,
+  };
+}
+
+/** The same in both themes: navy, the petals and the side bar's section colours. */
+const constant = {
+  navy: '#101632',
+  'navy-2': '#1D2550',
+  'navy-line': '#2F3870',
+  'on-navy': '#F7F5F0',
+  'on-navy-2': '#C9CBE0',
+  'on-navy-3': '#A9ACC8',
+  'rail-ink': '#F7F5F0',
+  'rail-ink-2': '#A9ACC8',
+  lime: '#C8F169',
+  pink: '#FF6FAE',
+  sky: '#59C3FF',
+  orange: '#FF9B45',
+  // Side bar section colours (D40): Quad's palette, never the school colour.
+  'nav-lime': '#C8F169',
+  'nav-orange': '#FF9B45',
+  'nav-pink': '#FF6FAE',
+  'nav-sky': '#59C3FF',
+  'nav-violet': '#8C93FF',
+  'nav-mist': '#C9CBE0',
+} as const;
 
 const light: ColorSet = {
-  canvas: '#FAF8F5',
+  ...constant,
+  canvas: '#F7F5F0',
   surface: '#FFFFFF',
-  'surface-2': '#F6F3EF',
-  line: '#ECE8E3',
-  'line-strong': '#DCD6CF',
-  ink: '#1C1B2E',
-  'ink-2': '#4E4C63',
-  'ink-3': '#7D7A90',
-  brand: '#DD4A42',
-  'brand-strong': '#C23B34',
-  'brand-soft': '#FDE7E5',
-  'brand-ink': '#FFFFFF',
-  'brand-fill': lightFill,
-  'brand-fill-strong': fillStrongFor(lightFill, 'darken'),
-  rail: '#1F2559',
-  'rail-2': '#2C3370',
-  'rail-ink': '#E6E7F5',
-  'rail-ink-2': '#A3A6CC',
-  'rail-active': '#DD4A42', // the brand colour (staff)
-  good: '#1F8A5B',
-  'good-soft': '#E3F4EC',
-  warn: '#B26A00',
-  'warn-soft': '#FFF1DC',
-  bad: '#D13A3A',
-  'bad-soft': '#FDE6E6',
-  info: '#6D5AE6',
-  'info-soft': '#EEEAFE',
-  c1: '#E5534B',
-  c2: '#3B4AA8',
-  c3: '#8B7CF6',
-  c4: '#F2A93B',
-  c5: '#2BB0A0',
-  gold: '#8B7CF6',
-  'gold-soft': '#EEEAFE',
+  'surface-2': '#F0EEE7',
+  'surface-3': '#E8E5DC',
+  line: '#E4E1D8',
+  'line-strong': '#CDC8BA',
+  'field-line': '#8E8A7D',
+  'switch-off': '#8E8A7D',
+  ink: '#101632',
+  'ink-2': '#3D4263',
+  'ink-3': '#5A5F7B',
+  ...brandTokens(DEFAULT_BRAND, 'light'),
+  rail: '#101632',
+  'rail-2': '#1D2550',
+  'rail-line': '#2A3266',
+  'navy-card': '#101632',
+  'navy-card-ring': 'transparent',
+  inverse: '#101632',
+  'on-inverse': '#F7F5F0',
+  'on-fill': '#FFFFFF',
+  good: '#16703F',
+  'good-soft': '#DDF4E4',
+  warn: '#A04A00',
+  'warn-soft': '#FFE9D3',
+  bad: '#C4234A',
+  'bad-soft': '#FFE3E9',
+  info: '#0B67A8',
+  'info-soft': '#DDF0FF',
+  c1: '#E0478A',
+  c2: '#4048B8',
+  c3: '#1F8ACF',
+  c4: '#D9640B',
+  c5: '#4E8A12',
+  gold: '#C8F169',
+  'gold-soft': '#E6F6B5',
+  'gold-ink': '#3D5410',
+  'lime-soft': '#EDF8CC',
+  'pink-soft': '#FFE3EF',
+  'sky-soft': '#DCF1FF',
+  'orange-soft': '#FFE8D2',
+  'lime-ink': '#3D5410',
+  'pink-ink': '#8A1D4C',
+  'sky-ink': '#0D4F7A',
+  'orange-ink': '#7A3A07',
+  'heat-0': '#FFD4E7',
+  'heat-1': '#ECFACB',
+  'heat-2': '#DBF69E',
+  'heat-3': '#C8F169',
+  'heat-0-ink': '#101632',
+  'heat-1-ink': '#101632',
+  'heat-2-ink': '#101632',
+  'heat-3-ink': '#101632',
+  focus: '#2F6BFF',
 };
-
-// The spec gives no dark values for rail-2, rail-ink and rail-ink-2: the rail is dark in both
-// themes, so the light values are kept.
-// Dark: #FF7A6E on #1B1D3A already passes 4.5:1, so brand-fill = brand and hover = brand-strong
-// (#FF978C, lighter, so it passes too). If a future value fails, it is lightened until it passes.
-const darkFill = fillFor('#FF7A6E', '#1B1D3A', 'lighten');
-const darkFillStrong =
-  contrastRatio('#FF978C', '#1B1D3A') >= MIN_CONTRAST
-    ? '#FF978C'
-    : fillStrongFor(darkFill, 'lighten');
 
 const dark: ColorSet = {
-  canvas: '#13142A',
-  surface: '#1B1D3A',
-  'surface-2': '#22254A',
-  line: '#2E3260',
-  'line-strong': '#3D4277',
-  ink: '#F1F1FA',
-  'ink-2': '#C4C5DD',
-  'ink-3': '#9395B5',
-  brand: '#FF7A6E',
-  'brand-strong': '#FF978C',
-  'brand-soft': '#3D1F2A',
-  'brand-ink': '#1B1D3A',
-  'brand-fill': darkFill,
-  'brand-fill-strong': darkFillStrong,
-  rail: '#0E0F22',
-  'rail-2': light['rail-2'],
-  'rail-ink': light['rail-ink'],
-  'rail-ink-2': light['rail-ink-2'],
-  'rail-active': '#FF7A6E', // the brand colour (staff)
-  good: '#4CC992',
-  'good-soft': '#123326',
-  warn: '#F0B357',
-  'warn-soft': '#3A2A10',
-  bad: '#FF7A7A',
-  'bad-soft': '#3D1A1E',
-  info: '#A99BFF',
-  'info-soft': '#262046',
-  c1: '#FF7A6E',
-  c2: '#7B8BF0',
-  c3: '#A99BFF',
-  c4: '#F5B95A',
-  c5: '#3CC7B5',
-  gold: '#A99BFF',
-  'gold-soft': '#262046',
+  ...constant,
+  canvas: '#0F1330',
+  surface: '#171D45',
+  'surface-2': '#1D2550',
+  'surface-3': '#242C5C',
+  line: '#2A3266',
+  'line-strong': '#3A4378',
+  'field-line': '#636DAA',
+  'switch-off': '#636DAA',
+  ink: '#F7F5F0',
+  'ink-2': '#C9CBE0',
+  'ink-3': '#A9ACC8',
+  ...brandTokens(DEFAULT_BRAND, 'dark'),
+  rail: '#0A0D24',
+  'rail-2': '#161C48',
+  'rail-line': '#232A5C',
+  'navy-card': '#1D2550',
+  'navy-card-ring': '#2F3870',
+  inverse: '#F7F5F0',
+  'on-inverse': '#101632',
+  'on-fill': '#101632',
+  good: '#5FD394',
+  'good-soft': '#12382A',
+  warn: '#FFB066',
+  'warn-soft': '#3D2610',
+  bad: '#FF7C9C',
+  'bad-soft': '#401A2A',
+  info: '#7CCBFF',
+  'info-soft': '#12304F',
+  c1: '#FF6FAE',
+  c2: '#8C93FF',
+  c3: '#59C3FF',
+  c4: '#FF9B45',
+  c5: '#C8F169',
+  gold: '#C8F169',
+  'gold-soft': '#41504E',
+  'gold-ink': '#D8F59A',
+  'lime-soft': '#37434B',
+  'pink-soft': '#452D5A',
+  'sky-soft': '#243E6A',
+  'orange-soft': '#453645',
+  'lime-ink': '#D8F59A',
+  'pink-ink': '#FFB3D3',
+  'sky-ink': '#A8DDFF',
+  'orange-ink': '#FFC694',
+  'heat-0': '#683A6A',
+  'heat-1': '#4C5D50',
+  'heat-2': '#819C5B',
+  'heat-3': '#C8F169',
+  'heat-0-ink': '#F7F5F0',
+  'heat-1-ink': '#F7F5F0',
+  'heat-2-ink': '#101632',
+  'heat-3-ink': '#101632',
+  focus: '#7FA6FF',
 };
 
-/** Console rail overrides (apply under `[data-app="console"]`), light theme. */
-const consoleLight: RailOverrides = {
-  rail: '#15173A',
-  'rail-2': '#23265A',
-  'rail-active': '#6D5AE6',
-};
+/**
+ * Light and dark. The console has no overrides any more (D34): its side bar is the same navy,
+ * and its active item and primary action are the default brand, Quad lime.
+ */
+export const colors = { light, dark } as const;
 
-/** Console rail overrides in the dark theme; only `rail` is specified, the rest stay as light. */
-const consoleDark: RailOverrides = {
-  rail: '#0C0D20',
-  'rail-2': consoleLight['rail-2'],
-  'rail-active': consoleLight['rail-active'],
-};
-
-export const colors = { light, dark, console: consoleLight, consoleDark } as const;
-
-/** Tokens whose value is the live brand colour rather than a fixed hex (staff rail-active). */
-export const brandLinked: readonly TokenName[] = ['rail-active'];
