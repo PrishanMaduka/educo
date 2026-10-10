@@ -4,6 +4,8 @@ import { cn } from '@quad/ui';
 import { X } from 'lucide-react';
 import { useEffect, useId, useRef } from 'react';
 
+import { LiveSignIn } from '../_live';
+
 import { button, focusRing, footerLink } from './styles';
 
 export interface ComingSoonLabels {
@@ -69,14 +71,8 @@ export function SignInEntry({
     footer: cn(footerLink, 'cursor-pointer border-0 bg-transparent px-0 text-left'),
   }[look];
 
-  if (!prelaunch) {
-    // TODO(M1b): open the sign-in dialog (spec 19 "Sign-in"); until then the portal handles it.
-    return (
-      <a href="/app" className={className}>
-        {label}
-      </a>
-    );
-  }
+  // The live sign-in comes from `_live`, which the pre-launch export swaps for a stub (D57).
+  if (!prelaunch) return <LiveSignIn label={label} className={className} />;
 
   return (
     <>

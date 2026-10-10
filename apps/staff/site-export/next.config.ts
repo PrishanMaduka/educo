@@ -1,3 +1,5 @@
+import { join } from 'node:path';
+
 import { parseWebPublicEnv } from '@quad/contracts/web-env';
 
 import type { NextConfig } from 'next';
@@ -14,6 +16,11 @@ if (!env.NEXT_PUBLIC_QUAD_PRELAUNCH) {
   throw new Error('The static export is the pre-launch site: set NEXT_PUBLIC_QUAD_PRELAUNCH=true.');
 }
 
+/** The webpack settings this config changes. */
+interface WebpackConfig {
+  resolve: { alias?: Record<string, string | false | string[]> };
+}
+
 const config: NextConfig = {
   reactStrictMode: true,
   output: 'export',
@@ -24,6 +31,16 @@ const config: NextConfig = {
   eslint: { ignoreDuringBuilds: true },
   typescript: { ignoreBuildErrors: true },
   images: { unoptimized: true },
+  // The build split (D57): `(public)/_live` (sign-in, the API client, Turnstile) is swapped for the
+  // stubs in prelaunch/ before compilation, so none of it is bundled; checkExport then scans the
+  // output for anything that would still need the API.
+  webpack: (webpackConfig: WebpackConfig, { dir }: { dir: string }) => {
+    webpackConfig.resolve.alias = {
+      ...webpackConfig.resolve.alias,
+      [join(dir, '..', 'src/app/(public)/_live')]: join(dir, 'prelaunch'),
+    };
+    return webpackConfig;
+  },
 };
 
 export default config;

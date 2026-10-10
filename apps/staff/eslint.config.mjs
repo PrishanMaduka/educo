@@ -10,4 +10,30 @@ export default [
     files: ['src/app/(public)/**'],
     rules: { '@next/next/no-html-link-for-pages': 'off' },
   },
+  {
+    // The build split (D57): the pre-launch export swaps `(public)/_live` for the stubs in
+    // site-export/prelaunch, so code that needs the API on the public pages lives there and is
+    // reached only through its index. test/build-export.test.ts also catches dynamic imports.
+    files: ['src/app/(public)/**'],
+    ignores: ['src/app/(public)/_live/**'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              regex: String.raw`^@quad/client(?:/|$)|^@tanstack/react-query(?:/|$)|^@/lib/api(?:/|$)|(?:^|/)\(auth\)(?:/|$)`,
+              message:
+                'The pre-launch export cannot call the API: put this in (public)/_live and import it from there (D57).',
+            },
+            {
+              regex: String.raw`(?:^|/)_live/.`,
+              message:
+                'Import (public)/_live through its index, which the pre-launch export swaps for stubs (D57).',
+            },
+          ],
+        },
+      ],
+    },
+  },
 ];

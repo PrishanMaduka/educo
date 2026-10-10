@@ -19,7 +19,8 @@
     "*.ts",
     ".next/types/**/*.ts",
     "site-export/app/**/*.tsx",
-    "site-export/next.config.ts"
+    "site-export/next.config.ts",
+    "site-export/prelaunch/**/*.ts"
   ],
   "exclude": ["node_modules", ".next"]
 }
