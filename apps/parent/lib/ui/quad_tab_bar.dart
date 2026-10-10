@@ -145,7 +145,7 @@ class _TabButton extends StatelessWidget {
                           height: 6,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: c.gold,
+                            color: c.brandInk,
                             border: Border.all(color: c.brandFill, width: 1.5),
                           ),
                         ),
@@ -162,7 +162,9 @@ class _TabButton extends StatelessWidget {
                     tab.label,
                     maxLines: 1,
                     style: labelStyle.copyWith(
-                      color: active ? c.brandFill : c.ink2,
+                      // Spec 03 "Parent tab bar": the active label is ink; the
+                      // fill is not a text colour (lime is 1.3:1 on white).
+                      color: active ? c.ink : c.ink2,
                     ),
                   ),
                 ),

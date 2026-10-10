@@ -54,9 +54,10 @@ InputDecoration signInFieldDecoration(QuadColors c, {String? label}) {
     filled: true,
     fillColor: c.surface,
     contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-    border: border(c.lineStrong),
-    enabledBorder: border(c.lineStrong),
-    focusedBorder: border(c.brand),
+    // Control edges meet 3:1 (field-line); focus is always blue (D34).
+    border: border(c.fieldLine),
+    enabledBorder: border(c.fieldLine),
+    focusedBorder: border(c.focus),
     errorBorder: border(c.bad),
     focusedErrorBorder: border(c.bad),
   );

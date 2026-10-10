@@ -66,7 +66,7 @@ class _FaceIdOfferState extends ConsumerState<FaceIdOfferScreen> {
         SignInBadge(
           icon: isFace ? Icons.face_outlined : Icons.fingerprint,
           background: c.brandSoft,
-          foreground: c.brand,
+          foreground: c.brandText,
         ),
         const SizedBox(height: 18),
         Semantics(

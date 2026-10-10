@@ -83,8 +83,8 @@ class _CodeBoxesState extends State<CodeBoxes> {
                         color: widget.hasError
                             ? c.bad
                             : _focus.hasFocus && i == code.length
-                            ? c.brand
-                            : c.lineStrong,
+                            ? c.focus
+                            : c.fieldLine,
                       ),
                     ),
                     child: Text(
