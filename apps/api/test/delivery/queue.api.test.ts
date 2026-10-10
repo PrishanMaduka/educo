@@ -2,8 +2,9 @@ import { randomBytes } from 'node:crypto';
 
 import { Queue } from 'bullmq';
 import { Redis } from 'ioredis';
-import { afterAll, describe, expect, it } from 'vitest';
+import { afterAll, describe, expect, it, vi } from 'vitest';
 
+import { CheckedFlowProducer } from '../../src/common/delivery/checked-flow-producer';
 import { BullDelivery } from '../../src/common/delivery/delivery.service';
 import { EMAIL_QUEUE, SMS_QUEUE } from '../../src/common/delivery/queues';
 import { currentRequestContext, runWithRequestContext } from '../../src/common/request-context';
@@ -183,6 +184,55 @@ describe('queued email and SMS on the compose Redis', () => {
       );
       expect(confirms).toHaveLength(1);
       expect(await emails.getJob(sales('c').jobId)).toBeDefined();
+    });
+  });
+
+  describe('CheckedFlowProducer: one MULTI, and every job checked', () => {
+    // MULTI does not roll back a Lua error in one command, and FlowProducer.addBulk drops the
+    // per-command results, so a refused job would otherwise go unnoticed.
+    const flows = new CheckedFlowProducer({ connection: redis, prefix });
+    const job = (id: string) => ({
+      name: 'demo_request_confirmation',
+      queueName: EMAIL_QUEUE,
+      data: { id },
+      opts: { jobId: id },
+    });
+
+    afterAll(async () => {
+      await flows.close();
+    });
+
+    it('adds every job and returns', async () => {
+      const ids = [
+        `flow.${randomBytes(6).toString('hex')}`,
+        `flow.${randomBytes(6).toString('hex')}`,
+      ];
+      await flows.addAll(ids.map(job));
+      for (const id of ids) expect(await emails.getJob(id)).toBeDefined();
+    });
+
+    it.each([
+      [
+        'an error',
+        [
+          [null, 'a'],
+          [new Error('ERR in script'), null],
+        ],
+      ],
+      [
+        'a refusal code',
+        [
+          [null, 'a'],
+          [null, -1],
+        ],
+      ],
+      ['a missing result', [[null, 'a']]],
+      ['no results (aborted)', null],
+    ])('throws when Redis answers one job with %s', async (_case, results) => {
+      vi.spyOn(flows.getBackend(), 'addFlow').mockResolvedValueOnce(
+        results as unknown as [Error | null, string | number][],
+      );
+      await expect(flows.addAll([job('flow.a'), job('flow.b')])).rejects.toThrow(/not added/);
     });
   });
 

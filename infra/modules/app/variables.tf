@@ -161,6 +161,16 @@ variable "sales_inbox" {
   }
 }
 
+variable "support_inbox" {
+  type        = string
+  description = "SUPPORT_INBOX: the Reply-To of Quad's own mail (spec 12; the demo request confirmation, D57), such as support@quad-edu.com. Not a secret."
+
+  validation {
+    condition     = can(regex("^[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*\\.[A-Za-z]{2,}$", var.support_inbox)) && length(var.support_inbox) <= 254
+    error_message = "support_inbox must be one email address, such as support@quad-edu.com."
+  }
+}
+
 variable "email_from_domain" {
   type        = string
   description = "EMAIL_FROM_DOMAIN: the SES identity's domain."

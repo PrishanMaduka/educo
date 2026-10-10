@@ -150,8 +150,10 @@ module "app" {
   cdn_url        = "${local.web_url}/assets"
 
   turnstile_expected_hostname = local.web_domain
-  # Demo request notifications go to the support inbox (owner, 2026-10-10, OQ2).
-  sales_inbox = "support@quad-edu.com"
+  # Demo request notifications go to the support inbox (owner, 2026-10-10, OQ2), which is also
+  # the Reply-To of Quad's own mail (spec 12).
+  sales_inbox   = "support@quad-edu.com"
+  support_inbox = "support@quad-edu.com"
 
   desired_count          = var.desired_count
   otel_exporter_endpoint = var.otel_exporter_endpoint

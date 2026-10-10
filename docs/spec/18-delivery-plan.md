@@ -319,6 +319,7 @@ To run a milestone in Claude Code, type `/build-milestone M3` (ids with a letter
 **Read:** 15, 16, 17, 20.
 **Scope:**
 - Production infrastructure: the `production` Terraform environment (separate AWS account, Multi-AZ RDS + Proxy, Redis with failover, three NAT gateways, WAF rules tuned on staging traffic), the release-tag deploy with approval, SES production access, registered SMS sender IDs, the `quad-prod` Firebase project.
+- **Email suppression at send time, before SES production access** (owner: M12; recorded in M1b, D57): the `send-email` worker skips an address in `email_suppressions` for every template, through a named security-definer lookup (no `withPlatform` in the worker), logs a `email_suppressed` metric with the job id only, and marks the job done. Tests: a suppressed address is never sent to, and a bounce recorded by the SES webhook stops the next email.
 - Backups (PITR 35 days, cross-region snapshot copy, monthly snapshots) and a **restore drill**, plus a rehearsed single-school restore; the tenant deletion job verified across Postgres, S3, Redis and search; the retention purge job.
 - Observability dashboards, SLOs (99.9% for sign-in, API and parent push within 60 s), alerts, the **on-call** rotation and paging, and the status page at `status.quad-edu.com`.
 - Performance work to meet the budgets, and a load test (k6) on the main endpoints.

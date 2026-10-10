@@ -370,6 +370,8 @@ dashboard, Turnstile, the widget's settings). `TURNSTILE_EXPECTED_HOSTNAME` is n
 module sets it from `turnstile_expected_hostname` (`staging.quad-edu.com` in `envs/staging`).
 `SALES_INBOX`, where demo request notifications go, is not a secret either: the module sets it
 from `sales_inbox` (`support@quad-edu.com` in `envs/staging`, the owner's choice, OQ2).
+`SUPPORT_INBOX`, the Reply-To of Quad's own mail (spec 12), comes from `support_inbox` the same
+way (`support@quad-edu.com` in `envs/staging`).
 The seed password is the staging password of the seeded sample accounts: 10 characters or more,
 and never the local placeholder from `.env.example`. Outside local, the seed refuses that
 placeholder or an empty value, and the api refuses the placeholder if it is ever given one.

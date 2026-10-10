@@ -124,6 +124,7 @@ variables {
 
   turnstile_expected_hostname = "staging.quad-edu.com"
   sales_inbox                 = "support@quad-edu.com"
+  support_inbox               = "support@quad-edu.com"
 }
 
 # Assertions compare structured values through jsonencode, because Terraform's == is
@@ -336,7 +337,7 @@ run "api_runs_behind_two_proxies" {
         "S3_REGION", "S3_BUCKET_PRIVATE", "S3_BUCKET_PUBLIC", "CDN_URL", "CLAMAV_HOST", "CLAMAV_PORT",
         "EMAIL_PROVIDER", "SES_REGION", "SES_CONFIGURATION_SET", "SES_SNS_TOPIC_ARN", "EMAIL_FROM_DOMAIN",
         "OTEL_SERVICE_NAME", "SENTRY_ENVIRONMENT", "KMS_KEY_ID", "TURNSTILE_EXPECTED_HOSTNAME",
-        "SALES_INBOX",
+        "SALES_INBOX", "SUPPORT_INBOX",
       ])) &&
       jsonencode(sort([for s in jsondecode(aws_ecs_task_definition.this["api"].container_definitions)[0].secrets : s.name])) ==
       jsonencode(sort([
@@ -471,6 +472,29 @@ run "sales_inbox_reaches_api_and_worker" {
     ])
     error_message = "The api and worker get SALES_INBOX as plain environment (D57: required outside local; not a secret)."
   }
+}
+
+run "support_inbox_reaches_api_and_worker" {
+  command = apply
+
+  assert {
+    condition = alltrue([
+      for service in ["api", "worker"] :
+      { for e in jsondecode(aws_ecs_task_definition.this[service].container_definitions)[0].environment : e.name => e.value }["SUPPORT_INBOX"] == "support@quad-edu.com" &&
+      !contains([for s in jsondecode(aws_ecs_task_definition.this[service].container_definitions)[0].secrets : s.name], "SUPPORT_INBOX")
+    ])
+    error_message = "The api and worker get SUPPORT_INBOX as plain environment, so Quad's own mail has a Reply-To (spec 12; not a secret)."
+  }
+}
+
+run "support_inbox_must_be_one_email_address" {
+  command = plan
+
+  variables {
+    support_inbox = "support"
+  }
+
+  expect_failures = [var.support_inbox]
 }
 
 run "sales_inbox_must_be_one_email_address" {

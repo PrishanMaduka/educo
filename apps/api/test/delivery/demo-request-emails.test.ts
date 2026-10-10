@@ -128,9 +128,8 @@ describe('the demo request emails (M1b Task 5, D57)', () => {
     });
 
     it('never contains the request’s name, school or note, whatever they are', () => {
-      const text = fc
-        .string({ minLength: 4, maxLength: 60 })
-        .filter((value) => value.trim().length >= 4);
+      // A marker the fixed copy never holds, so a short random string can never match by chance.
+      const text = fc.string({ minLength: 1, maxLength: 60 }).map((value) => `typed:${value}`);
       fc.assert(
         fc.property(
           fc.constantFrom('school', 'parent'),
@@ -150,6 +149,7 @@ describe('the demo request emails (M1b Task 5, D57)', () => {
             );
             const confirm = jobs.find((job) => job.template === 'demo_request_confirmation');
             if (confirm === undefined) throw new Error('no confirmation');
+            expect(confirm.params).toStrictEqual({ kind });
             const message = buildEmailMessage(
               {
                 to: confirm.to,
@@ -264,6 +264,25 @@ describe('the demo request emails (M1b Task 5, D57)', () => {
       );
       expect(message.subject).not.toMatch(/[\r\n]/);
     });
+
+    it.each(['x<a@b.co>', 'josé@example.test', '"quoted"@example.test'])(
+      'sets no Reply-To for %s, which the form allows but a mail header cannot carry safely',
+      (email) => {
+        const message = buildEmailMessage(
+          {
+            to: SALES_INBOX,
+            tenantId: null,
+            school: null,
+            template: 'demo_request_sales',
+            params: salesParams({ ...school, email }),
+          },
+          SETTINGS,
+        );
+        // The sender's default (the support inbox); the address is still in the body.
+        expect(message.replyTo).toBe('support@quad-edu.com');
+        expect(message.text).toContain(`Email: ${email}`);
+      },
+    );
 
     it('refuses a console link that does not lead to CONSOLE_URL', () => {
       const params = { ...salesParams(school), link: 'https://evil.example/leads/1' };

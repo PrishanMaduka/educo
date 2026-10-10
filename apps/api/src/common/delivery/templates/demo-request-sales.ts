@@ -2,7 +2,7 @@ import { DemoCurriculum, DemoRequestSchema, StudentsBand } from '@quad/contracts
 import { z } from 'zod';
 
 import { defineEmailTemplate } from './email-template';
-import { Link, TypedLine, TypedNote } from './params';
+import { Link, SendableAddress, TypedLine, TypedNote } from './params';
 import { formatMessage } from './render';
 
 import type { Paragraph } from './email-template';
@@ -61,7 +61,8 @@ function fieldLines(params: SalesParams): readonly MessageKey[] {
 
 /**
  * The lead notification for Quad's team (`SALES_INBOX`, D57): what the visitor typed, as plain
- * text (escaped in the HTML), with Reply-To the visitor. Nothing is ever sent to the school.
+ * text (escaped in the HTML), with Reply-To the visitor when their address is sendable. Nothing
+ * is ever sent to the school.
  */
 export const demoRequestSalesEmail = defineEmailTemplate({
   sender: 'account',
@@ -93,6 +94,7 @@ export const demoRequestSalesEmail = defineEmailTemplate({
   ],
   action: { label: 'email.demoRequestSales.action', link: ({ link }) => link, to: 'console' },
   after: ['email.demoRequestSales.consoleSoon'],
-  replyTo: ({ email }) => email,
+  // Only an address a header can carry safely; an odd form-valid one is still in the body.
+  replyTo: ({ email }) => (SendableAddress.safeParse(email).success ? email : undefined),
   footer: 'email.demoRequestSales.footer',
 });

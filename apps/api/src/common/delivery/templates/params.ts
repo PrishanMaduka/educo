@@ -22,6 +22,12 @@ export const TimeZone = z.string().refine(
   { message: 'must be an IANA time zone' },
 );
 
+/**
+ * An address the email queue and a mail header can take (`EmailJobSchema.to`). Stricter than the
+ * demo form's check, which lets through `josé@…`, `x<a@b.co>` and quoted forms.
+ */
+export const SendableAddress = z.string().email().max(320);
+
 /** One line a visitor typed (a name, a school): never a line break, so it can sit in a subject. */
 export const TypedLine = z
   .string()

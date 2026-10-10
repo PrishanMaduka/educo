@@ -1,7 +1,8 @@
-import { FlowProducer, Queue } from 'bullmq';
+import { Queue } from 'bullmq';
 
 import { currentRequestContext } from '../request-context';
 
+import { CheckedFlowProducer } from './checked-flow-producer';
 import { EmailJobSchema } from './email';
 import { DELIVERY_JOB_OPTIONS, EMAIL_QUEUE, JobIdSchema, SMS_QUEUE } from './queues';
 import { SmsJobSchema } from './sms';
@@ -42,9 +43,11 @@ export interface QueueSmsInput<T extends SmsTemplateId> {
 export interface DeliveryQueue {
   queueEmail<T extends EmailTemplateId>(input: QueueEmailInput<T>): Promise<void>;
   /**
-   * Queues several emails all or none: each is checked first, then all are added in one Redis
-   * transaction, so a failure never leaves one sent and another lost. An id already queued
-   * keeps its job, as with `queueEmail`.
+   * Queues several emails together. Each is checked first, so a bad one queues none; then all
+   * go to Redis in one transaction, so a connection lost before it runs queues none either. If
+   * Redis refuses one job while the transaction runs, the others stay queued and this throws,
+   * so the caller never resolves with an email missing. An id already queued keeps its job, as
+   * with `queueEmail`.
    */
   queueEmails(inputs: readonly AnyQueueEmailInput[]): Promise<void>;
   queueSms<T extends SmsTemplateId>(input: QueueSmsInput<T>): Promise<void>;
@@ -120,7 +123,7 @@ export interface BullDeliveryOptions {
  */
 export class BullDelivery implements DeliveryQueue, BeforeApplicationShutdown {
   private readonly queues = new Map<string, Queue>();
-  private flows: FlowProducer | undefined;
+  private flows: CheckedFlowProducer | undefined;
 
   constructor(
     private readonly redis: Redis,
@@ -136,9 +139,9 @@ export class BullDelivery implements DeliveryQueue, BeforeApplicationShutdown {
     const tenantId = currentRequestContext()?.tenantId ?? null;
     const prepared = inputs.map((input) => prepareEmailJob(input, tenantId));
     if (prepared.length === 0) return;
-    // `FlowProducer.addBulk` adds jobs with no children in one MULTI; `Queue.addBulk` uses a
-    // plain pipeline in this BullMQ version, which is not all-or-nothing.
-    await this.flowProducer().addBulk(
+    // One MULTI (`CheckedFlowProducer`); `Queue.addBulk` sends a plain pipeline in this BullMQ
+    // version, which a dropped connection can cut halfway.
+    await this.flowProducer().addAll(
       prepared.map(({ jobId, job }) => ({
         name: job.template,
         queueName: EMAIL_QUEUE,
@@ -166,9 +169,9 @@ export class BullDelivery implements DeliveryQueue, BeforeApplicationShutdown {
     await this.close();
   }
 
-  private flowProducer(): FlowProducer {
+  private flowProducer(): CheckedFlowProducer {
     if (this.flows === undefined) {
-      this.flows = new FlowProducer({
+      this.flows = new CheckedFlowProducer({
         connection: this.redis,
         ...(this.options.prefix === undefined ? {} : { prefix: this.options.prefix }),
       });

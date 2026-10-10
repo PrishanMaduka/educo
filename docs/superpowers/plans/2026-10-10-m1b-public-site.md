@@ -843,6 +843,8 @@ Steps:
   - Live projects: Sign in opens the dialog (not a link to `/app`), Escape returns focus, and the demo form posts (routed to a fake 202) and shows the thank-you.
   - Export projects: unchanged (coming-soon note, `mailto`), plus "no request to `/api/` happens while using the page" (a `page.on('request')` assertion), and the footer's Sign in opens the coming-soon note (the Task 6 Step 0 fix).
 
+- **Follow-up from the Task 5 review: the greeting's night scene and axe.** Whether the signed-in axe checks see the night scene depends on the time of day in Colombo when the run happens, and since Task 5's fix `expectAccessibleOnceStill` no longer waits for its endless star twinkle. Make the coverage deterministic here: run axe on `/design`'s `GreetingSceneSample` for every greeting period (morning, afternoon, evening, night), or run the signed-in axe checks with `reducedMotion: 'reduce'`.
+
 Steps:
 - [ ] **Step 1: Write the journeys and specs.** They fail until the pieces are in.
 - [ ] **Step 2: Run them.** `pnpm --filter @quad/staff e2e -- j17 j18 j20 landing && pnpm --filter @quad/staff e2e:export`. Expected: PASS after Tasks 6 to 13.

@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import { EMAIL_TEMPLATES, EMAIL_TEMPLATE_IDS } from './templates';
+import { SendableAddress } from './templates/params';
 import { formatMessage } from './templates/render';
 
 import type { Config } from '../../config';
@@ -36,7 +37,7 @@ export type SchoolSender = z.infer<typeof SchoolSenderSchema>;
  */
 export const EmailJobSchema = z
   .object({
-    to: z.string().email().max(320),
+    to: SendableAddress,
     tenantId: z.string().uuid().nullable(),
     school: SchoolSenderSchema.nullable(),
     template: z.enum(EMAIL_TEMPLATE_IDS),

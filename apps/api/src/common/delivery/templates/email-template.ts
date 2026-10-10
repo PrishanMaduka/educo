@@ -46,7 +46,7 @@ export interface EmailTemplateSpec<S extends z.ZodType<object>> {
   };
   readonly after?: readonly MessageKey[];
   /** Reply-To for this email instead of the sender's (school office or support inbox). */
-  readonly replyTo?: (params: z.output<S>) => string;
+  readonly replyTo?: (params: z.output<S>) => string | undefined;
   /** The footer instead of the sender's default. */
   readonly footer?: MessageKey;
   /** A link under the footer, to a page of the web app (`/legal/privacy`). */
@@ -72,6 +72,10 @@ function checkedLink(link: string, base: string | undefined, variable: string): 
   }
   return url.href;
 }
+
+/** The rendered email's Reply-To, only when the template names one. */
+const replyToOf = (replyTo: string | undefined): { replyTo?: string } =>
+  replyTo === undefined ? {} : { replyTo };
 
 /** Plain text in HTML: escaped, with its line breaks kept. */
 const htmlText = (content: string): string => escapeHtml(content).replace(/\n/g, '<br>\n');
@@ -166,7 +170,7 @@ export function defineEmailTemplate<S extends z.ZodType<object>>(
         subject: formatMessage(subject, values),
         text: `${text}\n`,
         html: `${html}\n`,
-        ...(spec.replyTo === undefined ? {} : { replyTo: spec.replyTo(params) }),
+        ...replyToOf(spec.replyTo?.(params)),
       };
     },
   };

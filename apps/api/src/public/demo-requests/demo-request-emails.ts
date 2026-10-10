@@ -1,4 +1,4 @@
-import { EmailJobSchema } from '../../common/delivery/email';
+import { SendableAddress } from '../../common/delivery/templates/params';
 
 import type { AnyQueueEmailInput } from '../../common/delivery/delivery.service';
 import type { DemoRequestBody } from '@quad/contracts';
@@ -25,7 +25,7 @@ export interface DemoRequestEmailSettings {
 }
 
 /** Whether the email queue can take `address`: the form's check is looser (`josé@…` passes it). */
-const isSendable = (address: string): boolean => EmailJobSchema.shape.to.safeParse(address).success;
+const isSendable = (address: string): boolean => SendableAddress.safeParse(address).success;
 
 /**
  * The emails a stored request sends (D57; spec 06's `demo-request-received` is these
