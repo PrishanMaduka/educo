@@ -196,6 +196,8 @@ describe('DemoRequestBody (the API body, spec 06 POST /public/demo-requests)', (
     ['U+FEFF byte order mark', 'Sample\ufeffPerson'],
     ['U+0007 bell', 'Sample\u0007Person'],
     ['U+0085 next line', 'Sample\u0085Person'],
+    ['U+2028 line separator', 'Sample\u2028Person'],
+    ['U+2029 paragraph separator', 'Sample\u2029Person'],
   ] as const;
 
   describe.each([

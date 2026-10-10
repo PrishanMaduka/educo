@@ -386,6 +386,7 @@ Steps:
   - `packages/contracts/i18n/en.json` (`email.demoRequest*`);
   - `apps/api/src/config.ts` (`SALES_INBOX` required outside local; the console origin for the link);
   - `.env.example` (local default `SALES_INBOX=sales@quad.local`, which goes to Mailpit).
+  - **Infra (note from the Task 3 review):** a variable required outside local must reach the staging task definitions in the same change, or the api and worker fail at boot. Wire `SALES_INBOX` the way Task 3 wired `TURNSTILE_EXPECTED_HOSTNAME`: an app module variable (`sales_inbox`, with an email validation) in `infra/modules/app/variables.tf`, `SALES_INBOX = var.sales_inbox` in `node_environment` (`tasks.tf`), set in `infra/envs/staging/main.tf` (`support@quad-edu.com`, OQ2), with `modules/app/tests/app.tftest.hcl` (the api environment list, a value assertion) and `envs/staging/tests/staging.tftest.hcl` updated. It is not a secret.
 
 **Behaviour:**
 - **Lead notification ("sales") email.** Sender "Quad", to `SALES_INBOX` (`support@quad-edu.com` in production, OQ2), with Reply-To the requester. Subject "Demo request: {school}" or "From a parent: {school}". A parent request's first line is "From a parent: Quad's team follows up with the school. Nothing has been sent to the school." (OQ1).
@@ -551,6 +552,7 @@ Steps:
   - **Turnstile.** On the first focus inside the form, `TurnstileField` loads Turnstile's script once (`render=explicit`) and renders an invisible widget with `NEXT_PUBLIC_TURNSTILE_SITE_KEY`, `action: 'demo-request'`, `appearance: 'interaction-only'` and the theme following `data-theme`.
     - When the site key is unset in a local build, it renders nothing and supplies the dummy token `XXXX.DUMMY.TOKEN.XXXX`, which the local verifier accepts (Task 3). The e2e stack therefore needs no network.
     - A staging or production web build without the site key fails at build: `parseWebPublicEnv` requires `NEXT_PUBLIC_TURNSTILE_SITE_KEY` when `NEXT_PUBLIC_APP_ENV` is not `local` and the flag is off.
+      - **Note from the Task 3 review:** the staging build then needs the site key too, or the deploy fails at build. Pass `--build-arg NEXT_PUBLIC_TURNSTILE_SITE_KEY=…` for staff wherever `NEXT_PUBLIC_API_URL` is passed (`.github/workflows/deploy-staging.yml`, infra README step 7), from a repository variable (the site key is public), and update `scripts/test/workflows.test.ts`. Cloudflare's test site keys are already refused outside local (Task 3).
   - **Honeypot.** A visually hidden `website` input (`tabIndex=-1`, `autocomplete="off"`, `aria-hidden`, the label "Leave this empty") sent as is.
   - **Submit.**
     - The client check, then `POST /api/v1/public/demo-requests` (plain `fetch`, JSON, the `DemoRequestBody` shape), with the button showing "Sending…" and disabled (`aria-busy`).

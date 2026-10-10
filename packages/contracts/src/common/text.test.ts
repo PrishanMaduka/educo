@@ -14,9 +14,10 @@ describe('hasHiddenCharacter (D32)', () => {
     expect(hasHiddenCharacter('a\nb', { lineBreaks: false })).toBe(true);
   });
 
-  it('refuses the Unicode line and paragraph separators in single-line fields', () => {
-    for (const text of ['a b', 'a b']) {
+  it('refuses the Unicode line and paragraph separators, even where line breaks are allowed', () => {
+    for (const text of ['a\u2028b', 'a\u2029b']) {
       expect(hasHiddenCharacter(text, { lineBreaks: false }), JSON.stringify(text)).toBe(true);
+      expect(hasHiddenCharacter(text, { lineBreaks: true }), JSON.stringify(text)).toBe(true);
     }
   });
 

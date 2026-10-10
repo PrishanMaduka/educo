@@ -459,13 +459,14 @@ function deliveryRules(env: RawEnv): ConfigProblem[] {
  */
 function turnstileRules(env: RawEnv): ConfigProblem[] {
   const problems: ConfigProblem[] = [];
-  const secret = blank(env.TURNSTILE_SECRET_KEY);
-  const host = blank(env.TURNSTILE_EXPECTED_HOSTNAME);
+  // Typed reads of the raw values: empty counts as unset, as `blank` does.
+  const secret = env.TURNSTILE_SECRET_KEY || undefined;
+  const host = env.TURNSTILE_EXPECTED_HOSTNAME || undefined;
   const appEnv = blank(env.APP_ENV);
   if (appEnv === 'staging' || appEnv === 'production') {
     if (secret === undefined) {
       problems.push({ variable: 'TURNSTILE_SECRET_KEY', problem: 'must be set outside local' });
-    } else if (typeof secret === 'string' && isCloudflareTestSecret(secret)) {
+    } else if (isCloudflareTestSecret(secret)) {
       problems.push({
         variable: 'TURNSTILE_SECRET_KEY',
         problem: 'is a Cloudflare test secret, which is for local only; set the real secret',

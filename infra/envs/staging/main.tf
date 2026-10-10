@@ -149,6 +149,8 @@ module "app" {
   console_url    = "https://${local.console_domain}"
   cdn_url        = "${local.web_url}/assets"
 
+  turnstile_expected_hostname = local.web_domain
+
   desired_count          = var.desired_count
   otel_exporter_endpoint = var.otel_exporter_endpoint
 }

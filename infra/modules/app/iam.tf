@@ -30,6 +30,7 @@ locals {
     aws_secretsmanager_secret.app["FIELD_ENCRYPTION_KEY"].arn,
     aws_secretsmanager_secret.app["JWT_PRIVATE_KEY"].arn,
     aws_secretsmanager_secret.app["JWT_PUBLIC_KEY"].arn,
+    aws_secretsmanager_secret.app["TURNSTILE_SECRET_KEY"].arn,
     aws_secretsmanager_secret.app["SENTRY_DSN"].arn,
     aws_secretsmanager_secret.app["OTEL_EXPORTER_OTLP_HEADERS"].arn,
   ]

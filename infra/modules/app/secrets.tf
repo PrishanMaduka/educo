@@ -6,14 +6,16 @@
 #     worker afterwards. FIELD_ENCRYPTION_KEY stays at version 1 until M12 (D32): a new key would
 #     leave every encrypted field unreadable, and re-encryption arrives with the KMS adapter.
 #   - JWT_PRIVATE_KEY, JWT_PUBLIC_KEY (an Ed25519 pair made with openssl), SEED_PASSWORD,
-#     SENTRY_DSN and OTEL_EXPORTER_OTLP_HEADERS are set by hand (README). Terraform writes a
+#     TURNSTILE_SECRET_KEY (the demo form widget's secret from Cloudflare, D57), SENTRY_DSN and
+#     OTEL_EXPORTER_OTLP_HEADERS are set by hand (README). Terraform writes a
 #     placeholder version once, so the tasks can start before they are set: ECS refuses a secret
 #     without a current version, and Secrets Manager refuses an empty string. The placeholder is
 #     a JSON object whose keys hold empty strings, and the task definitions read one key each
 #     (`<arn>:<key>::`), so the apps see an empty variable, which they treat as unset. Its
 #     write-only version never changes, so Terraform never overwrites a value set by hand.
 #     SENTRY_DSN has one key per Sentry project: api (the api and the worker), staff and console;
-#     the others have one key, `value`. The api refuses to boot until both JWT keys are set.
+#     the others have one key, `value`. The api and worker refuse to boot until both JWT keys and
+#     TURNSTILE_SECRET_KEY are set.
 
 locals {
   generated_app_secrets = toset(["SESSION_SECRET", "LINK_SIGNING_SECRET", "FIELD_ENCRYPTION_KEY"])
@@ -24,6 +26,7 @@ locals {
     JWT_PRIVATE_KEY            = jsonencode({ value = "" })
     JWT_PUBLIC_KEY             = jsonencode({ value = "" })
     SEED_PASSWORD              = jsonencode({ value = "" })
+    TURNSTILE_SECRET_KEY       = jsonencode({ value = "" })
   }
 
   app_secret_names = concat(sort(local.generated_app_secrets), sort(keys(local.placeholder_app_secrets)))

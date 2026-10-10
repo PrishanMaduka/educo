@@ -165,9 +165,10 @@ run "app_takes_the_data_dns_and_tooling_wiring" {
       module.app.api_environment["APP_ENV"] == "staging" &&
       module.app.api_environment["TRUST_PROXY_HOPS"] == "2" &&
       module.app.api_environment["CONSOLE_URL"] == "https://console.staging.quad-edu.com" &&
-      module.app.api_environment["CDN_URL"] == "https://staging.quad-edu.com/assets"
+      module.app.api_environment["CDN_URL"] == "https://staging.quad-edu.com/assets" &&
+      module.app.api_environment["TURNSTILE_EXPECTED_HOSTNAME"] == "staging.quad-edu.com"
     )
-    error_message = "The api runs as staging behind two proxies, with the staging console and CDN URLs."
+    error_message = "The api runs as staging behind two proxies, with the staging console and CDN URLs, and accepts Turnstile tokens for staging.quad-edu.com only."
   }
 
   assert {

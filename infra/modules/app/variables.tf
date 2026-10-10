@@ -141,6 +141,16 @@ variable "cdn_url" {
   default     = "https://staging.quad-edu.com/assets"
 }
 
+variable "turnstile_expected_hostname" {
+  type        = string
+  description = "TURNSTILE_EXPECTED_HOSTNAME: the hostname Turnstile siteverify must report for a demo form token (D57), such as staging.quad-edu.com."
+
+  validation {
+    condition     = can(regex("^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*$", var.turnstile_expected_hostname)) && length(var.turnstile_expected_hostname) <= 253
+    error_message = "turnstile_expected_hostname must be a bare lower-case host name, such as quad-edu.com, with no scheme, port or path."
+  }
+}
+
 variable "email_from_domain" {
   type        = string
   description = "EMAIL_FROM_DOMAIN: the SES identity's domain."

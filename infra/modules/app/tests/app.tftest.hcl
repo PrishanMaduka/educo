@@ -74,6 +74,11 @@ override_resource {
 }
 
 override_resource {
+  target = aws_secretsmanager_secret.app["TURNSTILE_SECRET_KEY"]
+  values = { arn = "arn:aws:secretsmanager:ap-south-1:123456789012:secret:quad-staging/env/TURNSTILE_SECRET_KEY-AbCdEf" }
+}
+
+override_resource {
   target = aws_secretsmanager_secret.app["SENTRY_DSN"]
   values = { arn = "arn:aws:secretsmanager:ap-south-1:123456789012:secret:quad-staging/env/SENTRY_DSN-AbCdEf" }
 }
@@ -116,6 +121,8 @@ variables {
   ses_events_topic_arn       = "arn:aws:sns:ap-south-1:123456789012:quad-staging-ses-events"
 
   tooling_account_id = "210987654321"
+
+  turnstile_expected_hostname = "staging.quad-edu.com"
 }
 
 # Assertions compare structured values through jsonencode, because Terraform's == is
@@ -327,12 +334,13 @@ run "api_runs_behind_two_proxies" {
         "APP_ENV", "NODE_ENV", "TRUST_PROXY_HOPS", "PUBLIC_WEB_URL", "CONSOLE_URL", "API_PORT",
         "S3_REGION", "S3_BUCKET_PRIVATE", "S3_BUCKET_PUBLIC", "CDN_URL", "CLAMAV_HOST", "CLAMAV_PORT",
         "EMAIL_PROVIDER", "SES_REGION", "SES_CONFIGURATION_SET", "SES_SNS_TOPIC_ARN", "EMAIL_FROM_DOMAIN",
-        "OTEL_SERVICE_NAME", "SENTRY_ENVIRONMENT", "KMS_KEY_ID",
+        "OTEL_SERVICE_NAME", "SENTRY_ENVIRONMENT", "KMS_KEY_ID", "TURNSTILE_EXPECTED_HOSTNAME",
       ])) &&
       jsonencode(sort([for s in jsondecode(aws_ecs_task_definition.this["api"].container_definitions)[0].secrets : s.name])) ==
       jsonencode(sort([
         "DATABASE_URL", "DATABASE_PLATFORM_URL", "REDIS_URL", "SESSION_SECRET", "LINK_SIGNING_SECRET",
         "FIELD_ENCRYPTION_KEY", "JWT_PRIVATE_KEY", "JWT_PUBLIC_KEY", "SENTRY_DSN", "OTEL_EXPORTER_OTLP_HEADERS",
+        "TURNSTILE_SECRET_KEY",
       ]))
     )
     error_message = "The api gets exactly spec 02's runtime variables; with no OTLP endpoint, OTEL_EXPORTER_OTLP_ENDPOINT is left out."
@@ -415,11 +423,39 @@ run "field_and_token_keys_reach_api_worker_and_seed" {
     condition = alltrue(flatten([
       for task in ["staff", "console", "clamav", "migrate", "db-bootstrap"] : [
         for secret in try(jsondecode(aws_ecs_task_definition.this[task].container_definitions)[0].secrets, []) :
-        !contains(["FIELD_ENCRYPTION_KEY", "JWT_PRIVATE_KEY", "JWT_PUBLIC_KEY", "SEED_PASSWORD"], secret.name)
+        !contains(["FIELD_ENCRYPTION_KEY", "JWT_PRIVATE_KEY", "JWT_PUBLIC_KEY", "SEED_PASSWORD", "TURNSTILE_SECRET_KEY"], secret.name)
       ]
     ]))
-    error_message = "Only the api, the worker and the seed get the field key, the JWT keys or the seed password."
+    error_message = "Only the api, the worker and the seed get the field key, the JWT keys, the seed password or the Turnstile secret."
   }
+}
+
+run "turnstile_reaches_api_and_worker" {
+  command = apply
+
+  assert {
+    condition = alltrue([
+      for service in ["api", "worker"] :
+      { for e in jsondecode(aws_ecs_task_definition.this[service].container_definitions)[0].environment : e.name => e.value }["TURNSTILE_EXPECTED_HOSTNAME"] == "staging.quad-edu.com" &&
+      { for s in jsondecode(aws_ecs_task_definition.this[service].container_definitions)[0].secrets : s.name => s.valueFrom }["TURNSTILE_SECRET_KEY"] == "${aws_secretsmanager_secret.app["TURNSTILE_SECRET_KEY"].arn}:value::"
+    ])
+    error_message = "The api and worker get TURNSTILE_EXPECTED_HOSTNAME and the value key of the hand-set TURNSTILE_SECRET_KEY placeholder (D57: both required outside local)."
+  }
+
+  assert {
+    condition     = contains(flatten([for s in jsondecode(aws_iam_role_policy.execution["runtime"].policy).Statement : s.Resource if contains(flatten([s.Action]), "secretsmanager:GetSecretValue")]), aws_secretsmanager_secret.app["TURNSTILE_SECRET_KEY"].arn)
+    error_message = "runtime-exec may read the Turnstile secret."
+  }
+}
+
+run "turnstile_hostname_must_be_a_bare_host_name" {
+  command = plan
+
+  variables {
+    turnstile_expected_hostname = "https://staging.quad-edu.com"
+  }
+
+  expect_failures = [var.turnstile_expected_hostname]
 }
 
 run "the_field_key_cannot_be_rotated_before_m12" {
@@ -712,18 +748,18 @@ run "secrets_are_write_only" {
   assert {
     condition = (
       jsonencode(sort([for s in aws_secretsmanager_secret.app : s.name])) ==
-      jsonencode(sort([for name in ["SESSION_SECRET", "LINK_SIGNING_SECRET", "FIELD_ENCRYPTION_KEY", "JWT_PRIVATE_KEY", "JWT_PUBLIC_KEY", "SEED_PASSWORD", "SENTRY_DSN", "OTEL_EXPORTER_OTLP_HEADERS"] : "quad-staging/env/${name}"])) &&
+      jsonencode(sort([for name in ["SESSION_SECRET", "LINK_SIGNING_SECRET", "FIELD_ENCRYPTION_KEY", "JWT_PRIVATE_KEY", "JWT_PUBLIC_KEY", "SEED_PASSWORD", "TURNSTILE_SECRET_KEY", "SENTRY_DSN", "OTEL_EXPORTER_OTLP_HEADERS"] : "quad-staging/env/${name}"])) &&
       alltrue([for s in aws_secretsmanager_secret.app : s.kms_key_id == var.data_kms_key_arn])
     )
-    error_message = "The eight app secrets live at <name>/env/<NAME>, encrypted with the data key."
+    error_message = "The nine app secrets live at <name>/env/<NAME>, encrypted with the data key."
   }
 
   assert {
     condition = (
       jsonencode(sort(keys(aws_secretsmanager_secret_version.generated))) == jsonencode(["FIELD_ENCRYPTION_KEY", "LINK_SIGNING_SECRET", "SESSION_SECRET"]) &&
-      jsonencode(sort(keys(aws_secretsmanager_secret_version.placeholder))) == jsonencode(["JWT_PRIVATE_KEY", "JWT_PUBLIC_KEY", "OTEL_EXPORTER_OTLP_HEADERS", "SEED_PASSWORD", "SENTRY_DSN"])
+      jsonencode(sort(keys(aws_secretsmanager_secret_version.placeholder))) == jsonencode(["JWT_PRIVATE_KEY", "JWT_PUBLIC_KEY", "OTEL_EXPORTER_OTLP_HEADERS", "SEED_PASSWORD", "SENTRY_DSN", "TURNSTILE_SECRET_KEY"])
     )
-    error_message = "SESSION_SECRET, LINK_SIGNING_SECRET and FIELD_ENCRYPTION_KEY are generated; the JWT keys, SEED_PASSWORD, SENTRY_DSN and OTEL_EXPORTER_OTLP_HEADERS start as placeholders set by hand."
+    error_message = "SESSION_SECRET, LINK_SIGNING_SECRET and FIELD_ENCRYPTION_KEY are generated; the JWT keys, SEED_PASSWORD, TURNSTILE_SECRET_KEY, SENTRY_DSN and OTEL_EXPORTER_OTLP_HEADERS start as placeholders set by hand."
   }
 }
 

@@ -36,6 +36,8 @@ locals {
     # Field-level encryption uses FIELD_ENCRYPTION_KEY (a generated secret, below) in every
     # environment until M12's KMS adapter reads KMS_KEY_ID; it is passed now, unused (spec 02, D32).
     KMS_KEY_ID = var.field_kms_key_arn
+    # The hostname Turnstile siteverify must report for a demo form token (D57).
+    TURNSTILE_EXPECTED_HOSTNAME = var.turnstile_expected_hostname
   }, local.otel_endpoint)
 
   sentry_dsn_arn = aws_secretsmanager_secret.app["SENTRY_DSN"].arn
@@ -51,6 +53,7 @@ locals {
     FIELD_ENCRYPTION_KEY  = local.field_key_arn
     JWT_PRIVATE_KEY       = "${aws_secretsmanager_secret.app["JWT_PRIVATE_KEY"].arn}:value::"
     JWT_PUBLIC_KEY        = "${aws_secretsmanager_secret.app["JWT_PUBLIC_KEY"].arn}:value::"
+    TURNSTILE_SECRET_KEY  = "${aws_secretsmanager_secret.app["TURNSTILE_SECRET_KEY"].arn}:value::"
     SENTRY_DSN            = "${local.sentry_dsn_arn}:api::"
   }, local.otel_headers)
 

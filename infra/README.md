@@ -349,9 +349,9 @@ The worker, migrate, seed and db-bootstrap tasks run the api image.
 ### Step 8. Bootstrap the database roles, migrate and seed (staging administrator)
 
 First set the app secrets that Terraform leaves as placeholders (D32). The api and worker refuse to
-start without an Ed25519 key pair (their config check), and the seed task refuses to run while
-`SEED_PASSWORD` is empty (its own check, `seedPasswordRefusal`). Make the pair on your own machine,
-store it, then delete the files:
+start without an Ed25519 key pair or the Turnstile secret (their config check, D57), and the seed
+task refuses to run while `SEED_PASSWORD` is empty (its own check, `seedPasswordRefusal`). Make the
+pair on your own machine, store it, then delete the files:
 ```bash
 openssl genpkey -algorithm ed25519 -out jwt-private.pem
 openssl pkey -in jwt-private.pem -pubout -out jwt-public.pem
@@ -362,7 +362,12 @@ aws secretsmanager put-secret-value --secret-id quad-staging/env/JWT_PUBLIC_KEY 
 rm jwt-private.pem jwt-public.pem
 read -rs SEED && aws secretsmanager put-secret-value --secret-id quad-staging/env/SEED_PASSWORD \
   --secret-string "$(jq -n --arg v "$SEED" '{value: $v}')"; unset SEED
+read -rs TURNSTILE && aws secretsmanager put-secret-value --secret-id quad-staging/env/TURNSTILE_SECRET_KEY \
+  --secret-string "$(jq -n --arg v "$TURNSTILE" '{value: $v}')"; unset TURNSTILE
 ```
+The Turnstile secret comes from the Cloudflare Turnstile widget for the public site (Cloudflare
+dashboard, Turnstile, the widget's settings). `TURNSTILE_EXPECTED_HOSTNAME` is not a secret: the
+module sets it from `turnstile_expected_hostname` (`staging.quad-edu.com` in `envs/staging`).
 The seed password is the staging password of the seeded sample accounts: 10 characters or more,
 and never the local placeholder from `.env.example`. Outside local, the seed refuses that
 placeholder or an empty value, and the api refuses the placeholder if it is ever given one.
@@ -375,6 +380,9 @@ Before the first deploy, check:
 - [ ] `quad-staging/env/JWT_PRIVATE_KEY` and `JWT_PUBLIC_KEY` hold one Ed25519 pair (PEM), not the
   `.env.example` pair, which the API recognises and refuses outside local.
 - [ ] `quad-staging/env/SEED_PASSWORD` is set: 10 characters or more, not the local placeholder.
+- [ ] `quad-staging/env/TURNSTILE_SECRET_KEY` holds the real secret of the Cloudflare widget whose
+  hostnames are `quad-edu.com` and `staging.quad-edu.com`, never one of Cloudflare's test secrets
+  (`1x…AA`, `2x…AA`, `3x…AA`), which the API refuses outside local (D57).
 - [ ] `quad-staging/env/FIELD_ENCRYPTION_KEY` exists (Terraform made it); leave it alone.
 - [ ] Nothing sets `DEV_FIXED_OTP` for staging (no task definition, secret or tfvars entry). The api
   refuses to boot with it unless `APP_ENV=local` (D46, D54), so staging sign-in always needs a real
@@ -505,7 +513,7 @@ first deploy and record the result in the M0b pull request.
 - <a id="placeholder-secrets-stay-untouched"></a>**Placeholder secrets stay untouched.** The first
   `apply (staging)` after step 10 plans no change to
   `module.app.aws_secretsmanager_secret_version.placeholder["SENTRY_DSN"]` or
-  `…placeholder["OTEL_EXPORTER_OTLP_HEADERS"]`, nor to the JWT keys or `SEED_PASSWORD` set in step 8
+  `…placeholder["OTEL_EXPORTER_OTLP_HEADERS"]`, nor to the JWT keys, `SEED_PASSWORD` or `TURNSTILE_SECRET_KEY` set in step 8
   (the plan summary lists none of them), and afterwards
   `aws secretsmanager get-secret-value --secret-id quad-staging/env/SENTRY_DSN --query VersionStages`
   still shows the hand-set version as `AWSCURRENT`. If a refresh would move `AWSCURRENT` back to the
@@ -666,6 +674,8 @@ role's version (or the Redis version) and apply again, then run db-bootstrap and
   keep working for their last 15 minutes; it is not wired into the task definition yet, so until
   then a new pair makes every parent app refresh at once (their refresh tokens stay valid).
 - `SEED_PASSWORD` is set by hand (step 8); change it, then run the seed task again.
+- `TURNSTILE_SECRET_KEY` is set by hand (step 8). After rotating it in Cloudflare, put the new value
+  and force a new deployment of the `api` and `worker`.
 - `SENTRY_DSN` and `OTEL_EXPORTER_OTLP_HEADERS` are set by hand (step 10) in the same JSON shape.
   After a change, force a new deployment of every service that reads them (`api`, `worker`,
   `staff`, `console`).
