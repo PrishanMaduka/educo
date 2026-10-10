@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { and, desc, eq, platformAudit, sql } from '@quad/db';
+import { and, asc, desc, eq, exists, platformAudit, platformUsers, sql } from '@quad/db';
 
 import { instantText, olderThan } from '../../common/pagination/instant-keyset';
 
@@ -102,5 +102,24 @@ export class PlatformAuditRepository {
       .where(matching(filters))
       .orderBy(desc(platformAudit.at), desc(platformAudit.id))
       .limit(max + 1);
+  }
+
+  /**
+   * The Quad staff who appear as the actor of an entry, by name: one `exists` probe each on the
+   * `actor_platform_user_id` index, never a scan of the whole log.
+   */
+  people(tx: PlatformTx): Promise<{ id: string; name: string }[]> {
+    return tx
+      .select({ id: platformUsers.id, name: platformUsers.name })
+      .from(platformUsers)
+      .where(
+        exists(
+          tx
+            .select({ one: sql`1` })
+            .from(platformAudit)
+            .where(eq(platformAudit.actorPlatformUserId, platformUsers.id)),
+        ),
+      )
+      .orderBy(asc(platformUsers.name), asc(platformUsers.id));
   }
 }

@@ -5,6 +5,7 @@ import {
   AuditLog,
   AuditLogQuery,
   AuditPeople,
+  PlatformAuditPeople,
   PlatformAuditEntry,
   PlatformAuditLogAction,
   PlatformAuditLogQuery,
@@ -161,6 +162,21 @@ describe('PlatformAuditLogQuery (GET /platform/audit)', () => {
     expect(pathOf(PlatformAuditEntry.safeParse({ ...entry, actor: { type: 'member' } }))).toEqual([
       'actor',
       'type',
+    ]);
+  });
+});
+
+describe('PlatformAuditPeople (GET /platform/audit/people)', () => {
+  it('accepts the Quad staff who appear in the console log, each with an id and a name', () => {
+    const people = { items: [{ id: ID, name: 'Nora Lindqvist' }] };
+    expect(PlatformAuditPeople.parse(people)).toEqual(people);
+  });
+
+  it('refuses a person without a name', () => {
+    expect(pathOf(PlatformAuditPeople.safeParse({ items: [{ id: ID }] }))).toEqual([
+      'items',
+      0,
+      'name',
     ]);
   });
 });

@@ -1,4 +1,4 @@
-import { PlatformAuditLog } from '@quad/contracts';
+import { PlatformAuditLog, PlatformAuditPeople } from '@quad/contracts';
 import { describe, expect, it } from 'vitest';
 
 import { csvLines, insertAuditRow, insertPlatformAuditRow } from '../helpers/audit';
@@ -261,5 +261,75 @@ describe('GET /platform/audit as CSV', () => {
       [quad.id],
     );
     expect(rows).toEqual([]);
+  });
+});
+
+describe('GET /platform/audit/people', () => {
+  const peopleOf = async (browser: Browser, query = '') => {
+    const response = await browser.get(`/platform/audit/people${query}`);
+    expect(response.statusCode).toBe(200);
+    return PlatformAuditPeople.parse(response.json()).items;
+  };
+
+  it('lists the Quad staff who appear as the actor in the console log, by name, once each', async () => {
+    const { owner } = await arrange();
+    const zed = await insertConsoleUser(db(), { role: 'support', name: 'Zed Quad Actor' });
+    await insertPlatformAuditRow(db(), {
+      action: 'auth.sign_in',
+      at: '2026-10-04T09:00:00.000000Z',
+      actorPlatformUserId: zed.id,
+    });
+    const idle = await insertConsoleUser(db(), { role: 'support', name: 'Idle Quad Staff' });
+    const { browser, id: reader } = await consoleAs('readonly');
+
+    const people = await peopleOf(browser);
+
+    const ids = people.map((person) => person.id);
+    expect(ids).toContain(owner.id);
+    expect(ids).toContain(zed.id);
+    // Never acted (the reader only read): not offered as a filter.
+    expect(ids).not.toContain(idle.id);
+    expect(ids).not.toContain(reader);
+    expect(ids.filter((id) => id === owner.id)).toHaveLength(1);
+    expect(people.find((person) => person.id === owner.id)?.name).toBe('Ama Perera');
+    const names = people.map((person) => person.name);
+    expect(names).toEqual([...names].sort((a, b) => a.localeCompare(b, 'en')));
+  });
+
+  it('answers 400 validation for any query, since it takes none', async () => {
+    const { browser } = await consoleAs('owner');
+    const response = await browser.get('/platform/audit/people?tenantId=x');
+    expect(response.statusCode).toBe(400);
+    expect(response.json()).toMatchObject({ code: 'validation' });
+  });
+
+  it('answers 401 without a console session: none, one still at the authenticator step, or a school member’s', async () => {
+    expect((await consoleBrowser(app).get('/platform/audit/people')).statusCode).toBe(401);
+    const { browser } = await consoleAs('owner', 'two_step');
+    expect((await browser.get('/platform/audit/people')).statusCode).toBe(401);
+    const school = await schoolWithRoles(db());
+    const admin = await staffHolding(db(), school, school.roles.admin);
+    expect((await asStaff(app, admin.session)('GET', '/platform/audit/people')).statusCode).toBe(
+      401,
+    );
+  });
+
+  it('never lists a school’s members, even ones who acted in their school’s log', async () => {
+    const { a } = await arrange();
+    const admin = await staffHolding(db(), a, a.roles.admin);
+    await insertAuditRow(db(), {
+      tenantId: a.id,
+      action: 'auth.sign_in',
+      at: '2026-10-04T09:00:00.000000Z',
+      actorUserId: admin.userId,
+    });
+    const { browser } = await consoleAs('owner');
+    const ids = (await peopleOf(browser)).map((person) => person.id);
+    expect(ids).not.toContain(admin.userId);
+    // Positive control: the school's own person filter lists them.
+    const own = await asStaff(app, admin.session)('GET', '/audit/people');
+    expect(own.json<{ items: { id: string }[] }>().items.map((item) => item.id)).toContain(
+      admin.userId,
+    );
   });
 });

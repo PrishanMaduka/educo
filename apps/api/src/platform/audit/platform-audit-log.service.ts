@@ -17,7 +17,7 @@ import { PlatformAuditService } from './platform-audit.service';
 import type { PlatformAuditFilters } from './platform-audit.repository';
 import type { ConsoleAuth } from '../auth/console-auth';
 import type { ConsoleClient } from '../auth/console-sign-in-failures';
-import type { PlatformAuditLog, PlatformAuditLogQuery } from '@quad/contracts';
+import type { PlatformAuditLog, PlatformAuditLogQuery, PlatformAuditPeople } from '@quad/contracts';
 import type { QuadPlatformDb } from '@quad/db';
 
 /** The filters a request set, for the export's own entry (unset ones left out). */
@@ -53,6 +53,11 @@ export class PlatformAuditLogService {
       const page = pageOf(rows, query.limit, (last) => ({ at: last.keysetAt, id: last.id }));
       return { items: page.items.map(toPlatformAuditEntry), nextCursor: page.nextCursor };
     });
+  }
+
+  /** `GET /platform/audit/people`: the actor filter's choices. */
+  people(): Promise<PlatformAuditPeople> {
+    return this.db.withPlatform(async (tx) => ({ items: await this.repository.people(tx) }));
   }
 
   /** `GET /platform/audit` with `Accept: text/csv`: every filtered entry, newest first. */

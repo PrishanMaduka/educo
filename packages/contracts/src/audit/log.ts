@@ -157,3 +157,10 @@ export type PlatformAuditEntry = z.infer<typeof PlatformAuditEntry>;
 
 export const PlatformAuditLog = paginated(PlatformAuditEntry);
 export type PlatformAuditLog = z.infer<typeof PlatformAuditLog>;
+
+/**
+ * `GET /platform/audit/people`: the Quad staff who did something in the console's log, by name,
+ * for the Audit log's actor filter (spec 07). The same shape as a school's `GET /audit/people`.
+ */
+export const PlatformAuditPeople = z.object({ items: z.array(AuditPerson) });
+export type PlatformAuditPeople = z.infer<typeof PlatformAuditPeople>;

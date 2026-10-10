@@ -1354,6 +1354,33 @@
           "nextCursor"
         ]
       },
+      "PlatformAuditPeople": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "name": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "name"
+              ]
+            }
+          }
+        },
+        "required": [
+          "items"
+        ]
+      },
       "PlatformTenantList": {
         "type": "object",
         "properties": {
@@ -5436,6 +5463,46 @@
             }
           },
           "422": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/platform/audit/people": {
+      "get": {
+        "summary": "Console → Audit log: the Quad staff who appear as the actor of an entry, by name, for the actor filter (any console role)",
+        "tags": [
+          "platform"
+        ],
+        "responses": {
+          "200": {
+            "description": "The Quad staff in the log",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformAuditPeople"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "401": {
             "description": "Error",
             "content": {
               "application/json": {

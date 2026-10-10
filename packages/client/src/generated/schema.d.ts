@@ -1791,6 +1791,60 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/platform/audit/people": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Console → Audit log: the Quad staff who appear as the actor of an entry, by name, for the actor filter (any console role) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description The Quad staff in the log */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PlatformAuditPeople"];
+                    };
+                };
+                /** @description Error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Error */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/platform/tenants": {
         parameters: {
             query?: never;
@@ -3840,6 +3894,13 @@ export interface components {
                 ip: string | null;
             }[];
             nextCursor: string | null;
+        };
+        PlatformAuditPeople: {
+            items: {
+                /** Format: uuid */
+                id: string;
+                name: string;
+            }[];
         };
         PlatformTenantList: {
             items: {

@@ -1,10 +1,11 @@
-import { PlatformAuditLog, PlatformAuditLogQuery } from '@quad/contracts';
+import { PlatformAuditLog, PlatformAuditLogQuery, PlatformAuditPeople } from '@quad/contracts';
 
 import { named } from '../../openapi/registry';
 
 import type { ApiRoute } from '../../openapi/registry';
 
 const Log = named('PlatformAuditLog', PlatformAuditLog);
+const People = named('PlatformAuditPeople', PlatformAuditPeople);
 
 export const platformAuditRoutes: readonly ApiRoute[] = [
   {
@@ -18,5 +19,14 @@ export const platformAuditRoutes: readonly ApiRoute[] = [
       200: { description: 'A page of the log, or the CSV export', schema: Log, csv: true },
     },
     errors: [400, 401, 422],
+  },
+  {
+    method: 'get',
+    path: '/platform/audit/people',
+    summary:
+      'Console → Audit log: the Quad staff who appear as the actor of an entry, by name, for the actor filter (any console role)',
+    tags: ['platform'],
+    responses: { 200: { description: 'The Quad staff in the log', schema: People } },
+    errors: [400, 401],
   },
 ];
