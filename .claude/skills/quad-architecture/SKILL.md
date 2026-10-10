@@ -21,6 +21,8 @@ apps/staff, console  Next.js 15                                                 
 apps/parent          Flutter, generated quad_api client, tokens.g.dart             (talks to the API only)
 ```
 
+`packages/client` also holds hand-written browser helpers (`fetcher.ts`, `query.ts`, `browser.ts`: `createBrowserApi`, `ApiError`, `safeReturnPath`) beside `src/generated/`, which is regenerated with `pnpm api:client` and never edited.
+
 Dependency rules (the ESLint import rules enforce most of them):
 - Arrows only point down the list above. `domain` never imports `db`; `ui` never imports `client`; apps never import other apps.
 - Only `apps/api` talks to the database. Only `packages/db` touches the raw Drizzle client.
