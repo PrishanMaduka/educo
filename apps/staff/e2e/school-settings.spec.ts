@@ -3,9 +3,7 @@ import {
   expectCanvas,
   expectAccessibleOnceStill,
   expectNoSideScroll,
-  saveScreenshot,
   schemeOf,
-  takeScreenshots,
 } from '@quad/config/playwright/checks';
 import { test } from '@quad/config/playwright/stack';
 import { School } from '@quad/contracts';
@@ -197,27 +195,4 @@ test.describe('School settings, as the school admin', () => {
       await expect(first).toBeFocused();
     },
   );
-});
-
-test.describe('screenshots', () => {
-  test.skip(!takeScreenshots, 'Set QUAD_SCREENSHOTS=1 to write the review screenshots');
-  test.use({ storageState: PRISHAN_STATE });
-
-  // docs/screenshots/m1/school-general-1440-light.png and school-audit-<width>-<scheme>.png at
-  // 1440 light and 390 dark (Task 22).
-  test('School settings', async ({ page }, testInfo) => {
-    const width = page.viewportSize()?.width;
-    const scheme = schemeOf(testInfo);
-    const wide = width === 1440 && scheme === 'light';
-    test.skip(!wide && !(width === 390 && scheme === 'dark'), 'Reviewed at 1440 light, 390 dark');
-    await page.emulateMedia({ reducedMotion: 'reduce' });
-    if (wide) {
-      await page.goto(PATH);
-      await expect(page.getByLabel('School name')).toBeVisible();
-      await saveScreenshot(page, testInfo, 'm1', 'school-general');
-    }
-    await page.goto(`${PATH}?tab=audit`);
-    await expect(openButtons(page).first()).toBeVisible();
-    await saveScreenshot(page, testInfo, 'm1', 'school-audit');
-  });
 });

@@ -3,9 +3,7 @@ import {
   expectCanvas,
   expectAccessibleOnceStill,
   expectNoSideScroll,
-  saveScreenshot,
   schemeOf,
-  takeScreenshots,
 } from '@quad/config/playwright/checks';
 import { test } from '@quad/config/playwright/stack';
 
@@ -228,31 +226,5 @@ test.describe('Users & roles, as the school admin', () => {
         .getByRole('table', { name: `What ${name} can do` })
         .getByRole('checkbox', { name: 'View in Fees & invoicing' }),
     ).toBeChecked();
-  });
-});
-
-test.describe('screenshots', () => {
-  test.skip(!takeScreenshots, 'Set QUAD_SCREENSHOTS=1 to write the review screenshots');
-  test.use({ storageState: PRISHAN_STATE });
-
-  // docs/screenshots/m1/users-people-<width>-<scheme>.png at 1440 light and 390 dark, and
-  // users-roles-1440-light.png (Task 21).
-  test('Users & roles', async ({ page }, testInfo) => {
-    const width = page.viewportSize()?.width;
-    const scheme = schemeOf(testInfo);
-    const wide = width === 1440 && scheme === 'light';
-    test.skip(!wide && !(width === 390 && scheme === 'dark'), 'Reviewed at 1440 light, 390 dark');
-    await page.emulateMedia({ reducedMotion: 'reduce' });
-    await page.goto(PATH);
-    await expect(people(page)).toBeVisible();
-    await saveScreenshot(page, testInfo, 'm1', 'users-people');
-    if (!wide) return;
-    await page.goto(`${PATH}?tab=roles`);
-    await page
-      .getByRole('group', { name: 'Roles' })
-      .getByRole('button', { name: /^Teacher/ })
-      .click();
-    await expect(page.getByRole('table', { name: 'What Teacher can do' })).toBeVisible();
-    await saveScreenshot(page, testInfo, 'm1', 'users-roles');
   });
 });
