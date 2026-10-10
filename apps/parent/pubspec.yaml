@@ -62,8 +62,11 @@ flutter:
           weight: 700
         - asset: assets/fonts/Figtree-ExtraBold.ttf
           weight: 800
-    # Static instances of Google Fonts' variable Bricolage Grotesque (opsz 24, wdth 100), made with
-    # fontTools' instancer: Flutter picks a file by weight. The web loads the variable file.
+    # Static instances of Google Fonts' variable Bricolage Grotesque (opsz 24, wdth 100): Flutter
+    # picks a file by weight; the web loads the variable file. Source: google/fonts at
+    # bd8f81ddb5c74d5c8897b36ad88b440266245103, ofl/bricolagegrotesque/
+    # BricolageGrotesque[opsz,wdth,wght].ttf (sha256 413e7357…f0472ac682), made with fontTools 4.66.1:
+    # fonttools varLib.instancer <ttf> wght=<600|700|800> wdth=100 opsz=24 --update-name-table
     - family: Bricolage Grotesque
       fonts:
         - asset: assets/fonts/BricolageGrotesque-SemiBold.ttf
