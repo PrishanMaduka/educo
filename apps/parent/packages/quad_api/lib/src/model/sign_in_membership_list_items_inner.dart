@@ -3,7 +3,7 @@
 //
 
 // ignore_for_file: unused_element
-import 'package:quad_api/src/model/me_school_brand.dart';
+import 'package:quad_api/src/model/me_brand.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'sign_in_membership_list_items_inner.g.dart';
@@ -92,7 +92,7 @@ class SignInMembershipListItemsInner {
   )
 
 
-  final MeSchoolBrand brand;
+  final MeBrand brand;
 
 
 

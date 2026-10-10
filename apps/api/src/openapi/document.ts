@@ -29,10 +29,8 @@ export const API_ROUTES: readonly ApiRoute[] = [
   ...healthRoutes,
   ...openApiRoutes,
   ...sesWebhookRoutes,
-  // Before the auth routes, so the generated Dart client keeps the name `MeSchoolBrand` for the
-  // brand palette both areas share.
-  ...meRoutes,
   ...authRoutes,
+  ...meRoutes,
   ...platformAuthRoutes,
   ...platformAuditRoutes,
   ...platformTenantsRoutes,

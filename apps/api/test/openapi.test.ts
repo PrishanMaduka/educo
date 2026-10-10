@@ -38,6 +38,24 @@ describe('OpenAPI document', () => {
     expect(document.components?.schemas).toHaveProperty('ErrorBody');
   });
 
+  it('names the school brand and its per-theme tokens once, wherever they appear', () => {
+    const schemas = document.components?.schemas ?? {};
+    expect(schemas).toHaveProperty('MeBrand');
+    expect(schemas).toHaveProperty('MeBrandTheme');
+    expect(schemas['MeBrand']).toMatchObject({
+      properties: {
+        light: { $ref: '#/components/schemas/MeBrandTheme' },
+        dark: { $ref: '#/components/schemas/MeBrandTheme' },
+      },
+    });
+    const text = JSON.stringify(document);
+    // Me, the staff school list and the parent sign-in all point at the one brand schema.
+    expect(
+      text.match(/"brand":\{"\$ref":"#\/components\/schemas\/MeBrand"\}/g)?.length,
+    ).toBeGreaterThanOrEqual(3);
+    expect(text.match(/"fillStrong":/g)).toHaveLength(1);
+  });
+
   it('only documents routes the app actually serves', () => {
     const fastify = app().getHttpAdapter().getInstance();
     for (const [path, item] of Object.entries(paths)) {

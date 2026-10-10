@@ -172,8 +172,8 @@ final schoolBrandProvider = SchoolBrandProvider._();
 /// Quad's until the new school answers).
 
 final class SchoolBrandProvider
-    extends $FunctionalProvider<MeSchoolBrand?, MeSchoolBrand?, MeSchoolBrand?>
-    with $Provider<MeSchoolBrand?> {
+    extends $FunctionalProvider<MeBrand?, MeBrand?, MeBrand?>
+    with $Provider<MeBrand?> {
   /// The school's brand once its `GET /me` has answered, or null for Quad's
   /// own (D13: the welcome and sign-in steps are Quad-branded; a switch shows
   /// Quad's until the new school answers).
@@ -193,21 +193,21 @@ final class SchoolBrandProvider
 
   @$internal
   @override
-  $ProviderElement<MeSchoolBrand?> $createElement($ProviderPointer pointer) =>
+  $ProviderElement<MeBrand?> $createElement($ProviderPointer pointer) =>
       $ProviderElement(pointer);
 
   @override
-  MeSchoolBrand? create(Ref ref) {
+  MeBrand? create(Ref ref) {
     return schoolBrand(ref);
   }
 
   /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(MeSchoolBrand? value) {
+  Override overrideWithValue(MeBrand? value) {
     return $ProviderOverride(
       origin: this,
-      providerOverride: $SyncValueProvider<MeSchoolBrand?>(value),
+      providerOverride: $SyncValueProvider<MeBrand?>(value),
     );
   }
 }
 
-String _$schoolBrandHash() => r'8413578ecec55a47c033851a8a6e029ec7357862';
+String _$schoolBrandHash() => r'df39ef231231fa85d0e2baf1a53d3a830a969152';

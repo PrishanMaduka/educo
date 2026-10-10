@@ -27,7 +27,7 @@ void main() {
       // TODO
     });
 
-    // MeSchoolBrand brand
+    // MeBrand brand
     test('to test the property `brand`', () async {
       // TODO
     });

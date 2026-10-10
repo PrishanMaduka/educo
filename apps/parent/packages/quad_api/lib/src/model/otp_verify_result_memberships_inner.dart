@@ -3,7 +3,7 @@
 //
 
 // ignore_for_file: unused_element
-import 'package:quad_api/src/model/me_school_brand.dart';
+import 'package:quad_api/src/model/me_brand.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'otp_verify_result_memberships_inner.g.dart';
@@ -92,7 +92,7 @@ class OtpVerifyResultMembershipsInner {
   )
 
 
-  final MeSchoolBrand brand;
+  final MeBrand brand;
 
 
 

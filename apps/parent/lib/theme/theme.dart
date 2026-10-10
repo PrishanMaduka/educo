@@ -4,7 +4,7 @@ import 'package:quad_parent/theme/tokens.g.dart';
 
 /// The app's ThemeData for [brightness], built only from the generated tokens
 /// and, once signed in, the school's [brand] from `GET /me` (D13).
-ThemeData quadTheme(Brightness brightness, {MeSchoolBrand? brand}) {
+ThemeData quadTheme(Brightness brightness, {MeBrand? brand}) {
   final base = brightness == Brightness.dark
       ? QuadColors.dark
       : QuadColors.light;
@@ -57,7 +57,7 @@ ThemeData quadTheme(Brightness brightness, {MeSchoolBrand? brand}) {
 /// here. Navy, the petals, status colours and focus stay Quad's.
 QuadColors withSchoolBrand(
   QuadColors base,
-  MeSchoolBrand brand,
+  MeBrand brand,
   Brightness brightness,
 ) {
   final t = brightness == Brightness.dark ? brand.dark : brand.light;

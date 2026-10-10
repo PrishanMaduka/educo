@@ -3,7 +3,7 @@
 //
 
 // ignore_for_file: unused_element
-import 'package:quad_api/src/model/me_school_brand.dart';
+import 'package:quad_api/src/model/me_brand.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'me_school.g.dart';
@@ -86,7 +86,7 @@ class MeSchool {
   )
 
 
-  final MeSchoolBrand brand;
+  final MeBrand brand;
 
 
 

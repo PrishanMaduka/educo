@@ -5,7 +5,7 @@
 // ignore_for_file: unused_element
 import 'package:json_annotation/json_annotation.dart';
 
-part 'me_school_brand_light.g.dart';
+part 'me_brand_theme.g.dart';
 
 
 @JsonSerializable(
@@ -14,9 +14,9 @@ part 'me_school_brand_light.g.dart';
   disallowUnrecognizedKeys: false,
   explicitToJson: true,
 )
-class MeSchoolBrandLight {
-  /// Returns a new [MeSchoolBrandLight] instance.
-  MeSchoolBrandLight({
+class MeBrandTheme {
+  /// Returns a new [MeBrandTheme] instance.
+  MeBrandTheme({
 
     required  this.fill,
 
@@ -120,7 +120,7 @@ class MeSchoolBrandLight {
 
 
     @override
-    bool operator ==(Object other) => identical(this, other) || other is MeSchoolBrandLight &&
+    bool operator ==(Object other) => identical(this, other) || other is MeBrandTheme &&
       other.fill == fill &&
       other.fillStrong == fillStrong &&
       other.ink == ink &&
@@ -139,9 +139,9 @@ class MeSchoolBrandLight {
         railActive.hashCode +
         railActiveInk.hashCode;
 
-  factory MeSchoolBrandLight.fromJson(Map<String, dynamic> json) => _$MeSchoolBrandLightFromJson(json);
+  factory MeBrandTheme.fromJson(Map<String, dynamic> json) => _$MeBrandThemeFromJson(json);
 
-  Map<String, dynamic> toJson() => _$MeSchoolBrandLightToJson(this);
+  Map<String, dynamic> toJson() => _$MeBrandThemeToJson(this);
 
   @override
   String toString() {

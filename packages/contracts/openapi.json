@@ -155,6 +155,407 @@
           "SigningCertURL"
         ]
       },
+      "SignInResult": {
+        "type": "object",
+        "properties": {
+          "next": {
+            "type": "string",
+            "enum": [
+              "two_step",
+              "two_step_setup",
+              "choose_school",
+              "no_school",
+              "done"
+            ]
+          }
+        },
+        "required": [
+          "next"
+        ]
+      },
+      "PasswordSignInInput": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "maxLength": 254,
+            "format": "email"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          },
+          "keepSignedIn": {
+            "type": "boolean",
+            "default": false
+          },
+          "inviteToken": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
+      "TotpVerifyInput": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "pattern": "^\\d{6}$"
+          },
+          "recoveryCode": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40
+          },
+          "trustDevice": {
+            "type": "boolean",
+            "default": false
+          },
+          "inviteToken": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048
+          }
+        }
+      },
+      "MeBrandTheme": {
+        "type": "object",
+        "properties": {
+          "fill": {
+            "type": "string",
+            "pattern": "^#[0-9A-Fa-f]{6}$"
+          },
+          "fillStrong": {
+            "type": "string",
+            "pattern": "^#[0-9A-Fa-f]{6}$"
+          },
+          "ink": {
+            "type": "string",
+            "pattern": "^#[0-9A-Fa-f]{6}$"
+          },
+          "text": {
+            "type": "string",
+            "pattern": "^#[0-9A-Fa-f]{6}$"
+          },
+          "soft": {
+            "type": "string",
+            "pattern": "^#[0-9A-Fa-f]{6}$"
+          },
+          "railActive": {
+            "type": "string",
+            "pattern": "^#[0-9A-Fa-f]{6}$"
+          },
+          "railActiveInk": {
+            "type": "string",
+            "pattern": "^#[0-9A-Fa-f]{6}$"
+          }
+        },
+        "required": [
+          "fill",
+          "fillStrong",
+          "ink",
+          "text",
+          "soft",
+          "railActive",
+          "railActiveInk"
+        ]
+      },
+      "MeBrand": {
+        "type": "object",
+        "properties": {
+          "color": {
+            "type": "string",
+            "pattern": "^#[0-9A-Fa-f]{6}$"
+          },
+          "light": {
+            "$ref": "#/components/schemas/MeBrandTheme"
+          },
+          "dark": {
+            "$ref": "#/components/schemas/MeBrandTheme"
+          }
+        },
+        "required": [
+          "color",
+          "light",
+          "dark"
+        ]
+      },
+      "SignInMembershipList": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "tenantId": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "shortName": {
+                  "type": "string"
+                },
+                "logoUrl": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "format": "uri"
+                },
+                "brand": {
+                  "$ref": "#/components/schemas/MeBrand"
+                },
+                "roleNames": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "suspended": {
+                  "type": "boolean"
+                },
+                "suspendReason": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "tenantId",
+                "name",
+                "shortName",
+                "logoUrl",
+                "brand",
+                "roleNames",
+                "suspended",
+                "suspendReason"
+              ]
+            }
+          }
+        },
+        "required": [
+          "items"
+        ]
+      },
+      "SelectSchoolTokens": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string"
+          },
+          "refreshToken": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "accessToken"
+        ]
+      },
+      "SelectSchoolInput": {
+        "type": "object",
+        "properties": {
+          "tenantId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "remember": {
+            "type": "boolean",
+            "default": false
+          }
+        },
+        "required": [
+          "tenantId"
+        ]
+      },
+      "OtpRequestInput": {
+        "type": "object",
+        "properties": {
+          "phone": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 32
+          },
+          "email": {
+            "type": "string",
+            "maxLength": 254,
+            "format": "email"
+          }
+        },
+        "additionalProperties": false
+      },
+      "OtpVerifyResult": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "signed_in",
+              "choose_school",
+              "not_found"
+            ]
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "memberships": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "tenantId": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "shortName": {
+                  "type": "string"
+                },
+                "logoUrl": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "format": "uri"
+                },
+                "brand": {
+                  "$ref": "#/components/schemas/MeBrand"
+                },
+                "suspended": {
+                  "type": "boolean"
+                },
+                "suspendReason": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "kind": {
+                  "type": "string",
+                  "enum": [
+                    "guardian",
+                    "relative"
+                  ]
+                }
+              },
+              "required": [
+                "tenantId",
+                "name",
+                "shortName",
+                "logoUrl",
+                "brand",
+                "suspended",
+                "suspendReason",
+                "kind"
+              ]
+            }
+          },
+          "accessToken": {
+            "type": "string"
+          },
+          "refreshToken": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "memberships"
+        ]
+      },
+      "OtpVerifyInput": {
+        "type": "object",
+        "properties": {
+          "phone": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 32
+          },
+          "email": {
+            "type": "string",
+            "maxLength": 254,
+            "format": "email"
+          },
+          "code": {
+            "type": "string",
+            "pattern": "^\\d{6}$"
+          }
+        },
+        "required": [
+          "code"
+        ],
+        "additionalProperties": false
+      },
+      "TokenPair": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string"
+          },
+          "refreshToken": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "accessToken",
+          "refreshToken"
+        ]
+      },
+      "RefreshInput": {
+        "type": "object",
+        "properties": {
+          "refreshToken": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\\.(?:0|[1-9]\\d{0,8})\\.[A-Za-z0-9_-]{86}$"
+          }
+        },
+        "required": [
+          "refreshToken"
+        ],
+        "additionalProperties": false
+      },
+      "PasswordForgotInput": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "maxLength": 254,
+            "format": "email"
+          }
+        },
+        "required": [
+          "email"
+        ]
+      },
+      "PasswordResetInput": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048
+          },
+          "password": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          }
+        },
+        "required": [
+          "token",
+          "password"
+        ]
+      },
       "Me": {
         "type": "object",
         "properties": {
@@ -210,102 +611,7 @@
                 "type": "string"
               },
               "brand": {
-                "type": "object",
-                "properties": {
-                  "color": {
-                    "type": "string",
-                    "pattern": "^#[0-9A-Fa-f]{6}$"
-                  },
-                  "light": {
-                    "type": "object",
-                    "properties": {
-                      "fill": {
-                        "type": "string",
-                        "pattern": "^#[0-9A-Fa-f]{6}$"
-                      },
-                      "fillStrong": {
-                        "type": "string",
-                        "pattern": "^#[0-9A-Fa-f]{6}$"
-                      },
-                      "ink": {
-                        "type": "string",
-                        "pattern": "^#[0-9A-Fa-f]{6}$"
-                      },
-                      "text": {
-                        "type": "string",
-                        "pattern": "^#[0-9A-Fa-f]{6}$"
-                      },
-                      "soft": {
-                        "type": "string",
-                        "pattern": "^#[0-9A-Fa-f]{6}$"
-                      },
-                      "railActive": {
-                        "type": "string",
-                        "pattern": "^#[0-9A-Fa-f]{6}$"
-                      },
-                      "railActiveInk": {
-                        "type": "string",
-                        "pattern": "^#[0-9A-Fa-f]{6}$"
-                      }
-                    },
-                    "required": [
-                      "fill",
-                      "fillStrong",
-                      "ink",
-                      "text",
-                      "soft",
-                      "railActive",
-                      "railActiveInk"
-                    ]
-                  },
-                  "dark": {
-                    "type": "object",
-                    "properties": {
-                      "fill": {
-                        "type": "string",
-                        "pattern": "^#[0-9A-Fa-f]{6}$"
-                      },
-                      "fillStrong": {
-                        "type": "string",
-                        "pattern": "^#[0-9A-Fa-f]{6}$"
-                      },
-                      "ink": {
-                        "type": "string",
-                        "pattern": "^#[0-9A-Fa-f]{6}$"
-                      },
-                      "text": {
-                        "type": "string",
-                        "pattern": "^#[0-9A-Fa-f]{6}$"
-                      },
-                      "soft": {
-                        "type": "string",
-                        "pattern": "^#[0-9A-Fa-f]{6}$"
-                      },
-                      "railActive": {
-                        "type": "string",
-                        "pattern": "^#[0-9A-Fa-f]{6}$"
-                      },
-                      "railActiveInk": {
-                        "type": "string",
-                        "pattern": "^#[0-9A-Fa-f]{6}$"
-                      }
-                    },
-                    "required": [
-                      "fill",
-                      "fillStrong",
-                      "ink",
-                      "text",
-                      "soft",
-                      "railActive",
-                      "railActiveInk"
-                    ]
-                  }
-                },
-                "required": [
-                  "color",
-                  "light",
-                  "dark"
-                ]
+                "$ref": "#/components/schemas/MeBrand"
               }
             },
             "required": [
@@ -804,535 +1110,6 @@
             "maxLength": 2048
           }
         }
-      },
-      "SignInResult": {
-        "type": "object",
-        "properties": {
-          "next": {
-            "type": "string",
-            "enum": [
-              "two_step",
-              "two_step_setup",
-              "choose_school",
-              "no_school",
-              "done"
-            ]
-          }
-        },
-        "required": [
-          "next"
-        ]
-      },
-      "PasswordSignInInput": {
-        "type": "object",
-        "properties": {
-          "email": {
-            "type": "string",
-            "maxLength": 254,
-            "format": "email"
-          },
-          "password": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 1024
-          },
-          "keepSignedIn": {
-            "type": "boolean",
-            "default": false
-          },
-          "inviteToken": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 2048
-          }
-        },
-        "required": [
-          "email",
-          "password"
-        ]
-      },
-      "TotpVerifyInput": {
-        "type": "object",
-        "properties": {
-          "code": {
-            "type": "string",
-            "pattern": "^\\d{6}$"
-          },
-          "recoveryCode": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 40
-          },
-          "trustDevice": {
-            "type": "boolean",
-            "default": false
-          },
-          "inviteToken": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 2048
-          }
-        }
-      },
-      "SignInMembershipList": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "tenantId": {
-                  "type": "string",
-                  "format": "uuid"
-                },
-                "name": {
-                  "type": "string"
-                },
-                "shortName": {
-                  "type": "string"
-                },
-                "logoUrl": {
-                  "type": [
-                    "string",
-                    "null"
-                  ],
-                  "format": "uri"
-                },
-                "brand": {
-                  "type": "object",
-                  "properties": {
-                    "color": {
-                      "type": "string",
-                      "pattern": "^#[0-9A-Fa-f]{6}$"
-                    },
-                    "light": {
-                      "type": "object",
-                      "properties": {
-                        "fill": {
-                          "type": "string",
-                          "pattern": "^#[0-9A-Fa-f]{6}$"
-                        },
-                        "fillStrong": {
-                          "type": "string",
-                          "pattern": "^#[0-9A-Fa-f]{6}$"
-                        },
-                        "ink": {
-                          "type": "string",
-                          "pattern": "^#[0-9A-Fa-f]{6}$"
-                        },
-                        "text": {
-                          "type": "string",
-                          "pattern": "^#[0-9A-Fa-f]{6}$"
-                        },
-                        "soft": {
-                          "type": "string",
-                          "pattern": "^#[0-9A-Fa-f]{6}$"
-                        },
-                        "railActive": {
-                          "type": "string",
-                          "pattern": "^#[0-9A-Fa-f]{6}$"
-                        },
-                        "railActiveInk": {
-                          "type": "string",
-                          "pattern": "^#[0-9A-Fa-f]{6}$"
-                        }
-                      },
-                      "required": [
-                        "fill",
-                        "fillStrong",
-                        "ink",
-                        "text",
-                        "soft",
-                        "railActive",
-                        "railActiveInk"
-                      ]
-                    },
-                    "dark": {
-                      "type": "object",
-                      "properties": {
-                        "fill": {
-                          "type": "string",
-                          "pattern": "^#[0-9A-Fa-f]{6}$"
-                        },
-                        "fillStrong": {
-                          "type": "string",
-                          "pattern": "^#[0-9A-Fa-f]{6}$"
-                        },
-                        "ink": {
-                          "type": "string",
-                          "pattern": "^#[0-9A-Fa-f]{6}$"
-                        },
-                        "text": {
-                          "type": "string",
-                          "pattern": "^#[0-9A-Fa-f]{6}$"
-                        },
-                        "soft": {
-                          "type": "string",
-                          "pattern": "^#[0-9A-Fa-f]{6}$"
-                        },
-                        "railActive": {
-                          "type": "string",
-                          "pattern": "^#[0-9A-Fa-f]{6}$"
-                        },
-                        "railActiveInk": {
-                          "type": "string",
-                          "pattern": "^#[0-9A-Fa-f]{6}$"
-                        }
-                      },
-                      "required": [
-                        "fill",
-                        "fillStrong",
-                        "ink",
-                        "text",
-                        "soft",
-                        "railActive",
-                        "railActiveInk"
-                      ]
-                    }
-                  },
-                  "required": [
-                    "color",
-                    "light",
-                    "dark"
-                  ]
-                },
-                "roleNames": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "suspended": {
-                  "type": "boolean"
-                },
-                "suspendReason": {
-                  "type": [
-                    "string",
-                    "null"
-                  ]
-                }
-              },
-              "required": [
-                "tenantId",
-                "name",
-                "shortName",
-                "logoUrl",
-                "brand",
-                "roleNames",
-                "suspended",
-                "suspendReason"
-              ]
-            }
-          }
-        },
-        "required": [
-          "items"
-        ]
-      },
-      "SelectSchoolTokens": {
-        "type": "object",
-        "properties": {
-          "accessToken": {
-            "type": "string"
-          },
-          "refreshToken": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "accessToken"
-        ]
-      },
-      "SelectSchoolInput": {
-        "type": "object",
-        "properties": {
-          "tenantId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "remember": {
-            "type": "boolean",
-            "default": false
-          }
-        },
-        "required": [
-          "tenantId"
-        ]
-      },
-      "OtpRequestInput": {
-        "type": "object",
-        "properties": {
-          "phone": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 32
-          },
-          "email": {
-            "type": "string",
-            "maxLength": 254,
-            "format": "email"
-          }
-        },
-        "additionalProperties": false
-      },
-      "OtpVerifyResult": {
-        "type": "object",
-        "properties": {
-          "status": {
-            "type": "string",
-            "enum": [
-              "signed_in",
-              "choose_school",
-              "not_found"
-            ]
-          },
-          "firstName": {
-            "type": "string"
-          },
-          "memberships": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "tenantId": {
-                  "type": "string",
-                  "format": "uuid"
-                },
-                "name": {
-                  "type": "string"
-                },
-                "shortName": {
-                  "type": "string"
-                },
-                "logoUrl": {
-                  "type": [
-                    "string",
-                    "null"
-                  ],
-                  "format": "uri"
-                },
-                "brand": {
-                  "type": "object",
-                  "properties": {
-                    "color": {
-                      "type": "string",
-                      "pattern": "^#[0-9A-Fa-f]{6}$"
-                    },
-                    "light": {
-                      "type": "object",
-                      "properties": {
-                        "fill": {
-                          "type": "string",
-                          "pattern": "^#[0-9A-Fa-f]{6}$"
-                        },
-                        "fillStrong": {
-                          "type": "string",
-                          "pattern": "^#[0-9A-Fa-f]{6}$"
-                        },
-                        "ink": {
-                          "type": "string",
-                          "pattern": "^#[0-9A-Fa-f]{6}$"
-                        },
-                        "text": {
-                          "type": "string",
-                          "pattern": "^#[0-9A-Fa-f]{6}$"
-                        },
-                        "soft": {
-                          "type": "string",
-                          "pattern": "^#[0-9A-Fa-f]{6}$"
-                        },
-                        "railActive": {
-                          "type": "string",
-                          "pattern": "^#[0-9A-Fa-f]{6}$"
-                        },
-                        "railActiveInk": {
-                          "type": "string",
-                          "pattern": "^#[0-9A-Fa-f]{6}$"
-                        }
-                      },
-                      "required": [
-                        "fill",
-                        "fillStrong",
-                        "ink",
-                        "text",
-                        "soft",
-                        "railActive",
-                        "railActiveInk"
-                      ]
-                    },
-                    "dark": {
-                      "type": "object",
-                      "properties": {
-                        "fill": {
-                          "type": "string",
-                          "pattern": "^#[0-9A-Fa-f]{6}$"
-                        },
-                        "fillStrong": {
-                          "type": "string",
-                          "pattern": "^#[0-9A-Fa-f]{6}$"
-                        },
-                        "ink": {
-                          "type": "string",
-                          "pattern": "^#[0-9A-Fa-f]{6}$"
-                        },
-                        "text": {
-                          "type": "string",
-                          "pattern": "^#[0-9A-Fa-f]{6}$"
-                        },
-                        "soft": {
-                          "type": "string",
-                          "pattern": "^#[0-9A-Fa-f]{6}$"
-                        },
-                        "railActive": {
-                          "type": "string",
-                          "pattern": "^#[0-9A-Fa-f]{6}$"
-                        },
-                        "railActiveInk": {
-                          "type": "string",
-                          "pattern": "^#[0-9A-Fa-f]{6}$"
-                        }
-                      },
-                      "required": [
-                        "fill",
-                        "fillStrong",
-                        "ink",
-                        "text",
-                        "soft",
-                        "railActive",
-                        "railActiveInk"
-                      ]
-                    }
-                  },
-                  "required": [
-                    "color",
-                    "light",
-                    "dark"
-                  ]
-                },
-                "suspended": {
-                  "type": "boolean"
-                },
-                "suspendReason": {
-                  "type": [
-                    "string",
-                    "null"
-                  ]
-                },
-                "kind": {
-                  "type": "string",
-                  "enum": [
-                    "guardian",
-                    "relative"
-                  ]
-                }
-              },
-              "required": [
-                "tenantId",
-                "name",
-                "shortName",
-                "logoUrl",
-                "brand",
-                "suspended",
-                "suspendReason",
-                "kind"
-              ]
-            }
-          },
-          "accessToken": {
-            "type": "string"
-          },
-          "refreshToken": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "status",
-          "memberships"
-        ]
-      },
-      "OtpVerifyInput": {
-        "type": "object",
-        "properties": {
-          "phone": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 32
-          },
-          "email": {
-            "type": "string",
-            "maxLength": 254,
-            "format": "email"
-          },
-          "code": {
-            "type": "string",
-            "pattern": "^\\d{6}$"
-          }
-        },
-        "required": [
-          "code"
-        ],
-        "additionalProperties": false
-      },
-      "TokenPair": {
-        "type": "object",
-        "properties": {
-          "accessToken": {
-            "type": "string"
-          },
-          "refreshToken": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "accessToken",
-          "refreshToken"
-        ]
-      },
-      "RefreshInput": {
-        "type": "object",
-        "properties": {
-          "refreshToken": {
-            "type": "string",
-            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\\.(?:0|[1-9]\\d{0,8})\\.[A-Za-z0-9_-]{86}$"
-          }
-        },
-        "required": [
-          "refreshToken"
-        ],
-        "additionalProperties": false
-      },
-      "PasswordForgotInput": {
-        "type": "object",
-        "properties": {
-          "email": {
-            "type": "string",
-            "maxLength": 254,
-            "format": "email"
-          }
-        },
-        "required": [
-          "email"
-        ]
-      },
-      "PasswordResetInput": {
-        "type": "object",
-        "properties": {
-          "token": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 2048
-          },
-          "password": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 1024
-          }
-        },
-        "required": [
-          "token",
-          "password"
-        ]
       },
       "PlatformSignInResult": {
         "type": "object",
@@ -4200,453 +3977,6 @@
         }
       }
     },
-    "/api/v1/me": {
-      "get": {
-        "summary": "The signed-in person, their school and brand, other schools, banners and greeting",
-        "tags": [
-          "me"
-        ],
-        "responses": {
-          "200": {
-            "description": "The signed-in person",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Me"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          }
-        }
-      },
-      "patch": {
-        "summary": "Change your name, theme or locale in this school (needs X-CSRF-Token)",
-        "tags": [
-          "me"
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/MeUpdateInput"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "The signed-in person, updated",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Me"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/me/permissions": {
-      "get": {
-        "summary": "What you can do in this school: permission keys, every staff page and how much of it opens, your home page and any role preview",
-        "tags": [
-          "me",
-          "staff"
-        ],
-        "responses": {
-          "200": {
-            "description": "Your permissions",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MePermissions"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/me/role-preview": {
-      "post": {
-        "summary": "Preview the staff portal as a role, read-only (users.manage; a role for own classes needs a sample person; needs X-CSRF-Token)",
-        "tags": [
-          "me",
-          "staff"
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RolePreviewInput"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Your permissions while previewing",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MePermissions"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "summary": "End the role preview: back to your own view (needs X-CSRF-Token)",
-        "tags": [
-          "me",
-          "staff"
-        ],
-        "responses": {
-          "204": {
-            "description": "The preview ended"
-          },
-          "401": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/me/sessions": {
-      "get": {
-        "summary": "Your signed-in devices, newest first",
-        "tags": [
-          "me"
-        ],
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "required": false,
-            "name": "cursor",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 200,
-              "default": 50
-            },
-            "required": false,
-            "name": "limit",
-            "in": "query"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "A page of your sessions",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SessionSummaryList"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/me/sessions/{id}": {
-      "delete": {
-        "summary": "Sign one of your devices out (needs X-CSRF-Token)",
-        "tags": [
-          "me"
-        ],
-        "parameters": [
-          {
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "required": true,
-            "name": "id",
-            "in": "path"
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Signed out"
-          },
-          "400": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/me/totp": {
-      "post": {
-        "summary": "Set up an authenticator: without a code it starts one, with its code it confirms it and gives the recovery codes (needs X-CSRF-Token)",
-        "tags": [
-          "me"
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/TotpSetupInput"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "The otpauth URI, or the recovery codes",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TotpSetupResult"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/v1/auth/password": {
       "post": {
         "summary": "Sign in with email and password; sets the session cookies and says what comes next",
@@ -5180,6 +4510,453 @@
             }
           },
           "429": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/me": {
+      "get": {
+        "summary": "The signed-in person, their school and brand, other schools, banners and greeting",
+        "tags": [
+          "me"
+        ],
+        "responses": {
+          "200": {
+            "description": "The signed-in person",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Me"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "summary": "Change your name, theme or locale in this school (needs X-CSRF-Token)",
+        "tags": [
+          "me"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MeUpdateInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The signed-in person, updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Me"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/me/permissions": {
+      "get": {
+        "summary": "What you can do in this school: permission keys, every staff page and how much of it opens, your home page and any role preview",
+        "tags": [
+          "me",
+          "staff"
+        ],
+        "responses": {
+          "200": {
+            "description": "Your permissions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MePermissions"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/me/role-preview": {
+      "post": {
+        "summary": "Preview the staff portal as a role, read-only (users.manage; a role for own classes needs a sample person; needs X-CSRF-Token)",
+        "tags": [
+          "me",
+          "staff"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RolePreviewInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Your permissions while previewing",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MePermissions"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "End the role preview: back to your own view (needs X-CSRF-Token)",
+        "tags": [
+          "me",
+          "staff"
+        ],
+        "responses": {
+          "204": {
+            "description": "The preview ended"
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/me/sessions": {
+      "get": {
+        "summary": "Your signed-in devices, newest first",
+        "tags": [
+          "me"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": false,
+            "name": "cursor",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200,
+              "default": 50
+            },
+            "required": false,
+            "name": "limit",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A page of your sessions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionSummaryList"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/me/sessions/{id}": {
+      "delete": {
+        "summary": "Sign one of your devices out (needs X-CSRF-Token)",
+        "tags": [
+          "me"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Signed out"
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/me/totp": {
+      "post": {
+        "summary": "Set up an authenticator: without a code it starts one, with its code it confirms it and gives the recovery codes (needs X-CSRF-Token)",
+        "tags": [
+          "me"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TotpSetupInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The otpauth URI, or the recovery codes",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TotpSetupResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "409": {
             "description": "Error",
             "content": {
               "application/json": {

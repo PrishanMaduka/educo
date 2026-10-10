@@ -1,4 +1,4 @@
-# quad_api.model.MeSchoolBrand
+# quad_api.model.MeBrandTheme
 
 ## Load the model package
 ```dart
@@ -8,9 +8,13 @@ import 'package:quad_api/api.dart';
 ## Properties
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**color** | **String** |  | 
-**light** | [**MeSchoolBrandLight**](MeSchoolBrandLight.md) |  | 
-**dark** | [**MeSchoolBrandLight**](MeSchoolBrandLight.md) |  | 
+**fill** | **String** |  | 
+**fillStrong** | **String** |  | 
+**ink** | **String** |  | 
+**text** | **String** |  | 
+**soft** | **String** |  | 
+**railActive** | **String** |  | 
+**railActiveInk** | **String** |  | 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

@@ -12,7 +12,7 @@ Name | Type | Description | Notes
 **name** | **String** |  | 
 **shortName** | **String** |  | 
 **logoUrl** | **String** |  | 
-**brand** | [**MeSchoolBrand**](MeSchoolBrand.md) |  | 
+**brand** | [**MeBrand**](MeBrand.md) |  | 
 **suspended** | **bool** |  | 
 **suspendReason** | **String** |  | 
 **kind** | **String** |  | 

@@ -29,7 +29,7 @@ OtpVerifyResultMembershipsInner _$OtpVerifyResultMembershipsInnerFromJson(
     logoUrl: $checkedConvert('logoUrl', (v) => v as String?),
     brand: $checkedConvert(
       'brand',
-      (v) => MeSchoolBrand.fromJson(v as Map<String, dynamic>),
+      (v) => MeBrand.fromJson(v as Map<String, dynamic>),
     ),
     suspended: $checkedConvert('suspended', (v) => v as bool),
     suspendReason: $checkedConvert('suspendReason', (v) => v as String?),

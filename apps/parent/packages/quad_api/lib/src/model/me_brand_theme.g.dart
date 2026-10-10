@@ -1,13 +1,13 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'me_school_brand_light.dart';
+part of 'me_brand_theme.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-MeSchoolBrandLight _$MeSchoolBrandLightFromJson(Map<String, dynamic> json) =>
-    $checkedCreate('MeSchoolBrandLight', json, ($checkedConvert) {
+MeBrandTheme _$MeBrandThemeFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('MeBrandTheme', json, ($checkedConvert) {
       $checkKeys(
         json,
         requiredKeys: const [
@@ -20,7 +20,7 @@ MeSchoolBrandLight _$MeSchoolBrandLightFromJson(Map<String, dynamic> json) =>
           'railActiveInk',
         ],
       );
-      final val = MeSchoolBrandLight(
+      final val = MeBrandTheme(
         fill: $checkedConvert('fill', (v) => v as String),
         fillStrong: $checkedConvert('fillStrong', (v) => v as String),
         ink: $checkedConvert('ink', (v) => v as String),
@@ -32,7 +32,7 @@ MeSchoolBrandLight _$MeSchoolBrandLightFromJson(Map<String, dynamic> json) =>
       return val;
     });
 
-Map<String, dynamic> _$MeSchoolBrandLightToJson(MeSchoolBrandLight instance) =>
+Map<String, dynamic> _$MeBrandThemeToJson(MeBrandTheme instance) =>
     <String, dynamic>{
       'fill': instance.fill,
       'fillStrong': instance.fillStrong,

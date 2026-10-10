@@ -19,7 +19,7 @@ MeSchool _$MeSchoolFromJson(Map<String, dynamic> json) =>
         timeZone: $checkedConvert('timeZone', (v) => v as String),
         brand: $checkedConvert(
           'brand',
-          (v) => MeSchoolBrand.fromJson(v as Map<String, dynamic>),
+          (v) => MeBrand.fromJson(v as Map<String, dynamic>),
         ),
       );
       return val;

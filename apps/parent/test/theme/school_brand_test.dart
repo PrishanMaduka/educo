@@ -8,7 +8,7 @@ import '../helpers/sign_in_data.dart';
 
 void main() {
   // As the API computes it for Greenfield green (spec 03 worked example, D56).
-  final brand = MeSchoolBrand.fromJson(greenBrand);
+  final brand = MeBrand.fromJson(greenBrand);
 
   test('light mode applies the light tokens the API derived', () {
     final c = withSchoolBrand(QuadColors.light, brand, Brightness.light);

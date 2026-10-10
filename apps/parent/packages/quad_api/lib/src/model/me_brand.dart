@@ -3,10 +3,10 @@
 //
 
 // ignore_for_file: unused_element
-import 'package:quad_api/src/model/me_school_brand_light.dart';
+import 'package:quad_api/src/model/me_brand_theme.dart';
 import 'package:json_annotation/json_annotation.dart';
 
-part 'me_school_brand.g.dart';
+part 'me_brand.g.dart';
 
 
 @JsonSerializable(
@@ -15,9 +15,9 @@ part 'me_school_brand.g.dart';
   disallowUnrecognizedKeys: false,
   explicitToJson: true,
 )
-class MeSchoolBrand {
-  /// Returns a new [MeSchoolBrand] instance.
-  MeSchoolBrand({
+class MeBrand {
+  /// Returns a new [MeBrand] instance.
+  MeBrand({
 
     required  this.color,
 
@@ -46,7 +46,7 @@ class MeSchoolBrand {
   )
 
 
-  final MeSchoolBrandLight light;
+  final MeBrandTheme light;
 
 
 
@@ -58,14 +58,14 @@ class MeSchoolBrand {
   )
 
 
-  final MeSchoolBrandLight dark;
+  final MeBrandTheme dark;
 
 
 
 
 
     @override
-    bool operator ==(Object other) => identical(this, other) || other is MeSchoolBrand &&
+    bool operator ==(Object other) => identical(this, other) || other is MeBrand &&
       other.color == color &&
       other.light == light &&
       other.dark == dark;
@@ -76,9 +76,9 @@ class MeSchoolBrand {
         light.hashCode +
         dark.hashCode;
 
-  factory MeSchoolBrand.fromJson(Map<String, dynamic> json) => _$MeSchoolBrandFromJson(json);
+  factory MeBrand.fromJson(Map<String, dynamic> json) => _$MeBrandFromJson(json);
 
-  Map<String, dynamic> toJson() => _$MeSchoolBrandToJson(this);
+  Map<String, dynamic> toJson() => _$MeBrandToJson(this);
 
   @override
   String toString() {

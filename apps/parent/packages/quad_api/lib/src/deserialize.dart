@@ -2,14 +2,14 @@ import 'package:quad_api/src/model/error_body.dart';
 import 'package:quad_api/src/model/health_live.dart';
 import 'package:quad_api/src/model/health_ready.dart';
 import 'package:quad_api/src/model/me.dart';
+import 'package:quad_api/src/model/me_brand.dart';
+import 'package:quad_api/src/model/me_brand_theme.dart';
 import 'package:quad_api/src/model/me_greeting.dart';
 import 'package:quad_api/src/model/me_memberships_inner.dart';
 import 'package:quad_api/src/model/me_person.dart';
 import 'package:quad_api/src/model/me_preview.dart';
 import 'package:quad_api/src/model/me_preview_sample_user.dart';
 import 'package:quad_api/src/model/me_school.dart';
-import 'package:quad_api/src/model/me_school_brand.dart';
-import 'package:quad_api/src/model/me_school_brand_light.dart';
 import 'package:quad_api/src/model/me_support.dart';
 import 'package:quad_api/src/model/me_update_input.dart';
 import 'package:quad_api/src/model/otp_request_input.dart';
@@ -58,6 +58,10 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return HealthReady.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Me':
           return Me.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'MeBrand':
+          return MeBrand.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'MeBrandTheme':
+          return MeBrandTheme.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'MeGreeting':
           return MeGreeting.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'MeMembershipsInner':
@@ -70,10 +74,6 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return MePreviewSampleUser.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'MeSchool':
           return MeSchool.fromJson(value as Map<String, dynamic>) as ReturnType;
-        case 'MeSchoolBrand':
-          return MeSchoolBrand.fromJson(value as Map<String, dynamic>) as ReturnType;
-        case 'MeSchoolBrandLight':
-          return MeSchoolBrandLight.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'MeSupport':
           return MeSupport.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'MeUpdateInput':

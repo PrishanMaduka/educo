@@ -1,12 +1,12 @@
 import 'package:test/test.dart';
 import 'package:quad_api/quad_api.dart';
 
-// tests for MeSchoolBrandLight
+// tests for MeBrandTheme
 void main() {
-  final MeSchoolBrandLight? instance = /* MeSchoolBrandLight(...) */ null;
+  final MeBrandTheme? instance = /* MeBrandTheme(...) */ null;
   // TODO add properties to the entity
 
-  group(MeSchoolBrandLight, () {
+  group(MeBrandTheme, () {
     // String fill
     test('to test the property `fill`', () async {
       // TODO

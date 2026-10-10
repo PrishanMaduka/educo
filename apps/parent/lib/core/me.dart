@@ -62,7 +62,7 @@ void reloadCurrentMe(WidgetRef ref) {
 /// own (D13: the welcome and sign-in steps are Quad-branded; a switch shows
 /// Quad's until the new school answers).
 @riverpod
-MeSchoolBrand? schoolBrand(Ref ref) => switch (ref.watch(currentMeProvider)) {
+MeBrand? schoolBrand(Ref ref) => switch (ref.watch(currentMeProvider)) {
   AsyncData(:final value) => value.school.brand,
   _ => null,
 };

@@ -1,5 +1,5 @@
 import { OpenAPIRegistry, extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi';
-import { ErrorBodySchema } from '@quad/contracts';
+import { ErrorBodySchema, MeBrand, MeBrandTheme } from '@quad/contracts';
 import { z } from 'zod';
 
 import { API_PREFIX } from '../common/api-prefix';
@@ -64,6 +64,20 @@ export function routeBodyLimits(routes: readonly ApiRoute[]): ReadonlyMap<string
 export function named<T extends z.ZodTypeAny>(name: string, schema: T): T {
   return schema.openapi(name);
 }
+
+/**
+ * Names a contract schema in place, so every schema that nests it (not only a route's own
+ * schema) refers to one component. `named` returns a renamed copy, which a schema built from the
+ * original in packages/contracts never sees. Only OpenAPI metadata changes; validation does not.
+ */
+function nameNested(name: string, schema: z.ZodTypeAny): void {
+  const def: z.ZodTypeDef = schema._def;
+  def.openapi = { ...def.openapi, _internal: { ...def.openapi?._internal, refId: name } };
+}
+
+// The school brand appears in `GET /me`, the staff school list and the parent sign-in (D56).
+nameNested('MeBrandTheme', MeBrandTheme);
+nameNested('MeBrand', MeBrand);
 
 const ErrorBody = named('ErrorBody', ErrorBodySchema);
 
