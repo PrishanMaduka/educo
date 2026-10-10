@@ -62,19 +62,19 @@ export interface QuadCookie {
   readonly purpose: string;
 }
 
+/** The cookies Quad sets itself, in registry order: the only ids `cookieNameIn` takes. */
+export const QUAD_SET_COOKIE_IDS = [
+  'session',
+  'csrf',
+  'trustedDevice',
+  'lastSchool',
+  'consoleSession',
+  'consoleCsrf',
+] as const;
+export type QuadSetCookieId = (typeof QUAD_SET_COOKIE_IDS)[number];
+
 export type QuadCookieId =
-  | 'session'
-  | 'csrf'
-  | 'trustedDevice'
-  | 'lastSchool'
-  | 'consoleSession'
-  | 'consoleCsrf'
-  | 'theme'
-  | 'rail'
-  | 'siteView'
-  | 'cookieConsent'
-  | 'ga'
-  | 'gaSession';
+  QuadSetCookieId | 'theme' | 'rail' | 'siteView' | 'cookieConsent' | 'ga' | 'gaSession';
 
 type EntryInput = Omit<QuadCookie, 'names' | 'label'> & {
   /** The local name; the prefixed one is derived when `hostPrefixed`. */
@@ -223,7 +223,7 @@ export function registryEntry(id: QuadCookieId): QuadCookie {
 }
 
 /** The first exact name of an entry: its local name, or its only name. */
-function baseName(id: QuadCookieId): string {
+function baseName(id: QuadSetCookieId): string {
   const [name] = registryEntry(id).names;
   if (name === undefined) throw new Error(`Cookie registry entry ${id} has no fixed name`);
   return name;
@@ -234,7 +234,7 @@ function baseName(id: QuadCookieId): string {
  * `__Host-` prefix, which the browser accepts only with `Secure`, `Path=/` and no `Domain`
  * (spec 05, D32). Locally the API runs on plain http, so the prefix is dropped.
  */
-export function cookieNameIn(id: QuadCookieId, appEnv: CookieEnv): string {
+export function cookieNameIn(id: QuadSetCookieId, appEnv: CookieEnv): string {
   const name = baseName(id);
   return registryEntry(id).hostPrefixed && appEnv !== 'local' ? `${HOST_PREFIX}${name}` : name;
 }

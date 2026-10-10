@@ -178,4 +178,65 @@ describe('DemoRequestBody (the API body, spec 06 POST /public/demo-requests)', (
       'website',
     );
   });
+
+  it('refuses a honeypot over 2,048 characters', () => {
+    const at = (website: string) =>
+      DemoRequestBody.safeParse({ kind: 'school', ...school, ...token, website });
+    expect(at('x'.repeat(2048)).success).toBe(true);
+    expect(at('x'.repeat(2049)).error?.issues.map((issue) => issue.path[0])).toEqual(['website']);
+  });
+
+  // D32: these values reach the sales email subject and the console Leads list.
+  const hidden = [
+    ['a line break', 'Sample\nPerson'],
+    ['a carriage return and line feed', 'Sample\r\nBcc: x@example.com'],
+    ['U+202E right-to-left override', 'Sample \u202ePerson'],
+    ['U+2066 left-to-right isolate', 'Sample \u2066Person'],
+    ['U+200B zero-width space', 'Sample\u200bPerson'],
+    ['U+FEFF byte order mark', 'Sample\ufeffPerson'],
+    ['U+0007 bell', 'Sample\u0007Person'],
+    ['U+0085 next line', 'Sample\u0085Person'],
+  ] as const;
+
+  describe.each([
+    ['school', school, ['name', 'email', 'school', 'country']],
+    ['parent', parent, ['name', 'email', 'school', 'city']],
+  ] as const)('a %s request', (kind, form, fields) => {
+    it.each(fields)('refuses hidden characters in %s, a single line, at that field', (field) => {
+      for (const [, text] of hidden) {
+        const value =
+          field === 'email' ? text.replace(' ', '').replace('Person', '@example.com') : text;
+        const result = DemoRequestBody.safeParse({ kind, ...form, ...token, [field]: value });
+        expect(result.success, JSON.stringify(value)).toBe(false);
+        // An email can also fail its shape check; either way, only that field is marked.
+        expect([...new Set(result.error?.issues.map((issue) => issue.path[0]))]).toEqual([field]);
+      }
+    });
+  });
+
+  it('keeps line breaks in a parent note and refuses every other hidden character there', () => {
+    const withNote = (note: string) =>
+      DemoRequestBody.safeParse({ kind: 'parent', ...parent, ...token, note });
+    expect(withNote('Line one\nLine two').data).toMatchObject({ note: 'Line one\nLine two' });
+    for (const [label, text] of hidden.filter(([label]) => label !== 'a line break')) {
+      const result = withNote(text);
+      expect(result.success, label).toBe(false);
+      expect(result.error?.issues.map((issue) => issue.path[0])).toEqual(['note']);
+    }
+  });
+
+  it('keeps the zero-width joiner and non-joiner, which Sinhala and Tamil spelling needs', () => {
+    const name = 'ශ්\u200dරී ලංකා';
+    expect(DemoRequestBody.parse({ kind: 'school', ...school, ...token, name }).name).toBe(name);
+    const city = 'க\u200cஷ';
+    expect(DemoRequestBody.parse({ kind: 'parent', ...parent, ...token, city })).toMatchObject({
+      city,
+    });
+  });
+
+  it('leaves the form schemas as they were: the check belongs to the API body', () => {
+    expect(DemoRequestSchema.safeParse({ ...school, name: 'Sample\u200bPerson' }).success).toBe(
+      true,
+    );
+  });
 });

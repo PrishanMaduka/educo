@@ -1,4 +1,4 @@
-import { QUAD_COOKIES, findRegistryEntry, registryEntry } from '@quad/contracts';
+import { QUAD_COOKIES, findRegistryEntry, registryEntry } from '@quad/contracts/cookies';
 import { describe, expect, it } from 'vitest';
 
 import { LAST_SCHOOL_COOKIE, cookieNames } from '../../src/common/session/cookies';

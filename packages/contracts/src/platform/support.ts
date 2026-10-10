@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { HexColor } from '../common/color';
 import { IdSchema } from '../common/ids';
 import { PageQuerySchema, paginated } from '../common/pagination';
+import { HIDDEN_CHARACTER } from '../common/text';
 import { TenantStatus } from '../enums';
 
 /**
@@ -16,14 +17,7 @@ import { TenantStatus } from '../enums';
 export const SUPPORT_REASON_MIN = 10;
 export const SUPPORT_REASON_MAX = 500;
 
-/**
- * Any control character but the line feed (Unicode `Cc`: C0, DEL and C1), and any invisible
- * format character (`Cf`: bidi overrides and isolates such as U+202E, zero-width spaces, the byte
- * order mark, soft hyphens) but the zero-width joiner and non-joiner, which Sinhala and Tamil
- * spelling needs. The reason is shown in the console and written to `platform_audit`, so it
- * keeps line breaks and nothing else unseen, and cannot display reordered text.
- */
-const HIDDEN_CHARACTER = /[^\P{Cc}\n]|[^\P{Cf}\u200c\u200d]/u;
+// The reason is shown in the console and written to `platform_audit`: line breaks only (D32).
 
 /** `:id` of `/platform/tenants/:id/…`: a school's id. */
 export const TenantIdParams = z.object({ id: IdSchema });

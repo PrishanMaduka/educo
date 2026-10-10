@@ -1,6 +1,6 @@
 import { createHash, randomBytes } from 'node:crypto';
 
-import { LAST_SCHOOL_COOKIE, cookieNameIn } from '@quad/contracts';
+import { LAST_SCHOOL_COOKIE, cookieNameIn } from '@quad/contracts/cookies';
 
 import type { Config } from '../../config';
 import type { CookieSerializeOptions } from '@fastify/cookie';
