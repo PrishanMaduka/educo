@@ -140,7 +140,7 @@ describe('School settings: General', () => {
     const [patch] = requestsTo('PATCH /api/v1/school');
     expect(patch?.body).toEqual({ address: '12 Example Road' });
     expect(patch?.ifMatch).toBe('"v1"');
-    expect(patch?.csrf).toBe('csrf-1');
+    expect(patch?.csrf).toBe('staff-csrf');
     await waitFor(() => {
       expect(screen.queryByRole('button', { name: 'Save school details' })).toBeNull();
     });

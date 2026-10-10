@@ -1,3 +1,5 @@
+import { safeReturnPath } from '@quad/client';
+
 /**
  * What the console knows about its session without asking the API (spec 05; D32). The console's
  * cookies are the API's own (`quad_console_sid`, `quad_console_csrf`, with `__Host-` outside
@@ -14,14 +16,12 @@ export const CONSOLE_CSRF_COOKIES: readonly string[] = [
 const SIGN_IN = /^\/sign-in(?:[/?#]|$)/;
 
 /**
- * Where to go after signing in: `?next=` only when it is a path on this site (one leading slash,
- * no backslash and no `.` or `..` segment), and never sign-in itself; the overview otherwise.
+ * Where to go after signing in: `?next=` only when it is a path on this site (`safeReturnPath`:
+ * no control character, backslash or dot segment, and the same origin once parsed), and never
+ * sign-in itself; the overview otherwise.
  */
 export function safeNext(raw: unknown): string {
-  if (typeof raw !== 'string' || !raw.startsWith('/') || raw.startsWith('//')) return '/';
-  if (raw.includes('\\') || /\/\.\.?(?:[/?#]|$)/.test(raw)) return '/';
-  if (SIGN_IN.test(raw)) return '/';
-  return raw;
+  return safeReturnPath(raw, { allow: (path) => !SIGN_IN.test(path), fallback: '/' });
 }
 
 /** `/sign-in?next=<the page asked for>`, for a visit the API no longer accepts. */

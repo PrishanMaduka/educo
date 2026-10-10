@@ -8,7 +8,9 @@ export {
   fieldError,
   filenameFrom,
   isFieldError,
+  safeReturnPath,
   unwrap,
   unwrapEmpty,
   type BrowserApiOptions,
+  type SafeReturnPathOptions,
 } from './browser';

@@ -36,8 +36,13 @@ export function resetFake(answers: Record<string, FakeAnswer | FakeAnswer[]> = {
   fake.sent = [];
 }
 
-/** The CSRF cookies the fake page holds: the portal's and the console's, both `csrf-1`. */
-export const fakeCookies = () => 'quad_csrf=csrf-1; quad_console_csrf=csrf-1';
+/** The CSRF values the fake page holds: one per app, so a test proves which cookie was echoed. */
+export const FAKE_STAFF_CSRF = 'staff-csrf';
+export const FAKE_CONSOLE_CSRF = 'console-csrf';
+
+/** The CSRF cookies the fake page holds: the portal's and the console's, side by side as on localhost. */
+export const fakeCookies = () =>
+  `quad_csrf=${FAKE_STAFF_CSRF}; quad_console_csrf=${FAKE_CONSOLE_CSRF}`;
 
 export async function fakeFetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
   const request = new Request(input, init);

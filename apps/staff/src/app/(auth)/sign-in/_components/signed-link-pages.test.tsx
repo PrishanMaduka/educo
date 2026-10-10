@@ -87,7 +87,7 @@ describe('the support link page', () => {
       expect(onOpen).toHaveBeenCalledWith('/app');
     });
     expect(fake.requests).toEqual([
-      { key: 'POST /api/v1/auth/support-session', body: { token: TOKEN }, csrf: 'csrf-1' },
+      { key: 'POST /api/v1/auth/support-session', body: { token: TOKEN }, csrf: 'staff-csrf' },
     ]);
   });
 
@@ -143,7 +143,7 @@ describe('the invite link page', () => {
       'GET /api/v1/auth/memberships',
     ]);
     expect(fake.requests[1]?.body).toMatchObject({ inviteToken: TOKEN });
-    expect(fake.requests[2]).toMatchObject({ body: {}, csrf: 'csrf-1' });
+    expect(fake.requests[2]).toMatchObject({ body: {}, csrf: 'staff-csrf' });
   });
 
   it('accepts once, even when the chosen school then asks for two-step and the flow goes on', async () => {

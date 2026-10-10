@@ -108,6 +108,6 @@ describe('ConsoleShell sign out', () => {
     const sent = fake.requests.find(
       (request) => request.key === 'POST /api/v1/platform/auth/sign-out',
     );
-    expect(sent?.csrf).toBe('csrf-1');
+    expect(sent?.csrf).toBe('console-csrf');
   });
 });

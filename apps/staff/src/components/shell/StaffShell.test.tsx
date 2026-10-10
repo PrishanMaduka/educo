@@ -156,7 +156,7 @@ describe('StaffShell', () => {
     expect(fake.requests).toContainEqual({
       key: 'POST /api/v1/auth/select-school',
       body: { tenantId: KANDY, remember: false },
-      csrf: 'csrf-1',
+      csrf: 'staff-csrf',
     });
   });
 
@@ -235,7 +235,7 @@ describe('StaffShell while previewing a role', () => {
     expect(fake.requests).toContainEqual({
       key: 'DELETE /api/v1/me/role-preview',
       body: undefined,
-      csrf: 'csrf-1',
+      csrf: 'staff-csrf',
     });
   });
 

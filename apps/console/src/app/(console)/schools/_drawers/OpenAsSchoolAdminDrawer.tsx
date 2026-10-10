@@ -1,7 +1,11 @@
 'use client';
 
 import { fieldError, isFieldError } from '@quad/client';
-import { SupportSessionCreateInput, type PlatformTenant } from '@quad/contracts';
+import {
+  SUPPORT_REASON_MAX,
+  SupportSessionCreateInput,
+  type PlatformTenant,
+} from '@quad/contracts';
 import { Button, Drawer, DrawerClose, Textarea, useToast } from '@quad/ui';
 import { Eye, ShieldCheck } from 'lucide-react';
 import { useEffect, useState, type FormEvent } from 'react';
@@ -104,7 +108,7 @@ export function OpenAsSchoolAdminDrawer({
           placeholder={t('console.support.reasonPlaceholder')}
           name="reason"
           rows={4}
-          maxLength={1000}
+          maxLength={SUPPORT_REASON_MAX}
           value={reason}
           error={error}
           onChange={(event) => {

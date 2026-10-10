@@ -1,4 +1,4 @@
-import { cookieValue } from '@quad/client';
+import { cookieValue, safeReturnPath } from '@quad/client';
 
 /**
  * What the staff app knows about the staff session without asking the API (spec 05; D32). The
@@ -41,15 +41,15 @@ export function lastSchoolFrom(value: string | undefined): string | null {
   return name.trim().slice(0, LAST_SCHOOL_MAX);
 }
 
+const PORTAL_PATH = /^\/app(?:[/?#]|$)/;
+
 /**
  * Where to go after signing in: `?next=` only when it is a path inside the portal (`/app` or
- * below), so a link can never send someone to another site or back round to sign-in.
+ * below) on this site (`safeReturnPath`: no control character, backslash or dot segment, and the
+ * same origin once parsed), so a link can never send someone to another site or back to sign-in.
  */
 export function safeNext(raw: unknown): string {
-  if (typeof raw !== 'string') return '/app';
-  if (!/^\/app(?:[/?#]|$)/.test(raw)) return '/app';
-  if (raw.includes('\\') || /(?:^|\/)\.\.?(?:[/?#]|$)/.test(raw)) return '/app';
-  return raw;
+  return safeReturnPath(raw, { allow: (path) => PORTAL_PATH.test(path), fallback: '/app' });
 }
 
 /** `/sign-in?next=<the page asked for>`, for a signed-out visit to the portal. */

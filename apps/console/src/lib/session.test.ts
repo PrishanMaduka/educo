@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { CONSOLE_CSRF_COOKIES, safeNext, signInPathFor } from './session';
 
 describe('safeNext (where the console opens after sign-in)', () => {
-  it.each(['/', '/schools', '/audit?actor=x', '/schools#top'])(
+  it.each(['/', '/schools', '/audit?actor=x', '/schools#top', '/%09/x'])(
     'keeps the console page %s',
     (path) => {
       expect(safeNext(path)).toBe(path);
@@ -23,6 +23,13 @@ describe('safeNext (where the console opens after sign-in)', () => {
     '/sign-in',
     '/sign-in?next=/audit',
     '/sign-in/anything',
+    // Browsers drop tab, newline and carriage return when they parse a URL: `//evil.example`.
+    '/\t/evil.example',
+    '/\n/evil.example',
+    '/\r/evil.example',
+    '/\\evil',
+    '/\u0000/x',
+    '/\u007f/x',
   ])('sends %j to the overview instead', (raw) => {
     expect(safeNext(raw)).toBe('/');
   });

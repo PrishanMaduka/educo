@@ -66,6 +66,7 @@ describe('safeNext', () => {
     ['/app', '/app'],
     ['/app/students?year=7', '/app/students?year=7'],
     ['/app#fees', '/app#fees'],
+    ['/app/%09/x', '/app/%09/x'],
   ])('keeps the portal path %s', (raw, expected) => {
     expect(safeNext(raw)).toBe(expected);
   });
@@ -84,6 +85,13 @@ describe('safeNext', () => {
     '/app/../sign-in',
     '/app\\..\\x',
     ['/app', '/x'],
+    // Browsers drop tab, newline and carriage return when they parse a URL.
+    '/app/\t/x',
+    '/\t/evil.example',
+    '/\n/evil.example',
+    '/\r/evil.example',
+    '/\\evil',
+    '/app\u0000',
   ])('sends %j to /app instead', (raw) => {
     expect(safeNext(raw)).toBe('/app');
   });

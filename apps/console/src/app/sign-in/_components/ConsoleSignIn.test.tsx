@@ -65,7 +65,7 @@ describe('ConsoleSignIn (spec 05: email, password, then the authenticator, D37)'
       expect(openPage).toHaveBeenCalledWith('/audit?actor=a');
     });
     const verify = fake.requests.find((r) => r.key === 'POST /api/v1/platform/auth/totp/verify');
-    expect(verify).toMatchObject({ body: { code: '000000' }, csrf: 'csrf-1' });
+    expect(verify).toMatchObject({ body: { code: '000000' }, csrf: 'console-csrf' });
     expect(screen.getByRole('heading', { name: 'Opening the console…' })).toBeInTheDocument();
   });
 

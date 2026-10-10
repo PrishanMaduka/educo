@@ -98,7 +98,7 @@ describe('SignInFlow', () => {
     });
     expect(fake.requests[1]).toMatchObject({
       body: { code: '000000', trustDevice: true },
-      csrf: 'csrf-1',
+      csrf: 'staff-csrf',
     });
   });
 
@@ -246,8 +246,8 @@ describe('SignInFlow', () => {
     await userEvent.click(screen.getByRole('button', { name: 'I’ve saved them, continue' }));
     expect(await heading('Choose a school')).toBeInTheDocument();
     expect(fake.requests.filter((request) => request.key === 'POST /api/v1/me/totp')).toEqual([
-      { key: 'POST /api/v1/me/totp', body: {}, csrf: 'csrf-1' },
-      { key: 'POST /api/v1/me/totp', body: { code: '123456' }, csrf: 'csrf-1' },
+      { key: 'POST /api/v1/me/totp', body: {}, csrf: 'staff-csrf' },
+      { key: 'POST /api/v1/me/totp', body: { code: '123456' }, csrf: 'staff-csrf' },
     ]);
   });
 

@@ -153,7 +153,7 @@ describe('Schools', () => {
     const sent = fake.requests.find((request) => request.key.endsWith('/support-session'));
     expect(sent).toMatchObject({
       body: { reason: 'Principal asked for help with fee reminders' },
-      csrf: 'csrf-1',
+      csrf: 'console-csrf',
     });
   });
 

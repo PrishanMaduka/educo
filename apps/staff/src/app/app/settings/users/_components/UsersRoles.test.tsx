@@ -259,7 +259,7 @@ describe('Users & roles: People', () => {
     expect(fake.requests).toContainEqual({
       key: `PATCH /api/v1/users/${NADEESHA.id}`,
       body: { status: 'deactivated' },
-      csrf: 'csrf-1',
+      csrf: 'staff-csrf',
     });
   });
 
@@ -306,7 +306,7 @@ describe('Users & roles: Invite staff', () => {
         emails: ['a.one@colombo-intl.local', 'b.two@colombo-intl.local'],
         roleId: TEACHER.id,
       },
-      csrf: 'csrf-1',
+      csrf: 'staff-csrf',
     });
   });
 
@@ -523,7 +523,7 @@ describe('Users & roles: Preview a role', () => {
     expect(fake.requests).toContainEqual({
       key: 'POST /api/v1/me/role-preview',
       body: { roleId: BURSAR.id },
-      csrf: 'csrf-1',
+      csrf: 'staff-csrf',
     });
   });
 

@@ -111,3 +111,46 @@ export function filenameFrom(response: Response, fallback: string): string {
   const header = response.headers.get('content-disposition') ?? '';
   return /filename="([^"]+)"/.exec(header)?.[1] ?? fallback;
 }
+
+/** A C0 control (U+0000–U+001F), DEL or backslash: browsers drop or rewrite them when parsing a URL. */
+function isUnsafeInPath(text: string): boolean {
+  for (let index = 0; index < text.length; index += 1) {
+    const code = text.charCodeAt(index);
+    if (code <= 0x1f || code === 0x7f || code === 0x5c) return true;
+  }
+  return false;
+}
+/** A `.` or `..` path segment, which a URL parser would fold away. */
+const DOT_SEGMENT = /(?:^|\/)\.\.?(?:[/?#]|$)/;
+/** Any origin works: the path is resolved against it only to check it stays there. */
+const PROBE_ORIGIN = 'https://quad.invalid';
+
+export interface SafeReturnPathOptions {
+  /** Whether the app may open this path (for example only `/app…`, or never `/sign-in`). */
+  allow: (path: string) => boolean;
+  /** Where to go instead. */
+  fallback: string;
+}
+
+/**
+ * A `?next=` the browser may be sent to after sign-in (`location.assign`), or `fallback`. Only a
+ * path on this site: it is refused outright with a control character, DEL or backslash (a tab
+ * in `/\t/evil.example` is dropped by the browser, which then reads `//evil.example`) or a dot
+ * segment, then resolved as a URL and kept only if it stays on the same origin, as its path,
+ * query and fragment. Shared by the staff portal and the console.
+ */
+export function safeReturnPath(raw: unknown, options: SafeReturnPathOptions): string {
+  if (typeof raw !== 'string' || !raw.startsWith('/') || raw.startsWith('//')) {
+    return options.fallback;
+  }
+  if (isUnsafeInPath(raw) || DOT_SEGMENT.test(raw)) return options.fallback;
+  let url: URL;
+  try {
+    url = new URL(raw, PROBE_ORIGIN);
+  } catch {
+    return options.fallback;
+  }
+  if (url.origin !== PROBE_ORIGIN) return options.fallback;
+  const path = `${url.pathname}${url.search}${url.hash}`;
+  return options.allow(path) ? path : options.fallback;
+}

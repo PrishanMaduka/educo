@@ -7,6 +7,7 @@ import {
   fieldError,
   filenameFrom,
   isFieldError,
+  safeReturnPath,
   unwrap,
   unwrapEmpty,
 } from './browser';
@@ -126,5 +127,34 @@ describe('filenameFrom', () => {
     });
     expect(filenameFrom(named, 'audit.csv')).toBe('quad-platform-audit-2026-10-10.csv');
     expect(filenameFrom(new Response(''), 'audit.csv')).toBe('audit.csv');
+  });
+});
+
+describe('safeReturnPath (where a web app may send someone after sign-in)', () => {
+  const console = { allow: (path: string) => !path.startsWith('/sign-in'), fallback: '/' };
+
+  it.each(['/', '/audit?actor=a&b=1', '/schools#top', '/%09/x'])('keeps %s as it is', (raw) => {
+    expect(safeReturnPath(raw, console)).toBe(raw);
+  });
+
+  it.each([
+    undefined,
+    42,
+    '',
+    'audit',
+    'https://evil.example/',
+    '//evil.example',
+    '/\t/evil.example',
+    '/\n/evil.example',
+    '/\r/evil.example',
+    '/\u0000/x',
+    '/\u001f/x',
+    '/\u007f/x',
+    '/\\evil',
+    '/a/../sign-in',
+    '/./a',
+    '/sign-in',
+  ])('refuses %j', (raw) => {
+    expect(safeReturnPath(raw, console)).toBe('/');
   });
 });
