@@ -4,7 +4,8 @@ import localFont from 'next/font/local';
 import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from 'react';
 
-import { I18nProvider, t } from '@/i18n';
+import { Providers } from '@/components/Providers';
+import { t } from '@/i18n';
 
 import './globals.css';
 
@@ -39,7 +40,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <script dangerouslySetInnerHTML={{ __html: themeBootstrapScript }} />
       </head>
       <body>
-        <I18nProvider>{children}</I18nProvider>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

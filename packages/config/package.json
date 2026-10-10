@@ -9,6 +9,7 @@
     "./eslint/react": "./eslint/react.mjs",
     "./eslint/next": "./eslint/next.mjs",
     "./vitest": "./vitest/preset.ts",
+    "./vitest/fake-api": "./vitest/fake-api.ts",
     "./prettier": "./prettier.cjs",
     "./playwright": "./playwright/preset.ts",
     "./playwright/checks": "./playwright/checks.ts",

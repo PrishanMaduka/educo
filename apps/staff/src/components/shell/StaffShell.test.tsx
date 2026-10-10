@@ -2,7 +2,7 @@ import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { fake, resetFake } from '../../../test/fake-api';
+import { fake, resetFake } from '@quad/config/vitest/fake-api';
 
 import { StaffShell } from './StaffShell';
 
@@ -14,7 +14,7 @@ import { openPage } from '@/lib/navigate';
 
 vi.mock('@/lib/api', async (importOriginal) => {
   const actual = await importOriginal<typeof Api>();
-  const { fakeCookies, fakeFetch } = await import('../../../test/fake-api');
+  const { fakeCookies, fakeFetch } = await import('@quad/config/vitest/fake-api');
   const client = actual.createStaffApi('http://localhost:3000', {
     fetch: fakeFetch,
     cookies: fakeCookies,

@@ -1,7 +1,8 @@
 /**
- * A fake API for the sign-in component tests: one answer (or a queue) per `METHOD /path`, and a
- * record of every request with its body and CSRF header. Use it from `vi.mock('@/lib/api')`, with
- * the real `createStaffApi` (this module must not import `@/lib/api`, or the mock waits on itself):
+ * A fake API for the web apps' component tests (staff and console): one answer (or a queue) per
+ * `METHOD /path`, and a record of every request with its body and CSRF header. Use it from
+ * `vi.mock('@/lib/api')`, with the app's real client factory (this module must not import the
+ * app's `@/lib/api`, or the mock waits on itself):
  *   `staffApi: () => actual.createStaffApi(origin, { fetch: fakeFetch, cookies: fakeCookies })`.
  */
 export interface FakeAnswer {
@@ -35,8 +36,8 @@ export function resetFake(answers: Record<string, FakeAnswer | FakeAnswer[]> = {
   fake.sent = [];
 }
 
-/** The CSRF cookie the fake page holds. */
-export const fakeCookies = () => 'quad_csrf=csrf-1';
+/** The CSRF cookies the fake page holds: the portal's and the console's, both `csrf-1`. */
+export const fakeCookies = () => 'quad_csrf=csrf-1; quad_console_csrf=csrf-1';
 
 export async function fakeFetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
   const request = new Request(input, init);

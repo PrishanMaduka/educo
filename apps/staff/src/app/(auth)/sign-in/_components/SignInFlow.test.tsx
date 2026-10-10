@@ -3,7 +3,7 @@ import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { fake, resetFake } from '../../../../../test/fake-api';
+import { fake, resetFake } from '@quad/config/vitest/fake-api';
 
 import { RecoveryCodes } from './RecoveryCodes';
 import { SignInFlow, type SignInFlowProps } from './SignInFlow';
@@ -14,7 +14,7 @@ import { Providers as AuthProviders } from '@/components/Providers';
 
 vi.mock('@/lib/api', async (importOriginal) => {
   const actual = await importOriginal<typeof Api>();
-  const { fakeCookies, fakeFetch } = await import('../../../../../test/fake-api');
+  const { fakeCookies, fakeFetch } = await import('@quad/config/vitest/fake-api');
   const client = actual.createStaffApi('http://localhost:3000', {
     fetch: fakeFetch,
     cookies: fakeCookies,

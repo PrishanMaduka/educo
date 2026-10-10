@@ -25,7 +25,7 @@ const config: NextConfig = {
     ],
   },
   // The workspace packages ship TypeScript source.
-  transpilePackages: ['@quad/contracts', '@quad/tokens', '@quad/ui'],
+  transpilePackages: ['@quad/client', '@quad/contracts', '@quad/tokens', '@quad/ui'],
   // `pnpm lint` runs ESLint for every package; the build only type-checks.
   eslint: { ignoreDuringBuilds: true },
   rewrites() {
