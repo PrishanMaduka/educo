@@ -1090,6 +1090,7 @@
   "console.audit.action.auth.sign_out": "Signed out",
   "console.audit.action.audit.exported": "Exported an audit log",
   "console.audit.action.auth.password_reset": "Reset a password",
+  "console.audit.action.auth.recovery_code_used": "Used a recovery code",
   "console.audit.action.user.invited": "Invited staff",
   "console.audit.action.user.invite_accepted": "Accepted an invitation",
   "console.audit.action.user.role_changed": "Changed a role",

@@ -2002,6 +2002,7 @@
   "consoleAuditActionAuthSignOut": "Signed out",
   "consoleAuditActionAuditExported": "Exported an audit log",
   "consoleAuditActionAuthPasswordReset": "Reset a password",
+  "consoleAuditActionAuthRecoveryCodeUsed": "Used a recovery code",
   "consoleAuditActionUserInvited": "Invited staff",
   "consoleAuditActionUserInviteAccepted": "Accepted an invitation",
   "consoleAuditActionUserRoleChanged": "Changed a role",
