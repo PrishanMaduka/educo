@@ -90,7 +90,16 @@ function stubMatchMedia(): void {
   }));
 }
 
+// The public layout's inline view script makes React warn that client-rendered scripts never
+// run; on the real page it is server-rendered, so the warning is noise here and is dropped.
+const SCRIPT_TAG_WARNING = 'Encountered a script tag while rendering React component';
+const consoleError = console.error.bind(console);
+
 beforeEach(() => {
+  vi.spyOn(console, 'error').mockImplementation((...args: unknown[]) => {
+    if (typeof args[0] === 'string' && args[0].startsWith(SCRIPT_TAG_WARNING)) return;
+    consoleError(...args);
+  });
   stubMatchMedia();
   fetchMock.mockReset();
   vi.stubGlobal('fetch', fetchMock);
@@ -100,6 +109,7 @@ afterEach(() => {
   // Unmount before the stubs go: hooks run last-registered first, before the setup's cleanup.
   cleanup();
   vi.unstubAllGlobals();
+  vi.restoreAllMocks();
   clearCookies();
   document.documentElement.removeAttribute('data-view');
 });
@@ -146,6 +156,15 @@ describe('SignedInHint (Open {school}, spec 19 "Sign-in", D57)', () => {
     const [url, init] = fetchMock.mock.calls[0] ?? [];
     expect(url).toBe('/api/v1/me');
     expect(init).toMatchObject({ credentials: 'same-origin' });
+  });
+
+  it('reads the production cookie name, __Host-quad_csrf, too', async () => {
+    // jsdom refuses to set a __Host- cookie on http://, so the page's cookie string is stubbed.
+    vi.spyOn(document, 'cookie', 'get').mockReturnValue('__Host-quad_csrf=token');
+    fetchMock.mockResolvedValue(answer(200, ME));
+    renderLanding();
+    expect(await screen.findAllByRole('link', { name: OPEN, hidden: true })).toHaveLength(4);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
   it('shows Open {school} in a support session or a role preview too', async () => {
